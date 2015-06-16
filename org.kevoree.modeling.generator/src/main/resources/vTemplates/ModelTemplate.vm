@@ -1,0 +1,53 @@
+package $context.metaModelPackage;
+
+public class ${context.metaModelName}Model extends org.kevoree.modeling.abs.AbstractKModel<${context.metaModelName}Universe>
+    {
+
+    private org.kevoree.modeling.meta.KMetaModel _metaModel;
+
+    public ${context.metaModelName}Model() {
+    super();
+    _metaModel = new org.kevoree.modeling.meta.impl.MetaModel("${context.metaModelName}");
+    org.kevoree.modeling.meta.KMetaClass[] tempMetaClasses = new org.kevoree.modeling.meta.KMetaClass[${context.model.getClasses().size()}];
+    #foreach($class in $context.model.getClasses())
+            tempMetaClasses[${class.index}] = ${class.pack}.meta.Meta${class.name}.getInstance();
+        #end
+    ((org.kevoree.modeling.meta.impl.MetaModel) _metaModel).init(tempMetaClasses);
+    }
+
+    @Override
+    protected ${context.metaModelName}Universe internalCreateUniverse(long key) {
+        return new ${context.metaModelName}Universe(key,_manager);
+    }
+
+    @Override
+    public org.kevoree.modeling.meta.KMetaModel metaModel() {
+        return _metaModel;
+    }
+
+    @Override
+    protected org.kevoree.modeling.KObject internalCreateObject(long universe, long time, long uuid,
+    org.kevoree.modeling.meta.KMetaClass p_clazz) {
+    if (p_clazz == null) {
+    return null;
+    }
+    switch (p_clazz.index()) {
+    #foreach($class in $context.model.getClasses())
+            #set($lastIdx = $class.fqn.lastIndexOf(".")+1)
+            case ${class.index} : return new ${class.fqn.substring(0,$class.fqn.lastIndexOf("."))}.impl.${class.fqn.substring($lastIdx)}Impl(universe, time, uuid, p_clazz, _manager);
+        #end
+    default : return new org.kevoree.modeling.meta.impl.GenericObject(universe, time, uuid, p_clazz, _manager);
+    }
+    }
+
+    #foreach($class in $context.model.getClasses())
+            #set($lastIdx = $class.fqn.lastIndexOf(".")+1)
+
+        public $class.fqn create$class.fqn.substring($lastIdx)(long universe,long time) {
+            return ($class.fqn) this.create(${class.pack}.meta.Meta${class.name}.getInstance(), universe, time);
+        }
+        #end
+
+    }
+
+#* @vtlvariable name="context" type="org.kevoree.modeling.generator.GenerationContext" *#

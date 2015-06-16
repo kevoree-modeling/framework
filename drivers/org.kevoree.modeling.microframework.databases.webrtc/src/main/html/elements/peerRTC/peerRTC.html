@@ -1,0 +1,260 @@
+<link rel="import" href="../../../resources/bower_components/polymer/polymer.html">
+
+<polymer-element name="peer-rtc">
+    <template>
+        <link rel="stylesheet" href="peerRTC.css">
+
+        <h1>RTCDataChannel</h1>
+
+        <div id="buttons">
+            <button on-click="{{createConnection}}" id="startButton">Start</button>
+            <button on-click="{{sendData}}" id="sendButton">Send</button>
+            <button on-click="{{closeDataChannels}}" id="closeButton">Stop</button>
+        </div>
+        <div id="sendReceive">
+            <div id="send">
+                <h2>Send</h2>
+                <textarea id="dataChannelSend" disabled
+                          placeholder="Press Start, enter some text, then press Send."></textarea>
+            </div>
+            <div id="receive">
+                <h2>Receive</h2>
+                <textarea id="dataChannelReceive" disabled></textarea>
+            </div>
+        </div>
+
+        <p>View the console to see logging.</p>
+
+        <p>The <code>RTCPeerConnection</code> objects <code>localPeerConnection</code> and
+            <code>remotePeerConnection</code> are in global scope, so you can inspect them in the console as well.</p>
+    </template>
+    <script src="../../../js/adapter.js"></script>
+    <script src="../../../js/intercom.js"></script>
+    <!-- script src="../../../js/dbIndexed.js"></script -->
+    <script>
+        Polymer({
+            id: "", /* Our unique ID */
+            sharedKey: "", /* Unique identifier for two clients to find each other */
+            remote: "", /* ID of the remote peer -- set once they send an offer */
+
+            /* Keep track of our connection state */
+            running: false,
+            /* Use Google's public servers for STUN
+             * STUN is a component of the actual WebRTC connection
+             * */
+            servers: {iceServers: [{url: 'stun:stun.l.google.com:19302'}]},
+
+            peerConnection: '', /* This is our WebRTC connection */
+            dataChannel: null, /* This is our outgoing data channel within WebRTC */
+
+            intercom: null,
+
+            ready: function () {
+                //html5rocks.indexedDB.open();
+                adaptator.adapteRTCapi();
+                this.intercom = Intercom.getInstance();
+
+                /* Generate this browser a unique ID */
+                this.id = Math.random().toString().replace('.', '');
+                /* Unique identifier for two clients, They MUST share this to find each other
+                 * Each peer waits in the announcement channel to find its matching identifier
+                 * When it finds its matching identifier, it initiates a WebRTC offer with that client.
+                 * This unique identifier can be pretty much anything in practice.
+                 */
+                this.sharedKey = prompt("Please enter a shared identifier");
+                /* Send a message to the announcement channel
+                 * If our partner is already waiting, they will send us a WebRTC offer
+                 * over signalling channel and we can begin delegating WebRTC
+                 */
+                this.sendAnnounceChannelMessage();
+
+                this.intercom.on("on-signal", this.handleSignalChannelMessage.bind(this));
+                this.intercom.on("on-announce", this.handleAnnounceChannelMessage.bind(this));
+            },
+            // Announce our arrival to the announcement channel
+            sendAnnounceChannelMessage: function () {
+                this.intercom.emit("on-announce",{
+                    "id": this.id,
+                    "sharedKey" : this.sharedKey
+                });
+                //html5rocks.indexedDB.sendAnnounce(this.id, this.sharedKey);
+            },
+            // Handle an incoming message on the announcement channel
+            handleAnnounceChannelMessage: function ( message ) {
+                //var message = html5rocks.indexedDB.getAnnounce(this.sharedKey);
+                if (message.id != this.id && message.sharedKey == this.sharedKey) {
+                    console.log('Discovered matching announcement from ' + message.id);
+                    this.remote = message.id;
+                    this.initiateWebRTCState();
+                    this.dataChannel = this.peerConnection.createDataChannel('myDataChannel');
+                    this.dataChannel.onmessage = this.handleDataChannelMessage;
+                    this.dataChannel.onopen = this.handleDataChannelOpen;
+                    this.dataChannel.onclose = this.handleDataChannelClosed();
+                    this.connect();
+                }
+            },
+            // Function to initiate the WebRTC peerconnection and dataChannel
+            initiateWebRTCState: function () {
+                var channelSCTP = true, channelRTP = false;
+                var pcConstraint = null;
+                if (channelSCTP) {
+                    // SCTP is supported from Chrome 31 and is supported in FF.
+                    // No need to pass DTLS constraint as it is on by default in Chrome 31.
+                    // For SCTP, reliable and ordered is true by default.
+                    adaptator.trace('Using SCTP based data channels');
+                } else {
+                    pcConstraint = {
+                        optional: [{RtpDataChannels: true}]
+                    };
+                    if (!channelRTP) {
+                        // Use RTP data channels for Chrome versions older than 31.
+                        adaptator.trace('Using RTP based data channels, as you are on an older version than 31.');
+                        channelRTP = true;
+                    }
+                }
+                adaptator.trace('Created remote peer connection object peerConnection');
+                this.peerConnection = new adaptator.RTCPeerConnection(this.servers, pcConstraint);
+                this.peerConnection.ondatachannel = this.handleDataChannel;
+            },
+            /* == Data Channel Functions ==
+             * The WebRTC connection is established by the time these functions run
+             * The hard part is over, and these are the functions we really want to use
+             *
+             * The functions below relate to sending and receiving WebRTC messages over
+             * the peer-to-peer data channels
+             */
+            // This is our receiving data channel event
+            // We receive this channel when our peer opens a sending channel
+            // We will bind to trigger a handler when an incoming message happens
+            handleDataChannel: function (event) {
+                adaptator.trace('Receive Channel Callback');
+                this.dataChannel = event.channel;
+                this.dataChannel.onmessage = this.handleDataChannelMessage;
+                this.dataChannel.onopen = this.handleDataChannelOpen;
+                this.dataChannel.onclose = this.handleDataChannelClosed();
+            },
+            // This is called on an incoming message from our peer
+            // You probably want to overwrite this to do something more useful!
+            handleDataChannelMessage: function (event) {
+                console.log('Recieved Message: ' + event.data);
+                this.$.dataChannelReceive.value = event.data;
+            },
+            // This is called when the WebRTC sending data channel is officially 'open'
+            handleDataChannelOpen: function () {
+                console.log('Data channel created! Hello! I am ' + this.id);
+                this.$.dataChannelSend.disabled = false;
+                this.$.dataChannelSend.focus();
+                this.$.dataChannelSend.placeholder = '';
+                this.dataChannel.send('Hello! I am ' + id);
+            },
+            // Called when the data channel has closed
+            handleDataChannelClosed: function () {
+                console.log('The data channel has been closed!');
+                this.$.dataChannelSend.disabled = true;
+            },
+            // Function to offer to start a WebRTC connection with a peer
+            connect: function () {
+                this.running = true;
+                this.startSendingCandidates();
+                var self = this;
+                this.peerConnection.createOffer( (function ( offer ) {
+                    console.log('Sending offer to '+ this.remote);
+                    var sessionDescription = new RTCSessionDescription(offer);
+                    this.peerConnection.setLocalDescription( sessionDescription , function() {
+                        // send the offer to a server to be forwarded to the friend you're calling.
+                        self.sendSignalChannelMessage( sessionDescription );
+                    }, function error(err) {
+                                console.log("Offer error!");
+                            }
+                    );
+                }).bind(this));
+            },
+            /* == Signal Channel Functions ==
+             * The signal channels are used to delegate the WebRTC connection between
+             * two peers once they have found each other via the announcement channel.
+             *
+             * Once the two peers communicate the necessary information to 'find' each other via WebRTC,
+             * the signalling channel is no longer used and the connection becomes peer-to-peer.
+             */
+            sendSignalChannelMessage: function(message) {
+                message.sender = this.id;
+                this.intercom.emit("on-signal",{
+                    "data": message,
+                    "sharedKey" : this.sharedKey
+                });
+                //html5rocks.indexedDB.sendSignal( this.sharedKey, message );
+            },
+            // This is the general handler for a message from our remote client
+            // Determine what type of message it is, and call the appropriate handler
+            handleSignalChannelMessage: function ( message ) {
+                //var message = html5rocks.indexedDB.getSignal( this.sharedKey );
+                var sender = message.data.sender;
+                var type = message.data.type;
+                console.log('Received a \'' + type + '\' signal from ' + sender);
+                if (type == 'offer') { this.handleOfferSignal(message.data); }
+                else if (type == 'answer') { this.handleAnswerSignal(message.data); }
+                else if (type == 'candidate' && this.running) { this.handleCandidateSignal(message.data); }
+            },
+            // Handle a WebRTC offer request from a remote client
+            handleOfferSignal: function (message) {
+                this.running = true;
+                this.remote = message.sender;
+                this.initiateWebRTCState();
+                this.startSendingCandidates();
+                this.peerConnection.setRemoteDescription(new RTCSessionDescription(message));
+                this.peerConnection.createAnswer( (function (sessionDescription) {
+                    console.log('Sending answer to ' + message.sender);
+                    this.peerConnection.setLocalDescription(sessionDescription);
+                    this.sendSignalChannelMessage(sessionDescription);
+                }).bind(this) );
+            },
+            // Handle a WebRTC answer response to our offer we gave the remote client
+            handleAnswerSignal: function (message) {
+                this.peerConnection.setRemoteDescription( new RTCSessionDescription(message) );
+            },
+            // Handle an ICE candidate notification from the remote client
+            handleCandidateSignal: function (message) {
+                var candidate = new RTCIceCandidate(message);
+                this.peerConnection.addIceCandidate( candidate );
+            },
+            /* == ICE Candidate Functions ==
+             * ICE candidates are what will connect the two peers
+             * Both peers must find a list of suitable candidates and exchange their list
+             * We exchange this list over the signalling channel (Firebase)
+             */
+            // Add listener functions to ICE Candidate events
+            startSendingCandidates: function () {
+                this.peerConnection.oniceconnectionstatechange = this.handleICEConnectionStateChange.bind( this );
+                this.peerConnection.onicecandidate = this.handleICECandidate.bind( this );
+            },
+            // This is how we determine when the WebRTC connection has ended
+            // This is most likely because the other peer left the page
+            handleICEConnectionStateChange: function () {
+                if (this.peerConnection.iceConnectionState == 'disconnected') {
+                    console.log('Client disconnected!');
+                    this.sendAnnounceChannelMessage();
+                }
+            },
+            // Handle ICE Candidate events by sending them to our remote
+            // Send the ICE Candidates via the signal channel
+            handleICECandidate: function (event) {
+                var candidate = event.candidate;
+                if (candidate) {
+                    candidate.type = 'candidate';
+                    console.log('Sending candidate to ' + this.remote);
+                    this.sendSignalChannelMessage(candidate);
+                } else {
+                    console.log('All candidates sent');
+                }
+            },
+            sendData: function () {
+                var data = this.$.dataChannelSend.value;
+                this.dataChannel.send(data);
+                adaptator.trace('Sent data: ' + data);
+            },
+            closeDataChannels: function(){
+                console.log('Try to close');
+            }
+        });
+    </script>
+</polymer-element>

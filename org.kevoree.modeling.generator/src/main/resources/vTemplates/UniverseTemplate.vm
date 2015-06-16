@@ -1,0 +1,16 @@
+package ${context.metaModelPackage};
+
+public class ${context.metaModelName}Universe extends org.kevoree.modeling.abs.AbstractKUniverse<${context.metaModelName}View, ${context.metaModelName}Universe, ${context.metaModelName}Model> {
+
+    protected ${context.metaModelName}Universe(long p_key, org.kevoree.modeling.memory.manager.KMemoryManager p_manager) {
+        super(p_key, p_manager);
+    }
+
+    @Override
+    protected ${context.metaModelName}View internal_create(long timePoint) {
+        return new ${context.metaModelPackage}.impl.${context.metaModelName}ViewImpl(_universe, timePoint, _manager);
+    }
+
+}
+
+#* @vtlvariable name="context" type="org.kevoree.modeling.generator.GenerationContext" *#

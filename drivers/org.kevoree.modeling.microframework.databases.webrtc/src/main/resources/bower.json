@@ -1,0 +1,24 @@
+{
+  "name": "peer-rtc",
+  "version": "0.1.0",
+  "homepage": "none",
+  "keywords": [
+    "peer-to-peer"
+  ],
+  "authors": [
+    "cyril cassagnes"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.5.4",
+    "firebase": "~2.2.0"
+  }
+}

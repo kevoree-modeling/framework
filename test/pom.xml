@@ -1,0 +1,101 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>org.kevoree.modeling.test.root</artifactId>
+    <groupId>org.kevoree.modeling.test</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Kevoree :: Modeling :: Test :: Root</name>
+    <url>https://github.com/dukeboard/kevoree-modeling-framework</url>
+    <description>Kevoree Modeling Framework Test</description>
+
+    <licenses>
+        <license>
+            <name>
+                GNU Library or Lesser General Public License (LGPL)
+            </name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <kmf.version>4.18.5-SNAPSHOT</kmf.version>
+        <java2typescript.plugin.version>28</java2typescript.plugin.version>
+    </properties>
+
+    <developers>
+        <developer>
+            <name>Francois Fouquet</name>
+            <id>francois.fouquet</id>
+            <email>fouquet.f@gmail.com</email>
+            <roles>
+                <role>admin</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <name>Gregory Nain</name>
+            <id>gregory.nain</id>
+            <email>gregory.nain@uni.lu</email>
+            <roles>
+                <role>admin</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <name>Thomas Hartmann</name>
+            <id>thomas.hartmann</id>
+            <email>thomi.hartmann@gmail.com</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>org.kevoree.modeling.test.fsm</module>
+        <module>org.kevoree.modeling.test.cloud</module>
+        <module>org.kevoree.modeling.test.opposite</module>
+        <module>org.kevoree.modeling.test.datastore</module>
+        <module>org.kevoree.modeling.test.diamond</module>
+        <module>org.kevoree.modeling.test.kevoree</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.kevoree.modeling</groupId>
+            <artifactId>org.kevoree.modeling.microframework</artifactId>
+            <version>${kmf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.17</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="./org.kevoree.modeling.test.diamond-all.js"></script>
+<script>
+    var diamondUniverse = new org.kevoree.DiamondUniverse();
+    diamondUniverse.newDimension(function(dimension){
+        var diamondView = dimension.time(0);
+
+        //create your root element from 'diamondView' ::  var element = diamondView.create[...]();
+        //set your root element (if necessary) 'diamondView' ::  diamondView.setRoot(<element>);
+
+        //Load from JSON
+        //diamondView.json().load("Model_As_String", function(error){console.error(error);});
+
+        /*  Serialize in JSON:
+
+         diamondView.json().save(<model>, function(serializedModel, error){
+         if(!error) {
+             //Do something with 'serializedModel'
+         } else {
+             console.error(error);
+         }
+         */
+    });
+
+</script>
+</body>
+</html>

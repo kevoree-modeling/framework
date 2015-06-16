@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="./org.kevoree.modeling.test.kevoree-all.js"></script>
+<script>
+    var kevoreeUniverse = new org.kevoreeUniverse();
+    kevoreeUniverse.connect(function(error){
+        var kevoreeView = kevoreeUniverse.newDimension().time(0);
+
+        //create your root element from 'kevoreeView' ::  var element = kevoreeView.create[...]();
+        //set your root element (if necessary) 'kevoreeView' ::  kevoreeView.setRoot(<element>);
+
+        //Load from JSON
+        //kevoreeView.json().load("Model_As_String", function(error){console.error(error);});
+
+        /*  Serialize in JSON:
+
+         kevoreeView.json().save(<model>, function(serializedModel, error){
+         if(!error) {
+             //Do something with 'serializedModel'
+         } else {
+             console.error(error);
+         }
+         */
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+package ${context.metaModelPackage}.impl;
+
+public class ${context.metaModelName}ViewImpl extends org.kevoree.modeling.abs.AbstractKView implements ${context.metaModelPackage}.${context.metaModelName}View {
+
+    public ${context.metaModelName}ViewImpl(long p_universe, long _time, org.kevoree.modeling.memory.manager.KMemoryManager p_manager) {
+        super(p_universe, _time, p_manager);
+    }
+
+#foreach($class in $context.model.getClasses())
+#set($lastIdx = $class.fqn.lastIndexOf(".")+1)
+    @Override
+    public $class.fqn create$class.fqn.substring($lastIdx)() {
+        return ($class.fqn) this.create(${class.pack}.meta.Meta${class.name}.getInstance());
+    }
+#end
+
+}
+
+#* @vtlvariable name="context" type="org.kevoree.modeling.generator.GenerationContext" *#

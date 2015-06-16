@@ -1,0 +1,60 @@
+#set($classDeclaration = $context.classDeclaration)
+package ${classDeclaration.pack}.meta;
+
+public class Meta${classDeclaration.name} extends org.kevoree.modeling.meta.impl.MetaClass {
+
+private static Meta${classDeclaration.name} INSTANCE = null;
+
+public static Meta${classDeclaration.name} getInstance() {
+    if (INSTANCE == null) {
+        INSTANCE = new Meta${classDeclaration.name}();
+    }
+    return INSTANCE;
+}
+
+#foreach($attribute in $classDeclaration.attributes)
+#if(${context.generationContext.getHelper().getInstance().isPrimitive(${attribute.getType()})})
+    #set($attTypeValue = "org.kevoree.modeling.meta.KPrimitiveTypes.$attribute.getType().toUpperCase()")
+#else
+    #set($substringIndex = ${attribute.getType().lastIndexOf('.')} + 1)
+    #set($attTypeValue = "${classDeclaration.pack}.meta.Meta${attribute.getType().substring($substringIndex)}.getInstance()")
+#end
+#if($attribute.type == "Continuous")
+public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, #if($context.generationContext.helper.isNull(${attribute.precision}))0#{else}$attribute.precision#end, #if($attribute.id)true#{else}false#end, $attTypeValue, org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation.instance());
+#else
+public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, 0, #if($attribute.id)true#{else}false#end, $attTypeValue, org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation.instance());
+#end
+#end
+
+#foreach($reference in $classDeclaration.references)
+public static final org.kevoree.modeling.meta.KMetaReference REF_${reference.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaReference("${reference.name}", ${reference.index}, ${reference.visible}, ${reference.single}, new org.kevoree.modeling.abs.KLazyResolver() {@Override public org.kevoree.modeling.meta.KMeta meta() {return ${reference.type.pack}.meta.Meta${reference.type.name}.getInstance();}},"${reference.opposite.name}",new org.kevoree.modeling.abs.KLazyResolver() {@Override public org.kevoree.modeling.meta.KMeta meta() {return ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.getInstance();}});
+#end
+
+#foreach($operation in $classDeclaration.operations)
+public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaOperation("${operation.name}", ${operation.index},new org.kevoree.modeling.abs.KLazyResolver() {@Override public org.kevoree.modeling.meta.KMeta meta() {return ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.getInstance();}});
+#end
+
+    private Meta${classDeclaration.name}() {
+        super("${classDeclaration.fqn}", ${classDeclaration.index});
+        org.kevoree.modeling.meta.KMeta[] temp_all = new org.kevoree.modeling.meta.KMeta[${classDeclaration.attributes.size()}+${classDeclaration.references.size()}+${classDeclaration.operations.size()}];
+#set($i = 0)
+#foreach($attribute in $classDeclaration.attributes)
+        temp_all[${i}] = ATT_${attribute.name.toUpperCase()};
+    #set($i = $i +1)
+#end
+        org.kevoree.modeling.meta.KMetaReference[] temp_references = new org.kevoree.modeling.meta.KMetaReference[${classDeclaration.references.size()}];
+#foreach($reference in $classDeclaration.references)
+        temp_all[${i}] = REF_${reference.name.toUpperCase()};
+    #set($i = $i +1)
+#end
+        org.kevoree.modeling.meta.KMetaOperation[] temp_operations = new org.kevoree.modeling.meta.KMetaOperation[${classDeclaration.operations.size()}];
+#foreach($operation in $classDeclaration.operations)
+        temp_all[${i}] = OP_${operation.name.toUpperCase()};
+    #set($i = $i +1)
+#end
+        init(temp_all);
+    }
+
+}
+#* @vtlvariable name="context" type="org.kevoree.modeling.generator.ClassGenerationContext" *#
+#* @vtlvariable name="classDeclaration" type="org.kevoree.modeling.ast.MModelClass" *#

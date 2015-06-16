@@ -1,0 +1,13 @@
+html,body {
+    font-family: 'RobotoDraft', sans-serif;
+    font-weight: 300;
+    height: 100%;
+    margin: 0;
+    background-color: #E5E5E5;
+
+}
+.container {
+    margin: 0 auto 0 auto;
+    max-width: 40em;
+    padding: 1em 1.5em 1.3em 1.5em;
+}

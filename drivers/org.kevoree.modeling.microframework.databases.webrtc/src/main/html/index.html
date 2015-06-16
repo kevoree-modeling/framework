@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="Simplest possible examples of HTML, CSS and JavaScript." />
+    <meta name="author" content="cyril">
+    <meta id="theme-color" name="theme-color" content="#fff">
+
+    <title>peer RTC test</title>
+
+    <!-- Specify a default target for all hyperlinks and forms on a page:
+    ---- _blank opens the link in a new window or tab
+    --><base target="_blank">
+
+    <script src="../resources/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+    <link rel="stylesheet" href="core-page.css">
+    <link rel="import" href="elements/peerRTC/peerRTCchrome.html">
+    <link rel="import" href="elements/peerRTC/peerRTC.html">
+</head>
+<body unresolved>
+
+<!--div class="container" layout vertical center>
+    <peer-rtc-chrome></peer-rtc-chrome>
+</div-->
+<div class="container" layout vertical center>
+    <peer-rtc></peer-rtc>
+</div>
+
+</body>
+</html>

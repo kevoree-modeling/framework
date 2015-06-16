@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.kevoree.modeling.test</groupId>
+        <artifactId>org.kevoree.modeling.test.root</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>org.kevoree.modeling.test.fsm</artifactId>
+    <packaging>jar</packaging>
+    <name>Kevoree :: Modeling :: Test :: Fsm</name>
+
+    <build>
+        <sourceDirectory>target/generated-sources/kmf</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.kevoree.modeling</groupId>
+                <artifactId>org.kevoree.modeling.generator.mavenplugin</artifactId>
+                <version>${kmf.version}</version>
+                <executions>
+                    <execution>
+                        <id>ModelGen</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <!--
+                            <metaModelFile>metamodel/smartgrid.mm</metaModelFile>
+                            <utilityPackage>fsmsample</utilityPackage>
+                            -->
+                            <metaModelFile>metamodel/FSM.mm</metaModelFile>
+                            <metaModelQualifiedName>fsmsample.FSM</metaModelQualifiedName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+    <!--<script src="./java.js"></script>-->
+    <script src="./org.kevoree.modeling.test.datastore-all.js"></script>
+    <script src="./org.kevoree.modeling.database.websocket.WebSocket.js"></script>
+</head>
+<body>
+
+<button id="addNewShapeButton">AddNewShape</button> <button id="addNewShapeOperation">AddNewShape by operation</button>
+
+<div id="shapesContainer"></div>
+
+<script>
+
+    var dataBaseConnection = new org.kevoree.modeling.database.websocket.WebSocketClient("ws://localhost:23664");
+    var geometryModel  = new geometry.GeometryModel();
+    geometryModel.setContentDeliveryDriver(dataBaseConnection);
+
+    console.log("Connecting");
+
+    geometryModel.connect().then(function(err){
+        console.log("Connected:", err);
+        if(err == null) {
+            var dimension = geometryModel.universe(0);
+            var view = dimension.time(0);
+            view.getRoot().then(function(root){
+                if(root == null) {
+                    console.error("No root found.", root)
+                } else {
+                    var lib = root;
+                    displayShapes(lib);
+
+                    lib.listen(0, function(source, metas) {
+                        console.log(source, metas);
+                        displayShapes(source);
+                        /*
+                         if(event.actionType() == org.kevoree.modeling.api.KActionType.ADD && event.metaClass() == lib.metaClass() && event.metaElement() == lib.metaClass().metaReference("shapes")) {
+                         console.log(event.value());
+                         addShapeToDisplay(event.value());
+                         }
+                         */
+                    });
+                    console.log("Yeah go ahead !")
+                }
+            });
+        } else {
+            console.log(err);
+            err.printStackTrace();
+        }
+    });
+
+    function displayShapes(lib) {
+
+        var shapesContainer = $('#shapesContainer');
+        lib.getShapes().then(function(shapes){
+            if(shapes != null) {
+                for(var i = 0; i < shapes.length; i++) {
+                    if(shapesContainer.find('div#'+ shapes[i].getName()).length == 0) {
+                        $('<div id="'+shapes[i].getName()+'" style="height:50px;width:50px;display: inline-block; margin: 10px;background-color: '+shapes[i].getColor()+';"></div>').appendTo(shapesContainer);
+                        shapes[i].listen(0, function(newShape){
+                            $('div#' + newShape.getName()).css('background-color', newShape.getColor());
+                        });
+                        /*
+                        */
+                    }
+                }
+            } else {
+                console.error("No shapes found");
+            }});
+    }
+
+    $('#addNewShapeButton').on('click', addNewShape);
+    $('#addNewShapeOperation').on('click', addNewShapeOperation);
+
+    function addNewShape() {
+        var dimension = geometryModel.universe(0);
+        var view = dimension.time(0);
+        view.getRoot().then(function (root) {
+            if (root === undefined) {
+                console.error("No root found.", root)
+            } else {
+                var lib = root;
+                var index = lib.sizeOfShapes();
+                index = index +1;
+                var newShape = view.createShape();
+                newShape.setName("Shape"+index);
+                newShape.setColor("grey");
+                try {
+                    lib.addShapes(newShape);
+                    geometryModel.save().then(function (err) {
+                        if (err) {
+                            console.error(err);
+                        }
+                    });
+                }catch( e ) {
+                    console.error(e);
+                }
+            }
+        });
+    }
+
+    function addNewShapeOperation() {
+        var dimension = geometryModel.universe(0);
+        var view = dimension.time(0);
+        view.getRoot().then(function (root) {
+            if (root === undefined) {
+                console.error("No root found.", root)
+            } else {
+                var lib = root;
+                var index = lib.sizeOfShapes();
+                index = index +1;
+                lib.addShape("" + index, function(result) {
+                    console.log("Shape added by operation:" + result);
+                });
+            }
+        });
+    }
+
+</script>
+
+
+</body>
+</html>

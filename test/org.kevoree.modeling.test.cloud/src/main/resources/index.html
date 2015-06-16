@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="./org.kevoree.modeling.test.cloud-all.js"></script>
+<script>
+    var cloudUniverse = new cloud.CloudUniverse();
+    cloudUniverse.newDimension(function(dimension){
+        var cloudView = dimension.time(0);
+
+        //create your root element from 'cloudView' ::  var element = cloudView.create[...]();
+        //set your root element (if necessary) 'cloudView' ::  cloudView.setRoot(<element>);
+
+        //Load from JSON
+        //cloudView.json().load("Model_As_String", function(error){console.error(error);});
+
+        /*  Serialize in JSON:
+
+         cloudView.json().save(<model>, function(serializedModel, error){
+         if(!error) {
+             //Do something with 'serializedModel'
+         } else {
+             console.error(error);
+         }
+         */
+    });
+
+</script>
+</body>
+</html>

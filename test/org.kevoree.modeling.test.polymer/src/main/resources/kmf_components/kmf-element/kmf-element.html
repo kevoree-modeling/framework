@@ -1,0 +1,42 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<polymer-element name="kmf-element" attributes="kmfElement level">
+    <template>
+        <style>
+            :host {
+                display: block;
+                width: 100%;
+                height: 20px;
+                margin-top: 5px;
+                border: 1px solid black;
+            }
+        </style>
+            <div id="{{id}}">
+                <div style="display: block; width: 100%">{{value}}</div>
+                <div id="ccontainer" style="height:300px; width:300px; border: 1px solid black; padding: 5px;">
+                </div>
+            </div>
+    </template>
+    <script>
+        Polymer({
+            ready : function() {
+
+            },
+            kmfElementChanged : function(element) {
+                this.id = this.kmfElement.getId();
+                this.value = this.kmfElement.getValue();
+                var self = this;
+                this.kmfElement.eachContent(function(element){
+                    var htmlElement = document.createElement("kmf-element");
+                    //htmlElement.setAttribute("kmfElement", element);
+                    htmlElement.kmfElement = element;
+                    self.$.ccontainer.appendChild(htmlElement);
+                }, function(error){
+                    if(error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    </script>
+</polymer-element>

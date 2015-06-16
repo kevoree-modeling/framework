@@ -1,0 +1,165 @@
+<link rel="import" href="../../../resources/bower_components/polymer/polymer.html">
+
+<polymer-element name="peer-rtc-chrome">
+    <template>
+        <link rel="stylesheet" href="peerRTC.css">
+
+        <h1>RTCDataChannel</h1>
+
+        <div id="buttons">
+            <button on-click="{{createConnection}}" id="startButton">Start</button>
+            <button on-click="{{sendData}}" id="sendButton">Send</button>
+            <button on-click="{{closeDataChannels}}" id="closeButton">Stop</button>
+        </div>
+        <div id="sendReceive">
+            <div id="send">
+                <h2>Send</h2>
+                <textarea id="dataChannelSend" disabled
+                          placeholder="Press Start, enter some text, then press Send."></textarea>
+            </div>
+            <div id="receive">
+                <h2>Receive</h2>
+                <textarea id="dataChannelReceive" disabled></textarea>
+            </div>
+        </div>
+
+        <p>View the console to see logging.</p>
+
+        <p>The <code>RTCPeerConnection</code> objects <code>localPeerConnection</code> and
+            <code>remotePeerConnection</code> are in global scope, so you can inspect them in the console as well.</p>
+
+        <p>This modified code comes from a google public release with kind permission of Vikas Marwaha.</p>
+    </template>
+
+    <script>
+        Polymer({
+            localPeerConnection: null,
+            remotePeerConnection: null,
+            sendChannel: null,
+            receiveChannel: null,
+
+            ready: function () {
+            },
+
+            trace: function (text) {
+                console.log((window.performance.now() / 1000).toFixed(3) + ': ' + text);
+            },
+
+            createConnection: function () {
+                var servers = null;
+                this.localPeerConnection = new webkitRTCPeerConnection(servers, {optional: [{RtpDataChannels: true}]});
+                this.trace('Created local peer connection object localPeerConnection');
+
+                try {
+                    // Reliable Data Channels not yet supported in Chrome
+                    this.sendChannel = this.localPeerConnection.createDataChannel('sendDataChannel', {reliable: false});
+                    this.trace('Created send data channel');
+                } catch (e) {
+                    alert('Failed to create data channel. ' + 'You need Chrome M25 or later with RtpDataChannel enabled');
+                    this.trace('createDataChannel() failed with exception: ' + e.message);
+                }
+                this.localPeerConnection.onicecandidate = this.gotLocalCandidate.bind( this );
+                this.sendChannel.onopen = this.handleSendChannelStateChange.bind( this );
+                this.sendChannel.onclose = this.handleSendChannelStateChange.bind( this );
+
+                this.remotePeerConnection = new webkitRTCPeerConnection(servers, {optional: [{RtpDataChannels: true}]});
+                this.trace('Created remote peer connection object remotePeerConnection');
+                this.remotePeerConnection.onicecandidate = this.gotRemoteIceCandidate.bind( this );
+                this.remotePeerConnection.ondatachannel = this.gotReceiveChannel.bind( this );
+
+                this.localPeerConnection.createOffer( this.gotLocalDescription.bind( this ) );
+                this.$.startButton.disabled = true;
+                this.$.closeButton.disabled = false;
+            },
+
+            sendData: function () {
+                var data = this.$.dataChannelSend.value;
+                this.sendChannel.send(data);
+                this.trace('Sent data: ' + data);
+            },
+
+            closeDataChannels: function () {
+                this.trace('Closing data channels');
+                this.sendChannel.close();
+                this.trace('Closed data channel with label: ' + this.sendChannel.label);
+                this.receiveChannel.close();
+                this.trace('Closed data channel with label: ' + this.receiveChannel.label);
+                this.localPeerConnection.close();
+                this.remotePeerConnection.close();
+                this.localPeerConnection = null;
+                this.remotePeerConnection = null;
+                this.trace('Closed peer connections');
+                this.$.startButton.disabled = false;
+                this.$.sendButton.disabled = true;
+                this.$.closeButton.disabled = true;
+                this.$.dataChannelSend.value = '';
+                this.$.dataChannelReceive.value = '';
+                this.$.dataChannelSend.disabled = true;
+                this.$.dataChannelSend.placeholder = 'Press Start, enter some text, then press Send.';
+            },
+
+            gotLocalDescription: function (desc) {
+                this.localPeerConnection.setLocalDescription( desc );
+                this.trace('Offer from localPeerConnection \n' + desc.sdp);
+                this.remotePeerConnection.setRemoteDescription(desc);
+                this.remotePeerConnection.createAnswer( this.gotRemoteDescription.bind(this) );
+            },
+
+            gotRemoteDescription: function (desc) {
+                this.remotePeerConnection.setLocalDescription(desc);
+                this.trace('Answer from remotePeerConnection \n' + desc.sdp);
+                this.localPeerConnection.setRemoteDescription(desc);
+            },
+
+            gotLocalCandidate: function (event) {
+                this.trace('local ice callback');
+                if (event.candidate) {
+                    this.remotePeerConnection.addIceCandidate(event.candidate);
+                    this.trace('Local ICE candidate: \n' + event.candidate.candidate);
+                }
+            },
+
+            gotRemoteIceCandidate: function (event) {
+                this.trace('remote ice callback');
+                if (event.candidate) {
+                    this.localPeerConnection.addIceCandidate(event.candidate);
+                    this.trace('Remote ICE candidate: \n ' + event.candidate.candidate);
+                }
+            },
+
+            gotReceiveChannel: function (event) {
+                this.trace('Receive Channel Callback');
+                this.receiveChannel = event.channel;
+                this.receiveChannel.onmessage = this.handleMessage.bind( this );
+                this.receiveChannel.onopen = this.handleReceiveChannelStateChange.bind( this );
+                this.receiveChannel.onclose = this.handleReceiveChannelStateChange.bind( this );
+            },
+
+            handleMessage: function (event) {
+                this.trace('Received message: ' + event.data);
+                this.$.dataChannelReceive.value = event.data;
+            },
+
+            handleSendChannelStateChange: function () {
+                var readyState = this.sendChannel.readyState;
+                this.trace('Send channel state is: ' + readyState);
+                if (readyState === 'open') {
+                    this.$.dataChannelSend.disabled = false;
+                    this.$.dataChannelSend.focus();
+                    this.$.dataChannelSend.placeholder = '';
+                    this.$.sendButton.disabled = false;
+                    this.$.closeButton.disabled = false;
+                } else {
+                    this.$.dataChannelSend.disabled = true;
+                    this.$.sendButton.disabled = true;
+                    this.$.closeButton.disabled = true;
+                }
+            },
+
+            handleReceiveChannelStateChange: function () {
+                var readyState = this.receiveChannel.readyState;
+                this.trace('Receive channel state is: ' + readyState);
+            }
+        });
+    </script>
+</polymer-element>
