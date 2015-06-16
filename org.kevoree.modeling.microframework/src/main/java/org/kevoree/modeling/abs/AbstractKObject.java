@@ -87,7 +87,7 @@ public abstract class AbstractKObject implements KObject {
                     for (int j = 0; j < inboundsKeys.length; j++) {
                         collector.put(inboundsKeys[j], inboundsKeys[j]);
                     }
-                    rawPayload.clearRef(metaElements[i].index());
+                    rawPayload.clearRef(metaElements[i].index(), _metaClass);
                 }
             }
             long[] flatCollected = new long[collector.size()];
