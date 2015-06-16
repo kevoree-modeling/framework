@@ -6,17 +6,24 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 public abstract class AbstractArrayTree {
 
-    private static final int BLACK = 0;
-    private static final int RED = 1;
-
     protected long _root_index = -1;
     protected int _size = 0;
-    protected int _threshold;
+    protected int _threshold = 0;
     protected float _loadFactor;
     protected long[] _back = null;
-
     private boolean _dirty = true;
     private int _counter = 0;
+
+    public AbstractArrayTree() {
+        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
+    }
+
+    abstract int ELEM_SIZE();
+
+    private void allocate(int capacity) {
+        _back = new long[capacity * ELEM_SIZE()];
+        _threshold = (int) (capacity * _loadFactor);
+    }
 
     public int size() {
         return _size;
@@ -385,10 +392,6 @@ public abstract class AbstractArrayTree {
         }
     }*/
 
-    public void delete(long p_key) {
-        //TODO
-    }
-
     private boolean nodeColor(long n) {
         if (n == -1) {
             return true;
@@ -397,43 +400,60 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    private void node_serialize(StringBuilder builder, long current) {
-        builder.append("|");
-        if (nodeColor(current) == true) {
-            builder.append(BLACK);
-        } else {
-            builder.append(RED);
-        }
-        builder.append(key(current));
-        if (left(current) == -1 && right(current) == -1) {
-            builder.append("%");
-        } else {
-            if (left(current) != -1) {
-                node_serialize(builder, left(current));
-            } else {
-                builder.append("#");
-            }
-            if (right(current) != -1) {
-                node_serialize(builder, right(current));
-            } else {
-                builder.append("#");
-            }
-        }
-    }
-
     public String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
-        builder.append(_size);
-
-
-        if (_root_index != -1) {
-            node_serialize(builder, _root_index);
+        if (_root_index == -1) {
+            builder.append("0");
+        } else {
+            builder.append(_size);
+            builder.append(',');
+            builder.append(_root_index);
+            builder.append('[');
+            for (int i = 0; i < (_size*ELEM_SIZE()); i++) {
+                if (i != 0) {
+                    builder.append(',');
+                }
+                builder.append(_back[i]);
+            }
+            builder.append(']');
         }
         return builder.toString();
     }
 
     public void init(String payload, KMetaModel metaModel) throws Exception {
-        //TODO
+        if (payload == null || payload.length() == 0) {
+            return;
+        }
+        int initPos = 0;
+        int cursor = 0;
+        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '[') {
+            cursor++;
+        }
+        if (payload.charAt(cursor) == ',') {//className to parse
+            _size = Integer.parseInt(payload.substring(initPos, cursor));
+            cursor++;
+            initPos = cursor;
+        }
+        while (cursor < payload.length() && payload.charAt(cursor) != '[') {
+            cursor++;
+        }
+        _root_index = Integer.parseInt(payload.substring(initPos, cursor));
+        allocate(_size);
+        int _back_index = 0;
+        while (cursor < payload.length()) {
+            cursor++;
+            int beginChunk = cursor;
+            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+                cursor++;
+            }
+            int cleanedEnd = cursor;
+            if (payload.charAt(cleanedEnd - 1) == ']') {
+                cleanedEnd--;
+            }
+            long loopKey = Long.parseLong(payload.substring(beginChunk, cleanedEnd));
+            _back[_back_index] = loopKey;
+            _back_index++;
+        }
     }
 
     public boolean isDirty() {
@@ -462,6 +482,7 @@ public abstract class AbstractArrayTree {
 
     public void free(KMetaModel p_metaModel) {
         this._back = null;
+        this._threshold = 0;
     }
 
 }

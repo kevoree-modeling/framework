@@ -7,8 +7,8 @@ import org.kevoree.modeling.memory.struct.tree.KLongTree;
 public class LongTreeTest extends BaseKLongTreeTest {
 
     @Override
-    public KLongTree createKLongTree() {
-        return new LongTree();
+    public KLongTree createLongTree() {
+        return new ArrayLongTree();
     }
 }
 

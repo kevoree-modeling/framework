@@ -9,8 +9,8 @@ import org.kevoree.modeling.memory.KMemoryFactory;
 import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
-import org.kevoree.modeling.memory.struct.tree.impl.LongLongTree;
-import org.kevoree.modeling.memory.struct.tree.impl.LongTree;
+import org.kevoree.modeling.memory.struct.tree.impl.ArrayLongLongTree;
+import org.kevoree.modeling.memory.struct.tree.impl.ArrayLongTree;
 
 public class HeapMemoryFactory implements KMemoryFactory {
 
@@ -21,12 +21,12 @@ public class HeapMemoryFactory implements KMemoryFactory {
 
     @Override
     public KLongTree newLongTree() {
-        return new LongTree();
+        return new ArrayLongTree();
     }
 
     @Override
     public KLongLongTree newLongLongTree() {
-        return new LongLongTree();
+        return new ArrayLongLongTree();
     }
 
     @Override

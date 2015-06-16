@@ -10,7 +10,6 @@ import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.memory.manager.AccessMode;
 import org.kevoree.modeling.meta.KMetaReference;
 
 /**
@@ -57,7 +56,7 @@ public class GraphBuilder {
     }
 
     private static void createEdges(Graph graph, KObject elem) {
-        KMemorySegment rawPayload = elem.manager().segment(elem.universe(),elem.now(),elem.uuid(),AccessMode.RESOLVE, elem.metaClass(),null);
+        KMemorySegment rawPayload = elem.manager().segment(elem.universe(),elem.now(),elem.uuid(),true, elem.metaClass(),null);
         for (KMeta meta : elem.metaClass().metaElements()) {
             if (meta instanceof KMetaReference) {
                 KMetaReference metaRef = (KMetaReference) meta;

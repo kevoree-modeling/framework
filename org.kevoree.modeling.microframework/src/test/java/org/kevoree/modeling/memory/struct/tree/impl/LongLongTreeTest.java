@@ -9,14 +9,8 @@ import org.kevoree.modeling.memory.struct.tree.KLongTree;
  */
 public class LongLongTreeTest extends BaseKLongLongTreeTest {
 
-
-    @Override
-    public KLongTree createKLongTree() {
-        return new LongTree();
-    }
-
     @Override
     public KLongLongTree createKLongLongTree() {
-        return new LongLongTree();
+        return new ArrayLongLongTree();
     }
 }

@@ -24,6 +24,8 @@ public interface KMemorySegment extends KMemoryElement {
 
     boolean removeRef(int index, long previousRef, KMetaClass metaClass);
 
+    void clearRef(int index);
+
     /* Extrapolated attributes management */
     double[] getInfer(int index, KMetaClass metaClass);
 

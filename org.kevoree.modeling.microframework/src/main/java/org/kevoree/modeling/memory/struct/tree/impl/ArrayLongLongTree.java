@@ -2,16 +2,19 @@ package org.kevoree.modeling.memory.struct.tree.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
-import org.kevoree.modeling.memory.struct.tree.KLongTree;
 
 public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTree {
 
     private static final int SIZE_NODE = 6;
 
     public ArrayLongLongTree() {
-        _back = new long[_size * SIZE_NODE];
-        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        _threshold = (int) (_size * _loadFactor);
+        super();
+        _back = null;
+    }
+
+    @Override
+    int ELEM_SIZE() {
+        return SIZE_NODE;
     }
 
     @Override
@@ -49,7 +52,9 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             long[] new_back = new long[length * SIZE_NODE];
-            System.arraycopy(_back, 0, new_back, 0, _size * SIZE_NODE);
+            if (_back != null) {
+                System.arraycopy(_back, 0, new_back, 0, _size * SIZE_NODE);
+            }
             _threshold = (int) (_size * _loadFactor);
             _back = new_back;
         }

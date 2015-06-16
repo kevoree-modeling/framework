@@ -10,6 +10,33 @@ public abstract class BaseKLongTreeTest {
     public abstract KLongTree createKLongTree();
 
     @Test
+    public void saveLoad0() throws Exception {
+        KLongTree tree = createLongTree();
+        for (long i = 0; i <= 6; i++) {
+            tree.insert(i);
+        }
+        KLongTree treeBis = createLongTree();
+        treeBis.init(tree.serialize(null), null);
+        Assert.assertEquals(tree.size(), treeBis.size());
+    }
+
+    @Test
+    public void saveLoad() throws Exception {
+        KLongTree tree = createLongTree();
+        for (long i = 0; i <= 6; i++) {
+            tree.insert(i);
+        }
+        KLongTree treeBis = createLongTree();
+        treeBis.init(tree.serialize(null), null);
+        Assert.assertEquals(tree.size(), treeBis.size());
+        for (int i = 0; i < tree.size(); i++) {
+            Long resolved = tree.lookup(i);
+            Long resolvedBis = treeBis.lookup(i);
+            Assert.assertEquals(resolved, resolvedBis);
+        }
+    }
+
+    @Test
     public void printTest() {
         long MIN = 0L;
         long MAX = 99L;
@@ -24,7 +51,6 @@ public abstract class BaseKLongTreeTest {
             }
         }
     }
-
 
     /*
     @Test

@@ -6,20 +6,15 @@ import org.kevoree.modeling.KConfig;
 
 public abstract class BaseKLongLongTreeTest {
 
-    public abstract KLongTree createKLongTree();
-
     public abstract KLongLongTree createKLongLongTree();
 
     @Test
     public void saveLoad0() throws Exception {
-        KLongTree tree = createKLongTree();
+        KLongLongTree tree = createKLongLongTree();
         for (long i = 0; i <= 6; i++) {
-            tree.insert(i);
+            tree.insert(i, i);
         }
-        KLongTree treeBis = createKLongTree();
-
-        System.err.println(tree.serialize(null));
-
+        KLongLongTree treeBis = createKLongLongTree();
         treeBis.init(tree.serialize(null), null);
         Assert.assertEquals(tree.size(), treeBis.size());
     }

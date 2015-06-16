@@ -6,7 +6,6 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.memory.manager.AccessMode;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongMapCallBack;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
@@ -96,7 +95,7 @@ public class DeepCollectAction implements KTraversalAction {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) p_inputStep[i];
                     currentObject = loopObj;
-                    KMemorySegment raw = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), AccessMode.RESOLVE, loopObj.metaClass(), null);
+                    KMemorySegment raw = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                     if (raw != null) {
                         if (_reference == null) {
                             KMeta[] metaElements = loopObj.metaClass().metaElements();

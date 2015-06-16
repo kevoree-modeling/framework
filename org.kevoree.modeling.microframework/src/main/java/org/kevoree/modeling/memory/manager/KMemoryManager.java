@@ -23,7 +23,7 @@ public interface KMemoryManager {
 
     void lookupAlltimes(long universe, long[] time, long uuid, KCallback<KObject[]> callback);
 
-    KMemorySegment segment(long universe, long time, long uuid, AccessMode accessMode, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace);
+    KMemorySegment segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace);
 
     void save(KCallback<Throwable> callback);
 

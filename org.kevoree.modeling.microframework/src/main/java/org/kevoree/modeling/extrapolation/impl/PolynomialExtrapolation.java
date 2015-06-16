@@ -4,7 +4,6 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.extrapolation.impl.maths.PolynomialFitEjml;
-import org.kevoree.modeling.memory.manager.AccessMode;
 import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
@@ -19,7 +18,7 @@ public class PolynomialExtrapolation implements Extrapolation {
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute) {
         KMemorySegmentResolutionTrace trace = new MemorySegmentResolutionTrace();
-        KMemorySegment raw = ((AbstractKObject) current)._manager.segment(current.universe(), current.now(), current.uuid(), AccessMode.RESOLVE, current.metaClass(), trace);
+        KMemorySegment raw = ((AbstractKObject) current)._manager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
         if (raw != null) {
             Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), trace.getTime());
             if (attribute.attributeType() == KPrimitiveTypes.DOUBLE) {
@@ -178,14 +177,14 @@ public class PolynomialExtrapolation implements Extrapolation {
     @Override
     public void mutate(KObject current, KMetaAttribute attribute, Object payload) {
         KMemorySegmentResolutionTrace trace = new MemorySegmentResolutionTrace();
-        KMemorySegment raw = current.manager().segment(current.universe(), current.now(), current.uuid(), AccessMode.RESOLVE, current.metaClass(), trace);
+        KMemorySegment raw = current.manager().segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
         if (raw.getInferSize(attribute.index(), current.metaClass()) == 0) {
-            raw = current.manager().segment(current.universe(), current.now(), current.uuid(), AccessMode.NEW, current.metaClass(), null);
+            raw = current.manager().segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
         }
         if (!insert(current.now(), castNumber(payload), trace.getTime(), raw, attribute.index(), attribute.precision(), current.metaClass())) {
             long prevTime = (long) raw.getInferElem(attribute.index(), LASTTIME, current.metaClass()) + trace.getTime();
             double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, trace.getTime());
-            KMemorySegment newSegment = current.manager().segment(current.universe(), prevTime, current.uuid(), AccessMode.NEW, current.metaClass(), null);
+            KMemorySegment newSegment = current.manager().segment(current.universe(), prevTime, current.uuid(), false, current.metaClass(), null);
             insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
             insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
         }

@@ -6,7 +6,6 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.memory.manager.AccessMode;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
@@ -42,7 +41,7 @@ public class TraverseQueryAction implements KTraversalAction {
             for (int i = 0; i < p_inputs.length; i++) {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) p_inputs[i];
-                    KMemorySegment raw = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), AccessMode.RESOLVE, loopObj.metaClass(), null);
+                    KMemorySegment raw = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                     KMeta[] metaElements = loopObj.metaClass().metaElements();
                     if (raw != null) {
                         if (_referenceQuery == null) {

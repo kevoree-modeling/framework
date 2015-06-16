@@ -338,6 +338,11 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
+    public void clearRef(int index) {
+        raw[index] = null;
+    }
+
+    @Override
     public double[] getInfer(int index, KMetaClass metaClass) {
         if (raw != null) {
             Object previousObj = raw[index];

@@ -7,7 +7,6 @@ import org.kevoree.modeling.memory.cache.impl.HashMemoryCache;
 import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
 import org.kevoree.modeling.memory.cache.KCache;
-import org.kevoree.modeling.memory.manager.AccessMode;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.struct.HeapMemoryFactory;
@@ -22,7 +21,6 @@ import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
-import org.kevoree.modeling.memory.struct.tree.impl.LongLongTree;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
@@ -313,7 +311,7 @@ public class HeapMemoryManager implements KMemoryManager {
     }
 
     @Override
-    public KMemorySegment segment(long universe, long time, long uuid, AccessMode accessMode, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace) {
+    public KMemorySegment segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace) {
         HeapMemorySegment currentEntry = (HeapMemorySegment) _cache.get(universe, time, uuid);
         if (currentEntry != null) {
             if (resolutionTrace != null) {
@@ -339,21 +337,14 @@ public class HeapMemoryManager implements KMemoryManager {
             resolutionTrace.setTimeTree(timeTree);
         }
         if (resolvedTime != KConfig.NULL_LONG) {
-            boolean needTimeCopy = accessMode.equals(AccessMode.NEW) && (resolvedTime != time);
-            boolean needUniverseCopy = accessMode.equals(AccessMode.NEW) && (resolvedUniverse != universe);
+            boolean needTimeCopy = !resolvePreviousSegment && (resolvedTime != time);
+            boolean needUniverseCopy = !resolvePreviousSegment && (resolvedUniverse != universe);
             HeapMemorySegment entry = (HeapMemorySegment) _cache.get(resolvedUniverse, resolvedTime, uuid);
             if (entry == null) {
                 return null;
             }
-            if (accessMode.equals(AccessMode.DELETE)) {
-                timeTree.delete(time);
-                if (resolutionTrace != null) {
-                    resolutionTrace.setSegment(entry);
-                }
-                return entry;
-            }
             if (!needTimeCopy && !needUniverseCopy) {
-                if (accessMode.equals(AccessMode.NEW)) {
+                if (!resolvePreviousSegment) {
                     entry.setDirty();
                 }
                 if (resolutionTrace != null) {
@@ -474,7 +465,7 @@ public class HeapMemoryManager implements KMemoryManager {
                             if (universeTree == null) {
                                 callback.on(null);
                             } else {
-                                long resolvedVal = ((LongLongTree) universeTree).previousOrEqualValue(time);
+                                long resolvedVal = ((KLongLongTree) universeTree).previousOrEqualValue(time);
                                 if (resolvedVal == KConfig.NULL_LONG) {
                                     callback.on(null);
                                 } else {
@@ -652,10 +643,10 @@ public class HeapMemoryManager implements KMemoryManager {
     private KMemoryElement internal_unserialize(KContentKey key, String payload) {
         KMemoryElement newElement = _factory.newFromKey(key.universe, key.time, key.obj);
         try {
-            if(key.universe != KConfig.NULL_LONG && key.time != KConfig.NULL_LONG && key.obj != KConfig.NULL_LONG){
-                KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG,KConfig.NULL_LONG,key.obj);
-                if(alreadyLoadedOrder != null){
-                    ((KMemorySegment)newElement).initMetaClass(_model.metaModel().metaClassByName(alreadyLoadedOrder.metaClassName()));
+            if (key.universe != KConfig.NULL_LONG && key.time != KConfig.NULL_LONG && key.obj != KConfig.NULL_LONG) {
+                KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, key.obj);
+                if (alreadyLoadedOrder != null) {
+                    ((KMemorySegment) newElement).initMetaClass(_model.metaModel().metaClassByName(alreadyLoadedOrder.metaClassName()));
                 }
             }
 

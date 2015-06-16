@@ -8,9 +8,13 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
     private static final int SIZE_NODE = 5;
 
     public ArrayLongTree() {
-        _back = new long[_size * SIZE_NODE];
-        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        _threshold = (int) (_size * _loadFactor);
+        super();
+        _back = null;
+    }
+
+    @Override
+    int ELEM_SIZE() {
+        return SIZE_NODE;
     }
 
     public synchronized long previousOrEqual(long key) {
@@ -26,7 +30,9 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             long[] new_back = new long[length * SIZE_NODE];
-            System.arraycopy(_back, 0, new_back, 0, _size * SIZE_NODE);
+            if(_back != null){
+                System.arraycopy(_back, 0, new_back, 0, _size * SIZE_NODE);
+            }
             _threshold = (int) (_size * _loadFactor);
             _back = new_back;
         }

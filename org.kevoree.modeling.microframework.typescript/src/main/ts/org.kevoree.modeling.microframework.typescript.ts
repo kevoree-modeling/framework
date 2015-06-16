@@ -500,7 +500,7 @@ module org {
 
                     public delete(cb: (p : any) => void): void {
                         var selfPointer: org.kevoree.modeling.KObject = this;
-                        var rawPayload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.DELETE, this._metaClass, null);
+                        var rawPayload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, false, this._metaClass, null);
                         if (rawPayload == null) {
                             cb(new java.lang.Exception(AbstractKObject.OUT_OF_CACHE_MSG));
                         } else {
@@ -512,6 +512,7 @@ module org {
                                     for (var j: number = 0; j < inboundsKeys.length; j++) {
                                         collector.put(inboundsKeys[j], inboundsKeys[j]);
                                     }
+                                    rawPayload.clearRef(metaElements[i].index());
                                 }
                             }
                             var flatCollected: number[] = new Array();
@@ -615,7 +616,7 @@ module org {
                             if (metaReference.single()) {
                                 this.internal_mutate(org.kevoree.modeling.KActionType.SET, metaReference, param, setOpposite);
                             } else {
-                                var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.NEW, this._metaClass, null);
+                                var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, false, this._metaClass, null);
                                 if (raw != null) {
                                     if (raw.addRef(metaReference.index(), param.uuid(), this._metaClass)) {
                                         if (setOpposite) {
@@ -632,7 +633,7 @@ module org {
                                     if (param == null) {
                                         this.internal_mutate(org.kevoree.modeling.KActionType.REMOVE, metaReference, null, setOpposite);
                                     } else {
-                                        var payload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.NEW, this._metaClass, null);
+                                        var payload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, false, this._metaClass, null);
                                         var previous: number[] = payload.getRef(metaReference.index(), this._metaClass);
                                         var singleValue: number[] = new Array();
                                         singleValue[0] = param.uuid();
@@ -655,7 +656,7 @@ module org {
                             } else {
                                 if (actionType.equals(org.kevoree.modeling.KActionType.REMOVE)) {
                                     if (metaReference.single()) {
-                                        var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.NEW, this._metaClass, null);
+                                        var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, false, this._metaClass, null);
                                         var previousKid: number[] = raw.getRef(metaReference.index(), this._metaClass);
                                         raw.set(metaReference.index(), null, this._metaClass);
                                         if (setOpposite) {
@@ -673,7 +674,7 @@ module org {
                                             }
                                         }
                                     } else {
-                                        var payload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.NEW, this._metaClass, null);
+                                        var payload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, false, this._metaClass, null);
                                         if (payload != null) {
                                             if (payload.removeRef(metaReference.index(), param.uuid(), this._metaClass)) {
                                                 if (setOpposite) {
@@ -692,7 +693,7 @@ module org {
                         if (transposed == null) {
                             throw new java.lang.RuntimeException("Bad KMF usage, the attribute named " + p_metaReference.metaName() + " is not part of " + this.metaClass().metaName());
                         } else {
-                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, this._metaClass, null);
+                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
                             if (raw != null) {
                                 var ref: any = raw.get(transposed.index(), this._metaClass);
                                 if (ref == null) {
@@ -722,7 +723,7 @@ module org {
                         if (transposed == null) {
                             throw new java.lang.RuntimeException("Bad KMF usage, the reference named " + p_metaReference.metaName() + " is not part of " + this.metaClass().metaName());
                         } else {
-                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, this._metaClass, null);
+                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
                             if (raw == null) {
                                 cb(new Array());
                             } else {
@@ -765,7 +766,7 @@ module org {
                         for (var i: number = 0; i < metaElements.length; i++) {
                             if (metaElements[i] instanceof org.kevoree.modeling.meta.impl.MetaReference) {
                                 var reference: org.kevoree.modeling.meta.KMetaReference = <org.kevoree.modeling.meta.KMetaReference>metaElements[i];
-                                var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, this._metaClass, null);
+                                var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
                                 if (raw != null) {
                                     var idArr: number[] = raw.getRef(reference.index(), this._metaClass);
                                     if (idArr != null) {
@@ -850,7 +851,7 @@ module org {
                     }
 
                     public toJSON(): string {
-                        var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, this._metaClass, null);
+                        var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
                         if (raw != null) {
                             return org.kevoree.modeling.format.json.JsonRaw.encode(raw, this._uuid, this._metaClass, false);
                         } else {
@@ -936,7 +937,7 @@ module org {
 
                     public referencesWith(o: org.kevoree.modeling.KObject): org.kevoree.modeling.meta.KMetaReference[] {
                         if (org.kevoree.modeling.util.Checker.isDefined(o)) {
-                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, this._metaClass, null);
+                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
                             if (raw != null) {
                                 var metaElements: org.kevoree.modeling.meta.KMeta[] = this.metaClass().metaElements();
                                 var selected: java.util.List<org.kevoree.modeling.meta.KMetaReference> = new java.util.ArrayList<org.kevoree.modeling.meta.KMetaReference>();
@@ -1748,7 +1749,7 @@ module org {
                         }
 
                         public extrapolate(current: org.kevoree.modeling.KObject, attribute: org.kevoree.modeling.meta.KMetaAttribute): any {
-                            var payload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (<org.kevoree.modeling.abs.AbstractKObject>current)._manager.segment(current.universe(), current.now(), current.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, current.metaClass(), null);
+                            var payload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (<org.kevoree.modeling.abs.AbstractKObject>current)._manager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), null);
                             if (payload != null) {
                                 return payload.get(attribute.index(), current.metaClass());
                             } else {
@@ -1757,7 +1758,7 @@ module org {
                         }
 
                         public mutate(current: org.kevoree.modeling.KObject, attribute: org.kevoree.modeling.meta.KMetaAttribute, payload: any): void {
-                            var internalPayload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (<org.kevoree.modeling.abs.AbstractKObject>current)._manager.segment(current.universe(), current.now(), current.uuid(), org.kevoree.modeling.memory.manager.AccessMode.NEW, current.metaClass(), null);
+                            var internalPayload: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (<org.kevoree.modeling.abs.AbstractKObject>current)._manager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
                             if (internalPayload != null) {
                                 internalPayload.set(attribute.index(), payload, current.metaClass());
                             }
@@ -1776,7 +1777,7 @@ module org {
                         private static INSTANCE: org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation;
                         public extrapolate(current: org.kevoree.modeling.KObject, attribute: org.kevoree.modeling.meta.KMetaAttribute): any {
                             var trace: org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace = new org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace();
-                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (<org.kevoree.modeling.abs.AbstractKObject>current)._manager.segment(current.universe(), current.now(), current.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, current.metaClass(), trace);
+                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (<org.kevoree.modeling.abs.AbstractKObject>current)._manager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
                             if (raw != null) {
                                 var extrapolatedValue: number = this.extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), trace.getTime());
                                 if (attribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.DOUBLE) {
@@ -1921,14 +1922,14 @@ module org {
 
                         public mutate(current: org.kevoree.modeling.KObject, attribute: org.kevoree.modeling.meta.KMetaAttribute, payload: any): void {
                             var trace: org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace = new org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace();
-                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = current.manager().segment(current.universe(), current.now(), current.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, current.metaClass(), trace);
+                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = current.manager().segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
                             if (raw.getInferSize(attribute.index(), current.metaClass()) == 0) {
-                                raw = current.manager().segment(current.universe(), current.now(), current.uuid(), org.kevoree.modeling.memory.manager.AccessMode.NEW, current.metaClass(), null);
+                                raw = current.manager().segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
                             }
                             if (!this.insert(current.now(), this.castNumber(payload), trace.getTime(), raw, attribute.index(), attribute.precision(), current.metaClass())) {
                                 var prevTime: number = <number>raw.getInferElem(attribute.index(), PolynomialExtrapolation.LASTTIME, current.metaClass()) + trace.getTime();
                                 var val: number = this.extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, trace.getTime());
-                                var newSegment: org.kevoree.modeling.memory.struct.segment.KMemorySegment = current.manager().segment(current.universe(), prevTime, current.uuid(), org.kevoree.modeling.memory.manager.AccessMode.NEW, current.metaClass(), null);
+                                var newSegment: org.kevoree.modeling.memory.struct.segment.KMemorySegment = current.manager().segment(current.universe(), prevTime, current.uuid(), false, current.metaClass(), null);
                                 this.insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
                                 this.insert(current.now(), this.castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
                             }
@@ -2508,7 +2509,7 @@ module org {
                             var metaClass: org.kevoree.modeling.meta.KMetaClass = manager.model().metaModel().metaClassByName(meta);
                             var current: org.kevoree.modeling.KObject = (<org.kevoree.modeling.abs.AbstractKModel<any>>manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass);
                             manager.initKObject(current);
-                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = manager.segment(current.universe(), current.now(), current.uuid(), org.kevoree.modeling.memory.manager.AccessMode.NEW, current.metaClass(), null);
+                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = manager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
                             p_param.each( (metaKey : string, payload_content : any) => {
                                 if (metaKey.equals(org.kevoree.modeling.format.json.JsonFormat.KEY_ROOT)) {
                                     p_rootElem[0] = current;
@@ -2642,7 +2643,7 @@ module org {
 
                         public static printJSON(elem: org.kevoree.modeling.KObject, builder: java.lang.StringBuilder, isRoot: boolean): void {
                             if (elem != null) {
-                                var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (<org.kevoree.modeling.abs.AbstractKObject>elem)._manager.segment(elem.universe(), elem.now(), elem.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, elem.metaClass(), null);
+                                var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (<org.kevoree.modeling.abs.AbstractKObject>elem)._manager.segment(elem.universe(), elem.now(), elem.uuid(), true, elem.metaClass(), null);
                                 if (raw != null) {
                                     builder.append(org.kevoree.modeling.format.json.JsonRaw.encode(raw, elem.uuid(), elem.metaClass(), isRoot));
                                 }
@@ -4612,24 +4613,6 @@ module org {
                     }
                 }
                 export module manager {
-                    export class AccessMode {
-
-                        public static RESOLVE: AccessMode = new AccessMode();
-                        public static NEW: AccessMode = new AccessMode();
-                        public static DELETE: AccessMode = new AccessMode();
-                        public equals(other: any): boolean {
-                            return this == other;
-                        }
-                        public static _AccessModeVALUES : AccessMode[] = [
-                            AccessMode.RESOLVE
-                            ,AccessMode.NEW
-                            ,AccessMode.DELETE
-                        ];
-                        public static values():AccessMode[]{
-                            return AccessMode._AccessModeVALUES;
-                        }
-                    }
-
                     export interface KMemoryManager {
 
                         cdn(): org.kevoree.modeling.cdn.KContentDeliveryDriver;
@@ -4644,7 +4627,7 @@ module org {
 
                         lookupAlltimes(universe: number, time: number[], uuid: number, callback: (p : org.kevoree.modeling.KObject[]) => void): void;
 
-                        segment(universe: number, time: number, uuid: number, accessMode: org.kevoree.modeling.memory.manager.AccessMode, metaClass: org.kevoree.modeling.meta.KMetaClass, resolutionTrace: org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace): org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+                        segment(universe: number, time: number, uuid: number, resolvePreviousSegment: boolean, metaClass: org.kevoree.modeling.meta.KMetaClass, resolutionTrace: org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace): org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 
                         save(callback: (p : java.lang.Throwable) => void): void;
 
@@ -4964,7 +4947,7 @@ module org {
                                 }
                             }
 
-                            public segment(universe: number, time: number, uuid: number, accessMode: org.kevoree.modeling.memory.manager.AccessMode, metaClass: org.kevoree.modeling.meta.KMetaClass, resolutionTrace: org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace): org.kevoree.modeling.memory.struct.segment.KMemorySegment {
+                            public segment(universe: number, time: number, uuid: number, resolvePreviousSegment: boolean, metaClass: org.kevoree.modeling.meta.KMetaClass, resolutionTrace: org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace): org.kevoree.modeling.memory.struct.segment.KMemorySegment {
                                 var currentEntry: org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment = <org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment>this._cache.get(universe, time, uuid);
                                 if (currentEntry != null) {
                                     if (resolutionTrace != null) {
@@ -4990,21 +4973,14 @@ module org {
                                     resolutionTrace.setTimeTree(timeTree);
                                 }
                                 if (resolvedTime != org.kevoree.modeling.KConfig.NULL_LONG) {
-                                    var needTimeCopy: boolean = accessMode.equals(org.kevoree.modeling.memory.manager.AccessMode.NEW) && (resolvedTime != time);
-                                    var needUniverseCopy: boolean = accessMode.equals(org.kevoree.modeling.memory.manager.AccessMode.NEW) && (resolvedUniverse != universe);
+                                    var needTimeCopy: boolean = !resolvePreviousSegment && (resolvedTime != time);
+                                    var needUniverseCopy: boolean = !resolvePreviousSegment && (resolvedUniverse != universe);
                                     var entry: org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment = <org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment>this._cache.get(resolvedUniverse, resolvedTime, uuid);
                                     if (entry == null) {
                                         return null;
                                     }
-                                    if (accessMode.equals(org.kevoree.modeling.memory.manager.AccessMode.DELETE)) {
-                                        timeTree.delete(time);
-                                        if (resolutionTrace != null) {
-                                            resolutionTrace.setSegment(entry);
-                                        }
-                                        return entry;
-                                    }
                                     if (!needTimeCopy && !needUniverseCopy) {
-                                        if (accessMode.equals(org.kevoree.modeling.memory.manager.AccessMode.NEW)) {
+                                        if (!resolvePreviousSegment) {
                                             entry.setDirty();
                                         }
                                         if (resolutionTrace != null) {
@@ -5104,7 +5080,7 @@ module org {
                                             if (universeTree == null) {
                                                 callback(null);
                                             } else {
-                                                var resolvedVal: number = (<org.kevoree.modeling.memory.struct.tree.impl.LongLongTree>universeTree).previousOrEqualValue(time);
+                                                var resolvedVal: number = (<org.kevoree.modeling.memory.struct.tree.KLongLongTree>universeTree).previousOrEqualValue(time);
                                                 if (resolvedVal == org.kevoree.modeling.KConfig.NULL_LONG) {
                                                     callback(null);
                                                 } else {
@@ -5502,11 +5478,11 @@ module org {
                         }
 
                         public newLongTree(): org.kevoree.modeling.memory.struct.tree.KLongTree {
-                            return new org.kevoree.modeling.memory.struct.tree.impl.LongTree();
+                            return new org.kevoree.modeling.memory.struct.tree.impl.ArrayLongTree();
                         }
 
                         public newLongLongTree(): org.kevoree.modeling.memory.struct.tree.KLongLongTree {
-                            return new org.kevoree.modeling.memory.struct.tree.impl.LongLongTree();
+                            return new org.kevoree.modeling.memory.struct.tree.impl.ArrayLongLongTree();
                         }
 
                         public newUniverseMap(initSize: number, p_className: string): org.kevoree.modeling.memory.struct.map.KUniverseOrderMap {
@@ -5735,6 +5711,8 @@ module org {
 
                             removeRef(index: number, previousRef: number, metaClass: org.kevoree.modeling.meta.KMetaClass): boolean;
 
+                            clearRef(index: number): void;
+
                             getInfer(index: number, metaClass: org.kevoree.modeling.meta.KMetaClass): number[];
 
                             getInferSize(index: number, metaClass: org.kevoree.modeling.meta.KMetaClass): number;
@@ -5951,6 +5929,10 @@ module org {
                                     return false;
                                 }
 
+                                public clearRef(index: number): void {
+                                    this.raw[index] = null;
+                                }
+
                                 public getInfer(index: number, metaClass: org.kevoree.modeling.meta.KMetaClass): number[] {
                                     if (this.raw != null) {
                                         var previousObj: any = this.raw[index];
@@ -6062,8 +6044,6 @@ module org {
 
                             range(startKey: number, endKey: number, walker: (p : number) => void): void;
 
-                            delete(key: number): void;
-
                         }
 
                         export interface KTree extends org.kevoree.modeling.memory.KMemoryElement {
@@ -6081,15 +6061,26 @@ module org {
                         export module impl {
                             export class AbstractArrayTree {
 
-                                private static BLACK: number = 0;
-                                private static RED: number = 1;
                                 public _root_index: number = -1;
                                 public _size: number = 0;
-                                public _threshold: number;
+                                public _threshold: number = 0;
                                 public _loadFactor: number;
                                 public _back: number[] = null;
                                 private _dirty: boolean = true;
                                 private _counter: number = 0;
+                                constructor() {
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                }
+
+                                public ELEM_SIZE(): number {
+                                    throw "Abstract method";
+                                }
+
+                                private allocate(capacity: number): void {
+                                    this._back = new Array();
+                                    this._threshold = <number>(capacity * this._loadFactor);
+                                }
+
                                 public size(): number {
                                     return this._size;
                                 }
@@ -6362,9 +6353,6 @@ module org {
                                     }
                                 }
 
-                                public delete(p_key: number): void {
-                                }
-
                                 private nodeColor(n: number): boolean {
                                     if (n == -1) {
                                         return true;
@@ -6373,40 +6361,60 @@ module org {
                                     }
                                 }
 
-                                private node_serialize(builder: java.lang.StringBuilder, current: number): void {
-                                    builder.append("|");
-                                    if (this.nodeColor(current) == true) {
-                                        builder.append(AbstractArrayTree.BLACK);
-                                    } else {
-                                        builder.append(AbstractArrayTree.RED);
-                                    }
-                                    builder.append(this.key(current));
-                                    if (this.left(current) == -1 && this.right(current) == -1) {
-                                        builder.append("%");
-                                    } else {
-                                        if (this.left(current) != -1) {
-                                            this.node_serialize(builder, this.left(current));
-                                        } else {
-                                            builder.append("#");
-                                        }
-                                        if (this.right(current) != -1) {
-                                            this.node_serialize(builder, this.right(current));
-                                        } else {
-                                            builder.append("#");
-                                        }
-                                    }
-                                }
-
                                 public serialize(metaModel: org.kevoree.modeling.meta.KMetaModel): string {
                                     var builder: java.lang.StringBuilder = new java.lang.StringBuilder();
-                                    builder.append(this._size);
-                                    if (this._root_index != -1) {
-                                        this.node_serialize(builder, this._root_index);
+                                    if (this._root_index == -1) {
+                                        builder.append("0");
+                                    } else {
+                                        builder.append(this._size);
+                                        builder.append(',');
+                                        builder.append(this._root_index);
+                                        builder.append('[');
+                                        for (var i: number = 0; i < (this._size * this.ELEM_SIZE()); i++) {
+                                            if (i != 0) {
+                                                builder.append(',');
+                                            }
+                                            builder.append(this._back[i]);
+                                        }
+                                        builder.append(']');
                                     }
                                     return builder.toString();
                                 }
 
                                 public init(payload: string, metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                    if (payload == null || payload.length == 0) {
+                                        return;
+                                    }
+                                    var initPos: number = 0;
+                                    var cursor: number = 0;
+                                    while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '['){
+                                        cursor++;
+                                    }
+                                    if (payload.charAt(cursor) == ',') {
+                                        this._size = java.lang.Integer.parseInt(payload.substring(initPos, cursor));
+                                        cursor++;
+                                        initPos = cursor;
+                                    }
+                                    while (cursor < payload.length && payload.charAt(cursor) != '['){
+                                        cursor++;
+                                    }
+                                    this._root_index = java.lang.Integer.parseInt(payload.substring(initPos, cursor));
+                                    this.allocate(this._size);
+                                    var _back_index: number = 0;
+                                    while (cursor < payload.length){
+                                        cursor++;
+                                        var beginChunk: number = cursor;
+                                        while (cursor < payload.length && payload.charAt(cursor) != ','){
+                                            cursor++;
+                                        }
+                                        var cleanedEnd: number = cursor;
+                                        if (payload.charAt(cleanedEnd - 1) == ']') {
+                                            cleanedEnd--;
+                                        }
+                                        var loopKey: number = java.lang.Long.parseLong(payload.substring(beginChunk, cleanedEnd));
+                                        this._back[_back_index] = loopKey;
+                                        _back_index++;
+                                    }
                                 }
 
                                 public isDirty(): boolean {
@@ -6435,6 +6443,7 @@ module org {
 
                                 public free(p_metaModel: org.kevoree.modeling.meta.KMetaModel): void {
                                     this._back = null;
+                                    this._threshold = 0;
                                 }
 
                             }
@@ -6443,9 +6452,12 @@ module org {
 
                                 private static SIZE_NODE: number = 6;
                                 constructor() {
-                                    this._back = new Array();
-                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
-                                    this._threshold = <number>(this._size * this._loadFactor);
+                                    super();
+                                    this._back = null;
+                                }
+
+                                public ELEM_SIZE(): number {
+                                    return ArrayLongLongTree.SIZE_NODE;
                                 }
 
                                 public previousOrEqualValue(p_key: number): number {
@@ -6480,7 +6492,9 @@ module org {
                                     if ((this._size + 1) > this._threshold) {
                                         var length: number = (this._size == 0 ? 1 : this._size << 1);
                                         var new_back: number[] = new Array();
-                                        System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongLongTree.SIZE_NODE);
+                                        if (this._back != null) {
+                                            System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongLongTree.SIZE_NODE);
+                                        }
                                         this._threshold = <number>(this._size * this._loadFactor);
                                         this._back = new_back;
                                     }
@@ -6542,9 +6556,12 @@ module org {
 
                                 private static SIZE_NODE: number = 5;
                                 constructor() {
-                                    this._back = new Array();
-                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
-                                    this._threshold = <number>(this._size * this._loadFactor);
+                                    super();
+                                    this._back = null;
+                                }
+
+                                public ELEM_SIZE(): number {
+                                    return ArrayLongTree.SIZE_NODE;
                                 }
 
                                 public previousOrEqual(key: number): number {
@@ -6560,7 +6577,9 @@ module org {
                                     if ((this._size + 1) > this._threshold) {
                                         var length: number = (this._size == 0 ? 1 : this._size << 1);
                                         var new_back: number[] = new Array();
-                                        System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongTree.SIZE_NODE);
+                                        if (this._back != null) {
+                                            System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongTree.SIZE_NODE);
+                                        }
                                         this._threshold = <number>(this._size * this._loadFactor);
                                         this._back = new_back;
                                     }
@@ -6613,1535 +6632,6 @@ module org {
                                     this.insertCase1(insertedNode);
                                 }
 
-                            }
-
-                            export class LongLongTree implements org.kevoree.modeling.memory.KMemoryElement, org.kevoree.modeling.memory.struct.tree.KLongLongTree {
-
-                                private root: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = null;
-                                private _size: number = 0;
-                                public _dirty: boolean = false;
-                                private _counter: number = 0;
-                                private _previousOrEqualsCacheValues: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode[] = null;
-                                private _previousOrEqualsNextCacheElem: number;
-                                private _lookupCacheValues: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode[] = null;
-                                private _lookupNextCacheElem: number;
-                                public size(): number {
-                                    return this._size;
-                                }
-
-                                public counter(): number {
-                                    return this._counter;
-                                }
-
-                                public inc(): void {
-                                    this._counter++;
-                                }
-
-                                public dec(): void {
-                                    this._counter--;
-                                }
-
-                                public free(metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                                }
-
-                                public toString(): string {
-                                    return this.serialize(null);
-                                }
-
-                                public isDirty(): boolean {
-                                    return this._dirty;
-                                }
-
-                                public setDirty(): void {
-                                    this._dirty = true;
-                                }
-
-                                public serialize(metaModel: org.kevoree.modeling.meta.KMetaModel): string {
-                                    var builder: java.lang.StringBuilder = new java.lang.StringBuilder();
-                                    builder.append(this._size);
-                                    if (this.root != null) {
-                                        this.root.serialize(builder);
-                                    }
-                                    return builder.toString();
-                                }
-
-                                constructor() {
-                                    this._lookupCacheValues = new Array();
-                                    this._previousOrEqualsCacheValues = new Array();
-                                    this._previousOrEqualsNextCacheElem = 0;
-                                    this._lookupNextCacheElem = 0;
-                                }
-
-                                private tryPreviousOrEqualsCache(key: number): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    if (this._previousOrEqualsCacheValues != null) {
-                                        for (var i: number = 0; i < this._previousOrEqualsNextCacheElem; i++) {
-                                            if (this._previousOrEqualsCacheValues[i] != null && key == this._previousOrEqualsCacheValues[i].key) {
-                                                return this._previousOrEqualsCacheValues[i];
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                private tryLookupCache(key: number): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    if (this._lookupCacheValues != null) {
-                                        for (var i: number = 0; i < this._lookupNextCacheElem; i++) {
-                                            if (this._lookupCacheValues[i] != null && key == this._lookupCacheValues[i].key) {
-                                                return this._lookupCacheValues[i];
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                private resetCache(): void {
-                                    this._previousOrEqualsNextCacheElem = 0;
-                                    this._lookupNextCacheElem = 0;
-                                }
-
-                                private putInPreviousOrEqualsCache(resolved: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (this._previousOrEqualsNextCacheElem == org.kevoree.modeling.KConfig.TREE_CACHE_SIZE) {
-                                        this._previousOrEqualsNextCacheElem = 0;
-                                    }
-                                    this._previousOrEqualsCacheValues[this._previousOrEqualsNextCacheElem] = resolved;
-                                    this._previousOrEqualsNextCacheElem++;
-                                }
-
-                                private putInLookupCache(resolved: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (this._lookupNextCacheElem == org.kevoree.modeling.KConfig.TREE_CACHE_SIZE) {
-                                        this._lookupNextCacheElem = 0;
-                                    }
-                                    this._lookupCacheValues[this._lookupNextCacheElem] = resolved;
-                                    this._lookupNextCacheElem++;
-                                }
-
-                                public setClean(metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                                    this._dirty = false;
-                                }
-
-                                public init(payload: string, metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                                    if (payload == null || payload.length == 0) {
-                                        return;
-                                    }
-                                    var i: number = 0;
-                                    var buffer: java.lang.StringBuilder = new java.lang.StringBuilder();
-                                    var ch: string = payload.charAt(i);
-                                    while (i < payload.length && ch != '|'){
-                                        buffer.append(ch);
-                                        i = i + 1;
-                                        ch = payload.charAt(i);
-                                    }
-                                    this._size = java.lang.Integer.parseInt(buffer.toString());
-                                    var ctx: org.kevoree.modeling.memory.struct.tree.impl.TreeReaderContext = new org.kevoree.modeling.memory.struct.tree.impl.TreeReaderContext();
-                                    ctx.index = i;
-                                    ctx.payload = payload;
-                                    ctx.buffer = new Array();
-                                    this.root = org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode.unserialize(ctx);
-                                    this.resetCache();
-                                }
-
-                                public lookupValue(key: number): number {
-                                    var result: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.internal_lookup(key);
-                                    if (result != null) {
-                                        return result.value;
-                                    } else {
-                                        return org.kevoree.modeling.KConfig.NULL_LONG;
-                                    }
-                                }
-
-                                private internal_lookup(key: number): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.tryLookupCache(key);
-                                    if (n != null) {
-                                        return n;
-                                    }
-                                    n = this.root;
-                                    if (n == null) {
-                                        return null;
-                                    }
-                                    while (n != null){
-                                        if (key == n.key) {
-                                            this.putInLookupCache(n);
-                                            return n;
-                                        } else {
-                                            if (key < n.key) {
-                                                n = n.getLeft();
-                                            } else {
-                                                n = n.getRight();
-                                            }
-                                        }
-                                    }
-                                    this.putInLookupCache(null);
-                                    return n;
-                                }
-
-                                public previousOrEqualValue(key: number): number {
-                                    var result: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.internal_previousOrEqual(key);
-                                    if (result != null) {
-                                        return result.value;
-                                    } else {
-                                        return org.kevoree.modeling.KConfig.NULL_LONG;
-                                    }
-                                }
-
-                                private internal_previousOrEqual(key: number): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.tryPreviousOrEqualsCache(key);
-                                    if (p != null) {
-                                        return p;
-                                    }
-                                    p = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (key == p.key) {
-                                            this.putInPreviousOrEqualsCache(p);
-                                            return p;
-                                        }
-                                        if (key > p.key) {
-                                            if (p.getRight() != null) {
-                                                p = p.getRight();
-                                            } else {
-                                                this.putInPreviousOrEqualsCache(p);
-                                                return p;
-                                            }
-                                        } else {
-                                            if (p.getLeft() != null) {
-                                                p = p.getLeft();
-                                            } else {
-                                                var parent: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = p.getParent();
-                                                var ch: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = p;
-                                                while (parent != null && ch == parent.getLeft()){
-                                                    ch = parent;
-                                                    parent = parent.getParent();
-                                                }
-                                                this.putInPreviousOrEqualsCache(parent);
-                                                return parent;
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public nextOrEqual(key: number): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (key == p.key) {
-                                            return p;
-                                        }
-                                        if (key < p.key) {
-                                            if (p.getLeft() != null) {
-                                                p = p.getLeft();
-                                            } else {
-                                                return p;
-                                            }
-                                        } else {
-                                            if (p.getRight() != null) {
-                                                p = p.getRight();
-                                            } else {
-                                                var parent: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = p.getParent();
-                                                var ch: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = p;
-                                                while (parent != null && ch == parent.getRight()){
-                                                    ch = parent;
-                                                    parent = parent.getParent();
-                                                }
-                                                return parent;
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public previous(key: number): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (key < p.key) {
-                                            if (p.getLeft() != null) {
-                                                p = p.getLeft();
-                                            } else {
-                                                return p.previous();
-                                            }
-                                        } else {
-                                            if (key > p.key) {
-                                                if (p.getRight() != null) {
-                                                    p = p.getRight();
-                                                } else {
-                                                    return p;
-                                                }
-                                            } else {
-                                                return p.previous();
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public next(key: number): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (key < p.key) {
-                                            if (p.getLeft() != null) {
-                                                p = p.getLeft();
-                                            } else {
-                                                return p;
-                                            }
-                                        } else {
-                                            if (key > p.key) {
-                                                if (p.getRight() != null) {
-                                                    p = p.getRight();
-                                                } else {
-                                                    return p.next();
-                                                }
-                                            } else {
-                                                return p.next();
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public first(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (p.getLeft() != null) {
-                                            p = p.getLeft();
-                                        } else {
-                                            return p;
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public last(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (p.getRight() != null) {
-                                            p = p.getRight();
-                                        } else {
-                                            return p;
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                private rotateLeft(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    var r: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = n.getRight();
-                                    this.replaceNode(n, r);
-                                    n.setRight(r.getLeft());
-                                    if (r.getLeft() != null) {
-                                        r.getLeft().setParent(n);
-                                    }
-                                    r.setLeft(n);
-                                    n.setParent(r);
-                                }
-
-                                private rotateRight(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    var l: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = n.getLeft();
-                                    this.replaceNode(n, l);
-                                    n.setLeft(l.getRight());
-                                    if (l.getRight() != null) {
-                                        l.getRight().setParent(n);
-                                    }
-                                    l.setRight(n);
-                                    n.setParent(l);
-                                }
-
-                                private replaceNode(oldn: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode, newn: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (oldn.getParent() == null) {
-                                        this.root = newn;
-                                    } else {
-                                        if (oldn == oldn.getParent().getLeft()) {
-                                            oldn.getParent().setLeft(newn);
-                                        } else {
-                                            oldn.getParent().setRight(newn);
-                                        }
-                                    }
-                                    if (newn != null) {
-                                        newn.setParent(oldn.getParent());
-                                    }
-                                }
-
-                                public insert(key: number, value: number): void {
-                                    this.resetCache();
-                                    this._dirty = true;
-                                    var insertedNode: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = new org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode(key, value, false, null, null);
-                                    if (this.root == null) {
-                                        this._size++;
-                                        this.root = insertedNode;
-                                    } else {
-                                        var n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.root;
-                                        while (true){
-                                            if (key == n.key) {
-                                                n.value = value;
-                                                return;
-                                            } else {
-                                                if (key < n.key) {
-                                                    if (n.getLeft() == null) {
-                                                        n.setLeft(insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    } else {
-                                                        n = n.getLeft();
-                                                    }
-                                                } else {
-                                                    if (n.getRight() == null) {
-                                                        n.setRight(insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    } else {
-                                                        n = n.getRight();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        insertedNode.setParent(n);
-                                    }
-                                    this.insertCase1(insertedNode);
-                                }
-
-                                private insertCase1(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (n.getParent() == null) {
-                                        n.color = true;
-                                    } else {
-                                        this.insertCase2(n);
-                                    }
-                                }
-
-                                private insertCase2(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (this.nodeColor(n.getParent()) == true) {
-                                        return;
-                                    } else {
-                                        this.insertCase3(n);
-                                    }
-                                }
-
-                                private insertCase3(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (this.nodeColor(n.uncle()) == false) {
-                                        n.getParent().color = true;
-                                        n.uncle().color = true;
-                                        n.grandparent().color = false;
-                                        this.insertCase1(n.grandparent());
-                                    } else {
-                                        this.insertCase4(n);
-                                    }
-                                }
-
-                                private insertCase4(n_n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    var n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = n_n;
-                                    if (n == n.getParent().getRight() && n.getParent() == n.grandparent().getLeft()) {
-                                        this.rotateLeft(n.getParent());
-                                        n = n.getLeft();
-                                    } else {
-                                        if (n == n.getParent().getLeft() && n.getParent() == n.grandparent().getRight()) {
-                                            this.rotateRight(n.getParent());
-                                            n = n.getRight();
-                                        }
-                                    }
-                                    this.insertCase5(n);
-                                }
-
-                                private insertCase5(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    n.getParent().color = true;
-                                    n.grandparent().color = false;
-                                    if (n == n.getParent().getLeft() && n.getParent() == n.grandparent().getLeft()) {
-                                        this.rotateRight(n.grandparent());
-                                    } else {
-                                        this.rotateLeft(n.grandparent());
-                                    }
-                                }
-
-                                public delete(key: number): void {
-                                    var n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this.internal_lookup(key);
-                                    if (n == null) {
-                                        return;
-                                    } else {
-                                        this._size--;
-                                        if (n.getLeft() != null && n.getRight() != null) {
-                                            var pred: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = n.getLeft();
-                                            while (pred.getRight() != null){
-                                                pred = pred.getRight();
-                                            }
-                                            n.key = pred.key;
-                                            n.value = pred.value;
-                                            n = pred;
-                                        }
-                                        var child: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode;
-                                        if (n.getRight() == null) {
-                                            child = n.getLeft();
-                                        } else {
-                                            child = n.getRight();
-                                        }
-                                        if (this.nodeColor(n) == true) {
-                                            n.color = this.nodeColor(child);
-                                            this.deleteCase1(n);
-                                        }
-                                        this.replaceNode(n, child);
-                                    }
-                                }
-
-                                private deleteCase1(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (n.getParent() == null) {
-                                        return;
-                                    } else {
-                                        this.deleteCase2(n);
-                                    }
-                                }
-
-                                private deleteCase2(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (this.nodeColor(n.sibling()) == false) {
-                                        n.getParent().color = false;
-                                        n.sibling().color = true;
-                                        if (n == n.getParent().getLeft()) {
-                                            this.rotateLeft(n.getParent());
-                                        } else {
-                                            this.rotateRight(n.getParent());
-                                        }
-                                    }
-                                    this.deleteCase3(n);
-                                }
-
-                                private deleteCase3(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (this.nodeColor(n.getParent()) == true && this.nodeColor(n.sibling()) == true && this.nodeColor(n.sibling().getLeft()) == true && this.nodeColor(n.sibling().getRight()) == true) {
-                                        n.sibling().color = false;
-                                        this.deleteCase1(n.getParent());
-                                    } else {
-                                        this.deleteCase4(n);
-                                    }
-                                }
-
-                                private deleteCase4(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (this.nodeColor(n.getParent()) == false && this.nodeColor(n.sibling()) == true && this.nodeColor(n.sibling().getLeft()) == true && this.nodeColor(n.sibling().getRight()) == true) {
-                                        n.sibling().color = false;
-                                        n.getParent().color = true;
-                                    } else {
-                                        this.deleteCase5(n);
-                                    }
-                                }
-
-                                private deleteCase5(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    if (n == n.getParent().getLeft() && this.nodeColor(n.sibling()) == true && this.nodeColor(n.sibling().getLeft()) == false && this.nodeColor(n.sibling().getRight()) == true) {
-                                        n.sibling().color = false;
-                                        n.sibling().getLeft().color = true;
-                                        this.rotateRight(n.sibling());
-                                    } else {
-                                        if (n == n.getParent().getRight() && this.nodeColor(n.sibling()) == true && this.nodeColor(n.sibling().getRight()) == false && this.nodeColor(n.sibling().getLeft()) == true) {
-                                            n.sibling().color = false;
-                                            n.sibling().getRight().color = true;
-                                            this.rotateLeft(n.sibling());
-                                        }
-                                    }
-                                    this.deleteCase6(n);
-                                }
-
-                                private deleteCase6(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    n.sibling().color = this.nodeColor(n.getParent());
-                                    n.getParent().color = true;
-                                    if (n == n.getParent().getLeft()) {
-                                        n.sibling().getRight().color = true;
-                                        this.rotateLeft(n.getParent());
-                                    } else {
-                                        n.sibling().getLeft().color = true;
-                                        this.rotateRight(n.getParent());
-                                    }
-                                }
-
-                                private nodeColor(n: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): boolean {
-                                    if (n == null) {
-                                        return true;
-                                    } else {
-                                        return n.color;
-                                    }
-                                }
-
-                            }
-
-                            export class LongTree implements org.kevoree.modeling.memory.KMemoryElement, org.kevoree.modeling.memory.struct.tree.KLongTree {
-
-                                private _size: number = 0;
-                                private root: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = null;
-                                private _previousOrEqualsCacheValues: org.kevoree.modeling.memory.struct.tree.impl.TreeNode[] = null;
-                                private _nextCacheElem: number;
-                                private _counter: number = 0;
-                                private _dirty: boolean = false;
-                                constructor() {
-                                    this._previousOrEqualsCacheValues = new Array();
-                                    this._nextCacheElem = 0;
-                                }
-
-                                public size(): number {
-                                    return this._size;
-                                }
-
-                                public counter(): number {
-                                    return this._counter;
-                                }
-
-                                public inc(): void {
-                                    this._counter++;
-                                }
-
-                                public dec(): void {
-                                    this._counter--;
-                                }
-
-                                public free(metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                                }
-
-                                private tryPreviousOrEqualsCache(key: number): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    if (this._previousOrEqualsCacheValues != null) {
-                                        for (var i: number = 0; i < this._nextCacheElem; i++) {
-                                            if (this._previousOrEqualsCacheValues[i] != null && this._previousOrEqualsCacheValues[i].key == key) {
-                                                return this._previousOrEqualsCacheValues[i];
-                                            }
-                                        }
-                                        return null;
-                                    } else {
-                                        return null;
-                                    }
-                                }
-
-                                private resetCache(): void {
-                                    this._nextCacheElem = 0;
-                                }
-
-                                private putInPreviousOrEqualsCache(resolved: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (this._nextCacheElem == org.kevoree.modeling.KConfig.TREE_CACHE_SIZE) {
-                                        this._nextCacheElem = 0;
-                                    }
-                                    this._previousOrEqualsCacheValues[this._nextCacheElem] = resolved;
-                                    this._nextCacheElem++;
-                                }
-
-                                public isDirty(): boolean {
-                                    return this._dirty;
-                                }
-
-                                public setClean(metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                                    this._dirty = false;
-                                }
-
-                                public setDirty(): void {
-                                    this._dirty = true;
-                                }
-
-                                public serialize(metaModel: org.kevoree.modeling.meta.KMetaModel): string {
-                                    var builder: java.lang.StringBuilder = new java.lang.StringBuilder();
-                                    builder.append(this._size);
-                                    if (this.root != null) {
-                                        this.root.serialize(builder);
-                                    }
-                                    return builder.toString();
-                                }
-
-                                public toString(): string {
-                                    return this.serialize(null);
-                                }
-
-                                public init(payload: string, metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                                    if (payload == null || payload.length == 0) {
-                                        return;
-                                    }
-                                    var i: number = 0;
-                                    var buffer: java.lang.StringBuilder = new java.lang.StringBuilder();
-                                    var ch: string = payload.charAt(i);
-                                    while (i < payload.length && ch != '|'){
-                                        buffer.append(ch);
-                                        i = i + 1;
-                                        ch = payload.charAt(i);
-                                    }
-                                    this._size = java.lang.Integer.parseInt(buffer.toString());
-                                    var ctx: org.kevoree.modeling.memory.struct.tree.impl.TreeReaderContext = new org.kevoree.modeling.memory.struct.tree.impl.TreeReaderContext();
-                                    ctx.index = i;
-                                    ctx.payload = payload;
-                                    this.root = org.kevoree.modeling.memory.struct.tree.impl.TreeNode.unserialize(ctx);
-                                    this.resetCache();
-                                }
-
-                                public previousOrEqual(key: number): number {
-                                    var resolvedNode: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.internal_previousOrEqual(key);
-                                    if (resolvedNode != null) {
-                                        return resolvedNode.key;
-                                    }
-                                    return org.kevoree.modeling.KConfig.NULL_LONG;
-                                }
-
-                                public internal_previousOrEqual(key: number): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    var cachedVal: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.tryPreviousOrEqualsCache(key);
-                                    if (cachedVal != null) {
-                                        return cachedVal;
-                                    }
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (key == p.key) {
-                                            this.putInPreviousOrEqualsCache(p);
-                                            return p;
-                                        }
-                                        if (key > p.key) {
-                                            if (p.getRight() != null) {
-                                                p = p.getRight();
-                                            } else {
-                                                this.putInPreviousOrEqualsCache(p);
-                                                return p;
-                                            }
-                                        } else {
-                                            if (p.getLeft() != null) {
-                                                p = p.getLeft();
-                                            } else {
-                                                var parent: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = p.getParent();
-                                                var ch: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = p;
-                                                while (parent != null && ch == parent.getLeft()){
-                                                    ch = parent;
-                                                    parent = parent.getParent();
-                                                }
-                                                this.putInPreviousOrEqualsCache(parent);
-                                                return parent;
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public nextOrEqual(key: number): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (key == p.key) {
-                                            return p;
-                                        }
-                                        if (key < p.key) {
-                                            if (p.getLeft() != null) {
-                                                p = p.getLeft();
-                                            } else {
-                                                return p;
-                                            }
-                                        } else {
-                                            if (p.getRight() != null) {
-                                                p = p.getRight();
-                                            } else {
-                                                var parent: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = p.getParent();
-                                                var ch: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = p;
-                                                while (parent != null && ch == parent.getRight()){
-                                                    ch = parent;
-                                                    parent = parent.getParent();
-                                                }
-                                                return parent;
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public previous(key: number): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (key < p.key) {
-                                            if (p.getLeft() != null) {
-                                                p = p.getLeft();
-                                            } else {
-                                                return p.previous();
-                                            }
-                                        } else {
-                                            if (key > p.key) {
-                                                if (p.getRight() != null) {
-                                                    p = p.getRight();
-                                                } else {
-                                                    return p;
-                                                }
-                                            } else {
-                                                return p.previous();
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public next(key: number): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (key < p.key) {
-                                            if (p.getLeft() != null) {
-                                                p = p.getLeft();
-                                            } else {
-                                                return p;
-                                            }
-                                        } else {
-                                            if (key > p.key) {
-                                                if (p.getRight() != null) {
-                                                    p = p.getRight();
-                                                } else {
-                                                    return p.next();
-                                                }
-                                            } else {
-                                                return p.next();
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public first(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (p.getLeft() != null) {
-                                            p = p.getLeft();
-                                        } else {
-                                            return p;
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public last(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                    if (p == null) {
-                                        return null;
-                                    }
-                                    while (p != null){
-                                        if (p.getRight() != null) {
-                                            p = p.getRight();
-                                        } else {
-                                            return p;
-                                        }
-                                    }
-                                    return null;
-                                }
-
-                                public lookup(key: number): number {
-                                    var n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                    if (n == null) {
-                                        return org.kevoree.modeling.KConfig.NULL_LONG;
-                                    }
-                                    while (n != null){
-                                        if (key == n.key) {
-                                            return n.key;
-                                        } else {
-                                            if (key < n.key) {
-                                                n = n.getLeft();
-                                            } else {
-                                                n = n.getRight();
-                                            }
-                                        }
-                                    }
-                                    return org.kevoree.modeling.KConfig.NULL_LONG;
-                                }
-
-                                public range(start: number, end: number, walker: (p : number) => void): void {
-                                    var it: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.internal_previousOrEqual(end);
-                                    while (it != null && it.key >= start){
-                                        walker(it.key);
-                                        it = it.previous();
-                                    }
-                                }
-
-                                private rotateLeft(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    var r: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = n.getRight();
-                                    this.replaceNode(n, r);
-                                    n.setRight(r.getLeft());
-                                    if (r.getLeft() != null) {
-                                        r.getLeft().setParent(n);
-                                    }
-                                    r.setLeft(n);
-                                    n.setParent(r);
-                                }
-
-                                private rotateRight(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    var l: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = n.getLeft();
-                                    this.replaceNode(n, l);
-                                    n.setLeft(l.getRight());
-                                    if (l.getRight() != null) {
-                                        l.getRight().setParent(n);
-                                    }
-                                    l.setRight(n);
-                                    n.setParent(l);
-                                }
-
-                                private replaceNode(oldn: org.kevoree.modeling.memory.struct.tree.impl.TreeNode, newn: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (oldn.getParent() == null) {
-                                        this.root = newn;
-                                    } else {
-                                        if (oldn == oldn.getParent().getLeft()) {
-                                            oldn.getParent().setLeft(newn);
-                                        } else {
-                                            oldn.getParent().setRight(newn);
-                                        }
-                                    }
-                                    if (newn != null) {
-                                        newn.setParent(oldn.getParent());
-                                    }
-                                }
-
-                                public insert(key: number): void {
-                                    this._dirty = true;
-                                    var insertedNode: org.kevoree.modeling.memory.struct.tree.impl.TreeNode;
-                                    if (this.root == null) {
-                                        this._size++;
-                                        insertedNode = new org.kevoree.modeling.memory.struct.tree.impl.TreeNode(key, false, null, null);
-                                        this.root = insertedNode;
-                                    } else {
-                                        var n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                        while (true){
-                                            if (key == n.key) {
-                                                this.putInPreviousOrEqualsCache(n);
-                                                return;
-                                            } else {
-                                                if (key < n.key) {
-                                                    if (n.getLeft() == null) {
-                                                        insertedNode = new org.kevoree.modeling.memory.struct.tree.impl.TreeNode(key, false, null, null);
-                                                        n.setLeft(insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    } else {
-                                                        n = n.getLeft();
-                                                    }
-                                                } else {
-                                                    if (n.getRight() == null) {
-                                                        insertedNode = new org.kevoree.modeling.memory.struct.tree.impl.TreeNode(key, false, null, null);
-                                                        n.setRight(insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    } else {
-                                                        n = n.getRight();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        insertedNode.setParent(n);
-                                    }
-                                    this.insertCase1(insertedNode);
-                                    this.putInPreviousOrEqualsCache(insertedNode);
-                                }
-
-                                private insertCase1(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (n.getParent() == null) {
-                                        n.color = true;
-                                    } else {
-                                        this.insertCase2(n);
-                                    }
-                                }
-
-                                private insertCase2(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (this.nodeColor(n.getParent()) == true) {
-                                        return;
-                                    } else {
-                                        this.insertCase3(n);
-                                    }
-                                }
-
-                                private insertCase3(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (this.nodeColor(n.uncle()) == false) {
-                                        n.getParent().color = true;
-                                        n.uncle().color = true;
-                                        n.grandparent().color = false;
-                                        this.insertCase1(n.grandparent());
-                                    } else {
-                                        this.insertCase4(n);
-                                    }
-                                }
-
-                                private insertCase4(n_n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    var n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = n_n;
-                                    if (n == n.getParent().getRight() && n.getParent() == n.grandparent().getLeft()) {
-                                        this.rotateLeft(n.getParent());
-                                        n = n.getLeft();
-                                    } else {
-                                        if (n == n.getParent().getLeft() && n.getParent() == n.grandparent().getRight()) {
-                                            this.rotateRight(n.getParent());
-                                            n = n.getRight();
-                                        }
-                                    }
-                                    this.insertCase5(n);
-                                }
-
-                                private insertCase5(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    n.getParent().color = true;
-                                    n.grandparent().color = false;
-                                    if (n == n.getParent().getLeft() && n.getParent() == n.grandparent().getLeft()) {
-                                        this.rotateRight(n.grandparent());
-                                    } else {
-                                        this.rotateLeft(n.grandparent());
-                                    }
-                                }
-
-                                public delete(key: number): void {
-                                    var n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = null;
-                                    var nn: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this.root;
-                                    while (nn != null){
-                                        if (key == nn.key) {
-                                            n = nn;
-                                        } else {
-                                            if (key < nn.key) {
-                                                nn = nn.getLeft();
-                                            } else {
-                                                nn = nn.getRight();
-                                            }
-                                        }
-                                    }
-                                    if (n == null) {
-                                        return;
-                                    } else {
-                                        this._size--;
-                                        if (n.getLeft() != null && n.getRight() != null) {
-                                            var pred: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = n.getLeft();
-                                            while (pred.getRight() != null){
-                                                pred = pred.getRight();
-                                            }
-                                            n.key = pred.key;
-                                            n = pred;
-                                        }
-                                        var child: org.kevoree.modeling.memory.struct.tree.impl.TreeNode;
-                                        if (n.getRight() == null) {
-                                            child = n.getLeft();
-                                        } else {
-                                            child = n.getRight();
-                                        }
-                                        if (this.nodeColor(n) == true) {
-                                            n.color = this.nodeColor(child);
-                                            this.deleteCase1(n);
-                                        }
-                                        this.replaceNode(n, child);
-                                    }
-                                }
-
-                                private deleteCase1(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (n.getParent() == null) {
-                                        return;
-                                    } else {
-                                        this.deleteCase2(n);
-                                    }
-                                }
-
-                                private deleteCase2(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (this.nodeColor(n.sibling()) == false) {
-                                        n.getParent().color = false;
-                                        n.sibling().color = true;
-                                        if (n == n.getParent().getLeft()) {
-                                            this.rotateLeft(n.getParent());
-                                        } else {
-                                            this.rotateRight(n.getParent());
-                                        }
-                                    }
-                                    this.deleteCase3(n);
-                                }
-
-                                private deleteCase3(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (this.nodeColor(n.getParent()) == true && this.nodeColor(n.sibling()) == true && this.nodeColor(n.sibling().getLeft()) == true && this.nodeColor(n.sibling().getRight()) == true) {
-                                        n.sibling().color = false;
-                                        this.deleteCase1(n.getParent());
-                                    } else {
-                                        this.deleteCase4(n);
-                                    }
-                                }
-
-                                private deleteCase4(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (this.nodeColor(n.getParent()) == false && this.nodeColor(n.sibling()) == true && this.nodeColor(n.sibling().getLeft()) == true && this.nodeColor(n.sibling().getRight()) == true) {
-                                        n.sibling().color = false;
-                                        n.getParent().color = true;
-                                    } else {
-                                        this.deleteCase5(n);
-                                    }
-                                }
-
-                                private deleteCase5(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    if (n == n.getParent().getLeft() && this.nodeColor(n.sibling()) == true && this.nodeColor(n.sibling().getLeft()) == false && this.nodeColor(n.sibling().getRight()) == true) {
-                                        n.sibling().color = false;
-                                        n.sibling().getLeft().color = true;
-                                        this.rotateRight(n.sibling());
-                                    } else {
-                                        if (n == n.getParent().getRight() && this.nodeColor(n.sibling()) == true && this.nodeColor(n.sibling().getRight()) == false && this.nodeColor(n.sibling().getLeft()) == true) {
-                                            n.sibling().color = false;
-                                            n.sibling().getRight().color = true;
-                                            this.rotateLeft(n.sibling());
-                                        }
-                                    }
-                                    this.deleteCase6(n);
-                                }
-
-                                private deleteCase6(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    n.sibling().color = this.nodeColor(n.getParent());
-                                    n.getParent().color = true;
-                                    if (n == n.getParent().getLeft()) {
-                                        n.sibling().getRight().color = true;
-                                        this.rotateLeft(n.getParent());
-                                    } else {
-                                        n.sibling().getLeft().color = true;
-                                        this.rotateRight(n.getParent());
-                                    }
-                                }
-
-                                private nodeColor(n: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): boolean {
-                                    if (n == null) {
-                                        return true;
-                                    } else {
-                                        return n.color;
-                                    }
-                                }
-
-                            }
-
-                            export class LongTreeNode {
-
-                                public static BLACK: string = '0';
-                                public static RED: string = '2';
-                                public key: number;
-                                public value: number;
-                                public color: boolean;
-                                private left: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode;
-                                private right: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode;
-                                private parent: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = null;
-                                constructor(key: number, value: number, color: boolean, left: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode, right: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode) {
-                                    this.key = key;
-                                    this.value = value;
-                                    this.color = color;
-                                    this.left = left;
-                                    this.right = right;
-                                    if (left != null) {
-                                        left.parent = this;
-                                    }
-                                    if (right != null) {
-                                        right.parent = this;
-                                    }
-                                    this.parent = null;
-                                }
-
-                                public grandparent(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    if (this.parent != null) {
-                                        return this.parent.parent;
-                                    } else {
-                                        return null;
-                                    }
-                                }
-
-                                public sibling(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    if (this.parent == null) {
-                                        return null;
-                                    } else {
-                                        if (this == this.parent.left) {
-                                            return this.parent.right;
-                                        } else {
-                                            return this.parent.left;
-                                        }
-                                    }
-                                }
-
-                                public uncle(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    if (this.parent != null) {
-                                        return this.parent.sibling();
-                                    } else {
-                                        return null;
-                                    }
-                                }
-
-                                public getLeft(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    return this.left;
-                                }
-
-                                public setLeft(left: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    this.left = left;
-                                }
-
-                                public getRight(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    return this.right;
-                                }
-
-                                public setRight(right: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    this.right = right;
-                                }
-
-                                public getParent(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    return this.parent;
-                                }
-
-                                public setParent(parent: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode): void {
-                                    this.parent = parent;
-                                }
-
-                                public serialize(builder: java.lang.StringBuilder): void {
-                                    builder.append("|");
-                                    if (this.color == true) {
-                                        builder.append(LongTreeNode.BLACK);
-                                    } else {
-                                        builder.append(LongTreeNode.RED);
-                                    }
-                                    builder.append(this.key);
-                                    builder.append("@");
-                                    builder.append(this.value);
-                                    if (this.left == null && this.right == null) {
-                                        builder.append("%");
-                                    } else {
-                                        if (this.left != null) {
-                                            this.left.serialize(builder);
-                                        } else {
-                                            builder.append("#");
-                                        }
-                                        if (this.right != null) {
-                                            this.right.serialize(builder);
-                                        } else {
-                                            builder.append("#");
-                                        }
-                                    }
-                                }
-
-                                public next(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this;
-                                    if (p.right != null) {
-                                        p = p.right;
-                                        while (p.left != null){
-                                            p = p.left;
-                                        }
-                                        return p;
-                                    } else {
-                                        if (p.parent != null) {
-                                            if (p == p.parent.left) {
-                                                return p.parent;
-                                            } else {
-                                                while (p.parent != null && p == p.parent.right){
-                                                    p = p.parent;
-                                                }
-                                                return p.parent;
-                                            }
-                                        } else {
-                                            return null;
-                                        }
-                                    }
-                                }
-
-                                public previous(): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = this;
-                                    if (p.left != null) {
-                                        p = p.left;
-                                        while (p.right != null){
-                                            p = p.right;
-                                        }
-                                        return p;
-                                    } else {
-                                        if (p.parent != null) {
-                                            if (p == p.parent.right) {
-                                                return p.parent;
-                                            } else {
-                                                while (p.parent != null && p == p.parent.left){
-                                                    p = p.parent;
-                                                }
-                                                return p.parent;
-                                            }
-                                        } else {
-                                            return null;
-                                        }
-                                    }
-                                }
-
-                                public static unserialize(ctx: org.kevoree.modeling.memory.struct.tree.impl.TreeReaderContext): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    return org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode.internal_unserialize(true, ctx);
-                                }
-
-                                public static internal_unserialize(rightBranch: boolean, ctx: org.kevoree.modeling.memory.struct.tree.impl.TreeReaderContext): org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode {
-                                    if (ctx.index >= ctx.payload.length) {
-                                        return null;
-                                    }
-                                    var ch: string = ctx.payload.charAt(ctx.index);
-                                    if (ch == '%') {
-                                        if (rightBranch) {
-                                            ctx.index = ctx.index + 1;
-                                        }
-                                        return null;
-                                    }
-                                    if (ch == '#') {
-                                        ctx.index = ctx.index + 1;
-                                        return null;
-                                    }
-                                    if (ch != '|') {
-                                        throw new java.lang.Exception("Error while loading BTree");
-                                    }
-                                    ctx.index = ctx.index + 1;
-                                    ch = ctx.payload.charAt(ctx.index);
-                                    var colorLoaded: boolean = true;
-                                    if (ch == LongTreeNode.RED) {
-                                        colorLoaded = false;
-                                    }
-                                    ctx.index = ctx.index + 1;
-                                    ch = ctx.payload.charAt(ctx.index);
-                                    var i: number = 0;
-                                    while (ctx.index + 1 < ctx.payload.length && ch != '|' && ch != '#' && ch != '%' && ch != '@'){
-                                        ctx.buffer[i] = ch;
-                                        i++;
-                                        ctx.index = ctx.index + 1;
-                                        ch = ctx.payload.charAt(ctx.index);
-                                    }
-                                    if (ch != '|' && ch != '#' && ch != '%' && ch != '@') {
-                                        ctx.buffer[i] = ch;
-                                        i++;
-                                    }
-                                    var key: number = java.lang.Long.parseLong(StringUtils.copyValueOf(ctx.buffer, 0, i));
-                                    i = 0;
-                                    ctx.index = ctx.index + 1;
-                                    ch = ctx.payload.charAt(ctx.index);
-                                    while (ctx.index + 1 < ctx.payload.length && ch != '|' && ch != '#' && ch != '%' && ch != '@'){
-                                        ctx.buffer[i] = ch;
-                                        i++;
-                                        ctx.index = ctx.index + 1;
-                                        ch = ctx.payload.charAt(ctx.index);
-                                    }
-                                    if (ch != '|' && ch != '#' && ch != '%' && ch != '@') {
-                                        ctx.buffer[i] = ch;
-                                        i++;
-                                    }
-                                    var value: number = java.lang.Long.parseLong(StringUtils.copyValueOf(ctx.buffer, 0, i));
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = new org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode(key, value, colorLoaded, null, null);
-                                    var left: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode.internal_unserialize(false, ctx);
-                                    if (left != null) {
-                                        left.setParent(p);
-                                    }
-                                    var right: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode.internal_unserialize(true, ctx);
-                                    if (right != null) {
-                                        right.setParent(p);
-                                    }
-                                    p.setLeft(left);
-                                    p.setRight(right);
-                                    return p;
-                                }
-
-                            }
-
-                            export class TreeNode {
-
-                                public static BLACK: string = '0';
-                                public static RED: string = '1';
-                                public key: number;
-                                public color: boolean;
-                                private left: org.kevoree.modeling.memory.struct.tree.impl.TreeNode;
-                                private right: org.kevoree.modeling.memory.struct.tree.impl.TreeNode;
-                                private parent: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = null;
-                                constructor(key: number, color: boolean, left: org.kevoree.modeling.memory.struct.tree.impl.TreeNode, right: org.kevoree.modeling.memory.struct.tree.impl.TreeNode) {
-                                    this.key = key;
-                                    this.color = color;
-                                    this.left = left;
-                                    this.right = right;
-                                    if (left != null) {
-                                        left.parent = this;
-                                    }
-                                    if (right != null) {
-                                        right.parent = this;
-                                    }
-                                    this.parent = null;
-                                }
-
-                                public getKey(): number {
-                                    return this.key;
-                                }
-
-                                public grandparent(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    if (this.parent != null) {
-                                        return this.parent.parent;
-                                    } else {
-                                        return null;
-                                    }
-                                }
-
-                                public sibling(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    if (this.parent == null) {
-                                        return null;
-                                    } else {
-                                        if (this == this.parent.left) {
-                                            return this.parent.right;
-                                        } else {
-                                            return this.parent.left;
-                                        }
-                                    }
-                                }
-
-                                public uncle(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    if (this.parent != null) {
-                                        return this.parent.sibling();
-                                    } else {
-                                        return null;
-                                    }
-                                }
-
-                                public getLeft(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    return this.left;
-                                }
-
-                                public setLeft(left: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    this.left = left;
-                                }
-
-                                public getRight(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    return this.right;
-                                }
-
-                                public setRight(right: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    this.right = right;
-                                }
-
-                                public getParent(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    return this.parent;
-                                }
-
-                                public setParent(parent: org.kevoree.modeling.memory.struct.tree.impl.TreeNode): void {
-                                    this.parent = parent;
-                                }
-
-                                public serialize(builder: java.lang.StringBuilder): void {
-                                    builder.append("|");
-                                    if (this.color == true) {
-                                        builder.append(TreeNode.BLACK);
-                                    } else {
-                                        builder.append(TreeNode.RED);
-                                    }
-                                    builder.append(this.key);
-                                    if (this.left == null && this.right == null) {
-                                        builder.append("%");
-                                    } else {
-                                        if (this.left != null) {
-                                            this.left.serialize(builder);
-                                        } else {
-                                            builder.append("#");
-                                        }
-                                        if (this.right != null) {
-                                            this.right.serialize(builder);
-                                        } else {
-                                            builder.append("#");
-                                        }
-                                    }
-                                }
-
-                                public next(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this;
-                                    if (p.right != null) {
-                                        p = p.right;
-                                        while (p.left != null){
-                                            p = p.left;
-                                        }
-                                        return p;
-                                    } else {
-                                        if (p.parent != null) {
-                                            if (p == p.parent.left) {
-                                                return p.parent;
-                                            } else {
-                                                while (p.parent != null && p == p.parent.right){
-                                                    p = p.parent;
-                                                }
-                                                return p.parent;
-                                            }
-                                        } else {
-                                            return null;
-                                        }
-                                    }
-                                }
-
-                                public previous(): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = this;
-                                    if (p.left != null) {
-                                        p = p.left;
-                                        while (p.right != null){
-                                            p = p.right;
-                                        }
-                                        return p;
-                                    } else {
-                                        if (p.parent != null) {
-                                            if (p == p.parent.right) {
-                                                return p.parent;
-                                            } else {
-                                                while (p.parent != null && p == p.parent.left){
-                                                    p = p.parent;
-                                                }
-                                                return p.parent;
-                                            }
-                                        } else {
-                                            return null;
-                                        }
-                                    }
-                                }
-
-                                public static unserialize(ctx: org.kevoree.modeling.memory.struct.tree.impl.TreeReaderContext): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    return org.kevoree.modeling.memory.struct.tree.impl.TreeNode.internal_unserialize(true, ctx);
-                                }
-
-                                public static internal_unserialize(rightBranch: boolean, ctx: org.kevoree.modeling.memory.struct.tree.impl.TreeReaderContext): org.kevoree.modeling.memory.struct.tree.impl.TreeNode {
-                                    if (ctx.index >= ctx.payload.length) {
-                                        return null;
-                                    }
-                                    var tokenBuild: java.lang.StringBuilder = new java.lang.StringBuilder();
-                                    var ch: string = ctx.payload.charAt(ctx.index);
-                                    if (ch == '%') {
-                                        if (rightBranch) {
-                                            ctx.index = ctx.index + 1;
-                                        }
-                                        return null;
-                                    }
-                                    if (ch == '#') {
-                                        ctx.index = ctx.index + 1;
-                                        return null;
-                                    }
-                                    if (ch != '|') {
-                                        throw new java.lang.Exception("Error while loading BTree");
-                                    }
-                                    ctx.index = ctx.index + 1;
-                                    ch = ctx.payload.charAt(ctx.index);
-                                    var colorLoaded: boolean;
-                                    if (ch == org.kevoree.modeling.memory.struct.tree.impl.TreeNode.BLACK) {
-                                        colorLoaded = true;
-                                    } else {
-                                        colorLoaded = false;
-                                    }
-                                    ctx.index = ctx.index + 1;
-                                    ch = ctx.payload.charAt(ctx.index);
-                                    while (ctx.index + 1 < ctx.payload.length && ch != '|' && ch != '#' && ch != '%'){
-                                        tokenBuild.append(ch);
-                                        ctx.index = ctx.index + 1;
-                                        ch = ctx.payload.charAt(ctx.index);
-                                    }
-                                    if (ch != '|' && ch != '#' && ch != '%') {
-                                        tokenBuild.append(ch);
-                                    }
-                                    var p: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = new org.kevoree.modeling.memory.struct.tree.impl.TreeNode(java.lang.Long.parseLong(tokenBuild.toString()), colorLoaded, null, null);
-                                    var left: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = org.kevoree.modeling.memory.struct.tree.impl.TreeNode.internal_unserialize(false, ctx);
-                                    if (left != null) {
-                                        left.setParent(p);
-                                    }
-                                    var right: org.kevoree.modeling.memory.struct.tree.impl.TreeNode = org.kevoree.modeling.memory.struct.tree.impl.TreeNode.internal_unserialize(true, ctx);
-                                    if (right != null) {
-                                        right.setParent(p);
-                                    }
-                                    p.setLeft(left);
-                                    p.setRight(right);
-                                    return p;
-                                }
-
-                            }
-
-                            export class TreeReaderContext {
-
-                                public payload: string;
-                                public index: number;
-                                public buffer: string[];
                             }
 
                         }
@@ -9608,7 +8098,7 @@ module org {
                                         try {
                                             var loopObj: org.kevoree.modeling.abs.AbstractKObject = <org.kevoree.modeling.abs.AbstractKObject>p_inputStep[i];
                                             currentObject = loopObj;
-                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, loopObj.metaClass(), null);
+                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                                             if (raw != null) {
                                                 if (this._reference == null) {
                                                     var metaElements: org.kevoree.modeling.meta.KMeta[] = loopObj.metaClass().metaElements();
@@ -9724,7 +8214,7 @@ module org {
                                     for (var i: number = 0; i < p_inputs.length; i++) {
                                         try {
                                             var loopObj: org.kevoree.modeling.abs.AbstractKObject = <org.kevoree.modeling.abs.AbstractKObject>p_inputs[i];
-                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (loopObj)._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, loopObj.metaClass(), null);
+                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = (loopObj)._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                                             if (raw != null) {
                                                 if (this._attribute == null) {
                                                     if (this._expectedValue == null) {
@@ -9965,7 +8455,7 @@ module org {
                                     for (var i: number = 0; i < p_inputs.length; i++) {
                                         try {
                                             var loopObj: org.kevoree.modeling.abs.AbstractKObject = <org.kevoree.modeling.abs.AbstractKObject>p_inputs[i];
-                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, loopObj.metaClass(), null);
+                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                                             if (raw != null) {
                                                 if (this._attribute == null) {
                                                     if (this._expectedValue == null) {
@@ -10150,7 +8640,7 @@ module org {
                                     for (var i: number = 0; i < p_inputs.length; i++) {
                                         try {
                                             var loopObj: org.kevoree.modeling.abs.AbstractKObject = <org.kevoree.modeling.abs.AbstractKObject>p_inputs[i];
-                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = currentObject._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, loopObj.metaClass(), null);
+                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = currentObject._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                                             if (raw != null) {
                                                 if (this._reference == null) {
                                                     var metaElements: org.kevoree.modeling.meta.KMeta[] = loopObj.metaClass().metaElements();
@@ -10223,7 +8713,7 @@ module org {
                                     for (var i: number = 0; i < p_inputs.length; i++) {
                                         try {
                                             var loopObj: org.kevoree.modeling.abs.AbstractKObject = <org.kevoree.modeling.abs.AbstractKObject>p_inputs[i];
-                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), org.kevoree.modeling.memory.manager.AccessMode.RESOLVE, loopObj.metaClass(), null);
+                                            var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                                             var metaElements: org.kevoree.modeling.meta.KMeta[] = loopObj.metaClass().metaElements();
                                             if (raw != null) {
                                                 if (this._referenceQuery == null) {
