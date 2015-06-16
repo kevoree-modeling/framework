@@ -7,14 +7,14 @@ import org.kevoree.modeling.KConfig;
 public abstract class BaseKLongTreeTest {
     private static final int RANGE_TEST_SIZE = 100;
 
-    public abstract KLongTree createLongTree();
+    public abstract KLongTree createKLongTree();
 
     @Test
     public void printTest() {
         long MIN = 0L;
         long MAX = 99L;
         for (long j = MIN; j <= MAX; j++) {
-            KLongTree tree = createLongTree();
+            KLongTree tree = createKLongTree();
             for (long i = MIN; i <= j; i++) {
                 if ((i % 3) == 0L) {
                     tree.insert(i);
@@ -130,7 +130,7 @@ public abstract class BaseKLongTreeTest {
 
     @Test
     public void previousOrEqualTest() {
-        KLongTree tree = createLongTree();
+        KLongTree tree = createKLongTree();
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
@@ -175,7 +175,7 @@ public abstract class BaseKLongTreeTest {
 
     @Test
     public void cacheEffectTest() {
-        KLongTree tree = createLongTree();
+        KLongTree tree = createKLongTree();
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
@@ -197,7 +197,7 @@ public abstract class BaseKLongTreeTest {
 
     @Test
     public void rangeTest() {
-        KLongTree tree = createLongTree();
+        KLongTree tree = createKLongTree();
 
         for (int i = 0; i < RANGE_TEST_SIZE; i++) {
             tree.insert(i);
