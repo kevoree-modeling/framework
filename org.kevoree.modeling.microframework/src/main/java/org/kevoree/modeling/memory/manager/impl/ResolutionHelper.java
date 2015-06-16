@@ -1,7 +1,7 @@
 package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.cache.KCache;
+import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;

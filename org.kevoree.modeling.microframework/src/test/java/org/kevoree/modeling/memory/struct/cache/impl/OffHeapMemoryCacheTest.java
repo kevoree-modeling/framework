@@ -1,4 +1,4 @@
-package org.kevoree.modeling.memory.cache.impl;
+package org.kevoree.modeling.memory.struct.cache.impl;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -6,7 +6,7 @@ import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.memory.cache.KCache;
+import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.memory.struct.segment.impl.OffHeapMemorySegment;
 import org.kevoree.modeling.meta.KMetaClass;

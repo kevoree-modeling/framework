@@ -1,10 +1,10 @@
-package org.kevoree.modeling.memory.cache.impl;
+package org.kevoree.modeling.memory.struct.cache.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
-import org.kevoree.modeling.memory.cache.KCache;
+import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.manager.impl.ResolutionHelper;
 import org.kevoree.modeling.memory.struct.OffHeapMemoryFactory;

@@ -2,7 +2,7 @@ package org.kevoree.modeling.memory.manager;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.memory.cache.KCache;
+import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.KMemoryFactory;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.meta.KMetaClass;

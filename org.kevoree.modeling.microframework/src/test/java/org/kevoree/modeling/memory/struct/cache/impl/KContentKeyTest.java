@@ -1,4 +1,4 @@
-package org.kevoree.modeling.memory.cache.impl;
+package org.kevoree.modeling.memory.struct.cache.impl;
 
 import org.junit.Assert;
 import org.junit.Test;

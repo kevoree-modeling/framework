@@ -3,10 +3,9 @@ package org.kevoree.modeling.memory.manager.impl;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.*;
-import org.kevoree.modeling.memory.cache.impl.HashMemoryCache;
 import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
-import org.kevoree.modeling.memory.cache.KCache;
+import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.struct.HeapMemoryFactory;
@@ -24,7 +23,7 @@ import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
-import org.kevoree.modeling.memory.cache.impl.KCacheDirty;
+import org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,8 @@ public class HeapMemoryManager implements KMemoryManager {
     private static final short zeroPrefix = 0;
 
     public HeapMemoryManager(KModel model) {
-        this._cache = new HashMemoryCache();
+        this._factory = new HeapMemoryFactory();
+        this._cache = _factory.newCache();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);
         this._groupKeyCalculator = new KeyCalculator(zeroPrefix, 0);
         this._db = new MemoryContentDeliveryDriver();
@@ -60,7 +60,6 @@ public class HeapMemoryManager implements KMemoryManager {
         this._operationManager = new HashOperationManager(this);
         this._scheduler = new DirectScheduler();
         this._model = model;
-        this._factory = new HeapMemoryFactory();
     }
 
     @Override
@@ -564,6 +563,7 @@ public class HeapMemoryManager implements KMemoryManager {
     @Override
     public void setFactory(KMemoryFactory p_factory) {
         this._factory = p_factory;
+        this._cache = _factory.newCache();
     }
 
     public void bumpKeyToCache(final KContentKey contentKey, final KCallback<KMemoryElement> callback) {

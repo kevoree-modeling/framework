@@ -3,6 +3,8 @@ package org.kevoree.modeling.memory.struct;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KMemoryFactory;
+import org.kevoree.modeling.memory.struct.cache.KCache;
+import org.kevoree.modeling.memory.struct.cache.impl.OffHeapMemoryCache;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.memory.struct.segment.impl.OffHeapMemorySegment;
@@ -11,7 +13,9 @@ import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.memory.struct.tree.impl.ArrayLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.impl.OffHeapLongTree;
 
-/** @ignore ts */
+/**
+ * @ignore ts
+ */
 public class OffHeapMemoryFactory implements KMemoryFactory {
 
     @Override
@@ -40,6 +44,11 @@ public class OffHeapMemoryFactory implements KMemoryFactory {
             return newCacheSegment();
         }
         return null;
+    }
+
+    @Override
+    public KCache newCache() {
+        return new OffHeapMemoryCache();
     }
 
 }

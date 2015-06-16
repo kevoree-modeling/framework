@@ -1,9 +1,8 @@
-package org.kevoree.modeling.memory.cache;
+package org.kevoree.modeling.memory.struct.cache;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.meta.KMetaModel;
 

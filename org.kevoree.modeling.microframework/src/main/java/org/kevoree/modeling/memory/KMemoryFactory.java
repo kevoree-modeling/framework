@@ -1,5 +1,6 @@
 package org.kevoree.modeling.memory;
 
+import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
@@ -16,5 +17,7 @@ public interface KMemoryFactory {
     KUniverseOrderMap newUniverseMap(int initSize, String className);
 
     KMemoryElement newFromKey(long universe,long time, long uuid);
+
+    KCache newCache();
 
 }
