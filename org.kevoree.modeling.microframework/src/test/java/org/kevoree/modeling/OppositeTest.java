@@ -1,4 +1,4 @@
-package org.kevoree.modeling.abs;
+package org.kevoree.modeling;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import org.kevoree.modeling.meta.impl.MetaModel;
 /**
  * Created by gnain on 16/06/15.
  */
-public class KObjectOppositeTest {
+public class OppositeTest {
 
     private MetaModel metaModel;
     private KModel model;
@@ -18,7 +18,7 @@ public class KObjectOppositeTest {
     private KMetaClass A_Class, B_Class;
 
 
-    public KObjectOppositeTest() {
+    public OppositeTest() {
         metaModel = new MetaModel("OppositeMM");
         A_Class = metaModel.addMetaClass("A");
         B_Class = metaModel.addMetaClass("B");
