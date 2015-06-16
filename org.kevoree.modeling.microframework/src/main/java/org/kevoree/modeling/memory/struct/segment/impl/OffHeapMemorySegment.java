@@ -14,7 +14,7 @@ import sun.misc.Unsafe;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 
-/**
+/** @ignore ts
  * OffHeap implementation of KMemorySegment
  * - Memory structure: |meta class index  |counter    |dirty    |modified indexes        |raw     |
  * -                   |(4 byte)          |(4 byte)   |(1 byte) |(meta class elem byte)  |(x byte)|

@@ -14,7 +14,7 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
-/**
+/** @ignore ts
  * OffHeap implementation of KCache
  * - memory structure:  |elem count |elem data size |elem data              |
  * -                    |(4 byte)   |(4 byte)       |(x * num of elem byte) |

@@ -9,7 +9,7 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
-/**
+/** @ignore ts
  * OffHeap implementation of KLongTree
  * - Memory structure: |size      |dirty    |counter  |root index   |tree structure |
  * -                   |(4 byte)  |(1 byte) |(4 byte) |(8 byte)     |(size * 8 byte)|

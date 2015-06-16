@@ -4386,6 +4386,14 @@ module org {
 
                 }
 
+                export interface KOffHeapMemoryElement extends org.kevoree.modeling.memory.KMemoryElement {
+
+                    getMemoryAddress(): number;
+
+                    setMemoryAddress(address: number): void;
+
+                }
+
                 export module cache {
                     export interface KCache {
 

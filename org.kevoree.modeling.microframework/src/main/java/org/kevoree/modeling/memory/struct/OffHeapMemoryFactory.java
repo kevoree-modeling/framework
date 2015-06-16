@@ -11,6 +11,7 @@ import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.memory.struct.tree.impl.ArrayLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.impl.OffHeapLongTree;
 
+/** @ignore ts */
 public class OffHeapMemoryFactory implements KMemoryFactory {
 
     @Override

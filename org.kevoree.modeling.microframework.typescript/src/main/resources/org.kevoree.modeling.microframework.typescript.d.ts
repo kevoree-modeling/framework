@@ -830,6 +830,10 @@ declare module org {
                     newUniverseMap(initSize: number, className: string): org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
                     newFromKey(universe: number, time: number, uuid: number): org.kevoree.modeling.memory.KMemoryElement;
                 }
+                interface KOffHeapMemoryElement extends org.kevoree.modeling.memory.KMemoryElement {
+                    getMemoryAddress(): number;
+                    setMemoryAddress(address: number): void;
+                }
                 module cache {
                     interface KCache {
                         get(universe: number, time: number, obj: number): org.kevoree.modeling.memory.KMemoryElement;

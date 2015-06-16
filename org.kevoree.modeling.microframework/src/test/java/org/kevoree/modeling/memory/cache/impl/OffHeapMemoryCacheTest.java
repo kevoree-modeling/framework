@@ -15,6 +15,7 @@ import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
+/** @ignore ts */
 public class OffHeapMemoryCacheTest {
 
     @Test
