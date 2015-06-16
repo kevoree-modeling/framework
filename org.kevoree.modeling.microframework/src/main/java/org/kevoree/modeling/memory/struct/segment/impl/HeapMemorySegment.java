@@ -338,7 +338,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public void clearRef(int index) {
+    public void clearRef(int index, KMetaClass metaClass) {
         raw[index] = null;
     }
 

@@ -334,6 +334,22 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
+    public void clearRef(int index, KMetaClass metaClass) {
+        KMeta meta = metaClass.meta(index);
+        long ptr = internal_ptr_raw_for_index(index, metaClass);
+
+        if (meta.metaType().equals(MetaType.REFERENCE)) {
+            long ptr_ref_segment = UNSAFE.getLong(ptr);
+            if (ptr_ref_segment != 0) {
+                UNSAFE.freeMemory(ptr_ref_segment);
+                _allocated_segments--;
+
+                UNSAFE.putLong(ptr, 0);
+            }
+        }
+    }
+
+    @Override
     public double[] getInfer(int index, KMetaClass metaClass) {
         double[] infer = null;
         long ptr = internal_ptr_raw_for_index(index, metaClass);
