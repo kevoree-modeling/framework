@@ -5469,6 +5469,535 @@ var org;
                     (function (tree) {
                         var impl;
                         (function (impl) {
+                            var AbstractArrayTree = (function () {
+                                function AbstractArrayTree() {
+                                    this._root_index = -1;
+                                    this._size = 0;
+                                    this._back = null;
+                                    this._dirty = true;
+                                    this._counter = 0;
+                                }
+                                AbstractArrayTree.prototype.size = function () {
+                                    return this._size;
+                                };
+                                AbstractArrayTree.prototype.left = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[p_currentIndex];
+                                };
+                                AbstractArrayTree.prototype.setLeft = function (p_currentIndex, p_paramIndex) {
+                                    this._back[p_currentIndex] = p_paramIndex;
+                                };
+                                AbstractArrayTree.prototype.right = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[p_currentIndex + 1];
+                                };
+                                AbstractArrayTree.prototype.setRight = function (p_currentIndex, p_paramIndex) {
+                                    this._back[p_currentIndex + 1] = p_paramIndex;
+                                };
+                                AbstractArrayTree.prototype.parent = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[p_currentIndex + 2];
+                                };
+                                AbstractArrayTree.prototype.setParent = function (p_currentIndex, p_paramIndex) {
+                                    this._back[p_currentIndex + 2] = p_paramIndex;
+                                };
+                                AbstractArrayTree.prototype.key = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[p_currentIndex + 3];
+                                };
+                                AbstractArrayTree.prototype.setKey = function (p_currentIndex, p_paramIndex) {
+                                    this._back[p_currentIndex + 3] = p_paramIndex;
+                                };
+                                AbstractArrayTree.prototype.color = function (currentIndex) {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[currentIndex + 4];
+                                };
+                                AbstractArrayTree.prototype.setColor = function (currentIndex, paramIndex) {
+                                    this._back[currentIndex + 4] = paramIndex;
+                                };
+                                AbstractArrayTree.prototype.value = function (currentIndex) {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[currentIndex + 5];
+                                };
+                                AbstractArrayTree.prototype.setValue = function (currentIndex, paramIndex) {
+                                    this._back[currentIndex + 5] = paramIndex;
+                                };
+                                AbstractArrayTree.prototype.grandParent = function (currentIndex) {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    if (this.parent(currentIndex) != -1) {
+                                        return this.parent(this.parent(currentIndex));
+                                    }
+                                    else {
+                                        return -1;
+                                    }
+                                };
+                                AbstractArrayTree.prototype.sibling = function (currentIndex) {
+                                    if (this.parent(currentIndex) == -1) {
+                                        return -1;
+                                    }
+                                    else {
+                                        if (currentIndex == this.left(this.parent(currentIndex))) {
+                                            return this.right(this.parent(currentIndex));
+                                        }
+                                        else {
+                                            return this.left(this.parent(currentIndex));
+                                        }
+                                    }
+                                };
+                                AbstractArrayTree.prototype.uncle = function (currentIndex) {
+                                    if (this.parent(currentIndex) != -1) {
+                                        return this.sibling(this.parent(currentIndex));
+                                    }
+                                    else {
+                                        return -1;
+                                    }
+                                };
+                                AbstractArrayTree.prototype.previous = function (p_index) {
+                                    var p = p_index;
+                                    if (this.left(p) != -1) {
+                                        p = this.left(p);
+                                        while (this.right(p) != -1) {
+                                            p = this.right(p);
+                                        }
+                                        return p;
+                                    }
+                                    else {
+                                        if (this.parent(p) != -1) {
+                                            if (p == this.right(this.parent(p))) {
+                                                return this.parent(p);
+                                            }
+                                            else {
+                                                while (this.parent(p) != -1 && p == this.left(this.parent(p))) {
+                                                    p = this.parent(p);
+                                                }
+                                                return this.parent(p);
+                                            }
+                                        }
+                                        else {
+                                            return -1;
+                                        }
+                                    }
+                                };
+                                AbstractArrayTree.prototype.lookup = function (p_key) {
+                                    var n = this._root_index;
+                                    if (n == -1) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    while (n != -1) {
+                                        if (p_key == this.key(n)) {
+                                            return this.key(n);
+                                        }
+                                        else {
+                                            if (p_key < this.key(n)) {
+                                                n = this.left(n);
+                                            }
+                                            else {
+                                                n = this.right(n);
+                                            }
+                                        }
+                                    }
+                                    return n;
+                                };
+                                AbstractArrayTree.prototype.range = function (startKey, endKey, walker) {
+                                    var indexEnd = this.internal_previousOrEqual_index(endKey);
+                                    while (indexEnd != -1 && this.key(indexEnd) >= startKey) {
+                                        walker(this.key(indexEnd));
+                                        indexEnd = this.previous(indexEnd);
+                                    }
+                                };
+                                AbstractArrayTree.prototype.internal_previousOrEqual_index = function (p_key) {
+                                    var p = this._root_index;
+                                    if (p == -1) {
+                                        return p;
+                                    }
+                                    while (p != -1) {
+                                        if (p_key == this.key(p)) {
+                                            return p;
+                                        }
+                                        if (p_key > this.key(p)) {
+                                            if (this.right(p) != -1) {
+                                                p = this.right(p);
+                                            }
+                                            else {
+                                                return p;
+                                            }
+                                        }
+                                        else {
+                                            if (this.left(p) != -1) {
+                                                p = this.left(p);
+                                            }
+                                            else {
+                                                var parent = this.parent(p);
+                                                var ch = p;
+                                                while (parent != -1 && ch == this.left(parent)) {
+                                                    ch = parent;
+                                                    parent = this.parent(parent);
+                                                }
+                                                return parent;
+                                            }
+                                        }
+                                    }
+                                    return -1;
+                                };
+                                AbstractArrayTree.prototype.rotateLeft = function (n) {
+                                    var r = this.right(n);
+                                    this.replaceNode(n, r);
+                                    this.setRight(n, this.left(r));
+                                    if (this.left(r) != -1) {
+                                        this.setParent(this.left(r), n);
+                                    }
+                                    this.setLeft(r, n);
+                                    this.setParent(n, r);
+                                };
+                                AbstractArrayTree.prototype.rotateRight = function (n) {
+                                    var l = this.left(n);
+                                    this.replaceNode(n, l);
+                                    this.setLeft(n, this.right(l));
+                                    if (this.right(l) != -1) {
+                                        this.setParent(this.right(l), n);
+                                    }
+                                    this.setRight(l, n);
+                                    this.setParent(n, l);
+                                };
+                                AbstractArrayTree.prototype.replaceNode = function (oldn, newn) {
+                                    if (this.parent(oldn) == -1) {
+                                        this._root_index = newn;
+                                    }
+                                    else {
+                                        if (oldn == this.left(this.parent(oldn))) {
+                                            this.setLeft(this.parent(oldn), newn);
+                                        }
+                                        else {
+                                            this.setRight(this.parent(oldn), newn);
+                                        }
+                                    }
+                                    if (newn != -1) {
+                                        this.setParent(newn, this.parent(oldn));
+                                    }
+                                };
+                                AbstractArrayTree.prototype.insertCase1 = function (n) {
+                                    if (this.parent(n) == -1) {
+                                        this.setColor(n, 1);
+                                    }
+                                    else {
+                                        this.insertCase2(n);
+                                    }
+                                };
+                                AbstractArrayTree.prototype.insertCase2 = function (n) {
+                                    if (this.nodeColor(this.parent(n)) == true) {
+                                        return;
+                                    }
+                                    else {
+                                        this.insertCase3(n);
+                                    }
+                                };
+                                AbstractArrayTree.prototype.insertCase3 = function (n) {
+                                    if (this.nodeColor(this.uncle(n)) == false) {
+                                        this.setColor(this.parent(n), 1);
+                                        this.setColor(this.uncle(n), 1);
+                                        this.setColor(this.grandParent(n), 0);
+                                        this.insertCase1(this.grandParent(n));
+                                    }
+                                    else {
+                                        this.insertCase4(n);
+                                    }
+                                };
+                                AbstractArrayTree.prototype.insertCase4 = function (n_n) {
+                                    var n = n_n;
+                                    if (n == this.right(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
+                                        this.rotateLeft(this.parent(n));
+                                        n = this.left(n);
+                                    }
+                                    else {
+                                        if (n == this.left(this.parent(n)) && this.parent(n) == this.right(this.grandParent(n))) {
+                                            this.rotateRight(this.parent(n));
+                                            n = this.right(n);
+                                        }
+                                    }
+                                    this.insertCase5(n);
+                                };
+                                AbstractArrayTree.prototype.insertCase5 = function (n) {
+                                    this.setColor(this.parent(n), 1);
+                                    this.setColor(this.grandParent(n), 0);
+                                    if (n == this.left(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
+                                        this.rotateRight(this.grandParent(n));
+                                    }
+                                    else {
+                                        this.rotateLeft(this.grandParent(n));
+                                    }
+                                };
+                                AbstractArrayTree.prototype.delete = function (p_key) {
+                                };
+                                AbstractArrayTree.prototype.nodeColor = function (n) {
+                                    if (n == -1) {
+                                        return true;
+                                    }
+                                    else {
+                                        return this.color(n) == 1;
+                                    }
+                                };
+                                AbstractArrayTree.prototype.node_serialize = function (builder, current) {
+                                    builder.append("|");
+                                    if (this.nodeColor(current) == true) {
+                                        builder.append(AbstractArrayTree.BLACK);
+                                    }
+                                    else {
+                                        builder.append(AbstractArrayTree.RED);
+                                    }
+                                    builder.append(this.key(current));
+                                    if (this.left(current) == -1 && this.right(current) == -1) {
+                                        builder.append("%");
+                                    }
+                                    else {
+                                        if (this.left(current) != -1) {
+                                            this.node_serialize(builder, this.left(current));
+                                        }
+                                        else {
+                                            builder.append("#");
+                                        }
+                                        if (this.right(current) != -1) {
+                                            this.node_serialize(builder, this.right(current));
+                                        }
+                                        else {
+                                            builder.append("#");
+                                        }
+                                    }
+                                };
+                                AbstractArrayTree.prototype.serialize = function (metaModel) {
+                                    var builder = new java.lang.StringBuilder();
+                                    builder.append(this._size);
+                                    if (this._root_index != -1) {
+                                        this.node_serialize(builder, this._root_index);
+                                    }
+                                    return builder.toString();
+                                };
+                                AbstractArrayTree.prototype.init = function (payload, metaModel) {
+                                };
+                                AbstractArrayTree.prototype.isDirty = function () {
+                                    return this._dirty;
+                                };
+                                AbstractArrayTree.prototype.setClean = function (p_metaModel) {
+                                    this._dirty = false;
+                                };
+                                AbstractArrayTree.prototype.setDirty = function () {
+                                    this._dirty = true;
+                                };
+                                AbstractArrayTree.prototype.counter = function () {
+                                    return this._counter;
+                                };
+                                AbstractArrayTree.prototype.inc = function () {
+                                    this._counter--;
+                                };
+                                AbstractArrayTree.prototype.dec = function () {
+                                    this._counter--;
+                                };
+                                AbstractArrayTree.prototype.free = function (p_metaModel) {
+                                    this._back = null;
+                                };
+                                AbstractArrayTree.BLACK = 0;
+                                AbstractArrayTree.RED = 1;
+                                return AbstractArrayTree;
+                            })();
+                            impl.AbstractArrayTree = AbstractArrayTree;
+                            var ArrayLongLongTree = (function (_super) {
+                                __extends(ArrayLongLongTree, _super);
+                                function ArrayLongLongTree() {
+                                    this._back = new Array();
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = (this._size * this._loadFactor);
+                                }
+                                ArrayLongLongTree.prototype.previousOrEqualValue = function (p_key) {
+                                    var result = this.internal_previousOrEqual_index(p_key);
+                                    if (result != -1) {
+                                        return this.value(result);
+                                    }
+                                    else {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                };
+                                ArrayLongLongTree.prototype.lookupValue = function (p_key) {
+                                    var n = this._root_index;
+                                    if (n == -1) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    while (n != -1) {
+                                        if (p_key == this.key(n)) {
+                                            return this.value(n);
+                                        }
+                                        else {
+                                            if (p_key < this.key(n)) {
+                                                n = this.left(n);
+                                            }
+                                            else {
+                                                n = this.right(n);
+                                            }
+                                        }
+                                    }
+                                    return n;
+                                };
+                                ArrayLongLongTree.prototype.insert = function (p_key, p_value) {
+                                    if ((this._size + 1) > this._threshold) {
+                                        var length = (this._size == 0 ? 1 : this._size << 1);
+                                        var new_back = new Array();
+                                        System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongLongTree.SIZE_NODE);
+                                        this._threshold = (this._size * this._loadFactor);
+                                        this._back = new_back;
+                                    }
+                                    var insertedNode = (this._size) * ArrayLongLongTree.SIZE_NODE;
+                                    if (this._size == 0) {
+                                        this._size = 1;
+                                        this.setKey(insertedNode, p_key);
+                                        this.setValue(insertedNode, p_value);
+                                        this.setColor(insertedNode, 0);
+                                        this.setLeft(insertedNode, -1);
+                                        this.setRight(insertedNode, -1);
+                                        this.setParent(insertedNode, -1);
+                                        this._root_index = insertedNode;
+                                    }
+                                    else {
+                                        var n = this._root_index;
+                                        while (true) {
+                                            if (p_key == this.key(n)) {
+                                                return;
+                                            }
+                                            else {
+                                                if (p_key < this.key(n)) {
+                                                    if (this.left(n) == -1) {
+                                                        this.setKey(insertedNode, p_key);
+                                                        this.setValue(insertedNode, p_value);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setLeft(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    }
+                                                    else {
+                                                        n = this.left(n);
+                                                    }
+                                                }
+                                                else {
+                                                    if (this.right(n) == -1) {
+                                                        this.setKey(insertedNode, p_key);
+                                                        this.setValue(insertedNode, p_value);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setRight(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    }
+                                                    else {
+                                                        n = this.right(n);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        this.setParent(insertedNode, n);
+                                    }
+                                    this.insertCase1(insertedNode);
+                                };
+                                ArrayLongLongTree.SIZE_NODE = 6;
+                                return ArrayLongLongTree;
+                            })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
+                            impl.ArrayLongLongTree = ArrayLongLongTree;
+                            var ArrayLongTree = (function (_super) {
+                                __extends(ArrayLongTree, _super);
+                                function ArrayLongTree() {
+                                    this._back = new Array();
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = (this._size * this._loadFactor);
+                                }
+                                ArrayLongTree.prototype.previousOrEqual = function (key) {
+                                    var result = this.internal_previousOrEqual_index(key);
+                                    if (result != -1) {
+                                        return this.key(result);
+                                    }
+                                    else {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                };
+                                ArrayLongTree.prototype.insert = function (key) {
+                                    if ((this._size + 1) > this._threshold) {
+                                        var length = (this._size == 0 ? 1 : this._size << 1);
+                                        var new_back = new Array();
+                                        System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongTree.SIZE_NODE);
+                                        this._threshold = (this._size * this._loadFactor);
+                                        this._back = new_back;
+                                    }
+                                    var insertedNode = (this._size) * ArrayLongTree.SIZE_NODE;
+                                    if (this._size == 0) {
+                                        this._size = 1;
+                                        this.setKey(insertedNode, key);
+                                        this.setColor(insertedNode, 0);
+                                        this.setLeft(insertedNode, -1);
+                                        this.setRight(insertedNode, -1);
+                                        this.setParent(insertedNode, -1);
+                                        this._root_index = insertedNode;
+                                    }
+                                    else {
+                                        var n = this._root_index;
+                                        while (true) {
+                                            if (key == this.key(n)) {
+                                                return;
+                                            }
+                                            else {
+                                                if (key < this.key(n)) {
+                                                    if (this.left(n) == -1) {
+                                                        this.setKey(insertedNode, key);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setLeft(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    }
+                                                    else {
+                                                        n = this.left(n);
+                                                    }
+                                                }
+                                                else {
+                                                    if (this.right(n) == -1) {
+                                                        this.setKey(insertedNode, key);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setRight(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    }
+                                                    else {
+                                                        n = this.right(n);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        this.setParent(insertedNode, n);
+                                    }
+                                    this.insertCase1(insertedNode);
+                                };
+                                ArrayLongTree.SIZE_NODE = 5;
+                                return ArrayLongTree;
+                            })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
+                            impl.ArrayLongTree = ArrayLongTree;
                             var LongLongTree = (function () {
                                 function LongLongTree() {
                                     this.root = null;

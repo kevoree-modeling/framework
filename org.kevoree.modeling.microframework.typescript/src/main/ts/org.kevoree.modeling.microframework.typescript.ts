@@ -6079,6 +6079,542 @@ module org {
                         }
 
                         export module impl {
+                            export class AbstractArrayTree {
+
+                                private static BLACK: number = 0;
+                                private static RED: number = 1;
+                                public _root_index: number = -1;
+                                public _size: number = 0;
+                                public _threshold: number;
+                                public _loadFactor: number;
+                                public _back: number[] = null;
+                                private _dirty: boolean = true;
+                                private _counter: number = 0;
+                                public size(): number {
+                                    return this._size;
+                                }
+
+                                public left(p_currentIndex: number): number {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[<number>p_currentIndex];
+                                }
+
+                                public setLeft(p_currentIndex: number, p_paramIndex: number): void {
+                                    this._back[<number>p_currentIndex] = p_paramIndex;
+                                }
+
+                                public right(p_currentIndex: number): number {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[<number>p_currentIndex + 1];
+                                }
+
+                                public setRight(p_currentIndex: number, p_paramIndex: number): void {
+                                    this._back[<number>p_currentIndex + 1] = p_paramIndex;
+                                }
+
+                                private parent(p_currentIndex: number): number {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[<number>p_currentIndex + 2];
+                                }
+
+                                public setParent(p_currentIndex: number, p_paramIndex: number): void {
+                                    this._back[<number>p_currentIndex + 2] = p_paramIndex;
+                                }
+
+                                public key(p_currentIndex: number): number {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[<number>p_currentIndex + 3];
+                                }
+
+                                public setKey(p_currentIndex: number, p_paramIndex: number): void {
+                                    this._back[<number>p_currentIndex + 3] = p_paramIndex;
+                                }
+
+                                private color(currentIndex: number): number {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[<number>currentIndex + 4];
+                                }
+
+                                public setColor(currentIndex: number, paramIndex: number): void {
+                                    this._back[<number>currentIndex + 4] = paramIndex;
+                                }
+
+                                public value(currentIndex: number): number {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this._back[<number>currentIndex + 5];
+                                }
+
+                                public setValue(currentIndex: number, paramIndex: number): void {
+                                    this._back[<number>currentIndex + 5] = paramIndex;
+                                }
+
+                                public grandParent(currentIndex: number): number {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    if (this.parent(currentIndex) != -1) {
+                                        return this.parent(this.parent(currentIndex));
+                                    } else {
+                                        return -1;
+                                    }
+                                }
+
+                                public sibling(currentIndex: number): number {
+                                    if (this.parent(currentIndex) == -1) {
+                                        return -1;
+                                    } else {
+                                        if (currentIndex == this.left(this.parent(currentIndex))) {
+                                            return this.right(this.parent(currentIndex));
+                                        } else {
+                                            return this.left(this.parent(currentIndex));
+                                        }
+                                    }
+                                }
+
+                                public uncle(currentIndex: number): number {
+                                    if (this.parent(currentIndex) != -1) {
+                                        return this.sibling(this.parent(currentIndex));
+                                    } else {
+                                        return -1;
+                                    }
+                                }
+
+                                private previous(p_index: number): number {
+                                    var p: number = p_index;
+                                    if (this.left(p) != -1) {
+                                        p = this.left(p);
+                                        while (this.right(p) != -1){
+                                            p = this.right(p);
+                                        }
+                                        return p;
+                                    } else {
+                                        if (this.parent(p) != -1) {
+                                            if (p == this.right(this.parent(p))) {
+                                                return this.parent(p);
+                                            } else {
+                                                while (this.parent(p) != -1 && p == this.left(this.parent(p))){
+                                                    p = this.parent(p);
+                                                }
+                                                return this.parent(p);
+                                            }
+                                        } else {
+                                            return -1;
+                                        }
+                                    }
+                                }
+
+                                public lookup(p_key: number): number {
+                                    var n: number = this._root_index;
+                                    if (n == -1) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    while (n != -1){
+                                        if (p_key == this.key(n)) {
+                                            return this.key(n);
+                                        } else {
+                                            if (p_key < this.key(n)) {
+                                                n = this.left(n);
+                                            } else {
+                                                n = this.right(n);
+                                            }
+                                        }
+                                    }
+                                    return n;
+                                }
+
+                                public range(startKey: number, endKey: number, walker: (p : number) => void): void {
+                                    var indexEnd: number = this.internal_previousOrEqual_index(endKey);
+                                    while (indexEnd != -1 && this.key(indexEnd) >= startKey){
+                                        walker(this.key(indexEnd));
+                                        indexEnd = this.previous(indexEnd);
+                                    }
+                                }
+
+                                public internal_previousOrEqual_index(p_key: number): number {
+                                    var p: number = this._root_index;
+                                    if (p == -1) {
+                                        return p;
+                                    }
+                                    while (p != -1){
+                                        if (p_key == this.key(p)) {
+                                            return p;
+                                        }
+                                        if (p_key > this.key(p)) {
+                                            if (this.right(p) != -1) {
+                                                p = this.right(p);
+                                            } else {
+                                                return p;
+                                            }
+                                        } else {
+                                            if (this.left(p) != -1) {
+                                                p = this.left(p);
+                                            } else {
+                                                var parent: number = this.parent(p);
+                                                var ch: number = p;
+                                                while (parent != -1 && ch == this.left(parent)){
+                                                    ch = parent;
+                                                    parent = this.parent(parent);
+                                                }
+                                                return parent;
+                                            }
+                                        }
+                                    }
+                                    return -1;
+                                }
+
+                                private rotateLeft(n: number): void {
+                                    var r: number = this.right(n);
+                                    this.replaceNode(n, r);
+                                    this.setRight(n, this.left(r));
+                                    if (this.left(r) != -1) {
+                                        this.setParent(this.left(r), n);
+                                    }
+                                    this.setLeft(r, n);
+                                    this.setParent(n, r);
+                                }
+
+                                private rotateRight(n: number): void {
+                                    var l: number = this.left(n);
+                                    this.replaceNode(n, l);
+                                    this.setLeft(n, this.right(l));
+                                    if (this.right(l) != -1) {
+                                        this.setParent(this.right(l), n);
+                                    }
+                                    this.setRight(l, n);
+                                    this.setParent(n, l);
+                                }
+
+                                private replaceNode(oldn: number, newn: number): void {
+                                    if (this.parent(oldn) == -1) {
+                                        this._root_index = newn;
+                                    } else {
+                                        if (oldn == this.left(this.parent(oldn))) {
+                                            this.setLeft(this.parent(oldn), newn);
+                                        } else {
+                                            this.setRight(this.parent(oldn), newn);
+                                        }
+                                    }
+                                    if (newn != -1) {
+                                        this.setParent(newn, this.parent(oldn));
+                                    }
+                                }
+
+                                public insertCase1(n: number): void {
+                                    if (this.parent(n) == -1) {
+                                        this.setColor(n, 1);
+                                    } else {
+                                        this.insertCase2(n);
+                                    }
+                                }
+
+                                private insertCase2(n: number): void {
+                                    if (this.nodeColor(this.parent(n)) == true) {
+                                        return;
+                                    } else {
+                                        this.insertCase3(n);
+                                    }
+                                }
+
+                                private insertCase3(n: number): void {
+                                    if (this.nodeColor(this.uncle(n)) == false) {
+                                        this.setColor(this.parent(n), 1);
+                                        this.setColor(this.uncle(n), 1);
+                                        this.setColor(this.grandParent(n), 0);
+                                        this.insertCase1(this.grandParent(n));
+                                    } else {
+                                        this.insertCase4(n);
+                                    }
+                                }
+
+                                private insertCase4(n_n: number): void {
+                                    var n: number = n_n;
+                                    if (n == this.right(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
+                                        this.rotateLeft(this.parent(n));
+                                        n = this.left(n);
+                                    } else {
+                                        if (n == this.left(this.parent(n)) && this.parent(n) == this.right(this.grandParent(n))) {
+                                            this.rotateRight(this.parent(n));
+                                            n = this.right(n);
+                                        }
+                                    }
+                                    this.insertCase5(n);
+                                }
+
+                                private insertCase5(n: number): void {
+                                    this.setColor(this.parent(n), 1);
+                                    this.setColor(this.grandParent(n), 0);
+                                    if (n == this.left(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
+                                        this.rotateRight(this.grandParent(n));
+                                    } else {
+                                        this.rotateLeft(this.grandParent(n));
+                                    }
+                                }
+
+                                public delete(p_key: number): void {
+                                }
+
+                                private nodeColor(n: number): boolean {
+                                    if (n == -1) {
+                                        return true;
+                                    } else {
+                                        return this.color(n) == 1;
+                                    }
+                                }
+
+                                private node_serialize(builder: java.lang.StringBuilder, current: number): void {
+                                    builder.append("|");
+                                    if (this.nodeColor(current) == true) {
+                                        builder.append(AbstractArrayTree.BLACK);
+                                    } else {
+                                        builder.append(AbstractArrayTree.RED);
+                                    }
+                                    builder.append(this.key(current));
+                                    if (this.left(current) == -1 && this.right(current) == -1) {
+                                        builder.append("%");
+                                    } else {
+                                        if (this.left(current) != -1) {
+                                            this.node_serialize(builder, this.left(current));
+                                        } else {
+                                            builder.append("#");
+                                        }
+                                        if (this.right(current) != -1) {
+                                            this.node_serialize(builder, this.right(current));
+                                        } else {
+                                            builder.append("#");
+                                        }
+                                    }
+                                }
+
+                                public serialize(metaModel: org.kevoree.modeling.meta.KMetaModel): string {
+                                    var builder: java.lang.StringBuilder = new java.lang.StringBuilder();
+                                    builder.append(this._size);
+                                    if (this._root_index != -1) {
+                                        this.node_serialize(builder, this._root_index);
+                                    }
+                                    return builder.toString();
+                                }
+
+                                public init(payload: string, metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                }
+
+                                public isDirty(): boolean {
+                                    return this._dirty;
+                                }
+
+                                public setClean(p_metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                    this._dirty = false;
+                                }
+
+                                public setDirty(): void {
+                                    this._dirty = true;
+                                }
+
+                                public counter(): number {
+                                    return this._counter;
+                                }
+
+                                public inc(): void {
+                                    this._counter--;
+                                }
+
+                                public dec(): void {
+                                    this._counter--;
+                                }
+
+                                public free(p_metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                    this._back = null;
+                                }
+
+                            }
+
+                            export class ArrayLongLongTree extends org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree implements org.kevoree.modeling.memory.struct.tree.KLongLongTree {
+
+                                private static SIZE_NODE: number = 6;
+                                constructor() {
+                                    this._back = new Array();
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = <number>(this._size * this._loadFactor);
+                                }
+
+                                public previousOrEqualValue(p_key: number): number {
+                                    var result: number = this.internal_previousOrEqual_index(p_key);
+                                    if (result != -1) {
+                                        return this.value(result);
+                                    } else {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                }
+
+                                public lookupValue(p_key: number): number {
+                                    var n: number = this._root_index;
+                                    if (n == -1) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    while (n != -1){
+                                        if (p_key == this.key(n)) {
+                                            return this.value(n);
+                                        } else {
+                                            if (p_key < this.key(n)) {
+                                                n = this.left(n);
+                                            } else {
+                                                n = this.right(n);
+                                            }
+                                        }
+                                    }
+                                    return n;
+                                }
+
+                                public insert(p_key: number, p_value: number): void {
+                                    if ((this._size + 1) > this._threshold) {
+                                        var length: number = (this._size == 0 ? 1 : this._size << 1);
+                                        var new_back: number[] = new Array();
+                                        System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongLongTree.SIZE_NODE);
+                                        this._threshold = <number>(this._size * this._loadFactor);
+                                        this._back = new_back;
+                                    }
+                                    var insertedNode: number = (this._size) * ArrayLongLongTree.SIZE_NODE;
+                                    if (this._size == 0) {
+                                        this._size = 1;
+                                        this.setKey(insertedNode, p_key);
+                                        this.setValue(insertedNode, p_value);
+                                        this.setColor(insertedNode, 0);
+                                        this.setLeft(insertedNode, -1);
+                                        this.setRight(insertedNode, -1);
+                                        this.setParent(insertedNode, -1);
+                                        this._root_index = insertedNode;
+                                    } else {
+                                        var n: number = this._root_index;
+                                        while (true){
+                                            if (p_key == this.key(n)) {
+                                                return;
+                                            } else {
+                                                if (p_key < this.key(n)) {
+                                                    if (this.left(n) == -1) {
+                                                        this.setKey(insertedNode, p_key);
+                                                        this.setValue(insertedNode, p_value);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setLeft(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    } else {
+                                                        n = this.left(n);
+                                                    }
+                                                } else {
+                                                    if (this.right(n) == -1) {
+                                                        this.setKey(insertedNode, p_key);
+                                                        this.setValue(insertedNode, p_value);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setRight(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    } else {
+                                                        n = this.right(n);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        this.setParent(insertedNode, n);
+                                    }
+                                    this.insertCase1(insertedNode);
+                                }
+
+                            }
+
+                            export class ArrayLongTree extends org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree implements org.kevoree.modeling.memory.struct.tree.KLongTree {
+
+                                private static SIZE_NODE: number = 5;
+                                constructor() {
+                                    this._back = new Array();
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = <number>(this._size * this._loadFactor);
+                                }
+
+                                public previousOrEqual(key: number): number {
+                                    var result: number = this.internal_previousOrEqual_index(key);
+                                    if (result != -1) {
+                                        return this.key(result);
+                                    } else {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                }
+
+                                public insert(key: number): void {
+                                    if ((this._size + 1) > this._threshold) {
+                                        var length: number = (this._size == 0 ? 1 : this._size << 1);
+                                        var new_back: number[] = new Array();
+                                        System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongTree.SIZE_NODE);
+                                        this._threshold = <number>(this._size * this._loadFactor);
+                                        this._back = new_back;
+                                    }
+                                    var insertedNode: number = (this._size) * ArrayLongTree.SIZE_NODE;
+                                    if (this._size == 0) {
+                                        this._size = 1;
+                                        this.setKey(insertedNode, key);
+                                        this.setColor(insertedNode, 0);
+                                        this.setLeft(insertedNode, -1);
+                                        this.setRight(insertedNode, -1);
+                                        this.setParent(insertedNode, -1);
+                                        this._root_index = insertedNode;
+                                    } else {
+                                        var n: number = this._root_index;
+                                        while (true){
+                                            if (key == this.key(n)) {
+                                                return;
+                                            } else {
+                                                if (key < this.key(n)) {
+                                                    if (this.left(n) == -1) {
+                                                        this.setKey(insertedNode, key);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setLeft(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    } else {
+                                                        n = this.left(n);
+                                                    }
+                                                } else {
+                                                    if (this.right(n) == -1) {
+                                                        this.setKey(insertedNode, key);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setRight(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    } else {
+                                                        n = this.right(n);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        this.setParent(insertedNode, n);
+                                    }
+                                    this.insertCase1(insertedNode);
+                                }
+
+                            }
+
                             export class LongLongTree implements org.kevoree.modeling.memory.KMemoryElement, org.kevoree.modeling.memory.struct.tree.KLongLongTree {
 
                                 private root: org.kevoree.modeling.memory.struct.tree.impl.LongTreeNode = null;
