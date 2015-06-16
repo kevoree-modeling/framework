@@ -11,22 +11,22 @@ public abstract class BaseKLongTreeTest {
 
     @Test
     public void saveLoad0() throws Exception {
-        KLongTree tree = createLongTree();
+        KLongTree tree = createKLongTree();
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
-        KLongTree treeBis = createLongTree();
+        KLongTree treeBis = createKLongTree();
         treeBis.init(tree.serialize(null), null);
         Assert.assertEquals(tree.size(), treeBis.size());
     }
 
     @Test
     public void saveLoad() throws Exception {
-        KLongTree tree = createLongTree();
+        KLongTree tree = createKLongTree();
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
-        KLongTree treeBis = createLongTree();
+        KLongTree treeBis = createKLongTree();
         treeBis.init(tree.serialize(null), null);
         Assert.assertEquals(tree.size(), treeBis.size());
         for (int i = 0; i < tree.size(); i++) {
