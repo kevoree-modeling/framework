@@ -12,6 +12,8 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void saveLoad0() throws Exception {
         KLongTree tree = createKLongTree();
+        tree.init(null, null);
+
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
@@ -23,11 +25,19 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void saveLoad() throws Exception {
         KLongTree tree = createKLongTree();
-        for (long i = 0; i <= 6; i++) {
+        tree.init(null, null);
+
+        System.out.println(tree.serialize(null));
+
+        for (long i = 0; i <= 2; i++) {
             tree.insert(i);
         }
+
+        System.out.println(tree.serialize(null));
+
         KLongTree treeBis = createKLongTree();
         treeBis.init(tree.serialize(null), null);
+
         Assert.assertEquals(tree.size(), treeBis.size());
         for (int i = 0; i < tree.size(); i++) {
             Long resolved = tree.lookup(i);
@@ -42,6 +52,8 @@ public abstract class BaseKLongTreeTest {
         long MAX = 99L;
         for (long j = MIN; j <= MAX; j++) {
             KLongTree tree = createKLongTree();
+            tree.init(null, null);
+
             for (long i = MIN; i <= j; i++) {
                 if ((i % 3) == 0L) {
                     tree.insert(i);
@@ -157,6 +169,8 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void previousOrEqualTest() {
         KLongTree tree = createKLongTree();
+        tree.init(null, null);
+
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
@@ -202,6 +216,8 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void cacheEffectTest() {
         KLongTree tree = createKLongTree();
+        tree.init(null, null);
+
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
@@ -224,6 +240,7 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void rangeTest() {
         KLongTree tree = createKLongTree();
+        tree.init(null, null);
 
         for (int i = 0; i < RANGE_TEST_SIZE; i++) {
             tree.insert(i);

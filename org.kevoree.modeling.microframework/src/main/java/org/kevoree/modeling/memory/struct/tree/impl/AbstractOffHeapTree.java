@@ -8,25 +8,41 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
-/** @ignore ts
+/**
  * OffHeap implementation of AbstractOffHeapTree
- * - memory structure:  | root index (8) | size (4) | dirty (1) | counter (4) | back (size * 8) |
+ * - memory structure:  | root index (8) | size (4) | dirty (1) | counter (4) | back (size * node size * 8) |
+ * - back:              | left (8)       | right (8)| parent (8)| key (8)     | color (8)   | value (8)     |
  */
 public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
     protected static final Unsafe UNSAFE = getUnsafe();
 
-    private final int SIZE_NODE = getNodeSize();
-
     public abstract int getNodeSize();
 
-    private static final int BLACK = 0;
-    private static final int RED = 1;
+    private static final int POS_LEFT = 0;
+    private static final int POS_RIGHT = 1;
+    private static final int POS_PARENT = 2;
+    private static final int POS_KEY = 3;
+    private static final int POS_COLOR = 4;
+    private static final int POS_VALUE = 5;
 
     protected long _start_address;
     protected int _threshold;
     protected float _loadFactor;
 
-    private int internal_size_base_segment() {
+    private void internal_allocate(int size) {
+        long bytes = internal_size_base_segment() + size * 8;
+
+        _start_address = UNSAFE.allocateMemory(bytes);
+        UNSAFE.setMemory(_start_address, bytes, (byte) 0);
+
+        UNSAFE.putLong(internal_ptr_root_index(), -1);
+        UNSAFE.putInt(internal_ptr_size(), size);
+
+        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
+        _threshold = (int) (size() * _loadFactor);
+    }
+
+    protected int internal_size_base_segment() {
         return 8 + 4 + 1 + 4; // root index, size, dirty, counter
     }
 
@@ -51,7 +67,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
     }
 
     protected long internal_ptr_back_idx(long idx) {
-        return internal_ptr_back() + idx * 8 * SIZE_NODE;
+        return internal_ptr_back() + idx * 8 * getNodeSize();
     }
 
     public int size() {
@@ -81,7 +97,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         UNSAFE.putLong(internal_ptr_back_idx(p_currentIndex) + 1 * 8, p_paramIndex);
     }
 
-    private long parent(long p_currentIndex) {
+    protected long parent(long p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
@@ -434,49 +450,68 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         }
     }
 
-    private void node_serialize(StringBuilder builder, long current) {
-        builder.append("|");
-        if (nodeColor(current) == true) {
-            builder.append(BLACK);
-        } else {
-            builder.append(RED);
-        }
-        builder.append(key(current));
-        if (left(current) == -1 && right(current) == -1) {
-            builder.append("%");
-        } else {
-            if (left(current) != -1) {
-                node_serialize(builder, left(current));
-            } else {
-                builder.append("#");
-            }
-            if (right(current) != -1) {
-                node_serialize(builder, right(current));
-            } else {
-                builder.append("#");
-            }
-        }
-    }
-
     public String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
-        builder.append(size());
 
-        long _root_index = UNSAFE.getLong(internal_ptr_root_index());
-        if (_root_index != -1) {
-            node_serialize(builder, _root_index);
+        long rootIndex = UNSAFE.getLong(internal_ptr_root_index());
+        int size = UNSAFE.getInt(internal_ptr_size());
+        if (rootIndex == -1) {
+            builder.append("0");
+        } else {
+            builder.append(size);
+            builder.append(',');
+            builder.append(rootIndex);
+            builder.append('[');
+            for (int i = 0; i < (size * getNodeSize()); i++) {
+                if (i != 0) {
+                    builder.append(',');
+                }
+                builder.append(UNSAFE.getLong(internal_ptr_back() + i * 8));
+            }
+            builder.append(']');
         }
         return builder.toString();
     }
 
     public void init(String payload, KMetaModel metaModel) {
-        _start_address = UNSAFE.allocateMemory(internal_size_base_segment()); // allocate memory for base segment
-        UNSAFE.setMemory(_start_address, internal_size_base_segment(), (byte) 0);
-        UNSAFE.putLong(internal_ptr_root_index(), -1);
+        if (payload == null || payload.length() == 0) {
+            internal_allocate(0);
+            return;
+        }
 
-        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        _threshold = (int) (size() * _loadFactor);
+        int size = 0;
 
+        int initPos = 0;
+        int cursor = 0;
+        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '[') {
+            cursor++;
+        }
+        if (payload.charAt(cursor) == ',') {//className to parse
+            size = Integer.parseInt(payload.substring(initPos, cursor));
+            cursor++;
+            initPos = cursor;
+        }
+        while (cursor < payload.length() && payload.charAt(cursor) != '[') {
+            cursor++;
+        }
+        long rootIndex = Integer.parseInt(payload.substring(initPos, cursor));
+        internal_allocate(size);
+        UNSAFE.putLong(internal_ptr_root_index(), rootIndex);
+        int _back_index = 0;
+        while (cursor < payload.length()) {
+            cursor++;
+            int beginChunk = cursor;
+            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+                cursor++;
+            }
+            int cleanedEnd = cursor;
+            if (payload.charAt(cleanedEnd - 1) == ']') {
+                cleanedEnd--;
+            }
+            long loopKey = Long.parseLong(payload.substring(beginChunk, cleanedEnd));
+            UNSAFE.putLong(internal_ptr_back_idx(_back_index), loopKey);
+            _back_index++;
+        }
     }
 
     public boolean isDirty() {
@@ -535,6 +570,5 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
         _threshold = (int) (size() * _loadFactor);
     }
-
 
 }

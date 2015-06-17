@@ -14,7 +14,8 @@ import sun.misc.Unsafe;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 
-/** @ignore ts
+/**
+ * @ignore ts
  * OffHeap implementation of KMemorySegment
  * - Memory structure: |meta class index  |counter    |dirty    |modified indexes        |raw     |
  * -                   |(4 byte)          |(4 byte)   |(1 byte) |(meta class elem byte)  |(x byte)|
@@ -587,7 +588,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public void init(String payload, KMetaModel metaModel)  {
+    public void init(String payload, KMetaModel metaModel) {
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);
@@ -784,27 +785,5 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     public void setMemoryAddress(long address) {
         _start_address = address;
     }
-
-    //    private void debugSegments(KMetaClass metaClass) {
-//        for (int i = 0; i < metaClass.metaElements().length; i++) {
-//            KMeta meta = metaClass.metaElements()[i];
-//            if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
-//                KMetaAttribute metaAttribute = (KMetaAttribute) meta;
-//
-//                long ptr = internal_ptr_raw_for_index(metaAttribute.index(), metaClass);
-//                System.out.println("attr pointer: " + ptr);
-//                System.out.println("attr ref pointer: " + UNSAFE.getLong(ptr));
-//
-//            } else if (meta.metaType().equals(MetaType.REFERENCE)) {
-//                KMetaReference metaReference = (KMetaReference) meta;
-//
-//                long ptr = internal_ptr_raw_for_index(metaReference.index(), metaClass);
-//                System.out.println("ref pointer: " + ptr);
-//                System.out.println("ref ref pointer: " + UNSAFE.getLong(ptr));
-//
-//            }
-//        }
-//    }
-
 
 }
