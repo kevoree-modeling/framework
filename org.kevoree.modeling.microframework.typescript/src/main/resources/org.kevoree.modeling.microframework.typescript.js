@@ -5161,166 +5161,6 @@ var org;
                                 return ArrayUniverseOrderMap;
                             })(org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap);
                             impl.ArrayUniverseOrderMap = ArrayUniverseOrderMap;
-                            var OffHeapLongMap = (function () {
-                                function OffHeapLongMap(p_initalCapacity, p_loadFactor) {
-                                    this.initalCapacity = p_initalCapacity;
-                                    this.loadFactor = p_loadFactor;
-                                    this.elementCount = 0;
-                                    this.elementData = this.newElementArray(this.initalCapacity);
-                                    this.elementDataSize = this.initalCapacity;
-                                    this.computeMaxSize();
-                                }
-                                OffHeapLongMap.prototype.newElementArray = function (s) {
-                                    return new Array();
-                                };
-                                OffHeapLongMap.prototype.clear = function () {
-                                    if (this.elementCount > 0) {
-                                        this.elementCount = 0;
-                                        this.elementData = this.newElementArray(this.initalCapacity);
-                                        this.elementDataSize = this.initalCapacity;
-                                    }
-                                };
-                                OffHeapLongMap.prototype.computeMaxSize = function () {
-                                    this.threshold = (this.elementDataSize * this.loadFactor);
-                                };
-                                OffHeapLongMap.prototype.contains = function (key) {
-                                    if (this.elementDataSize == 0) {
-                                        return false;
-                                    }
-                                    var hash = (key);
-                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                    var m = this.findNonNullKeyEntry(key, index);
-                                    return m != null;
-                                };
-                                OffHeapLongMap.prototype.get = function (key) {
-                                    if (this.elementDataSize == 0) {
-                                        return null;
-                                    }
-                                    var m;
-                                    var hash = (key);
-                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                    m = this.findNonNullKeyEntry(key, index);
-                                    if (m != null) {
-                                        return m.value;
-                                    }
-                                    return null;
-                                };
-                                OffHeapLongMap.prototype.findNonNullKeyEntry = function (key, index) {
-                                    var m = this.elementData[index];
-                                    while (m != null) {
-                                        if (key == m.key) {
-                                            return m;
-                                        }
-                                        m = m.next;
-                                    }
-                                    return null;
-                                };
-                                OffHeapLongMap.prototype.each = function (callback) {
-                                    for (var i = 0; i < this.elementDataSize; i++) {
-                                        if (this.elementData[i] != null) {
-                                            var current = this.elementData[i];
-                                            callback(this.elementData[i].key, this.elementData[i].value);
-                                            while (current.next != null) {
-                                                current = current.next;
-                                                callback(current.key, current.value);
-                                            }
-                                        }
-                                    }
-                                };
-                                OffHeapLongMap.prototype.put = function (key, value) {
-                                    var entry = null;
-                                    var hash = (key);
-                                    var index = -1;
-                                    if (this.elementDataSize != 0) {
-                                        index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                        entry = this.findNonNullKeyEntry(key, index);
-                                    }
-                                    if (entry == null) {
-                                        if (++this.elementCount > this.threshold) {
-                                            this.rehash();
-                                            index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                        }
-                                        entry = this.createHashedEntry(key, index);
-                                    }
-                                    entry.value = value;
-                                };
-                                OffHeapLongMap.prototype.createHashedEntry = function (key, index) {
-                                    var entry = new org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry(key, null);
-                                    entry.next = this.elementData[index];
-                                    this.elementData[index] = entry;
-                                    return entry;
-                                };
-                                OffHeapLongMap.prototype.rehashCapacity = function (capacity) {
-                                    var length = (capacity == 0 ? 1 : capacity << 1);
-                                    var newData = this.newElementArray(length);
-                                    for (var i = 0; i < this.elementDataSize; i++) {
-                                        var entry = this.elementData[i];
-                                        while (entry != null) {
-                                            var index = (entry.key & 0x7FFFFFFF) % length;
-                                            var next = entry.next;
-                                            entry.next = newData[index];
-                                            newData[index] = entry;
-                                            entry = next;
-                                        }
-                                    }
-                                    this.elementData = newData;
-                                    this.elementDataSize = length;
-                                    this.computeMaxSize();
-                                };
-                                OffHeapLongMap.prototype.rehash = function () {
-                                    this.rehashCapacity(this.elementDataSize);
-                                };
-                                OffHeapLongMap.prototype.remove = function (key) {
-                                    var entry = this.removeEntry(key);
-                                    if (entry == null) {
-                                        return null;
-                                    }
-                                    else {
-                                        return entry.value;
-                                    }
-                                };
-                                OffHeapLongMap.prototype.removeEntry = function (key) {
-                                    if (this.elementDataSize == 0) {
-                                        return null;
-                                    }
-                                    var entry;
-                                    var last = null;
-                                    var hash = key;
-                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                    entry = this.elementData[index];
-                                    while (entry != null && !(key == entry.key)) {
-                                        last = entry;
-                                        entry = entry.next;
-                                    }
-                                    if (entry == null) {
-                                        return null;
-                                    }
-                                    if (last == null) {
-                                        this.elementData[index] = entry.next;
-                                    }
-                                    else {
-                                        last.next = entry.next;
-                                    }
-                                    this.elementCount--;
-                                    return entry;
-                                };
-                                OffHeapLongMap.prototype.size = function () {
-                                    return this.elementCount;
-                                };
-                                return OffHeapLongMap;
-                            })();
-                            impl.OffHeapLongMap = OffHeapLongMap;
-                            var OffHeapLongMap;
-                            (function (OffHeapLongMap) {
-                                var Entry = (function () {
-                                    function Entry(theKey, theValue) {
-                                        this.key = theKey;
-                                        this.value = theValue;
-                                    }
-                                    return Entry;
-                                })();
-                                OffHeapLongMap.Entry = Entry;
-                            })(OffHeapLongMap = impl.OffHeapLongMap || (impl.OffHeapLongMap = {}));
                         })(impl = map.impl || (map.impl = {}));
                     })(map = struct.map || (struct.map = {}));
                     var segment;
@@ -5640,40 +5480,40 @@ var org;
                                 AbstractArrayTree.prototype.size = function () {
                                     return this._size;
                                 };
-                                AbstractArrayTree.prototype.left = function (p_currentIndex) {
+                                AbstractArrayTree.prototype.key = function (p_currentIndex) {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
                                     return this._back[p_currentIndex];
                                 };
-                                AbstractArrayTree.prototype.setLeft = function (p_currentIndex, p_paramIndex) {
+                                AbstractArrayTree.prototype.setKey = function (p_currentIndex, p_paramIndex) {
                                     this._back[p_currentIndex] = p_paramIndex;
                                 };
-                                AbstractArrayTree.prototype.right = function (p_currentIndex) {
+                                AbstractArrayTree.prototype.left = function (p_currentIndex) {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
                                     return this._back[p_currentIndex + 1];
                                 };
-                                AbstractArrayTree.prototype.setRight = function (p_currentIndex, p_paramIndex) {
+                                AbstractArrayTree.prototype.setLeft = function (p_currentIndex, p_paramIndex) {
                                     this._back[p_currentIndex + 1] = p_paramIndex;
                                 };
-                                AbstractArrayTree.prototype.parent = function (p_currentIndex) {
+                                AbstractArrayTree.prototype.right = function (p_currentIndex) {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
                                     return this._back[p_currentIndex + 2];
                                 };
-                                AbstractArrayTree.prototype.setParent = function (p_currentIndex, p_paramIndex) {
+                                AbstractArrayTree.prototype.setRight = function (p_currentIndex, p_paramIndex) {
                                     this._back[p_currentIndex + 2] = p_paramIndex;
                                 };
-                                AbstractArrayTree.prototype.key = function (p_currentIndex) {
+                                AbstractArrayTree.prototype.parent = function (p_currentIndex) {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
                                     return this._back[p_currentIndex + 3];
                                 };
-                                AbstractArrayTree.prototype.setKey = function (p_currentIndex, p_paramIndex) {
+                                AbstractArrayTree.prototype.setParent = function (p_currentIndex, p_paramIndex) {
                                     this._back[p_currentIndex + 3] = p_paramIndex;
                                 };
                                 AbstractArrayTree.prototype.color = function (currentIndex) {
@@ -5916,15 +5756,41 @@ var org;
                                     else {
                                         builder.append(this._size);
                                         builder.append(',');
-                                        builder.append(this._root_index);
-                                        builder.append('[');
-                                        for (var i = 0; i < (this._size * this.ELEM_SIZE()); i++) {
-                                            if (i != 0) {
-                                                builder.append(',');
+                                        var elemSize = this.ELEM_SIZE();
+                                        builder.append(this._root_index / elemSize);
+                                        for (var i = 0; i < this._size; i++) {
+                                            var nextSegmentBegin = i * elemSize;
+                                            var beginParent = this.parent(nextSegmentBegin);
+                                            var isOnLeft = false;
+                                            if (beginParent != -1) {
+                                                isOnLeft = this.left(beginParent) == nextSegmentBegin;
                                             }
-                                            builder.append(this._back[i]);
+                                            if (this.color(nextSegmentBegin) == 0) {
+                                                if (isOnLeft) {
+                                                    builder.append(AbstractArrayTree.BLACK_LEFT);
+                                                }
+                                                else {
+                                                    builder.append(AbstractArrayTree.BLACK_RIGHT);
+                                                }
+                                            }
+                                            else {
+                                                if (isOnLeft) {
+                                                    builder.append(AbstractArrayTree.RED_LEFT);
+                                                }
+                                                else {
+                                                    builder.append(AbstractArrayTree.RED_RIGHT);
+                                                }
+                                            }
+                                            builder.append(this.key(nextSegmentBegin));
+                                            builder.append(',');
+                                            if (beginParent != -1) {
+                                                builder.append(beginParent / elemSize);
+                                            }
+                                            if (elemSize > 5) {
+                                                builder.append(',');
+                                                builder.append(this.value(nextSegmentBegin));
+                                            }
                                         }
-                                        builder.append(']');
                                     }
                                     return builder.toString();
                                 };
@@ -5932,9 +5798,10 @@ var org;
                                     if (payload == null || payload.length == 0) {
                                         return;
                                     }
+                                    var elemSize = this.ELEM_SIZE();
                                     var initPos = 0;
                                     var cursor = 0;
-                                    while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '[') {
+                                    while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
                                         cursor++;
                                     }
                                     if (payload.charAt(cursor) == ',') {
@@ -5942,25 +5809,68 @@ var org;
                                         cursor++;
                                         initPos = cursor;
                                     }
-                                    while (cursor < payload.length && payload.charAt(cursor) != '[') {
+                                    while (cursor < payload.length && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
                                         cursor++;
                                     }
-                                    this._root_index = java.lang.Integer.parseInt(payload.substring(initPos, cursor));
+                                    this._root_index = java.lang.Integer.parseInt(payload.substring(initPos, cursor)) * elemSize;
                                     this.allocate(this._size);
+                                    for (var i = 0; i < this._size * elemSize; i++) {
+                                        this._back[i] = -1;
+                                    }
                                     var _back_index = 0;
                                     while (cursor < payload.length) {
-                                        cursor++;
-                                        var beginChunk = cursor;
-                                        while (cursor < payload.length && payload.charAt(cursor) != ',') {
+                                        while (cursor < payload.length && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
                                             cursor++;
                                         }
-                                        var cleanedEnd = cursor;
-                                        if (payload.charAt(cleanedEnd - 1) == ']') {
-                                            cleanedEnd--;
+                                        if (cursor < payload.length) {
+                                            var elem = payload.charAt(cursor);
+                                            var currentBlock = _back_index * elemSize;
+                                            var isOnLeft = false;
+                                            if (elem == AbstractArrayTree.BLACK_LEFT || elem == AbstractArrayTree.RED_LEFT) {
+                                                isOnLeft = true;
+                                            }
+                                            if (elem == AbstractArrayTree.BLACK_LEFT || elem == AbstractArrayTree.BLACK_RIGHT) {
+                                                this.setColor(currentBlock, 0);
+                                            }
+                                            else {
+                                                this.setColor(currentBlock, 1);
+                                            }
+                                            cursor++;
+                                            var beginChunk = cursor;
+                                            while (cursor < payload.length && payload.charAt(cursor) != ',') {
+                                                cursor++;
+                                            }
+                                            var loopKey = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
+                                            this.setKey(currentBlock, loopKey);
+                                            cursor++;
+                                            beginChunk = cursor;
+                                            while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
+                                                cursor++;
+                                            }
+                                            if (cursor > beginChunk) {
+                                                var parentRaw = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
+                                                var parentValue = parentRaw * elemSize;
+                                                this.setParent(currentBlock, parentValue);
+                                                if (isOnLeft) {
+                                                    this.setLeft(parentValue, currentBlock);
+                                                }
+                                                else {
+                                                    this.setRight(parentValue, currentBlock);
+                                                }
+                                            }
+                                            if (cursor < payload.length && payload.charAt(cursor) == ',') {
+                                                cursor++;
+                                                beginChunk = cursor;
+                                                while (cursor < payload.length && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
+                                                    cursor++;
+                                                }
+                                                if (cursor > beginChunk) {
+                                                    var currentValue = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
+                                                    this.setValue(currentBlock, currentValue);
+                                                }
+                                            }
+                                            _back_index++;
                                         }
-                                        var loopKey = java.lang.Long.parseLong(payload.substring(beginChunk, cleanedEnd));
-                                        this._back[_back_index] = loopKey;
-                                        _back_index++;
                                     }
                                 };
                                 AbstractArrayTree.prototype.isDirty = function () {
@@ -5985,6 +5895,10 @@ var org;
                                     this._back = null;
                                     this._threshold = 0;
                                 };
+                                AbstractArrayTree.BLACK_LEFT = '{';
+                                AbstractArrayTree.BLACK_RIGHT = '}';
+                                AbstractArrayTree.RED_LEFT = '[';
+                                AbstractArrayTree.RED_RIGHT = ']';
                                 return AbstractArrayTree;
                             })();
                             impl.AbstractArrayTree = AbstractArrayTree;
@@ -6181,12 +6095,6 @@ var org;
                                 return ArrayLongTree;
                             })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
                             impl.ArrayLongTree = ArrayLongTree;
-                            var OffHeapLongLongTree = (function () {
-                                function OffHeapLongLongTree() {
-                                }
-                                return OffHeapLongLongTree;
-                            })();
-                            impl.OffHeapLongLongTree = OffHeapLongLongTree;
                         })(impl = tree.impl || (tree.impl = {}));
                     })(tree = struct.tree || (struct.tree = {}));
                 })(struct = memory.struct || (memory.struct = {}));

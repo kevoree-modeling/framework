@@ -3,6 +3,7 @@ package org.kevoree.modeling.memory.struct.tree.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 
+/** @ignore ts*/
 public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLongTree {
 
     @Override

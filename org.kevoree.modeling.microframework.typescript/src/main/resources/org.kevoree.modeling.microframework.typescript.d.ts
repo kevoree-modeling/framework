@@ -1131,37 +1131,6 @@ declare module org {
                                 serialize(m: any): string;
                                 init(payload: string, metaModel: org.kevoree.modeling.meta.KMetaModel): void;
                             }
-                            class OffHeapLongMap<V> implements org.kevoree.modeling.memory.struct.map.KLongMap<any> {
-                                elementCount: number;
-                                elementData: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>[];
-                                private elementDataSize;
-                                threshold: number;
-                                private initalCapacity;
-                                private loadFactor;
-                                newElementArray(s: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>[];
-                                constructor(p_initalCapacity: number, p_loadFactor: number);
-                                clear(): void;
-                                private computeMaxSize();
-                                contains(key: number): boolean;
-                                get(key: number): V;
-                                findNonNullKeyEntry(key: number, index: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
-                                each(callback: (p: number, p1: V) => void): void;
-                                put(key: number, value: V): void;
-                                createHashedEntry(key: number, index: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
-                                rehashCapacity(capacity: number): void;
-                                rehash(): void;
-                                remove(key: number): V;
-                                removeEntry(key: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
-                                size(): number;
-                            }
-                            module OffHeapLongMap {
-                                class Entry<V> {
-                                    next: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
-                                    key: number;
-                                    value: V;
-                                    constructor(theKey: number, theValue: V);
-                                }
-                            }
                         }
                     }
                     module segment {
@@ -1247,18 +1216,22 @@ declare module org {
                                 _back: number[];
                                 private _dirty;
                                 private _counter;
+                                private static BLACK_LEFT;
+                                private static BLACK_RIGHT;
+                                private static RED_LEFT;
+                                private static RED_RIGHT;
                                 constructor();
                                 ELEM_SIZE(): number;
                                 private allocate(capacity);
                                 size(): number;
+                                key(p_currentIndex: number): number;
+                                setKey(p_currentIndex: number, p_paramIndex: number): void;
                                 left(p_currentIndex: number): number;
                                 setLeft(p_currentIndex: number, p_paramIndex: number): void;
                                 right(p_currentIndex: number): number;
                                 setRight(p_currentIndex: number, p_paramIndex: number): void;
                                 private parent(p_currentIndex);
                                 setParent(p_currentIndex: number, p_paramIndex: number): void;
-                                key(p_currentIndex: number): number;
-                                setKey(p_currentIndex: number, p_paramIndex: number): void;
                                 private color(currentIndex);
                                 setColor(currentIndex: number, paramIndex: number): void;
                                 value(currentIndex: number): number;
@@ -1303,8 +1276,6 @@ declare module org {
                                 ELEM_SIZE(): number;
                                 previousOrEqual(key: number): number;
                                 insert(key: number): void;
-                            }
-                            class OffHeapLongLongTree {
                             }
                         }
                     }

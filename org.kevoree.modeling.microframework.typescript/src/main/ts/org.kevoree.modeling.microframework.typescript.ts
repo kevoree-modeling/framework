@@ -5716,189 +5716,6 @@ module org {
                                  }
                             }
 
-                            export class OffHeapLongMap<V> implements org.kevoree.modeling.memory.struct.map.KLongMap<any> {
-
-                                public elementCount: number;
-                                public elementData: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>[];
-                                private elementDataSize: number;
-                                public threshold: number;
-                                private initalCapacity: number;
-                                private loadFactor: number;
-                                public newElementArray(s: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>[] {
-                                    return new Array();
-                                }
-
-                                constructor(p_initalCapacity: number, p_loadFactor: number) {
-                                    this.initalCapacity = p_initalCapacity;
-                                    this.loadFactor = p_loadFactor;
-                                    this.elementCount = 0;
-                                    this.elementData = this.newElementArray(this.initalCapacity);
-                                    this.elementDataSize = this.initalCapacity;
-                                    this.computeMaxSize();
-                                }
-
-                                public clear(): void {
-                                    if (this.elementCount > 0) {
-                                        this.elementCount = 0;
-                                        this.elementData = this.newElementArray(this.initalCapacity);
-                                        this.elementDataSize = this.initalCapacity;
-                                    }
-                                }
-
-                                private computeMaxSize(): void {
-                                    this.threshold = <number>(this.elementDataSize * this.loadFactor);
-                                }
-
-                                public contains(key: number): boolean {
-                                    if (this.elementDataSize == 0) {
-                                        return false;
-                                    }
-                                    var hash: number = <number>(key);
-                                    var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                    var m: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.findNonNullKeyEntry(key, index);
-                                    return m != null;
-                                }
-
-                                public get(key: number): V {
-                                    if (this.elementDataSize == 0) {
-                                        return null;
-                                    }
-                                    var m: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
-                                    var hash: number = <number>(key);
-                                    var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                    m = this.findNonNullKeyEntry(key, index);
-                                    if (m != null) {
-                                        return m.value;
-                                    }
-                                    return null;
-                                }
-
-                                public findNonNullKeyEntry(key: number, index: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> {
-                                    var m: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.elementData[index];
-                                    while (m != null){
-                                        if (key == m.key) {
-                                            return m;
-                                        }
-                                        m = m.next;
-                                    }
-                                    return null;
-                                }
-
-                                public each(callback: (p : number, p1 : V) => void): void {
-                                    for (var i: number = 0; i < this.elementDataSize; i++) {
-                                        if (this.elementData[i] != null) {
-                                            var current: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.elementData[i];
-                                            callback(this.elementData[i].key, this.elementData[i].value);
-                                            while (current.next != null){
-                                                current = current.next;
-                                                callback(current.key, current.value);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                public put(key: number, value: V): void {
-                                    var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = null;
-                                    var hash: number = <number>(key);
-                                    var index: number = -1;
-                                    if (this.elementDataSize != 0) {
-                                        index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                        entry = this.findNonNullKeyEntry(key, index);
-                                    }
-                                    if (entry == null) {
-                                        if (++this.elementCount > this.threshold) {
-                                            this.rehash();
-                                            index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                        }
-                                        entry = this.createHashedEntry(key, index);
-                                    }
-                                    entry.value = value;
-                                }
-
-                                public createHashedEntry(key: number, index: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> {
-                                    var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = new org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>(key, null);
-                                    entry.next = this.elementData[index];
-                                    this.elementData[index] = entry;
-                                    return entry;
-                                }
-
-                                public rehashCapacity(capacity: number): void {
-                                    var length: number = (capacity == 0 ? 1 : capacity << 1);
-                                    var newData: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>[] = this.newElementArray(length);
-                                    for (var i: number = 0; i < this.elementDataSize; i++) {
-                                        var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.elementData[i];
-                                        while (entry != null){
-                                            var index: number = (<number>entry.key & 0x7FFFFFFF) % length;
-                                            var next: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = entry.next;
-                                            entry.next = newData[index];
-                                            newData[index] = entry;
-                                            entry = next;
-                                        }
-                                    }
-                                    this.elementData = newData;
-                                    this.elementDataSize = length;
-                                    this.computeMaxSize();
-                                }
-
-                                public rehash(): void {
-                                    this.rehashCapacity(this.elementDataSize);
-                                }
-
-                                public remove(key: number): V {
-                                    var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.removeEntry(key);
-                                    if (entry == null) {
-                                        return null;
-                                    } else {
-                                        return entry.value;
-                                    }
-                                }
-
-                                public removeEntry(key: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> {
-                                    if (this.elementDataSize == 0) {
-                                        return null;
-                                    }
-                                    var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
-                                    var last: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = null;
-                                    var hash: number = <number>key;
-                                    var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                    entry = this.elementData[index];
-                                    while (entry != null && !(key == entry.key)){
-                                        last = entry;
-                                        entry = entry.next;
-                                    }
-                                    if (entry == null) {
-                                        return null;
-                                    }
-                                    if (last == null) {
-                                        this.elementData[index] = entry.next;
-                                    } else {
-                                        last.next = entry.next;
-                                    }
-                                    this.elementCount--;
-                                    return entry;
-                                }
-
-                                public size(): number {
-                                    return this.elementCount;
-                                }
-
-                            }
-
-                            export module OffHeapLongMap { 
-                                export class Entry<V> {
-
-                                    public next: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
-                                    public key: number;
-                                    public value: V;
-                                    constructor(theKey: number, theValue: V) {
-                                        this.key = theKey;
-                                        this.value = theValue;
-                                    }
-
-                                }
-
-
-                            }
                         }
                     }
                     export module segment {
@@ -6277,6 +6094,10 @@ module org {
                                 public _back: number[] = null;
                                 private _dirty: boolean = true;
                                 private _counter: number = 0;
+                                private static BLACK_LEFT: string = '{';
+                                private static BLACK_RIGHT: string = '}';
+                                private static RED_LEFT: string = '[';
+                                private static RED_RIGHT: string = ']';
                                 constructor() {
                                     this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
                                 }
@@ -6294,47 +6115,47 @@ module org {
                                     return this._size;
                                 }
 
-                                public left(p_currentIndex: number): number {
+                                public key(p_currentIndex: number): number {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
                                     return this._back[<number>p_currentIndex];
                                 }
 
-                                public setLeft(p_currentIndex: number, p_paramIndex: number): void {
+                                public setKey(p_currentIndex: number, p_paramIndex: number): void {
                                     this._back[<number>p_currentIndex] = p_paramIndex;
                                 }
 
-                                public right(p_currentIndex: number): number {
+                                public left(p_currentIndex: number): number {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
                                     return this._back[<number>p_currentIndex + 1];
                                 }
 
-                                public setRight(p_currentIndex: number, p_paramIndex: number): void {
+                                public setLeft(p_currentIndex: number, p_paramIndex: number): void {
                                     this._back[<number>p_currentIndex + 1] = p_paramIndex;
                                 }
 
-                                private parent(p_currentIndex: number): number {
+                                public right(p_currentIndex: number): number {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
                                     return this._back[<number>p_currentIndex + 2];
                                 }
 
-                                public setParent(p_currentIndex: number, p_paramIndex: number): void {
+                                public setRight(p_currentIndex: number, p_paramIndex: number): void {
                                     this._back[<number>p_currentIndex + 2] = p_paramIndex;
                                 }
 
-                                public key(p_currentIndex: number): number {
+                                private parent(p_currentIndex: number): number {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
                                     return this._back[<number>p_currentIndex + 3];
                                 }
 
-                                public setKey(p_currentIndex: number, p_paramIndex: number): void {
+                                public setParent(p_currentIndex: number, p_paramIndex: number): void {
                                     this._back[<number>p_currentIndex + 3] = p_paramIndex;
                                 }
 
@@ -6577,15 +6398,38 @@ module org {
                                     } else {
                                         builder.append(this._size);
                                         builder.append(',');
-                                        builder.append(this._root_index);
-                                        builder.append('[');
-                                        for (var i: number = 0; i < (this._size * this.ELEM_SIZE()); i++) {
-                                            if (i != 0) {
-                                                builder.append(',');
+                                        var elemSize: number = this.ELEM_SIZE();
+                                        builder.append(this._root_index / elemSize);
+                                        for (var i: number = 0; i < this._size; i++) {
+                                            var nextSegmentBegin: number = i * elemSize;
+                                            var beginParent: number = this.parent(nextSegmentBegin);
+                                            var isOnLeft: boolean = false;
+                                            if (beginParent != -1) {
+                                                isOnLeft = this.left(beginParent) == nextSegmentBegin;
                                             }
-                                            builder.append(this._back[i]);
+                                            if (this.color(nextSegmentBegin) == 0) {
+                                                if (isOnLeft) {
+                                                    builder.append(AbstractArrayTree.BLACK_LEFT);
+                                                } else {
+                                                    builder.append(AbstractArrayTree.BLACK_RIGHT);
+                                                }
+                                            } else {
+                                                if (isOnLeft) {
+                                                    builder.append(AbstractArrayTree.RED_LEFT);
+                                                } else {
+                                                    builder.append(AbstractArrayTree.RED_RIGHT);
+                                                }
+                                            }
+                                            builder.append(this.key(nextSegmentBegin));
+                                            builder.append(',');
+                                            if (beginParent != -1) {
+                                                builder.append(beginParent / elemSize);
+                                            }
+                                            if (elemSize > 5) {
+                                                builder.append(',');
+                                                builder.append(this.value(nextSegmentBegin));
+                                            }
                                         }
-                                        builder.append(']');
                                     }
                                     return builder.toString();
                                 }
@@ -6594,9 +6438,10 @@ module org {
                                     if (payload == null || payload.length == 0) {
                                         return;
                                     }
+                                    var elemSize: number = this.ELEM_SIZE();
                                     var initPos: number = 0;
                                     var cursor: number = 0;
-                                    while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '['){
+                                    while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT){
                                         cursor++;
                                     }
                                     if (payload.charAt(cursor) == ',') {
@@ -6604,25 +6449,66 @@ module org {
                                         cursor++;
                                         initPos = cursor;
                                     }
-                                    while (cursor < payload.length && payload.charAt(cursor) != '['){
+                                    while (cursor < payload.length && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT){
                                         cursor++;
                                     }
-                                    this._root_index = java.lang.Integer.parseInt(payload.substring(initPos, cursor));
+                                    this._root_index = java.lang.Integer.parseInt(payload.substring(initPos, cursor)) * elemSize;
                                     this.allocate(this._size);
+                                    for (var i: number = 0; i < this._size * elemSize; i++) {
+                                        this._back[i] = -1;
+                                    }
                                     var _back_index: number = 0;
                                     while (cursor < payload.length){
-                                        cursor++;
-                                        var beginChunk: number = cursor;
-                                        while (cursor < payload.length && payload.charAt(cursor) != ','){
+                                        while (cursor < payload.length && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT){
                                             cursor++;
                                         }
-                                        var cleanedEnd: number = cursor;
-                                        if (payload.charAt(cleanedEnd - 1) == ']') {
-                                            cleanedEnd--;
+                                        if (cursor < payload.length) {
+                                            var elem: string = payload.charAt(cursor);
+                                            var currentBlock: number = _back_index * elemSize;
+                                            var isOnLeft: boolean = false;
+                                            if (elem == AbstractArrayTree.BLACK_LEFT || elem == AbstractArrayTree.RED_LEFT) {
+                                                isOnLeft = true;
+                                            }
+                                            if (elem == AbstractArrayTree.BLACK_LEFT || elem == AbstractArrayTree.BLACK_RIGHT) {
+                                                this.setColor(currentBlock, 0);
+                                            } else {
+                                                this.setColor(currentBlock, 1);
+                                            }
+                                            cursor++;
+                                            var beginChunk: number = cursor;
+                                            while (cursor < payload.length && payload.charAt(cursor) != ','){
+                                                cursor++;
+                                            }
+                                            var loopKey: number = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
+                                            this.setKey(currentBlock, loopKey);
+                                            cursor++;
+                                            beginChunk = cursor;
+                                            while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT){
+                                                cursor++;
+                                            }
+                                            if (cursor > beginChunk) {
+                                                var parentRaw: number = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
+                                                var parentValue: number = parentRaw * elemSize;
+                                                this.setParent(currentBlock, parentValue);
+                                                if (isOnLeft) {
+                                                    this.setLeft(parentValue, currentBlock);
+                                                } else {
+                                                    this.setRight(parentValue, currentBlock);
+                                                }
+                                            }
+                                            if (cursor < payload.length && payload.charAt(cursor) == ',') {
+                                                cursor++;
+                                                beginChunk = cursor;
+                                                while (cursor < payload.length && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT){
+                                                    cursor++;
+                                                }
+                                                if (cursor > beginChunk) {
+                                                    var currentValue: number = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
+                                                    this.setValue(currentBlock, currentValue);
+                                                }
+                                            }
+                                            _back_index++;
                                         }
-                                        var loopKey: number = java.lang.Long.parseLong(payload.substring(beginChunk, cleanedEnd));
-                                        this._back[_back_index] = loopKey;
-                                        _back_index++;
                                     }
                                 }
 
@@ -6840,10 +6726,6 @@ module org {
                                     }
                                     this.insertCase1(insertedNode);
                                 }
-
-                            }
-
-                            export class OffHeapLongLongTree {
 
                             }
 
