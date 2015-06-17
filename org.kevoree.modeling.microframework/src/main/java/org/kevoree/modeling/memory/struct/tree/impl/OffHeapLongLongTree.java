@@ -3,10 +3,8 @@ package org.kevoree.modeling.memory.struct.tree.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 
-public class OffHeapLongLongTree extends AbstractArrayTree implements KLongLongTree {
-
-    private static final int SIZE_NODE = 6;
-
+public class OffHeapLongLongTree /*extends AbstractOffHeapTree implements KLongLongTree*/ {
+/*
     public OffHeapLongLongTree() {
         _back = new long[_size * SIZE_NODE];
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
@@ -103,4 +101,9 @@ public class OffHeapLongLongTree extends AbstractArrayTree implements KLongLongT
         insertCase1(insertedNode);
     }
 
+    @Override
+    public int getNodeSize() {
+        return 6;
+    }
+*/
 }
