@@ -29,9 +29,13 @@ public abstract class BaseKLongTreeTest {
         for (long i = 0; i <= 2; i++) {
             tree.insert(i);
         }
+
+        String saved0 = tree.serialize(null);
+        Assert.assertEquals(saved0,"TODO_REPLACE_WHEN_COMPILE_AGAIN!");
+
         KLongTree treeBis = createKLongTree();
-        treeBis.init(tree.serialize(null), null);
-        Assert.assertEquals(tree.serialize(null), treeBis.serialize(null));
+        treeBis.init(saved0, null);
+        Assert.assertEquals(saved0, treeBis.serialize(null));
         Assert.assertEquals(tree.size(), treeBis.size());
         for (int i = 0; i < tree.size(); i++) {
             Long resolved = tree.lookup(i);
