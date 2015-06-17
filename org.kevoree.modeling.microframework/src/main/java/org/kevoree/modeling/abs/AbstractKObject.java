@@ -451,7 +451,7 @@ public abstract class AbstractKObject implements KObject {
     public String toJSON() {
         KMemorySegment raw = _manager.segment(_universe, _time, _uuid, true, _metaClass, null);
         if (raw != null) {
-            return JsonRaw.encode(raw, _uuid, _metaClass, false);
+            return raw.serialize(_manager.model().metaModel());
         } else {
             return null;
         }
@@ -459,7 +459,19 @@ public abstract class AbstractKObject implements KObject {
 
     @Override
     public String toString() {
-        return toJSON();
+        StringBuilder builder = new StringBuilder();
+        builder.append("universe=");
+        builder.append(_universe);
+        builder.append(",time=");
+        builder.append(_time);
+        builder.append(",uuid=");
+        builder.append(_uuid);
+        KMemorySegment raw = _manager.segment(_universe, _time, _uuid, true, _metaClass, null);
+        if (raw != null) {
+            builder.append(",data=");
+            builder.append(raw.toString());
+        }
+        return builder.toString();
     }
 
     @Override

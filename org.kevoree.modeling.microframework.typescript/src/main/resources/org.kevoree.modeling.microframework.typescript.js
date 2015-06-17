@@ -308,7 +308,7 @@ var org;
                                     for (var j = 0; j < inboundsKeys.length; j++) {
                                         collector.put(inboundsKeys[j], inboundsKeys[j]);
                                     }
-                                    rawPayload.clearRef(metaElements[i].index());
+                                    rawPayload.clearRef(metaElements[i].index(), this._metaClass);
                                 }
                             }
                             var flatCollected = new Array();
@@ -3931,197 +3931,6 @@ var org;
             })(infer = modeling.infer || (modeling.infer = {}));
             var memory;
             (function (memory) {
-                var cache;
-                (function (cache) {
-                    var impl;
-                    (function (impl) {
-                        var HashMemoryCache = (function () {
-                            function HashMemoryCache() {
-                                this.initalCapacity = org.kevoree.modeling.KConfig.CACHE_INIT_SIZE;
-                                this.loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
-                                this.elementCount = 0;
-                                this.elementData = new Array();
-                                this.elementDataSize = this.initalCapacity;
-                                this.threshold = (this.elementDataSize * this.loadFactor);
-                            }
-                            HashMemoryCache.prototype.get = function (universe, time, obj) {
-                                if (this.elementDataSize == 0) {
-                                    return null;
-                                }
-                                var index = ((universe ^ time ^ obj) & 0x7FFFFFFF) % this.elementDataSize;
-                                var m = this.elementData[index];
-                                while (m != null) {
-                                    if (m.universe == universe && m.time == time && m.obj == obj) {
-                                        return m.value;
-                                    }
-                                    m = m.next;
-                                }
-                                return null;
-                            };
-                            HashMemoryCache.prototype.put = function (universe, time, obj, payload) {
-                                var entry = null;
-                                var hash = (universe ^ time ^ obj);
-                                var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                if (this.elementDataSize != 0) {
-                                    var m = this.elementData[index];
-                                    while (m != null) {
-                                        if (m.universe == universe && m.time == time && m.obj == obj) {
-                                            entry = m;
-                                            break;
-                                        }
-                                        m = m.next;
-                                    }
-                                }
-                                if (entry == null) {
-                                    entry = this.complex_insert(index, hash, universe, time, obj);
-                                }
-                                entry.value = payload;
-                            };
-                            HashMemoryCache.prototype.complex_insert = function (previousIndex, hash, universe, time, obj) {
-                                var index = previousIndex;
-                                if (++this.elementCount > this.threshold) {
-                                    var length = (this.elementDataSize == 0 ? 1 : this.elementDataSize << 1);
-                                    var newData = new Array();
-                                    for (var i = 0; i < this.elementDataSize; i++) {
-                                        var entry = this.elementData[i];
-                                        while (entry != null) {
-                                            index = ((entry.universe ^ entry.time ^ entry.obj) & 0x7FFFFFFF) % length;
-                                            var next = entry.next;
-                                            entry.next = newData[index];
-                                            newData[index] = entry;
-                                            entry = next;
-                                        }
-                                    }
-                                    this.elementData = newData;
-                                    this.elementDataSize = length;
-                                    this.threshold = (this.elementDataSize * this.loadFactor);
-                                    index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                }
-                                var entry = new org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry();
-                                entry.universe = universe;
-                                entry.time = time;
-                                entry.obj = obj;
-                                entry.next = this.elementData[index];
-                                this.elementData[index] = entry;
-                                return entry;
-                            };
-                            HashMemoryCache.prototype.dirties = function () {
-                                var nbDirties = 0;
-                                for (var i = 0; i < this.elementData.length; i++) {
-                                    if (this.elementData[i] != null) {
-                                        var current = this.elementData[i];
-                                        if (this.elementData[i].value.isDirty()) {
-                                            nbDirties++;
-                                        }
-                                        while (current.next != null) {
-                                            current = current.next;
-                                            if (current.value.isDirty()) {
-                                                nbDirties++;
-                                            }
-                                        }
-                                    }
-                                }
-                                var collectedDirties = new Array();
-                                var dirtySize = nbDirties;
-                                nbDirties = 0;
-                                for (var i = 0; i < this.elementData.length; i++) {
-                                    if (nbDirties < dirtySize) {
-                                        if (this.elementData[i] != null) {
-                                            var current = this.elementData[i];
-                                            if (this.elementData[i].value.isDirty()) {
-                                                var dirty = new org.kevoree.modeling.memory.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), this.elementData[i].value);
-                                                collectedDirties[nbDirties] = dirty;
-                                                nbDirties++;
-                                            }
-                                            while (current.next != null) {
-                                                current = current.next;
-                                                if (current.value.isDirty()) {
-                                                    var dirty = new org.kevoree.modeling.memory.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), current.value);
-                                                    collectedDirties[nbDirties] = dirty;
-                                                    nbDirties++;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                return collectedDirties;
-                            };
-                            HashMemoryCache.prototype.clean = function (metaModel) {
-                            };
-                            HashMemoryCache.prototype.monitor = function (origin) {
-                            };
-                            HashMemoryCache.prototype.size = function () {
-                                return this.elementCount;
-                            };
-                            HashMemoryCache.prototype.remove = function (universe, time, obj, p_metaModel) {
-                                var hash = (universe ^ time ^ obj);
-                                var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                if (this.elementDataSize != 0) {
-                                    var previous = null;
-                                    var m = this.elementData[index];
-                                    while (m != null) {
-                                        if (m.universe == universe && m.time == time && m.obj == obj) {
-                                            this.elementCount--;
-                                            try {
-                                                m.value.free(p_metaModel);
-                                            }
-                                            catch ($ex$) {
-                                                if ($ex$ instanceof java.lang.Exception) {
-                                                    var e = $ex$;
-                                                    e.printStackTrace();
-                                                }
-                                                else {
-                                                    throw $ex$;
-                                                }
-                                            }
-                                            if (previous == null) {
-                                                this.elementData[index] = m.next;
-                                            }
-                                            else {
-                                                previous.next = m.next;
-                                            }
-                                        }
-                                        previous = m;
-                                        m = m.next;
-                                    }
-                                }
-                            };
-                            HashMemoryCache.prototype.clear = function (metaModel) {
-                                for (var i = 0; i < this.elementData.length; i++) {
-                                    var e = this.elementData[i];
-                                    while (e != null) {
-                                        e.value.free(metaModel);
-                                        e = e.next;
-                                    }
-                                }
-                                if (this.elementCount > 0) {
-                                    this.elementCount = 0;
-                                    this.elementData = new Array();
-                                    this.elementDataSize = this.initalCapacity;
-                                }
-                            };
-                            return HashMemoryCache;
-                        })();
-                        impl.HashMemoryCache = HashMemoryCache;
-                        var HashMemoryCache;
-                        (function (HashMemoryCache) {
-                            var Entry = (function () {
-                                function Entry() {
-                                }
-                                return Entry;
-                            })();
-                            HashMemoryCache.Entry = Entry;
-                        })(HashMemoryCache = impl.HashMemoryCache || (impl.HashMemoryCache = {}));
-                        var KCacheDirty = (function () {
-                            function KCacheDirty(key, object) {
-                                this.key = key;
-                                this.object = object;
-                            }
-                            return KCacheDirty;
-                        })();
-                        impl.KCacheDirty = KCacheDirty;
-                    })(impl = cache.impl || (cache.impl = {}));
-                })(cache = memory.cache || (memory.cache = {}));
                 var manager;
                 (function (manager) {
                     var impl;
@@ -4131,7 +3940,8 @@ var org;
                                 this._objectKeyCalculator = null;
                                 this._universeKeyCalculator = null;
                                 this.isConnected = false;
-                                this._cache = new org.kevoree.modeling.memory.cache.impl.HashMemoryCache();
+                                this._factory = new org.kevoree.modeling.memory.struct.HeapMemoryFactory();
+                                this._cache = this._factory.newCache();
                                 this._modelKeyCalculator = new org.kevoree.modeling.memory.manager.impl.KeyCalculator(HeapMemoryManager.zeroPrefix, 0);
                                 this._groupKeyCalculator = new org.kevoree.modeling.memory.manager.impl.KeyCalculator(HeapMemoryManager.zeroPrefix, 0);
                                 this._db = new org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver();
@@ -4139,7 +3949,6 @@ var org;
                                 this._operationManager = new org.kevoree.modeling.operation.impl.HashOperationManager(this);
                                 this._scheduler = new org.kevoree.modeling.scheduler.impl.DirectScheduler();
                                 this._model = model;
-                                this._factory = new org.kevoree.modeling.memory.struct.HeapMemoryFactory();
                             }
                             HeapMemoryManager.prototype.cache = function () {
                                 return this._cache;
@@ -4572,6 +4381,7 @@ var org;
                             };
                             HeapMemoryManager.prototype.setFactory = function (p_factory) {
                                 this._factory = p_factory;
+                                this._cache = this._factory.newCache();
                             };
                             HeapMemoryManager.prototype.bumpKeyToCache = function (contentKey, callback) {
                                 var _this = this;
@@ -4910,9 +4720,203 @@ var org;
                             }
                             return result;
                         };
+                        HeapMemoryFactory.prototype.newCache = function () {
+                            return new org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache();
+                        };
                         return HeapMemoryFactory;
                     })();
                     struct.HeapMemoryFactory = HeapMemoryFactory;
+                    var cache;
+                    (function (cache) {
+                        var impl;
+                        (function (impl) {
+                            var HashMemoryCache = (function () {
+                                function HashMemoryCache() {
+                                    this.initalCapacity = org.kevoree.modeling.KConfig.CACHE_INIT_SIZE;
+                                    this.loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this.elementCount = 0;
+                                    this.elementData = new Array();
+                                    this.elementDataSize = this.initalCapacity;
+                                    this.threshold = (this.elementDataSize * this.loadFactor);
+                                }
+                                HashMemoryCache.prototype.get = function (universe, time, obj) {
+                                    if (this.elementDataSize == 0) {
+                                        return null;
+                                    }
+                                    var index = ((universe ^ time ^ obj) & 0x7FFFFFFF) % this.elementDataSize;
+                                    var m = this.elementData[index];
+                                    while (m != null) {
+                                        if (m.universe == universe && m.time == time && m.obj == obj) {
+                                            return m.value;
+                                        }
+                                        m = m.next;
+                                    }
+                                    return null;
+                                };
+                                HashMemoryCache.prototype.put = function (universe, time, obj, payload) {
+                                    var entry = null;
+                                    var hash = (universe ^ time ^ obj);
+                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    if (this.elementDataSize != 0) {
+                                        var m = this.elementData[index];
+                                        while (m != null) {
+                                            if (m.universe == universe && m.time == time && m.obj == obj) {
+                                                entry = m;
+                                                break;
+                                            }
+                                            m = m.next;
+                                        }
+                                    }
+                                    if (entry == null) {
+                                        entry = this.complex_insert(index, hash, universe, time, obj);
+                                    }
+                                    entry.value = payload;
+                                };
+                                HashMemoryCache.prototype.complex_insert = function (previousIndex, hash, universe, time, obj) {
+                                    var index = previousIndex;
+                                    if (++this.elementCount > this.threshold) {
+                                        var length = (this.elementDataSize == 0 ? 1 : this.elementDataSize << 1);
+                                        var newData = new Array();
+                                        for (var i = 0; i < this.elementDataSize; i++) {
+                                            var entry = this.elementData[i];
+                                            while (entry != null) {
+                                                index = ((entry.universe ^ entry.time ^ entry.obj) & 0x7FFFFFFF) % length;
+                                                var next = entry.next;
+                                                entry.next = newData[index];
+                                                newData[index] = entry;
+                                                entry = next;
+                                            }
+                                        }
+                                        this.elementData = newData;
+                                        this.elementDataSize = length;
+                                        this.threshold = (this.elementDataSize * this.loadFactor);
+                                        index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    }
+                                    var entry = new org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry();
+                                    entry.universe = universe;
+                                    entry.time = time;
+                                    entry.obj = obj;
+                                    entry.next = this.elementData[index];
+                                    this.elementData[index] = entry;
+                                    return entry;
+                                };
+                                HashMemoryCache.prototype.dirties = function () {
+                                    var nbDirties = 0;
+                                    for (var i = 0; i < this.elementData.length; i++) {
+                                        if (this.elementData[i] != null) {
+                                            var current = this.elementData[i];
+                                            if (this.elementData[i].value.isDirty()) {
+                                                nbDirties++;
+                                            }
+                                            while (current.next != null) {
+                                                current = current.next;
+                                                if (current.value.isDirty()) {
+                                                    nbDirties++;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    var collectedDirties = new Array();
+                                    var dirtySize = nbDirties;
+                                    nbDirties = 0;
+                                    for (var i = 0; i < this.elementData.length; i++) {
+                                        if (nbDirties < dirtySize) {
+                                            if (this.elementData[i] != null) {
+                                                var current = this.elementData[i];
+                                                if (this.elementData[i].value.isDirty()) {
+                                                    var dirty = new org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), this.elementData[i].value);
+                                                    collectedDirties[nbDirties] = dirty;
+                                                    nbDirties++;
+                                                }
+                                                while (current.next != null) {
+                                                    current = current.next;
+                                                    if (current.value.isDirty()) {
+                                                        var dirty = new org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), current.value);
+                                                        collectedDirties[nbDirties] = dirty;
+                                                        nbDirties++;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    return collectedDirties;
+                                };
+                                HashMemoryCache.prototype.clean = function (metaModel) {
+                                };
+                                HashMemoryCache.prototype.monitor = function (origin) {
+                                };
+                                HashMemoryCache.prototype.size = function () {
+                                    return this.elementCount;
+                                };
+                                HashMemoryCache.prototype.remove = function (universe, time, obj, p_metaModel) {
+                                    var hash = (universe ^ time ^ obj);
+                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    if (this.elementDataSize != 0) {
+                                        var previous = null;
+                                        var m = this.elementData[index];
+                                        while (m != null) {
+                                            if (m.universe == universe && m.time == time && m.obj == obj) {
+                                                this.elementCount--;
+                                                try {
+                                                    m.value.free(p_metaModel);
+                                                }
+                                                catch ($ex$) {
+                                                    if ($ex$ instanceof java.lang.Exception) {
+                                                        var e = $ex$;
+                                                        e.printStackTrace();
+                                                    }
+                                                    else {
+                                                        throw $ex$;
+                                                    }
+                                                }
+                                                if (previous == null) {
+                                                    this.elementData[index] = m.next;
+                                                }
+                                                else {
+                                                    previous.next = m.next;
+                                                }
+                                            }
+                                            previous = m;
+                                            m = m.next;
+                                        }
+                                    }
+                                };
+                                HashMemoryCache.prototype.clear = function (metaModel) {
+                                    for (var i = 0; i < this.elementData.length; i++) {
+                                        var e = this.elementData[i];
+                                        while (e != null) {
+                                            e.value.free(metaModel);
+                                            e = e.next;
+                                        }
+                                    }
+                                    if (this.elementCount > 0) {
+                                        this.elementCount = 0;
+                                        this.elementData = new Array();
+                                        this.elementDataSize = this.initalCapacity;
+                                    }
+                                };
+                                return HashMemoryCache;
+                            })();
+                            impl.HashMemoryCache = HashMemoryCache;
+                            var HashMemoryCache;
+                            (function (HashMemoryCache) {
+                                var Entry = (function () {
+                                    function Entry() {
+                                    }
+                                    return Entry;
+                                })();
+                                HashMemoryCache.Entry = Entry;
+                            })(HashMemoryCache = impl.HashMemoryCache || (impl.HashMemoryCache = {}));
+                            var KCacheDirty = (function () {
+                                function KCacheDirty(key, object) {
+                                    this.key = key;
+                                    this.object = object;
+                                }
+                                return KCacheDirty;
+                            })();
+                            impl.KCacheDirty = KCacheDirty;
+                        })(impl = cache.impl || (cache.impl = {}));
+                    })(cache = struct.cache || (struct.cache = {}));
                     var map;
                     (function (map) {
                         var impl;
@@ -5147,6 +5151,45 @@ var org;
                                 return ArrayUniverseOrderMap;
                             })(org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap);
                             impl.ArrayUniverseOrderMap = ArrayUniverseOrderMap;
+                            var OffHeapLongMap = (function () {
+                                function OffHeapLongMap(initalCapacity, loadFactor) {
+                                }
+                                OffHeapLongMap.prototype.clear = function () {
+                                    for (var p in this) {
+                                        if (this.hasOwnProperty(p)) {
+                                            delete this[p];
+                                        }
+                                    }
+                                };
+                                OffHeapLongMap.prototype.get = function (key) {
+                                    return this[key];
+                                };
+                                OffHeapLongMap.prototype.put = function (key, pval) {
+                                    var previousVal = this[key];
+                                    this[key] = pval;
+                                    return previousVal;
+                                };
+                                OffHeapLongMap.prototype.contains = function (key) {
+                                    return this.hasOwnProperty(key);
+                                };
+                                OffHeapLongMap.prototype.remove = function (key) {
+                                    var tmp = this[key];
+                                    delete this[key];
+                                    return tmp;
+                                };
+                                OffHeapLongMap.prototype.size = function () {
+                                    return Object.keys(this).length;
+                                };
+                                OffHeapLongMap.prototype.each = function (callback) {
+                                    for (var p in this) {
+                                        if (this.hasOwnProperty(p)) {
+                                            callback(p, this[p]);
+                                        }
+                                    }
+                                };
+                                return OffHeapLongMap;
+                            })();
+                            impl.OffHeapLongMap = OffHeapLongMap;
                         })(impl = map.impl || (map.impl = {}));
                     })(map = struct.map || (struct.map = {}));
                     var segment;
@@ -5345,7 +5388,7 @@ var org;
                                     }
                                     return false;
                                 };
-                                HeapMemorySegment.prototype.clearRef = function (index) {
+                                HeapMemorySegment.prototype.clearRef = function (index, metaClass) {
                                     this.raw[index] = null;
                                 };
                                 HeapMemorySegment.prototype.getInfer = function (index, metaClass) {
@@ -5814,6 +5857,403 @@ var org;
                                 return AbstractArrayTree;
                             })();
                             impl.AbstractArrayTree = AbstractArrayTree;
+                            var AbstractOffHeapTree = (function () {
+                                function AbstractOffHeapTree() {
+                                    this.SIZE_NODE = this.getNodeSize();
+                                }
+                                AbstractOffHeapTree.prototype.getNodeSize = function () {
+                                    throw "Abstract method";
+                                };
+                                AbstractOffHeapTree.prototype.internal_size_base_segment = function () {
+                                    return 8 + 4 + 1 + 4;
+                                };
+                                AbstractOffHeapTree.prototype.internal_ptr_root_index = function () {
+                                    return this._start_address;
+                                };
+                                AbstractOffHeapTree.prototype.internal_ptr_size = function () {
+                                    return this.internal_ptr_root_index() + 8;
+                                };
+                                AbstractOffHeapTree.prototype.internal_ptr_dirty = function () {
+                                    return this.internal_ptr_size() + 4;
+                                };
+                                AbstractOffHeapTree.prototype.internal_ptr_counter = function () {
+                                    return this.internal_ptr_dirty() + 1;
+                                };
+                                AbstractOffHeapTree.prototype.internal_ptr_back = function () {
+                                    return this.internal_ptr_counter() + 4;
+                                };
+                                AbstractOffHeapTree.prototype.internal_ptr_back_idx = function (idx) {
+                                    return this.internal_ptr_back() + idx * 8 * this.SIZE_NODE;
+                                };
+                                AbstractOffHeapTree.prototype.size = function () {
+                                    return AbstractOffHeapTree.UNSAFE.getInt(this.internal_ptr_size());
+                                };
+                                AbstractOffHeapTree.prototype.left = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(p_currentIndex));
+                                };
+                                AbstractOffHeapTree.prototype.setLeft = function (p_currentIndex, p_paramIndex) {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(p_currentIndex), p_paramIndex);
+                                };
+                                AbstractOffHeapTree.prototype.right = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(p_currentIndex) + 1 * 8);
+                                };
+                                AbstractOffHeapTree.prototype.setRight = function (p_currentIndex, p_paramIndex) {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(p_currentIndex) + 1 * 8, p_paramIndex);
+                                };
+                                AbstractOffHeapTree.prototype.parent = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(p_currentIndex) + 2 * 8);
+                                };
+                                AbstractOffHeapTree.prototype.setParent = function (p_currentIndex, p_paramIndex) {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(p_currentIndex) + 2 * 8, p_paramIndex);
+                                };
+                                AbstractOffHeapTree.prototype.key = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(p_currentIndex) + 3 * 8);
+                                };
+                                AbstractOffHeapTree.prototype.setKey = function (p_currentIndex, p_paramIndex) {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(p_currentIndex) + 3 * 8, p_paramIndex);
+                                };
+                                AbstractOffHeapTree.prototype.color = function (currentIndex) {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(currentIndex) + 4 * 8);
+                                };
+                                AbstractOffHeapTree.prototype.setColor = function (currentIndex, paramIndex) {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(currentIndex) + 4 * 8, paramIndex);
+                                };
+                                AbstractOffHeapTree.prototype.value = function (currentIndex) {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(currentIndex) + 5 * 8);
+                                };
+                                AbstractOffHeapTree.prototype.setValue = function (currentIndex, paramIndex) {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(currentIndex) + 5 * 8, paramIndex);
+                                };
+                                AbstractOffHeapTree.prototype.grandParent = function (currentIndex) {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    if (this.parent(currentIndex) != -1) {
+                                        return this.parent(this.parent(currentIndex));
+                                    }
+                                    else {
+                                        return -1;
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.sibling = function (currentIndex) {
+                                    if (this.parent(currentIndex) == -1) {
+                                        return -1;
+                                    }
+                                    else {
+                                        if (currentIndex == this.left(this.parent(currentIndex))) {
+                                            return this.right(this.parent(currentIndex));
+                                        }
+                                        else {
+                                            return this.left(this.parent(currentIndex));
+                                        }
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.uncle = function (currentIndex) {
+                                    if (this.parent(currentIndex) != -1) {
+                                        return this.sibling(this.parent(currentIndex));
+                                    }
+                                    else {
+                                        return -1;
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.previous = function (p_index) {
+                                    var p = p_index;
+                                    if (this.left(p) != -1) {
+                                        p = this.left(p);
+                                        while (this.right(p) != -1) {
+                                            p = this.right(p);
+                                        }
+                                        return p;
+                                    }
+                                    else {
+                                        if (this.parent(p) != -1) {
+                                            if (p == this.right(this.parent(p))) {
+                                                return this.parent(p);
+                                            }
+                                            else {
+                                                while (this.parent(p) != -1 && p == this.left(this.parent(p))) {
+                                                    p = this.parent(p);
+                                                }
+                                                return this.parent(p);
+                                            }
+                                        }
+                                        else {
+                                            return -1;
+                                        }
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.lookup = function (p_key) {
+                                    var n = AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_root_index());
+                                    if (n == -1) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    while (n != -1) {
+                                        if (p_key == this.key(n)) {
+                                            return this.key(n);
+                                        }
+                                        else {
+                                            if (p_key < this.key(n)) {
+                                                n = this.left(n);
+                                            }
+                                            else {
+                                                n = this.right(n);
+                                            }
+                                        }
+                                    }
+                                    return n;
+                                };
+                                AbstractOffHeapTree.prototype.range = function (startKey, endKey, walker) {
+                                    var indexEnd = this.internal_previousOrEqual_index(endKey);
+                                    while (indexEnd != -1 && this.key(indexEnd) >= startKey) {
+                                        walker(this.key(indexEnd));
+                                        indexEnd = this.previous(indexEnd);
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.internal_previousOrEqual_index = function (p_key) {
+                                    var p = AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_root_index());
+                                    if (p == -1) {
+                                        return p;
+                                    }
+                                    while (p != -1) {
+                                        if (p_key == this.key(p)) {
+                                            return p;
+                                        }
+                                        if (p_key > this.key(p)) {
+                                            if (this.right(p) != -1) {
+                                                p = this.right(p);
+                                            }
+                                            else {
+                                                return p;
+                                            }
+                                        }
+                                        else {
+                                            if (this.left(p) != -1) {
+                                                p = this.left(p);
+                                            }
+                                            else {
+                                                var parent = this.parent(p);
+                                                var ch = p;
+                                                while (parent != -1 && ch == this.left(parent)) {
+                                                    ch = parent;
+                                                    parent = this.parent(parent);
+                                                }
+                                                return parent;
+                                            }
+                                        }
+                                    }
+                                    return -1;
+                                };
+                                AbstractOffHeapTree.prototype.rotateLeft = function (n) {
+                                    var r = this.right(n);
+                                    this.replaceNode(n, r);
+                                    this.setRight(n, this.left(r));
+                                    if (this.left(r) != -1) {
+                                        this.setParent(this.left(r), n);
+                                    }
+                                    this.setLeft(r, n);
+                                    this.setParent(n, r);
+                                };
+                                AbstractOffHeapTree.prototype.rotateRight = function (n) {
+                                    var l = this.left(n);
+                                    this.replaceNode(n, l);
+                                    this.setLeft(n, this.right(l));
+                                    if (this.right(l) != -1) {
+                                        this.setParent(this.right(l), n);
+                                    }
+                                    this.setRight(l, n);
+                                    this.setParent(n, l);
+                                };
+                                AbstractOffHeapTree.prototype.replaceNode = function (oldn, newn) {
+                                    if (this.parent(oldn) == -1) {
+                                        AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_root_index(), newn);
+                                    }
+                                    else {
+                                        if (oldn == this.left(this.parent(oldn))) {
+                                            this.setLeft(this.parent(oldn), newn);
+                                        }
+                                        else {
+                                            this.setRight(this.parent(oldn), newn);
+                                        }
+                                    }
+                                    if (newn != -1) {
+                                        this.setParent(newn, this.parent(oldn));
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.insertCase1 = function (n) {
+                                    if (this.parent(n) == -1) {
+                                        this.setColor(n, 1);
+                                    }
+                                    else {
+                                        this.insertCase2(n);
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.insertCase2 = function (n) {
+                                    if (this.nodeColor(this.parent(n)) == true) {
+                                        return;
+                                    }
+                                    else {
+                                        this.insertCase3(n);
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.insertCase3 = function (n) {
+                                    if (this.nodeColor(this.uncle(n)) == false) {
+                                        this.setColor(this.parent(n), 1);
+                                        this.setColor(this.uncle(n), 1);
+                                        this.setColor(this.grandParent(n), 0);
+                                        this.insertCase1(this.grandParent(n));
+                                    }
+                                    else {
+                                        this.insertCase4(n);
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.insertCase4 = function (n_n) {
+                                    var n = n_n;
+                                    if (n == this.right(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
+                                        this.rotateLeft(this.parent(n));
+                                        n = this.left(n);
+                                    }
+                                    else {
+                                        if (n == this.left(this.parent(n)) && this.parent(n) == this.right(this.grandParent(n))) {
+                                            this.rotateRight(this.parent(n));
+                                            n = this.right(n);
+                                        }
+                                    }
+                                    this.insertCase5(n);
+                                };
+                                AbstractOffHeapTree.prototype.insertCase5 = function (n) {
+                                    this.setColor(this.parent(n), 1);
+                                    this.setColor(this.grandParent(n), 0);
+                                    if (n == this.left(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
+                                        this.rotateRight(this.grandParent(n));
+                                    }
+                                    else {
+                                        this.rotateLeft(this.grandParent(n));
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.delete = function (p_key) {
+                                };
+                                AbstractOffHeapTree.prototype.nodeColor = function (n) {
+                                    if (n == -1) {
+                                        return true;
+                                    }
+                                    else {
+                                        return this.color(n) == 1;
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.node_serialize = function (builder, current) {
+                                    builder.append("|");
+                                    if (this.nodeColor(current) == true) {
+                                        builder.append(AbstractOffHeapTree.BLACK);
+                                    }
+                                    else {
+                                        builder.append(AbstractOffHeapTree.RED);
+                                    }
+                                    builder.append(this.key(current));
+                                    if (this.left(current) == -1 && this.right(current) == -1) {
+                                        builder.append("%");
+                                    }
+                                    else {
+                                        if (this.left(current) != -1) {
+                                            this.node_serialize(builder, this.left(current));
+                                        }
+                                        else {
+                                            builder.append("#");
+                                        }
+                                        if (this.right(current) != -1) {
+                                            this.node_serialize(builder, this.right(current));
+                                        }
+                                        else {
+                                            builder.append("#");
+                                        }
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.serialize = function (metaModel) {
+                                    var builder = new java.lang.StringBuilder();
+                                    builder.append(this.size());
+                                    var _root_index = AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_root_index());
+                                    if (_root_index != -1) {
+                                        this.node_serialize(builder, _root_index);
+                                    }
+                                    return builder.toString();
+                                };
+                                AbstractOffHeapTree.prototype.init = function (payload, metaModel) {
+                                    this._start_address = AbstractOffHeapTree.UNSAFE.allocateMemory(this.internal_size_base_segment());
+                                    AbstractOffHeapTree.UNSAFE.setMemory(this._start_address, this.internal_size_base_segment(), 0);
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_root_index(), -1);
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = (this.size() * this._loadFactor);
+                                };
+                                AbstractOffHeapTree.prototype.isDirty = function () {
+                                    return AbstractOffHeapTree.UNSAFE.getByte(this.internal_ptr_dirty()) != 0;
+                                };
+                                AbstractOffHeapTree.prototype.setClean = function (p_metaModel) {
+                                    AbstractOffHeapTree.UNSAFE.putByte(this.internal_ptr_dirty(), 0);
+                                };
+                                AbstractOffHeapTree.prototype.setDirty = function () {
+                                    AbstractOffHeapTree.UNSAFE.putByte(this.internal_ptr_dirty(), 1);
+                                };
+                                AbstractOffHeapTree.prototype.counter = function () {
+                                    return AbstractOffHeapTree.UNSAFE.getInt(this.internal_ptr_counter());
+                                };
+                                AbstractOffHeapTree.prototype.inc = function () {
+                                    var c = AbstractOffHeapTree.UNSAFE.getInt(this.internal_ptr_counter());
+                                    AbstractOffHeapTree.UNSAFE.putInt(this.internal_ptr_counter(), c + 1);
+                                };
+                                AbstractOffHeapTree.prototype.dec = function () {
+                                    var c = AbstractOffHeapTree.UNSAFE.getInt(this.internal_ptr_counter());
+                                    AbstractOffHeapTree.UNSAFE.putInt(this.internal_ptr_counter(), c - 1);
+                                };
+                                AbstractOffHeapTree.prototype.free = function (p_metaModel) {
+                                    AbstractOffHeapTree.UNSAFE.freeMemory(this._start_address);
+                                };
+                                AbstractOffHeapTree.getUnsafe = function () {
+                                    try {
+                                        var theUnsafe = Unsafe.getDeclaredField("theUnsafe");
+                                        theUnsafe.setAccessible(true);
+                                        return theUnsafe.get(null);
+                                    }
+                                    catch ($ex$) {
+                                        if ($ex$ instanceof java.lang.Exception) {
+                                            var e = $ex$;
+                                            throw new java.lang.RuntimeException("ERROR: unsafe operations are not available");
+                                        }
+                                        else {
+                                            throw $ex$;
+                                        }
+                                    }
+                                };
+                                AbstractOffHeapTree.prototype.getMemoryAddress = function () {
+                                    return this._start_address;
+                                };
+                                AbstractOffHeapTree.prototype.setMemoryAddress = function (address) {
+                                    this._start_address = address;
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = (this.size() * this._loadFactor);
+                                };
+                                AbstractOffHeapTree.UNSAFE = org.kevoree.modeling.memory.struct.tree.impl.AbstractOffHeapTree.getUnsafe();
+                                AbstractOffHeapTree.BLACK = 0;
+                                AbstractOffHeapTree.RED = 1;
+                                return AbstractOffHeapTree;
+                            })();
+                            impl.AbstractOffHeapTree = AbstractOffHeapTree;
                             var ArrayLongLongTree = (function (_super) {
                                 __extends(ArrayLongLongTree, _super);
                                 function ArrayLongLongTree() {
@@ -6007,6 +6447,110 @@ var org;
                                 return ArrayLongTree;
                             })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
                             impl.ArrayLongTree = ArrayLongTree;
+                            var OffHeapLongLongTree = (function (_super) {
+                                __extends(OffHeapLongLongTree, _super);
+                                function OffHeapLongLongTree() {
+                                    this._back = new Array();
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = (this._size * this._loadFactor);
+                                }
+                                OffHeapLongLongTree.prototype.previousOrEqualValue = function (p_key) {
+                                    var result = this.internal_previousOrEqual_index(p_key);
+                                    if (result != -1) {
+                                        return this.value(result);
+                                    }
+                                    else {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                };
+                                OffHeapLongLongTree.prototype.lookupValue = function (p_key) {
+                                    var n = this._root_index;
+                                    if (n == -1) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    while (n != -1) {
+                                        if (p_key == this.key(n)) {
+                                            return this.value(n);
+                                        }
+                                        else {
+                                            if (p_key < this.key(n)) {
+                                                n = this.left(n);
+                                            }
+                                            else {
+                                                n = this.right(n);
+                                            }
+                                        }
+                                    }
+                                    return n;
+                                };
+                                OffHeapLongLongTree.prototype.insert = function (p_key, p_value) {
+                                    if ((this._size + 1) > this._threshold) {
+                                        var length = (this._size == 0 ? 1 : this._size << 1);
+                                        var new_back = new Array();
+                                        System.arraycopy(this._back, 0, new_back, 0, this._size * OffHeapLongLongTree.SIZE_NODE);
+                                        this._threshold = (this._size * this._loadFactor);
+                                        this._back = new_back;
+                                    }
+                                    var insertedNode = (this._size) * OffHeapLongLongTree.SIZE_NODE;
+                                    if (this._size == 0) {
+                                        this._size = 1;
+                                        this.setKey(insertedNode, p_key);
+                                        this.setValue(insertedNode, p_value);
+                                        this.setColor(insertedNode, 0);
+                                        this.setLeft(insertedNode, -1);
+                                        this.setRight(insertedNode, -1);
+                                        this.setParent(insertedNode, -1);
+                                        this._root_index = insertedNode;
+                                    }
+                                    else {
+                                        var n = this._root_index;
+                                        while (true) {
+                                            if (p_key == this.key(n)) {
+                                                return;
+                                            }
+                                            else {
+                                                if (p_key < this.key(n)) {
+                                                    if (this.left(n) == -1) {
+                                                        this.setKey(insertedNode, p_key);
+                                                        this.setValue(insertedNode, p_value);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setLeft(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    }
+                                                    else {
+                                                        n = this.left(n);
+                                                    }
+                                                }
+                                                else {
+                                                    if (this.right(n) == -1) {
+                                                        this.setKey(insertedNode, p_key);
+                                                        this.setValue(insertedNode, p_value);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setRight(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    }
+                                                    else {
+                                                        n = this.right(n);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        this.setParent(insertedNode, n);
+                                    }
+                                    this.insertCase1(insertedNode);
+                                };
+                                OffHeapLongLongTree.SIZE_NODE = 6;
+                                return OffHeapLongLongTree;
+                            })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
+                            impl.OffHeapLongLongTree = OffHeapLongLongTree;
                         })(impl = tree.impl || (tree.impl = {}));
                     })(tree = struct.tree || (struct.tree = {}));
                 })(struct = memory.struct || (memory.struct = {}));

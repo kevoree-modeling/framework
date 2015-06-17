@@ -512,7 +512,7 @@ module org {
                                     for (var j: number = 0; j < inboundsKeys.length; j++) {
                                         collector.put(inboundsKeys[j], inboundsKeys[j]);
                                     }
-                                    rawPayload.clearRef(metaElements[i].index());
+                                    rawPayload.clearRef(metaElements[i].index(), this._metaClass);
                                 }
                             }
                             var flatCollected: number[] = new Array();
@@ -4384,6 +4384,8 @@ module org {
 
                     newFromKey(universe: number, time: number, uuid: number): org.kevoree.modeling.memory.KMemoryElement;
 
+                    newCache(): org.kevoree.modeling.memory.struct.cache.KCache;
+
                 }
 
                 export interface KOffHeapMemoryElement extends org.kevoree.modeling.memory.KMemoryElement {
@@ -4394,232 +4396,6 @@ module org {
 
                 }
 
-                export module cache {
-                    export interface KCache {
-
-                        get(universe: number, time: number, obj: number): org.kevoree.modeling.memory.KMemoryElement;
-
-                        put(universe: number, time: number, obj: number, payload: org.kevoree.modeling.memory.KMemoryElement): void;
-
-                        dirties(): org.kevoree.modeling.memory.cache.impl.KCacheDirty[];
-
-                        clear(metaModel: org.kevoree.modeling.meta.KMetaModel): void;
-
-                        clean(metaModel: org.kevoree.modeling.meta.KMetaModel): void;
-
-                        monitor(origin: org.kevoree.modeling.KObject): void;
-
-                        size(): number;
-
-                    }
-
-                    export module impl {
-                        export class HashMemoryCache implements org.kevoree.modeling.memory.cache.KCache {
-
-                            private elementData: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry[];
-                            private elementCount: number;
-                            private elementDataSize: number;
-                            private loadFactor: number;
-                            private initalCapacity: number;
-                            private threshold: number;
-                            public get(universe: number, time: number, obj: number): org.kevoree.modeling.memory.KMemoryElement {
-                                if (this.elementDataSize == 0) {
-                                    return null;
-                                }
-                                var index: number = ((<number>(universe ^ time ^ obj)) & 0x7FFFFFFF) % this.elementDataSize;
-                                var m: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = this.elementData[index];
-                                while (m != null){
-                                    if (m.universe == universe && m.time == time && m.obj == obj) {
-                                        return m.value;
-                                    }
-                                    m = m.next;
-                                }
-                                return null;
-                            }
-
-                            public put(universe: number, time: number, obj: number, payload: org.kevoree.modeling.memory.KMemoryElement): void {
-                                var entry: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = null;
-                                var hash: number = <number>(universe ^ time ^ obj);
-                                var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                if (this.elementDataSize != 0) {
-                                    var m: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = this.elementData[index];
-                                    while (m != null){
-                                        if (m.universe == universe && m.time == time && m.obj == obj) {
-                                            entry = m;
-                                            break;
-                                        }
-                                        m = m.next;
-                                    }
-                                }
-                                if (entry == null) {
-                                    entry = this.complex_insert(index, hash, universe, time, obj);
-                                }
-                                entry.value = payload;
-                            }
-
-                            private complex_insert(previousIndex: number, hash: number, universe: number, time: number, obj: number): org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry {
-                                var index: number = previousIndex;
-                                if (++this.elementCount > this.threshold) {
-                                    var length: number = (this.elementDataSize == 0 ? 1 : this.elementDataSize << 1);
-                                    var newData: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry[] = new Array();
-                                    for (var i: number = 0; i < this.elementDataSize; i++) {
-                                        var entry: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = this.elementData[i];
-                                        while (entry != null){
-                                            index = (<number>(entry.universe ^ entry.time ^ entry.obj) & 0x7FFFFFFF) % length;
-                                            var next: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = entry.next;
-                                            entry.next = newData[index];
-                                            newData[index] = entry;
-                                            entry = next;
-                                        }
-                                    }
-                                    this.elementData = newData;
-                                    this.elementDataSize = length;
-                                    this.threshold = <number>(this.elementDataSize * this.loadFactor);
-                                    index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                }
-                                var entry: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = new org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry();
-                                entry.universe = universe;
-                                entry.time = time;
-                                entry.obj = obj;
-                                entry.next = this.elementData[index];
-                                this.elementData[index] = entry;
-                                return entry;
-                            }
-
-                            public dirties(): org.kevoree.modeling.memory.cache.impl.KCacheDirty[] {
-                                var nbDirties: number = 0;
-                                for (var i: number = 0; i < this.elementData.length; i++) {
-                                    if (this.elementData[i] != null) {
-                                        var current: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = this.elementData[i];
-                                        if (this.elementData[i].value.isDirty()) {
-                                            nbDirties++;
-                                        }
-                                        while (current.next != null){
-                                            current = current.next;
-                                            if (current.value.isDirty()) {
-                                                nbDirties++;
-                                            }
-                                        }
-                                    }
-                                }
-                                var collectedDirties: org.kevoree.modeling.memory.cache.impl.KCacheDirty[] = new Array();
-                                var dirtySize: number = nbDirties;
-                                nbDirties = 0;
-                                for (var i: number = 0; i < this.elementData.length; i++) {
-                                    if (nbDirties < dirtySize) {
-                                        if (this.elementData[i] != null) {
-                                            var current: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = this.elementData[i];
-                                            if (this.elementData[i].value.isDirty()) {
-                                                var dirty: org.kevoree.modeling.memory.cache.impl.KCacheDirty = new org.kevoree.modeling.memory.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), this.elementData[i].value);
-                                                collectedDirties[nbDirties] = dirty;
-                                                nbDirties++;
-                                            }
-                                            while (current.next != null){
-                                                current = current.next;
-                                                if (current.value.isDirty()) {
-                                                    var dirty: org.kevoree.modeling.memory.cache.impl.KCacheDirty = new org.kevoree.modeling.memory.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), current.value);
-                                                    collectedDirties[nbDirties] = dirty;
-                                                    nbDirties++;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                return collectedDirties;
-                            }
-
-                            public clean(metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                            }
-
-                            public monitor(origin: org.kevoree.modeling.KObject): void {
-                            }
-
-                            public size(): number {
-                                return this.elementCount;
-                            }
-
-                            private remove(universe: number, time: number, obj: number, p_metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                                var hash: number = <number>(universe ^ time ^ obj);
-                                var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                if (this.elementDataSize != 0) {
-                                    var previous: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = null;
-                                    var m: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = this.elementData[index];
-                                    while (m != null){
-                                        if (m.universe == universe && m.time == time && m.obj == obj) {
-                                            this.elementCount--;
-                                            try {
-                                                m.value.free(p_metaModel);
-                                            } catch ($ex$) {
-                                                if ($ex$ instanceof java.lang.Exception) {
-                                                    var e: java.lang.Exception = <java.lang.Exception>$ex$;
-                                                    e.printStackTrace();
-                                                } else {
-                                                    throw $ex$;
-                                                }
-                                            }
-                                            if (previous == null) {
-                                                this.elementData[index] = m.next;
-                                            } else {
-                                                previous.next = m.next;
-                                            }
-                                        }
-                                        previous = m;
-                                        m = m.next;
-                                    }
-                                }
-                            }
-
-                            constructor() {
-                                this.initalCapacity = org.kevoree.modeling.KConfig.CACHE_INIT_SIZE;
-                                this.loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
-                                this.elementCount = 0;
-                                this.elementData = new Array();
-                                this.elementDataSize = this.initalCapacity;
-                                this.threshold = <number>(this.elementDataSize * this.loadFactor);
-                            }
-
-                            public clear(metaModel: org.kevoree.modeling.meta.KMetaModel): void {
-                                for (var i: number = 0; i < this.elementData.length; i++) {
-                                    var e: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry = this.elementData[i];
-                                    while (e != null){
-                                        e.value.free(metaModel);
-                                        e = e.next;
-                                    }
-                                }
-                                if (this.elementCount > 0) {
-                                    this.elementCount = 0;
-                                    this.elementData = new Array();
-                                    this.elementDataSize = this.initalCapacity;
-                                }
-                            }
-
-                        }
-
-                        export module HashMemoryCache { 
-                            export class Entry {
-
-                                public next: org.kevoree.modeling.memory.cache.impl.HashMemoryCache.Entry;
-                                public universe: number;
-                                public time: number;
-                                public obj: number;
-                                public value: org.kevoree.modeling.memory.KMemoryElement;
-                            }
-
-
-                        }
-                        export class KCacheDirty {
-
-                            public key: org.kevoree.modeling.KContentKey;
-                            public object: org.kevoree.modeling.memory.KMemoryElement;
-                            constructor(key: org.kevoree.modeling.KContentKey, object: org.kevoree.modeling.memory.KMemoryElement) {
-                                this.key = key;
-                                this.object = object;
-                            }
-
-                        }
-
-                    }
-                }
                 export module manager {
                     export interface KMemoryManager {
 
@@ -4627,7 +4403,7 @@ module org {
 
                         model(): org.kevoree.modeling.KModel<any>;
 
-                        cache(): org.kevoree.modeling.memory.cache.KCache;
+                        cache(): org.kevoree.modeling.memory.struct.cache.KCache;
 
                         lookup(universe: number, time: number, uuid: number, callback: (p : org.kevoree.modeling.KObject) => void): void;
 
@@ -4720,13 +4496,14 @@ module org {
                             private _modelKeyCalculator: org.kevoree.modeling.memory.manager.impl.KeyCalculator;
                             private _groupKeyCalculator: org.kevoree.modeling.memory.manager.impl.KeyCalculator;
                             private isConnected: boolean = false;
-                            private _cache: org.kevoree.modeling.memory.cache.KCache;
+                            private _cache: org.kevoree.modeling.memory.struct.cache.KCache;
                             private static UNIVERSE_INDEX: number = 0;
                             private static OBJ_INDEX: number = 1;
                             private static GLO_TREE_INDEX: number = 2;
                             private static zeroPrefix: number = 0;
                             constructor(model: org.kevoree.modeling.KModel<any>) {
-                                this._cache = new org.kevoree.modeling.memory.cache.impl.HashMemoryCache();
+                                this._factory = new org.kevoree.modeling.memory.struct.HeapMemoryFactory();
+                                this._cache = this._factory.newCache();
                                 this._modelKeyCalculator = new org.kevoree.modeling.memory.manager.impl.KeyCalculator(HeapMemoryManager.zeroPrefix, 0);
                                 this._groupKeyCalculator = new org.kevoree.modeling.memory.manager.impl.KeyCalculator(HeapMemoryManager.zeroPrefix, 0);
                                 this._db = new org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver();
@@ -4734,10 +4511,9 @@ module org {
                                 this._operationManager = new org.kevoree.modeling.operation.impl.HashOperationManager(this);
                                 this._scheduler = new org.kevoree.modeling.scheduler.impl.DirectScheduler();
                                 this._model = model;
-                                this._factory = new org.kevoree.modeling.memory.struct.HeapMemoryFactory();
                             }
 
-                            public cache(): org.kevoree.modeling.memory.cache.KCache {
+                            public cache(): org.kevoree.modeling.memory.struct.cache.KCache {
                                 return this._cache;
                             }
 
@@ -4830,7 +4606,7 @@ module org {
                             }
 
                             public save(callback: (p : java.lang.Throwable) => void): void {
-                                var dirtiesEntries: org.kevoree.modeling.memory.cache.impl.KCacheDirty[] = this._cache.dirties();
+                                var dirtiesEntries: org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty[] = this._cache.dirties();
                                 var request: org.kevoree.modeling.cdn.impl.ContentPutRequest = new org.kevoree.modeling.cdn.impl.ContentPutRequest(dirtiesEntries.length + 2);
                                 var notificationMessages: org.kevoree.modeling.message.impl.Events = new org.kevoree.modeling.message.impl.Events(dirtiesEntries.length);
                                 for (var i: number = 0; i < dirtiesEntries.length; i++) {
@@ -5170,6 +4946,7 @@ module org {
 
                             public setFactory(p_factory: org.kevoree.modeling.memory.KMemoryFactory): void {
                                 this._factory = p_factory;
+                                this._cache = this._factory.newCache();
                             }
 
                             public bumpKeyToCache(contentKey: org.kevoree.modeling.KContentKey, callback: (p : org.kevoree.modeling.memory.KMemoryElement) => void): void {
@@ -5412,7 +5189,7 @@ module org {
 
                         export class ResolutionHelper {
 
-                            public static resolve_trees(universe: number, time: number, uuid: number, cache: org.kevoree.modeling.memory.cache.KCache): org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace {
+                            public static resolve_trees(universe: number, time: number, uuid: number, cache: org.kevoree.modeling.memory.struct.cache.KCache): org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace {
                                 var result: org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace = new org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace();
                                 var objectUniverseTree: org.kevoree.modeling.memory.struct.map.KUniverseOrderMap = <org.kevoree.modeling.memory.struct.map.KUniverseOrderMap>cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, uuid);
                                 var globalUniverseOrder: org.kevoree.modeling.memory.struct.map.KUniverseOrderMap = <org.kevoree.modeling.memory.struct.map.KUniverseOrderMap>cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
@@ -5522,8 +5299,238 @@ module org {
                             return result;
                         }
 
+                        public newCache(): org.kevoree.modeling.memory.struct.cache.KCache {
+                            return new org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache();
+                        }
+
                     }
 
+                    export module cache {
+                        export interface KCache {
+
+                            get(universe: number, time: number, obj: number): org.kevoree.modeling.memory.KMemoryElement;
+
+                            put(universe: number, time: number, obj: number, payload: org.kevoree.modeling.memory.KMemoryElement): void;
+
+                            dirties(): org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty[];
+
+                            clear(metaModel: org.kevoree.modeling.meta.KMetaModel): void;
+
+                            clean(metaModel: org.kevoree.modeling.meta.KMetaModel): void;
+
+                            monitor(origin: org.kevoree.modeling.KObject): void;
+
+                            size(): number;
+
+                        }
+
+                        export module impl {
+                            export class HashMemoryCache implements org.kevoree.modeling.memory.struct.cache.KCache {
+
+                                private elementData: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry[];
+                                private elementCount: number;
+                                private elementDataSize: number;
+                                private loadFactor: number;
+                                private initalCapacity: number;
+                                private threshold: number;
+                                public get(universe: number, time: number, obj: number): org.kevoree.modeling.memory.KMemoryElement {
+                                    if (this.elementDataSize == 0) {
+                                        return null;
+                                    }
+                                    var index: number = ((<number>(universe ^ time ^ obj)) & 0x7FFFFFFF) % this.elementDataSize;
+                                    var m: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = this.elementData[index];
+                                    while (m != null){
+                                        if (m.universe == universe && m.time == time && m.obj == obj) {
+                                            return m.value;
+                                        }
+                                        m = m.next;
+                                    }
+                                    return null;
+                                }
+
+                                public put(universe: number, time: number, obj: number, payload: org.kevoree.modeling.memory.KMemoryElement): void {
+                                    var entry: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = null;
+                                    var hash: number = <number>(universe ^ time ^ obj);
+                                    var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    if (this.elementDataSize != 0) {
+                                        var m: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = this.elementData[index];
+                                        while (m != null){
+                                            if (m.universe == universe && m.time == time && m.obj == obj) {
+                                                entry = m;
+                                                break;
+                                            }
+                                            m = m.next;
+                                        }
+                                    }
+                                    if (entry == null) {
+                                        entry = this.complex_insert(index, hash, universe, time, obj);
+                                    }
+                                    entry.value = payload;
+                                }
+
+                                private complex_insert(previousIndex: number, hash: number, universe: number, time: number, obj: number): org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry {
+                                    var index: number = previousIndex;
+                                    if (++this.elementCount > this.threshold) {
+                                        var length: number = (this.elementDataSize == 0 ? 1 : this.elementDataSize << 1);
+                                        var newData: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry[] = new Array();
+                                        for (var i: number = 0; i < this.elementDataSize; i++) {
+                                            var entry: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = this.elementData[i];
+                                            while (entry != null){
+                                                index = (<number>(entry.universe ^ entry.time ^ entry.obj) & 0x7FFFFFFF) % length;
+                                                var next: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = entry.next;
+                                                entry.next = newData[index];
+                                                newData[index] = entry;
+                                                entry = next;
+                                            }
+                                        }
+                                        this.elementData = newData;
+                                        this.elementDataSize = length;
+                                        this.threshold = <number>(this.elementDataSize * this.loadFactor);
+                                        index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    }
+                                    var entry: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = new org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry();
+                                    entry.universe = universe;
+                                    entry.time = time;
+                                    entry.obj = obj;
+                                    entry.next = this.elementData[index];
+                                    this.elementData[index] = entry;
+                                    return entry;
+                                }
+
+                                public dirties(): org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty[] {
+                                    var nbDirties: number = 0;
+                                    for (var i: number = 0; i < this.elementData.length; i++) {
+                                        if (this.elementData[i] != null) {
+                                            var current: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = this.elementData[i];
+                                            if (this.elementData[i].value.isDirty()) {
+                                                nbDirties++;
+                                            }
+                                            while (current.next != null){
+                                                current = current.next;
+                                                if (current.value.isDirty()) {
+                                                    nbDirties++;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    var collectedDirties: org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty[] = new Array();
+                                    var dirtySize: number = nbDirties;
+                                    nbDirties = 0;
+                                    for (var i: number = 0; i < this.elementData.length; i++) {
+                                        if (nbDirties < dirtySize) {
+                                            if (this.elementData[i] != null) {
+                                                var current: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = this.elementData[i];
+                                                if (this.elementData[i].value.isDirty()) {
+                                                    var dirty: org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty = new org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), this.elementData[i].value);
+                                                    collectedDirties[nbDirties] = dirty;
+                                                    nbDirties++;
+                                                }
+                                                while (current.next != null){
+                                                    current = current.next;
+                                                    if (current.value.isDirty()) {
+                                                        var dirty: org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty = new org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), current.value);
+                                                        collectedDirties[nbDirties] = dirty;
+                                                        nbDirties++;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    return collectedDirties;
+                                }
+
+                                public clean(metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                }
+
+                                public monitor(origin: org.kevoree.modeling.KObject): void {
+                                }
+
+                                public size(): number {
+                                    return this.elementCount;
+                                }
+
+                                private remove(universe: number, time: number, obj: number, p_metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                    var hash: number = <number>(universe ^ time ^ obj);
+                                    var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    if (this.elementDataSize != 0) {
+                                        var previous: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = null;
+                                        var m: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = this.elementData[index];
+                                        while (m != null){
+                                            if (m.universe == universe && m.time == time && m.obj == obj) {
+                                                this.elementCount--;
+                                                try {
+                                                    m.value.free(p_metaModel);
+                                                } catch ($ex$) {
+                                                    if ($ex$ instanceof java.lang.Exception) {
+                                                        var e: java.lang.Exception = <java.lang.Exception>$ex$;
+                                                        e.printStackTrace();
+                                                    } else {
+                                                        throw $ex$;
+                                                    }
+                                                }
+                                                if (previous == null) {
+                                                    this.elementData[index] = m.next;
+                                                } else {
+                                                    previous.next = m.next;
+                                                }
+                                            }
+                                            previous = m;
+                                            m = m.next;
+                                        }
+                                    }
+                                }
+
+                                constructor() {
+                                    this.initalCapacity = org.kevoree.modeling.KConfig.CACHE_INIT_SIZE;
+                                    this.loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this.elementCount = 0;
+                                    this.elementData = new Array();
+                                    this.elementDataSize = this.initalCapacity;
+                                    this.threshold = <number>(this.elementDataSize * this.loadFactor);
+                                }
+
+                                public clear(metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                    for (var i: number = 0; i < this.elementData.length; i++) {
+                                        var e: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry = this.elementData[i];
+                                        while (e != null){
+                                            e.value.free(metaModel);
+                                            e = e.next;
+                                        }
+                                    }
+                                    if (this.elementCount > 0) {
+                                        this.elementCount = 0;
+                                        this.elementData = new Array();
+                                        this.elementDataSize = this.initalCapacity;
+                                    }
+                                }
+
+                            }
+
+                            export module HashMemoryCache { 
+                                export class Entry {
+
+                                    public next: org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry;
+                                    public universe: number;
+                                    public time: number;
+                                    public obj: number;
+                                    public value: org.kevoree.modeling.memory.KMemoryElement;
+                                }
+
+
+                            }
+                            export class KCacheDirty {
+
+                                public key: org.kevoree.modeling.KContentKey;
+                                public object: org.kevoree.modeling.memory.KMemoryElement;
+                                constructor(key: org.kevoree.modeling.KContentKey, object: org.kevoree.modeling.memory.KMemoryElement) {
+                                    this.key = key;
+                                    this.object = object;
+                                }
+
+                            }
+
+                        }
+                    }
                     export module map {
                         export interface KIntMap<V> {
 
@@ -5698,6 +5705,18 @@ module org {
                                  }
                             }
 
+                            export class OffHeapLongMap<V> implements org.kevoree.modeling.memory.struct.map.KLongMap<any> {
+
+                                 constructor(initalCapacity: number, loadFactor : number) { }
+                                 public clear():void { for(var p in this){if(this.hasOwnProperty(p)){delete this[p];} } }
+                                 public get(key:number):V { return this[key]; }
+                                 public put(key:number, pval : V):V { var previousVal = this[key];this[key] = pval;return previousVal;}
+                                 public contains(key:number):boolean { return this.hasOwnProperty(<any>key);}
+                                 public remove(key:number):V { var tmp = this[key]; delete this[key]; return tmp; }
+                                 public size():number { return Object.keys(this).length; }
+                                 public each(callback: (p : number, p1 : V) => void): void { for(var p in this){ if(this.hasOwnProperty(p)){ callback(<number>p,this[p]); } } }
+                            }
+
                         }
                     }
                     export module segment {
@@ -5719,7 +5738,7 @@ module org {
 
                             removeRef(index: number, previousRef: number, metaClass: org.kevoree.modeling.meta.KMetaClass): boolean;
 
-                            clearRef(index: number): void;
+                            clearRef(index: number, metaClass: org.kevoree.modeling.meta.KMetaClass): void;
 
                             getInfer(index: number, metaClass: org.kevoree.modeling.meta.KMetaClass): number[];
 
@@ -5937,7 +5956,7 @@ module org {
                                     return false;
                                 }
 
-                                public clearRef(index: number): void {
+                                public clearRef(index: number, metaClass: org.kevoree.modeling.meta.KMetaClass): void {
                                     this.raw[index] = null;
                                 }
 
@@ -6456,6 +6475,429 @@ module org {
 
                             }
 
+                            export class AbstractOffHeapTree implements org.kevoree.modeling.memory.KOffHeapMemoryElement {
+
+                                public static UNSAFE: Unsafe = org.kevoree.modeling.memory.struct.tree.impl.AbstractOffHeapTree.getUnsafe();
+                                private SIZE_NODE: number = this.getNodeSize();
+                                private static BLACK: number = 0;
+                                private static RED: number = 1;
+                                public _start_address: number;
+                                public _threshold: number;
+                                public _loadFactor: number;
+                                public getNodeSize(): number {
+                                    throw "Abstract method";
+                                }
+
+                                private internal_size_base_segment(): number {
+                                    return 8 + 4 + 1 + 4;
+                                }
+
+                                public internal_ptr_root_index(): number {
+                                    return this._start_address;
+                                }
+
+                                public internal_ptr_size(): number {
+                                    return this.internal_ptr_root_index() + 8;
+                                }
+
+                                public internal_ptr_dirty(): number {
+                                    return this.internal_ptr_size() + 4;
+                                }
+
+                                public internal_ptr_counter(): number {
+                                    return this.internal_ptr_dirty() + 1;
+                                }
+
+                                public internal_ptr_back(): number {
+                                    return this.internal_ptr_counter() + 4;
+                                }
+
+                                public internal_ptr_back_idx(idx: number): number {
+                                    return this.internal_ptr_back() + idx * 8 * this.SIZE_NODE;
+                                }
+
+                                public size(): number {
+                                    return AbstractOffHeapTree.UNSAFE.getInt(this.internal_ptr_size());
+                                }
+
+                                public left(p_currentIndex: number): number {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(p_currentIndex));
+                                }
+
+                                public setLeft(p_currentIndex: number, p_paramIndex: number): void {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(p_currentIndex), p_paramIndex);
+                                }
+
+                                public right(p_currentIndex: number): number {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(p_currentIndex) + 1 * 8);
+                                }
+
+                                public setRight(p_currentIndex: number, p_paramIndex: number): void {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(p_currentIndex) + 1 * 8, p_paramIndex);
+                                }
+
+                                private parent(p_currentIndex: number): number {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(p_currentIndex) + 2 * 8);
+                                }
+
+                                public setParent(p_currentIndex: number, p_paramIndex: number): void {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(p_currentIndex) + 2 * 8, p_paramIndex);
+                                }
+
+                                public key(p_currentIndex: number): number {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(p_currentIndex) + 3 * 8);
+                                }
+
+                                public setKey(p_currentIndex: number, p_paramIndex: number): void {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(p_currentIndex) + 3 * 8, p_paramIndex);
+                                }
+
+                                private color(currentIndex: number): number {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(currentIndex) + 4 * 8);
+                                }
+
+                                public setColor(currentIndex: number, paramIndex: number): void {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(currentIndex) + 4 * 8, paramIndex);
+                                }
+
+                                public value(currentIndex: number): number {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_back_idx(currentIndex) + 5 * 8);
+                                }
+
+                                public setValue(currentIndex: number, paramIndex: number): void {
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_back_idx(currentIndex) + 5 * 8, paramIndex);
+                                }
+
+                                public grandParent(currentIndex: number): number {
+                                    if (currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    if (this.parent(currentIndex) != -1) {
+                                        return this.parent(this.parent(currentIndex));
+                                    } else {
+                                        return -1;
+                                    }
+                                }
+
+                                public sibling(currentIndex: number): number {
+                                    if (this.parent(currentIndex) == -1) {
+                                        return -1;
+                                    } else {
+                                        if (currentIndex == this.left(this.parent(currentIndex))) {
+                                            return this.right(this.parent(currentIndex));
+                                        } else {
+                                            return this.left(this.parent(currentIndex));
+                                        }
+                                    }
+                                }
+
+                                public uncle(currentIndex: number): number {
+                                    if (this.parent(currentIndex) != -1) {
+                                        return this.sibling(this.parent(currentIndex));
+                                    } else {
+                                        return -1;
+                                    }
+                                }
+
+                                private previous(p_index: number): number {
+                                    var p: number = p_index;
+                                    if (this.left(p) != -1) {
+                                        p = this.left(p);
+                                        while (this.right(p) != -1){
+                                            p = this.right(p);
+                                        }
+                                        return p;
+                                    } else {
+                                        if (this.parent(p) != -1) {
+                                            if (p == this.right(this.parent(p))) {
+                                                return this.parent(p);
+                                            } else {
+                                                while (this.parent(p) != -1 && p == this.left(this.parent(p))){
+                                                    p = this.parent(p);
+                                                }
+                                                return this.parent(p);
+                                            }
+                                        } else {
+                                            return -1;
+                                        }
+                                    }
+                                }
+
+                                public lookup(p_key: number): number {
+                                    var n: number = AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_root_index());
+                                    if (n == -1) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    while (n != -1){
+                                        if (p_key == this.key(n)) {
+                                            return this.key(n);
+                                        } else {
+                                            if (p_key < this.key(n)) {
+                                                n = this.left(n);
+                                            } else {
+                                                n = this.right(n);
+                                            }
+                                        }
+                                    }
+                                    return n;
+                                }
+
+                                public range(startKey: number, endKey: number, walker: (p : number) => void): void {
+                                    var indexEnd: number = this.internal_previousOrEqual_index(endKey);
+                                    while (indexEnd != -1 && this.key(indexEnd) >= startKey){
+                                        walker(this.key(indexEnd));
+                                        indexEnd = this.previous(indexEnd);
+                                    }
+                                }
+
+                                public internal_previousOrEqual_index(p_key: number): number {
+                                    var p: number = AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_root_index());
+                                    if (p == -1) {
+                                        return p;
+                                    }
+                                    while (p != -1){
+                                        if (p_key == this.key(p)) {
+                                            return p;
+                                        }
+                                        if (p_key > this.key(p)) {
+                                            if (this.right(p) != -1) {
+                                                p = this.right(p);
+                                            } else {
+                                                return p;
+                                            }
+                                        } else {
+                                            if (this.left(p) != -1) {
+                                                p = this.left(p);
+                                            } else {
+                                                var parent: number = this.parent(p);
+                                                var ch: number = p;
+                                                while (parent != -1 && ch == this.left(parent)){
+                                                    ch = parent;
+                                                    parent = this.parent(parent);
+                                                }
+                                                return parent;
+                                            }
+                                        }
+                                    }
+                                    return -1;
+                                }
+
+                                private rotateLeft(n: number): void {
+                                    var r: number = this.right(n);
+                                    this.replaceNode(n, r);
+                                    this.setRight(n, this.left(r));
+                                    if (this.left(r) != -1) {
+                                        this.setParent(this.left(r), n);
+                                    }
+                                    this.setLeft(r, n);
+                                    this.setParent(n, r);
+                                }
+
+                                private rotateRight(n: number): void {
+                                    var l: number = this.left(n);
+                                    this.replaceNode(n, l);
+                                    this.setLeft(n, this.right(l));
+                                    if (this.right(l) != -1) {
+                                        this.setParent(this.right(l), n);
+                                    }
+                                    this.setRight(l, n);
+                                    this.setParent(n, l);
+                                }
+
+                                private replaceNode(oldn: number, newn: number): void {
+                                    if (this.parent(oldn) == -1) {
+                                        AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_root_index(), newn);
+                                    } else {
+                                        if (oldn == this.left(this.parent(oldn))) {
+                                            this.setLeft(this.parent(oldn), newn);
+                                        } else {
+                                            this.setRight(this.parent(oldn), newn);
+                                        }
+                                    }
+                                    if (newn != -1) {
+                                        this.setParent(newn, this.parent(oldn));
+                                    }
+                                }
+
+                                public insertCase1(n: number): void {
+                                    if (this.parent(n) == -1) {
+                                        this.setColor(n, 1);
+                                    } else {
+                                        this.insertCase2(n);
+                                    }
+                                }
+
+                                private insertCase2(n: number): void {
+                                    if (this.nodeColor(this.parent(n)) == true) {
+                                        return;
+                                    } else {
+                                        this.insertCase3(n);
+                                    }
+                                }
+
+                                private insertCase3(n: number): void {
+                                    if (this.nodeColor(this.uncle(n)) == false) {
+                                        this.setColor(this.parent(n), 1);
+                                        this.setColor(this.uncle(n), 1);
+                                        this.setColor(this.grandParent(n), 0);
+                                        this.insertCase1(this.grandParent(n));
+                                    } else {
+                                        this.insertCase4(n);
+                                    }
+                                }
+
+                                private insertCase4(n_n: number): void {
+                                    var n: number = n_n;
+                                    if (n == this.right(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
+                                        this.rotateLeft(this.parent(n));
+                                        n = this.left(n);
+                                    } else {
+                                        if (n == this.left(this.parent(n)) && this.parent(n) == this.right(this.grandParent(n))) {
+                                            this.rotateRight(this.parent(n));
+                                            n = this.right(n);
+                                        }
+                                    }
+                                    this.insertCase5(n);
+                                }
+
+                                private insertCase5(n: number): void {
+                                    this.setColor(this.parent(n), 1);
+                                    this.setColor(this.grandParent(n), 0);
+                                    if (n == this.left(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
+                                        this.rotateRight(this.grandParent(n));
+                                    } else {
+                                        this.rotateLeft(this.grandParent(n));
+                                    }
+                                }
+
+                                public delete(p_key: number): void {
+                                }
+
+                                private nodeColor(n: number): boolean {
+                                    if (n == -1) {
+                                        return true;
+                                    } else {
+                                        return this.color(n) == 1;
+                                    }
+                                }
+
+                                private node_serialize(builder: java.lang.StringBuilder, current: number): void {
+                                    builder.append("|");
+                                    if (this.nodeColor(current) == true) {
+                                        builder.append(AbstractOffHeapTree.BLACK);
+                                    } else {
+                                        builder.append(AbstractOffHeapTree.RED);
+                                    }
+                                    builder.append(this.key(current));
+                                    if (this.left(current) == -1 && this.right(current) == -1) {
+                                        builder.append("%");
+                                    } else {
+                                        if (this.left(current) != -1) {
+                                            this.node_serialize(builder, this.left(current));
+                                        } else {
+                                            builder.append("#");
+                                        }
+                                        if (this.right(current) != -1) {
+                                            this.node_serialize(builder, this.right(current));
+                                        } else {
+                                            builder.append("#");
+                                        }
+                                    }
+                                }
+
+                                public serialize(metaModel: org.kevoree.modeling.meta.KMetaModel): string {
+                                    var builder: java.lang.StringBuilder = new java.lang.StringBuilder();
+                                    builder.append(this.size());
+                                    var _root_index: number = AbstractOffHeapTree.UNSAFE.getLong(this.internal_ptr_root_index());
+                                    if (_root_index != -1) {
+                                        this.node_serialize(builder, _root_index);
+                                    }
+                                    return builder.toString();
+                                }
+
+                                public init(payload: string, metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                    this._start_address = AbstractOffHeapTree.UNSAFE.allocateMemory(this.internal_size_base_segment());
+                                    AbstractOffHeapTree.UNSAFE.setMemory(this._start_address, this.internal_size_base_segment(), <number>0);
+                                    AbstractOffHeapTree.UNSAFE.putLong(this.internal_ptr_root_index(), -1);
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = <number>(this.size() * this._loadFactor);
+                                }
+
+                                public isDirty(): boolean {
+                                    return AbstractOffHeapTree.UNSAFE.getByte(this.internal_ptr_dirty()) != 0;
+                                }
+
+                                public setClean(p_metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                    AbstractOffHeapTree.UNSAFE.putByte(this.internal_ptr_dirty(), <number>0);
+                                }
+
+                                public setDirty(): void {
+                                    AbstractOffHeapTree.UNSAFE.putByte(this.internal_ptr_dirty(), <number>1);
+                                }
+
+                                public counter(): number {
+                                    return AbstractOffHeapTree.UNSAFE.getInt(this.internal_ptr_counter());
+                                }
+
+                                public inc(): void {
+                                    var c: number = AbstractOffHeapTree.UNSAFE.getInt(this.internal_ptr_counter());
+                                    AbstractOffHeapTree.UNSAFE.putInt(this.internal_ptr_counter(), c + 1);
+                                }
+
+                                public dec(): void {
+                                    var c: number = AbstractOffHeapTree.UNSAFE.getInt(this.internal_ptr_counter());
+                                    AbstractOffHeapTree.UNSAFE.putInt(this.internal_ptr_counter(), c - 1);
+                                }
+
+                                public free(p_metaModel: org.kevoree.modeling.meta.KMetaModel): void {
+                                    AbstractOffHeapTree.UNSAFE.freeMemory(this._start_address);
+                                }
+
+                                public static getUnsafe(): Unsafe {
+                                    try {
+                                        var theUnsafe: Field = Unsafe.getDeclaredField("theUnsafe");
+                                        theUnsafe.setAccessible(true);
+                                        return <Unsafe>theUnsafe.get(null);
+                                    } catch ($ex$) {
+                                        if ($ex$ instanceof java.lang.Exception) {
+                                            var e: java.lang.Exception = <java.lang.Exception>$ex$;
+                                            throw new java.lang.RuntimeException("ERROR: unsafe operations are not available");
+                                        } else {
+                                            throw $ex$;
+                                        }
+                                    }
+                                }
+
+                                public getMemoryAddress(): number {
+                                    return this._start_address;
+                                }
+
+                                public setMemoryAddress(address: number): void {
+                                    this._start_address = address;
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = <number>(this.size() * this._loadFactor);
+                                }
+
+                            }
+
                             export class ArrayLongLongTree extends org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree implements org.kevoree.modeling.memory.struct.tree.KLongLongTree {
 
                                 private static SIZE_NODE: number = 6;
@@ -6622,6 +7064,105 @@ module org {
                                                 } else {
                                                     if (this.right(n) == -1) {
                                                         this.setKey(insertedNode, key);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setRight(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    } else {
+                                                        n = this.right(n);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        this.setParent(insertedNode, n);
+                                    }
+                                    this.insertCase1(insertedNode);
+                                }
+
+                            }
+
+                            export class OffHeapLongLongTree extends org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree implements org.kevoree.modeling.memory.struct.tree.KLongLongTree {
+
+                                private static SIZE_NODE: number = 6;
+                                constructor() {
+                                    this._back = new Array();
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._threshold = <number>(this._size * this._loadFactor);
+                                }
+
+                                public previousOrEqualValue(p_key: number): number {
+                                    var result: number = this.internal_previousOrEqual_index(p_key);
+                                    if (result != -1) {
+                                        return this.value(result);
+                                    } else {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                }
+
+                                public lookupValue(p_key: number): number {
+                                    var n: number = this._root_index;
+                                    if (n == -1) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    while (n != -1){
+                                        if (p_key == this.key(n)) {
+                                            return this.value(n);
+                                        } else {
+                                            if (p_key < this.key(n)) {
+                                                n = this.left(n);
+                                            } else {
+                                                n = this.right(n);
+                                            }
+                                        }
+                                    }
+                                    return n;
+                                }
+
+                                public insert(p_key: number, p_value: number): void {
+                                    if ((this._size + 1) > this._threshold) {
+                                        var length: number = (this._size == 0 ? 1 : this._size << 1);
+                                        var new_back: number[] = new Array();
+                                        System.arraycopy(this._back, 0, new_back, 0, this._size * OffHeapLongLongTree.SIZE_NODE);
+                                        this._threshold = <number>(this._size * this._loadFactor);
+                                        this._back = new_back;
+                                    }
+                                    var insertedNode: number = (this._size) * OffHeapLongLongTree.SIZE_NODE;
+                                    if (this._size == 0) {
+                                        this._size = 1;
+                                        this.setKey(insertedNode, p_key);
+                                        this.setValue(insertedNode, p_value);
+                                        this.setColor(insertedNode, 0);
+                                        this.setLeft(insertedNode, -1);
+                                        this.setRight(insertedNode, -1);
+                                        this.setParent(insertedNode, -1);
+                                        this._root_index = insertedNode;
+                                    } else {
+                                        var n: number = this._root_index;
+                                        while (true){
+                                            if (p_key == this.key(n)) {
+                                                return;
+                                            } else {
+                                                if (p_key < this.key(n)) {
+                                                    if (this.left(n) == -1) {
+                                                        this.setKey(insertedNode, p_key);
+                                                        this.setValue(insertedNode, p_value);
+                                                        this.setColor(insertedNode, 0);
+                                                        this.setLeft(insertedNode, -1);
+                                                        this.setRight(insertedNode, -1);
+                                                        this.setParent(insertedNode, -1);
+                                                        this.setLeft(n, insertedNode);
+                                                        this._size++;
+                                                        break;
+                                                    } else {
+                                                        n = this.left(n);
+                                                    }
+                                                } else {
+                                                    if (this.right(n) == -1) {
+                                                        this.setKey(insertedNode, p_key);
+                                                        this.setValue(insertedNode, p_value);
                                                         this.setColor(insertedNode, 0);
                                                         this.setLeft(insertedNode, -1);
                                                         this.setRight(insertedNode, -1);
