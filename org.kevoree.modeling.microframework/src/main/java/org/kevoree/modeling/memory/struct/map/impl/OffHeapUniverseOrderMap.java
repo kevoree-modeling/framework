@@ -1,13 +1,10 @@
 package org.kevoree.modeling.memory.struct.map.impl;
 
-import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
-import org.kevoree.modeling.meta.KMetaModel;
-
 /**
  * @ignore ts
  */
-public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniverseOrderMap {
-
+public class OffHeapUniverseOrderMap /* extends OffHeapLongLongMap implements KUniverseOrderMap */ {
+/*
     private int _counter = 0;
 
     private String _className;
@@ -156,5 +153,5 @@ public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniv
     public void free(KMetaModel metaModel) {
         this.elementData = null;
     }
-
+*/
 }
