@@ -4,108 +4,149 @@ package org.kevoree.modeling.memory.struct.map.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
 
 /**
  * @ignore ts
- *
+ * <p/>
  * - memory structure:
- * - root      | elem count (4) | elem data size (4) | dirty (1) | elem data (size * 8) |
- * - entry     | key (8)        | value (8)          |
+ * - root      | elem count (4) | elem data size (4) | dirty (1) | ... | key (8) | value (8) | next (8)....
  */
 public class OffHeapLongLongMap implements KLongLongMap {
+    protected static final Unsafe UNSAFE = getUnsafe();
 
-    protected int elementCount;
-    protected int elementDataSize;
-    protected boolean _isDirty = false;
-
-    protected Entry[] elementData;
+    private long _start_address;
+    private int _allocated_segments = 0;
 
     protected int _threshold;
-    private final int _initalCapacity;
     private final float _loadFactor;
+    private final int _initalCapacity;
+
+    private static final int POS_KEY = 0;
+    private static final int POS_VALUE = 1;
+    private static final int POS_NEXT = 1;
 
 
-    /**
-     * @ignore ts
-     */
-    static final class Entry {
-        Entry next;
-        long key;
-        long value;
-
-        Entry(long theKey, long theValue) {
-            this.key = theKey;
-            this.value = theValue;
-        }
+    private long internal_ptr_elem_count() {
+        return _start_address;
     }
+
+    private long internal_ptr_elem_data_size() {
+        return internal_ptr_elem_count() + 4;
+    }
+
+    private long internal_ptr_dirty() {
+        return internal_ptr_elem_data_size() + 4;
+    }
+
+    private long internal_ptr_elem_data() {
+        return internal_ptr_dirty() + 1;
+    }
+
+    private long internal_ptr_elem_data_idx(int index) {
+        return internal_ptr_elem_data_idx(internal_ptr_dirty(), index);
+    }
+
+    private long internal_ptr_elem_data_idx(long startAddress, int index) {
+        return startAddress + index * 8 * 3;
+    }
+
+    private int internal_size_base_segment() {
+        return 4 + 4 + 1;
+    }
+
+    private int internal_size_data_segment(int capacity) {
+        return capacity * 8 * 3;
+    }
+
 
     public OffHeapLongLongMap(int p_initalCapacity, float p_loadFactor) {
         this._initalCapacity = p_initalCapacity;
         this._loadFactor = p_loadFactor;
-        elementCount = 0;
-        elementData = new Entry[_initalCapacity];
-        elementDataSize = _initalCapacity;
+
+        int bytes = internal_size_base_segment() + internal_size_data_segment(p_initalCapacity);
+        _start_address = UNSAFE.allocateMemory(bytes);
+        _allocated_segments++;
+        UNSAFE.setMemory(_start_address, bytes, (byte) KConfig.NULL_LONG);
+
+        UNSAFE.putInt(internal_ptr_elem_count(), 0);
+        UNSAFE.putInt(internal_ptr_elem_data_size(), _initalCapacity);
+
         computeMaxSize();
     }
 
     public void clear() {
-        if (elementCount > 0) {
-            elementCount = 0;
-            this.elementData = new Entry[_initalCapacity];
-            this.elementDataSize = _initalCapacity;
+        if (UNSAFE.getInt(internal_ptr_elem_count()) > 0) {
+            UNSAFE.putInt(internal_ptr_elem_count(), 0);
+
+            long bytes = internal_size_base_segment() + _initalCapacity * 8;
+            _start_address = UNSAFE.reallocateMemory(_start_address, bytes);
+
+            UNSAFE.putInt(internal_ptr_elem_data_size(), _initalCapacity);
         }
     }
 
     private void computeMaxSize() {
-        _threshold = (int) (elementDataSize * _loadFactor);
+        _threshold = (int) (UNSAFE.getInt(internal_ptr_elem_data_size()) * _loadFactor);
     }
 
     @Override
     public boolean contains(long key) {
-        if (elementDataSize == 0) {
+        if (UNSAFE.getInt(internal_ptr_elem_data_size()) == 0) {
             return false;
         }
         int hash = (int) (key);
-        int index = (hash & 0x7FFFFFFF) % elementDataSize;
-        Entry m = findNonNullKeyEntry(key, index);
-        return m != null;
+        int index = (hash & 0x7FFFFFFF) % UNSAFE.getInt(internal_ptr_elem_data_size());
+        long m = findNonNullKeyEntry(key, index);
+
+        return m != KConfig.NULL_LONG;
     }
 
     @Override
     public long get(long key) {
-        if (elementDataSize == 0) {
+        if (UNSAFE.getInt(internal_ptr_elem_data_size()) == 0) {
             return KConfig.NULL_LONG;
         }
-        Entry m;
+        long m;
         int hash = (int) (key);
-        int index = (hash & 0x7FFFFFFF) % elementDataSize;
+        int index = (hash & 0x7FFFFFFF) % UNSAFE.getInt(internal_ptr_elem_data_size());
         m = findNonNullKeyEntry(key, index);
-        if (m != null) {
-            return m.value;
+        if (m != KConfig.NULL_LONG) {
+            return UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_VALUE);
         }
         return KConfig.NULL_LONG;
     }
 
-    final Entry findNonNullKeyEntry(long key, int index) {
-        Entry m = elementData[index];
-        while (m != null) {
-            if (key == m.key) {
+    final long findNonNullKeyEntry(long key, int index) {
+        long m = UNSAFE.getLong(internal_ptr_elem_data_idx(index));
+        while (m != KConfig.NULL_LONG) {
+            if (key == UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_KEY)) {
                 return m;
             }
-            m = m.next;
+            m = UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_NEXT);
         }
-        return null;
+        return KConfig.NULL_LONG;
     }
 
     @Override
     public void each(KLongLongMapCallBack callback) {
-        for (int i = 0; i < elementDataSize; i++) {
-            if (elementData[i] != null) {
-                Entry current = elementData[i];
-                callback.on(elementData[i].key, elementData[i].value);
-                while (current.next != null) {
-                    current = current.next;
-                    callback.on(current.key, current.value);
+        for (int i = 0; i < UNSAFE.getInt(internal_ptr_elem_data_size()); i++) {
+            if (UNSAFE.getLong(internal_ptr_elem_data_idx(i)) != KConfig.NULL_LONG) {
+                long current_ptr = internal_ptr_elem_data_idx(i);
+
+                long current_key = UNSAFE.getLong(current_ptr + POS_KEY);
+                long current_value = UNSAFE.getLong(current_ptr + POS_VALUE);
+                long current_next = UNSAFE.getLong(current_ptr + POS_NEXT);
+
+                callback.on(current_key, current_value);
+                while (current_next == KConfig.NULL_LONG) {
+                    current_ptr = current_next;
+                    current_key = UNSAFE.getLong(current_ptr + POS_KEY);
+                    current_value = UNSAFE.getLong(current_ptr + POS_VALUE);
+
+                    callback.on(current_key, current_value);
                 }
             }
         }
@@ -113,82 +154,115 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
     @Override
     public synchronized void put(long key, long value) {
-        _isDirty = true;
-        Entry entry = null;
+        UNSAFE.putByte(internal_ptr_dirty(), (byte) 1);
+
+        long entry = KConfig.NULL_LONG;
         int index = -1;
         int hash = (int) (key);
-        if (elementDataSize != 0) {
-            index = (hash & 0x7FFFFFFF) % elementDataSize;
+        if (UNSAFE.getInt(internal_ptr_elem_data_size()) != 0) {
+            index = (hash & 0x7FFFFFFF) % UNSAFE.getInt(internal_ptr_elem_data_size());
             entry = findNonNullKeyEntry(key, index);
         }
-        if (entry == null) {
-            if (++elementCount > _threshold) {
+        if (entry == KConfig.NULL_LONG) {
+            UNSAFE.putInt(internal_ptr_elem_count(), UNSAFE.getInt(internal_ptr_elem_count()) + 1);
+            if (UNSAFE.getInt(internal_ptr_elem_count()) > _threshold) {
                 rehash();
-                index = (hash & 0x7FFFFFFF) % elementDataSize;
+                index = (hash & 0x7FFFFFFF) % UNSAFE.getInt(internal_ptr_elem_data_size());
             }
             entry = createHashedEntry(key, index);
         }
-        entry.value = value;
+
+        UNSAFE.putLong(entry + POS_VALUE, value);
     }
 
-    Entry createHashedEntry(long key, int index) {
-        Entry entry = new Entry(key, KConfig.NULL_LONG);
-        entry.next = elementData[index];
-        elementData[index] = entry;
-        return entry;
+    long createHashedEntry(long key, int index) {
+        long entry_pos = internal_ptr_elem_data_idx(index);
+        UNSAFE.putLong(entry_pos + POS_KEY, key);
+        UNSAFE.putLong(entry_pos + POS_VALUE, KConfig.NULL_LONG);
+        UNSAFE.putLong(entry_pos + POS_NEXT, UNSAFE.getLong(entry_pos));
+
+        return entry_pos;
     }
 
     void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
-        Entry[] newData = new Entry[length];
-        for (int i = 0; i < elementDataSize; i++) {
-            Entry entry = elementData[i];
-            while (entry != null) {
-                int index = ((int) entry.key & 0x7FFFFFFF) % length;
-                Entry next = entry.next;
-                entry.next = newData[index];
-                newData[index] = entry;
-                entry = next;
+
+        long bytes = internal_size_data_segment(length);
+        long _new_data_start = UNSAFE.allocateMemory(bytes);
+        _allocated_segments++;
+        UNSAFE.setMemory(_new_data_start, bytes, (byte) KConfig.NULL_LONG);
+
+        for (int i = 0; i < UNSAFE.getInt(internal_ptr_elem_data_size()); i++) {
+            long entry_pos = internal_ptr_elem_data_idx(i);
+            while (entry_pos != KConfig.NULL_LONG) {
+                long entry_key = UNSAFE.getLong(entry_pos + POS_KEY);
+                int index = ((int) entry_key & 0x7FFFFFFF) % length;
+
+                long next = UNSAFE.getLong(entry_pos + POS_NEXT);
+                UNSAFE.putLong(entry_pos + POS_NEXT, internal_ptr_elem_data_idx(_new_data_start, index));
+                UNSAFE.putLong(internal_ptr_elem_data_idx(_new_data_start, index), entry_pos);
+
+                entry_pos = next;
             }
         }
-        elementData = newData;
-        elementDataSize = length;
+
+        UNSAFE.copyMemory(_new_data_start, internal_ptr_elem_data(), bytes);
+        UNSAFE.freeMemory(_new_data_start);
+        _allocated_segments--;
+
+        UNSAFE.putInt(internal_ptr_elem_data_size(), length);
         computeMaxSize();
     }
 
     void rehash() {
-        rehashCapacity(elementDataSize);
+        rehashCapacity(UNSAFE.getInt(internal_ptr_elem_data_size()));
     }
 
     public void remove(long key) {
+        int elementDataSize = UNSAFE.getInt(internal_ptr_elem_data_size());
         if (elementDataSize == 0) {
             return;
         }
         int index = 0;
-        Entry entry;
-        Entry last = null;
+        long entry_pos;
+        long last_pos = KConfig.NULL_LONG;
         int hash = (int) (key);
         index = (hash & 0x7FFFFFFF) % elementDataSize;
-        entry = elementData[index];
-        while (entry != null && !(/*((int)segment.key) == hash &&*/ key == entry.key)) {
-            last = entry;
-            entry = entry.next;
+
+        entry_pos = internal_ptr_elem_data_idx(index);
+        long entry_key = UNSAFE.getLong(entry_pos + POS_KEY);
+        while (entry_pos != KConfig.NULL_LONG && !(/*((int)segment.key) == hash &&*/ key == entry_key)) {
+            last_pos = entry_pos;
+            entry_pos = UNSAFE.getLong(entry_pos + POS_NEXT);
         }
-        if (entry == null) {
+        if (entry_pos == KConfig.NULL_LONG) {
             return;
         }
-        if (last == null) {
-            elementData[index] = entry.next;
+        if (last_pos == KConfig.NULL_LONG) {
+            UNSAFE.putLong(internal_ptr_elem_data_idx(index), UNSAFE.getLong(entry_pos + POS_NEXT));
         } else {
-            last.next = entry.next;
+            UNSAFE.putLong(last_pos + POS_NEXT, UNSAFE.getLong(entry_pos + POS_NEXT));
         }
-        elementCount--;
+        UNSAFE.putInt(internal_ptr_elem_count(), UNSAFE.getInt(internal_ptr_elem_count()) - 1);
     }
 
     public int size() {
-        return elementCount;
+        return UNSAFE.getInt(internal_ptr_elem_count());
     }
 
+
+    @SuppressWarnings("restriction")
+    protected static Unsafe getUnsafe() {
+        try {
+
+            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            return (Unsafe) theUnsafe.get(null);
+
+        } catch (Exception e) {
+            throw new RuntimeException("ERROR: unsafe operations are not available");
+        }
+    }
 }
 
 

@@ -6,7 +6,7 @@ import org.kevoree.modeling.memory.KMemoryFactory;
 import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.struct.cache.impl.OffHeapMemoryCache;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
-import org.kevoree.modeling.memory.struct.map.impl.OffHeapUniverseOrderMap;
+import org.kevoree.modeling.memory.struct.map.impl.ArrayUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.memory.struct.segment.impl.OffHeapMemorySegment;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
@@ -37,7 +37,7 @@ public class OffHeapMemoryFactory implements KMemoryFactory {
     @Override
     public KUniverseOrderMap newUniverseMap(int initSize, String p_className) {
         //return new OffHeapUniverseOrderMap(initSize, KConfig.CACHE_LOAD_FACTOR, p_className);
-        return null;
+        return new ArrayUniverseOrderMap(initSize, KConfig.CACHE_LOAD_FACTOR, p_className);
     }
 
     @Override
