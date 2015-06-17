@@ -1,62 +1,63 @@
 
 package org.kevoree.modeling.memory.struct.map.impl;
 
-import org.kevoree.modeling.memory.struct.map.KLongMap;
-import org.kevoree.modeling.memory.struct.map.KLongMapCallBack;
+import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.struct.map.KLongLongMap;
+import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 
 /**
- * OffHeap implementation of KLongMap
- * - memory structure:  |elem count
+ * @ignore ts
+ *
+ * - memory structure:
+ * - root      | elem count (4) | elem data size (4) | dirty (1) | elem data (size * 8) |
+ * - entry     | key (8)        | value (8)          |
  */
-public class OffHeapLongMap<V> implements KLongMap<V> {
+public class OffHeapLongLongMap implements KLongLongMap {
 
     protected int elementCount;
+    protected int elementDataSize;
+    protected boolean _isDirty = false;
 
-    protected Entry<V>[] elementData;
+    protected Entry[] elementData;
 
-    private int elementDataSize;
+    protected int _threshold;
+    private final int _initalCapacity;
+    private final float _loadFactor;
 
-    protected int threshold;
 
-    private final int initalCapacity;
-
-    private final float loadFactor;
-
-    static final class Entry<V> {
-        Entry<V> next;
+    /**
+     * @ignore ts
+     */
+    static final class Entry {
+        Entry next;
         long key;
-        V value;
+        long value;
 
-        Entry(long theKey, V theValue) {
+        Entry(long theKey, long theValue) {
             this.key = theKey;
             this.value = theValue;
         }
     }
 
-    @SuppressWarnings("unchecked")
-    Entry<V>[] newElementArray(int s) {
-        return new Entry[s];
-    }
-
-    public OffHeapLongMap(int p_initalCapacity, float p_loadFactor) {
-        this.initalCapacity = p_initalCapacity;
-        this.loadFactor = p_loadFactor;
+    public OffHeapLongLongMap(int p_initalCapacity, float p_loadFactor) {
+        this._initalCapacity = p_initalCapacity;
+        this._loadFactor = p_loadFactor;
         elementCount = 0;
-        elementData = newElementArray(initalCapacity);
-        elementDataSize = initalCapacity;
+        elementData = new Entry[_initalCapacity];
+        elementDataSize = _initalCapacity;
         computeMaxSize();
     }
 
     public void clear() {
         if (elementCount > 0) {
             elementCount = 0;
-            this.elementData = newElementArray(initalCapacity);
-            this.elementDataSize = initalCapacity;
+            this.elementData = new Entry[_initalCapacity];
+            this.elementDataSize = _initalCapacity;
         }
     }
 
     private void computeMaxSize() {
-        threshold = (int) (elementDataSize * loadFactor);
+        _threshold = (int) (elementDataSize * _loadFactor);
     }
 
     @Override
@@ -66,27 +67,27 @@ public class OffHeapLongMap<V> implements KLongMap<V> {
         }
         int hash = (int) (key);
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
-        Entry<V> m = findNonNullKeyEntry(key, index);
+        Entry m = findNonNullKeyEntry(key, index);
         return m != null;
     }
 
     @Override
-    public V get(long key) {
+    public long get(long key) {
         if (elementDataSize == 0) {
-            return null;
+            return KConfig.NULL_LONG;
         }
-        Entry<V> m;
+        Entry m;
         int hash = (int) (key);
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
         m = findNonNullKeyEntry(key, index);
         if (m != null) {
             return m.value;
         }
-        return null;
+        return KConfig.NULL_LONG;
     }
 
-    final Entry<V> findNonNullKeyEntry(long key, int index) {
-        Entry<V> m = elementData[index];
+    final Entry findNonNullKeyEntry(long key, int index) {
+        Entry m = elementData[index];
         while (m != null) {
             if (key == m.key) {
                 return m;
@@ -97,10 +98,10 @@ public class OffHeapLongMap<V> implements KLongMap<V> {
     }
 
     @Override
-    public void each(KLongMapCallBack<V> callback) {
+    public void each(KLongLongMapCallBack callback) {
         for (int i = 0; i < elementDataSize; i++) {
             if (elementData[i] != null) {
-                Entry<V> current = elementData[i];
+                Entry current = elementData[i];
                 callback.on(elementData[i].key, elementData[i].value);
                 while (current.next != null) {
                     current = current.next;
@@ -111,16 +112,17 @@ public class OffHeapLongMap<V> implements KLongMap<V> {
     }
 
     @Override
-    public void put(long key, V value) {
-        Entry<V> entry = null;
-        int hash = (int) (key);
+    public synchronized void put(long key, long value) {
+        _isDirty = true;
+        Entry entry = null;
         int index = -1;
+        int hash = (int) (key);
         if (elementDataSize != 0) {
             index = (hash & 0x7FFFFFFF) % elementDataSize;
             entry = findNonNullKeyEntry(key, index);
         }
         if (entry == null) {
-            if (++elementCount > threshold) {
+            if (++elementCount > _threshold) {
                 rehash();
                 index = (hash & 0x7FFFFFFF) % elementDataSize;
             }
@@ -129,8 +131,8 @@ public class OffHeapLongMap<V> implements KLongMap<V> {
         entry.value = value;
     }
 
-    Entry<V> createHashedEntry(long key, int index) {
-        Entry<V> entry = new Entry<V>(key, null);
+    Entry createHashedEntry(long key, int index) {
+        Entry entry = new Entry(key, KConfig.NULL_LONG);
         entry.next = elementData[index];
         elementData[index] = entry;
         return entry;
@@ -138,12 +140,12 @@ public class OffHeapLongMap<V> implements KLongMap<V> {
 
     void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
-        Entry<V>[] newData = newElementArray(length);
+        Entry[] newData = new Entry[length];
         for (int i = 0; i < elementDataSize; i++) {
-            Entry<V> entry = elementData[i];
+            Entry entry = elementData[i];
             while (entry != null) {
                 int index = ((int) entry.key & 0x7FFFFFFF) % length;
-                Entry<V> next = entry.next;
+                Entry next = entry.next;
                 entry.next = newData[index];
                 newData[index] = entry;
                 entry = next;
@@ -158,30 +160,22 @@ public class OffHeapLongMap<V> implements KLongMap<V> {
         rehashCapacity(elementDataSize);
     }
 
-    public V remove(long key) {
-        Entry<V> entry = removeEntry(key);
-        if (entry == null) {
-            return null;
-        } else {
-            return entry.value;
-        }
-    }
-
-    Entry<V> removeEntry(long key) {
+    public void remove(long key) {
         if (elementDataSize == 0) {
-            return null;
+            return;
         }
-        Entry<V> entry;
-        Entry<V> last = null;
-        int hash = (int) key;
-        int index = (hash & 0x7FFFFFFF) % elementDataSize;
+        int index = 0;
+        Entry entry;
+        Entry last = null;
+        int hash = (int) (key);
+        index = (hash & 0x7FFFFFFF) % elementDataSize;
         entry = elementData[index];
         while (entry != null && !(/*((int)segment.key) == hash &&*/ key == entry.key)) {
             last = entry;
             entry = entry.next;
         }
         if (entry == null) {
-            return null;
+            return;
         }
         if (last == null) {
             elementData[index] = entry.next;
@@ -189,7 +183,6 @@ public class OffHeapLongMap<V> implements KLongMap<V> {
             last.next = entry.next;
         }
         elementCount--;
-        return entry;
     }
 
     public int size() {
