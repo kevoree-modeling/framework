@@ -449,29 +449,25 @@ public abstract class AbstractKObject implements KObject {
     }
 
     public String toJSON() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{\"universe\":");
+        builder.append(_universe);
+        builder.append(",\"time\":");
+        builder.append(_time);
+        builder.append(",\"uuid\":");
+        builder.append(_uuid);
         KMemorySegment raw = _manager.segment(_universe, _time, _uuid, true, _metaClass, null);
         if (raw != null) {
-            return raw.serialize(_manager.model().metaModel());
-        } else {
-            return null;
+            builder.append(",\"data\":");
+            builder.append(raw.serialize(_manager.model().metaModel()));
         }
+        builder.append("}");
+        return builder.toString();
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("universe=");
-        builder.append(_universe);
-        builder.append(",time=");
-        builder.append(_time);
-        builder.append(",uuid=");
-        builder.append(_uuid);
-        KMemorySegment raw = _manager.segment(_universe, _time, _uuid, true, _metaClass, null);
-        if (raw != null) {
-            builder.append(",data=");
-            builder.append(raw.toString());
-        }
-        return builder.toString();
+        return toJSON();
     }
 
     @Override

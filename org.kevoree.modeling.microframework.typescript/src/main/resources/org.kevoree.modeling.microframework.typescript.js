@@ -663,14 +663,26 @@ var org;
                     AbstractKObject.prototype.toJSON = function () {
                         var raw = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
                         if (raw != null) {
-                            return org.kevoree.modeling.format.json.JsonRaw.encode(raw, this._uuid, this._metaClass, false);
+                            return raw.serialize(this._manager.model().metaModel());
                         }
                         else {
                             return null;
                         }
                     };
                     AbstractKObject.prototype.toString = function () {
-                        return this.toJSON();
+                        var builder = new java.lang.StringBuilder();
+                        builder.append("universe=");
+                        builder.append(this._universe);
+                        builder.append(",time=");
+                        builder.append(this._time);
+                        builder.append(",uuid=");
+                        builder.append(this._uuid);
+                        var raw = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
+                        if (raw != null) {
+                            builder.append(",data=");
+                            builder.append(raw.toString());
+                        }
+                        return builder.toString();
                     };
                     AbstractKObject.prototype.equals = function (obj) {
                         if (!(obj instanceof org.kevoree.modeling.abs.AbstractKObject)) {
@@ -5152,44 +5164,165 @@ var org;
                             })(org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap);
                             impl.ArrayUniverseOrderMap = ArrayUniverseOrderMap;
                             var OffHeapLongMap = (function () {
-                                function OffHeapLongMap(initalCapacity, loadFactor) {
+                                function OffHeapLongMap(p_initalCapacity, p_loadFactor) {
+                                    this.initalCapacity = p_initalCapacity;
+                                    this.loadFactor = p_loadFactor;
+                                    this.elementCount = 0;
+                                    this.elementData = this.newElementArray(this.initalCapacity);
+                                    this.elementDataSize = this.initalCapacity;
+                                    this.computeMaxSize();
                                 }
+                                OffHeapLongMap.prototype.newElementArray = function (s) {
+                                    return new Array();
+                                };
                                 OffHeapLongMap.prototype.clear = function () {
-                                    for (var p in this) {
-                                        if (this.hasOwnProperty(p)) {
-                                            delete this[p];
-                                        }
+                                    if (this.elementCount > 0) {
+                                        this.elementCount = 0;
+                                        this.elementData = this.newElementArray(this.initalCapacity);
+                                        this.elementDataSize = this.initalCapacity;
                                     }
                                 };
-                                OffHeapLongMap.prototype.get = function (key) {
-                                    return this[key];
-                                };
-                                OffHeapLongMap.prototype.put = function (key, pval) {
-                                    var previousVal = this[key];
-                                    this[key] = pval;
-                                    return previousVal;
+                                OffHeapLongMap.prototype.computeMaxSize = function () {
+                                    this.threshold = (this.elementDataSize * this.loadFactor);
                                 };
                                 OffHeapLongMap.prototype.contains = function (key) {
-                                    return this.hasOwnProperty(key);
+                                    if (this.elementDataSize == 0) {
+                                        return false;
+                                    }
+                                    var hash = (key);
+                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    var m = this.findNonNullKeyEntry(key, index);
+                                    return m != null;
                                 };
-                                OffHeapLongMap.prototype.remove = function (key) {
-                                    var tmp = this[key];
-                                    delete this[key];
-                                    return tmp;
+                                OffHeapLongMap.prototype.get = function (key) {
+                                    if (this.elementDataSize == 0) {
+                                        return null;
+                                    }
+                                    var m;
+                                    var hash = (key);
+                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    m = this.findNonNullKeyEntry(key, index);
+                                    if (m != null) {
+                                        return m.value;
+                                    }
+                                    return null;
                                 };
-                                OffHeapLongMap.prototype.size = function () {
-                                    return Object.keys(this).length;
+                                OffHeapLongMap.prototype.findNonNullKeyEntry = function (key, index) {
+                                    var m = this.elementData[index];
+                                    while (m != null) {
+                                        if (key == m.key) {
+                                            return m;
+                                        }
+                                        m = m.next;
+                                    }
+                                    return null;
                                 };
                                 OffHeapLongMap.prototype.each = function (callback) {
-                                    for (var p in this) {
-                                        if (this.hasOwnProperty(p)) {
-                                            callback(p, this[p]);
+                                    for (var i = 0; i < this.elementDataSize; i++) {
+                                        if (this.elementData[i] != null) {
+                                            var current = this.elementData[i];
+                                            callback(this.elementData[i].key, this.elementData[i].value);
+                                            while (current.next != null) {
+                                                current = current.next;
+                                                callback(current.key, current.value);
+                                            }
                                         }
                                     }
+                                };
+                                OffHeapLongMap.prototype.put = function (key, value) {
+                                    var entry = null;
+                                    var hash = (key);
+                                    var index = -1;
+                                    if (this.elementDataSize != 0) {
+                                        index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                        entry = this.findNonNullKeyEntry(key, index);
+                                    }
+                                    if (entry == null) {
+                                        if (++this.elementCount > this.threshold) {
+                                            this.rehash();
+                                            index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                        }
+                                        entry = this.createHashedEntry(key, index);
+                                    }
+                                    entry.value = value;
+                                };
+                                OffHeapLongMap.prototype.createHashedEntry = function (key, index) {
+                                    var entry = new org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry(key, null);
+                                    entry.next = this.elementData[index];
+                                    this.elementData[index] = entry;
+                                    return entry;
+                                };
+                                OffHeapLongMap.prototype.rehashCapacity = function (capacity) {
+                                    var length = (capacity == 0 ? 1 : capacity << 1);
+                                    var newData = this.newElementArray(length);
+                                    for (var i = 0; i < this.elementDataSize; i++) {
+                                        var entry = this.elementData[i];
+                                        while (entry != null) {
+                                            var index = (entry.key & 0x7FFFFFFF) % length;
+                                            var next = entry.next;
+                                            entry.next = newData[index];
+                                            newData[index] = entry;
+                                            entry = next;
+                                        }
+                                    }
+                                    this.elementData = newData;
+                                    this.elementDataSize = length;
+                                    this.computeMaxSize();
+                                };
+                                OffHeapLongMap.prototype.rehash = function () {
+                                    this.rehashCapacity(this.elementDataSize);
+                                };
+                                OffHeapLongMap.prototype.remove = function (key) {
+                                    var entry = this.removeEntry(key);
+                                    if (entry == null) {
+                                        return null;
+                                    }
+                                    else {
+                                        return entry.value;
+                                    }
+                                };
+                                OffHeapLongMap.prototype.removeEntry = function (key) {
+                                    if (this.elementDataSize == 0) {
+                                        return null;
+                                    }
+                                    var entry;
+                                    var last = null;
+                                    var hash = key;
+                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    entry = this.elementData[index];
+                                    while (entry != null && !(key == entry.key)) {
+                                        last = entry;
+                                        entry = entry.next;
+                                    }
+                                    if (entry == null) {
+                                        return null;
+                                    }
+                                    if (last == null) {
+                                        this.elementData[index] = entry.next;
+                                    }
+                                    else {
+                                        last.next = entry.next;
+                                    }
+                                    this.elementCount--;
+                                    return entry;
+                                };
+                                OffHeapLongMap.prototype.size = function () {
+                                    return this.elementCount;
                                 };
                                 return OffHeapLongMap;
                             })();
                             impl.OffHeapLongMap = OffHeapLongMap;
+                            var OffHeapLongMap;
+                            (function (OffHeapLongMap) {
+                                var Entry = (function () {
+                                    function Entry(theKey, theValue) {
+                                        this.key = theKey;
+                                        this.value = theValue;
+                                    }
+                                    return Entry;
+                                })();
+                                OffHeapLongMap.Entry = Entry;
+                            })(OffHeapLongMap = impl.OffHeapLongMap || (impl.OffHeapLongMap = {}));
                         })(impl = map.impl || (map.impl = {}));
                     })(map = struct.map || (struct.map = {}));
                     var segment;
@@ -6447,109 +6580,11 @@ var org;
                                 return ArrayLongTree;
                             })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
                             impl.ArrayLongTree = ArrayLongTree;
-                            var OffHeapLongLongTree = (function (_super) {
-                                __extends(OffHeapLongLongTree, _super);
+                            var OffHeapLongLongTree = (function () {
                                 function OffHeapLongLongTree() {
-                                    this._back = new Array();
-                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
-                                    this._threshold = (this._size * this._loadFactor);
                                 }
-                                OffHeapLongLongTree.prototype.previousOrEqualValue = function (p_key) {
-                                    var result = this.internal_previousOrEqual_index(p_key);
-                                    if (result != -1) {
-                                        return this.value(result);
-                                    }
-                                    else {
-                                        return org.kevoree.modeling.KConfig.NULL_LONG;
-                                    }
-                                };
-                                OffHeapLongLongTree.prototype.lookupValue = function (p_key) {
-                                    var n = this._root_index;
-                                    if (n == -1) {
-                                        return org.kevoree.modeling.KConfig.NULL_LONG;
-                                    }
-                                    while (n != -1) {
-                                        if (p_key == this.key(n)) {
-                                            return this.value(n);
-                                        }
-                                        else {
-                                            if (p_key < this.key(n)) {
-                                                n = this.left(n);
-                                            }
-                                            else {
-                                                n = this.right(n);
-                                            }
-                                        }
-                                    }
-                                    return n;
-                                };
-                                OffHeapLongLongTree.prototype.insert = function (p_key, p_value) {
-                                    if ((this._size + 1) > this._threshold) {
-                                        var length = (this._size == 0 ? 1 : this._size << 1);
-                                        var new_back = new Array();
-                                        System.arraycopy(this._back, 0, new_back, 0, this._size * OffHeapLongLongTree.SIZE_NODE);
-                                        this._threshold = (this._size * this._loadFactor);
-                                        this._back = new_back;
-                                    }
-                                    var insertedNode = (this._size) * OffHeapLongLongTree.SIZE_NODE;
-                                    if (this._size == 0) {
-                                        this._size = 1;
-                                        this.setKey(insertedNode, p_key);
-                                        this.setValue(insertedNode, p_value);
-                                        this.setColor(insertedNode, 0);
-                                        this.setLeft(insertedNode, -1);
-                                        this.setRight(insertedNode, -1);
-                                        this.setParent(insertedNode, -1);
-                                        this._root_index = insertedNode;
-                                    }
-                                    else {
-                                        var n = this._root_index;
-                                        while (true) {
-                                            if (p_key == this.key(n)) {
-                                                return;
-                                            }
-                                            else {
-                                                if (p_key < this.key(n)) {
-                                                    if (this.left(n) == -1) {
-                                                        this.setKey(insertedNode, p_key);
-                                                        this.setValue(insertedNode, p_value);
-                                                        this.setColor(insertedNode, 0);
-                                                        this.setLeft(insertedNode, -1);
-                                                        this.setRight(insertedNode, -1);
-                                                        this.setParent(insertedNode, -1);
-                                                        this.setLeft(n, insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    }
-                                                    else {
-                                                        n = this.left(n);
-                                                    }
-                                                }
-                                                else {
-                                                    if (this.right(n) == -1) {
-                                                        this.setKey(insertedNode, p_key);
-                                                        this.setValue(insertedNode, p_value);
-                                                        this.setColor(insertedNode, 0);
-                                                        this.setLeft(insertedNode, -1);
-                                                        this.setRight(insertedNode, -1);
-                                                        this.setParent(insertedNode, -1);
-                                                        this.setRight(n, insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    }
-                                                    else {
-                                                        n = this.right(n);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        this.setParent(insertedNode, n);
-                                    }
-                                    this.insertCase1(insertedNode);
-                                };
-                                OffHeapLongLongTree.SIZE_NODE = 6;
                                 return OffHeapLongLongTree;
-                            })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
+                            })();
                             impl.OffHeapLongLongTree = OffHeapLongLongTree;
                         })(impl = tree.impl || (tree.impl = {}));
                     })(tree = struct.tree || (struct.tree = {}));

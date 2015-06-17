@@ -24,7 +24,7 @@ public class HelloTest {
                     CloudUniverse universe = model.newUniverse();
                     CloudView time0 = universe.time(0l);
                     Node root = time0.createNode();
-                    time0.setRoot(root,null);
+                    time0.setRoot(root, null);
                     root.setName("root");
                     Assert.assertEquals("root", root.getName());
                     Node n1 = time0.createNode();
@@ -34,7 +34,7 @@ public class HelloTest {
                     root.addChildren(n1);
                     root.addChildren(n2);
 
-                    time0.lookup(42,new KCallback<KObject>() {
+                    time0.lookup(42, new KCallback<KObject>() {
                         @Override
                         public void on(KObject kObject) {
                             Assert.assertNull(kObject);
@@ -67,28 +67,13 @@ public class HelloTest {
                     n2.setName("n2");
                     root.addChildren(n1);
                     root.addChildren(n2);
-                    time0.lookup(root.uuid(),new KCallback<KObject>() {
+                    time0.lookup(root.uuid(), new KCallback<KObject>() {
                         @Override
                         public void on(KObject kObject) {
                             Assert.assertNotNull(kObject);
                             Assert.assertEquals(kObject, root);
                         }
                     });
-                    /*
-                    n1.inbounds().then(new Callback<KObject[]>() {
-                        @Override
-                        public void on(KObject[] kObjects) {
-                            Assert.assertNotNull(kObjects[0]);
-                            Assert.assertEquals(kObjects[0].uuid(), root.uuid());
-                        }
-                    });
-                    n2.inbounds().then(new Callback<KObject[]>() {
-                        @Override
-                        public void on(KObject[] kObjects) {
-                            Assert.assertEquals(kObjects[0].uuid(), root.uuid());
-                        }
-                    });
-                    */
                 }
             }
         });
@@ -154,7 +139,7 @@ public class HelloTest {
                 i[0]++;
                 return KVisitResult.CONTINUE;
             }
-        },new KCallback<Throwable>() {
+        }, new KCallback<Throwable>() {
             @Override
             public void on(Throwable t) {
                 j[0]++;
@@ -163,7 +148,8 @@ public class HelloTest {
         Assert.assertEquals(2, i[0]);
         Assert.assertEquals(1, j[0]);
 
-        //System.err.println(nodeT0);
+        Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toJSON());
+        Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toString());
 
     }
 

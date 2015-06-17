@@ -853,14 +853,26 @@ module org {
                     public toJSON(): string {
                         var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
                         if (raw != null) {
-                            return org.kevoree.modeling.format.json.JsonRaw.encode(raw, this._uuid, this._metaClass, false);
+                            return raw.serialize(this._manager.model().metaModel());
                         } else {
                             return null;
                         }
                     }
 
                     public toString(): string {
-                        return this.toJSON();
+                        var builder: java.lang.StringBuilder = new java.lang.StringBuilder();
+                        builder.append("universe=");
+                        builder.append(this._universe);
+                        builder.append(",time=");
+                        builder.append(this._time);
+                        builder.append(",uuid=");
+                        builder.append(this._uuid);
+                        var raw: org.kevoree.modeling.memory.struct.segment.KMemorySegment = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
+                        if (raw != null) {
+                            builder.append(",data=");
+                            builder.append(raw.toString());
+                        }
+                        return builder.toString();
                     }
 
                     public equals(obj: any): boolean {
@@ -5707,16 +5719,187 @@ module org {
 
                             export class OffHeapLongMap<V> implements org.kevoree.modeling.memory.struct.map.KLongMap<any> {
 
-                                 constructor(initalCapacity: number, loadFactor : number) { }
-                                 public clear():void { for(var p in this){if(this.hasOwnProperty(p)){delete this[p];} } }
-                                 public get(key:number):V { return this[key]; }
-                                 public put(key:number, pval : V):V { var previousVal = this[key];this[key] = pval;return previousVal;}
-                                 public contains(key:number):boolean { return this.hasOwnProperty(<any>key);}
-                                 public remove(key:number):V { var tmp = this[key]; delete this[key]; return tmp; }
-                                 public size():number { return Object.keys(this).length; }
-                                 public each(callback: (p : number, p1 : V) => void): void { for(var p in this){ if(this.hasOwnProperty(p)){ callback(<number>p,this[p]); } } }
+                                public elementCount: number;
+                                public elementData: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>[];
+                                private elementDataSize: number;
+                                public threshold: number;
+                                private initalCapacity: number;
+                                private loadFactor: number;
+                                public newElementArray(s: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>[] {
+                                    return new Array();
+                                }
+
+                                constructor(p_initalCapacity: number, p_loadFactor: number) {
+                                    this.initalCapacity = p_initalCapacity;
+                                    this.loadFactor = p_loadFactor;
+                                    this.elementCount = 0;
+                                    this.elementData = this.newElementArray(this.initalCapacity);
+                                    this.elementDataSize = this.initalCapacity;
+                                    this.computeMaxSize();
+                                }
+
+                                public clear(): void {
+                                    if (this.elementCount > 0) {
+                                        this.elementCount = 0;
+                                        this.elementData = this.newElementArray(this.initalCapacity);
+                                        this.elementDataSize = this.initalCapacity;
+                                    }
+                                }
+
+                                private computeMaxSize(): void {
+                                    this.threshold = <number>(this.elementDataSize * this.loadFactor);
+                                }
+
+                                public contains(key: number): boolean {
+                                    if (this.elementDataSize == 0) {
+                                        return false;
+                                    }
+                                    var hash: number = <number>(key);
+                                    var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    var m: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.findNonNullKeyEntry(key, index);
+                                    return m != null;
+                                }
+
+                                public get(key: number): V {
+                                    if (this.elementDataSize == 0) {
+                                        return null;
+                                    }
+                                    var m: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
+                                    var hash: number = <number>(key);
+                                    var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    m = this.findNonNullKeyEntry(key, index);
+                                    if (m != null) {
+                                        return m.value;
+                                    }
+                                    return null;
+                                }
+
+                                public findNonNullKeyEntry(key: number, index: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> {
+                                    var m: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.elementData[index];
+                                    while (m != null){
+                                        if (key == m.key) {
+                                            return m;
+                                        }
+                                        m = m.next;
+                                    }
+                                    return null;
+                                }
+
+                                public each(callback: (p : number, p1 : V) => void): void {
+                                    for (var i: number = 0; i < this.elementDataSize; i++) {
+                                        if (this.elementData[i] != null) {
+                                            var current: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.elementData[i];
+                                            callback(this.elementData[i].key, this.elementData[i].value);
+                                            while (current.next != null){
+                                                current = current.next;
+                                                callback(current.key, current.value);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                public put(key: number, value: V): void {
+                                    var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = null;
+                                    var hash: number = <number>(key);
+                                    var index: number = -1;
+                                    if (this.elementDataSize != 0) {
+                                        index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                        entry = this.findNonNullKeyEntry(key, index);
+                                    }
+                                    if (entry == null) {
+                                        if (++this.elementCount > this.threshold) {
+                                            this.rehash();
+                                            index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                        }
+                                        entry = this.createHashedEntry(key, index);
+                                    }
+                                    entry.value = value;
+                                }
+
+                                public createHashedEntry(key: number, index: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> {
+                                    var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = new org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>(key, null);
+                                    entry.next = this.elementData[index];
+                                    this.elementData[index] = entry;
+                                    return entry;
+                                }
+
+                                public rehashCapacity(capacity: number): void {
+                                    var length: number = (capacity == 0 ? 1 : capacity << 1);
+                                    var newData: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>[] = this.newElementArray(length);
+                                    for (var i: number = 0; i < this.elementDataSize; i++) {
+                                        var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.elementData[i];
+                                        while (entry != null){
+                                            var index: number = (<number>entry.key & 0x7FFFFFFF) % length;
+                                            var next: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = entry.next;
+                                            entry.next = newData[index];
+                                            newData[index] = entry;
+                                            entry = next;
+                                        }
+                                    }
+                                    this.elementData = newData;
+                                    this.elementDataSize = length;
+                                    this.computeMaxSize();
+                                }
+
+                                public rehash(): void {
+                                    this.rehashCapacity(this.elementDataSize);
+                                }
+
+                                public remove(key: number): V {
+                                    var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = this.removeEntry(key);
+                                    if (entry == null) {
+                                        return null;
+                                    } else {
+                                        return entry.value;
+                                    }
+                                }
+
+                                public removeEntry(key: number): org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> {
+                                    if (this.elementDataSize == 0) {
+                                        return null;
+                                    }
+                                    var entry: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
+                                    var last: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any> = null;
+                                    var hash: number = <number>key;
+                                    var index: number = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                    entry = this.elementData[index];
+                                    while (entry != null && !(key == entry.key)){
+                                        last = entry;
+                                        entry = entry.next;
+                                    }
+                                    if (entry == null) {
+                                        return null;
+                                    }
+                                    if (last == null) {
+                                        this.elementData[index] = entry.next;
+                                    } else {
+                                        last.next = entry.next;
+                                    }
+                                    this.elementCount--;
+                                    return entry;
+                                }
+
+                                public size(): number {
+                                    return this.elementCount;
+                                }
+
                             }
 
+                            export module OffHeapLongMap { 
+                                export class Entry<V> {
+
+                                    public next: org.kevoree.modeling.memory.struct.map.impl.OffHeapLongMap.Entry<any>;
+                                    public key: number;
+                                    public value: V;
+                                    constructor(theKey: number, theValue: V) {
+                                        this.key = theKey;
+                                        this.value = theValue;
+                                    }
+
+                                }
+
+
+                            }
                         }
                     }
                     export module segment {
@@ -7084,102 +7267,7 @@ module org {
 
                             }
 
-                            export class OffHeapLongLongTree extends org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree implements org.kevoree.modeling.memory.struct.tree.KLongLongTree {
-
-                                private static SIZE_NODE: number = 6;
-                                constructor() {
-                                    this._back = new Array();
-                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
-                                    this._threshold = <number>(this._size * this._loadFactor);
-                                }
-
-                                public previousOrEqualValue(p_key: number): number {
-                                    var result: number = this.internal_previousOrEqual_index(p_key);
-                                    if (result != -1) {
-                                        return this.value(result);
-                                    } else {
-                                        return org.kevoree.modeling.KConfig.NULL_LONG;
-                                    }
-                                }
-
-                                public lookupValue(p_key: number): number {
-                                    var n: number = this._root_index;
-                                    if (n == -1) {
-                                        return org.kevoree.modeling.KConfig.NULL_LONG;
-                                    }
-                                    while (n != -1){
-                                        if (p_key == this.key(n)) {
-                                            return this.value(n);
-                                        } else {
-                                            if (p_key < this.key(n)) {
-                                                n = this.left(n);
-                                            } else {
-                                                n = this.right(n);
-                                            }
-                                        }
-                                    }
-                                    return n;
-                                }
-
-                                public insert(p_key: number, p_value: number): void {
-                                    if ((this._size + 1) > this._threshold) {
-                                        var length: number = (this._size == 0 ? 1 : this._size << 1);
-                                        var new_back: number[] = new Array();
-                                        System.arraycopy(this._back, 0, new_back, 0, this._size * OffHeapLongLongTree.SIZE_NODE);
-                                        this._threshold = <number>(this._size * this._loadFactor);
-                                        this._back = new_back;
-                                    }
-                                    var insertedNode: number = (this._size) * OffHeapLongLongTree.SIZE_NODE;
-                                    if (this._size == 0) {
-                                        this._size = 1;
-                                        this.setKey(insertedNode, p_key);
-                                        this.setValue(insertedNode, p_value);
-                                        this.setColor(insertedNode, 0);
-                                        this.setLeft(insertedNode, -1);
-                                        this.setRight(insertedNode, -1);
-                                        this.setParent(insertedNode, -1);
-                                        this._root_index = insertedNode;
-                                    } else {
-                                        var n: number = this._root_index;
-                                        while (true){
-                                            if (p_key == this.key(n)) {
-                                                return;
-                                            } else {
-                                                if (p_key < this.key(n)) {
-                                                    if (this.left(n) == -1) {
-                                                        this.setKey(insertedNode, p_key);
-                                                        this.setValue(insertedNode, p_value);
-                                                        this.setColor(insertedNode, 0);
-                                                        this.setLeft(insertedNode, -1);
-                                                        this.setRight(insertedNode, -1);
-                                                        this.setParent(insertedNode, -1);
-                                                        this.setLeft(n, insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    } else {
-                                                        n = this.left(n);
-                                                    }
-                                                } else {
-                                                    if (this.right(n) == -1) {
-                                                        this.setKey(insertedNode, p_key);
-                                                        this.setValue(insertedNode, p_value);
-                                                        this.setColor(insertedNode, 0);
-                                                        this.setLeft(insertedNode, -1);
-                                                        this.setRight(insertedNode, -1);
-                                                        this.setParent(insertedNode, -1);
-                                                        this.setRight(n, insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    } else {
-                                                        n = this.right(n);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        this.setParent(insertedNode, n);
-                                    }
-                                    this.insertCase1(insertedNode);
-                                }
+                            export class OffHeapLongLongTree {
 
                             }
 
