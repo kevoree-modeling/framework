@@ -12,11 +12,11 @@ public interface KMemoryElement {
 
     /**
      * format: definition repeat all entry ...
-     * KLongTree: size,root_index[... ,left_index,right_index, parent_index, key, color ...]
-     * KLongLongTree: size,root_index[... ,left_index,right_index, parent_index, key, color (black==0), value ...]
+     * KLongTree: size,root_index[... ,key,left_index,right_index, parent_index, color ...]
+     * KLongLongTree: size,root_index[... ,key,left_index,right_index, parent_index, color (black==0), value ...]
      * KMemorySegment: {... ,"name":value ...}
      * KUniverseOrderMap: className, size{... ,"key":value ...}
-     * */
+     */
     String serialize(KMetaModel metaModel);
 
     void init(String payload, KMetaModel metaModel);

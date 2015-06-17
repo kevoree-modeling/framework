@@ -29,47 +29,47 @@ public abstract class AbstractArrayTree {
         return _size;
     }
 
-    protected long left(long p_currentIndex) {
+    protected long key(long p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
         return _back[(int) p_currentIndex];
     }
 
-    protected void setLeft(long p_currentIndex, long p_paramIndex) {
+    protected void setKey(long p_currentIndex, long p_paramIndex) {
         _back[(int) p_currentIndex] = p_paramIndex;
     }
 
-    protected long right(long p_currentIndex) {
+    protected long left(long p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
         return _back[(int) p_currentIndex + 1];
     }
 
-    protected void setRight(long p_currentIndex, long p_paramIndex) {
+    protected void setLeft(long p_currentIndex, long p_paramIndex) {
         _back[(int) p_currentIndex + 1] = p_paramIndex;
     }
 
-    private long parent(long p_currentIndex) {
+    protected long right(long p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
         return _back[(int) p_currentIndex + 2];
     }
 
-    protected void setParent(long p_currentIndex, long p_paramIndex) {
+    protected void setRight(long p_currentIndex, long p_paramIndex) {
         _back[(int) p_currentIndex + 2] = p_paramIndex;
     }
 
-    protected long key(long p_currentIndex) {
+    private long parent(long p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
         return _back[(int) p_currentIndex + 3];
     }
 
-    protected void setKey(long p_currentIndex, long p_paramIndex) {
+    protected void setParent(long p_currentIndex, long p_paramIndex) {
         _back[(int) p_currentIndex + 3] = p_paramIndex;
     }
 
@@ -407,13 +407,27 @@ public abstract class AbstractArrayTree {
         } else {
             builder.append(_size);
             builder.append(',');
-            builder.append(_root_index);
+            int elemSize = ELEM_SIZE();
+            builder.append(_root_index / elemSize);
             builder.append('[');
-            for (int i = 0; i < (_size*ELEM_SIZE()); i++) {
+            for (int i = 0; i < _size; i++) {
                 if (i != 0) {
-                    builder.append(',');
+                    builder.append('|');
                 }
-                builder.append(_back[i]);
+                int nextSegmentBegin = i * elemSize;
+                for (int j = 0; j < elemSize; j++) {
+                    if (j != 0) {
+                        builder.append(',');
+                    }
+                    long elemAtCursor = _back[nextSegmentBegin + j];
+                    if (elemAtCursor != -1) {
+                        if (j > 0 && j < 4) {
+                            builder.append(elemAtCursor / elemSize);
+                        } else {
+                            builder.append(elemAtCursor);
+                        }
+                    }
+                }
             }
             builder.append(']');
         }
@@ -437,22 +451,37 @@ public abstract class AbstractArrayTree {
         while (cursor < payload.length() && payload.charAt(cursor) != '[') {
             cursor++;
         }
-        _root_index = Integer.parseInt(payload.substring(initPos, cursor));
+        int elemSize = ELEM_SIZE();
+        _root_index = Integer.parseInt(payload.substring(initPos, cursor)) * elemSize;
         allocate(_size);
         int _back_index = 0;
+        int _nbInSegment = 0;
         while (cursor < payload.length()) {
             cursor++;
             int beginChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+            while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '|') {
                 cursor++;
             }
             int cleanedEnd = cursor;
             if (payload.charAt(cleanedEnd - 1) == ']') {
                 cleanedEnd--;
             }
-            long loopKey = Long.parseLong(payload.substring(beginChunk, cleanedEnd));
-            _back[_back_index] = loopKey;
+            if (cleanedEnd > beginChunk) {
+                long loopKey = Long.parseLong(payload.substring(beginChunk, cleanedEnd));
+                if (_nbInSegment > 0 && _nbInSegment < 4) {
+                    _back[_back_index] = loopKey * elemSize;
+                } else {
+                    _back[_back_index] = loopKey;
+                }
+            } else {
+                _back[_back_index] = -1;
+            }
             _back_index++;
+            if (cursor < payload.length() && payload.charAt(cursor) == '|') {
+                _nbInSegment = 0;
+            } else {
+                _nbInSegment++;
+            }
         }
     }
 
