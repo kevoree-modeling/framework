@@ -209,14 +209,17 @@ public class HeapMemoryManager implements KMemoryManager {
     public void initKObject(KObject obj) {
         KMemorySegment cacheEntry = _factory.newCacheSegment();
         cacheEntry.initMetaClass(obj.metaClass());
+        cacheEntry.init(null, model().metaModel());
         cacheEntry.setDirty();
         cacheEntry.inc();
         //initiate time management
         KLongTree timeTree = _factory.newLongTree();
+        timeTree.init(null, model().metaModel());
         timeTree.inc();
         timeTree.insert(obj.now());
         //initiate universe management
         KUniverseOrderMap universeTree = _factory.newUniverseMap(0, obj.metaClass().metaName());
+        universeTree.init(null, model().metaModel());
         universeTree.inc();
         universeTree.put(obj.universe(), obj.now());
         //save related objects to cache

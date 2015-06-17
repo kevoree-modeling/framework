@@ -146,7 +146,7 @@ public class HeapMemorySegment implements KMemorySegment {
      * }
      */
     @Override
-    public void init(String payload, KMetaModel metaModel) throws Exception {
+    public void init(String payload, KMetaModel metaModel) {
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);
