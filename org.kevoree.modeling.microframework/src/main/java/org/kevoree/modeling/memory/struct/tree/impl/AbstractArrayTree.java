@@ -400,6 +400,12 @@ public abstract class AbstractArrayTree {
         }
     }
 
+    private static final char BLACK_LEFT = '{';
+    private static final char BLACK_RIGHT = '}';
+    private static final char RED_LEFT = '[';
+    private static final char RED_RIGHT = ']';
+
+
     public String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
         if (_root_index == -1) {
@@ -409,27 +415,37 @@ public abstract class AbstractArrayTree {
             builder.append(',');
             int elemSize = ELEM_SIZE();
             builder.append(_root_index / elemSize);
-            builder.append('[');
             for (int i = 0; i < _size; i++) {
-                if (i != 0) {
-                    builder.append('|');
-                }
                 int nextSegmentBegin = i * elemSize;
-                for (int j = 0; j < elemSize; j++) {
-                    if (j != 0) {
-                        builder.append(',');
+                long beginParent = parent(nextSegmentBegin);
+                boolean isOnLeft = false;
+                if (beginParent != -1) {
+                    isOnLeft = left(beginParent) == nextSegmentBegin;
+                }
+                if (color(nextSegmentBegin) == 0) {
+                    if (isOnLeft) {
+                        builder.append(BLACK_LEFT);
+                    } else {
+                        builder.append(BLACK_RIGHT);
                     }
-                    long elemAtCursor = _back[nextSegmentBegin + j];
-                    if (elemAtCursor != -1) {
-                        if (j > 0 && j < 4) {
-                            builder.append(elemAtCursor / elemSize);
-                        } else {
-                            builder.append(elemAtCursor);
-                        }
+                } else {
+                    //red
+                    if (isOnLeft) {
+                        builder.append(RED_LEFT);
+                    } else {
+                        builder.append(RED_RIGHT);
                     }
+                }
+                builder.append(key(nextSegmentBegin));
+                builder.append(',');
+                if (beginParent != -1) {
+                    builder.append(beginParent / elemSize);
+                }
+                if (elemSize > 5) {
+                    builder.append(',');
+                    builder.append(value(nextSegmentBegin));
                 }
             }
-            builder.append(']');
         }
         return builder.toString();
     }
@@ -438,9 +454,10 @@ public abstract class AbstractArrayTree {
         if (payload == null || payload.length() == 0) {
             return;
         }
+        int elemSize = ELEM_SIZE();
         int initPos = 0;
         int cursor = 0;
-        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '[') {
+        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
         if (payload.charAt(cursor) == ',') {//className to parse
@@ -448,39 +465,65 @@ public abstract class AbstractArrayTree {
             cursor++;
             initPos = cursor;
         }
-        while (cursor < payload.length() && payload.charAt(cursor) != '[') {
+        while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
-        int elemSize = ELEM_SIZE();
         _root_index = Integer.parseInt(payload.substring(initPos, cursor)) * elemSize;
         allocate(_size);
+        for (int i = 0; i < _size * elemSize; i++) {
+            _back[i] = -1;
+        }
         int _back_index = 0;
-        int _nbInSegment = 0;
         while (cursor < payload.length()) {
-            cursor++;
-            int beginChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '|') {
+            while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
                 cursor++;
             }
-            int cleanedEnd = cursor;
-            if (payload.charAt(cleanedEnd - 1) == ']') {
-                cleanedEnd--;
-            }
-            if (cleanedEnd > beginChunk) {
-                long loopKey = Long.parseLong(payload.substring(beginChunk, cleanedEnd));
-                if (_nbInSegment > 0 && _nbInSegment < 4) {
-                    _back[_back_index] = loopKey * elemSize;
-                } else {
-                    _back[_back_index] = loopKey;
+            if (cursor < payload.length()) {
+                char elem = payload.charAt(cursor);
+                int currentBlock = _back_index * elemSize;
+                boolean isOnLeft = false;
+                if (elem == BLACK_LEFT || elem == RED_LEFT) {
+                    isOnLeft = true;
                 }
-            } else {
-                _back[_back_index] = -1;
-            }
-            _back_index++;
-            if (cursor < payload.length() && payload.charAt(cursor) == '|') {
-                _nbInSegment = 0;
-            } else {
-                _nbInSegment++;
+                if (elem == BLACK_LEFT || elem == BLACK_RIGHT) {
+                    setColor(currentBlock, 0);
+                } else {
+                    setColor(currentBlock, 1);
+                }
+                cursor++;
+                int beginChunk = cursor;
+                while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+                    cursor++;
+                }
+                long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
+                setKey(currentBlock, loopKey);
+                cursor++;
+                beginChunk = cursor;
+                while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+                    cursor++;
+                }
+                if (cursor > beginChunk) {
+                    long parentRaw = Long.parseLong(payload.substring(beginChunk, cursor));
+                    long parentValue = parentRaw * elemSize;
+                    setParent(currentBlock, parentValue);
+                    if (isOnLeft) {
+                        setLeft(parentValue, currentBlock);
+                    } else {
+                        setRight(parentValue, currentBlock);
+                    }
+                }
+                if (cursor < payload.length() && payload.charAt(cursor) == ',') {
+                    cursor++;
+                    beginChunk = cursor;
+                    while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+                        cursor++;
+                    }
+                    if (cursor > beginChunk) {
+                        long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
+                        setValue(currentBlock, currentValue);
+                    }
+                }
+                _back_index++;
             }
         }
     }

@@ -12,8 +12,9 @@ public interface KMemoryElement {
 
     /**
      * format: definition repeat all entry ...
-     * KLongTree: size,root_index[... ,key,left_index,right_index, parent_index, color ...]
-     * KLongLongTree: size,root_index[... ,key,left_index,right_index, parent_index, color (black==0), value ...]
+     * KTree: ]=>red right [=>red left }=>black right {=>black left
+     * KLongTree: size,root_index ... SEP key,parent_index ...]
+     * KLongLongTree: size,root_index[... SEP key,parent_index,value ...]
      * KMemorySegment: {... ,"name":value ...}
      * KUniverseOrderMap: className, size{... ,"key":value ...}
      */
