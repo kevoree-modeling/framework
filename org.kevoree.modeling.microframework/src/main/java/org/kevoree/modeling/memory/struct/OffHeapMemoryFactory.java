@@ -36,7 +36,8 @@ public class OffHeapMemoryFactory implements KMemoryFactory {
 
     @Override
     public KUniverseOrderMap newUniverseMap(int initSize, String p_className) {
-        return new OffHeapUniverseOrderMap(initSize, KConfig.CACHE_LOAD_FACTOR, p_className);
+        //return new OffHeapUniverseOrderMap(initSize, KConfig.CACHE_LOAD_FACTOR, p_className);
+        return null;
     }
 
     @Override
