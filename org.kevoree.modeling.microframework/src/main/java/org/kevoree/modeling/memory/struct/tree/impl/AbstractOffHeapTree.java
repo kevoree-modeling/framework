@@ -469,7 +469,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return builder.toString();
     }
 
-    public void init(String payload, KMetaModel metaModel) throws Exception {
+    public void init(String payload, KMetaModel metaModel) {
         _start_address = UNSAFE.allocateMemory(internal_size_base_segment()); // allocate memory for base segment
         UNSAFE.setMemory(_start_address, internal_size_base_segment(), (byte) 0);
         UNSAFE.putLong(internal_ptr_root_index(), -1);
