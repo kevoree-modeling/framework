@@ -139,10 +139,8 @@ public class HeapMemorySegment implements KMemorySegment {
      * var metaClass = metaModel.metaClass(this._metaClassIndex);
      * this.raw = [];
      * for (var key in rawElem) {
-     * if("@class" != key){
      * var elem = metaClass.metaByName(key);
      * if(elem != null && elem != undefined){ this.raw[elem.index()] = rawElem[key]; }
-     * }
      * }
      */
     @Override
