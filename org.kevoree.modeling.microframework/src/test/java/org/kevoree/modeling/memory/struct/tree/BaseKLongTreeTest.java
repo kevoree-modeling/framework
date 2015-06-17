@@ -31,7 +31,7 @@ public abstract class BaseKLongTreeTest {
         }
 
         String saved0 = tree.serialize(null);
-        Assert.assertEquals(saved0,"TODO_REPLACE_WHEN_COMPILE_AGAIN!");
+        Assert.assertEquals(saved0,"3,1{0,1]1,}2,1");
 
         KLongTree treeBis = createKLongTree();
         treeBis.init(saved0, null);
