@@ -5824,10 +5824,8 @@ module org {
                                      var metaClass = metaModel.metaClass(this._metaClassIndex);
                                      this.raw = [];
                                      for (var key in rawElem) {
-                                     if("@class" != key){
                                      var elem = metaClass.metaByName(key);
                                      if(elem != null && elem != undefined){ this.raw[elem.index()] = rawElem[key]; }
-                                     }
                                      }
                                 }
 
@@ -5949,6 +5947,7 @@ module org {
                                                 }
                                                 this._modifiedIndexes[index] = true;
                                                 this._dirty = true;
+                                                return true;
                                             }
                                         }
                                     }
