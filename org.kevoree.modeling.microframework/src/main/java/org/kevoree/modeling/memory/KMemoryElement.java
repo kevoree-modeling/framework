@@ -11,9 +11,10 @@ public interface KMemoryElement {
     void setDirty();
 
     /**
-     * format:
-     * KLongTree:
-     *
+     * format: definition repeat all entry ...
+     * KLongTree: size,root_index[... ,left_index,right_index, parent_index, key, color ...]
+     * KLongLongTree: size,root_index[... ,left_index,right_index, parent_index, key, color (black==0), value ...]
+     * 
      * */
     String serialize(KMetaModel metaModel);
 
