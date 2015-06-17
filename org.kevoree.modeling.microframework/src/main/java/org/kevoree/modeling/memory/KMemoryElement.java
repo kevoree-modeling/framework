@@ -10,6 +10,11 @@ public interface KMemoryElement {
 
     void setDirty();
 
+    /**
+     * format:
+     * KLongTree:
+     *
+     * */
     String serialize(KMetaModel metaModel);
 
     void init(String payload, KMetaModel metaModel);

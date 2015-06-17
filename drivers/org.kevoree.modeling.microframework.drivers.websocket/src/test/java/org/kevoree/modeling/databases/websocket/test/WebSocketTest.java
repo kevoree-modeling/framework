@@ -13,9 +13,6 @@ import org.kevoree.modeling.databases.websocket.WebSocketWrapper;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by duke on 05/01/15.
- */
 public class WebSocketTest {
 
     private int PORT = 6000;
