@@ -1,4 +1,4 @@
-package org.kevoree.modeling.databases.redis;
+package org.kevoree.modeling.drivers.redis;
 
 import org.junit.Assert;
 import org.kevoree.modeling.KCallback;

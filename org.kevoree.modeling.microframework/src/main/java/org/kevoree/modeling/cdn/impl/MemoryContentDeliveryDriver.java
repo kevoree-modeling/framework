@@ -12,12 +12,16 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.event.impl.LocalEventListeners;
+import org.kevoree.modeling.memory.struct.map.KIntMap;
+import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
 import org.kevoree.modeling.memory.struct.map.KStringMap;
+import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
 import org.kevoree.modeling.message.KMessage;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
@@ -123,50 +127,46 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
     public void send(KMessage msgs) {
         //NO REMOTE MANAGEMENT
         if (additionalInterceptors != null) {
-            for (int i = 0; i < additionalInterceptors.length; i++) {
-                KMessageInterceptor interceptor = additionalInterceptors[i];
-                if(interceptor != null){
-                    if (interceptor.on(msgs)) {
-                        return; //exit if intercepted
+            additionalInterceptors.each(new KIntMapCallBack<KMessageInterceptor>() {
+                @Override
+                public void on(int key, KMessageInterceptor value) {
+                    if(value != null){
+                        if (value.on(msgs)) {
+                            return; //exit if intercepted
+                        }
                     }
                 }
-            }
+            });
         }
         _localEventListeners.dispatch(msgs);
     }
 
-    private KMessageInterceptor[] additionalInterceptors = null;
+    private ArrayIntMap<KMessageInterceptor> additionalInterceptors = null;
+
+    /** @ignore ts */
+    private Random random = new Random();
 
     /** @native ts
-     * if(this.additionalInterceptors == null){this.additionalInterceptors = []; }
-     * var previousSize = this.additionalInterceptors.length;
-     * this.additionalInterceptors.push(p_interceptor);
-     * return previousSize;
+     * return Math.random();
      * */
+    private int randomInterceptorID(){
+        return random.nextInt();
+    }
+
     @Override
     public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
         if (additionalInterceptors == null) {
-            additionalInterceptors = new KMessageInterceptor[1];
-            additionalInterceptors[0] = p_interceptor;
-            return 0;
-        } else {
-            int id = additionalInterceptors.length;
-            KMessageInterceptor[] newInterceptors = new KMessageInterceptor[id + 1];
-            System.arraycopy(additionalInterceptors, 0, newInterceptors, 0, id);
-            newInterceptors[id] = p_interceptor;
-            additionalInterceptors = newInterceptors;
-            return id;
+            additionalInterceptors = new ArrayIntMap<KMessageInterceptor>(KConfig.CACHE_INIT_SIZE,KConfig.CACHE_LOAD_FACTOR);
         }
+        int newID = randomInterceptorID();
+        additionalInterceptors.put(newID,p_interceptor);
+        return newID;
     }
 
-    /** @native ts
-     * if(this.additionalInterceptors == null){ return }
-     * delete this.additionalInterceptors[id];
-     * */
     @Override
     public synchronized void removeMessageInterceptor(int id) {
         if (additionalInterceptors != null) {
-            additionalInterceptors[id] = null;
+            additionalInterceptors.remove(id);
         }
     }
 

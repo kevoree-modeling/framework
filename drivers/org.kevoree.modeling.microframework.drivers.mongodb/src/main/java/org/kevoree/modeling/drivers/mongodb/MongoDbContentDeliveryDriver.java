@@ -10,13 +10,16 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentPutRequest;
+import org.kevoree.modeling.cdn.KMessageInterceptor;
 import org.kevoree.modeling.event.KEventListener;
 import org.kevoree.modeling.event.KEventMultiListener;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.event.impl.LocalEventListeners;
 
 import java.net.UnknownHostException;
+import java.util.Random;
 
 public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
 
@@ -168,5 +171,35 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
             callback.on(null);
         }
     }
+
+    private ArrayIntMap<KMessageInterceptor> additionalInterceptors = null;
+
+    /** @ignore ts */
+    private Random random = new Random();
+
+    /** @native ts
+     * return Math.random();
+     * */
+    private int randomInterceptorID(){
+        return random.nextInt();
+    }
+
+    @Override
+    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+        if (additionalInterceptors == null) {
+            additionalInterceptors = new ArrayIntMap<KMessageInterceptor>(KConfig.CACHE_INIT_SIZE,KConfig.CACHE_LOAD_FACTOR);
+        }
+        int newID = randomInterceptorID();
+        additionalInterceptors.put(newID,p_interceptor);
+        return newID;
+    }
+
+    @Override
+    public synchronized void removeMessageInterceptor(int id) {
+        if (additionalInterceptors != null) {
+            additionalInterceptors.remove(id);
+        }
+    }
+
 
 }

@@ -1,13 +1,15 @@
-package org.kevoree.modeling.databases.rocksdb;
+package org.kevoree.modeling.drivers.rocksdb;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentPutRequest;
+import org.kevoree.modeling.cdn.KMessageInterceptor;
 import org.kevoree.modeling.event.KEventListener;
 import org.kevoree.modeling.event.KEventMultiListener;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.event.impl.LocalEventListeners;
+import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
 import org.kevoree.modeling.message.KMessage;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
@@ -17,6 +19,7 @@ import org.rocksdb.WriteOptions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * Created by duke on 11/4/14.
@@ -172,6 +175,35 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
         //noop
         if (callback != null) {
             callback.on(null);
+        }
+    }
+
+    private ArrayIntMap<KMessageInterceptor> additionalInterceptors = null;
+
+    /** @ignore ts */
+    private Random random = new Random();
+
+    /** @native ts
+     * return Math.random();
+     * */
+    private int randomInterceptorID(){
+        return random.nextInt();
+    }
+
+    @Override
+    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+        if (additionalInterceptors == null) {
+            additionalInterceptors = new ArrayIntMap<KMessageInterceptor>(KConfig.CACHE_INIT_SIZE,KConfig.CACHE_LOAD_FACTOR);
+        }
+        int newID = randomInterceptorID();
+        additionalInterceptors.put(newID,p_interceptor);
+        return newID;
+    }
+
+    @Override
+    public synchronized void removeMessageInterceptor(int id) {
+        if (additionalInterceptors != null) {
+            additionalInterceptors.remove(id);
         }
     }
 
