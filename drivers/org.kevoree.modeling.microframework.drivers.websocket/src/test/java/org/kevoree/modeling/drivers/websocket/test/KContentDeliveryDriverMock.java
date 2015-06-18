@@ -1,4 +1,4 @@
-package org.kevoree.modeling.databases.websocket.test;
+package org.kevoree.modeling.drivers.websocket.test;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.KContentKey;
@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 
-/**
- * Created by duke on 10/03/15.
- */
 public class KContentDeliveryDriverMock implements KContentDeliveryDriver {
 
     public HashMap<String, String> alreadyPut = new HashMap<String, String>();

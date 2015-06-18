@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.kevoree.modeling</groupId>
-            <artifactId>org.kevoree.modeling.java2typescript</artifactId>
+            <artifactId>org.kevoree.modeling.java2typescript.transpiler</artifactId>
             <version>${java2typescript.plugin.version}</version>
         </dependency>
     </dependencies>

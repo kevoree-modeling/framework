@@ -28,6 +28,10 @@ public interface KContentDeliveryDriver {
 
     void send(KMessage msgs);
 
+    int addMessageInterceptor(KMessageInterceptor interceptor);
+
+    void removeMessageInterceptor(int id);
+
     void setManager(KMemoryManager manager);
 
 }

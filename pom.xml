@@ -70,7 +70,7 @@
 
     <properties>
         <kmf.plugin.version>18</kmf.plugin.version>
-        <java2typescript.plugin.version>31</java2typescript.plugin.version>
+        <java2typescript.plugin.version>32-SNAPSHOT</java2typescript.plugin.version>
     </properties>
 
     <modules>

@@ -1,9 +1,6 @@
-package org.kevoree.modeling.databases.websocket;
+package org.kevoree.modeling.drivers.websocket;
 
-import io.undertow.websockets.core.AbstractReceiveListener;
-import io.undertow.websockets.core.BufferedTextMessage;
-import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSockets;
+import io.undertow.websockets.core.*;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
@@ -15,15 +12,15 @@ import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
 import org.kevoree.modeling.message.*;
 import org.kevoree.modeling.message.impl.*;
 import org.kevoree.modeling.event.impl.LocalEventListeners;
+import org.xnio.*;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 
-/**
- * Created by duke on 24/02/15.
- */
-public class WebSocketClient extends AbstractReceiveListener implements KContentDeliveryDriver {
+public class WebSocketContentDeliveryDriver extends AbstractReceiveListener implements KContentDeliveryDriver {
 
     private static final int CALLBACK_SIZE = 100000;
 
@@ -35,7 +32,7 @@ public class WebSocketClient extends AbstractReceiveListener implements KContent
 
     private final ArrayLongMap<Object> _callbacks = new ArrayLongMap<Object>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
 
-    public WebSocketClient(String url) {
+    public WebSocketContentDeliveryDriver(String url) {
         _client = new UndertowWSClient(url);
     }
 
@@ -106,7 +103,7 @@ public class WebSocketClient extends AbstractReceiveListener implements KContent
                 this._manager.reload(eventsMessage.allKeys(), new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
-                        WebSocketClient.this._localEventListeners.dispatch(eventsMessage);
+                        WebSocketContentDeliveryDriver.this._localEventListeners.dispatch(eventsMessage);
                     }
                 });
             }
@@ -174,6 +171,63 @@ public class WebSocketClient extends AbstractReceiveListener implements KContent
     public void setManager(KMemoryManager p_manager) {
         _manager = p_manager;
         _localEventListeners.setManager(p_manager);
+    }
+
+    class UndertowWSClient {
+
+        private ByteBufferSlicePool _buffer;
+        private XnioWorker _worker;
+        private WebSocketChannel _webSocketChannel = null;
+        private String _url;
+
+        public UndertowWSClient(String url) {
+            this._url = url;
+            try {
+                Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
+                _worker = xnio.createWorker(OptionMap.builder()
+                        .set(Options.WORKER_IO_THREADS, 2)
+                        .set(Options.CONNECTION_HIGH_WATER, 1000000)
+                        .set(Options.CONNECTION_LOW_WATER, 1000000)
+                        .set(Options.WORKER_TASK_CORE_THREADS, 30)
+                        .set(Options.WORKER_TASK_MAX_THREADS, 30)
+                        .set(Options.TCP_NODELAY, true)
+                        .set(Options.CORK, true)
+                        .getMap());
+
+                _buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void connect(AbstractReceiveListener listener) {
+            try {
+
+                _webSocketChannel = io.undertow.websockets.client.WebSocketClient.connect(_worker, _buffer, OptionMap.EMPTY, new URI(_url), WebSocketVersion.V13).get();
+                _webSocketChannel.getReceiveSetter().set(listener);
+                _webSocketChannel.resumeReceives();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void close() {
+            try {
+                _webSocketChannel.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public WebSocketChannel getChannel() {
+            return _webSocketChannel;
+        }
+
     }
 
 }

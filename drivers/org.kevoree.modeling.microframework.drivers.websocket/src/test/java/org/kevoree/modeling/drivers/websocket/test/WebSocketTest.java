@@ -1,4 +1,4 @@
-package org.kevoree.modeling.databases.websocket.test;
+package org.kevoree.modeling.drivers.websocket.test;
 
 
 import org.junit.Assert;
@@ -7,8 +7,8 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 import org.kevoree.modeling.message.impl.Events;
-import org.kevoree.modeling.databases.websocket.WebSocketClient;
-import org.kevoree.modeling.databases.websocket.WebSocketWrapper;
+import org.kevoree.modeling.drivers.websocket.WebSocketContentDeliveryDriver;
+import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -34,14 +34,14 @@ public class WebSocketTest {
         eventsMessage.setEvent(0, KContentKey.createGlobalUniverseTree(), meta);
 
         KContentDeliveryDriverMock mock = new KContentDeliveryDriverMock();
-        WebSocketWrapper wrapper = new WebSocketWrapper(mock, PORT);
+        WebSocketGateway wrapper = new WebSocketGateway(mock, PORT);
 
         CountDownLatch latch = new CountDownLatch(3);
 
         wrapper.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
-                WebSocketClient client = new WebSocketClient("ws://localhost:" + PORT);
+                WebSocketContentDeliveryDriver client = new WebSocketContentDeliveryDriver("ws://localhost:" + PORT);
                 client.connect(new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {

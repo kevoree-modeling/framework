@@ -1,6 +1,6 @@
 
-///<reference path='java.d.ts'/>
-///<reference path='org.kevoree.modeling.microframework.typescript.d.ts'/>
+///<reference path='../../../target/jsdeps/java.d.ts'/>
+///<reference path='../../../target/jsdeps/org.kevoree.modeling.microframework.typescript.d.ts'/>
 
 module org {
     export module kevoree {

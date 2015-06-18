@@ -3,6 +3,7 @@ package org.kevoree.modeling.cdn.impl;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.cdn.KContentPutRequest;
+import org.kevoree.modeling.cdn.KMessageInterceptor;
 import org.kevoree.modeling.event.KEventListener;
 import org.kevoree.modeling.event.KEventMultiListener;
 import org.kevoree.modeling.KObject;
@@ -14,6 +15,9 @@ import org.kevoree.modeling.event.impl.LocalEventListeners;
 import org.kevoree.modeling.memory.struct.map.KStringMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
 import org.kevoree.modeling.message.KMessage;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
@@ -118,7 +122,52 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
     @Override
     public void send(KMessage msgs) {
         //NO REMOTE MANAGEMENT
+        if (additionalInterceptors != null) {
+            for (int i = 0; i < additionalInterceptors.length; i++) {
+                KMessageInterceptor interceptor = additionalInterceptors[i];
+                if(interceptor != null){
+                    if (interceptor.on(msgs)) {
+                        return; //exit if intercepted
+                    }
+                }
+            }
+        }
         _localEventListeners.dispatch(msgs);
+    }
+
+    private KMessageInterceptor[] additionalInterceptors = null;
+
+    /** @native ts
+     * if(this.additionalInterceptors == null){this.additionalInterceptors = []; }
+     * var previousSize = this.additionalInterceptors.length;
+     * this.additionalInterceptors.push(p_interceptor);
+     * return previousSize;
+     * */
+    @Override
+    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+        if (additionalInterceptors == null) {
+            additionalInterceptors = new KMessageInterceptor[1];
+            additionalInterceptors[0] = p_interceptor;
+            return 0;
+        } else {
+            int id = additionalInterceptors.length;
+            KMessageInterceptor[] newInterceptors = new KMessageInterceptor[id + 1];
+            System.arraycopy(additionalInterceptors, 0, newInterceptors, 0, id);
+            newInterceptors[id] = p_interceptor;
+            additionalInterceptors = newInterceptors;
+            return id;
+        }
+    }
+
+    /** @native ts
+     * if(this.additionalInterceptors == null){ return }
+     * delete this.additionalInterceptors[id];
+     * */
+    @Override
+    public synchronized void removeMessageInterceptor(int id) {
+        if (additionalInterceptors != null) {
+            additionalInterceptors[id] = null;
+        }
     }
 
     @Override

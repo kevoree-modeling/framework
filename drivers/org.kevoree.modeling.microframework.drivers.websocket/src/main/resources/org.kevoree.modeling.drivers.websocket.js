@@ -1,7 +1,5 @@
-/*
-///<reference path='java.d.ts'/>
-///<reference path='org.kevoree.modeling.microframework.typescript.d.ts'/>
-*/
+///<reference path='../../../target/jsdeps/java.d.ts'/>
+///<reference path='../../../target/jsdeps/org.kevoree.modeling.microframework.typescript.d.ts'/>
 var org;
 (function (org) {
     var kevoree;
@@ -16,7 +14,7 @@ var org;
                         function WebSocketClient(connectionUri) {
                             this._callbackId = 0;
                             this._reconnectionDelay = 3000;
-                            this._localEventListeners = new org.kevoree.modeling.util.LocalEventListeners();
+                            this._localEventListeners = new org.kevoree.modeling.event.impl.LocalEventListeners();
                             this._getCallbacks = new java.util.HashMap();
                             this._putCallbacks = new java.util.HashMap();
                             this._atomicGetCallbacks = new java.util.HashMap();
@@ -27,33 +25,33 @@ var org;
                             var self = this;
                             this._clientConnection = new WebSocket(this._connectionUri);
                             this._clientConnection.onmessage = function (message) {
-                                var msg = org.kevoree.modeling.msg.KMessageLoader.load(message.data);
+                                var msg = org.kevoree.modeling.message.KMessageLoader.load(message.data);
                                 switch (msg.type()) {
-                                    case org.kevoree.modeling.msg.KMessageLoader.GET_RES_TYPE:
+                                    case org.kevoree.modeling.message.KMessageLoader.GET_RES_TYPE:
                                         {
                                             var getResult = msg;
                                             _this._getCallbacks.remove(getResult.id)(getResult.values, null);
                                         }
                                         break;
-                                    case org.kevoree.modeling.msg.KMessageLoader.PUT_RES_TYPE:
+                                    case org.kevoree.modeling.message.KMessageLoader.PUT_RES_TYPE:
                                         {
                                             var putResult = msg;
                                             _this._putCallbacks.remove(putResult.id)(null);
                                         }
                                         break;
-                                    case org.kevoree.modeling.msg.KMessageLoader.ATOMIC_GET_INC_RESULT_TYPE:
+                                    case org.kevoree.modeling.message.KMessageLoader.ATOMIC_GET_INC_RESULT_TYPE:
                                         {
                                             var atomicGetResult = msg;
                                             _this._atomicGetCallbacks.remove(atomicGetResult.id)(atomicGetResult.value, null);
                                         }
                                         break;
-                                    case org.kevoree.modeling.msg.KMessageLoader.OPERATION_CALL_TYPE:
-                                    case org.kevoree.modeling.msg.KMessageLoader.OPERATION_RESULT_TYPE:
+                                    case org.kevoree.modeling.message.KMessageLoader.OPERATION_CALL_TYPE:
+                                    case org.kevoree.modeling.message.KMessageLoader.OPERATION_RESULT_TYPE:
                                         {
                                             _this._manager.operationManager().operationEventReceived(msg);
                                         }
                                         break;
-                                    case org.kevoree.modeling.msg.KMessageLoader.EVENTS_TYPE:
+                                    case org.kevoree.modeling.message.KMessageLoader.EVENTS_TYPE:
                                         {
                                             var eventsMsg = msg;
                                             _this._manager.reload(eventsMsg.allKeys(), (function (error) {
@@ -104,24 +102,23 @@ var org;
                             return this._callbackId;
                         };
                         WebSocketClient.prototype.put = function (request, error) {
-                            var putRequest = new org.kevoree.modeling.msg.KPutRequest();
+                            var putRequest = new org.kevoree.modeling.message.impl.PutRequest();
                             putRequest.id = this.nextKey();
                             putRequest.request = request;
                             this._putCallbacks.put(putRequest.id, error);
                             this._clientConnection.send(putRequest.json());
                         };
                         WebSocketClient.prototype.get = function (keys, callback) {
-                            var getRequest = new org.kevoree.modeling.msg.KGetRequest();
+                            var getRequest = new org.kevoree.modeling.message.impl.GetRequest();
                             getRequest.id = this.nextKey();
                             getRequest.keys = keys;
                             this._getCallbacks.put(getRequest.id, callback);
                             this._clientConnection.send(getRequest.json());
                         };
-                        WebSocketClient.prototype.atomicGetMutate = function (key, operation, callback) {
-                            var atomicGetRequest = new org.kevoree.modeling.msg.KAtomicGetRequest();
+                        WebSocketClient.prototype.atomicGetIncrement = function (key, callback) {
+                            var atomicGetRequest = new org.kevoree.modeling.message.impl.AtomicGetIncrementRequest();
                             atomicGetRequest.id = this.nextKey();
                             atomicGetRequest.key = key;
-                            atomicGetRequest.operation = operation;
                             this._atomicGetCallbacks.put(atomicGetRequest.id, callback);
                             this._clientConnection.send(atomicGetRequest.json());
                         };
@@ -154,4 +151,4 @@ var org;
         })(modeling = kevoree.modeling || (kevoree.modeling = {}));
     })(kevoree = org.kevoree || (org.kevoree = {}));
 })(org || (org = {}));
-//# sourceMappingURL=org.kevoree.modeling.database.websocket.WebSocket.js.map
+//# sourceMappingURL=org.kevoree.modeling.drivers.websocket.js.map

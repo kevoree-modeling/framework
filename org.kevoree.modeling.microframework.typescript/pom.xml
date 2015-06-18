@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.modeling.microframework.typescript</artifactId>
     <name>Kevoree :: Modeling :: MicroFramework :: TypeScript</name>
@@ -19,6 +20,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.kevoree.modeling</groupId>
+            <artifactId>org.kevoree.modeling.java2typescript.mavenplugin</artifactId>
+            <version>${java2typescript.plugin.version}</version>
+        </dependency>
+        <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.nodejs</artifactId>
             <version>1.28</version>
@@ -28,35 +34,6 @@
 
     <build>
         <plugins>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>copyTarget</id>
-                        <phase>process-sources</phase>
-                        <configuration>
-                            <tasks>
-                                <delete dir="${basedir}/src/main/ts" />
-                                <delete dir="${basedir}/src/main/resources" />
-                                <delete dir="${basedir}/src/test/ts" />
-                                <copy todir="${basedir}/target/sources">
-                                    <fileset dir="${basedir}/../org.kevoree.modeling.microframework/src/main/java" />
-                                </copy>
-                                <copy todir="${basedir}/target/sources">
-                                    <fileset dir="${basedir}/../org.kevoree.modeling.microframework/src/test/java" />
-                                </copy>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.kevoree.modeling</groupId>
                 <artifactId>org.kevoree.modeling.java2typescript.mavenplugin</artifactId>
@@ -69,8 +46,8 @@
                         </goals>
                         <configuration>
                             <source>${basedir}/../org.kevoree.modeling.microframework/src/main/java</source>
-                            <target>${basedir}/src/main/ts</target>
-                            <targetJS>${basedir}/src/main/resources</targetJS>
+                            <target>${basedir}/target/generated-sources</target>
+                            <targetJS>${basedir}/target/classes</targetJS>
                         </configuration>
                     </execution>
                     <execution>
@@ -83,29 +60,10 @@
                             <target>${basedir}/target/generated-test-sources</target>
                             <targetJS>${basedir}/target/test-classes</targetJS>
                             <flatJUnit>true</flatJUnit>
-                            <copyLibDTs>false</copyLibDTs>
                             <libraries>
-                                <library>${basedir}/src/main/resources</library>
+                                <library>${basedir}/target/classes</library>
                             </libraries>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <tasks>
-                                <copy todir="${basedir}/src/main/resources" file="${basedir}/src/main/ts/java.js" overwrite="true" />
-                                <copy todir="${basedir}/src/main/resources" file="${basedir}/src/main/ts/java.d.ts" overwrite="true" />
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
