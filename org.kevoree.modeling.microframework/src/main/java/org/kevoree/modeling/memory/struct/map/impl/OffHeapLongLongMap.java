@@ -159,7 +159,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         long entry = KConfig.NULL_LONG;
         int index = -1;
         int hash = (int) (key);
-        if (UNSAFE.getInt(internal_ptr_elem_data_size()) != -1) {
+        if (UNSAFE.getInt(internal_ptr_elem_data_size()) != 0) {
             index = (hash & 0x7FFFFFFF) % UNSAFE.getInt(internal_ptr_elem_data_size());
             entry = findNonNullKeyEntry(key, index);
         }
@@ -173,6 +173,15 @@ public class OffHeapLongLongMap implements KLongLongMap {
         }
 
         UNSAFE.putLong(entry + POS_VALUE * 8, value);
+    }
+
+    public void debug() {
+
+        for (int i = 0; i < UNSAFE.getInt(internal_ptr_elem_count()); i++) {
+
+            long entry_pos = internal_ptr_elem_data_idx(i);
+            System.out.println("key -> " + UNSAFE.getLong(entry_pos + POS_KEY * 8));
+        }
     }
 
     long createHashedEntry(long key, int index) {
@@ -198,18 +207,19 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
         for (int i = 0; i < UNSAFE.getInt(internal_ptr_elem_data_size()); i++) {
             long entry_pos = internal_ptr_elem_data_idx(i);
-            while (entry_pos != KConfig.NULL_LONG) {
-                long entry_key = UNSAFE.getLong(entry_pos + POS_KEY);
+            while (entry_pos != -1) {
+                long entry_key = UNSAFE.getLong(entry_pos + POS_KEY * 8);
                 int index = ((int) entry_key & 0x7FFFFFFF) % length;
 
-                long next = UNSAFE.getLong(entry_pos + POS_NEXT);
-                UNSAFE.putLong(entry_pos + POS_NEXT, internal_ptr_elem_data_idx(_new_data_start, index));
+                long next = UNSAFE.getLong(entry_pos + POS_NEXT * 8);
+                UNSAFE.putLong(entry_pos + POS_NEXT * 8, UNSAFE.getLong(internal_ptr_elem_data_idx(_new_data_start, index)));
                 UNSAFE.putLong(internal_ptr_elem_data_idx(_new_data_start, index), entry_pos);
 
                 entry_pos = next;
             }
         }
 
+        _start_address = UNSAFE.reallocateMemory(_start_address, internal_size_base_segment() + bytes);
         UNSAFE.copyMemory(_new_data_start, internal_ptr_elem_data(), bytes);
         UNSAFE.freeMemory(_new_data_start);
         _allocated_segments--;
@@ -234,18 +244,18 @@ public class OffHeapLongLongMap implements KLongLongMap {
         index = (hash & 0x7FFFFFFF) % elementDataSize;
 
         entry_pos = internal_ptr_elem_data_idx(index);
-        long entry_key = UNSAFE.getLong(entry_pos + POS_KEY);
+        long entry_key = UNSAFE.getLong(entry_pos + POS_KEY * 8);
         while (entry_pos != KConfig.NULL_LONG && !(/*((int)segment.key) == hash &&*/ key == entry_key)) {
             last_pos = entry_pos;
-            entry_pos = UNSAFE.getLong(entry_pos + POS_NEXT);
+            entry_pos = UNSAFE.getLong(entry_pos + POS_NEXT * 8);
         }
         if (entry_pos == KConfig.NULL_LONG) {
             return;
         }
         if (last_pos == KConfig.NULL_LONG) {
-            UNSAFE.putLong(internal_ptr_elem_data_idx(index), UNSAFE.getLong(entry_pos + POS_NEXT));
+            UNSAFE.putLong(internal_ptr_elem_data_idx(index), UNSAFE.getLong(entry_pos + POS_NEXT * 8));
         } else {
-            UNSAFE.putLong(last_pos + POS_NEXT, UNSAFE.getLong(entry_pos + POS_NEXT));
+            UNSAFE.putLong(last_pos + POS_NEXT * 8, UNSAFE.getLong(entry_pos + POS_NEXT * 8));
         }
         UNSAFE.putInt(internal_ptr_elem_count(), UNSAFE.getInt(internal_ptr_elem_count()) - 1);
     }
