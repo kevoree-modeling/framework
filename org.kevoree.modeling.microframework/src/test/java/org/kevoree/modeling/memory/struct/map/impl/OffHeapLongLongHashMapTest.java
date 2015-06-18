@@ -7,6 +7,7 @@ public class OffHeapLongLongHashMapTest extends BaseKLongLongHashMapTest {
 
     @Override
     public KLongLongMap createKLongLongHashMap(int p_initalCapacity, float p_loadFactor) {
+        //return new OffHeapLongLongMap(p_initalCapacity, p_loadFactor);
         return new ArrayLongLongMap(p_initalCapacity, p_loadFactor);
     }
 }
