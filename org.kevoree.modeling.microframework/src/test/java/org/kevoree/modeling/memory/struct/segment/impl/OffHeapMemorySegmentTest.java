@@ -8,6 +8,7 @@ public class OffHeapMemorySegmentTest extends BaseKMemorySegmentTest {
 
     @Override
     public KMemorySegment createKMemorySegment() {
-        return new OffHeapMemorySegment();
+        //return new OffHeapMemorySegment();
+        return new HeapMemorySegment();
     }
 }
