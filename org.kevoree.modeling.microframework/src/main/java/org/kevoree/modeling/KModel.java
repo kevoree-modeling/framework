@@ -47,4 +47,6 @@ public interface KModel<A extends KUniverse> {
 
     KObject create(KMetaClass clazz, long universe, long time);
 
+    void lookup(long universe, long time, long uuid, KCallback<KObject> cb);
+
 }

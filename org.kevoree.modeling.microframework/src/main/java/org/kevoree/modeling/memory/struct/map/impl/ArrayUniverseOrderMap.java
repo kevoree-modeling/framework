@@ -86,6 +86,9 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
         while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '{') {
             cursor++;
         }
+        if(cursor >= payload.length()){
+            return;
+        }
         if (payload.charAt(cursor) == ',') {//className to parse
             _className = payload.substring(initPos, cursor);
             cursor++;

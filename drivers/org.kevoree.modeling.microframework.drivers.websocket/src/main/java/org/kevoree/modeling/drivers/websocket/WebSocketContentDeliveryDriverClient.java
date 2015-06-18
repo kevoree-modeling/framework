@@ -5,6 +5,7 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentPutRequest;
+import org.kevoree.modeling.cdn.KMessageInterceptor;
 import org.kevoree.modeling.event.KEventListener;
 import org.kevoree.modeling.event.KEventMultiListener;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
@@ -20,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 
-public class WebSocketContentDeliveryDriver extends AbstractReceiveListener implements KContentDeliveryDriver {
+public class WebSocketContentDeliveryDriverClient extends AbstractReceiveListener implements KContentDeliveryDriver {
 
     private static final int CALLBACK_SIZE = 100000;
 
@@ -32,7 +33,7 @@ public class WebSocketContentDeliveryDriver extends AbstractReceiveListener impl
 
     private final ArrayLongMap<Object> _callbacks = new ArrayLongMap<Object>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
 
-    public WebSocketContentDeliveryDriver(String url) {
+    public WebSocketContentDeliveryDriverClient(String url) {
         _client = new UndertowWSClient(url);
     }
 
@@ -103,7 +104,7 @@ public class WebSocketContentDeliveryDriver extends AbstractReceiveListener impl
                 this._manager.reload(eventsMessage.allKeys(), new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
-                        WebSocketContentDeliveryDriver.this._localEventListeners.dispatch(eventsMessage);
+                        WebSocketContentDeliveryDriverClient.this._localEventListeners.dispatch(eventsMessage);
                     }
                 });
             }
@@ -165,6 +166,31 @@ public class WebSocketContentDeliveryDriver extends AbstractReceiveListener impl
     public void send(KMessage msg) {
         _localEventListeners.dispatch(msg);
         WebSockets.sendText(msg.json(), _client.getChannel(), null);
+    }
+
+    private KMessageInterceptor[] additionalInterceptors = null;
+
+    @Override
+    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+        if (additionalInterceptors == null) {
+            additionalInterceptors = new KMessageInterceptor[1];
+            additionalInterceptors[0] = p_interceptor;
+            return 0;
+        } else {
+            int id = additionalInterceptors.length;
+            KMessageInterceptor[] newInterceptors = new KMessageInterceptor[id + 1];
+            System.arraycopy(additionalInterceptors, 0, newInterceptors, 0, id);
+            newInterceptors[id] = p_interceptor;
+            additionalInterceptors = newInterceptors;
+            return id;
+        }
+    }
+
+    @Override
+    public synchronized void removeMessageInterceptor(int id) {
+        if (additionalInterceptors != null) {
+            additionalInterceptors[id] = null;
+        }
     }
 
     @Override

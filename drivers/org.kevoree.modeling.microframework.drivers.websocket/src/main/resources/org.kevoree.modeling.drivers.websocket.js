@@ -18,8 +18,17 @@ var org;
                             this._getCallbacks = new java.util.HashMap();
                             this._putCallbacks = new java.util.HashMap();
                             this._atomicGetCallbacks = new java.util.HashMap();
+                            this.interceptors = new Array();
                             this._connectionUri = connectionUri;
                         }
+                        WebSocketClient.prototype.addMessageInterceptor = function (interceptor) {
+                            var i = interceptor.length;
+                            this.interceptors.push(interceptor);
+                            return i;
+                        };
+                        WebSocketClient.prototype.removeMessageInterceptor = function (id) {
+                            delete this.interceptors[id];
+                        };
                         WebSocketClient.prototype.connect = function (callback) {
                             var _this = this;
                             var self = this;

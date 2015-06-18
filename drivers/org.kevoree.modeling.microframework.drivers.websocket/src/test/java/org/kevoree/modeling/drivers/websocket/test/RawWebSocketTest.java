@@ -5,20 +5,27 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KContentKey;
+import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 import org.kevoree.modeling.message.impl.Events;
-import org.kevoree.modeling.drivers.websocket.WebSocketContentDeliveryDriver;
+import org.kevoree.modeling.drivers.websocket.WebSocketContentDeliveryDriverClient;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
+import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.meta.impl.MetaModel;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class WebSocketTest {
+public class RawWebSocketTest {
 
     private int PORT = 6000;
 
     @Test
     public void test() {
+        KContentDeliveryDriverMock mock = new KContentDeliveryDriverMock();
+        KMetaModel dynamicMM = new MetaModel("mock");
+        KModel model = dynamicMM.model();
+
 
         KContentKey[] getRequest = new KContentKey[3];
         getRequest[0] = KContentKey.createGlobalUniverseTree();
@@ -33,18 +40,20 @@ public class WebSocketTest {
         meta[0] = 42;
         eventsMessage.setEvent(0, KContentKey.createGlobalUniverseTree(), meta);
 
-        KContentDeliveryDriverMock mock = new KContentDeliveryDriverMock();
-        WebSocketGateway wrapper = new WebSocketGateway(mock, PORT);
+        model.setContentDeliveryDriver(mock);
+        WebSocketGateway wrapper = WebSocketGateway.exposeModel(model,PORT);
+        wrapper.start();
 
         CountDownLatch latch = new CountDownLatch(3);
 
-        wrapper.connect(new KCallback<Throwable>() {
+        model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
-                WebSocketContentDeliveryDriver client = new WebSocketContentDeliveryDriver("ws://localhost:" + PORT);
+                WebSocketContentDeliveryDriverClient client = new WebSocketContentDeliveryDriverClient("ws://localhost:" + PORT);
                 client.connect(new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
+
                         client.get(getRequest, new KCallback<String[]>() {
                             @Override
                             public void on(String[] resultPayloads) {
@@ -55,6 +64,7 @@ public class WebSocketTest {
                                 }
                             }
                         });
+
                         client.put(putRequest, new KCallback<Throwable>() {
                             @Override
                             public void on(Throwable throwable) {

@@ -136,4 +136,9 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         return create(_manager.model().metaModel().metaClassByName(metaClassName), universe, time);
     }
 
+    @Override
+    public void lookup(long p_universe, long p_time, long p_uuid, KCallback<KObject> cb) {
+        _manager.lookup(p_universe, p_time, p_uuid, cb);
+    }
+
 }

@@ -4,6 +4,7 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentPutRequest;
+import org.kevoree.modeling.cdn.KMessageInterceptor;
 import org.kevoree.modeling.event.KEventListener;
 import org.kevoree.modeling.event.KEventMultiListener;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
@@ -77,6 +78,16 @@ public class KContentDeliveryDriverMock implements KContentDeliveryDriver {
     public void send(KMessage msgs) {
         recMessages.add(msgs);
         msgCounter.countDown();
+    }
+
+    @Override
+    public int addMessageInterceptor(KMessageInterceptor interceptor) {
+        return 0;
+    }
+
+    @Override
+    public void removeMessageInterceptor(int id) {
+
     }
 
     @Override

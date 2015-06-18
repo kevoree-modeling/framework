@@ -24,6 +24,18 @@ module org {
                             this._connectionUri = connectionUri;
                         }
 
+                        interceptors : Array<any> = new Array<any>();
+
+                        public addMessageInterceptor(interceptor): number{
+                            var i = interceptor.length;
+                            this.interceptors.push(interceptor);
+                            return i;
+                        }
+
+                        public removeMessageInterceptor(id):void {
+                            delete this.interceptors[id];
+                        }
+
                         public connect(callback:(p:java.lang.Throwable) => void):void {
                             var self = this;
                             this._clientConnection = new WebSocket(this._connectionUri);
