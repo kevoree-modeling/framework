@@ -8,7 +8,7 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 import org.kevoree.modeling.message.impl.Events;
-import org.kevoree.modeling.drivers.websocket.WebSocketContentDeliveryDriverClient;
+import org.kevoree.modeling.drivers.websocket.WebSocketCDNClient;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -49,7 +49,7 @@ public class RawWebSocketTest {
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
-                WebSocketContentDeliveryDriverClient client = new WebSocketContentDeliveryDriverClient("ws://localhost:" + PORT);
+                WebSocketCDNClient client = new WebSocketCDNClient("ws://localhost:" + PORT);
                 client.connect(new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
@@ -104,7 +104,7 @@ public class RawWebSocketTest {
         Assert.assertEquals(latch.getCount(), 0);
 
         Assert.assertEquals(mock.msgCounter.getCount(), 0);
-
+        wrapper.stop();
     }
 
 }

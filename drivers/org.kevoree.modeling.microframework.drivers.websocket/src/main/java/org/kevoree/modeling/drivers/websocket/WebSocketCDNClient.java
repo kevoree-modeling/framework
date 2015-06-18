@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 
-public class WebSocketContentDeliveryDriverClient extends AbstractReceiveListener implements KContentDeliveryDriver {
+public class WebSocketCDNClient extends AbstractReceiveListener implements KContentDeliveryDriver {
 
     private static final int CALLBACK_SIZE = 100000;
 
@@ -33,7 +33,7 @@ public class WebSocketContentDeliveryDriverClient extends AbstractReceiveListene
 
     private final ArrayLongMap<Object> _callbacks = new ArrayLongMap<Object>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
 
-    public WebSocketContentDeliveryDriverClient(String url) {
+    public WebSocketCDNClient(String url) {
         _client = new UndertowWSClient(url);
     }
 
@@ -104,7 +104,7 @@ public class WebSocketContentDeliveryDriverClient extends AbstractReceiveListene
                 this._manager.reload(eventsMessage.allKeys(), new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
-                        WebSocketContentDeliveryDriverClient.this._localEventListeners.dispatch(eventsMessage);
+                        WebSocketCDNClient.this._localEventListeners.dispatch(eventsMessage);
                     }
                 });
             }

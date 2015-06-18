@@ -5,9 +5,9 @@
 module org {
     export module kevoree {
         export module modeling {
-            export module database {
+            export module drivers {
                 export module websocket {
-                    export class WebSocketClient implements org.kevoree.modeling.cdn.KContentDeliveryDriver {
+                    export class WebSocketCDNClient implements org.kevoree.modeling.cdn.KContentDeliveryDriver {
 
                         private _callbackId = 0;
                         private _reconnectionDelay = 3000;

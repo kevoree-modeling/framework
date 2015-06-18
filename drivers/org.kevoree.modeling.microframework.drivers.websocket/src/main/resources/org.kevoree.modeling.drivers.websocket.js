@@ -6,12 +6,12 @@ var org;
     (function (kevoree) {
         var modeling;
         (function (modeling) {
-            var database;
-            (function (database) {
+            var drivers;
+            (function (drivers) {
                 var websocket;
                 (function (websocket) {
-                    var WebSocketClient = (function () {
-                        function WebSocketClient(connectionUri) {
+                    var WebSocketCDNClient = (function () {
+                        function WebSocketCDNClient(connectionUri) {
                             this._callbackId = 0;
                             this._reconnectionDelay = 3000;
                             this._localEventListeners = new org.kevoree.modeling.event.impl.LocalEventListeners();
@@ -21,15 +21,15 @@ var org;
                             this.interceptors = new Array();
                             this._connectionUri = connectionUri;
                         }
-                        WebSocketClient.prototype.addMessageInterceptor = function (interceptor) {
+                        WebSocketCDNClient.prototype.addMessageInterceptor = function (interceptor) {
                             var i = interceptor.length;
                             this.interceptors.push(interceptor);
                             return i;
                         };
-                        WebSocketClient.prototype.removeMessageInterceptor = function (id) {
+                        WebSocketCDNClient.prototype.removeMessageInterceptor = function (id) {
                             delete this.interceptors[id];
                         };
-                        WebSocketClient.prototype.connect = function (callback) {
+                        WebSocketCDNClient.prototype.connect = function (callback) {
                             var _this = this;
                             var self = this;
                             this._clientConnection = new WebSocket(this._connectionUri);
@@ -95,13 +95,13 @@ var org;
                                 }
                             };
                         };
-                        WebSocketClient.prototype.close = function (callback) {
+                        WebSocketCDNClient.prototype.close = function (callback) {
                             this._clientConnection.close();
                             if (callback != null) {
                                 callback(null);
                             }
                         };
-                        WebSocketClient.prototype.nextKey = function () {
+                        WebSocketCDNClient.prototype.nextKey = function () {
                             if (this._callbackId == 1000000) {
                                 this._callbackId = 0;
                             }
@@ -110,53 +110,53 @@ var org;
                             }
                             return this._callbackId;
                         };
-                        WebSocketClient.prototype.put = function (request, error) {
+                        WebSocketCDNClient.prototype.put = function (request, error) {
                             var putRequest = new org.kevoree.modeling.message.impl.PutRequest();
                             putRequest.id = this.nextKey();
                             putRequest.request = request;
                             this._putCallbacks.put(putRequest.id, error);
                             this._clientConnection.send(putRequest.json());
                         };
-                        WebSocketClient.prototype.get = function (keys, callback) {
+                        WebSocketCDNClient.prototype.get = function (keys, callback) {
                             var getRequest = new org.kevoree.modeling.message.impl.GetRequest();
                             getRequest.id = this.nextKey();
                             getRequest.keys = keys;
                             this._getCallbacks.put(getRequest.id, callback);
                             this._clientConnection.send(getRequest.json());
                         };
-                        WebSocketClient.prototype.atomicGetIncrement = function (key, callback) {
+                        WebSocketCDNClient.prototype.atomicGetIncrement = function (key, callback) {
                             var atomicGetRequest = new org.kevoree.modeling.message.impl.AtomicGetIncrementRequest();
                             atomicGetRequest.id = this.nextKey();
                             atomicGetRequest.key = key;
                             this._atomicGetCallbacks.put(atomicGetRequest.id, callback);
                             this._clientConnection.send(atomicGetRequest.json());
                         };
-                        WebSocketClient.prototype.remove = function (keys, error) {
+                        WebSocketCDNClient.prototype.remove = function (keys, error) {
                             console.error("Not implemented yet");
                         };
-                        WebSocketClient.prototype.registerListener = function (groupId, origin, listener) {
+                        WebSocketCDNClient.prototype.registerListener = function (groupId, origin, listener) {
                             this._localEventListeners.registerListener(groupId, origin, listener);
                         };
-                        WebSocketClient.prototype.registerMultiListener = function (groupId, origin, objects, listener) {
+                        WebSocketCDNClient.prototype.registerMultiListener = function (groupId, origin, objects, listener) {
                             this._localEventListeners.registerListenerAll(groupId, origin.key(), objects, listener);
                         };
-                        WebSocketClient.prototype.unregisterGroup = function (groupId) {
+                        WebSocketCDNClient.prototype.unregisterGroup = function (groupId) {
                             this._localEventListeners.unregister(groupId);
                         };
-                        WebSocketClient.prototype.setManager = function (manager) {
+                        WebSocketCDNClient.prototype.setManager = function (manager) {
                             this._manager = manager;
                             this._localEventListeners.setManager(manager);
                         };
-                        WebSocketClient.prototype.send = function (msg) {
+                        WebSocketCDNClient.prototype.send = function (msg) {
                             //Send to remote
                             this._localEventListeners.dispatch(msg);
                             this._clientConnection.send(msg.json());
                         };
-                        return WebSocketClient;
+                        return WebSocketCDNClient;
                     })();
-                    websocket.WebSocketClient = WebSocketClient;
-                })(websocket = database.websocket || (database.websocket = {}));
-            })(database = modeling.database || (modeling.database = {}));
+                    websocket.WebSocketCDNClient = WebSocketCDNClient;
+                })(websocket = drivers.websocket || (drivers.websocket = {}));
+            })(drivers = modeling.drivers || (modeling.drivers = {}));
         })(modeling = kevoree.modeling || (kevoree.modeling = {}));
     })(kevoree = org.kevoree || (org.kevoree = {}));
 })(org || (org = {}));

@@ -4,13 +4,10 @@ package org.kevoree.modeling.drivers.websocket.test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.cdn.impl.ContentPutRequest;
-import org.kevoree.modeling.drivers.websocket.WebSocketContentDeliveryDriverClient;
+import org.kevoree.modeling.drivers.websocket.WebSocketCDNClient;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
-import org.kevoree.modeling.message.impl.Events;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
@@ -51,7 +48,7 @@ public class ModelWebSocketTest {
                     @Override
                     public void on(Object o) {
                         //ok lets start a second VIRTUAL model connected through WebSocket
-                        WebSocketContentDeliveryDriverClient client = new WebSocketContentDeliveryDriverClient("ws://localhost:" + PORT);
+                        WebSocketCDNClient client = new WebSocketCDNClient("ws://localhost:" + PORT);
                         KModel modelClient = dynamicMM.model();
                         modelClient.setContentDeliveryDriver(client);
                         modelClient.connect(new KCallback() {
@@ -84,6 +81,7 @@ public class ModelWebSocketTest {
 
         Assert.assertEquals(latch.getCount(), 0);
 
+        wrapper.stop();
 
     }
 
