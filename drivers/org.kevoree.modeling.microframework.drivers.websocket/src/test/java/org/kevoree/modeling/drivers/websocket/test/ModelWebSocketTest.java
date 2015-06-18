@@ -154,11 +154,4 @@ public class ModelWebSocketTest {
 
     }
 
-    @Test
-    public void browserJS() throws Exception {
-
-    }
-
-
-
 }

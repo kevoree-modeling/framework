@@ -12,6 +12,7 @@ public class KMessageLoader {
     public static String OPERATION_NAME = "op";
     public static String KEY_NAME = "key";
     public static String KEYS_NAME = "keys";
+    public static String SENDER = "sender";
     public static String ID_NAME = "id";
     public static String VALUE_NAME = "value";
     public static String VALUES_NAME = "values";
@@ -46,9 +47,10 @@ public class KMessageLoader {
             Integer parsedType = Integer.parseInt(objectReader.get(TYPE_NAME).toString());
             if (parsedType == EVENTS_TYPE) {
                 Events eventsMessage = null;
-                if (objectReader.get(KEYS_NAME) != null) {
+                if (objectReader.get(KEYS_NAME) != null && objectReader.get(SENDER) != null) {
+                    int sender = Integer.parseInt(objectReader.get(SENDER).toString());
                     String[] objIdsRaw = objectReader.getAsStringArray(KEYS_NAME);
-                    eventsMessage = new Events(objIdsRaw.length);
+                    eventsMessage = new Events(objIdsRaw.length,sender);
                     KContentKey[] keys = new KContentKey[objIdsRaw.length];
                     for (int i = 0; i < objIdsRaw.length; i++) {
                         try {

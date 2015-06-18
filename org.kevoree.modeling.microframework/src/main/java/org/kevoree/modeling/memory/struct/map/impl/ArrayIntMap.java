@@ -2,6 +2,7 @@
 package org.kevoree.modeling.memory.struct.map.impl;
 
 import org.kevoree.modeling.memory.struct.map.KIntMap;
+import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
 import org.kevoree.modeling.memory.struct.map.KLongMapCallBack;
 
 /**
@@ -99,7 +100,7 @@ public class ArrayIntMap<V> implements KIntMap<V> {
     }
 
     @Override
-    public void each(KLongMapCallBack<V> callback) {
+    public void each(KIntMapCallBack<V> callback) {
         for (int i = 0; i < elementDataSize; i++) {
             if (elementData[i] != null) {
                 Entry<V> current = elementData[i];

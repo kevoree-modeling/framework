@@ -10,16 +10,23 @@ public class Events implements KMessage {
 
     public int[][] _metaindexes;
 
+    public int getSender() {
+        return _sender;
+    }
+
+    private int _sender;
+
     private int _size;
 
     public KContentKey[] allKeys() {
         return _objIds;
     }
 
-    public Events(int nbObject) {
+    public Events(int nbObject, int p_sender) {
         this._objIds = new KContentKey[nbObject];
         this._metaindexes = new int[nbObject][];
         this._size = nbObject;
+        this._sender = p_sender;
     }
 
     @Override
@@ -27,6 +34,9 @@ public class Events implements KMessage {
         StringBuilder buffer = new StringBuilder();
         MessageHelper.printJsonStart(buffer);
         MessageHelper.printType(buffer, type());
+        buffer.append(",");
+        buffer.append("\"sender\":");
+        buffer.append(_sender);
         buffer.append(",");
         buffer.append("\"");
         buffer.append(KMessageLoader.KEYS_NAME).append("\":[");

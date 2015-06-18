@@ -12,11 +12,17 @@ import io.undertow.websockets.core.WebSockets;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KMessageInterceptor;
+import org.kevoree.modeling.memory.struct.map.KIntMap;
+import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
+import org.kevoree.modeling.memory.struct.map.KLongLongMap;
+import org.kevoree.modeling.memory.struct.map.KLongMapCallBack;
+import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
+import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.message.*;
 import org.kevoree.modeling.message.impl.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import static io.undertow.Handlers.websocket;
 
@@ -37,7 +43,8 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
     }
 
     private KModel wrapped = null;
-    private ArrayList<WebSocketChannel> _connectedChannels = new ArrayList<WebSocketChannel>();
+    private ArrayIntMap<WebSocketChannel> _connectedChannels_hash = new ArrayIntMap<WebSocketChannel>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+    private HashMap<Integer, Short> _hash_prefix = new HashMap<Integer, Short>();
     private Undertow _server = null;
     private String _address = "0.0.0.0";
     private int _port = 8080;
@@ -57,9 +64,24 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
             @Override
             public boolean on(KMessage msg) {
                 String payload = msg.json();
-                for (int i = 0; i < _connectedChannels.size(); i++) {
-                    WebSocketChannel channel = _connectedChannels.get(i);
-                    WebSockets.sendText(payload, channel, null);
+                if(msg instanceof Events){
+                    Events events = (Events) msg;
+                    _connectedChannels_hash.each(new KIntMapCallBack<WebSocketChannel>() {
+                        @Override
+                        public void on(int key, WebSocketChannel channel) {
+                            Short prefix = _hash_prefix.get(channel.hashCode());
+                            if(events.getSender() != prefix){
+                                WebSockets.sendText(payload, channel, null);
+                            }
+                        }
+                    });
+                } else {
+                    _connectedChannels_hash.each(new KIntMapCallBack<WebSocketChannel>() {
+                        @Override
+                        public void on(int key, WebSocketChannel channel) {
+                            WebSockets.sendText(payload, channel, null);
+                        }
+                    });
                 }
                 return false;
             }
@@ -74,13 +96,14 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
     public void onConnect(WebSocketHttpExchange webSocketHttpExchange, WebSocketChannel webSocketChannel) {
         webSocketChannel.getReceiveSetter().set(this);
         webSocketChannel.resumeReceives();
-        _connectedChannels.add(webSocketChannel);
+        _connectedChannels_hash.put(webSocketChannel.hashCode(), webSocketChannel);
     }
 
 
     @Override
     protected void onClose(WebSocketChannel webSocketChannel, StreamSourceFrameChannel channel) throws IOException {
-        _connectedChannels.remove(webSocketChannel);
+        _connectedChannels_hash.remove(webSocketChannel.hashCode());
+        _hash_prefix.remove(webSocketChannel.hashCode());
         super.onClose(webSocketChannel, channel);
     }
 
@@ -124,6 +147,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
                             AtomicGetIncrementResult atomicGetResultMessage = new AtomicGetIncrementResult();
                             atomicGetResultMessage.id = atomicGetRequest.id;
                             atomicGetResultMessage.value = s;
+                            _hash_prefix.put(channel.hashCode(),s);
                             WebSockets.sendText(atomicGetResultMessage.json(), channel, null);
                         }
                     }
@@ -140,14 +164,6 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
                 wrapped.manager().reload(events.allKeys(), null);
                 //local listeners dispatch
                 wrapped.manager().cdn().send(events);
-                //forward to remote listeners
-                ArrayList<WebSocketChannel> channels = new ArrayList<>(_connectedChannels);
-                for (int i = 0; i < channels.size(); i++) {
-                    WebSocketChannel chan = channels.get(i);
-                    if (chan != channel) {
-                        WebSockets.sendText(payload, chan, null);
-                    }
-                }
             }
             break;
             default: {

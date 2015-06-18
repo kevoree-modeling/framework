@@ -11,7 +11,7 @@ public class KMessageTest {
     @Test
     public void test() {
 
-        Events event = new Events(1);
+        Events event = new Events(1,0);
         int[] meta = new int[2];
         meta[0] = 0;
         meta[1] = 1;
@@ -20,7 +20,7 @@ public class KMessageTest {
 
         Assert.assertEquals("{\n" +
                 "\"type\":\"0\"\n" +
-                ",\"keys\":[\"0/1/2\"]\n" +
+                ",\"sender\":0,\"keys\":[\"0/1/2\"]\n" +
                 ",\"values\":[\"0%1\"]\n" +
                 "}\n", event.json());
         KMessage parsed = KMessageLoader.load(event.json());

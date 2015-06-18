@@ -35,7 +35,7 @@ public class RawWebSocketTest {
         ContentPutRequest putRequest = new ContentPutRequest(2);
         putRequest.put(KContentKey.createGlobalUniverseTree(), "GlobalUniverseTree");
 
-        Events eventsMessage = new Events(1);
+        Events eventsMessage = new Events(1,0);
         int[] meta = new int[1];
         meta[0] = 42;
         eventsMessage.setEvent(0, KContentKey.createGlobalUniverseTree(), meta);

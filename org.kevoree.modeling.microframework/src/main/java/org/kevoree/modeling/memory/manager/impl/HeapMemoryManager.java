@@ -44,6 +44,7 @@ public class HeapMemoryManager implements KMemoryManager {
     private KeyCalculator _groupKeyCalculator;
     private boolean isConnected = false;
     private KCache _cache;
+    private Short prefix;
 
     private static final int UNIVERSE_INDEX = 0;
     private static final int OBJ_INDEX = 1;
@@ -176,7 +177,7 @@ public class HeapMemoryManager implements KMemoryManager {
     public synchronized void save(final KCallback<Throwable> callback) {
         KCacheDirty[] dirtiesEntries = _cache.dirties();
         ContentPutRequest request = new ContentPutRequest(dirtiesEntries.length + 2);
-        final Events notificationMessages = new Events(dirtiesEntries.length);
+        final Events notificationMessages = new Events(dirtiesEntries.length, prefix);
         for (int i = 0; i < dirtiesEntries.length; i++) {
             KMemoryElement cachedObject = dirtiesEntries[i].object;
             int[] meta;
@@ -252,7 +253,7 @@ public class HeapMemoryManager implements KMemoryManager {
                                         connectionElemKeys[UNIVERSE_INDEX] = KContentKey.createLastUniverseIndexFromPrefix(newPrefix);
                                         connectionElemKeys[OBJ_INDEX] = KContentKey.createLastObjectIndexFromPrefix(newPrefix);
                                         connectionElemKeys[GLO_TREE_INDEX] = KContentKey.createGlobalUniverseTree();
-                                        final Short finalNewPrefix = newPrefix;
+                                        prefix = newPrefix;
                                         _db.get(connectionElemKeys, new KCallback<String[]>() {
                                             @Override
                                             public void on(String[] strings) {
@@ -282,8 +283,8 @@ public class HeapMemoryManager implements KMemoryManager {
                                                         _cache.put(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, globalUniverseTree);
                                                         long newUniIndex = Long.parseLong(uniIndexPayload);
                                                         long newObjIndex = Long.parseLong(objIndexPayload);
-                                                        _universeKeyCalculator = new KeyCalculator(finalNewPrefix, newUniIndex);
-                                                        _objectKeyCalculator = new KeyCalculator(finalNewPrefix, newObjIndex);
+                                                        _universeKeyCalculator = new KeyCalculator(prefix, newUniIndex);
+                                                        _objectKeyCalculator = new KeyCalculator(prefix, newObjIndex);
                                                         isConnected = true;
                                                     } catch (Exception e) {
                                                         detected = e;

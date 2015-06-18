@@ -8,6 +8,6 @@ public interface KIntMap<V> {
 
     void put(int key, V value);
 
-    void each(KLongMapCallBack<V> callback);
+    void each(KIntMapCallBack<V> callback);
 
 }

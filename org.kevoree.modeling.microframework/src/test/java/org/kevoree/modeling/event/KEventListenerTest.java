@@ -47,7 +47,7 @@ public class KEventListenerTest {
             }
         };
         localEventListeners.registerListener(0, obj, listener);
-        Events events = new Events(1);
+        Events events = new Events(1, 0);
         int metaNameIndex = obj.metaClass().attribute("name").index();
         int[] metas = new int[]{metaNameIndex};
         events.setEvent(0, KContentKey.createObject(obj.universe(), obj.now(), obj.uuid()), metas);
@@ -77,7 +77,7 @@ public class KEventListenerTest {
         long[] toListen = new long[1];
         toListen[0] = obj.uuid();
         localEventListeners.registerListenerAll(0, t0.universe(), toListen, multiListener);
-        Events events = new Events(1);
+        Events events = new Events(1,0);
         int metaNameIndex = obj.metaClass().attribute("name").index();
         int[] metas = new int[]{metaNameIndex};
         events.setEvent(0, KContentKey.createObject(obj.universe(), obj.now(), obj.uuid()), metas);
@@ -87,7 +87,7 @@ public class KEventListenerTest {
         localEventListeners.unregister(0);
         localEventListeners.dispatch(events);
         Assert.assertEquals(counter[0], 0);
-        Events events2 = new Events(2);
+        Events events2 = new Events(2,0);
         events2.setEvent(0, KContentKey.createObject(obj.universe(), obj.now(), obj.uuid()), metas);
         events2.setEvent(1, KContentKey.createObject(obj2.universe(), obj.now(), obj.uuid()), metas);
         long[] toListen2 = new long[2];
