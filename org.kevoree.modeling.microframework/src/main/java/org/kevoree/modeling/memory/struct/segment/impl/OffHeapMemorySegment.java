@@ -1,7 +1,6 @@
 package org.kevoree.modeling.memory.struct.segment.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.format.json.JsonFormat;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
@@ -515,10 +514,9 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
         KMetaClass metaClass = metaModel.metaClass(metaClassIndex());
 
         StringBuilder builder = new StringBuilder();
-        builder.append("{\"@class\":\"");
-        builder.append(metaClass.metaName());
-        builder.append("\"");
+        builder.append("{");
 
+        boolean isFirst = true;
         KMeta[] metaElements = metaClass.metaElements();
         if (_start_address != 0 && metaElements != null) {
             for (int i = 0; i < metaElements.length; i++) {
@@ -530,7 +528,12 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                     if (metaAttribute.attributeType() != KPrimitiveTypes.CONTINUOUS) {
                         Object o = get(meta.index(), metaClass);
                         if (o != null) {
-                            builder.append(",\"");
+                            if (isFirst) {
+                                builder.append("\"");
+                                isFirst = false;
+                            } else {
+                                builder.append(",\"");
+                            }
                             builder.append(metaAttribute.metaName());
                             builder.append("\":");
 
@@ -592,75 +595,74 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);
-            if (objectReader.get(JsonFormat.KEY_META) != null) {
-                KMetaClass metaClass = metaModel.metaClassByName(objectReader.get(JsonFormat.KEY_META).toString());
-                initMetaClass(metaClass);
-                String[] metaKeys = objectReader.keys();
-                for (int i = 0; i < metaKeys.length; i++) {
-                    KMeta metaElement = metaClass.metaByName(metaKeys[i]);
-                    Object insideContent = objectReader.get(metaKeys[i]);
+            KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(internal_ptr_metaClassIndex()));
+            initMetaClass(metaClass);
+            String[] metaKeys = objectReader.keys();
+            for (int i = 0; i < metaKeys.length; i++) {
+                KMeta metaElement = metaClass.metaByName(metaKeys[i]);
+                Object insideContent = objectReader.get(metaKeys[i]);
 
-                    if (insideContent != null) {
-                        if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
-                            KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
-                            Object converted = null;
-                            if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                                converted = JsonString.unescape((String) insideContent);
-                            } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                                converted = Long.parseLong((String) insideContent);
-                            } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                                converted = Integer.parseInt((String) insideContent);
-                            } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                                converted = Boolean.parseBoolean((String) insideContent);
-                            } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
-                                converted = Short.parseShort((String) insideContent);
-                            } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                                converted = Double.parseDouble((String) insideContent);
-                            } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                                converted = Float.parseFloat((String) insideContent);
-                            } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                                String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
-                                double[] convertedRaw = new double[plainRawSet.length];
-                                for (int l = 0; l < plainRawSet.length; l++) {
-                                    try {
-                                        convertedRaw[l] = Double.parseDouble(plainRawSet[l]);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+                if (insideContent != null) {
+                    if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
+                        KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
+                        Object converted = null;
+                        if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                            converted = JsonString.unescape((String) insideContent);
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
+                            converted = Long.parseLong((String) insideContent);
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
+                            converted = Integer.parseInt((String) insideContent);
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
+                            converted = Boolean.parseBoolean((String) insideContent);
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
+                            converted = Short.parseShort((String) insideContent);
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+                            converted = Double.parseDouble((String) insideContent);
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
+                            converted = Float.parseFloat((String) insideContent);
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                            String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
+                            double[] convertedRaw = new double[plainRawSet.length];
+                            for (int l = 0; l < plainRawSet.length; l++) {
+                                try {
+                                    convertedRaw[l] = Double.parseDouble(plainRawSet[l]);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                                converted = convertedRaw;
                             }
+                            converted = convertedRaw;
+                        }
 
-                            if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                                double[] infer = (double[]) converted;
-                                extendInfer(metaAttribute.index(), infer.length, metaClass);
-                                for (int k = 0; k < infer.length; k++) {
-                                    setInferElem(metaAttribute.index(), k, infer[k], metaClass);
-                                }
-                            } else {
-                                set(metaAttribute.index(), converted, metaClass);
+                        if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                            double[] infer = (double[]) converted;
+                            extendInfer(metaAttribute.index(), infer.length, metaClass);
+                            for (int k = 0; k < infer.length; k++) {
+                                setInferElem(metaAttribute.index(), k, infer[k], metaClass);
                             }
+                        } else {
+                            set(metaAttribute.index(), converted, metaClass);
+                        }
 
-                        } else if (metaElement != null && metaElement instanceof KMetaReference) {
-                            try {
-                                String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
-                                long[] convertedRaw = new long[plainRawSet.length];
-                                for (int l = 0; l < plainRawSet.length; l++) {
-                                    try {
-                                        convertedRaw[l] = Long.parseLong(plainRawSet[l]);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+                    } else if (metaElement != null && metaElement instanceof KMetaReference) {
+                        try {
+                            String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
+                            long[] convertedRaw = new long[plainRawSet.length];
+                            for (int l = 0; l < plainRawSet.length; l++) {
+                                try {
+                                    convertedRaw[l] = Long.parseLong(plainRawSet[l]);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                                for (int k = 0; k < convertedRaw.length; k++) {
-                                    addRef(metaElement.index(), convertedRaw[k], metaClass);
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
+                            for (int k = 0; k < convertedRaw.length; k++) {
+                                addRef(metaElement.index(), convertedRaw[k], metaClass);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 }
+
             }
         }
         // should not be dirty after unserialization
@@ -737,9 +739,9 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
         UNSAFE.freeMemory(_start_address);
         _allocated_segments--;
 
-        if (_allocated_segments != 0) {
-            throw new RuntimeException("OffHeap Memory Management Exception: more segments allocated than freed");
-        }
+//        if (_allocated_segments != 0) {
+//            throw new RuntimeException("OffHeap Memory Management Exception: more segments allocated than freed");
+//        }
     }
 
 
