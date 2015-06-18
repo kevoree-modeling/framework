@@ -11,6 +11,8 @@ public abstract class BaseKLongLongTreeTest {
     @Test
     public void saveLoad0() throws Exception {
         KLongLongTree tree = createKLongLongTree();
+        tree.init(null, null);
+
         for (long i = 0; i <= 6; i++) {
             tree.insert(i, i);
         }
@@ -22,6 +24,8 @@ public abstract class BaseKLongLongTreeTest {
     @Test
     public void saveLoad() throws Exception {
         KLongLongTree tree = createKLongLongTree();
+        tree.init(null, null);
+
         for (long i = 0; i <= 6; i++) {
             tree.insert(i, i);
         }
@@ -38,6 +42,8 @@ public abstract class BaseKLongLongTreeTest {
     @Test
     public void cacheEffectTest() {
         KLongLongTree tree = createKLongLongTree();
+        tree.init(null, null);
+        
         for (long i = 0; i <= 6; i++) {
             tree.insert(i, i);
         }
