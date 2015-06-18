@@ -77,9 +77,11 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
         _connectedChannels.add(webSocketChannel);
     }
 
+
     @Override
     protected void onClose(WebSocketChannel webSocketChannel, StreamSourceFrameChannel channel) throws IOException {
         _connectedChannels.remove(webSocketChannel);
+        super.onClose(webSocketChannel, channel);
     }
 
     @Override

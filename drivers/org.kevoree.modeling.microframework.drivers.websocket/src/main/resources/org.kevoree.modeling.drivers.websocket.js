@@ -19,6 +19,7 @@ var org;
                             this._putCallbacks = new java.util.HashMap();
                             this._atomicGetCallbacks = new java.util.HashMap();
                             this.interceptors = new Array();
+                            this.shouldBeConnected = false;
                             this._connectionUri = connectionUri;
                         }
                         WebSocketCDNClient.prototype.addMessageInterceptor = function (interceptor) {
@@ -32,7 +33,14 @@ var org;
                         WebSocketCDNClient.prototype.connect = function (callback) {
                             var _this = this;
                             var self = this;
-                            this._clientConnection = new WebSocket(this._connectionUri);
+                            this.shouldBeConnected = true;
+                            if (typeof require !== "undefined") {
+                                var wsNodeJS = require('ws');
+                                this._clientConnection = new wsNodeJS(this._connectionUri);
+                            }
+                            else {
+                                this._clientConnection = new WebSocket(this._connectionUri);
+                            }
                             this._clientConnection.onmessage = function (message) {
                                 var msg = org.kevoree.modeling.message.KMessageLoader.load(message.data);
                                 switch (msg.type()) {
@@ -80,14 +88,16 @@ var org;
                                 }
                             };
                             this._clientConnection.onerror = function (error) {
-                                //console.log(error);
+                                console.log(error);
                             };
                             this._clientConnection.onclose = function (error) {
-                                console.log("Try reconnection in " + self._reconnectionDelay + " milliseconds.");
-                                //try to reconnect
-                                setTimeout(function () {
-                                    self.connect(null);
-                                }, self._reconnectionDelay);
+                                if (self.shouldBeConnected) {
+                                    console.log("Try reconnection in " + self._reconnectionDelay + " milliseconds.");
+                                    //try to reconnect
+                                    setTimeout(function () {
+                                        self.connect(null);
+                                    }, self._reconnectionDelay);
+                                }
                             };
                             this._clientConnection.onopen = function () {
                                 if (callback != null) {
@@ -96,6 +106,7 @@ var org;
                             };
                         };
                         WebSocketCDNClient.prototype.close = function (callback) {
+                            this.shouldBeConnected = false;
                             this._clientConnection.close();
                             if (callback != null) {
                                 callback(null);

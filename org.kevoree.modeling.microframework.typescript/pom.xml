@@ -21,7 +21,7 @@
         </dependency>
         <dependency>
             <groupId>org.kevoree.modeling</groupId>
-            <artifactId>org.kevoree.modeling.java2typescript.mavenplugin</artifactId>
+            <artifactId>org.kevoree.modeling.java2typescript.runtime</artifactId>
             <version>${java2typescript.plugin.version}</version>
         </dependency>
         <dependency>

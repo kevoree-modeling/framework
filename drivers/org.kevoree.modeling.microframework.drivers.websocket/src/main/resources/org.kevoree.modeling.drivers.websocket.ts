@@ -2,6 +2,8 @@
 ///<reference path='../../../target/jsdeps/java.d.ts'/>
 ///<reference path='../../../target/jsdeps/org.kevoree.modeling.microframework.typescript.d.ts'/>
 
+declare function require(p);
+
 module org {
     export module kevoree {
         export module modeling {
@@ -25,6 +27,7 @@ module org {
                         }
 
                         interceptors : Array<any> = new Array<any>();
+                        shouldBeConnected = false;
 
                         public addMessageInterceptor(interceptor): number{
                             var i = interceptor.length;
@@ -36,9 +39,19 @@ module org {
                             delete this.interceptors[id];
                         }
 
+
                         public connect(callback:(p:java.lang.Throwable) => void):void {
                             var self = this;
-                            this._clientConnection = new WebSocket(this._connectionUri);
+
+                            this.shouldBeConnected = true;
+
+                            if(typeof require !== "undefined") {
+                                var wsNodeJS = require('ws');
+                                this._clientConnection = new wsNodeJS(this._connectionUri);
+                            } else {
+                                this._clientConnection = new WebSocket(this._connectionUri);
+                            }
+
                             this._clientConnection.onmessage = (message) => {
                                 var msg = org.kevoree.modeling.message.KMessageLoader.load(message.data);
                                 switch (msg.type()) {
@@ -85,14 +98,16 @@ module org {
                                 }
                             };
                             this._clientConnection.onerror = function (error) {
-                                //console.log(error);
+                                console.log(error);
                             };
                             this._clientConnection.onclose = function (error) {
-                                console.log("Try reconnection in " + self._reconnectionDelay + " milliseconds.");
-                                //try to reconnect
-                                setTimeout(function () {
-                                    self.connect(null)
-                                }, self._reconnectionDelay);
+                                if(self.shouldBeConnected){
+                                    console.log("Try reconnection in " + self._reconnectionDelay + " milliseconds.");
+                                    //try to reconnect
+                                    setTimeout(function () {
+                                        self.connect(null)
+                                    }, self._reconnectionDelay);
+                                }
                             };
                             this._clientConnection.onopen = function () {
                                 if (callback != null) {
@@ -103,6 +118,7 @@ module org {
                         }
 
                         public close(callback:(p:java.lang.Throwable) => void):void {
+                            this.shouldBeConnected = false;
                             this._clientConnection.close();
                             if (callback != null) {
                                 callback(null);
