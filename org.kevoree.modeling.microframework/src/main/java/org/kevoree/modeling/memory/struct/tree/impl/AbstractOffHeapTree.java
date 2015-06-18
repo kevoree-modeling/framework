@@ -13,17 +13,22 @@ import java.lang.reflect.Field;
  *
  * OffHeap implementation of AbstractOffHeapTree
  * - memory structure:  | root index (8) | size (4) | dirty (1) | counter (4) | back (size * node size * 8) |
- * - back:              | left (8)       | right (8)| parent (8)| key (8)     | color (8)   | value (8)     |
+ * - back:              | key (8)        | left (8) | right (8) | parent (8)  | color (8)   | value (8)     |
  */
 public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
     protected static final Unsafe UNSAFE = getUnsafe();
 
     public abstract int getNodeSize();
 
-    private static final int POS_LEFT = 0;
-    private static final int POS_RIGHT = 1;
-    private static final int POS_PARENT = 2;
-    private static final int POS_KEY = 3;
+    private static final char BLACK_LEFT = '{';
+    private static final char BLACK_RIGHT = '}';
+    private static final char RED_LEFT = '[';
+    private static final char RED_RIGHT = ']';
+
+    private static final int POS_KEY = 0;
+    private static final int POS_LEFT = 1;
+    private static final int POS_RIGHT = 2;
+    private static final int POS_PARENT = 3;
     private static final int POS_COLOR = 4;
     private static final int POS_VALUE = 5;
 
@@ -32,7 +37,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
     protected float _loadFactor;
 
     private void internal_allocate(int size) {
-        long bytes = internal_size_base_segment() + size * 8;
+        long bytes = internal_size_base_segment() + internal_size_raw_segment(size);
 
         _start_address = UNSAFE.allocateMemory(bytes);
         UNSAFE.setMemory(_start_address, bytes, (byte) 0);
@@ -46,6 +51,10 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
 
     protected int internal_size_base_segment() {
         return 8 + 4 + 1 + 4; // root index, size, dirty, counter
+    }
+
+    protected int internal_size_raw_segment(int size) {
+        return size * 8 * getNodeSize();
     }
 
     protected long internal_ptr_root_index() {
@@ -76,71 +85,70 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return UNSAFE.getInt(internal_ptr_size());
     }
 
-    protected long left(long p_currentIndex) {
-        if (p_currentIndex == -1) {
+    protected long key(long p_nodeIndex) {
+        if (p_nodeIndex == -1) {
             return -1;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_currentIndex));
+        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_KEY * 8);
     }
 
-    protected void setLeft(long p_currentIndex, long p_paramIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_currentIndex), p_paramIndex);
-
+    protected void setKey(long p_nodeIndex, long p_key) {
+        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_KEY * 8, p_key);
     }
 
-    protected long right(long p_currentIndex) {
-        if (p_currentIndex == -1) {
+    protected long left(long p_nodeIndex) {
+        if (p_nodeIndex == -1) {
             return -1;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_currentIndex) + 1 * 8);
+        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_LEFT * 8);
     }
 
-    protected void setRight(long p_currentIndex, long p_paramIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_currentIndex) + 1 * 8, p_paramIndex);
+    protected void setLeft(long p_nodeIndex, long p_leftNodeIndex) {
+        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_LEFT * 8, p_leftNodeIndex);
     }
 
-    protected long parent(long p_currentIndex) {
-        if (p_currentIndex == -1) {
+    protected long right(long p_nodeIndex) {
+        if (p_nodeIndex == -1) {
             return -1;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_currentIndex) + 2 * 8);
+        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_RIGHT * 8);
     }
 
-    protected void setParent(long p_currentIndex, long p_paramIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_currentIndex) + 2 * 8, p_paramIndex);
+    protected void setRight(long p_nodeIndex, long p_rightNodeIndex) {
+        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_RIGHT * 8, p_rightNodeIndex);
     }
 
-    protected long key(long p_currentIndex) {
-        if (p_currentIndex == -1) {
+    protected long parent(long p_nodeIndex) {
+        if (p_nodeIndex == -1) {
             return -1;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_currentIndex) + 3 * 8);
+        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_PARENT * 8);
     }
 
-    protected void setKey(long p_currentIndex, long p_paramIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_currentIndex) + 3 * 8, p_paramIndex);
+    protected void setParent(long p_nodeIndex, long p_parentNodeIndex) {
+        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_PARENT * 8, p_parentNodeIndex);
     }
 
-    private long color(long currentIndex) {
-        if (currentIndex == -1) {
+    private long color(long p_nodeIndex) {
+        if (p_nodeIndex == -1) {
             return -1;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(currentIndex) + 4 * 8);
+        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_COLOR * 8);
     }
 
-    protected void setColor(long currentIndex, long paramIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(currentIndex) + 4 * 8, paramIndex);
+    protected void setColor(long p_nodeIndex, long p_color) {
+        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_COLOR * 8, p_color);
     }
 
-    protected long value(long currentIndex) {
-        if (currentIndex == -1) {
+    protected long value(long p_nodeIndex) {
+        if (p_nodeIndex == -1) {
             return -1;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(currentIndex) + 5 * 8);
+        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_VALUE * 8);
     }
 
-    protected void setValue(long currentIndex, long paramIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(currentIndex) + 5 * 8, paramIndex);
+    protected void setValue(long p_nodeIndex, long p_value) {
+        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_VALUE * 8, p_value);
     }
 
     public long grandParent(long currentIndex) {
@@ -454,23 +462,46 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
 
     public String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
-
         long rootIndex = UNSAFE.getLong(internal_ptr_root_index());
-        int size = UNSAFE.getInt(internal_ptr_size());
         if (rootIndex == -1) {
             builder.append("0");
         } else {
-            builder.append(size);
+            builder.append(size());
             builder.append(',');
-            builder.append(rootIndex);
-            builder.append('[');
-            for (int i = 0; i < (size * getNodeSize()); i++) {
-                if (i != 0) {
-                    builder.append(',');
+            int elemSize = getNodeSize();
+            builder.append(key(rootIndex));
+            for (int i = 0; i < size(); i++) {
+                long nextNodeIndex = i; /*i * elemSize;*/
+                long parentNodeIndex = parent(nextNodeIndex);
+                boolean isOnLeft = false;
+                if (parentNodeIndex != -1) {
+                    isOnLeft = left(parentNodeIndex) == nextNodeIndex;
                 }
-                builder.append(UNSAFE.getLong(internal_ptr_back() + i * 8));
+                if (color(nextNodeIndex) == 0) {
+                    if (isOnLeft) {
+                        builder.append(BLACK_LEFT);
+                    } else {
+                        builder.append(BLACK_RIGHT);
+                    }
+                } else {
+                    //red
+                    if (isOnLeft) {
+                        builder.append(RED_LEFT);
+                    } else {
+                        builder.append(RED_RIGHT);
+                    }
+                }
+                builder.append(key(nextNodeIndex));
+                builder.append(',');
+                if (parentNodeIndex != -1) {
+                    //builder.append(beginParent / elemSize);
+                    builder.append(key(parentNodeIndex));
+                }
+                if (elemSize > 5) {
+                    builder.append(',');
+                    builder.append(value(nextNodeIndex));
+                }
             }
-            builder.append(']');
         }
         return builder.toString();
     }
@@ -480,39 +511,80 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
             internal_allocate(0);
             return;
         }
-
-        int size = 0;
-
+        int elemSize = getNodeSize();
         int initPos = 0;
         int cursor = 0;
-        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '[') {
+        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
+
+        int s = Integer.parseInt(payload.substring(initPos, cursor));
+        internal_allocate(s);
+
         if (payload.charAt(cursor) == ',') {//className to parse
-            size = Integer.parseInt(payload.substring(initPos, cursor));
+            UNSAFE.putInt(internal_ptr_size(), s);
             cursor++;
             initPos = cursor;
         }
-        while (cursor < payload.length() && payload.charAt(cursor) != '[') {
+        while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
-        long rootIndex = Integer.parseInt(payload.substring(initPos, cursor));
-        internal_allocate(size);
-        UNSAFE.putLong(internal_ptr_root_index(), rootIndex);
+
+        UNSAFE.putLong(internal_ptr_root_index(), Integer.parseInt(payload.substring(initPos, cursor)));
+        UNSAFE.setMemory(internal_ptr_back(), internal_size_raw_segment(s), (byte) -1);
+
         int _back_index = 0;
         while (cursor < payload.length()) {
-            cursor++;
-            int beginChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+            while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
                 cursor++;
             }
-            int cleanedEnd = cursor;
-            if (payload.charAt(cleanedEnd - 1) == ']') {
-                cleanedEnd--;
+            if (cursor < payload.length()) {
+                char elem = payload.charAt(cursor);
+
+                boolean isOnLeft = false;
+                if (elem == BLACK_LEFT || elem == RED_LEFT) {
+                    isOnLeft = true;
+                }
+                if (elem == BLACK_LEFT || elem == BLACK_RIGHT) {
+                    setColor(_back_index, 0);
+                } else {
+                    setColor(_back_index, 1);
+                }
+                cursor++;
+                int beginChunk = cursor;
+                while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+                    cursor++;
+                }
+                long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
+                setKey(_back_index, loopKey);
+                cursor++;
+                beginChunk = cursor;
+                while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+                    cursor++;
+                }
+                if (cursor > beginChunk) {
+                    long parentRaw = Long.parseLong(payload.substring(beginChunk, cursor));
+                    long parentValue = parentRaw; //* elemSize;
+                    setParent(_back_index, parentValue);
+                    if (isOnLeft) {
+                        setLeft(parentValue, _back_index);
+                    } else {
+                        setRight(parentValue, _back_index);
+                    }
+                }
+                if (cursor < payload.length() && payload.charAt(cursor) == ',') {
+                    cursor++;
+                    beginChunk = cursor;
+                    while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+                        cursor++;
+                    }
+                    if (cursor > beginChunk) {
+                        long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
+                        setValue(_back_index, currentValue);
+                    }
+                }
+                _back_index++;
             }
-            long loopKey = Long.parseLong(payload.substring(beginChunk, cleanedEnd));
-            UNSAFE.putLong(internal_ptr_back_idx(_back_index), loopKey);
-            _back_index++;
         }
     }
 

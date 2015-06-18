@@ -17,12 +17,14 @@ public abstract class BaseKLongTreeTest {
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
+
         KLongTree treeBis = createKLongTree();
         treeBis.init(tree.serialize(null), null);
+
         Assert.assertEquals(tree.size(), treeBis.size());
     }
 
-    @Test
+   @Test
     public void saveLoad() throws Exception {
         KLongTree tree = createKLongTree();
         tree.init(null, null);
@@ -31,7 +33,7 @@ public abstract class BaseKLongTreeTest {
         }
 
         String saved0 = tree.serialize(null);
-        Assert.assertEquals(saved0,"3,1{0,1]1,}2,1");
+        Assert.assertEquals("3,1{0,1]1,}2,1", saved0);
 
         KLongTree treeBis = createKLongTree();
         treeBis.init(saved0, null);

@@ -32,61 +32,63 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
             _threshold = (int) (size() * _loadFactor);
         }
 
-        long insertedNode = key;//size() * SIZE_NODE;
+        //long insertedNode = key;//size() * SIZE_NODE;
+        long insertedNodeIndex = size();
+
         if (size() == 0) {
             UNSAFE.putInt(internal_ptr_size(), 1);
 
-            setKey(insertedNode, key);
-            setColor(insertedNode, 0);
-            setLeft(insertedNode, -1);
-            setRight(insertedNode, -1);
-            setParent(insertedNode, -1);
+            setKey(insertedNodeIndex, key);
+            setColor(insertedNodeIndex, 0);
+            setLeft(insertedNodeIndex, -1);
+            setRight(insertedNodeIndex, -1);
+            setParent(insertedNodeIndex, -1);
 
-            UNSAFE.putLong(internal_ptr_root_index(), insertedNode);
+            UNSAFE.putLong(internal_ptr_root_index(), insertedNodeIndex);
         } else {
-            long n = UNSAFE.getLong(internal_ptr_root_index());
+            long rootIndex = UNSAFE.getLong(internal_ptr_root_index());
             while (true) {
-                if (key == key(n)) {
+                if (key == key(rootIndex)) {
                     //nop _size
                     return;
-                } else if (key < key(n)) {
-                    if (left(n) == -1) {
+                } else if (key < key(rootIndex)) {
+                    if (left(rootIndex) == -1) {
 
-                        setKey(insertedNode, key);
-                        setColor(insertedNode, 0);
-                        setLeft(insertedNode, -1);
-                        setRight(insertedNode, -1);
-                        setParent(insertedNode, -1);
+                        setKey(insertedNodeIndex, key);
+                        setColor(insertedNodeIndex, 0);
+                        setLeft(insertedNodeIndex, -1);
+                        setRight(insertedNodeIndex, -1);
+                        setParent(insertedNodeIndex, -1);
 
-                        setLeft(n, insertedNode);
+                        setLeft(rootIndex, insertedNodeIndex);
 
                         UNSAFE.putInt(internal_ptr_size(), size() + 1);
                         break;
                     } else {
-                        n = left(n);
+                        rootIndex = left(rootIndex);
                     }
                 } else {
-                    if (right(n) == -1) {
+                    if (right(rootIndex) == -1) {
 
-                        setKey(insertedNode, key);
-                        setColor(insertedNode, 0);
-                        setLeft(insertedNode, -1);
-                        setRight(insertedNode, -1);
-                        setParent(insertedNode, -1);
+                        setKey(insertedNodeIndex, key);
+                        setColor(insertedNodeIndex, 0);
+                        setLeft(insertedNodeIndex, -1);
+                        setRight(insertedNodeIndex, -1);
+                        setParent(insertedNodeIndex, -1);
 
-                        setRight(n, insertedNode);
+                        setRight(rootIndex, insertedNodeIndex);
 
                         UNSAFE.putInt(internal_ptr_size(), size() + 1);
                         break;
                     } else {
-                        n = right(n);
+                        rootIndex = right(rootIndex);
                     }
                 }
             }
 
-            setParent(insertedNode, n);
+            setParent(insertedNodeIndex, rootIndex);
         }
-        insertCase1(insertedNode);
+        insertCase1(insertedNodeIndex);
     }
 
     @Override
