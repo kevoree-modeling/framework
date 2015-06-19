@@ -27,6 +27,8 @@ public interface KTraversal {
 
     //TODO add time traversal
 
+    //TODO add universe traversal
+
 }
 
 
