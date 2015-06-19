@@ -14,7 +14,7 @@ public class MassiveInsertTest {
 
     /**
      * @native ts
-     * */
+     */
     @Test
     public void test() {
 
