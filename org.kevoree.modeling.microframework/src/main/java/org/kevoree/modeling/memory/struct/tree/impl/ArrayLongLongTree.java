@@ -55,7 +55,7 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
             if (_back != null) {
                 System.arraycopy(_back, 0, new_back, 0, _size * SIZE_NODE);
             }
-            _threshold = (int) (_size * _loadFactor);
+            _threshold = (int) (length * _loadFactor);
             _back = new_back;
         }
         long insertedNode = (_size) * SIZE_NODE;
