@@ -1,6 +1,7 @@
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.swingViewer.ViewerListener;
 import org.graphstream.ui.swingViewer.ViewerPipe;
+import org.junit.Test;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -12,16 +13,13 @@ import org.kevoree.modeling.framework.addons.swing.GraphBuilder;
 
 import java.util.Random;
 
-/**
- * Created by duke on 20/03/15.
- */
 public class GraphTest {
 
-    private static int PRIMARY = 5;
+    private static int PRIMARY = 10;
 
-    private static int SECONDARY = 5;
+    private static int SECONDARY = 20;
 
-    //@Test
+   // @Test
     public void test() throws InterruptedException {
         KMetaModel metaModel = new MetaModel("TestModel");
         KMetaClass nodeClazz = metaModel.addMetaClass("Node");

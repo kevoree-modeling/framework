@@ -7,7 +7,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.operation.KOperation;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.KUniverse;
-import org.kevoree.modeling.memory.manager.impl.HeapMemoryManager;
+import org.kevoree.modeling.memory.manager.impl.MemoryManager;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -23,7 +23,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     final private long _key;
 
     protected AbstractKModel() {
-        _manager = new HeapMemoryManager(this);
+        _manager = new MemoryManager(this);
         _key = _manager.nextModelKey();
     }
 

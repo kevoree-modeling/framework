@@ -14,7 +14,6 @@ import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;
 import org.kevoree.modeling.message.impl.Events;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
@@ -28,7 +27,7 @@ import org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HeapMemoryManager implements KMemoryManager {
+public class MemoryManager implements KMemoryManager {
 
     private static final String OUT_OF_CACHE_MESSAGE = "KMF Error: your object is out of cache, you probably kept an old reference. Please reload it with a lookup";
     private static final String UNIVERSE_NOT_CONNECTED_ERROR = "Please connect your model prior to create a universe or an object";
@@ -51,7 +50,7 @@ public class HeapMemoryManager implements KMemoryManager {
     private static final int GLO_TREE_INDEX = 2;
     private static final short zeroPrefix = 0;
 
-    public HeapMemoryManager(KModel model) {
+    public MemoryManager(KModel model) {
         this._factory = new HeapMemoryFactory();
         this._cache = _factory.newCache();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);
@@ -181,8 +180,8 @@ public class HeapMemoryManager implements KMemoryManager {
         for (int i = 0; i < dirtiesEntries.length; i++) {
             KMemoryElement cachedObject = dirtiesEntries[i].object;
             int[] meta;
-            if (dirtiesEntries[i].object instanceof HeapMemorySegment) {
-                HeapMemorySegment segment = (HeapMemorySegment) dirtiesEntries[i].object;
+            if (dirtiesEntries[i].object instanceof KMemorySegment) {
+                KMemorySegment segment = (KMemorySegment) dirtiesEntries[i].object;
                 meta = segment.modifiedIndexes(_model.metaModel().metaClasses()[segment.metaClassIndex()]);
             } else {
                 meta = null;
@@ -315,7 +314,7 @@ public class HeapMemoryManager implements KMemoryManager {
 
     @Override
     public KMemorySegment segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace) {
-        HeapMemorySegment currentEntry = (HeapMemorySegment) _cache.get(universe, time, uuid);
+        KMemorySegment currentEntry = (KMemorySegment) _cache.get(universe, time, uuid);
         if (currentEntry != null) {
             if (resolutionTrace != null) {
                 resolutionTrace.setSegment(currentEntry);
@@ -342,7 +341,7 @@ public class HeapMemoryManager implements KMemoryManager {
         if (resolvedTime != KConfig.NULL_LONG) {
             boolean needTimeCopy = !resolvePreviousSegment && (resolvedTime != time);
             boolean needUniverseCopy = !resolvePreviousSegment && (resolvedUniverse != universe);
-            HeapMemorySegment entry = (HeapMemorySegment) _cache.get(resolvedUniverse, resolvedTime, uuid);
+            KMemorySegment entry = (KMemorySegment) _cache.get(resolvedUniverse, resolvedTime, uuid);
             if (entry == null) {
                 return null;
             }

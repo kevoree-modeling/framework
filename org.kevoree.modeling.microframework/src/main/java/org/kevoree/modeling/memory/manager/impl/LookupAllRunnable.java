@@ -4,7 +4,6 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.abs.AbstractKModel;
-import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;
 import org.kevoree.modeling.memory.KMemoryElement;
@@ -21,9 +20,9 @@ public class LookupAllRunnable implements Runnable {
 
     private long[] _keys;
     private KCallback<KObject[]> _callback;
-    private HeapMemoryManager _store;
+    private MemoryManager _store;
 
-    public LookupAllRunnable(long p_universe, long p_time, long[] p_keys, KCallback<KObject[]> p_callback, HeapMemoryManager p_store) {
+    public LookupAllRunnable(long p_universe, long p_time, long[] p_keys, KCallback<KObject[]> p_callback, MemoryManager p_store) {
         this._universe = p_universe;
         this._time = p_time;
 

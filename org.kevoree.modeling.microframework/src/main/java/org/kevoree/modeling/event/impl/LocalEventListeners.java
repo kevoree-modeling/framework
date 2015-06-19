@@ -10,7 +10,7 @@ import org.kevoree.modeling.event.KEventMultiListener;
 import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.KContentKey;
-import org.kevoree.modeling.memory.manager.impl.HeapMemoryManager;
+import org.kevoree.modeling.memory.manager.impl.MemoryManager;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.memory.manager.impl.KeyCalculator;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
@@ -170,7 +170,7 @@ public class LocalEventListeners {
                         toLoad[i] = loopKey;
                     }
                 }
-                ((HeapMemoryManager) _manager).bumpKeysToCache(toLoad, new KCallback<KMemoryElement[]>() {
+                ((MemoryManager) _manager).bumpKeysToCache(toLoad, new KCallback<KMemoryElement[]>() {
                     @Override
                     public void on(KMemoryElement[] kMemoryElements) {
                         final ArrayLongMap<KObject[]>[] multiObjectSets = new ArrayLongMap[1];
