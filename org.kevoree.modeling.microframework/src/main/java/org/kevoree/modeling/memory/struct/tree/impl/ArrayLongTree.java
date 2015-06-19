@@ -17,7 +17,7 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
         return SIZE_NODE;
     }
 
-    public synchronized long previousOrEqual(long key) {
+    public long previousOrEqual(long key) {
         long result = internal_previousOrEqual_index(key);
         if (result != -1) {
             return key(result);

@@ -12,8 +12,12 @@ import org.kevoree.modeling.meta.impl.MetaModel;
 
 public class MassiveInsertTest {
 
+    /**
+     * @native ts
+     * */
     @Test
     public void test() {
+
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass metaClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute attribute = metaClass.addAttribute("value", KPrimitiveTypes.LONG);
@@ -25,7 +29,10 @@ public class MassiveInsertTest {
 
                 KObject sensor = model.create(metaClass, 0, 0);
                 long before = System.currentTimeMillis();
-                for(int i=0;i<1000000;i++){
+                for (int i = 0; i < 1000000; i++) {
+
+                    //if(i % 1000000==0){ System.err.println(i); }
+
                     sensor.jump(i, new KCallback<KObject>() {
                         @Override
                         public void on(KObject timedObject) {
@@ -34,7 +41,7 @@ public class MassiveInsertTest {
                     });
                 }
                 long after = System.currentTimeMillis();
-                System.out.println( (after - before) +" ms");
+                System.out.println((after - before) + " ms");
 
             }
         });
