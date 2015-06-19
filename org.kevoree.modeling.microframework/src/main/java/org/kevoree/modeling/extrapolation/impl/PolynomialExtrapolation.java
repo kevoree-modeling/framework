@@ -21,7 +21,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         KMemorySegment raw = ((AbstractKObject) current)._manager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
         if (raw != null) {
             Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), trace.getTime());
-            if (attribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+            if (attribute.attributeType() == KPrimitiveTypes.CONTINUOUS || attribute.attributeType() == KPrimitiveTypes.DOUBLE) {
                 return extrapolatedValue;
             } else if (attribute.attributeType() == KPrimitiveTypes.LONG) {
                 return extrapolatedValue.longValue();
@@ -86,7 +86,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         if (raw.getInferElem(index, NUMSAMPLES, metaClass) == 1) {
             raw.setInferElem(index, STEP, (time - timeOrigin), metaClass);
         }
-        int deg = (int) raw.getInferElem(index,DEGREE,metaClass);
+        int deg = (int) raw.getInferElem(index, DEGREE, metaClass);
         int num = (int) raw.getInferElem(index, NUMSAMPLES, metaClass);
         double maxError = maxErr(precision, deg);
         //If the current model fits well the new value, return

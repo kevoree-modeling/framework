@@ -2,9 +2,10 @@ package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.memory.*;
 import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
+import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.KMemoryFactory;
 import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;

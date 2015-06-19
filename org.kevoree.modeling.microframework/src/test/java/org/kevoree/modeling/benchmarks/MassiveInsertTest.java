@@ -21,8 +21,9 @@ public class MassiveInsertTest {
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass metaClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute attribute = metaClass.addAttribute("value", KPrimitiveTypes.LONG);
-
         KModel model = metaModel.model();
+
+
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
