@@ -51,7 +51,7 @@ public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLon
             int size_raw_segment = length * getNodeSize() * 8;
             _start_address = UNSAFE.reallocateMemory(_start_address, size_base_segment + size_raw_segment);
 
-            _threshold = (int) (size() * _loadFactor);
+            _threshold = (int) (length * _loadFactor);
         }
 
         long insertedNodeIndex = size();
