@@ -12,7 +12,8 @@ import java.lang.reflect.Field;
  * @ignore ts
  * <p/>
  * - memory structure:
- * - root      | elem count (4) | elem data size (4) | dirty (1) | ... | key (8) | value (8) | next (8)....
+ * - root      | elem count (4) | elem data size (4) | dirty (1) | ... | key (8) | value (8) | next (8) | entry ptr (8) |....
+ * - entry     | key (8) | value (8) | next (8) | entry ptr (8) |
  */
 public class OffHeapLongLongMap implements KLongLongMap {
     protected static final Unsafe UNSAFE = getUnsafe();
@@ -27,6 +28,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
     private static final int POS_KEY = 0;
     private static final int POS_VALUE = 1;
     private static final int POS_NEXT = 2;
+    private static final int POS_ENTRY_PTR = 3;
 
 
     private long internal_ptr_elem_count() {
@@ -163,6 +165,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
             index = (hash & 0x7FFFFFFF) % UNSAFE.getInt(internal_ptr_elem_data_size());
             entry = findNonNullKeyEntry(key, index);
         }
+        // TODO handle conflicts!
         if (entry == KConfig.NULL_LONG) {
             UNSAFE.putInt(internal_ptr_elem_count(), UNSAFE.getInt(internal_ptr_elem_count()) + 1);
             if (UNSAFE.getInt(internal_ptr_elem_count()) > _threshold) {
@@ -175,24 +178,15 @@ public class OffHeapLongLongMap implements KLongLongMap {
         UNSAFE.putLong(entry + POS_VALUE * 8, value);
     }
 
-    public void debug() {
-
-        for (int i = 0; i < UNSAFE.getInt(internal_ptr_elem_count()); i++) {
-
-            long entry_pos = internal_ptr_elem_data_idx(i);
-            System.out.println("key -> " + UNSAFE.getLong(entry_pos + POS_KEY * 8));
-        }
-    }
-
     long createHashedEntry(long key, int index) {
         long entry_pos = internal_ptr_elem_data_idx(index);
         UNSAFE.putLong(entry_pos + POS_KEY * 8, key);
         UNSAFE.putLong(entry_pos + POS_VALUE * 8, KConfig.NULL_LONG);
 
-        if (index >= 1) {
-            long prev_pos = internal_ptr_elem_data_idx(index - 1);
-            UNSAFE.putLong(prev_pos + POS_NEXT * 8, entry_pos);
-        }
+//        if (index >= 1) {
+//            long prev_pos = internal_ptr_elem_data_idx(index - 1);
+//            UNSAFE.putLong(prev_pos + POS_NEXT * 8, entry_pos);
+//        }
 
         return entry_pos;
     }
