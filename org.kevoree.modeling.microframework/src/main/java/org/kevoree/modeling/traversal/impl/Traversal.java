@@ -77,6 +77,18 @@ public class Traversal implements KTraversal {
     }
 
     @Override
+    public KTraversal traverseTime(long timeOffset, long steps, KTraversalFilter continueCondition) {
+        throw new RuntimeException("Not Implemented Yet!");
+        //return null;
+    }
+
+    @Override
+    public KTraversal traverseUniverse(long universeOffset, KTraversalFilter continueCondition) {
+        throw new RuntimeException("Not Implemented Yet!");
+        //return null;
+    }
+
+    @Override
     public void then(KCallback<KObject[]> cb) {
         //set the terminal leaf action
         internal_chain_action(new FinalAction(cb));

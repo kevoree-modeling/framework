@@ -25,9 +25,9 @@ public interface KTraversal {
 
     KTraversal collect(KMetaReference metaReference, KTraversalFilter continueCondition);
 
-    //TODO add time traversal
+    KTraversal traverseTime(long timeOffset, long steps, KTraversalFilter continueCondition);
 
-    //TODO add universe traversal
+    KTraversal traverseUniverse(long universeOffset, KTraversalFilter continueCondition);
 
 }
 

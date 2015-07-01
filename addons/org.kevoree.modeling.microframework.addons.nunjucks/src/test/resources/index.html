@@ -1,5 +1,68 @@
 <html>
+<head>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="java.js"></script>
+    <script src="org.kevoree.modeling.microframework.typescript.js"></script>
+    <script src="org.kevoree.modeling.drivers.websocket.js"></script>
+    <script src="nunjucks.js"></script>
+</head>
 <body>
+<div id="content"></div>
+<script id="template" type="text/x-handlebars-template">
+    <h1>PlainOrigin {{origin.toJSON}}</h1>
+    <div class="body">
+        <ul>
+            {% asyncEach technology in ecosystem.technologies %}
+            <li>{{technology.name}}
+                <ul>
+                    {% asyncEach device in technology.devices %}
+                    <li>{{device.name}} ({{device.version}}) {{device | field('name')}} {{device | field('version')}}
+                        <ul>
+                            {% asyncEach ff in device.functions %}
+                            <li>
+                                <button onclick="javascript:btclick('{{ff.now()}}','{{ff.uuid()}}','sayHello');">
+                                    {{ff.name}}
+                                </button>
+                            </li>
+                            {% endeach %}
+                        </ul>
+                    </li>
+                    {% endeach %}
+                </ul>
+            </li>
+            {% endeach %}
+        </ul>
+    </div>
+</script>
 
+<script>
+    nunjucks.configure({autoescape: true});
+    var env = new nunjucks.Environment();
+    var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
+    var sensorClass = metaModel.addMetaClass("Sensor");
+    sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
+    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://localhost:8080/cdn");
+    var model = metaModel.model();
+    model.setContentDeliveryDriver(wsClient);
+    model.connect(function () {
+        model.lookup(0, 0, 1, function (obj) {
+            try {
+                env.renderString($("#ecosystem-template").html(), {
+                    origin: obj,
+                    autoRefresh: true,
+                    autoNow: true
+                }, function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    $("#content").html(res);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+            System.err.println("Yop " + obj.toJSON());
+        });
+    });
+</script>
 </body>
 </html>
