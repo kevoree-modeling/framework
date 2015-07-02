@@ -30,7 +30,7 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
     protected float _loadFactor;
 
     private void internal_allocate(int size) {
-        long bytes = 17 + size * 8 * getNodeSize();
+        long bytes = 17 + size * 40;
 
         _start_address = UNSAFE.allocateMemory(bytes);
         UNSAFE.setMemory(_start_address, bytes, (byte) 0);
@@ -47,14 +47,14 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
     }
 
     public long sibling(long currentIndex) {
-        long p_currentIndex = currentIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + currentIndex * 8 * getNodeSize() + 24);
+        long p_currentIndex = currentIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + currentIndex * 40 + 24);
         if (p_currentIndex == -1) {
             return -1;
         } else {
             //long p_currentIndex = parent(currentIndex);
-            long l_p_currentIndex = p_currentIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_currentIndex * 8 * getNodeSize() + 8);
+            long l_p_currentIndex = p_currentIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_currentIndex * 40 + 8);
             if (currentIndex == l_p_currentIndex) {
-                long r_p_currentIndex = p_currentIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_currentIndex * 8 * getNodeSize() + 16);
+                long r_p_currentIndex = p_currentIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_currentIndex * 40 + 16);
                 return r_p_currentIndex;
             } else {
                 return l_p_currentIndex;
@@ -63,7 +63,7 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
     }
 
     public long uncle(long currentIndex) {
-        long p_currentIndex = currentIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + currentIndex * 8 * getNodeSize() + 24);
+        long p_currentIndex = currentIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + currentIndex * 40 + 24);
         if (p_currentIndex != -1) {
             return sibling(p_currentIndex);
         } else {
@@ -73,24 +73,24 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
 
     private long previous(long p_index) {
         long p = p_index;
-        long l_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 8 * getNodeSize() + 8);
+        long l_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 40 + 8);
         if (l_p != -1) {
             p = l_p;
-            long r_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 8 * getNodeSize() + 16);
+            long r_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 40 + 16);
             while (r_p != -1) {
                 p = r_p;
-                r_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 8 * getNodeSize() + 16);
+                r_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 40 + 16);
             }
             return p;
         } else {
-            long p_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 8 * getNodeSize() + 24);
+            long p_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 40 + 24);
             if (p_p != -1) {
-                long r_p_p = p_p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_p * 8 * getNodeSize() + 16);
+                long r_p_p = p_p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_p * 40 + 16);
                 if (p == r_p_p) {
                     return p_p;
                 } else {
                     //long p_p = parent(p);
-                    long l_p_p = p_p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_p * 8 * getNodeSize() + 8);
+                    long l_p_p = p_p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_p * 40 + 8);
                     while (p_p != -1 && p == l_p_p) {
                         p = p_p;
                     }
@@ -110,15 +110,15 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
             return KConfig.NULL_LONG;
         }
         while (n != -1) {
-            long key_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize());
+            long key_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40);
             if (p_key == key_n) {
                 return key_n;
             } else {
                 if (p_key < key_n) {
-                    long l_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 8);
+                    long l_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 8);
                     n = l_n;
                 } else {
-                    long r_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 16);
+                    long r_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 16);
                     n = r_n;
                 }
             }
@@ -128,11 +128,11 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
 
     public void range(long startKey, long endKey, KTreeWalker walker) {
         long indexEnd = internal_previousOrEqual_index(endKey);
-        long key_indexEnd = indexEnd == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + indexEnd * 8 * getNodeSize());
+        long key_indexEnd = indexEnd == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + indexEnd * 40);
         while (indexEnd != -1 && key_indexEnd >= startKey) {
             walker.elem(key_indexEnd);
             indexEnd = previous(indexEnd);
-            key_indexEnd = indexEnd == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + indexEnd * 8 * getNodeSize());
+            key_indexEnd = indexEnd == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + indexEnd * 40);
         }
     }
 
@@ -142,28 +142,28 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
             return p;
         }
         while (p != -1) {
-            long key_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 8 * getNodeSize());
+            long key_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 40);
             if (p_key == key_p) {
                 return p;
             }
             if (p_key > key_p) {
-                long r_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 8 * getNodeSize() + 16);
+                long r_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 40 + 16);
                 if (r_p != -1) {
                     p = r_p;
                 } else {
                     return p;
                 }
             } else {
-                long l_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 8 * getNodeSize() + 8);
+                long l_p = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 40 + 8);
                 if (l_p != -1) {
                     p = l_p;
                 } else {
-                    long parent = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 8 * getNodeSize() + 24);
+                    long parent = p == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p * 40 + 24);
                     long ch = p;
-                    long left_parent = parent == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parent * 8 * getNodeSize() + 8);
+                    long left_parent = parent == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parent * 40 + 8);
                     while (parent != -1 && ch == left_parent) {
                         ch = parent;
-                        parent = parent == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parent * 8 * getNodeSize() + 24);
+                        parent = parent == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parent * 40 + 24);
                     }
                     return parent;
                 }
@@ -173,76 +173,76 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
     }
 
     private void rotateLeft(long n) {
-        long r = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 16);
-        long l_r = r == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + r * 8 * getNodeSize() + 8);
+        long r = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 16);
+        long l_r = r == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + r * 40 + 8);
         replaceNode(n, r);
         //setRight(n, l_r);
-        UNSAFE.putLong(_start_address + 17 + n * 8 * getNodeSize() + 16, l_r);
+        UNSAFE.putLong(_start_address + 17 + n * 40 + 16, l_r);
         if (l_r != -1) {
             //setParent(l_r, n);
-            UNSAFE.putLong(_start_address + 17 + l_r * 8 * getNodeSize() + 24, n);
+            UNSAFE.putLong(_start_address + 17 + l_r * 40 + 24, n);
         }
         //setLeft(r, n);
-        UNSAFE.putLong(_start_address + 17 + r * 8 * getNodeSize() + 8, n);
+        UNSAFE.putLong(_start_address + 17 + r * 40 + 8, n);
         //setParent(n, r);
-        UNSAFE.putLong(_start_address + 17 + n * 8 * getNodeSize() + 24, r);
+        UNSAFE.putLong(_start_address + 17 + n * 40 + 24, r);
 
     }
 
     private void rotateRight(long n) {
-        long l = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 8);
+        long l = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 8);
         replaceNode(n, l);
-        long r_l = l == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + l * 8 * getNodeSize() + 16);
+        long r_l = l == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + l * 40 + 16);
         //setLeft(n, right(l));
-        UNSAFE.putLong(_start_address + 17 + n * 8 * getNodeSize() + 8, r_l);
+        UNSAFE.putLong(_start_address + 17 + n * 40 + 8, r_l);
         if (r_l != -1) {
             //setParent(r_l, n);
-            UNSAFE.putLong(_start_address + 17 + r_l * 8 * getNodeSize() + 24, n);
+            UNSAFE.putLong(_start_address + 17 + r_l * 40 + 24, n);
 
         }
         //setRight(l, n);
-        UNSAFE.putLong(_start_address + 17 + l * 8 * getNodeSize() + 16, n);
+        UNSAFE.putLong(_start_address + 17 + l * 40 + 16, n);
         //setParent(n, l);
-        UNSAFE.putLong(_start_address + 17 + n * 8 * getNodeSize() + 24, l);
+        UNSAFE.putLong(_start_address + 17 + n * 40 + 24, l);
 
     }
 
     private void replaceNode(long oldn, long newn) {
-        long p_oldn = oldn == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + oldn * 8 * getNodeSize() + 24);
+        long p_oldn = oldn == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + oldn * 40 + 24);
         if (p_oldn == -1) {
             UNSAFE.putLong(_start_address, newn);
         } else {
             long parent_oldn = p_oldn;
-            long l_parent_oldn = parent_oldn == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parent_oldn * 8 * getNodeSize() + 8);
+            long l_parent_oldn = parent_oldn == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parent_oldn * 40 + 8);
             if (oldn == l_parent_oldn) {
                 //setLeft(parent_oldn, newn);
-                UNSAFE.putLong(_start_address + 17 + parent_oldn * 8 * getNodeSize() + 8, newn);
+                UNSAFE.putLong(_start_address + 17 + parent_oldn * 40 + 8, newn);
 
             } else {
                 //setRight(parent_oldn, newn);
-                UNSAFE.putLong(_start_address + 17 + parent_oldn * 8 * getNodeSize() + 16, newn);
+                UNSAFE.putLong(_start_address + 17 + parent_oldn * 40 + 16, newn);
             }
         }
         if (newn != -1) {
             //setParent(newn, p_oldn);
-            UNSAFE.putLong(_start_address + 17 + newn * 8 * getNodeSize() + 24, p_oldn);
+            UNSAFE.putLong(_start_address + 17 + newn * 40 + 24, p_oldn);
 
         }
     }
 
     protected void insertCase1(long n) {
-        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 24);
+        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 24);
         if (p_n == -1) {
             //setColor(n, 1);
-            UNSAFE.putLong(_start_address + 17 + n * 8 * getNodeSize() + 32, 1);
+            UNSAFE.putLong(_start_address + 17 + n * 40 + 32, 1);
         } else {
             insertCase2(n);
         }
     }
 
     private void insertCase2(long n) {
-        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 24);
-        boolean c_p_n = p_n == -1 ? true : (UNSAFE.getLong(_start_address + 17 + p_n * 8 * getNodeSize() + 32) == 1);
+        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 24);
+        boolean c_p_n = p_n == -1 ? true : (UNSAFE.getLong(_start_address + 17 + p_n * 40 + 32) == 1);
         if (c_p_n == true) {
             return;
         } else {
@@ -251,17 +251,17 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
     }
 
     private void insertCase3(long n) {
-        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 24);
-        boolean c_u_n = uncle(n) == -1 ? true : (UNSAFE.getLong(_start_address + 17 + uncle(n) * 8 * getNodeSize() + 32) == 1);
+        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 24);
+        boolean c_u_n = uncle(n) == -1 ? true : (UNSAFE.getLong(_start_address + 17 + uncle(n) * 40 + 32) == 1);
         if (c_u_n == false) {
-            long gp_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 8 * getNodeSize() + 24);
+            long gp_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 40 + 24);
 
             //setColor(p_n, 1);
-            UNSAFE.putLong(_start_address + 17 + p_n * 8 * getNodeSize() + 32, 1);
+            UNSAFE.putLong(_start_address + 17 + p_n * 40 + 32, 1);
             //setColor(uncle(n), 1);
-            UNSAFE.putLong(_start_address + 17 + uncle(n) * 8 * getNodeSize() + 32, 1);
+            UNSAFE.putLong(_start_address + 17 + uncle(n) * 40 + 32, 1);
             //setColor(grandParent(n), 0);
-            UNSAFE.putLong(_start_address + 17 + gp_n * 8 * getNodeSize() + 32, 0);
+            UNSAFE.putLong(_start_address + 17 + gp_n * 40 + 32, 0);
 
             insertCase1(gp_n);
         } else {
@@ -271,19 +271,19 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
 
     private void insertCase4(long n_n) {
         long n = n_n;
-        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 24);
-        long r_p_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 8 * getNodeSize() + 16);
-        long gp_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 8 * getNodeSize() + 24);
+        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 24);
+        long r_p_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 40 + 16);
+        long gp_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 40 + 24);
 
-        long l_gp_n = gp_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + gp_n * 8 * getNodeSize() + 8);
+        long l_gp_n = gp_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + gp_n * 40 + 8);
         if (n == r_p_n && p_n == l_gp_n) {
             rotateLeft(p_n);
-            n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 8);
+            n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 8);
         } else {
-            long l_p_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 8 * getNodeSize() + 8);
-            long r_gp_n = gp_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + gp_n * 8 * getNodeSize() + 16);
+            long l_p_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 40 + 8);
+            long r_gp_n = gp_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + gp_n * 40 + 16);
             if (n == l_p_n && p_n == r_gp_n) {
-                long r_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 16);
+                long r_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 16);
                 rotateRight(p_n);
                 n = r_n;
             }
@@ -292,15 +292,15 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
     }
 
     private void insertCase5(long n) {
-        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 8 * getNodeSize() + 24);
-        long gp_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 8 * getNodeSize() + 24);
-        long l_p_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 8 * getNodeSize() + 8);
-        long l_gp_n = gp_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + gp_n * 8 * getNodeSize() + 8);
+        long p_n = n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + n * 40 + 24);
+        long gp_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 40 + 24);
+        long l_p_n = p_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + p_n * 40 + 8);
+        long l_gp_n = gp_n == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + gp_n * 40 + 8);
 
         //setColor(p_n, 1);
-        UNSAFE.putLong(_start_address + 17 + p_n * 8 * getNodeSize() + 32, 1);
+        UNSAFE.putLong(_start_address + 17 + p_n * 40 + 32, 1);
         //setColor(gp_n, 0);
-        UNSAFE.putLong(_start_address + 17 + gp_n * 8 * getNodeSize() + 32, 0);
+        UNSAFE.putLong(_start_address + 17 + gp_n * 40 + 32, 0);
 
         if (n == l_p_n && p_n == l_gp_n) {
             rotateRight(gp_n);
@@ -325,16 +325,16 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
             builder.append(size);
             builder.append(',');
             int elemSize = getNodeSize();
-            builder.append(rootIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + rootIndex * 8 * getNodeSize()));
+            builder.append(rootIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + rootIndex * 40));
             for (int i = 0; i < size; i++) {
                 long nextNodeIndex = i; /*i * elemSize;*/
-                long parentNodeIndex = nextNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + nextNodeIndex * 8 * getNodeSize() + 24);
+                long parentNodeIndex = nextNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + nextNodeIndex * 40 + 24);
                 boolean isOnLeft = false;
                 if (parentNodeIndex != -1) {
-                    long l_parentNodeIndex = parentNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parentNodeIndex * 8 * getNodeSize() + 8);
+                    long l_parentNodeIndex = parentNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parentNodeIndex * 40 + 8);
                     isOnLeft = l_parentNodeIndex == nextNodeIndex;
                 }
-                long c_nextNodeIndex = nextNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + nextNodeIndex * 8 * getNodeSize() + 32);
+                long c_nextNodeIndex = nextNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + nextNodeIndex * 40 + 32);
                 if (c_nextNodeIndex == 0) {
                     if (isOnLeft) {
                         builder.append(BLACK_LEFT);
@@ -349,14 +349,14 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
                         builder.append(RED_RIGHT);
                     }
                 }
-                builder.append(nextNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + nextNodeIndex * 8 * getNodeSize()));
+                builder.append(nextNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + nextNodeIndex * 40));
                 builder.append(',');
                 if (parentNodeIndex != -1) {
-                    builder.append(parentNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parentNodeIndex * 8 * getNodeSize()));
+                    builder.append(parentNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + parentNodeIndex * 40));
                 }
                 if (elemSize > 5) {
                     builder.append(',');
-                    builder.append(nextNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + nextNodeIndex * 8 * getNodeSize() + 40));
+                    builder.append(nextNodeIndex == -1 ? -1 : UNSAFE.getLong(_start_address + 17 + nextNodeIndex * 40 + 40));
                 }
             }
         }
@@ -404,10 +404,10 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
                 }
                 if (elem == BLACK_LEFT || elem == BLACK_RIGHT) {
                     //setColor(_back_index, 0);
-                    UNSAFE.putLong(_start_address + 17 + _back_index * 8 * getNodeSize() + 32, 0);
+                    UNSAFE.putLong(_start_address + 17 + _back_index * 40 + 32, 0);
                 } else {
                     //setColor(_back_index, 1);
-                    UNSAFE.putLong(_start_address + 17 + _back_index * 8 * getNodeSize() + 32, 1);
+                    UNSAFE.putLong(_start_address + 17 + _back_index * 40 + 32, 1);
                 }
                 cursor++;
                 int beginChunk = cursor;
@@ -415,7 +415,7 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
                     cursor++;
                 }
                 long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
-                UNSAFE.putLong(_start_address + 17 + _back_index * 8 * getNodeSize(), loopKey); // key
+                UNSAFE.putLong(_start_address + 17 + _back_index * 40, loopKey); // key
                 cursor++;
                 beginChunk = cursor;
                 while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
@@ -425,15 +425,15 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
                     long parentRaw = Long.parseLong(payload.substring(beginChunk, cursor));
                     long parentValue = parentRaw; //* elemSize;
                     //setParent(_back_index, parentValue);
-                    UNSAFE.putLong(_start_address + 17 + _back_index * 8 * getNodeSize() + 24, parentValue);
+                    UNSAFE.putLong(_start_address + 17 + _back_index * 40 + 24, parentValue);
 
                     if (isOnLeft) {
                         //setLeft(parentValue, _back_index);
-                        UNSAFE.putLong(_start_address + 17 + parentValue * 8 * getNodeSize() + 8, _back_index);
+                        UNSAFE.putLong(_start_address + 17 + parentValue * 40 + 8, _back_index);
 
                     } else {
                         //setRight(parentValue, _back_index);
-                        UNSAFE.putLong(_start_address + 17 + parentValue * 8 * getNodeSize() + 16, _back_index);
+                        UNSAFE.putLong(_start_address + 17 + parentValue * 40 + 16, _back_index);
                     }
                 }
                 if (cursor < payload.length() && payload.charAt(cursor) == ',') {
@@ -445,7 +445,7 @@ public abstract class AbstractOffHeapTree2 implements KOffHeapMemoryElement {
                     if (cursor > beginChunk) {
                         long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
                         //setValue(_back_index, currentValue);
-                        UNSAFE.putLong(_start_address + 17 + _back_index * 8 * getNodeSize() + 40, currentValue);
+                        UNSAFE.putLong(_start_address + 17 + _back_index * 40 + 40, currentValue);
                     }
                 }
                 _back_index++;
