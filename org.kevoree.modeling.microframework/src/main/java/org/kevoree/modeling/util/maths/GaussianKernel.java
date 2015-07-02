@@ -6,6 +6,8 @@ package org.kevoree.modeling.util.maths;
 public class GaussianKernel {
     public double[] sum;
     public double[] sumOfSquares;
+    public double[] min;
+    public double[] max;
     public int dim;
     public int total;
 
@@ -20,18 +22,20 @@ public class GaussianKernel {
         for(int i=0;i<dim;i++){
             sum[i]+=features[i];
             sumOfSquares[i]+=features[i]*features[i];
+            if(features[i]<min[i]||total==0){
+                min[i]=features[i];
+            }
+            if(features[i]>max[i]||total==0){
+                max[i]=features[i];
+            }
         }
         total++;
     }
 
     public void addArrayData(double[][] features){
         for(int i=0;i<features.length;i++){
-            for(int j=0; j<dim;j++) {
-                sum[j] += features[i][j];
-                sumOfSquares[j] += features[i][j] * features[i][j];
-            }
+            addData(features[i]);
         }
-        total+=features.length;
     }
 
     public double[] getMeans(){
@@ -46,12 +50,10 @@ public class GaussianKernel {
             return null;
     }
 
-    public double[] getVariances(){
+    public double[] getVariances(double[] avg){
         if(total!=0) {
-            double[] avg= new double[dim];
             double[] newvar= new double[dim];
             for(int i=0;i<dim;i++){
-                avg[i]=sum[i] / total;
                 newvar[i]=sumOfSquares[i]/total-avg[i]*avg[i];
             }
             return newvar;
@@ -61,8 +63,9 @@ public class GaussianKernel {
     }
 
     public double getProbability(double[] features){
-        double[] variances=getVariances();
         double[] means=getMeans();
+        double[] variances=getVariances(means);
+
         double p=1;
 
         for(int i=0; i<dim; i++){
@@ -72,10 +75,10 @@ public class GaussianKernel {
     }
 
     public double[] getParralelProbabilities(double[] features){
-        double[] variances=getVariances();
         double[] means=getMeans();
-        double[] p=new double[dim];
+        double[] variances=getVariances(means);
 
+        double[] p=new double[dim];
         for(int i=0; i<dim; i++){
             p[i]=(1/Math.sqrt(2*Math.PI*variances[i]))*Math.exp(-((features[i]-means[i])*(features[i]-means[i]))/(2*variances[i]));
         }
