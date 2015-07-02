@@ -3,7 +3,7 @@ package org.kevoree.modeling.extrapolation.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
-import org.kevoree.modeling.extrapolation.impl.maths.PolynomialFitEjml;
+import org.kevoree.modeling.util.maths.PolynomialFit;
 import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
@@ -109,7 +109,7 @@ public class PolynomialExtrapolation implements Extrapolation {
             }
             times[ss] = (time - timeOrigin) / raw.getInferElem(index, STEP, metaClass);
             values[ss] = value;
-            PolynomialFitEjml pf = new PolynomialFitEjml(deg);
+            PolynomialFit pf = new PolynomialFit(deg);
             pf.fit(times, values);
             if (tempError(pf.getCoef(), times, values) <= maxError) {
                 raw.extendInfer(index, (raw.getInferSize(index, metaClass) + 1), metaClass);

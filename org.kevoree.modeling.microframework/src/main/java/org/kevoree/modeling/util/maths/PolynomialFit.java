@@ -1,6 +1,6 @@
-package org.kevoree.modeling.extrapolation.impl.maths;
+package org.kevoree.modeling.util.maths;
 
-public class PolynomialFitEjml {
+public class PolynomialFit {
     // Vandermonde matrix
     DenseMatrix64F A;
     // matrix containing computed polynomial coefficients
@@ -10,7 +10,7 @@ public class PolynomialFitEjml {
     // solver used to compute
     AdjLinearSolverQr solver;
 
-    public PolynomialFitEjml(int degree) {
+    public PolynomialFit(int degree) {
         coef = new DenseMatrix64F(degree + 1, 1);
         A = new DenseMatrix64F(1, degree + 1);
         y = new DenseMatrix64F(1, 1);

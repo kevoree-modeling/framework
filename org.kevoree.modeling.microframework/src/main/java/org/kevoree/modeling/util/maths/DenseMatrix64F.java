@@ -1,4 +1,4 @@
-package org.kevoree.modeling.extrapolation.impl.maths;
+package org.kevoree.modeling.util.maths;
 
 import java.util.Arrays;
 
