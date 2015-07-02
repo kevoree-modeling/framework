@@ -39,4 +39,14 @@ public class PolynomialFit {
         solver.solve(y, coef);
     }
 
+    public static double extrapolate(double time, double[] weights) {
+        double result = 0;
+        double power = 1;
+        for (int j = 0; j < weights.length; j++) {
+            result += weights[j] * power;
+            power = power * time;
+        }
+        return result;
+    }
+
 }

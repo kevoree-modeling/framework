@@ -131,7 +131,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         double temp;
         double ds;
         for (int i = 0; i < times.length; i++) {
-            temp = Math.abs(values[i] - test_extrapolate(times[i], computedWeights));
+            temp = Math.abs(values[i] - PolynomialFit.extrapolate(times[i], computedWeights));
             if (temp > maxErr) {
                 maxErr = temp;
             }
@@ -139,15 +139,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         return maxErr;
     }
 
-    private double test_extrapolate(double time, double[] weights) {
-        double result = 0;
-        double power = 1;
-        for (int j = 0; j < weights.length; j++) {
-            result += weights[j] * power;
-            power = power * time;
-        }
-        return result;
-    }
+
 
     private double internal_extrapolate(double t, KMemorySegment raw, int index, KMetaClass metaClass) {
         double result = 0;
