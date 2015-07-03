@@ -10,4 +10,6 @@ public interface KMetaDependency extends KMeta {
 
     KMetaClass origin();
 
+    String extractor();
+
 }
