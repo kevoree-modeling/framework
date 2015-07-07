@@ -7,7 +7,7 @@ import org.kevoree.modeling.KView;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.format.json.JsonFormat;
 import org.kevoree.modeling.meta.KMetaClass;
-import org.kevoree.modeling.traversal.impl.selector.Selector;
+import org.kevoree.modeling.traversal.query.QuerySelector;
 import org.kevoree.modeling.util.Checker;
 import org.kevoree.modeling.format.xmi.XmiFormat;
 
@@ -66,7 +66,7 @@ public abstract class AbstractKView implements KView {
                                 if (cleanedQuery.charAt(0) == '/') {
                                     cleanedQuery = cleanedQuery.substring(1);
                                 }
-                                Selector.select(rootObj, cleanedQuery, cb);
+                                QuerySelector.select(rootObj, cleanedQuery, cb);
                             }
                         }
                     }

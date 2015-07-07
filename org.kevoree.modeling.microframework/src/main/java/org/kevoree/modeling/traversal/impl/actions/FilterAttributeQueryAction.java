@@ -3,13 +3,12 @@ package org.kevoree.modeling.traversal.impl.actions;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
 import org.kevoree.modeling.memory.struct.map.KStringMapCallBack;
+import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.traversal.KTraversalAction;
-import org.kevoree.modeling.traversal.impl.selector.QueryParam;
 
 public class FilterAttributeQueryAction implements KTraversalAction {
 
@@ -139,6 +138,32 @@ public class FilterAttributeQueryAction implements KTraversalAction {
             }
         }
         return params;
+    }
+
+    private class QueryParam {
+
+        private String _name;
+        private String _value;
+        private boolean _negative;
+
+        public QueryParam(String p_name, String p_value, boolean p_negative) {
+            this._name = p_name;
+            this._value = p_value;
+            this._negative = p_negative;
+        }
+
+        public String name() {
+            return _name;
+        }
+
+        public String value() {
+            return _value;
+        }
+
+        public boolean isNegative() {
+            return _negative;
+        }
+
     }
 
 }

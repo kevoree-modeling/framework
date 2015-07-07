@@ -16,14 +16,13 @@ import org.kevoree.modeling.KTimeWalker;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;
-import org.kevoree.modeling.format.json.JsonRaw;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.traversal.KTraversal;
-import org.kevoree.modeling.traversal.impl.selector.Selector;
+import org.kevoree.modeling.traversal.query.QuerySelector;
 import org.kevoree.modeling.util.Checker;
 
 import java.util.ArrayList;
@@ -137,12 +136,12 @@ public abstract class AbstractKObject implements KObject {
                         if (rootObj == null) {
                             cb.on(new KObject[0]);
                         } else {
-                            Selector.select(rootObj, finalCleanedQuery, cb);
+                            QuerySelector.select(rootObj, finalCleanedQuery, cb);
                         }
                     }
                 });
             } else {
-                Selector.select(this, query, cb);
+                QuerySelector.select(this, query, cb);
             }
         }
     }

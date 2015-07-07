@@ -21,6 +21,8 @@ public interface KTraversal {
 
     void then(KCallback<KObject[]> cb);
 
+    void eval(String expression, KCallback<Object[]> callback);
+
     void map(KMetaAttribute attribute, KCallback<Object[]> cb);
 
     KTraversal collect(KMetaReference metaReference, KTraversalFilter continueCondition);

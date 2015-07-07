@@ -21,9 +21,10 @@ public class Traversal implements KTraversal {
 
     private boolean _terminated = false;
 
-    public Traversal(KObject p_root) {
-        this._initObjs = new KObject[1];
-        this._initObjs[0] = p_root;
+    public Traversal(KObject[] p_roots) {
+        this._initObjs = p_roots;
+       // this._initObjs = new KObject[1];
+        //this._initObjs[0] = p_root;
     }
 
     private KTraversal internal_chain_action(KTraversalAction p_action) {
@@ -95,6 +96,11 @@ public class Traversal implements KTraversal {
         _terminated = true;
         //execute the first element of the chain of actions
         _initAction.execute(_initObjs);
+    }
+
+    @Override
+    public void eval(String expression, KCallback<Object[]> callback) {
+        //TODO
     }
 
     @Override
