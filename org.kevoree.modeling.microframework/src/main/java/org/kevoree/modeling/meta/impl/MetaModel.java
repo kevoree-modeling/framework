@@ -1,6 +1,7 @@
 package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.struct.map.KStringMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -73,17 +74,26 @@ public class MetaModel implements KMetaModel {
     }
 
     @Override
-    public synchronized KMetaClass addMetaClass(String metaClassName) {
+    public KMetaClass addMetaClass(String metaClassName) {
+        return internal_addmetaclass(metaClassName, null);
+    }
+
+    @Override
+    public KMetaClass addInferMetaClass(String metaClassName, KInferAlg inferAlg) {
+        return internal_addmetaclass(metaClassName, inferAlg);
+    }
+
+    private synchronized KMetaClass internal_addmetaclass(String metaClassName, KInferAlg alg) {
         if (_metaClasses_indexes.contains(metaClassName)) {
             return metaClassByName(metaClassName);
         } else {
             if (_metaClasses == null) {
                 _metaClasses = new KMetaClass[1];
-                _metaClasses[0] = new MetaClass(metaClassName, 0);
+                _metaClasses[0] = new MetaClass(metaClassName, 0, alg);
                 _metaClasses_indexes.put(metaClassName, _metaClasses[0].index());
                 return _metaClasses[0];
             } else {
-                KMetaClass newMetaClass = new MetaClass(metaClassName, _metaClasses.length);
+                KMetaClass newMetaClass = new MetaClass(metaClassName, _metaClasses.length, alg);
                 interal_add_meta_class(newMetaClass);
                 return newMetaClass;
             }

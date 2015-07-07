@@ -64,7 +64,7 @@ public class MetaAttribute implements KMetaAttribute {
     public void setPrecision(double p_precision) {
         this._precision = p_precision;
     }
-
+    
     public MetaAttribute(String p_name, int p_index, double p_precision, boolean p_key, KType p_metaType, Extrapolation p_extrapolation) {
         this._name = p_name;
         this._index = p_index;

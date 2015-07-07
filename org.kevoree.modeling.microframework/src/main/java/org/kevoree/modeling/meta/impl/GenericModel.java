@@ -14,6 +14,7 @@ class GenericModel extends AbstractKModel {
         super();
         this._p_metaModel = mm;
     }
+
     @Override
     public KMetaModel metaModel() {
         return _p_metaModel;
@@ -26,6 +27,10 @@ class GenericModel extends AbstractKModel {
 
     @Override
     protected KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz) {
-        return new GenericObject(universe, time, uuid, clazz, _manager);
+        if (clazz.inferAlg() != null) {
+            return new GenericObjectInfer(universe, time, uuid, clazz, _manager);
+        } else {
+            return new GenericObject(universe, time, uuid, clazz, _manager);
+        }
     }
 }

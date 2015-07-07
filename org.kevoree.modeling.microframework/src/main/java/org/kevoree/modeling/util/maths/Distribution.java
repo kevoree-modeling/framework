@@ -1,12 +1,8 @@
 package org.kevoree.modeling.util.maths;
 
-/**
- * Created by assaad on 02/07/15.
- */
 public class Distribution {
 
-
-    public static double InverseNormalCDF(double q) {
+    public static double inverseNormalCDF(double q) {
         double b[] = {
                 1.570796288,
                 0.03706987906,

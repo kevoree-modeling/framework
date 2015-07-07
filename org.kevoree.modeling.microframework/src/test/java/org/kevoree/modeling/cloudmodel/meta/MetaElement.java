@@ -42,7 +42,7 @@ public class MetaElement extends MetaClass {
     });
 
     public MetaElement() {
-        super("org.kevoree.modeling.microframework.test.cloud.Element", 1);
+        super("org.kevoree.modeling.microframework.test.cloud.Element", 1,null);
         KMeta[] temp = new KMeta[3];
         temp[0] = ATT_NAME;
         temp[1] = ATT_VALUE;

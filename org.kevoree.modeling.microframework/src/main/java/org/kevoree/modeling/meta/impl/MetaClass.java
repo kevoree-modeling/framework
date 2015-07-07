@@ -6,6 +6,7 @@ import org.kevoree.modeling.abs.KLazyResolver;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation;
+import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.struct.map.KStringMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.*;
@@ -20,10 +21,13 @@ public class MetaClass implements KMetaClass {
 
     private KStringMap<Integer> _indexes = null;
 
-    protected MetaClass(String p_name, int p_index) {
+    private KInferAlg _alg;
+
+    protected MetaClass(String p_name, int p_index, KInferAlg p_alg) {
         this._name = p_name;
         this._index = p_index;
         this._meta = new KMeta[0];
+        this._alg = p_alg;
         _indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
@@ -102,6 +106,10 @@ public class MetaClass implements KMetaClass {
 
     @Override
     public KMetaAttribute addAttribute(String attributeName, KType p_type) {
+        return internal_addatt(attributeName, p_type);
+    }
+
+    private KMetaAttribute internal_addatt(String attributeName, KType p_type) {
         double precisionCleaned = -1;
         Extrapolation extrapolation;
         if (p_type == KPrimitiveTypes.CONTINUOUS) {
@@ -117,6 +125,10 @@ public class MetaClass implements KMetaClass {
 
     @Override
     public KMetaReference addReference(String referenceName, KMetaClass p_metaClass, String oppositeName, boolean toMany) {
+        return internal_addref(referenceName, p_metaClass, oppositeName, toMany);
+    }
+
+    private KMetaReference internal_addref(String referenceName, KMetaClass p_metaClass, String oppositeName, boolean toMany) {
         final KMetaClass tempOrigin = this;
         String opName = oppositeName;
         if (opName == null) {
@@ -164,7 +176,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaOperation addOperation(String operationName) {
         final KMetaClass tempOrigin = this;
-        MetaOperation tempOperation = new MetaOperation(operationName, _meta.length + 1, new KLazyResolver() {
+        MetaOperation tempOperation = new MetaOperation(operationName, _meta.length, new KLazyResolver() {
             @Override
             public KMeta meta() {
                 return tempOrigin;
@@ -172,6 +184,48 @@ public class MetaClass implements KMetaClass {
         });
         internal_add_meta(tempOperation);
         return tempOperation;
+    }
+
+    @Override
+    public KInferAlg inferAlg() {
+        return _alg;
+    }
+
+    @Override
+    public KMetaDependency addDependency(String dependencyName, KMetaClass p_metaClass, String oppositeName) {
+        KMetaDependencies dependencies = initDependencies();
+        return dependencies.addDependency(dependencyName, p_metaClass, oppositeName);
+    }
+
+    @Override
+    public KMetaInferInput addInput(String p_name, String p_extractor) {
+        KMetaInferInput newInput = new MetaInferInput(p_name, _meta.length, p_extractor);
+        internal_add_meta(newInput);
+        return newInput;
+    }
+
+    @Override
+    public KMetaInferOutput addOutput(String p_name, KType p_type) {
+        KMetaInferOutput newOutput = new MetaInferOutput(p_name, _meta.length, p_type);
+        internal_add_meta(newOutput);
+        return newOutput;
+    }
+
+    public synchronized KMetaDependencies initDependencies(){
+        KMetaDependencies currentDependencies = (KMetaDependencies) metaByName(MetaDependencies.DEPENDENCIES_NAME);
+        if(currentDependencies != null){
+            return  currentDependencies;
+        } else {
+            KMeta self = this;
+            KMetaDependencies dependencies = new MetaDependencies(_meta.length, new KLazyResolver() {
+                @Override
+                public KMeta meta() {
+                    return self;
+                }
+            });
+            internal_add_meta(dependencies);
+            return dependencies;
+        }
     }
 
     /**

@@ -2,14 +2,10 @@ package org.kevoree.modeling.meta;
 
 public interface KMetaDependency extends KMeta {
 
-    boolean single();
-
     KMetaClass type();
 
-    KMetaReference opposite();
+    KMetaDependency opposite();
 
-    KMetaClass origin();
-
-    String extractor();
+    KMetaDependencies origin();
 
 }

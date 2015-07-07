@@ -70,7 +70,7 @@ public class MetaNode extends MetaClass {
     });
 
     public MetaNode() {
-        super("org.kevoree.modeling.microframework.test.cloud.Node", 0);
+        super("org.kevoree.modeling.microframework.test.cloud.Node", 0, null);
         KMeta[] temp = new KMeta[6];
         temp[0] = ATT_NAME;
         temp[1] = ATT_VALUE;

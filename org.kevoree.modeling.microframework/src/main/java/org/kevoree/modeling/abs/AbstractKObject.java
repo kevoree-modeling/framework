@@ -34,7 +34,7 @@ public abstract class AbstractKObject implements KObject {
     final protected long _uuid;
     final protected long _time;
     final protected long _universe;
-    final private KMetaClass _metaClass;
+    final protected KMetaClass _metaClass;
     final public KMemoryManager _manager;
     final private static String OUT_OF_CACHE_MSG = "Out of cache Error";
 
