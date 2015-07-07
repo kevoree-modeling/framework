@@ -2,10 +2,10 @@ package org.kevoree.modeling.util.maths;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
 
 public class Expression {
 
@@ -20,15 +20,53 @@ public class Expression {
      */
     private List<String> rpn = null;
 
-    /**
-     * All defined operators with name and implementation.
-     */
-    private Map<String, Operator> operators = new HashMap<String, Expression.Operator>();
 
-    /**
-     * All defined functions with name and implementation.
-     */
-    private Map<String, Function> functions = new HashMap<String, Expression.Function>();
+    public static Map<String, Operator> operators;
+    public static Map<String, Function> functions;
+
+
+    public void init(){
+        if(operators==null) {
+            operators = new HashMap<String, Expression.Operator>();
+            operators.put("+",new Operator("+", 20, true));
+            operators.put("-",new Operator("-", 20, true));
+            operators.put("*",new Operator("*", 30, true));
+            operators.put("/",new Operator("/", 30, true));
+            operators.put("%",new Operator("%", 30, true));
+            operators.put("^",new Operator("^", 40, false));
+
+            operators.put("&&",new Operator("&&", 4, false));
+            operators.put("||",new Operator("||", 2, false));
+            operators.put(">",new Operator(">", 10, false));
+            operators.put(">=",new Operator(">=", 10, false));
+            operators.put("<",new Operator("<", 10, false));
+            operators.put("<=",new Operator("<=", 10, false));
+            operators.put("==",new Operator("==", 7, false));
+            operators.put("!=",new Operator("!=", 7, false));
+        }
+        if(functions==null){
+            functions = new HashMap<String, Expression.Function>();
+
+            functions.put("NOT",new Function("NOT", 1));
+            functions.put("IF",new Function("IF", 3));
+            functions.put("RAND",new Function("RAND", 0));
+            functions.put("SIN",new Function("SIN", 1));
+            functions.put("COS",new Function("COS", 1));
+            functions.put("TAN",new Function("TAN", 1));
+            functions.put("ASIN",new Function("ASIN", 1));
+            functions.put("ACOS",new Function("ACOS", 1));
+            functions.put("ATAN",new Function("ATAN", 1));
+            functions.put("MAX",new Function("MAX", 2));
+            functions.put("MIN",new Function("MIN", 2));
+            functions.put("ABS",new Function("ABS", 1));
+            functions.put("LOG",new Function("LOG", 1));
+            functions.put("ROUND",new Function("ROUND", 2));
+            functions.put("FLOOR",new Function("FLOOR", 1));
+            functions.put("CEILING",new Function("CEILING", 1));
+            functions.put("SQRT",new Function("SQRT", 1));
+
+        }
+    }
 
     /**
      * All defined variables with name and value.
@@ -60,7 +98,7 @@ public class Expression {
      * defined by a name, the number of parameters and the actual processing
      * implementation.
      */
-    public abstract class Function {
+    private class Function {
         /**
          * Name of this function.
          */
@@ -89,14 +127,70 @@ public class Expression {
             return numParams;
         }
 
-        public abstract double eval(List<Double> parameters);
+
+        public double eval(double[] p){
+            if(name.equals("NOT")){
+                return (p[0] == 0) ? 1 : 0;
+            }
+            else if(name.equals("IF")){
+                return !(p[0]==0) ? p[1] : p[2];
+            }
+            else if(name.equals("RAND")){
+                return Math.random();
+            }
+            else if(name.equals("SIN")){
+                return Math.sin(p[0]);
+            }
+            else if(name.equals("COS")) {
+                return Math.cos(p[0]);
+            }
+            else if(name.equals("TAN")){
+                return Math.tan(p[0]);
+            }
+            else if(name.equals("ASIN")){
+                return Math.asin(p[0]);
+            }
+            else if(name.equals("ACOS")){
+                return Math.acos(p[0]);
+            }
+            else if(name.equals("ATAN")){
+                return Math.atan(p[0]);
+            }
+            else if(name.equals("MAX")){
+                return p[0]>p[1] ? p[0] : p[1];
+            }
+            else if(name.equals("MIN")){
+                return p[0]<p[1] ? p[0] : p[1];
+            }
+            else if(name.equals("ABS")){
+                return Math.abs(p[0]);
+            }
+            else if(name.equals("LOG")){
+                return Math.log(p[0]);
+            }
+            else if(name.equals("ROUND")){
+                //todo round
+            }
+            else if(name.equals("FLOOR")) {
+                //todo floor
+            }
+            else if(name.equals("CEILING")){
+                //todo ceiling
+            }
+            else if(name.equals("SQRT")){
+                return Math.sqrt(p[0]);
+            }
+
+            return 0;
+        }
+
     }
 
     /**
      * Abstract definition of a supported operator. An operator is defined by
      * its name (pattern), precedence and if it is left- or right associative.
      */
-    public abstract class Operator {
+    private class Operator {
         /**
          * This operators name (pattern).
          */
@@ -136,14 +230,58 @@ public class Expression {
             return leftAssoc;
         }
 
-        /**
-         * Implementation for this operator.
-         *
-         * @param v1 Operand 1.
-         * @param v2 Operand 2.
-         * @return The result of the operation.
-         */
-        public abstract double eval(double v1, double v2);
+
+        public double eval(double v1, double v2){
+            if(oper.equals("+")){
+                return v1+v2;
+            }
+            else if(oper.equals("-")){
+                return v1-v2;
+            }
+            else if(oper.equals("*")){
+                return v1*v2;
+            }
+            else if(oper.equals("/")){
+                return v1/v2;
+            }
+            else if(oper.equals("%")){
+                return v1%v2;
+            }
+            else if(oper.equals("^")){
+                return Math.pow(v1,v2);
+            }
+            else if(oper.equals("&&")){
+                boolean b1 = !(v1==0);
+                boolean b2 = !(v2==0);
+                return b1 && b2 ? 1 : 0;
+            }
+            else if(oper.equals("||")){
+                boolean b1 = !(v1==0);
+                boolean b2 = !(v2==0);
+                return b1 || b2 ? 1 : 0;
+            }
+            else if(oper.equals(">")){
+                return v1>v2  ? 1 : 0;
+            }
+            else if(oper.equals(">=")){
+                return v1>=v2  ? 1 : 0;
+            }
+            else if(oper.equals("<")){
+                return v1<v2  ? 1 : 0;
+            }
+            else if(oper.equals("<=")){
+                return v1<=v2  ? 1 : 0;
+            }
+            else if(oper.equals("==")){
+                return v1==v2 ? 1 : 0;
+            }
+            else if(oper.equals("!=")){
+                return v1 != v2 ? 1 : 0;
+            }
+
+
+            return 0;
+        }
     }
 
     /**
@@ -151,6 +289,16 @@ public class Expression {
      * expression token by token. Blank characters will be skipped.
      */
     private class Tokenizer {
+
+        /**
+         * What character to use for decimal separators.
+         */
+        private final char decimalSeparator = '.';
+
+        /**
+         * What character to use for minus sign (negative values).
+         */
+        private final char minusSign = '-';
 
         /**
          * Actual position in expression string.
@@ -188,7 +336,7 @@ public class Expression {
             if (pos < (input.length() - 1)) {
                 return input.charAt(pos + 1);
             } else {
-                return 0;
+                return '\0';
             }
         }
 
@@ -205,7 +353,7 @@ public class Expression {
                 while ((Character.isDigit(ch) || ch == decimalSeparator)
                         && (pos < input.length())) {
                     token.append(input.charAt(pos++));
-                    ch = pos == input.length() ? 0 : input.charAt(pos);
+                    ch = pos == input.length() ? '\0' : input.charAt(pos);
                 }
             } else if (ch == minusSign
                     && Character.isDigit(peekNextChar())
@@ -218,7 +366,7 @@ public class Expression {
             } else if (Character.isLetter(ch) || (ch == '_')) {
                 while ((Character.isLetter(ch) || Character.isDigit(ch) || (ch == '_')) && (pos < input.length())) {
                     token.append(input.charAt(pos++));
-                    ch = pos == input.length() ? 0 : input.charAt(pos);
+                    ch = pos == input.length() ? '\0' : input.charAt(pos);
                 }
             } else if (ch == '(' || ch == ')' || ch == ',') {
                 token.append(ch);
@@ -229,7 +377,7 @@ public class Expression {
                         && ch != ')' && ch != ',' && (pos < input.length())) {
                     token.append(input.charAt(pos));
                     pos++;
-                    ch = pos == input.length() ? 0 : input.charAt(pos);
+                    ch = pos == input.length() ? '\0' : input.charAt(pos);
                     if (ch == minusSign) {
                         break;
                     }
@@ -259,268 +407,8 @@ public class Expression {
      *                   <code>"sin(y)>0 & max(z, 3)>3"</code>
      */
     public Expression(String expression) {
+        init();
         this.expression = expression;
-        addOperator(new Operator("+", 20, true) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 + v2;
-            }
-        });
-        addOperator(new Operator("-", 20, true) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 - v2;
-            }
-        });
-        addOperator(new Operator("*", 30, true) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 * v2;
-            }
-        });
-        addOperator(new Operator("/", 30, true) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 / v2;
-            }
-        });
-        addOperator(new Operator("%", 30, true) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 % v2;
-            }
-        });
-        addOperator(new Operator("^", 40, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                return Math.pow(v1, v2);
-            }
-        });
-        addOperator(new Operator("&&", 4, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                boolean b1 = !(v1 == 0);
-                boolean b2 = !(v2 == 0);
-                return b1 && b2 ? 1 : 0;
-            }
-        });
-
-        addOperator(new Operator("||", 2, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                boolean b1 = !(v1 == 0);
-                boolean b2 = !(v2 == 0);
-                return b1 || b2 ? 1 : 0;
-            }
-        });
-
-        addOperator(new Operator(">", 10, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 > v2 ? 1 : 0;
-            }
-        });
-
-        addOperator(new Operator(">=", 10, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 >= v2 ? 1 : 0;
-            }
-        });
-
-        addOperator(new Operator("<", 10, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 < v2 ? 1 : 0;
-            }
-        });
-
-        addOperator(new Operator("<=", 10, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 <= v2 ? 1 : 0;
-            }
-        });
-
-        addOperator(new Operator("==", 7, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 == v2 ? 1 : 0;
-            }
-        });
-
-        addOperator(new Operator("!=", 7, false) {
-            @Override
-            public double eval(double v1, double v2) {
-                return v1 != v2 ? 1 : 0;
-            }
-        });
-
-        addFunction(new Function("NOT", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                boolean zero = parameters.get(0) == 0;
-                return zero ? 1 : 0;
-            }
-        });
-
-        addFunction(new Function("IF", 3) {
-            @Override
-            public double eval(List<Double> parameters) {
-                boolean isTrue = !(parameters.get(0) == 0);
-                return isTrue ? parameters.get(1) : parameters.get(2);
-            }
-        });
-
-        addFunction(new Function("RANDOM", 0) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.random();
-            }
-        });
-        addFunction(new Function("SIN", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.sin(Math.toRadians(parameters.get(0)
-                        .doubleValue()));
-            }
-        });
-        addFunction(new Function("COS", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.cos(Math.toRadians(parameters.get(0)
-                        .doubleValue()));
-            }
-        });
-        addFunction(new Function("TAN", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.tan(Math.toRadians(parameters.get(0)
-                        .doubleValue()));
-            }
-        });
-        addFunction(new Function("ASIN", 1) { // added by av
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.toDegrees(Math.asin(parameters.get(0)
-                        .doubleValue()));
-            }
-        });
-        addFunction(new Function("ACOS", 1) { // added by av
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.toDegrees(Math.acos(parameters.get(0)
-                        .doubleValue()));
-            }
-        });
-        addFunction(new Function("ATAN", 1) { // added by av
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.toDegrees(Math.atan(parameters.get(0)
-                        .doubleValue()));
-            }
-        });
-        addFunction(new Function("SINH", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.sinh(parameters.get(0).doubleValue());
-            }
-        });
-        addFunction(new Function("COSH", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.cosh(parameters.get(0).doubleValue());
-            }
-        });
-        addFunction(new Function("TANH", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.tanh(parameters.get(0).doubleValue());
-            }
-        });
-        addFunction(new Function("RAD", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.toRadians(parameters.get(0).doubleValue());
-            }
-        });
-        addFunction(new Function("DEG", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.toDegrees(parameters.get(0).doubleValue());
-
-            }
-        });
-        addFunction(new Function("MAX", 2) {
-            @Override
-            public double eval(List<Double> parameters) {
-                double v1 = parameters.get(0);
-                double v2 = parameters.get(1);
-                return v1 > v2 ? v1 : v2;
-            }
-        });
-        addFunction(new Function("MIN", 2) {
-            @Override
-            public double eval(List<Double> parameters) {
-                double v1 = parameters.get(0);
-                double v2 = parameters.get(1);
-                return v1 < v2 ? v1 : v2;
-            }
-        });
-        addFunction(new Function("ABS", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.abs(parameters.get(0));
-            }
-        });
-        addFunction(new Function("LOG", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.log(parameters.get(0).doubleValue());
-            }
-        });
-        addFunction(new Function("LOG10", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                return Math.log10(parameters.get(0).doubleValue());
-            }
-        });
-        /*
-        addFunction(new Function("ROUND", 2) {
-            @Override
-            public double eval(List<Double> parameters) {
-                double toRound = parameters.get(0);
-                int precision = parameters.get(1).intValue();
-                return toRound.setScale(precision, mc.getRoundingMode());
-            }
-        });
-        addFunction(new Function("FLOOR", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                double toRound = parameters.get(0);
-                return toRound.setScale(0, RoundingMode.FLOOR);
-            }
-        });
-        addFunction(new Function("CEILING", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                double toRound = parameters.get(0);
-                return toRound.setScale(0, RoundingMode.CEILING);
-            }
-        });
-        */
-        addFunction(new Function("SQRT", 1) {
-            @Override
-            public double eval(List<Double> parameters) {
-                /*
-				 * From The Java Programmers Guide To numerical Computing
-				 * (Ronald Mak, 2003)
-				 */
-                return Math.sqrt(parameters.get(0));
-
-            }
-        });
-
         variables.put("PI", Math.PI);
         variables.put("TRUE", 1.0);
         variables.put("FALSE", 0.0);
@@ -536,7 +424,8 @@ public class Expression {
     private boolean isNumber(String st) {
         if (st.charAt(0) == minusSign && st.length() == 1)
             return false;
-        for (char ch : st.toCharArray()) {
+        for (int i=0; i<st.length();i++) {
+            char ch = st.charAt(i);
             if (!Character.isDigit(ch) && ch != minusSign
                     && ch != decimalSeparator)
                 return false;
@@ -657,10 +546,9 @@ public class Expression {
                 stack.push(variables.get(token));
             } else if (functions.containsKey(token.toUpperCase())) {
                 Function f = functions.get(token.toUpperCase());
-                ArrayList<Double> p = new ArrayList<Double>(
-                        f.getNumParams());
-                for (int i = 0; i < f.numParams; i++) {
-                    p.add(0, stack.pop());
+                double[] p = new double[f.getNumParams()];
+                for (int i = f.getNumParams()-1; i >=0 ; i--) {
+                    p[i]=stack.pop();
                 }
                 double fResult = f.eval(p);
                 stack.push(fResult);
@@ -672,39 +560,7 @@ public class Expression {
     }
 
 
-    /**
-     * Adds an operator to the list of supported operators.
-     *
-     * @param operator The operator to add.
-     * @return The previous operator with that name, or <code>null</code> if
-     * there was none.
-     */
-    public Operator addOperator(Operator operator) {
-        return operators.put(operator.getOper(), operator);
-    }
 
-    /**
-     * Adds a function to the list of supported functions
-     *
-     * @param function The function to add.
-     * @return The previous operator with that name, or <code>null</code> if
-     * there was none.
-     */
-    public Function addFunction(Function function) {
-        return functions.put(function.getName(), function);
-    }
-
-    /**
-     * Sets a variable value.
-     *
-     * @param variable The variable name.
-     * @param value    The variable value.
-     * @return The expression, allows to chain methods.
-     */
-    public Expression setVariable(String variable, double value) {
-        variables.put(variable, value);
-        return this;
-    }
 
     /**
      * Sets a variable value.
@@ -724,60 +580,6 @@ public class Expression {
     }
 
     /**
-     * Sets a variable value.
-     *
-     * @param variable The variable to set.
-     * @param value    The variable value.
-     * @return The expression, allows to chain methods.
-     */
-    public Expression with(String variable, double value) {
-        return setVariable(variable, value);
-    }
-
-    /**
-     * Sets a variable value.
-     *
-     * @param variable The variable to set.
-     * @param value    The variable value.
-     * @return The expression, allows to chain methods.
-     */
-    public Expression and(String variable, String value) {
-        return setVariable(variable, value);
-    }
-
-    /**
-     * Sets a variable value.
-     *
-     * @param variable The variable to set.
-     * @param value    The variable value.
-     * @return The expression, allows to chain methods.
-     */
-    public Expression and(String variable, double value) {
-        return setVariable(variable, value);
-    }
-
-    /**
-     * Sets a variable value.
-     *
-     * @param variable The variable to set.
-     * @param value    The variable value.
-     * @return The expression, allows to chain methods.
-     */
-    public Expression with(String variable, String value) {
-        return setVariable(variable, value);
-    }
-
-    /**
-     * Get an iterator for this expression, allows iterating over an expression
-     * token by token.
-     *
-     * @return A new iterator instance for this expression.
-     */
-    public Iterator<String> getExpressionTokenizer() {
-        return new Tokenizer(this.expression);
-    }
-
-    /**
      * Cached access to the RPN notation of this expression, ensures only one
      * calculation of the RPN per expression instance. If no cached instance
      * exists, a new one will be created and put to the cache.
@@ -790,5 +592,6 @@ public class Expression {
         }
         return rpn;
     }
+
 
 }
