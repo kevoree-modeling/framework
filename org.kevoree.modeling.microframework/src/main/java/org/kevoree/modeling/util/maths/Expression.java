@@ -1,10 +1,11 @@
 package org.kevoree.modeling.util.maths;
-        import java.util.ArrayList;
-        import java.util.HashMap;
-        import java.util.Iterator;
-        import java.util.List;
-        import java.util.Map;
-        import java.util.Stack;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 public class Expression {
 
@@ -72,10 +73,8 @@ public class Expression {
         /**
          * Creates a new function with given name and parameter count.
          *
-         * @param name
-         *            The name of the function.
-         * @param numParams
-         *            The number of parameters for this function.
+         * @param name      The name of the function.
+         * @param numParams The number of parameters for this function.
          */
         public Function(String name, int numParams) {
             this.name = name.toUpperCase();
@@ -114,13 +113,10 @@ public class Expression {
         /**
          * Creates a new operator.
          *
-         * @param oper
-         *            The operator name (pattern).
-         * @param precedence
-         *            The operators precedence.
-         * @param leftAssoc
-         *            <code>true</code> if the operator is left associative,
-         *            else <code>false</code>.
+         * @param oper       The operator name (pattern).
+         * @param precedence The operators precedence.
+         * @param leftAssoc  <code>true</code> if the operator is left associative,
+         *                   else <code>false</code>.
          */
         public Operator(String oper, int precedence, boolean leftAssoc) {
             this.oper = oper;
@@ -143,10 +139,8 @@ public class Expression {
         /**
          * Implementation for this operator.
          *
-         * @param v1
-         *            Operand 1.
-         * @param v2
-         *            Operand 2.
+         * @param v1 Operand 1.
+         * @param v2 Operand 2.
          * @return The result of the operation.
          */
         public abstract double eval(double v1, double v2);
@@ -156,7 +150,7 @@ public class Expression {
      * Expression tokenizer that allows to iterate over a {@link String}
      * expression token by token. Blank characters will be skipped.
      */
-    private class Tokenizer implements Iterator<String> {
+    private class Tokenizer {
 
         /**
          * Actual position in expression string.
@@ -175,14 +169,12 @@ public class Expression {
         /**
          * Creates a new tokenizer for an expression.
          *
-         * @param input
-         *            The expression string.
+         * @param input The expression string.
          */
         public Tokenizer(String input) {
             this.input = input.trim();
         }
 
-        @Override
         public boolean hasNext() {
             return (pos < input.length());
         }
@@ -200,7 +192,6 @@ public class Expression {
             }
         }
 
-        @Override
         public String next() {
             StringBuilder token = new StringBuilder();
             if (pos >= input.length()) {
@@ -244,16 +235,10 @@ public class Expression {
                     }
                 }
                 if (!operators.containsKey(token.toString())) {
-                    throw new ExpressionException("Unknown operator '" + token
-                            + "' at position " + (pos - token.length() + 1));
+                    throw new ExpressionException("Unknown operator '" + token + "' at position " + (pos - token.length() + 1));
                 }
             }
             return previousToken = token.toString();
-        }
-
-        @Override
-        public void remove() {
-            throw new ExpressionException("remove() not supported");
         }
 
         /**
@@ -270,53 +255,52 @@ public class Expression {
     /**
      * Creates a new expression instance from an expression string.
      *
-     * @param expression
-     *            The expression. E.g. <code>"2.4*sin(3)/(2-4)"</code> or
-     *            <code>"sin(y)>0 & max(z, 3)>3"</code>
+     * @param expression The expression. E.g. <code>"2.4*sin(3)/(2-4)"</code> or
+     *                   <code>"sin(y)>0 & max(z, 3)>3"</code>
      */
     public Expression(String expression) {
         this.expression = expression;
         addOperator(new Operator("+", 20, true) {
             @Override
             public double eval(double v1, double v2) {
-                return v1+v2;
+                return v1 + v2;
             }
         });
         addOperator(new Operator("-", 20, true) {
             @Override
             public double eval(double v1, double v2) {
-                return v1-v2;
+                return v1 - v2;
             }
         });
         addOperator(new Operator("*", 30, true) {
             @Override
             public double eval(double v1, double v2) {
-                return v1*v2;
+                return v1 * v2;
             }
         });
         addOperator(new Operator("/", 30, true) {
             @Override
             public double eval(double v1, double v2) {
-                return v1/v2;
+                return v1 / v2;
             }
         });
         addOperator(new Operator("%", 30, true) {
             @Override
             public double eval(double v1, double v2) {
-                return v1%v2;
+                return v1 % v2;
             }
         });
         addOperator(new Operator("^", 40, false) {
             @Override
-            public double eval(double v1, double v2) {				
-                return Math.pow(v1,v2);
+            public double eval(double v1, double v2) {
+                return Math.pow(v1, v2);
             }
         });
         addOperator(new Operator("&&", 4, false) {
             @Override
             public double eval(double v1, double v2) {
-                boolean b1 = !(v1==0);
-                boolean b2 = !(v2==0);
+                boolean b1 = !(v1 == 0);
+                boolean b2 = !(v2 == 0);
                 return b1 && b2 ? 1 : 0;
             }
         });
@@ -324,8 +308,8 @@ public class Expression {
         addOperator(new Operator("||", 2, false) {
             @Override
             public double eval(double v1, double v2) {
-                boolean b1 = !(v1==0);
-                boolean b2 = !(v2==0);
+                boolean b1 = !(v1 == 0);
+                boolean b2 = !(v2 == 0);
                 return b1 || b2 ? 1 : 0;
             }
         });
@@ -333,14 +317,14 @@ public class Expression {
         addOperator(new Operator(">", 10, false) {
             @Override
             public double eval(double v1, double v2) {
-                return v1>v2  ? 1 : 0;
+                return v1 > v2 ? 1 : 0;
             }
         });
 
         addOperator(new Operator(">=", 10, false) {
             @Override
             public double eval(double v1, double v2) {
-                return v1>=v2 ? 1 : 0;
+                return v1 >= v2 ? 1 : 0;
             }
         });
 
@@ -361,7 +345,7 @@ public class Expression {
         addOperator(new Operator("==", 7, false) {
             @Override
             public double eval(double v1, double v2) {
-                return v1==v2 ? 1 : 0;
+                return v1 == v2 ? 1 : 0;
             }
         });
 
@@ -383,7 +367,7 @@ public class Expression {
         addFunction(new Function("IF", 3) {
             @Override
             public double eval(List<Double> parameters) {
-                boolean isTrue = !(parameters.get(0)==0);
+                boolean isTrue = !(parameters.get(0) == 0);
                 return isTrue ? parameters.get(1) : parameters.get(2);
             }
         });
@@ -457,13 +441,13 @@ public class Expression {
         addFunction(new Function("RAD", 1) {
             @Override
             public double eval(List<Double> parameters) {
-                return  Math.toRadians(parameters.get(0).doubleValue());
+                return Math.toRadians(parameters.get(0).doubleValue());
             }
         });
         addFunction(new Function("DEG", 1) {
             @Override
             public double eval(List<Double> parameters) {
-                return  Math.toDegrees(parameters.get(0).doubleValue());
+                return Math.toDegrees(parameters.get(0).doubleValue());
 
             }
         });
@@ -472,7 +456,7 @@ public class Expression {
             public double eval(List<Double> parameters) {
                 double v1 = parameters.get(0);
                 double v2 = parameters.get(1);
-                return v1>v2 ? v1 : v2;
+                return v1 > v2 ? v1 : v2;
             }
         });
         addFunction(new Function("MIN", 2) {
@@ -480,7 +464,7 @@ public class Expression {
             public double eval(List<Double> parameters) {
                 double v1 = parameters.get(0);
                 double v2 = parameters.get(1);
-                return v1<v2 ? v1 : v2;
+                return v1 < v2 ? v1 : v2;
             }
         });
         addFunction(new Function("ABS", 1) {
@@ -492,13 +476,13 @@ public class Expression {
         addFunction(new Function("LOG", 1) {
             @Override
             public double eval(List<Double> parameters) {
-                return  Math.log(parameters.get(0).doubleValue());
+                return Math.log(parameters.get(0).doubleValue());
             }
         });
         addFunction(new Function("LOG10", 1) {
             @Override
             public double eval(List<Double> parameters) {
-                return  Math.log10(parameters.get(0).doubleValue());
+                return Math.log10(parameters.get(0).doubleValue());
             }
         });
         /*
@@ -528,7 +512,7 @@ public class Expression {
         addFunction(new Function("SQRT", 1) {
             @Override
             public double eval(List<Double> parameters) {
-				/*
+                /*
 				 * From The Java Programmers Guide To numerical Computing
 				 * (Ronald Mak, 2003)
 				 */
@@ -546,8 +530,7 @@ public class Expression {
     /**
      * Is the string a number?
      *
-     * @param st
-     *            The string.
+     * @param st The string.
      * @return <code>true</code>, if the input string is a number.
      */
     private boolean isNumber(String st) {
@@ -565,10 +548,9 @@ public class Expression {
      * Implementation of the <i>Shunting Yard</i> algorithm to transform an
      * infix expression to a RPN expression.
      *
-     * @param expression
-     *            The input expression in infx.
+     * @param expression The input expression in infx.
      * @return A RPN representation of the expression, with each token as a list
-     *         member.
+     * member.
      */
     private List<String> shuntingYard(String expression) {
         List<String> outputQueue = new ArrayList<String>();
@@ -655,6 +637,18 @@ public class Expression {
         Stack<Double> stack = new Stack<Double>();
 
         for (String token : getRPN()) {
+
+            //TODO copy past here all OP and Method eval
+
+            if(token.equals("")){
+
+            } else if(token.equals("")){
+
+            }
+
+            //TODO
+
+
             if (operators.containsKey(token)) {
                 double v1 = stack.pop();
                 double v2 = stack.pop();
@@ -666,26 +660,24 @@ public class Expression {
                 ArrayList<Double> p = new ArrayList<Double>(
                         f.getNumParams());
                 for (int i = 0; i < f.numParams; i++) {
-                    p.add(0,stack.pop());
+                    p.add(0, stack.pop());
                 }
                 double fResult = f.eval(p);
                 stack.push(fResult);
             } else {
-                stack.push(new Double (token));
+                stack.push(new Double(token));
             }
         }
         return stack.pop();
     }
 
 
-
     /**
      * Adds an operator to the list of supported operators.
      *
-     * @param operator
-     *            The operator to add.
+     * @param operator The operator to add.
      * @return The previous operator with that name, or <code>null</code> if
-     *         there was none.
+     * there was none.
      */
     public Operator addOperator(Operator operator) {
         return operators.put(operator.getOper(), operator);
@@ -694,10 +686,9 @@ public class Expression {
     /**
      * Adds a function to the list of supported functions
      *
-     * @param function
-     *            The function to add.
+     * @param function The function to add.
      * @return The previous operator with that name, or <code>null</code> if
-     *         there was none.
+     * there was none.
      */
     public Function addFunction(Function function) {
         return functions.put(function.getName(), function);
@@ -706,10 +697,8 @@ public class Expression {
     /**
      * Sets a variable value.
      *
-     * @param variable
-     *            The variable name.
-     * @param value
-     *            The variable value.
+     * @param variable The variable name.
+     * @param value    The variable value.
      * @return The expression, allows to chain methods.
      */
     public Expression setVariable(String variable, double value) {
@@ -720,10 +709,8 @@ public class Expression {
     /**
      * Sets a variable value.
      *
-     * @param variable
-     *            The variable to set.
-     * @param value
-     *            The variable value.
+     * @param variable The variable to set.
+     * @param value    The variable value.
      * @return The expression, allows to chain methods.
      */
     public Expression setVariable(String variable, String value) {
@@ -739,10 +726,8 @@ public class Expression {
     /**
      * Sets a variable value.
      *
-     * @param variable
-     *            The variable to set.
-     * @param value
-     *            The variable value.
+     * @param variable The variable to set.
+     * @param value    The variable value.
      * @return The expression, allows to chain methods.
      */
     public Expression with(String variable, double value) {
@@ -752,10 +737,8 @@ public class Expression {
     /**
      * Sets a variable value.
      *
-     * @param variable
-     *            The variable to set.
-     * @param value
-     *            The variable value.
+     * @param variable The variable to set.
+     * @param value    The variable value.
      * @return The expression, allows to chain methods.
      */
     public Expression and(String variable, String value) {
@@ -765,10 +748,8 @@ public class Expression {
     /**
      * Sets a variable value.
      *
-     * @param variable
-     *            The variable to set.
-     * @param value
-     *            The variable value.
+     * @param variable The variable to set.
+     * @param value    The variable value.
      * @return The expression, allows to chain methods.
      */
     public Expression and(String variable, double value) {
@@ -778,10 +759,8 @@ public class Expression {
     /**
      * Sets a variable value.
      *
-     * @param variable
-     *            The variable to set.
-     * @param value
-     *            The variable value.
+     * @param variable The variable to set.
+     * @param value    The variable value.
      * @return The expression, allows to chain methods.
      */
     public Expression with(String variable, String value) {
@@ -810,21 +789,6 @@ public class Expression {
             rpn = shuntingYard(this.expression);
         }
         return rpn;
-    }
-
-    /**
-     * Get a string representation of the RPN (Reverse Polish Notation) for this
-     * expression.
-     *
-     * @return A string with the RPN representation for this expression.
-     */
-    public String toRPN() {
-        String result = new String();
-        for (String st : getRPN()) {
-            result = result.isEmpty() ? result : result + " ";
-            result += st;
-        }
-        return result;
     }
 
 }
