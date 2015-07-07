@@ -1,8 +1,4 @@
 package org.kevoree.modeling.util.maths;
-
-
-        import java.math.MathContext;
-        import java.math.RoundingMode;
         import java.util.ArrayList;
         import java.util.HashMap;
         import java.util.Iterator;
