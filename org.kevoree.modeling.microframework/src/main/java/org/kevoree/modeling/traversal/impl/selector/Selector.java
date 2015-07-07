@@ -14,7 +14,7 @@ public class Selector {
         }
         KTraversal current = null;
         List<Query> extracted = Query.buildChain(query);
-        if(extracted != null){
+        if (extracted != null) {
             for (int i = 0; i < extracted.size(); i++) {
                 if (current == null) {
                     current = root.traversal().traverseQuery(extracted.get(i).relationName);

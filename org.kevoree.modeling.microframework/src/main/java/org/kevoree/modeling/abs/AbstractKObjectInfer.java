@@ -14,7 +14,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
 
     @Override
     public void train(KObject[] dependencies, Object[] expectedOutputs, KCallback callback) {
-        
+
     }
 
     @Override
@@ -35,6 +35,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     @Override
     public void resetLearning() {
         //TODO
+        throw new RuntimeException("Not Implemented Yet!");
     }
 
 }
