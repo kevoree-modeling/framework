@@ -69,8 +69,8 @@ public class StatInferAlg implements KInferAlg {
 
     public int getNumOfInput(KMetaDependencies meta){
         int counter =0;
-        for(KMeta km: meta.origin().metaElements()){
-            if(km.metaType().equals(MetaType.INPUT)){
+       for(int i=0; i<meta.origin().metaElements().length;i++){
+            if(meta.origin().metaElements()[i].metaType().equals(MetaType.INPUT)){
                 counter++;
             }
         }

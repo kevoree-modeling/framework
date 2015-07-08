@@ -110,7 +110,6 @@ public class GaussianClassification implements KInferAlg {
                 maxprob=prob;
                 result[0]=output;
             }
-
         }
         return result;
     }
