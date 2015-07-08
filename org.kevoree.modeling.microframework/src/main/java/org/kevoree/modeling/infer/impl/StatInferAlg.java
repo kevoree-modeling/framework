@@ -15,7 +15,9 @@ public class StatInferAlg implements KInferAlg {
     private static int SUM=2;
     private static int SUMSQuare=3;
     //to keep updated
-    private static int NUMOFVAR=4;
+    private static int NUMOFFIELDS =4;
+
+
 
 
 
@@ -25,7 +27,7 @@ public class StatInferAlg implements KInferAlg {
 
         //Create initial segment if empty
         if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
-            ks.extendInfer(meta.index(),NUMOFVAR*trainingSet[0].length+1,meta.origin());
+            ks.extendInfer(meta.index(), NUMOFFIELDS *trainingSet[0].length+1,meta.origin());
         }
 
         //get the state to double[]
@@ -33,32 +35,32 @@ public class StatInferAlg implements KInferAlg {
 
         //update the state
         for(int i=0;i<trainingSet.length;i++){
-            for(int j=0; j<trainingSet[0].length;j++){
+            for(int j=0; j<getNumOfInput(meta);j++){
                 //If this is the first datapoint
-                if(state[NUMOFVAR*trainingSet[0].length]==0){
-                    state[MIN+j*NUMOFVAR]=trainingSet[i][j];
-                    state[MAX+j*NUMOFVAR]=trainingSet[i][j];
-                    state[SUM+j*NUMOFVAR]=trainingSet[i][j];
-                    state[SUMSQuare+j*NUMOFVAR]=trainingSet[i][j]*trainingSet[i][j];
+                if(state[NUMOFFIELDS *trainingSet[0].length]==0){
+                    state[MIN+j* NUMOFFIELDS]=trainingSet[i][j];
+                    state[MAX+j* NUMOFFIELDS]=trainingSet[i][j];
+                    state[SUM+j* NUMOFFIELDS]=trainingSet[i][j];
+                    state[SUMSQuare+j* NUMOFFIELDS]=trainingSet[i][j]*trainingSet[i][j];
                 }
 
                 else{
-                    if(trainingSet[i][j]<state[MIN + j * NUMOFVAR]) {
-                        state[MIN + j * NUMOFVAR] = trainingSet[i][j];
+                    if(trainingSet[i][j]<state[MIN + j * NUMOFFIELDS]) {
+                        state[MIN + j * NUMOFFIELDS] = trainingSet[i][j];
                     }
-                    if(trainingSet[i][j]>state[MAX + j * NUMOFVAR]) {
-                        state[MAX + j * NUMOFVAR] = trainingSet[i][j];
+                    if(trainingSet[i][j]>state[MAX + j * NUMOFFIELDS]) {
+                        state[MAX + j * NUMOFFIELDS] = trainingSet[i][j];
                     }
-                    state[SUM+j*NUMOFVAR]+=trainingSet[i][j];
-                    state[SUMSQuare+j*NUMOFVAR]+=trainingSet[i][j]*trainingSet[i][j];
+                    state[SUM+j* NUMOFFIELDS]+=trainingSet[i][j];
+                    state[SUMSQuare+j* NUMOFFIELDS]+=trainingSet[i][j]*trainingSet[i][j];
                 }
-                //Global counter
-                state[NUMOFVAR*trainingSet[0].length]++;
             }
+            //Global counter
+            state[NUMOFFIELDS *getNumOfInput(meta)]++;
         }
 
         //Save the state back to the segment
-        for(int i=0;i<NUMOFVAR*trainingSet[0].length+1;i++){
+        for(int i=0;i< NUMOFFIELDS *getNumOfInput(meta)+1;i++){
             ks.setInferElem(meta.index(),i,state[i],meta.origin());
         }
 
@@ -123,7 +125,7 @@ public class StatInferAlg implements KInferAlg {
             return 0;
         }
 
-        return ks.getInferElem(meta.index(),featureNum*NUMOFVAR+SUM,meta.origin())/count;
+        return ks.getInferElem(meta.index(),featureNum* NUMOFFIELDS +SUM,meta.origin())/count;
     }
 
     public double getMin(int featureNum, KObject origin, KMetaDependencies meta){
@@ -137,7 +139,7 @@ public class StatInferAlg implements KInferAlg {
             return 0;
         }
 
-        return ks.getInferElem(meta.index(),featureNum*NUMOFVAR+MIN,meta.origin());
+        return ks.getInferElem(meta.index(),featureNum* NUMOFFIELDS +MIN,meta.origin());
     }
 
     public double getMax(int featureNum, KObject origin, KMetaDependencies meta){
@@ -151,7 +153,7 @@ public class StatInferAlg implements KInferAlg {
             return 0;
         }
 
-        return ks.getInferElem(meta.index(),featureNum*NUMOFVAR+MAX,meta.origin());
+        return ks.getInferElem(meta.index(),featureNum* NUMOFFIELDS +MAX,meta.origin());
     }
 
     public double getVariance(int featureNum, KObject origin, KMetaDependencies meta, double avg){
@@ -165,7 +167,7 @@ public class StatInferAlg implements KInferAlg {
             return 0;
         }
 
-        return ks.getInferElem(meta.index(),featureNum*NUMOFVAR+SUMSQuare,meta.origin())/count-avg*avg;
+        return ks.getInferElem(meta.index(),featureNum* NUMOFFIELDS +SUMSQuare,meta.origin())/count-avg*avg;
 
     }
 
