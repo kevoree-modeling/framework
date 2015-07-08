@@ -73,7 +73,7 @@ public class ArrayStringMap<V> implements KStringMap<V> {
 
     @Override
     public boolean contains(String key) {
-        if (elementDataSize == 0) {
+        if (elementDataSize == 0 || key == null) {
             return false;
         }
         int hash = key.hashCode();

@@ -21,10 +21,29 @@ public class QueryEngine implements KQueryEngine {
     public static final char CLOSE_BRACKET = ']';
     public static final char PIPE_SEP = '|';
 
+
     @Override
     public void eval(String query, KObject[] origins, KCallback<Object[]> callback) {
+        if (callback != null) {
+            internal_eval(query, origins, null, callback);
+        }
+    }
+
+    @Override
+    public void traverse(String query, KObject[] origins, KCallback<KObject[]> callback) {
+        if (callback != null) {
+            internal_eval(query, origins, callback, null);
+        }
+    }
+
+    private void internal_eval(String query, KObject[] origins, KCallback<KObject[]> callbackKObject, KCallback<Object[]> callbackGenericObject) {
         if (query == null || query.length() == 0) {
-            callback.on(new KObject[0]);
+            if (callbackKObject != null) {
+                callbackKObject.on(new KObject[0]);
+            }
+            if (callbackGenericObject != null) {
+                callbackGenericObject.on(new Object[0]);
+            }
         } else {
             KTraversal traversal = new Traversal(origins);
             int i = 0;
@@ -71,9 +90,13 @@ public class QueryEngine implements KQueryEngine {
                                 }
                             }
                         }
-                        relationName = query.substring(previousKQueryStart, previousKQueryNameEnd);
-
-                        if (relationName.startsWith(">>")) {
+                        relationName = query.substring(previousKQueryStart, previousKQueryNameEnd).trim();
+                        if (relationName.startsWith("=")) {
+                            if (callbackGenericObject != null) {
+                                traversal.eval(relationName.substring(1), callbackGenericObject);
+                                endEval = true;
+                            }
+                        } else if (relationName.startsWith(">>")) {
                             traversal = traversal.traverseQuery(relationName.substring(2));
                             if (atts != null) {
                                 traversal = traversal.attributeQuery(atts);
@@ -84,11 +107,11 @@ public class QueryEngine implements KQueryEngine {
                                 traversal = traversal.attributeQuery(atts);
                             }
                         } else {
-                            traversal.eval(relationName, callback);
-                            endEval = true;
-                            //expression
+                            traversal = traversal.traverseQuery(relationName);
+                            if (atts != null) {
+                                traversal = traversal.attributeQuery(atts);
+                            }
                         }
-
                         //ReInit
                         previousKQueryStart = i + 1;
                         previousKQueryNameEnd = -1;
@@ -99,12 +122,16 @@ public class QueryEngine implements KQueryEngine {
                 i = i + 1;
             }
             if (!endEval) {
-                traversal.then(new KCallback<KObject[]>() {
-                    @Override
-                    public void on(KObject[] kObjects) {
-                        callback.on(kObjects);
-                    }
-                });
+                if (callbackKObject != null) {
+                    traversal.then(callbackKObject);
+                } else {
+                    traversal.then(new KCallback<KObject[]>() {
+                        @Override
+                        public void on(KObject[] kObjects) {
+                            callbackGenericObject.on(kObjects);
+                        }
+                    });
+                }
             }
         }
     }

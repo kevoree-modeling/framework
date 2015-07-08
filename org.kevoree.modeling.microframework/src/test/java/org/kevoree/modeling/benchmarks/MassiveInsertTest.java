@@ -15,7 +15,7 @@ public class MassiveInsertTest {
     /**
      * @native ts
      */
-    @Test
+    //@Test
     public void test() {
 
         KMetaModel metaModel = new MetaModel("IoTModel");

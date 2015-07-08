@@ -99,8 +99,12 @@ public class Traversal implements KTraversal {
     }
 
     @Override
-    public void eval(String expression, KCallback<Object[]> callback) {
-        //TODO
+    public void eval(String p_expression, KCallback<Object[]> callback) {
+        //set the terminal leaf action
+        internal_chain_action(new MathExpressionAction(p_expression, callback));
+        _terminated = true;
+        //execute the first element of the chain of actions
+        _initAction.execute(_initObjs);
     }
 
     @Override

@@ -5,27 +5,11 @@ package org.kevoree.modeling.util.maths.expression.impl;
  * its name (pattern), precedence and if it is left- or right associative.
  */
 public class MathOperation {
-    /**
-     * This operators name (pattern).
-     */
+
     private String oper;
-    /**
-     * Operators precedence.
-     */
     private int precedence;
-    /**
-     * Operator is left associative.
-     */
     private boolean leftAssoc;
 
-    /**
-     * Creates a new operator.
-     *
-     * @param oper       The operator name (pattern).
-     * @param precedence The operators precedence.
-     * @param leftAssoc  <code>true</code> if the operator is left associative,
-     *                   else <code>false</code>.
-     */
     public MathOperation(String oper, int precedence, boolean leftAssoc) {
         this.oper = oper;
         this.precedence = precedence;

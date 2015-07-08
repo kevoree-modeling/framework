@@ -1,55 +1,90 @@
 package org.kevoree.modeling.util.maths.expression.impl;
 
-import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.struct.map.KStringMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
+import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 
-public class MathExpressionEngine {
+public class MathExpressionEngine implements KMathExpressionEngine {
 
-    /**
-     * All defined variables with name and value.
-     */
-    private KStringMap<Double> variables;
+    private KMathVariableResolver varResolver;
 
-    /**
-     * What character to use for decimal separators.
-     */
-    private final char decimalSeparator = '.';
-
-    /**
-     * What character to use for minus sign (negative values).
-     */
-    private final char minusSign = '-';
+    public static final char decimalSeparator = '.';
+    public static final char minusSign = '-';
 
     public MathExpressionEngine() {
-        this.variables = new ArrayStringMap<Double>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-        variables.put("PI", Math.PI);
-        variables.put("TRUE", 1.0);
-        variables.put("FALSE", 0.0);
+        varResolver = new KMathVariableResolver() {
+            @Override
+            public Double resolve(String potentialVarName) {
+                if (potentialVarName.equals("PI")) {
+                    return Math.PI;
+                }
+                if (potentialVarName.equals("TRUE")) {
+                    return 1.0;
+                }
+                if (potentialVarName.equals("FALSE")) {
+                    return 0.0;
+                }
+                return null;
+            }
+        };
     }
 
     /**
-     * Is the string a number?
-     *
-     * @param st The string.
-     * @return <code>true</code>, if the input string is a number.
+     * @native ts
+     * return !isNaN(+st);
      */
-    private boolean isNumber(String st) {
+    public static boolean isNumber(String st) {
         if (st.charAt(0) == minusSign && st.length() == 1)
             return false;
         for (int i = 0; i < st.length(); i++) {
             char ch = st.charAt(i);
-            if (!Character.isDigit(ch) && ch != minusSign && ch != decimalSeparator) {
+            if (!isDigit(ch) && ch != minusSign && ch != decimalSeparator) {
                 return false;
             }
         }
         return true;
     }
+
+    /**
+     * @native ts
+     * var cc = c.charCodeAt(0);
+     * if ( cc >= 0x30 && cc <= 0x39 ){
+     * return true ;
+     * }
+     * return false ;
+     */
+    public static boolean isDigit(char c) {
+        return Character.isDigit(c);
+    }
+
+    /**
+     * @native ts
+     * var cc = c.charCodeAt(0);
+     * if ( ( cc >= 0x41 && cc <= 0x5A ) || ( cc >= 0x61 && cc <= 0x7A ) ){
+     * return true ;
+     * }
+     * return false ;
+     */
+    public static boolean isLetter(char c) {
+        return Character.isLetter(c);
+    }
+
+    /**
+     * @native ts
+     * var cc = c.charCodeAt(0);
+     * if ( ( cc >= 0x0009 && cc <= 0x000D ) || ( cc == 0x0020 ) || ( cc == 0x0085 ) || ( cc == 0x00A0 ) ){
+     * return true ;
+     * }
+     * return false ;
+     */
+    public static boolean isWhitespace(char c) {
+        return Character.isWhitespace(c);
+    }
+
 
     /**
      * Implementation of the <i>Shunting Yard</i> algorithm to transform an
@@ -69,12 +104,12 @@ public class MathExpressionEngine {
             String token = tokenizer.next();
             if (isNumber(token)) {
                 outputQueue.add(token);
-            } else if (variables.contains(token)) {
+            } else if (varResolver.resolve(token) != null) {
                 outputQueue.add(token);
             } else if (MathEntities.getINSTANCE().functions.contains(token.toUpperCase())) {
                 stack.push(token);
                 lastFunction = token;
-            } else if (Character.isLetter(token.charAt(0))) {
+            } else if (isLetter(token.charAt(0))) {
                 stack.push(token);
             } else if (",".equals(token)) {
                 while (!stack.isEmpty() && !"(".equals(stack.peek())) {
@@ -146,8 +181,8 @@ public class MathExpressionEngine {
                 double v1 = stack.pop();
                 double v2 = stack.pop();
                 stack.push(MathEntities.getINSTANCE().operators.get(token).eval(v2, v1));
-            } else if (variables.contains(token)) {
-                stack.push(variables.get(token));
+            } else if (varResolver.resolve(token) != null ) {
+                stack.push(varResolver.resolve(token));
             } else if (MathEntities.getINSTANCE().functions.contains(token.toUpperCase())) {
                 MathFunction f = MathEntities.getINSTANCE().functions.get(token.toUpperCase());
                 double[] p = new double[f.getNumParams()];
@@ -157,23 +192,15 @@ public class MathExpressionEngine {
                 double fResult = f.eval(p);
                 stack.push(fResult);
             } else {
-                stack.push(new Double(token));
+                stack.push(Double.parseDouble(token));
             }
         }
         return stack.pop();
     }
 
-
-    /**
-     * Sets a variable value.
-     *
-     * @param variable The variable to set.
-     * @param value    The variable value.
-     * @return The expression, allows to chain methods.
-     */
-    public MathExpressionEngine setVariable(String variable, String value) {
-        variables.put(variable, new Double(value));
-        return this;
+    @Override
+    public void setVarResolver(KMathVariableResolver p_resolver) {
+        this.varResolver = p_resolver;
     }
 
 }
