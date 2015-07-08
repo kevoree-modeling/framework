@@ -34,7 +34,7 @@ public class Distribution {
         return q > 0.5 ? Math.sqrt(w1 * w3) : -Math.sqrt(w1 * w3);
     }
 
-    public static double normal(double[] features, double[] means, double[] variances) {
+    public static double gaussian(double[] features, double[] means, double[] variances) {
         int dim = features.length;
         double p = 1;
 
@@ -44,7 +44,7 @@ public class Distribution {
         return p;
     }
 
-    public static double[] parrallelNormal(double[] features, double[] means, double[] variances) {
+    public static double[] parallelGaussian(double[] features, double[] means, double[] variances) {
         int dim = features.length;
         double[] p = new double[dim];
 
@@ -54,7 +54,7 @@ public class Distribution {
         return p;
     }
 
-    public static double singleNormal(double feature, double mean, double variance) {
+    public static double gaussianOneFeature(double feature, double mean, double variance) {
         return (1 / Math.sqrt(2 * Math.PI * variance)) * Math.exp(-((feature - mean) * (feature - mean)) / (2 * variance));
     }
 }

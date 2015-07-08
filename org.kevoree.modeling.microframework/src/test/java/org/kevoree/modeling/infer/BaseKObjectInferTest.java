@@ -5,7 +5,7 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
-import org.kevoree.modeling.infer.impl.AvgInferAlg;
+import org.kevoree.modeling.infer.impl.StatInferAlg;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
@@ -20,7 +20,7 @@ public class BaseKObjectInferTest {
         metaClassSensor.addAttribute("value", KPrimitiveTypes.DOUBLE);
         metaClassSensor.addReference("siblings", metaClassSensor, null, true);
 
-        KMetaClass inferAvg = metaModel.addInferMetaClass("SensorProfile", new AvgInferAlg());
+        KMetaClass inferAvg = metaModel.addInferMetaClass("SensorProfile", new StatInferAlg());
         inferAvg.addDependency("sensors", metaClassSensor, null);
         inferAvg.addInput("value", "sensors | @value");
         inferAvg.addOutput("avg", KPrimitiveTypes.DOUBLE);
