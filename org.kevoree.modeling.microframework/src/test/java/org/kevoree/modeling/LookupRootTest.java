@@ -48,7 +48,7 @@ public class LookupRootTest {
                     }
                 });
 
-                lookupView.select("/",new KCallback<Object[]>() {
+                lookupView.select("@root",new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] kObjects) {
                         Assert.assertNotNull(kObjects[0]);
@@ -100,7 +100,7 @@ public class LookupRootTest {
         final CloudUniverse cloudDimension1 = universe1.universe(dimension0.key());
         final CloudView cloudView1 = cloudDimension1.time(1l);
 
-        cloudView1.select("/",new KCallback<Object[]>() {
+        cloudView1.select("@root",new KCallback<Object[]>() {
             @Override
             public void on(Object[] kObjects) {
                 Assert.assertNotNull(kObjects[0]);

@@ -23,7 +23,7 @@ public class Traversal implements KTraversal {
 
     public Traversal(KObject[] p_roots) {
         this._initObjs = p_roots;
-       // this._initObjs = new KObject[1];
+        // this._initObjs = new KObject[1];
         //this._initObjs[0] = p_root;
     }
 
@@ -78,6 +78,11 @@ public class Traversal implements KTraversal {
     }
 
     @Override
+    public KTraversal traverseIndex(String p_indexName) {
+        return internal_chain_action(new TraverseIndexAction(p_indexName));
+    }
+
+    @Override
     public KTraversal traverseTime(long timeOffset, long steps, KTraversalFilter continueCondition) {
         throw new RuntimeException("Not Implemented Yet!");
         //return null;
@@ -115,6 +120,5 @@ public class Traversal implements KTraversal {
         //execute the first element of the chain of actions
         _initAction.execute(_initObjs);
     }
-
 
 }

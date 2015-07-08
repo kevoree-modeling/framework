@@ -47,7 +47,7 @@ public class JSONLoadTest {
 
         Assert.assertEquals(passed[0], 2);
 
-        time0.select("/",new KCallback<Object[]>() {
+        time0.select("@root",new KCallback<Object[]>() {
             @Override
             public void on(Object[] kObjects) {
 

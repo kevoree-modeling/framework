@@ -91,7 +91,9 @@ public class QueryEngine implements KQueryEngine {
                             }
                         }
                         relationName = query.substring(previousKQueryStart, previousKQueryNameEnd).trim();
-                        if (relationName.startsWith("=")) {
+                        if(relationName.startsWith("@")){
+                            traversal = traversal.traverseIndex(relationName.substring(1));
+                        } else if (relationName.startsWith("=")) {
                             if (callbackGenericObject != null) {
                                 traversal.eval(relationName.substring(1), callbackGenericObject);
                                 endEval = true;

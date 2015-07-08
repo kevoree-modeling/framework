@@ -38,7 +38,7 @@ public class DeleteTest {
                                         public void on(Throwable aBoolean) {
                                             CloudView factory1 = universe.time(1l);
                                             final Element e = factory1.createElement();
-                                            factory1.select("/", new KCallback<Object[]>() {
+                                            factory1.select("@root", new KCallback<Object[]>() {
                                                 @Override
                                                 public void on(Object[] results) {
                                                     Node n2 = (Node) results[0];

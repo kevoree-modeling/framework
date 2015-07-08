@@ -124,29 +124,9 @@ public abstract class AbstractKObject implements KObject {
         if (!Checker.isDefined(query)) {
             cb.on(new KObject[0]);
         } else {
-            String cleanedQuery = query;
-            if (cleanedQuery.startsWith("/")) {
-                cleanedQuery = cleanedQuery.substring(1);
-            }
-            if (query.startsWith("/")) {
-                final String finalCleanedQuery = cleanedQuery;
-                _manager.getRoot(_universe, _time, new KCallback<KObject>() {
-                    @Override
-                    public void on(KObject rootObj) {
-                        if (rootObj == null) {
-                            cb.on(new KObject[0]);
-                        } else {
-                            KObject[] singleRoot = new KObject[1];
-                            singleRoot[0] = rootObj;
-                            QueryEngine.getINSTANCE().eval(finalCleanedQuery, singleRoot, cb);
-                        }
-                    }
-                });
-            } else {
-                KObject[] singleRoot = new KObject[1];
-                singleRoot[0] = this;
-                QueryEngine.getINSTANCE().eval(query, singleRoot, cb);
-            }
+            KObject[] singleRoot = new KObject[1];
+            singleRoot[0] = this;
+            QueryEngine.getINSTANCE().eval(query, singleRoot, cb);
         }
     }
 

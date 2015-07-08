@@ -31,6 +31,8 @@ public interface KTraversal {
 
     KTraversal traverseUniverse(long universeOffset, KTraversalFilter continueCondition);
 
+    KTraversal traverseIndex(String indexName);
+
 }
 
 

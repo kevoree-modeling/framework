@@ -57,19 +57,9 @@ public abstract class AbstractKView implements KView {
                         if (rootObj == null) {
                             cb.on(new KObject[0]);
                         } else {
-                            String cleanedQuery = query;
-                            if (query.length() == 1 && query.charAt(0) == '/') {
-                                KObject[] param = new KObject[1];
-                                param[0] = rootObj;
-                                cb.on(param);
-                            } else {
-                                if (cleanedQuery.charAt(0) == '/') {
-                                    cleanedQuery = cleanedQuery.substring(1);
-                                }
-                                KObject[] singleRoot = new KObject[1];
-                                singleRoot[0] = rootObj;
-                                QueryEngine.getINSTANCE().eval(cleanedQuery, singleRoot, cb);
-                            }
+                            KObject[] singleRoot = new KObject[1];
+                            singleRoot[0] = rootObj;
+                            QueryEngine.getINSTANCE().eval(query, singleRoot, cb);
                         }
                     }
                 });
