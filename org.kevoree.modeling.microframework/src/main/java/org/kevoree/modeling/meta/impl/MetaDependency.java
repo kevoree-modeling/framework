@@ -34,8 +34,10 @@ public class MetaDependency implements KMetaDependency {
     @Override
     public KMetaDependency opposite() {
         if (_oppositeName != null) {
-            KMetaDependencies dependencies = ((MetaClass) type()).initDependencies();
-            return dependencies.dependencyByName(_oppositeName);
+            KMetaDependencies dependencies = type().dependencies();
+            if(dependencies != null){
+                return dependencies.dependencyByName(_oppositeName);
+            }
         }
         return null;
     }

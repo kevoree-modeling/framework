@@ -19,7 +19,7 @@ public interface KMetaClass extends KMeta {
     KMetaOperation operation(String name);
 
     KMetaAttribute addAttribute(String attributeName, KType p_type);
-    
+
     KMetaReference addReference(String referenceName, KMetaClass metaClass, String oppositeName, boolean toMany);
 
     KMetaDependency addDependency(String dependencyName, KMetaClass p_metaClass, String oppositeName);
@@ -31,5 +31,11 @@ public interface KMetaClass extends KMeta {
     KMetaOperation addOperation(String operationName);
 
     KInferAlg inferAlg();
+
+    KMetaDependencies dependencies();
+
+    KMetaInferInput[] inputs();
+
+    KMetaInferOutput[] outputs();
 
 }

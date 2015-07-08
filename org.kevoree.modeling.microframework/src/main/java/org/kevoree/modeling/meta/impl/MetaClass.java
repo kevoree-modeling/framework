@@ -29,6 +29,10 @@ public class MetaClass implements KMetaClass {
         this._meta = new KMeta[0];
         this._alg = p_alg;
         _indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        if (this._alg != null) {
+            //in case of inference algorithm, we always inject a multi dependency object
+            internal_add_meta(new MetaDependencies(_meta.length, this));
+        }
     }
 
     public void init(KMeta[] p_metaElements) {
@@ -193,8 +197,11 @@ public class MetaClass implements KMetaClass {
 
     @Override
     public KMetaDependency addDependency(String dependencyName, KMetaClass p_metaClass, String oppositeName) {
-        KMetaDependencies dependencies = initDependencies();
-        return dependencies.addDependency(dependencyName, p_metaClass, oppositeName);
+        KMetaDependencies currentDeps = dependencies();
+        if (currentDeps != null) {
+            return currentDeps.addDependency(dependencyName, p_metaClass, oppositeName);
+        }
+        return null;
     }
 
     @Override
@@ -211,21 +218,51 @@ public class MetaClass implements KMetaClass {
         return newOutput;
     }
 
-    public synchronized KMetaDependencies initDependencies(){
-        KMetaDependencies currentDependencies = (KMetaDependencies) metaByName(MetaDependencies.DEPENDENCIES_NAME);
-        if(currentDependencies != null){
-            return  currentDependencies;
-        } else {
-            KMeta self = this;
-            KMetaDependencies dependencies = new MetaDependencies(_meta.length, new KLazyResolver() {
-                @Override
-                public KMeta meta() {
-                    return self;
-                }
-            });
-            internal_add_meta(dependencies);
-            return dependencies;
+    @Override
+    public KMetaDependencies dependencies() {
+        return (KMetaDependencies) metaByName(MetaDependencies.DEPENDENCIES_NAME);
+    }
+
+
+
+    //TODO enhance with a cache
+    @Override
+    public KMetaInferInput[] inputs() {
+        int nb = 0;
+        for (int i = 0; i < _meta.length; i++) {
+            if (_meta[i].metaType().equals(MetaType.INPUT)) {
+                nb++;
+            }
         }
+        KMetaInferInput[] res = new KMetaInferInput[nb];
+        nb = 0;
+        for (int i = 0; i < _meta.length; i++) {
+            if (_meta[i].metaType().equals(MetaType.INPUT)) {
+                res[nb] = (KMetaInferInput) _meta[i];
+                nb++;
+            }
+        }
+        return res;
+    }
+
+    //TODO enhance with a cache
+    @Override
+    public KMetaInferOutput[] outputs() {
+        int nb = 0;
+        for (int i = 0; i < _meta.length; i++) {
+            if (_meta[i].metaType().equals(MetaType.INPUT)) {
+                nb++;
+            }
+        }
+        KMetaInferOutput[] res = new KMetaInferOutput[nb];
+        nb = 0;
+        for (int i = 0; i < _meta.length; i++) {
+            if (_meta[i].metaType().equals(MetaType.OUTPUT)) {
+                res[nb] = (KMetaInferOutput) _meta[i];
+                nb++;
+            }
+        }
+        return res;
     }
 
     /**

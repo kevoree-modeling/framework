@@ -8,25 +8,22 @@ import org.kevoree.modeling.meta.*;
 
 public class MetaDependencies implements KMetaDependencies {
 
-    private KLazyResolver _lazyMetaOrigin;
+    private KMetaClass _origin;
     private KMetaDependency[] _dependencies;
     public static final String DEPENDENCIES_NAME = "dependencies";
     private int _index;
     private KStringMap<Integer> _indexes = null;
 
-    public MetaDependencies(int p_index, KLazyResolver p_lazyMetaOrigin) {
+    public MetaDependencies(int p_index, KMetaClass p_origin) {
         this._index = p_index;
-        this._lazyMetaOrigin = p_lazyMetaOrigin;
+        this._origin = p_origin;
         this._dependencies = new KMetaDependency[0];
         _indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
     @Override
     public KMetaClass origin() {
-        if (_lazyMetaOrigin != null) {
-            return (KMetaClass) _lazyMetaOrigin.meta();
-        }
-        return null;
+        return this._origin;
     }
 
     @Override
@@ -62,8 +59,9 @@ public class MetaDependencies implements KMetaDependencies {
     @Override
     public synchronized KMetaDependency addDependency(String p_dependencyName, KMetaClass p_type, String op_name) {
         if (op_name != null) {
-            KMetaDependencies dependencies = ((MetaClass) p_type).initDependencies();
-            dependencies.addDependency(op_name, origin(), null);
+            throw new RuntimeException("Not Implemented Yet!");
+            //KMetaDependencies dependencies = ((MetaClass) p_type).initDependencies();
+            //dependencies.addDependency(op_name, origin(), null);
         }
         KMetaDependency newDependency = new MetaDependency(p_dependencyName, _dependencies.length, this, new KLazyResolver() {
             @Override
