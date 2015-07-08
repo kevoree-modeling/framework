@@ -65,8 +65,8 @@ public class TimeTest {
 
         //resolves the object from time 5
         CloudView view5 = universe.time(5);
-        view5.select("/", new KCallback<KObject[]>() {
-            public void on(KObject[] kObjects) {
+        view5.select("/", new KCallback<Object[]>() {
+            public void on(Object[] kObjects) {
                 Node n = (Node) kObjects[0];
                 n.jump(jumpCounter[0], jumpCallback);
             }
@@ -270,9 +270,9 @@ public class TimeTest {
         });
 
         CloudView t0_2 = universe.time(0L);
-        t0_2.select("/", new KCallback<KObject[]>() {
+        t0_2.select("/", new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] kObjects) {
+            public void on(Object[] kObjects) {
                 if (kObjects != null && kObjects.length > 0) {
                     //TODO reinsert this test
                     //Assert.assertEquals(2, ((Node) kObjects[0]).timeTree().size());
@@ -311,9 +311,9 @@ public class TimeTest {
         CloudView t1 = universe.time(1L);
         final Element element = t1.createElement();
         element.setName("Element1");
-        t1.select("/", new KCallback<KObject[]>() {
+        t1.select("/", new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] kObjects) {
+            public void on(Object[] kObjects) {
                 if (kObjects != null && kObjects.length > 0) {
                     ((Node) kObjects[0]).setElement(element);
 
@@ -335,9 +335,9 @@ public class TimeTest {
         });
 
         CloudView t0_2 = universe.time(0L);
-        t0_2.select("/", new KCallback<KObject[]>() {
+        t0_2.select("/", new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] kObjects) {
+            public void on(Object[] kObjects) {
                 if (kObjects != null && kObjects.length > 0) {
                     //TODO reinsert this test
                     //Assert.assertEquals(2, ((Node) kObjects[0]).timeTree().size());

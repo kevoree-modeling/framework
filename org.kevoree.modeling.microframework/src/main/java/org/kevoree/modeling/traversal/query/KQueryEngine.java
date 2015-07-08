@@ -6,5 +6,5 @@ import org.kevoree.modeling.KObject;
 public interface KQueryEngine {
 
     void eval(String query, KObject[] origins, KCallback<Object[]> callback);
-
+    
 }

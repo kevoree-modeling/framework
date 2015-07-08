@@ -7,7 +7,7 @@ import org.kevoree.modeling.KView;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.format.json.JsonFormat;
 import org.kevoree.modeling.meta.KMetaClass;
-import org.kevoree.modeling.traversal.query.QuerySelector;
+import org.kevoree.modeling.traversal.query.impl.QueryEngine;
 import org.kevoree.modeling.util.Checker;
 import org.kevoree.modeling.format.xmi.XmiFormat;
 
@@ -46,7 +46,7 @@ public abstract class AbstractKView implements KView {
     }
 
     @Override
-    public void select(final String query, KCallback<KObject[]> cb) {
+    public void select(final String query, KCallback<Object[]> cb) {
         if (Checker.isDefined(cb)) {
             if (query == null || query.length() == 0) {
                 cb.on(new KObject[0]);
@@ -66,7 +66,9 @@ public abstract class AbstractKView implements KView {
                                 if (cleanedQuery.charAt(0) == '/') {
                                     cleanedQuery = cleanedQuery.substring(1);
                                 }
-                                QuerySelector.select(rootObj, cleanedQuery, cb);
+                                KObject[] singleRoot = new KObject[1];
+                                singleRoot[0] = rootObj;
+                                QueryEngine.getINSTANCE().eval(cleanedQuery, singleRoot, cb);
                             }
                         }
                     }

@@ -38,9 +38,9 @@ public class DeleteTest {
                                         public void on(Throwable aBoolean) {
                                             CloudView factory1 = universe.time(1l);
                                             final Element e = factory1.createElement();
-                                            factory1.select("/", new KCallback<KObject[]>() {
+                                            factory1.select("/", new KCallback<Object[]>() {
                                                 @Override
-                                                public void on(KObject[] results) {
+                                                public void on(Object[] results) {
                                                     Node n2 = (Node) results[0];
                                                     n2.setElement(e);
                                                     n2.jump(2, new KCallback<KObject>() {
@@ -69,9 +69,9 @@ public class DeleteTest {
                                                                                             n42.delete(null);
 
                                                                                             CloudView factory2_2 = universe.time(1l);
-                                                                                            factory2_2.select("/", new KCallback<KObject[]>() {
+                                                                                            factory2_2.select("/", new KCallback<Object[]>() {
                                                                                                 @Override
-                                                                                                public void on(KObject[] results) {
+                                                                                                public void on(Object[] results) {
                                                                                                     if (results != null && results.length > 0) {
                                                                                                         Node n2 = (Node) results[0];
                                                                                                         n2.getElement(new KCallback<Element>() {

@@ -8,6 +8,15 @@ import org.kevoree.modeling.traversal.query.KQueryEngine;
 
 public class QueryEngine implements KQueryEngine {
 
+    private static KQueryEngine INSTANCE = null;
+
+    public static KQueryEngine getINSTANCE() {
+        if (INSTANCE == null) {
+            INSTANCE = new QueryEngine();
+        }
+        return INSTANCE;
+    }
+
     public static final char OPEN_BRACKET = '[';
     public static final char CLOSE_BRACKET = ']';
     public static final char PIPE_SEP = '|';
@@ -75,7 +84,7 @@ public class QueryEngine implements KQueryEngine {
                                 traversal = traversal.attributeQuery(atts);
                             }
                         } else {
-                            traversal.eval(relationName,callback);
+                            traversal.eval(relationName, callback);
                             endEval = true;
                             //expression
                         }
@@ -89,7 +98,7 @@ public class QueryEngine implements KQueryEngine {
                 }
                 i = i + 1;
             }
-            if(!endEval){
+            if (!endEval) {
                 traversal.then(new KCallback<KObject[]>() {
                     @Override
                     public void on(KObject[] kObjects) {

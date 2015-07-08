@@ -9,6 +9,7 @@ import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaReference;
+import org.kevoree.modeling.traversal.query.impl.QueryEngine;
 import org.kevoree.modeling.traversal.visitor.KModelAttributeVisitor;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.KObject;
@@ -22,7 +23,6 @@ import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.traversal.KTraversal;
-import org.kevoree.modeling.traversal.query.QuerySelector;
 import org.kevoree.modeling.util.Checker;
 
 import java.util.ArrayList;
@@ -120,7 +120,7 @@ public abstract class AbstractKObject implements KObject {
     }
 
     @Override
-    public void select(String query, KCallback<KObject[]> cb) {
+    public void select(String query, KCallback<Object[]> cb) {
         if (!Checker.isDefined(query)) {
             cb.on(new KObject[0]);
         } else {
@@ -136,12 +136,16 @@ public abstract class AbstractKObject implements KObject {
                         if (rootObj == null) {
                             cb.on(new KObject[0]);
                         } else {
-                            QuerySelector.select(rootObj, finalCleanedQuery, cb);
+                            KObject[] singleRoot = new KObject[1];
+                            singleRoot[0] = rootObj;
+                            QueryEngine.getINSTANCE().eval(finalCleanedQuery, singleRoot, cb);
                         }
                     }
                 });
             } else {
-                QuerySelector.select(this, query, cb);
+                KObject[] singleRoot = new KObject[1];
+                singleRoot[0] = this;
+                QueryEngine.getINSTANCE().eval(query, singleRoot, cb);
             }
         }
     }
@@ -543,7 +547,9 @@ public abstract class AbstractKObject implements KObject {
 
     @Override
     public KTraversal traversal() {
-        return new Traversal(this);
+        KObject[] singleRoot = new KObject[1];
+        singleRoot[0] = this;
+        return new Traversal(singleRoot);
     }
 
     @Override

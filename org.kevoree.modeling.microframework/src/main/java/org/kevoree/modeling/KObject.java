@@ -20,7 +20,7 @@ public interface KObject {
 
     void delete(KCallback cb);
 
-    void select(String query, KCallback<KObject[]> cb);
+    void select(String query, KCallback<Object[]> cb);
 
     void listen(long groupId, KEventListener listener);
 

@@ -47,11 +47,11 @@ public class JSONLoadTest {
 
         Assert.assertEquals(passed[0], 2);
 
-        time0.select("/",new KCallback<KObject[]>() {
+        time0.select("/",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] kObjects) {
+            public void on(Object[] kObjects) {
 
-                time0.json().save(kObjects[0],new KCallback<String>() {
+                time0.json().save((KObject) kObjects[0],new KCallback<String>() {
                     @Override
                     public void on(String s) {
 

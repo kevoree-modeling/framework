@@ -39,9 +39,9 @@ public class BasicSelectTest {
                 Assert.assertEquals(kObject, node);
             }
         });
-        t0.select("/",new KCallback<KObject[]>() {
+        t0.select("/",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] kObjects) {
+            public void on(Object[] kObjects) {
                 Assert.assertEquals(kObjects[0], node);
             }
         });
@@ -53,11 +53,11 @@ public class BasicSelectTest {
                 Assert.assertEquals(t1.now(), kObject.now());
             }
         });
-        t1.select("/",new KCallback<KObject[]>() {
+        t1.select("/",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] kObjects) {
-                Assert.assertEquals(node.uuid(), kObjects[0].uuid());
-                Assert.assertEquals(t1.now(), kObjects[0].now());
+            public void on(Object[] kObjects) {
+                Assert.assertEquals(node.uuid(), ((KObject)kObjects[0]).uuid());
+                Assert.assertEquals(t1.now(), ((KObject)kObjects[0]).now());
             }
         });
     }
@@ -89,79 +89,79 @@ public class BasicSelectTest {
         node5.setName("n5");
         node3.addChildren(node5);
 
-        t0.select("children[]",new KCallback<KObject[]>() {
+        t0.select("children[]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(1, selecteds.length);
                 Assert.assertEquals(node2, selecteds[0]);
             }
         });
 
-        t0.select("children[name=*]",new KCallback<KObject[]>() {
+        t0.select("children[name=*]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(1, selecteds.length);
                 Assert.assertEquals(node2, selecteds[0]);
             }
         });
 
-        t0.select("children[name=n*]",new KCallback<KObject[]>() {
+        t0.select("children[name=n*]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(1, selecteds.length);
                 Assert.assertEquals(node2, selecteds[0]);
             }
         });
 
-        t0.select("children[name=n1]",new KCallback<KObject[]>() {
+        t0.select("children[name=n1]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(1, selecteds.length);
                 Assert.assertEquals(node2, selecteds[0]);
             }
         });
 
-        t0.select("children[name=!n1]",new KCallback<KObject[]>() {
+        t0.select("children[name=!n1]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(0, selecteds.length);
             }
         });
 
-        t0.select("children[name!=n1]",new KCallback<KObject[]>() {
+        t0.select("children[name!=n1]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(0, selecteds.length);
             }
         });
 
-        t0.select("children[name=n1]/children[name=n2]",new KCallback<KObject[]>() {
+        t0.select("children[name=n1] | children[name=n2]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(1, selecteds.length);
                 Assert.assertEquals(node3, selecteds[0]);
             }
         });
 
-        t0.select("/children[name=n1]/children[name=n2]",new KCallback<KObject[]>() {
+        t0.select("/children[name=n1] | children[name=n2]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(1, selecteds.length);
                 Assert.assertEquals(node3, selecteds[0]);
             }
         });
 
-        node.select("children[name=n1]/children[name=n2]",new KCallback<KObject[]>() {
+        node.select("children[name=n1] | children[name=n2]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(1, selecteds.length);
                 Assert.assertEquals(node3, selecteds[0]);
             }
         });
 
-        node.select("children[name=n1]/children[name=n2]/children[name=*]",new KCallback<KObject[]>() {
+        node.select("children[name=n1] | children[name=n2] | children[name=*]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(2, selecteds.length);
             }
         });
@@ -191,23 +191,23 @@ public class BasicSelectTest {
         n2.setValue("v2");
         n0.addChildren(n2);
 
-        t0.select("children[value=v2,name=n1]",new KCallback<KObject[]>() {
+        t0.select("children[value=v2,name=n1]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(selecteds.length,0);
             }
         });
 
-        t0.select("children[value=v2,name=n2]",new KCallback<KObject[]>() {
+        t0.select("children[value=v2,name=n2]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(selecteds.length,1);
             }
         });
 
-        t0.select("children[name=*]",new KCallback<KObject[]>() {
+        t0.select("children[name=*]",new KCallback<Object[]>() {
             @Override
-            public void on(KObject[] selecteds) {
+            public void on(Object[] selecteds) {
                 Assert.assertEquals(selecteds.length, 2);
             }
         });

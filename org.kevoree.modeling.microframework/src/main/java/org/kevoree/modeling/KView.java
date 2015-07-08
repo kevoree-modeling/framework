@@ -9,7 +9,7 @@ public interface KView {
 
     KObject create(KMetaClass clazz);
 
-    void select(String query, KCallback<KObject[]> cb);
+    void select(String query, KCallback<Object[]> cb);
 
     void lookup(long key, KCallback<KObject> cb);
 
