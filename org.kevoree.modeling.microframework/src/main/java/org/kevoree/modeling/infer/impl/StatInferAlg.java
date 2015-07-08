@@ -35,7 +35,7 @@ public class StatInferAlg implements KInferAlg {
 
         //update the state
         for(int i=0;i<trainingSet.length;i++){
-            for(int j=0; j<getNumOfInput(meta);j++){
+            for(int j=0; j<meta.origin().inputs().length;j++){
                 //If this is the first datapoint
                 if(state[NUMOFFIELDS *trainingSet[0].length]==0){
                     state[MIN+j* NUMOFFIELDS]=trainingSet[i][j];
@@ -56,26 +56,18 @@ public class StatInferAlg implements KInferAlg {
                 }
             }
             //Global counter
-            state[NUMOFFIELDS *getNumOfInput(meta)]++;
+            state[NUMOFFIELDS *meta.origin().inputs().length]++;
         }
 
         //Save the state back to the segment
-        for(int i=0;i< NUMOFFIELDS *getNumOfInput(meta)+1;i++){
+        for(int i=0;i< NUMOFFIELDS *meta.origin().inputs().length+1;i++){
             ks.setInferElem(meta.index(),i,state[i],meta.origin());
         }
 
 
     }
 
-    public int getNumOfInput(KMetaDependencies meta){
-        int counter =0;
-       for(int i=0; i<meta.origin().metaElements().length;i++){
-            if(meta.origin().metaElements()[i].metaType().equals(MetaType.INPUT)){
-                counter++;
-            }
-        }
-        return counter;
-    }
+
 
     @Override
     public double[] infer(double[] features, KObject origin, KMetaDependencies meta) {
@@ -83,32 +75,32 @@ public class StatInferAlg implements KInferAlg {
     }
 
     public double[] getAvgAll(KObject origin, KMetaDependencies meta){
-        double[] result = new double[getNumOfInput(meta)];
-        for(int i=0; i<getNumOfInput(meta);i++){
+        double[] result = new double[meta.origin().inputs().length];
+        for(int i=0; i<meta.origin().inputs().length;i++){
             result[i]=getAvg(i,origin,meta);
         }
         return result;
     }
 
     public double[] getMinAll(KObject origin, KMetaDependencies meta){
-        double[] result = new double[getNumOfInput(meta)];
-        for(int i=0; i<getNumOfInput(meta);i++){
+        double[] result = new double[meta.origin().inputs().length];
+        for(int i=0; i<meta.origin().inputs().length;i++){
             result[i]=getMin(i, origin, meta);
         }
         return result;
     }
 
     public double[] getMaxAll(KObject origin, KMetaDependencies meta){
-        double[] result = new double[getNumOfInput(meta)];
-        for(int i=0; i<getNumOfInput(meta);i++){
+        double[] result = new double[meta.origin().inputs().length];
+        for(int i=0; i<meta.origin().inputs().length;i++){
             result[i]=getMax(i, origin, meta);
         }
         return result;
     }
 
     public double[] getVarianceAll(KObject origin, KMetaDependencies meta, double[] avgs){
-        double[] result = new double[getNumOfInput(meta)];
-        for(int i=0; i<getNumOfInput(meta);i++){
+        double[] result = new double[meta.origin().inputs().length];
+        for(int i=0; i<meta.origin().inputs().length;i++){
             result[i]=getVariance(i, origin, meta, avgs[i]);
         }
         return result;
