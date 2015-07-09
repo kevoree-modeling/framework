@@ -35,8 +35,15 @@ public class Array1D implements KArray1D {
     }
 
     @Override
-    public void set(int p_index, double p_value) {
+    public double set(int p_index, double p_value) {
         this._segment.setInferElem(this._segmentIndex, this._offset + p_index, p_value, this._metaClass);
+        return p_value;
     }
+
+    @Override
+    public double add(int index, double value) {
+        return set(index,get(index)+value);
+    }
+
 
 }

@@ -6,6 +6,7 @@ import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.meta.MetaType;
+import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 
 //TODO
 public class StatInferAlg implements KInferAlg {
@@ -30,41 +31,34 @@ public class StatInferAlg implements KInferAlg {
             ks.extendInfer(meta.index(), NUMOFFIELDS *trainingSet[0].length+1,meta.origin());
         }
 
-        //get the state to double[]
-        double[] state = ks.getInfer(meta.index(),meta.origin());
+        Array1D state = new Array1D(NUMOFFIELDS *trainingSet[0].length+1,0,meta.index(),ks,meta.origin());
+
 
         //update the state
         for(int i=0;i<trainingSet.length;i++){
             for(int j=0; j<meta.origin().inputs().length;j++){
                 //If this is the first datapoint
-                if(state[NUMOFFIELDS *trainingSet[0].length]==0){
-                    state[MIN+j* NUMOFFIELDS]=trainingSet[i][j];
-                    state[MAX+j* NUMOFFIELDS]=trainingSet[i][j];
-                    state[SUM+j* NUMOFFIELDS]=trainingSet[i][j];
-                    state[SUMSQuare+j* NUMOFFIELDS]=trainingSet[i][j]*trainingSet[i][j];
+                if(state.get(NUMOFFIELDS *trainingSet[0].length)==0){
+                    state.set(MIN+j* NUMOFFIELDS,trainingSet[i][j]);
+                    state.set(MAX+j* NUMOFFIELDS,trainingSet[i][j]);
+                    state.set(SUM+j* NUMOFFIELDS,trainingSet[i][j]);
+                    state.set(SUMSQuare+j* NUMOFFIELDS,trainingSet[i][j]*trainingSet[i][j]);
                 }
 
                 else{
-                    if(trainingSet[i][j]<state[MIN + j * NUMOFFIELDS]) {
-                        state[MIN + j * NUMOFFIELDS] = trainingSet[i][j];
+                    if(trainingSet[i][j]<state.get(MIN + j * NUMOFFIELDS)) {
+                        state.set(MIN + j * NUMOFFIELDS, trainingSet[i][j]);
                     }
-                    if(trainingSet[i][j]>state[MAX + j * NUMOFFIELDS]) {
-                        state[MAX + j * NUMOFFIELDS] = trainingSet[i][j];
+                    if(trainingSet[i][j]>state.get(MAX + j * NUMOFFIELDS)) {
+                        state.set(MAX + j * NUMOFFIELDS , trainingSet[i][j]);
                     }
-                    state[SUM+j* NUMOFFIELDS]+=trainingSet[i][j];
-                    state[SUMSQuare+j* NUMOFFIELDS]+=trainingSet[i][j]*trainingSet[i][j];
+                    state.add(SUM+j* NUMOFFIELDS, trainingSet[i][j]);
+                    state.add(SUMSQuare+j* NUMOFFIELDS, trainingSet[i][j]*trainingSet[i][j]);
                 }
             }
             //Global counter
-            state[NUMOFFIELDS *meta.origin().inputs().length]++;
+            state.add(NUMOFFIELDS *meta.origin().inputs().length,1);
         }
-
-        //Save the state back to the segment
-        for(int i=0;i< NUMOFFIELDS *meta.origin().inputs().length+1;i++){
-            ks.setInferElem(meta.index(),i,state[i],meta.origin());
-        }
-
-
     }
 
 

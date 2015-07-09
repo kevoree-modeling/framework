@@ -43,7 +43,13 @@ public class Array2D implements KArray2D {
     }
 
     @Override
-    public void set(int p_rawIndex, int p_columnIndex, double value) {
+    public double set(int p_rawIndex, int p_columnIndex, double value) {
         this._segment.setInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns) + p_columnIndex, value, this._metaClass);
+        return value;
+    }
+
+    @Override
+    public double add(int rawIndex, int columnIndex, double value) {
+        return set(rawIndex,columnIndex,get(rawIndex,columnIndex)+value);
     }
 }
