@@ -41,6 +41,7 @@ public class MetaClass implements KMetaClass {
         for (int i = 0; i < _meta.length; i++) {
             _indexes.put(p_metaElements[i].metaName(), p_metaElements[i].index());
         }
+        clearCached();
     }
 
     @Override
@@ -223,11 +224,17 @@ public class MetaClass implements KMetaClass {
         return (KMetaDependencies) metaByName(MetaDependencies.DEPENDENCIES_NAME);
     }
 
+    private KMetaInferInput[] _cachedInputs = null;
 
-
-    //TODO enhance with a cache
     @Override
     public KMetaInferInput[] inputs() {
+        if(_cachedInputs == null){
+            cacheInputs();
+        }
+        return this._cachedInputs;
+    }
+
+    private synchronized void cacheInputs(){
         int nb = 0;
         for (int i = 0; i < _meta.length; i++) {
             if (_meta[i].metaType().equals(MetaType.INPUT)) {
@@ -242,12 +249,19 @@ public class MetaClass implements KMetaClass {
                 nb++;
             }
         }
-        return res;
     }
 
-    //TODO enhance with a cache
+    private KMetaInferOutput[] _cachedOutputs = null;
+
     @Override
     public KMetaInferOutput[] outputs() {
+        if(_cachedOutputs == null){
+            cacheOuputs();
+        }
+        return _cachedOutputs;
+    }
+
+    private synchronized void cacheOuputs(){
         int nb = 0;
         for (int i = 0; i < _meta.length; i++) {
             if (_meta[i].metaType().equals(MetaType.OUTPUT)) {
@@ -262,15 +276,21 @@ public class MetaClass implements KMetaClass {
                 nb++;
             }
         }
-        return res;
+    }
+
+    private void clearCached(){
+        this._cachedOutputs = null;
+        this._cachedInputs = null;
     }
 
     /**
      * @native ts
+     * clearCached();
      * this._meta[p_new_meta.index()] = p_new_meta;
      * this._indexes.put(p_new_meta.metaName(), p_new_meta.index());
      */
     private void internal_add_meta(KMeta p_new_meta) {
+        clearCached();
         KMeta[] incArray = new KMeta[_meta.length + 1];
         System.arraycopy(_meta, 0, incArray, 0, _meta.length);
         incArray[_meta.length] = p_new_meta;
