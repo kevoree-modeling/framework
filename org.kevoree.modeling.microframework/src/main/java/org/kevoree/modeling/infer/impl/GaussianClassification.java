@@ -19,6 +19,8 @@ public class GaussianClassification implements KInferAlg {
     private static int SUMSQUARE = 3;
     //to keep updated
     private static int NUMOFFIELDS = 4;
+    
+    private int maxOutput=3;
 
 
 
@@ -60,10 +62,10 @@ public class GaussianClassification implements KInferAlg {
 
         //Create initial segment if empty
         if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
-            ks.extendInfer(meta.index(),meta.origin().outputs().length*(meta.origin().inputs().length*NUMOFFIELDS+1),meta.origin());
+            ks.extendInfer(meta.index(),maxOutput*(meta.origin().inputs().length*NUMOFFIELDS+1),meta.origin());
         }
 
-        Array1D state = new Array1D(meta.origin().outputs().length*(meta.origin().inputs().length*NUMOFFIELDS+1),0,meta.index(),ks,meta.origin());
+        Array1D state = new Array1D(maxOutput*(meta.origin().inputs().length*NUMOFFIELDS+1),0,meta.index(),ks,meta.origin());
 
         //update the state
         for(int i=0;i<trainingSet.length;i++) {
@@ -94,22 +96,35 @@ public class GaussianClassification implements KInferAlg {
     @Override
     public double[] infer(double[] features, KObject origin, KMetaDependencies meta) {
 
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
-        Array1D state = new Array1D(meta.origin().outputs().length*(meta.origin().inputs().length*NUMOFFIELDS+1),0,meta.index(),ks,meta.origin());
-
         double[] result = new double[1];
-        double prob=0;
         double maxprob=0;
+        double prob=0;
 
-        for(int output=0; output<meta.origin().outputs().length;output++){
-            double[] avg =getAvg(output,state, meta);
-            double[] variance =getVariance(output,state,avg, meta);
-            prob= Distribution.gaussian(features,avg,variance);
+        for(int output=0; output<maxOutput;output++){
+            prob=getProba(features,output,origin,meta);
             if(prob>maxprob){
                 maxprob=prob;
                 result[0]=output;
             }
         }
         return result;
+    }
+
+    public double getProba (double[] features, int output, KObject origin, KMetaDependencies meta){
+        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
+        Array1D state = new Array1D(maxOutput*(meta.origin().inputs().length*NUMOFFIELDS+1),0,meta.index(),ks,meta.origin());
+        double prob=0;
+        double[] avg =getAvg(output, state, meta);
+        double[] variance =getVariance(output,state,avg, meta);
+        prob= Distribution.gaussian(features,avg,variance);
+        return prob;
+    }
+
+    public double[] getAllProba (double[] features, KObject origin, KMetaDependencies meta){
+        double[] results = new double[maxOutput];
+        for(int i=0;i<maxOutput;i++){
+            results[i]=getProba(features,i,origin,meta);
+        }
+        return results;
     }
 }
