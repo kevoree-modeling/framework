@@ -6,6 +6,6 @@ public interface KArray1D {
 
     double get(int index);
 
-    double set(int index);
+    void set(int index, double value);
 
 }

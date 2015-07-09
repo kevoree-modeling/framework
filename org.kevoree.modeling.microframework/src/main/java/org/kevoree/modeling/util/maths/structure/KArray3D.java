@@ -10,6 +10,6 @@ public interface KArray3D {
 
     double get(int rawIndex, int columnIndex, int deepIndex);
 
-    double set(int rawIndex, int columnIndex, int deepIndex);
+    void set(int rawIndex, int columnIndex, int deepIndex, double value);
     
 }

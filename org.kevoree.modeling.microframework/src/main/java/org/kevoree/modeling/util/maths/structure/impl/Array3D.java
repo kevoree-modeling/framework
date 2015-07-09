@@ -1,6 +1,7 @@
 package org.kevoree.modeling.util.maths.structure.impl;
 
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.util.maths.structure.KArray3D;
 
 public class Array3D implements KArray3D {
@@ -17,13 +18,16 @@ public class Array3D implements KArray3D {
 
     private KMemorySegment _segment;
 
-    public Array3D(int p_nbRaws, int p_nbColumns, int p_nbDeeps, int p_offset, int p_segmentIndex, KMemorySegment p_segment) {
+    private KMetaClass _metaClass;
+
+    public Array3D(int p_nbRaws, int p_nbColumns, int p_nbDeeps, int p_offset, int p_segmentIndex, KMemorySegment p_segment, KMetaClass p_metaClass) {
         this._nbRaws = p_nbRaws;
         this._nbColumns = p_nbColumns;
         this._nbDeeps = p_nbDeeps;
         this._offset = p_offset;
         this._segmentIndex = p_segmentIndex;
         this._segment = p_segment;
+        this._metaClass = p_metaClass;
     }
 
     @Override
@@ -42,12 +46,12 @@ public class Array3D implements KArray3D {
     }
 
     @Override
-    public double get(int rawIndex, int columnIndex, int deepIndex) {
-        return 0;
+    public double get(int p_rawIndex, int p_columnIndex, int p_deepIndex) {
+        return this._segment.getInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns * this._nbDeeps) + p_columnIndex + p_deepIndex, this._metaClass);
     }
 
     @Override
-    public double set(int rawIndex, int columnIndex, int deepIndex) {
-        return 0;
+    public void set(int p_rawIndex, int p_columnIndex, int p_deepIndex, double p_value) {
+        this._segment.setInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns * this._nbDeeps) + p_columnIndex + p_deepIndex, p_value, this._metaClass);
     }
 }

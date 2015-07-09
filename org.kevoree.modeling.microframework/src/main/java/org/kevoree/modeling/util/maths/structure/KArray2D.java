@@ -8,6 +8,6 @@ public interface KArray2D {
 
     double get(int rawIndex, int columnIndex);
 
-    double set(int rawIndex, int columnIndex);
+    void set(int rawIndex, int columnIndex, double value);
 
 }
