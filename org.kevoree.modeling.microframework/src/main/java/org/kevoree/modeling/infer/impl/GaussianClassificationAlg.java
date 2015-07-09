@@ -10,7 +10,7 @@ import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 /**
  * Created by assaad on 08/07/15.
  */
-public class GaussianClassification implements KInferAlg {
+public class GaussianClassificationAlg implements KInferAlg {
 
     private static int MIN = 0;
     private static int MAX = 1;
@@ -29,7 +29,7 @@ public class GaussianClassification implements KInferAlg {
     }
 
     private int getCounter(int output,  KMetaDependencies meta){
-        return output*(NUMOFFIELDS*meta.origin().inputs().length+1)+NUMOFFIELDS*meta.origin().inputs().length+NUMOFFIELDS;
+        return output*(NUMOFFIELDS*meta.origin().inputs().length+1)+NUMOFFIELDS*meta.origin().inputs().length;
     }
 
 
@@ -93,21 +93,25 @@ public class GaussianClassification implements KInferAlg {
     }
 
 
+
+
     @Override
-    public double[] infer(double[] features, KObject origin) {
+    public  double[][] infer(double[][] features, KObject origin) {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         Array1D state = new Array1D(maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
 
 
-        double[] result = new double[1];
+        double[][] result = new double[features.length][1];
         double maxprob=0;
         double prob=0;
 
-        for(int output=0; output<maxOutput;output++){
-            prob=getProba(features,output,state,origin.metaClass().dependencies());
-            if(prob>maxprob){
-                maxprob=prob;
-                result[0]=output;
+        for(int j=0;j<features.length;j++) {
+            for (int output = 0; output < maxOutput; output++) {
+                prob = getProba(features[j], output, state, origin.metaClass().dependencies());
+                if (prob > maxprob) {
+                    maxprob = prob;
+                    result[j][0] = output;
+                }
             }
         }
         return result;

@@ -56,9 +56,11 @@ public class StatInferAlg implements KInferAlg {
 
 
     @Override
-    public double[] infer(double[] features, KObject origin) {
+    public double[][] infer(double[][] features, KObject origin) {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
-        return getAvgAll(ks, origin.metaClass().dependencies());
+        double[][] result = new double[1][];
+        result[0]=getAvgAll(ks, origin.metaClass().dependencies());
+        return result;
     }
 
     public double[] getAvgAll(KMemorySegment ks, KMetaDependencies meta) {
