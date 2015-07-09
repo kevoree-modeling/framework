@@ -25,8 +25,8 @@ public class StatInferAlg implements KInferAlg {
       KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.metaClass().index(), false,origin.metaClass(), null);
 
         //Create initial segment if empty
-        if (ks.getInferSize(origin.metaClass().index(), origin.metaClass()) == 0) {
-            ks.extendInfer(origin.metaClass().index(), NUMOFFIELDS *trainingSet[0].length+1,origin.metaClass());
+        if (ks.getInferSize(origin.metaClass().dependencies().index(), origin.metaClass()) == 0) {
+            ks.extendInfer(origin.metaClass().dependencies().index(), NUMOFFIELDS *trainingSet[0].length+1,origin.metaClass());
         }
 
         Array1D state = new Array1D(NUMOFFIELDS *trainingSet[0].length+1,0,origin.metaClass().index(),ks,origin.metaClass());
