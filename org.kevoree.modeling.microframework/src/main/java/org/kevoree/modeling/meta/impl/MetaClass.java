@@ -241,11 +241,11 @@ public class MetaClass implements KMetaClass {
                 nb++;
             }
         }
-        KMetaInferInput[] res = new KMetaInferInput[nb];
+        this._cachedInputs = new KMetaInferInput[nb];
         nb = 0;
         for (int i = 0; i < _meta.length; i++) {
             if (_meta[i].metaType().equals(MetaType.INPUT)) {
-                res[nb] = (KMetaInferInput) _meta[i];
+                this._cachedInputs[nb] = (KMetaInferInput) _meta[i];
                 nb++;
             }
         }
@@ -268,11 +268,11 @@ public class MetaClass implements KMetaClass {
                 nb++;
             }
         }
-        KMetaInferOutput[] res = new KMetaInferOutput[nb];
+        this._cachedOutputs = new KMetaInferOutput[nb];
         nb = 0;
         for (int i = 0; i < _meta.length; i++) {
             if (_meta[i].metaType().equals(MetaType.OUTPUT)) {
-                res[nb] = (KMetaInferOutput) _meta[i];
+                this._cachedOutputs[nb] = (KMetaInferOutput) _meta[i];
                 nb++;
             }
         }
