@@ -1,6 +1,6 @@
 package ${context.pack}.meta;
 
-public class Meta${context.getName()} extends org.kevoree.modeling.abs.AbstractKDataType {
+public class Meta${context.getName()} extends org.kevoree.modeling.abs.AbstractDataType {
 
     private Meta${context.getName()}(String p_name, boolean p_isEnum) {
         super(p_name, p_isEnum);

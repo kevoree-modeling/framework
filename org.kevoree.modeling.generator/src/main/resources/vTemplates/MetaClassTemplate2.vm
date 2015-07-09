@@ -16,8 +16,10 @@ public static Meta${classDeclaration.name} getInstance() {
 #if(${context.generationContext.getHelper().getInstance().isPrimitive(${attribute.getType()})})
     #set($attTypeValue = "org.kevoree.modeling.meta.KPrimitiveTypes.$attribute.getType().toUpperCase()")
 #else
-    #set($substringIndex = ${attribute.getType().lastIndexOf('.')} + 1)
-    #set($attTypeValue = "${classDeclaration.pack}.meta.Meta${attribute.getType().substring($substringIndex)}.getInstance()")
+    #set($dotIndex = ${attribute.getType().lastIndexOf('.')})
+    #set($substringIndex = $dotIndex + 1)
+#*#set($attTypeValue = "${classDeclaration.pack}.meta.Meta${attribute.getType().substring($substringIndex)}.getInstance()")*#
+    #set($attTypeValue = "${attribute.getType().substring(0,$dotIndex)}.meta.Meta${attribute.getType().substring($substringIndex)}.getInstance()")
 #end
 #if($attribute.type == "Continuous")
 public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, #if($context.generationContext.helper.isNull(${attribute.precision}))0#{else}$attribute.precision#end, #if($attribute.id)true#{else}false#end, $attTypeValue, org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation.instance());
