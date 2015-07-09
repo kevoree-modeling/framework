@@ -47,7 +47,7 @@ public class GaussianClassification implements KInferAlg {
         double total = state[getCounter(output, meta)];
         if(total!=0) {
             for (int i = 0; i < meta.origin().inputs().length; i++) {
-                variances[i] = state[getIndex(i, output, SUMSQUARE, meta)] / total - avg[i]*avg[i];
+                variances[i] = state[getIndex(i, output, SUMSQUARE, meta)] / total - avg[i]*avg[i]; // x count/ (count-1)
             }
         }
         return variances;
