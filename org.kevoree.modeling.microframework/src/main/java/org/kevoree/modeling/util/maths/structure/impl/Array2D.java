@@ -18,7 +18,7 @@ public class Array2D implements KArray2D {
 
     private KMetaClass _metaClass;
 
-    public Array2D(int p_nbRaws, int p_nbColumns, int p_offset, KMemorySegment p_segment, int p_segmentIndex, KMetaClass p_metaClass) {
+    public Array2D(int p_nbRaws, int p_nbColumns, int p_offset, int p_segmentIndex, KMemorySegment p_segment, KMetaClass p_metaClass) {
         this._nbRaws = p_nbRaws;
         this._nbColumns = p_nbColumns;
         this._offset = p_offset;
