@@ -25,7 +25,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             @Override
             public KObject[] resolve(String indexName) {
                 KMetaDependency dependency = _metaClass.dependencies().dependencyByName(indexName);
-                if(dependency != null){
+                if (dependency != null) {
                     KObject[] single = new KObject[1];
                     single[0] = dependencies[dependency.index()];
                     return single;
@@ -34,7 +34,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             }
         };
         for (int i = 0; i < _metaClass.inputs().length; i++) {
-            _metaClass.inputs()[i].extractor().exec(null, resolver, waiter.wait(""+i));
+            _metaClass.inputs()[i].extractor().exec(null, resolver, waiter.wait("" + i));
         }
         waiter.then(new KCallback() {
             @Override
@@ -42,8 +42,8 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                 double[][] extractedInputs = new double[1][_metaClass.inputs().length];
                 for (int i = 0; i < _metaClass.inputs().length; i++) {
                     try {
-                        extractedInputs[0][i] = (double) waiter.getResult(""+i);
-                    } catch (Exception e){
+                        extractedInputs[0][i] = (double) waiter.getResult("" + i);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
