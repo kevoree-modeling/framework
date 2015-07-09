@@ -30,7 +30,7 @@ public class MetaInferOutput implements KMetaInferOutput {
 
     @Override
     public MetaType metaType() {
-        return MetaType.INPUT;
+        return MetaType.OUTPUT;
     }
 
     @Override

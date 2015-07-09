@@ -250,7 +250,7 @@ public class MetaClass implements KMetaClass {
     public KMetaInferOutput[] outputs() {
         int nb = 0;
         for (int i = 0; i < _meta.length; i++) {
-            if (_meta[i].metaType().equals(MetaType.INPUT)) {
+            if (_meta[i].metaType().equals(MetaType.OUTPUT)) {
                 nb++;
             }
         }

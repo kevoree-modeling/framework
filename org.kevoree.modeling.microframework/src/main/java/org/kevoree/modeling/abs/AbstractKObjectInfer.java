@@ -17,8 +17,11 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     @Override
     public void train(KObject[] dependencies, Object[] expectedOutputs, KCallback callback) {
         final KObjectInfer selfObject = this;
-        if (dependencies.length != _metaClass.dependencies().dependencies().length || expectedOutputs.length != _metaClass.outputs().length) {
+        if(dependencies == null || dependencies.length != _metaClass.dependencies().dependencies().length ){
             throw new RuntimeException("Bad number of arguments for dependencies");
+        }
+        if(expectedOutputs != null && expectedOutputs.length != _metaClass.outputs().length){
+            throw new RuntimeException("Bad number of arguments for output");
         }
         KDefer waiter = this.manager().model().defer();
         KTraversalIndexResolver resolver = new KTraversalIndexResolver() {
@@ -42,7 +45,10 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                 double[][] extractedInputs = new double[1][_metaClass.inputs().length];
                 for (int i = 0; i < _metaClass.inputs().length; i++) {
                     try {
-                        extractedInputs[0][i] = (double) waiter.getResult("" + i);
+                        Object[] extracted = (Object[]) waiter.getResult("" + i);
+                        if(extracted != null && extracted.length >0){
+                            extractedInputs[0][i] = (double) extracted[0];
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -50,7 +56,11 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                 double[][] extractedOutputs = new double[1][_metaClass.outputs().length];
                 for (int i = 0; i < _metaClass.outputs().length; i++) {
                     KMetaInferOutput metaInferOutput = _metaClass.outputs()[i];
-                    extractedOutputs[0][i] = internalConvertOutput(expectedOutputs[i], metaInferOutput);
+                    Object currentOutputObject = null;
+                    if(expectedOutputs != null){
+                        currentOutputObject = expectedOutputs[i];
+                    }
+                    extractedOutputs[0][i] = internalConvertOutput(currentOutputObject, metaInferOutput);
                 }
                 _metaClass.inferAlg().train(extractedInputs, extractedOutputs, selfObject);
                 if (callback != null) {

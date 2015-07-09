@@ -133,7 +133,7 @@ public class Traversal implements KTraversal {
 
     @Override
     public void exec(KObject[] origins, KTraversalIndexResolver resolver, KCallback<Object[]> callback) {
-        if (_terminated && this._initObjs == null) {
+        if (this._initObjs == null) {
             _initAction.execute(new TraversalContext(origins, resolver, callback));
         }
     }
