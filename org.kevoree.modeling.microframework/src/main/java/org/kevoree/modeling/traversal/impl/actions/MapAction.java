@@ -4,6 +4,7 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.traversal.KTraversalAction;
+import org.kevoree.modeling.traversal.KTraversalActionContext;
 
 public class MapAction implements KTraversalAction {
 
@@ -22,12 +23,12 @@ public class MapAction implements KTraversalAction {
     }
 
     @Override
-    public void execute(KObject[] inputs) {
-        Object[] selected = new Object[inputs.length];
+    public void execute(KTraversalActionContext context) {
+        Object[] selected = new Object[context.inputObjects().length];
         int nbElem = 0;
-        for (int i = 0; i < inputs.length; i++) {
-            if (inputs[i] != null) {
-                Object resolved = inputs[i].get(_attribute);
+        for (int i = 0; i < context.inputObjects().length; i++) {
+            if (context.inputObjects()[i] != null) {
+                Object resolved = context.inputObjects()[i].get(_attribute);
                 if (resolved != null) {
                     selected[i] = resolved;
                     nbElem++;
@@ -37,7 +38,7 @@ public class MapAction implements KTraversalAction {
         //trim the array
         Object[] trimmed = new Object[nbElem];
         int nbInserted = 0;
-        for (int i = 0; i < inputs.length; i++) {
+        for (int i = 0; i < context.inputObjects().length; i++) {
             if (selected[i] != null) {
                 trimmed[nbInserted] = selected[i];
                 nbInserted++;

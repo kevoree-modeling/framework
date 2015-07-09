@@ -5,6 +5,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongMapCallBack;
 import org.kevoree.modeling.traversal.KTraversalAction;
+import org.kevoree.modeling.traversal.KTraversalActionContext;
 
 public class RemoveDuplicateAction implements KTraversalAction {
 
@@ -16,10 +17,10 @@ public class RemoveDuplicateAction implements KTraversalAction {
     }
 
     @Override
-    public void execute(KObject[] p_inputs) {
-        ArrayLongMap elems = new ArrayLongMap(p_inputs.length, KConfig.CACHE_LOAD_FACTOR);
-        for (int i = 0; i < p_inputs.length; i++) {
-            elems.put(p_inputs[i].uuid(), p_inputs[i]);
+    public void execute(KTraversalActionContext context) {
+        ArrayLongMap elems = new ArrayLongMap(context.inputObjects().length, KConfig.CACHE_LOAD_FACTOR);
+        for (int i = 0; i < context.inputObjects().length; i++) {
+            elems.put(context.inputObjects()[i].uuid(), context.inputObjects()[i]);
         }
         final KObject[] trimmed = new KObject[elems.size()];
         final int[] nbInserted = {0};
@@ -30,7 +31,8 @@ public class RemoveDuplicateAction implements KTraversalAction {
                 nbInserted[0]++;
             }
         });
-        _next.execute(trimmed);
+        context.setInputObjects(trimmed);
+        _next.execute(context);
     }
 
 }

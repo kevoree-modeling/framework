@@ -3,6 +3,7 @@ package org.kevoree.modeling.traversal.impl.actions;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.KTraversalAction;
+import org.kevoree.modeling.traversal.KTraversalActionContext;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
 import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 import org.kevoree.modeling.util.maths.expression.impl.MathExpressionEngine;
@@ -27,10 +28,10 @@ public class MathExpressionAction implements KTraversalAction {
     }
 
     @Override
-    public void execute(KObject[] inputs) {
-        Object[] selected = new Object[inputs.length];
-        for (int i = 0; i < inputs.length; i++) {
-            if (inputs[i] != null) {
+    public void execute(KTraversalActionContext context) {
+        Object[] selected = new Object[context.inputObjects().length];
+        for (int i = 0; i < context.inputObjects().length; i++) {
+            if (context.inputObjects()[i] != null) {
                 final int finalI = i;
                 _engine.setVarResolver(new KMathVariableResolver() {
                     @Override
@@ -44,7 +45,7 @@ public class MathExpressionAction implements KTraversalAction {
                         if (potentialVarName.equals("FALSE")) {
                             return 0.0;
                         }
-                        Object resolved = inputs[finalI].getByName(potentialVarName);
+                        Object resolved = context.inputObjects()[finalI].getByName(potentialVarName);
                         if (resolved != null) {
                             try {
                                 return Double.parseDouble(resolved.toString());

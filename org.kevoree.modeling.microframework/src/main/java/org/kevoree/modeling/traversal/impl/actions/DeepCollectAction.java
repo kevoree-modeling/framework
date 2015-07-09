@@ -14,6 +14,7 @@ import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.impl.MetaReference;
 import org.kevoree.modeling.traversal.KTraversalAction;
+import org.kevoree.modeling.traversal.KTraversalActionContext;
 import org.kevoree.modeling.traversal.KTraversalFilter;
 
 public class DeepCollectAction implements KTraversalAction {
@@ -39,18 +40,17 @@ public class DeepCollectAction implements KTraversalAction {
     private ArrayLongMap<KObject> _finalElements = null;
 
     @Override
-    public void execute(KObject[] p_inputs) {
-        if (p_inputs == null || p_inputs.length == 0) {
-            _next.execute(p_inputs);
-            return;
+    public void execute(KTraversalActionContext context) {
+        if (context.inputObjects() == null || context.inputObjects().length == 0) {
+            _next.execute(context);
         } else {
             _alreadyPassed = new ArrayLongMap<KObject>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
             _finalElements = new ArrayLongMap<KObject>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-            KObject[] filtered_inputs = new KObject[p_inputs.length];
-            for (int i = 0; i < p_inputs.length; i++) {
-                if (_continueCondition == null || _continueCondition.filter(p_inputs[i])) {
-                    filtered_inputs[i] = p_inputs[i];
-                    _alreadyPassed.put(p_inputs[i].uuid(), p_inputs[i]);
+            KObject[] filtered_inputs = new KObject[context.inputObjects().length];
+            for (int i = 0; i < context.inputObjects().length; i++) {
+                if (_continueCondition == null || _continueCondition.filter(context.inputObjects()[i])) {
+                    filtered_inputs[i] = context.inputObjects()[i];
+                    _alreadyPassed.put(context.inputObjects()[i].uuid(), context.inputObjects()[i]);
                 }
             }
             final KCallback<KObject[]>[] iterationCallbacks = new KCallback[1];
@@ -79,7 +79,8 @@ public class DeepCollectAction implements KTraversalAction {
                                 nbInserted[0]++;
                             }
                         });
-                        _next.execute(trimmed);
+                        context.setInputObjects(trimmed);
+                        _next.execute(context);
                     }
                 }
             };

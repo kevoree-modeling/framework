@@ -4,6 +4,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.traversal.KTraversalIndexResolver;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalFilter;
@@ -11,7 +12,7 @@ import org.kevoree.modeling.traversal.impl.actions.*;
 
 public class Traversal implements KTraversal {
 
-    private static final String TERMINATED_MESSAGE = "Promise is terminated by the call of done method, please create another promise";
+    private static final String TERMINATED_MESSAGE = "Traversal is terminated by the call of done method, please create another promise";
 
     private KObject[] _initObjs;
 
@@ -23,8 +24,6 @@ public class Traversal implements KTraversal {
 
     public Traversal(KObject[] p_roots) {
         this._initObjs = p_roots;
-        // this._initObjs = new KObject[1];
-        //this._initObjs[0] = p_root;
     }
 
     private KTraversal internal_chain_action(KTraversalAction p_action) {
@@ -100,7 +99,9 @@ public class Traversal implements KTraversal {
         internal_chain_action(new FinalAction(cb));
         _terminated = true;
         //execute the first element of the chain of actions
-        _initAction.execute(_initObjs);
+        if (_initObjs != null) {
+            _initAction.execute(new TraversalContext(_initObjs, null));
+        }
     }
 
     @Override
@@ -109,7 +110,9 @@ public class Traversal implements KTraversal {
         internal_chain_action(new MathExpressionAction(p_expression, callback));
         _terminated = true;
         //execute the first element of the chain of actions
-        _initAction.execute(_initObjs);
+        if (_initObjs != null) {
+            _initAction.execute(new TraversalContext(_initObjs, null));
+        }
     }
 
     @Override
@@ -118,7 +121,17 @@ public class Traversal implements KTraversal {
         internal_chain_action(new MapAction(attribute, cb));
         _terminated = true;
         //execute the first element of the chain of actions
-        _initAction.execute(_initObjs);
+        if (_initObjs != null) {
+            _initAction.execute(new TraversalContext(_initObjs, null));
+        }
     }
+
+    @Override
+    public void exec(KObject[] origins, KTraversalIndexResolver resolver) {
+        if (_terminated && this._initObjs == null) {
+            _initAction.execute(new TraversalContext(origins, resolver));
+        }
+    }
+
 
 }

@@ -12,6 +12,7 @@ import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.impl.MetaReference;
 import org.kevoree.modeling.traversal.KTraversalAction;
+import org.kevoree.modeling.traversal.KTraversalActionContext;
 
 public class TraverseQueryAction implements KTraversalAction {
 
@@ -31,16 +32,16 @@ public class TraverseQueryAction implements KTraversalAction {
     }
 
     @Override
-    public void execute(KObject[] p_inputs) {
-        if (p_inputs == null || p_inputs.length == 0) {
-            _next.execute(p_inputs);
+    public void execute(KTraversalActionContext context) {
+        if (context.inputObjects() == null || context.inputObjects().length == 0) {
+            _next.execute(context);
             return;
         } else {
-            AbstractKObject currentFirstObject = (AbstractKObject) p_inputs[0];
+            AbstractKObject currentFirstObject = (AbstractKObject) context.inputObjects()[0];
             KLongLongMap nextIds = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-            for (int i = 0; i < p_inputs.length; i++) {
+            for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
-                    AbstractKObject loopObj = (AbstractKObject) p_inputs[i];
+                    AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];
                     KMemorySegment raw = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                     KMeta[] metaElements = loopObj.metaClass().metaElements();
                     if (raw != null) {
@@ -107,7 +108,8 @@ public class TraverseQueryAction implements KTraversalAction {
             currentFirstObject._manager.lookupAllobjects(currentFirstObject.universe(), currentFirstObject.now(), trimmed, new KCallback<KObject[]>() {
                 @Override
                 public void on(KObject[] kObjects) {
-                    _next.execute(kObjects);
+                    context.setInputObjects(kObjects);
+                    _next.execute(context);
                 }
             });
         }

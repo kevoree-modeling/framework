@@ -2,6 +2,7 @@ package org.kevoree.modeling.traversal.impl.actions;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.KTraversalAction;
+import org.kevoree.modeling.traversal.KTraversalActionContext;
 import org.kevoree.modeling.traversal.KTraversalFilter;
 
 public class FilterAction implements KTraversalAction {
@@ -20,12 +21,12 @@ public class FilterAction implements KTraversalAction {
     }
 
     @Override
-    public void execute(KObject[] p_inputs) {
-        boolean[] selectedIndex = new boolean[p_inputs.length];
+    public void execute(KTraversalActionContext context) {
+        boolean[] selectedIndex = new boolean[context.inputObjects().length];
         int selected = 0;
-        for (int i = 0; i < p_inputs.length; i++) {
+        for (int i = 0; i < context.inputObjects().length; i++) {
             try {
-                if (_filter.filter(p_inputs[i])) {
+                if (_filter.filter(context.inputObjects()[i])) {
                     selectedIndex[i] = true;
                     selected++;
                 }
@@ -35,13 +36,14 @@ public class FilterAction implements KTraversalAction {
         }
         KObject[] nextStepElement = new KObject[selected];
         int inserted = 0;
-        for (int i = 0; i < p_inputs.length; i++) {
+        for (int i = 0; i < context.inputObjects().length; i++) {
             if (selectedIndex[i]) {
-                nextStepElement[inserted] = p_inputs[i];
+                nextStepElement[inserted] = context.inputObjects()[i];
                 inserted++;
             }
         }
-        _next.execute(nextStepElement);
+        context.setInputObjects(nextStepElement);
+        _next.execute(context);
     }
 
 }

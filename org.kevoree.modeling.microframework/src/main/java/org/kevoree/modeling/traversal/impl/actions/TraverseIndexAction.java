@@ -3,6 +3,7 @@ package org.kevoree.modeling.traversal.impl.actions;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.KTraversalAction;
+import org.kevoree.modeling.traversal.KTraversalActionContext;
 
 public class TraverseIndexAction implements KTraversalAction {
 
@@ -21,16 +22,17 @@ public class TraverseIndexAction implements KTraversalAction {
     }
 
     @Override
-    public void execute(KObject[] inputs) {
+    public void execute(KTraversalActionContext context) {
         //TODO enhance this to general index usages
         if (_indexName.equals("root")) {
-            if (inputs.length > 0) {
-                inputs[0].manager().getRoot(inputs[0].universe(), inputs[0].now(), new KCallback<KObject>() {
+            if (context.inputObjects().length > 0) {
+                context.inputObjects()[0].manager().getRoot(context.inputObjects()[0].universe(), context.inputObjects()[0].now(), new KCallback<KObject>() {
                     @Override
                     public void on(KObject root) {
                         KObject[] selectedElems = new KObject[1];
                         selectedElems[0] = root;
-                        _next.execute(selectedElems);
+                        context.setInputObjects(selectedElems);
+                        _next.execute(context);
                     }
                 });
             }

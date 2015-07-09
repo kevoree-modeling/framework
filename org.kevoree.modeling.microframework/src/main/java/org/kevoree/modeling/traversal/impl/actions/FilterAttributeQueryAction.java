@@ -9,6 +9,7 @@ import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.traversal.KTraversalAction;
+import org.kevoree.modeling.traversal.KTraversalActionContext;
 
 public class FilterAttributeQueryAction implements KTraversalAction {
 
@@ -26,16 +27,16 @@ public class FilterAttributeQueryAction implements KTraversalAction {
     }
 
     @Override
-    public void execute(KObject[] p_inputs) {
-        if (p_inputs == null || p_inputs.length == 0) {
-            _next.execute(p_inputs);
+    public void execute(KTraversalActionContext context) {
+        if (context.inputObjects() == null || context.inputObjects().length == 0) {
+            _next.execute(context);
             return;
         } else {
-            boolean[] selectedIndexes = new boolean[p_inputs.length];
+            boolean[] selectedIndexes = new boolean[context.inputObjects().length];
             int nbSelected = 0;
-            for (int i = 0; i < p_inputs.length; i++) {
+            for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
-                    AbstractKObject loopObj = (AbstractKObject) p_inputs[i];
+                    AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];
                     if (_attributeQuery == null) {
                         selectedIndexes[i] = true;
                         nbSelected++;
@@ -89,13 +90,14 @@ public class FilterAttributeQueryAction implements KTraversalAction {
             }
             KObject[] nextStepElement = new KObject[nbSelected];
             int inserted = 0;
-            for (int i = 0; i < p_inputs.length; i++) {
+            for (int i = 0; i < context.inputObjects().length; i++) {
                 if (selectedIndexes[i]) {
-                    nextStepElement[inserted] = p_inputs[i];
+                    nextStepElement[inserted] = context.inputObjects()[i];
                     inserted++;
                 }
             }
-            _next.execute(nextStepElement);
+            context.setInputObjects(nextStepElement);
+            _next.execute(context);
         }
     }
 
