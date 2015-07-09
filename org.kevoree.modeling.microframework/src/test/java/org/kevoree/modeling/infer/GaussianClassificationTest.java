@@ -28,10 +28,10 @@ public class GaussianClassificationTest {
         KMetaClass inferGaussian = metaModel.addInferMetaClass("GaussianProfile", new GaussianClassificationAlg());
         inferGaussian.addDependency("Iris", metaClassIris, null);
 
-        inferGaussian.addInput("sepalLength", "Iris | @sepalLength");
-        inferGaussian.addInput("sepalWidth", "Iris | @sepalWidth");
-        inferGaussian.addInput("petalLength", "Iris | @petalLength");
-        inferGaussian.addInput("petalWidth", "Iris | @petalWidth");
+        inferGaussian.addInput("sepalLength", "@Iris | =sepalLength");
+        inferGaussian.addInput("sepalWidth", "@Iris | =sepalWidth");
+        inferGaussian.addInput("petalLength", "@Iris | =petalLength");
+        inferGaussian.addInput("petalWidth", "@Iris | =petalWidth");
 
         inferGaussian.addOutput("type", KPrimitiveTypes.DOUBLE);
 
