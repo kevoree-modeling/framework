@@ -15,8 +15,12 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -89,27 +93,6 @@ public class ModelWebSocketTest {
 
     }
 
-    private static int launchRunner(String file) {
-        IRuntimeConfig runtimeConfig = (new NodejsRuntimeConfigBuilder()).defaults().build();
-        NodejsProcess node = null;
-        try {
-            String basePath = ModelWebSocketTest.class.getClassLoader().getResource(file).getFile().replaceAll("%20", " ");
-            NodejsConfig nodejsConfig = new NodejsConfig(NodejsVersion.Main.V0_10, basePath, new ArrayList<String>(), basePath.toString().substring(0, basePath.toString().lastIndexOf("/")));
-            NodejsStarter runtime = new NodejsStarter(runtimeConfig);
-            NodejsExecutable e = runtime.prepare(nodejsConfig);
-            node = e.start();
-            return node.waitFor();
-        } catch (InterruptedException var11) {
-            var11.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (node != null) {
-                node.stop();
-            }
-        }
-        return -1;
-    }
 
     @Test
     public void nodeJS() throws Exception {
@@ -152,6 +135,100 @@ public class ModelWebSocketTest {
 
         wrapper.stop();
 
+    }
+
+
+    private int launchRunner(String file) {
+
+        if (testNativeNode()) {
+            try {
+                System.out.println("Native NodeJS installed on the machine, using it to compile to JS");
+                String[] params = new String[2];
+                if (getOS().equals(OSType.Windows)) {
+                    params[0] = "node.exe";
+                } else {
+                    params[0] = "node";
+                }
+                String basePath = ModelWebSocketTest.class.getClassLoader().getResource(file).getFile().replaceAll("%20", " ");
+                params[1] = basePath;
+                ProcessBuilder pb = new ProcessBuilder(params);
+                pb.directory(new File(basePath.toString().substring(0, basePath.toString().lastIndexOf("/"))));
+                pb.redirectError();
+                pb.redirectOutput();
+                int res = pb.start().waitFor();
+                if (res != 0) {
+                    StringBuilder builder = new StringBuilder();
+                    for (String s : params) {
+                        builder.append(" " + s);
+                    }
+                    throw new Exception("Compilation error, please check your console " + builder.toString());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            IRuntimeConfig runtimeConfig = (new NodejsRuntimeConfigBuilder()).defaults().build();
+            NodejsProcess node = null;
+            try {
+                String basePath = ModelWebSocketTest.class.getClassLoader().getResource(file).getFile().replaceAll("%20", " ");
+                NodejsConfig nodejsConfig = new NodejsConfig(NodejsVersion.Main.V0_10, basePath, new ArrayList<String>(), basePath.toString().substring(0, basePath.toString().lastIndexOf("/")));
+                NodejsStarter runtime = new NodejsStarter(runtimeConfig);
+                NodejsExecutable e = runtime.prepare(nodejsConfig);
+                node = e.start();
+                return node.waitFor();
+            } catch (InterruptedException var11) {
+                var11.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (node != null) {
+                    node.stop();
+                }
+            }
+        }
+        return -1;
+    }
+
+    private boolean testNativeNode() {
+        String[] params = new String[2];
+        if (getOS().equals(OSType.Windows)) {
+            params[0] = "node.exe";
+        } else {
+            params[0] = "node";
+        }
+        params[1] = "-v";
+        ProcessBuilder pb = new ProcessBuilder(params);
+        pb.redirectError();
+        pb.redirectOutput();
+        try {
+            int res = pb.start().waitFor();
+            return res == 0;
+        } catch (InterruptedException e) {
+        } catch (IOException e) {
+        }
+        return false;
+    }
+
+    public enum OSType {
+        Windows, MacOS, Linux, Other
+    }
+
+    public static OSType getOS() {
+        String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+        if ((OS.indexOf("mac") >= 0) || (OS.indexOf("darwin") >= 0)) {
+            return OSType.MacOS;
+        } else if (OS.indexOf("win") >= 0) {
+            return OSType.Windows;
+        } else if (OS.indexOf("nux") >= 0) {
+            return OSType.Linux;
+        } else {
+            return OSType.Other;
+        }
     }
 
 }
