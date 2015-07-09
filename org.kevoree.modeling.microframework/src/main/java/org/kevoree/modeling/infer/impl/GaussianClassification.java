@@ -57,10 +57,10 @@ public class GaussianClassification implements KInferAlg {
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin){
-    KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.metaClass().dependencies().index(), false, origin.metaClass(), null);
-
+        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
-        if (ks.getInferSize(origin.metaClass().dependencies().index(), origin.metaClass()) == 0) {
+        if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
             ks.extendInfer(origin.metaClass().dependencies().index(),maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),origin.metaClass());
         }
 
@@ -95,8 +95,9 @@ public class GaussianClassification implements KInferAlg {
 
     @Override
     public double[] infer(double[] features, KObject origin) {
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.metaClass().dependencies().index(), false, origin.metaClass(), null);
+        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         Array1D state = new Array1D(maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
+
 
         double[] result = new double[1];
         double maxprob=0;
