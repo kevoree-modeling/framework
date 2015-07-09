@@ -18,13 +18,14 @@ public class Array1DTest {
     public void test() {
         KMetaModel mm = new MetaModel("test");
         KMetaClass mc = mm.addInferMetaClass("infer_class", new KInferAlg() {
+
             @Override
-            public void train(double[][] trainingSet, double[] expectedResultSet, KObject currentInferObject, KMetaDependencies meta) {
+            public void train(double[][] trainingSet, double[][] expectedResultSet, KObject currentInferObject) {
 
             }
 
             @Override
-            public double[] infer(double[] features, KObject origin, KMetaDependencies meta) {
+            public double[] infer(double[] features, KObject currentInferObject) {
                 return new double[0];
             }
         });

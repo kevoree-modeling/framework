@@ -3,7 +3,6 @@ package org.kevoree.modeling.infer.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.util.maths.Distribution;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
@@ -19,7 +18,7 @@ public class GaussianClassification implements KInferAlg {
     private static int SUMSQUARE = 3;
     //to keep updated
     private static int NUMOFFIELDS = 4;
-    
+
     private int maxOutput=3;
 
 
@@ -57,51 +56,54 @@ public class GaussianClassification implements KInferAlg {
     }
 
     @Override
-    public void train(double[][] trainingSet, double[] expectedResultSet, KObject origin, KMetaDependencies meta) {
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
+    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin){
+    KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.metaClass().dependencies().index(), false, origin.metaClass(), null);
 
         //Create initial segment if empty
-        if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
-            ks.extendInfer(meta.index(),maxOutput*(meta.origin().inputs().length*NUMOFFIELDS+1),meta.origin());
+        if (ks.getInferSize(origin.metaClass().dependencies().index(), origin.metaClass()) == 0) {
+            ks.extendInfer(origin.metaClass().dependencies().index(),maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),origin.metaClass());
         }
 
-        Array1D state = new Array1D(maxOutput*(meta.origin().inputs().length*NUMOFFIELDS+1),0,meta.index(),ks,meta.origin());
+        Array1D state = new Array1D(maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
 
         //update the state
         for(int i=0;i<trainingSet.length;i++) {
-            int output = (int) expectedResultSet[i];
-            for (int j = 0; j < meta.origin().inputs().length; j++) {
+            int output = (int) expectedResultSet[i][0];
+            for (int j = 0; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
-                if (state.get(getCounter(output, meta)) == 0) {
-                    state.set(getIndex(j, output, MIN, meta), trainingSet[i][j]);
-                    state.set(getIndex(j,output,MAX, meta), trainingSet[i][j]);
-                    state.set(getIndex(j,output,SUM, meta), trainingSet[i][j]);
-                    state.set(getIndex(j,output, SUMSQUARE, meta), trainingSet[i][j] * trainingSet[i][j]);
+                if (state.get(getCounter(output, origin.metaClass().dependencies())) == 0) {
+                    state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j,output,MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j,output,SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j,output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
                 } else {
-                    if (trainingSet[i][j] < state.get(getIndex(j, output, MIN, meta))) {
-                        state.set(getIndex(j,output,MIN, meta), trainingSet[i][j]);
+                    if (trainingSet[i][j] < state.get(getIndex(j, output, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j,output,MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
                     }
-                    if (trainingSet[i][j] > state.get(getIndex(j, output, MAX, meta))) {
-                        state.set(getIndex(j,output,MAX, meta), trainingSet[i][j]);
+                    if (trainingSet[i][j] > state.get(getIndex(j, output, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j,output,MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
                     }
-                    state.add(getIndex(j,output,SUM, meta) , trainingSet[i][j]);
-                    state.add(getIndex(j,output, SUMSQUARE, meta) , trainingSet[i][j] * trainingSet[i][j]);
+                    state.add(getIndex(j,output,SUM, origin.metaClass().dependencies()) , trainingSet[i][j]);
+                    state.add(getIndex(j,output, SUMSQUARE, origin.metaClass().dependencies()) , trainingSet[i][j] * trainingSet[i][j]);
                 }
             }
             //Global counter
-            state.add(getCounter(output, meta),1);
+            state.add(getCounter(output, origin.metaClass().dependencies()),1);
         }
     }
 
+
     @Override
-    public double[] infer(double[] features, KObject origin, KMetaDependencies meta) {
+    public double[] infer(double[] features, KObject origin) {
+        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.metaClass().dependencies().index(), false, origin.metaClass(), null);
+        Array1D state = new Array1D(maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
 
         double[] result = new double[1];
         double maxprob=0;
         double prob=0;
 
         for(int output=0; output<maxOutput;output++){
-            prob=getProba(features,output,origin,meta);
+            prob=getProba(features,output,state,origin.metaClass().dependencies());
             if(prob>maxprob){
                 maxprob=prob;
                 result[0]=output;
@@ -110,9 +112,7 @@ public class GaussianClassification implements KInferAlg {
         return result;
     }
 
-    public double getProba (double[] features, int output, KObject origin, KMetaDependencies meta){
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
-        Array1D state = new Array1D(maxOutput*(meta.origin().inputs().length*NUMOFFIELDS+1),0,meta.index(),ks,meta.origin());
+    public double getProba (double[] features, int output,  Array1D state, KMetaDependencies meta){
         double prob=0;
         double[] avg =getAvg(output, state, meta);
         double[] variance =getVariance(output,state,avg, meta);
@@ -120,10 +120,10 @@ public class GaussianClassification implements KInferAlg {
         return prob;
     }
 
-    public double[] getAllProba (double[] features, KObject origin, KMetaDependencies meta){
+    public double[] getAllProba (double[] features,  Array1D state, KMetaDependencies meta){
         double[] results = new double[maxOutput];
         for(int i=0;i<maxOutput;i++){
-            results[i]=getProba(features,i,origin,meta);
+            results[i]=getProba(features,i,state,meta);
         }
         return results;
     }

@@ -20,23 +20,21 @@ public class StatInferAlg implements KInferAlg {
 
 
 
-
-
     @Override
-    public void train(double[][] trainingSet, double[] expectedResultSet, KObject origin, KMetaDependencies meta) {
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
+    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin) {
+      KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.metaClass().index(), false,origin.metaClass(), null);
 
         //Create initial segment if empty
-        if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
-            ks.extendInfer(meta.index(), NUMOFFIELDS *trainingSet[0].length+1,meta.origin());
+        if (ks.getInferSize(origin.metaClass().index(), origin.metaClass()) == 0) {
+            ks.extendInfer(origin.metaClass().index(), NUMOFFIELDS *trainingSet[0].length+1,origin.metaClass());
         }
 
-        Array1D state = new Array1D(NUMOFFIELDS *trainingSet[0].length+1,0,meta.index(),ks,meta.origin());
+        Array1D state = new Array1D(NUMOFFIELDS *trainingSet[0].length+1,0,origin.metaClass().index(),ks,origin.metaClass());
 
 
         //update the state
         for(int i=0;i<trainingSet.length;i++){
-            for(int j=0; j<meta.origin().inputs().length;j++){
+            for(int j=0; j<origin.metaClass().inputs().length;j++){
                 //If this is the first datapoint
                 if(state.get(NUMOFFIELDS *trainingSet[0].length)==0){
                     state.set(MIN+j* NUMOFFIELDS,trainingSet[i][j]);
@@ -57,51 +55,53 @@ public class StatInferAlg implements KInferAlg {
                 }
             }
             //Global counter
-            state.add(NUMOFFIELDS *meta.origin().inputs().length,1);
+            state.add(NUMOFFIELDS *origin.metaClass().inputs().length,1);
         }
     }
+
 
 
 
     @Override
-    public double[] infer(double[] features, KObject origin, KMetaDependencies meta) {
-        return getAvgAll(origin,meta);
+    public double[] infer(double[] features, KObject origin) {
+        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.metaClass().index(), false,origin.metaClass(), null);
+
+        return getAvgAll(origin,ks,origin.metaClass().dependencies());
     }
 
-    public double[] getAvgAll(KObject origin, KMetaDependencies meta){
+    public double[] getAvgAll(KObject origin, KMemorySegment ks, KMetaDependencies meta){
         double[] result = new double[meta.origin().inputs().length];
         for(int i=0; i<meta.origin().inputs().length;i++){
-            result[i]=getAvg(i,origin,meta);
+            result[i]=getAvg(i,origin,ks,meta);
         }
         return result;
     }
 
-    public double[] getMinAll(KObject origin, KMetaDependencies meta){
+    public double[] getMinAll(KObject origin, KMemorySegment ks, KMetaDependencies meta){
         double[] result = new double[meta.origin().inputs().length];
         for(int i=0; i<meta.origin().inputs().length;i++){
-            result[i]=getMin(i, origin, meta);
+            result[i]=getMin(i, origin, ks, meta);
         }
         return result;
     }
 
-    public double[] getMaxAll(KObject origin, KMetaDependencies meta){
+    public double[] getMaxAll(KObject origin, KMemorySegment ks, KMetaDependencies meta){
         double[] result = new double[meta.origin().inputs().length];
         for(int i=0; i<meta.origin().inputs().length;i++){
-            result[i]=getMax(i, origin, meta);
+            result[i]=getMax(i, origin, ks, meta);
         }
         return result;
     }
 
-    public double[] getVarianceAll(KObject origin, KMetaDependencies meta, double[] avgs){
+    public double[] getVarianceAll(KObject origin,  KMemorySegment ks, KMetaDependencies meta, double[] avgs){
         double[] result = new double[meta.origin().inputs().length];
         for(int i=0; i<meta.origin().inputs().length;i++){
-            result[i]=getVariance(i, origin, meta, avgs[i]);
+            result[i]=getVariance(i, origin, ks, meta, avgs[i]);
         }
         return result;
     }
 
-    public double getAvg(int featureNum, KObject origin, KMetaDependencies meta){
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
+    public double getAvg(int featureNum, KObject origin,  KMemorySegment ks, KMetaDependencies meta){
 
         if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
             return 0;
@@ -114,10 +114,8 @@ public class StatInferAlg implements KInferAlg {
         return ks.getInferElem(meta.index(),featureNum* NUMOFFIELDS +SUM,meta.origin())/count;
     }
 
-    public double getMin(int featureNum, KObject origin, KMetaDependencies meta){
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
-
-        if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
+    public double getMin(int featureNum, KObject origin, KMemorySegment ks, KMetaDependencies meta){
+       if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
             return 0;
         }
         double count=ks.getInferElem(meta.index(),ks.getInferSize(meta.index(),meta.origin())-1,meta.origin());
@@ -128,8 +126,7 @@ public class StatInferAlg implements KInferAlg {
         return ks.getInferElem(meta.index(),featureNum* NUMOFFIELDS +MIN,meta.origin());
     }
 
-    public double getMax(int featureNum, KObject origin, KMetaDependencies meta){
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
+    public double getMax(int featureNum, KObject origin, KMemorySegment ks, KMetaDependencies meta){
 
         if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
             return 0;
@@ -142,9 +139,7 @@ public class StatInferAlg implements KInferAlg {
         return ks.getInferElem(meta.index(),featureNum* NUMOFFIELDS +MAX,meta.origin());
     }
 
-    public double getVariance(int featureNum, KObject origin, KMetaDependencies meta, double avg){
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), meta.index(), false, meta.origin(), null);
-
+    public double getVariance(int featureNum, KObject origin, KMemorySegment ks, KMetaDependencies meta, double avg){
         if (ks.getInferSize(meta.index(), meta.origin()) == 0) {
             return 0;
         }
