@@ -7,6 +7,6 @@ public interface KInferAlg {
 
     void train(double[][] trainingSet, double[][] expectedResultSet, KObject currentInferObject);
 
-    double[] infer(double[][] features, KObject currentInferObject);
+    double[][] infer(double[][] features, KObject currentInferObject);
 
 }
