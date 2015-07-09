@@ -53,25 +53,7 @@ public class TscRunner {
         tsc(tscPath, params.toArray(new String[params.size()]));
     }
 
-    private boolean testNativeNode() {
-        String[] params = new String[2];
-        if (getOS().equals(OSType.Windows)) {
-            params[0] = "node.exe";
-        } else {
-            params[0] = "node";
-        }
-        params[1] = "-v";
-        ProcessBuilder pb = new ProcessBuilder(params);
-        pb.redirectError();
-        pb.redirectOutput();
-        try {
-            int res = pb.start().waitFor();
-            return res == 0;
-        } catch (InterruptedException e) {
-        } catch (IOException e) {
-        }
-        return false;
-    }
+
 
     private void tsc(String tscPath, String... args) throws Exception {
         if (testNativeNode()) {
@@ -118,28 +100,31 @@ public class TscRunner {
                 }
             }
         }
+    }
 
-        /*
-        if (res != 0) {
-            System.err.println("NodeJS not found, try Java embedded version ...");
-            ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-            engine.eval(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("node.js")));
-            StringBuilder param = new StringBuilder();
-            param.append("process.argv = [\"node\",\"node\"");
-            for (String p : args) {
-                param.append(",\"" + p + "\"");
-            }
-            param.append("];\n");
-            engine.eval(param.toString());
-            engine.eval(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("tsc.js")));
-        }*/
+    private boolean testNativeNode() {
+        String[] params = new String[2];
+        if (getOS().equals(OSType.Windows)) {
+            params[0] = "node.exe";
+        } else {
+            params[0] = "node";
+        }
+        params[1] = "-v";
+        ProcessBuilder pb = new ProcessBuilder(params);
+        pb.redirectError();
+        pb.redirectOutput();
+        try {
+            int res = pb.start().waitFor();
+            return res == 0;
+        } catch (InterruptedException e) {
+        } catch (IOException e) {
+        }
+        return false;
     }
 
     public enum OSType {
         Windows, MacOS, Linux, Other
     }
-
-    ;
 
     public static OSType getOS() {
         String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
