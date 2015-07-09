@@ -200,6 +200,9 @@ public class GaussianClassificationTest {
             @Override
             public void on(Object o) {
 
+                KObjectInfer gaussianProfile = (KObjectInfer) model.createByName("GaussianProfile", 0, 0);
+
+
                 for(int i=0;i<irisdataset.length;i+=5) {
 
                     KObject irisInstance = model.createByName("Iris", 0, 0);
@@ -207,10 +210,8 @@ public class GaussianClassificationTest {
                     irisInstance.setByName("sepalWidth", irisdataset[i+1]);
                     irisInstance.setByName("petalLength",irisdataset[i+2]);
                     irisInstance.setByName("petalWidth", irisdataset[i+3]);
-
                     irisInstance.setByName("type", irisdataset[i+4]);
 
-                    KObjectInfer gaussianProfile = (KObjectInfer) model.createByName("GaussianProfile", 0, 0);
                     gaussianProfile.train(new KObject[]{irisInstance}, new Object[]{irisdataset[i+4]}, null);
                 }
             }
