@@ -4,6 +4,7 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
+import org.kevoree.modeling.traversal.KTraversalIndexResolver;
 
 public class TraverseIndexAction implements KTraversalAction {
 
@@ -35,6 +36,17 @@ public class TraverseIndexAction implements KTraversalAction {
                         _next.execute(context);
                     }
                 });
+            }
+        } else {
+            KTraversalIndexResolver resolver = context.indexResolver();
+            if(resolver != null){
+                KObject[] resolved = resolver.resolve(this._indexName);
+                if(resolved != null){
+                    context.setInputObjects(resolved);
+                    _next.execute(context);
+                }
+            } else {
+                _next.execute(context);
             }
         }
     }
