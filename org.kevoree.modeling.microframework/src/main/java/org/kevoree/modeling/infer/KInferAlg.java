@@ -5,8 +5,8 @@ import org.kevoree.modeling.meta.KMetaDependencies;
 
 public interface KInferAlg {
 
-    void train(double[][] trainingSet, double[] expectedResultSet, KObject currentInferObject, KMetaDependencies meta);
+    void train(double[][] trainingSet, double[][] expectedResultSet, KObject currentInferObject);
 
-    double[] infer(double[] features, KObject origin, KMetaDependencies meta);
+    double[] infer(double[] features, KObject currentInferObject);
 
 }

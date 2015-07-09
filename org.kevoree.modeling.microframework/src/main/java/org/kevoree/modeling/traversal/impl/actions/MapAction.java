@@ -1,19 +1,15 @@
 package org.kevoree.modeling.traversal.impl.actions;
 
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
 
 public class MapAction implements KTraversalAction {
 
-    private KCallback<Object[]> _finalCallback;
 
     private KMetaAttribute _attribute;
 
-    public MapAction(KMetaAttribute p_attribute, KCallback<Object[]> p_callback) {
-        this._finalCallback = p_callback;
+    public MapAction(KMetaAttribute p_attribute) {
         this._attribute = p_attribute;
     }
 
@@ -44,6 +40,8 @@ public class MapAction implements KTraversalAction {
                 nbInserted++;
             }
         }
-        _finalCallback.on(trimmed);
+        if(context.finalCallback() != null){
+            context.finalCallback().on(trimmed);
+        }
     }
 }

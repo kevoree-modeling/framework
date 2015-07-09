@@ -8,6 +8,6 @@ public interface KQueryEngine {
 
     void eval(String query, KObject[] origins, KCallback<Object[]> callback);
 
-    KTraversal buildTraversal(String query, KCallback<Object[]> callback);
+    KTraversal buildTraversal(String query);
 
 }

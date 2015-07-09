@@ -33,7 +33,7 @@ public interface KTraversal {
 
     KTraversal traverseIndex(String indexName);
 
-    void exec(KObject[] origins, KTraversalIndexResolver resolver);
+    void exec(KObject[] origins, KTraversalIndexResolver resolver, KCallback<Object[]> callback);
 
 }
 

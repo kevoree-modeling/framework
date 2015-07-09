@@ -2,6 +2,8 @@ package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.meta.KMetaInferInput;
 import org.kevoree.modeling.meta.MetaType;
+import org.kevoree.modeling.traversal.KTraversal;
+import org.kevoree.modeling.traversal.query.impl.QueryEngine;
 
 public class MetaInferInput implements KMetaInferInput {
 
@@ -18,8 +20,24 @@ public class MetaInferInput implements KMetaInferInput {
     }
 
     @Override
-    public String extractor() {
+    public String extractorQuery() {
         return this._extractor;
+    }
+
+    private KTraversal _cachedTraversal;
+
+    @Override
+    public KTraversal extractor() {
+        if(_cachedTraversal != null){
+            return this._cachedTraversal;
+        } else {
+            return cacheTraversal();
+        }
+    }
+
+    private synchronized KTraversal cacheTraversal(){
+        this._cachedTraversal = QueryEngine.getINSTANCE().buildTraversal(this._extractor);
+        return this._cachedTraversal;
     }
 
     @Override

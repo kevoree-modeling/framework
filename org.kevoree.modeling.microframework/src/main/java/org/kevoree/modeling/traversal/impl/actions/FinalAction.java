@@ -20,6 +20,8 @@ public class FinalAction implements KTraversalAction {
 
     @Override
     public void execute(KTraversalActionContext context) {
+        context.finalCallback().on(context.inputObjects());
+
         _finalCallback.on(context.inputObjects());
     }
 }

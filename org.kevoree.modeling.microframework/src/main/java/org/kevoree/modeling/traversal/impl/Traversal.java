@@ -100,36 +100,41 @@ public class Traversal implements KTraversal {
         _terminated = true;
         //execute the first element of the chain of actions
         if (_initObjs != null) {
-            _initAction.execute(new TraversalContext(_initObjs, null));
+            _initAction.execute(new TraversalContext(_initObjs, null, new KCallback<Object[]>() {
+                @Override
+                public void on(Object[] objects) {
+                    cb.on((KObject[]) objects);
+                }
+            }));
         }
     }
 
     @Override
     public void eval(String p_expression, KCallback<Object[]> callback) {
         //set the terminal leaf action
-        internal_chain_action(new MathExpressionAction(p_expression, callback));
+        internal_chain_action(new MathExpressionAction(p_expression));
         _terminated = true;
         //execute the first element of the chain of actions
         if (_initObjs != null) {
-            _initAction.execute(new TraversalContext(_initObjs, null));
+            _initAction.execute(new TraversalContext(_initObjs, null, callback));
         }
     }
 
     @Override
     public void map(KMetaAttribute attribute, KCallback<Object[]> cb) {
         //set the terminal leaf action
-        internal_chain_action(new MapAction(attribute, cb));
+        internal_chain_action(new MapAction(attribute));
         _terminated = true;
         //execute the first element of the chain of actions
         if (_initObjs != null) {
-            _initAction.execute(new TraversalContext(_initObjs, null));
+            _initAction.execute(new TraversalContext(_initObjs, null, cb));
         }
     }
 
     @Override
-    public void exec(KObject[] origins, KTraversalIndexResolver resolver) {
+    public void exec(KObject[] origins, KTraversalIndexResolver resolver, KCallback<Object[]> callback) {
         if (_terminated && this._initObjs == null) {
-            _initAction.execute(new TraversalContext(origins, resolver));
+            _initAction.execute(new TraversalContext(origins, resolver, callback));
         }
     }
 

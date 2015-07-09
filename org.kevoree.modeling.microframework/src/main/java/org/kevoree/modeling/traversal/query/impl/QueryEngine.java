@@ -25,12 +25,12 @@ public class QueryEngine implements KQueryEngine {
     @Override
     public void eval(String query, KObject[] origins, KCallback<Object[]> callback) {
         if (callback != null) {
-            buildTraversal(query, callback).exec(origins, null);
+            buildTraversal(query).exec(origins, null,callback);
         }
     }
 
     @Override
-    public KTraversal buildTraversal(String query, KCallback<Object[]> callback) {
+    public KTraversal buildTraversal(String query) {
         if (query == null || query.length() == 0) {
             return null;
         } else {
@@ -83,7 +83,7 @@ public class QueryEngine implements KQueryEngine {
                         if (relationName.startsWith("@")) {
                             traversal = traversal.traverseIndex(relationName.substring(1));
                         } else if (relationName.startsWith("=")) {
-                            traversal.eval(relationName.substring(1), callback);
+                            traversal.eval(relationName.substring(1), null);
                             endEval = true;
                         } else if (relationName.startsWith(">>")) {
                             traversal = traversal.traverseQuery(relationName.substring(2));

@@ -1,7 +1,5 @@
 package org.kevoree.modeling.traversal.impl.actions;
 
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
@@ -10,14 +8,11 @@ import org.kevoree.modeling.util.maths.expression.impl.MathExpressionEngine;
 
 public class MathExpressionAction implements KTraversalAction {
 
-    private KCallback<Object[]> _finalCallback;
-
     private String _expression;
 
     private KMathExpressionEngine _engine;
 
-    public MathExpressionAction(String p_expression, KCallback<Object[]> p_callback) {
-        this._finalCallback = p_callback;
+    public MathExpressionAction(String p_expression) {
         this._expression = p_expression;
         this._engine = new MathExpressionEngine();
     }
@@ -59,6 +54,8 @@ public class MathExpressionAction implements KTraversalAction {
                 selected[finalI] = _engine.eval(this._expression);
             }
         }
-        _finalCallback.on(selected);
+        if(context.finalCallback() != null){
+            context.finalCallback().on(selected);
+        }
     }
 }
