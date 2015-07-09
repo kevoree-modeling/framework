@@ -1,6 +1,6 @@
-package org.kevoree.modeling.infer;
+package org.kevoree.modeling.util.maths.structure;
 
-public interface KInferArray3D {
+public interface KArray3D {
 
     int nbRaws();
 
