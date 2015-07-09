@@ -11,6 +11,7 @@ import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
+import org.kevoree.modeling.util.maths.structure.KArray3D;
 
 public class Array3DTest {
 
@@ -33,27 +34,32 @@ public class Array3DTest {
         segment.init(null, mm);
         int nbLines = 5;
         int nbColumn = 3;
+        int nbDeep = 2;
         //allocate for 5 elem
-        segment.extendInfer(mc.dependencies().index(), nbLines * nbColumn, mc);
+        segment.extendInfer(mc.dependencies().index(), nbLines * nbColumn * nbDeep, mc);
         //attach a wrapper
-        KArray2D array = new Array2D(nbLines, nbColumn, 0, mc.dependencies().index(), segment, mc);
+        KArray3D array = new Array3D(nbLines, nbColumn, nbDeep, 0, mc.dependencies().index(), segment, mc);
         //fill it
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
-                array.set(i, j, i * j);
+                for (int h = 0; h < nbDeep; h++) {
+                    array.set(i, j, h, (i + j + h));
+                }
             }
         }
         //test content
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
-                Assert.assertTrue(array.get(i,j) == i*j);
+                for (int h = 0; h < nbDeep; h++) {
+                    Assert.assertTrue(array.get(i, j, h) == (i + j + h));
+                }
             }
         }
 
         //test raw array
-        Assert.assertTrue(nbLines * nbColumn == segment.getInferSize(mc.dependencies().index(), mc));
+        Assert.assertTrue(nbLines * nbColumn * nbDeep == segment.getInferSize(mc.dependencies().index(), mc));
         double[] copyArray = segment.getInfer(mc.dependencies().index(), mc);
-        Assert.assertTrue(nbLines * nbColumn == copyArray.length);
+        Assert.assertTrue(nbLines * nbColumn * nbDeep == copyArray.length);
     }
 
 }
