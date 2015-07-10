@@ -45,7 +45,7 @@ public class Array3DTest {
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
                 for (int h = 0; h < nbDeep; h++) {
-                    array.set(i, j, h, (i+3*j+7*h));
+                    array.set(i, j, h, (i + 3 * j + 7 * h));
                 }
             }
         }
@@ -53,11 +53,10 @@ public class Array3DTest {
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
                 for (int h = 0; h < nbDeep; h++) {
-                    Assert.assertTrue(array.get(i, j, h) == (i+3*j+7*h));
+                    Assert.assertTrue(array.get(i, j, h) == (i + 3 * j + 7 * h));
                 }
             }
         }
-
         //test raw array
         Assert.assertTrue(nbLines * nbColumn * nbDeep == segment.getInferSize(mc.dependencies().index(), mc));
         double[] copyArray = segment.getInfer(mc.dependencies().index(), mc);
