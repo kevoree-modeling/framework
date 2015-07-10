@@ -11,8 +11,9 @@ import org.kevoree.modeling.meta.impl.MetaModel;
 
 public class TemplateTest {
 
-    @Test
-    public void test() {
+    //@Test
+    public static void main(String[] args) {
+        
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
