@@ -11,8 +11,8 @@ import java.util.Random;
 public class LinearRegressionAlg implements KInferAlg {
 
     //TODO meta-learning parameters to be passed from K-Infer somehow
-    private double alpha=0.001; //learning rate
-    private double gamma =0.001; //regularization parameter
+    private double alpha=0.005; //learning rate
+    private double gamma =0.000; //regularization parameter
     private int iterations=100; //iterations
 
     private static Random rand= new Random();
@@ -36,7 +36,7 @@ public class LinearRegressionAlg implements KInferAlg {
                 double error=-alpha*(h-expectedResultSet[row][0]);
 
                 for (int feature = 0; feature < origin.metaClass().inputs().length; feature++) {
-                    state.set(feature, state.get(feature) * (1 - alpha * gamma) + error * trainingSet[i][feature]);
+                    state.set(feature, state.get(feature) * (1 - alpha * gamma) + error * trainingSet[row][feature]);
                 }
                 state.add(origin.metaClass().inputs().length,error);
             }
