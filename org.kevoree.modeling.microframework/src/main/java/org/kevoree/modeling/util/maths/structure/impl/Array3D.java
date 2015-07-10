@@ -47,12 +47,12 @@ public class Array3D implements KArray3D {
 
     @Override
     public double get(int p_rawIndex, int p_columnIndex, int p_deepIndex) {
-        return this._segment.getInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns * this._nbDeeps) + p_columnIndex + p_deepIndex, this._metaClass);
+        return this._segment.getInferElem(this._segmentIndex, this._offset + (p_deepIndex * this._nbColumns * this._nbRaws) + p_columnIndex* this._nbRaws  + p_rawIndex, this._metaClass);
     }
 
     @Override
     public double set(int p_rawIndex, int p_columnIndex, int p_deepIndex, double p_value) {
-        this._segment.setInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns * this._nbDeeps) + p_columnIndex + p_deepIndex, p_value, this._metaClass);
+        this._segment.setInferElem(this._segmentIndex, this._offset + (p_deepIndex * this._nbColumns * this._nbRaws) + p_columnIndex* this._nbRaws  + p_rawIndex, p_value, this._metaClass);
         return p_value;
     }
 
