@@ -25,4 +25,12 @@ public class AbstractDataType implements KType {
         return _isEnum;
     }
 
+    /*
+    public static void main(String[] args) {
+
+
+
+        System.err.println(Long.toHexString(Long.MAX_VALUE));
+    }*/
+
 }

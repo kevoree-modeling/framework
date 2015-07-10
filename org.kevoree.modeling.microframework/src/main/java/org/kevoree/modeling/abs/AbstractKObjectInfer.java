@@ -132,6 +132,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                 //collect output
                 double[][] extractedInputs = new double[p_dependencies.length][_metaClass.inputs().length];
                 for (int i = 0; i < p_dependencies.length; i++) {
+                    extractedInputs[i] = new double[_metaClass.inputs().length];
                     for (int j = 0; j < _metaClass.inputs().length; j++) {
                         try {
                             Object[] extracted = (Object[]) waiter.getResult(i + "," + j);
@@ -149,6 +150,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                 } else {
                     Object[][] result = new Object[extractedOutputs.length][_metaClass.outputs().length];
                     for (int i = 0; i < extractedOutputs.length; i++) {
+                        result[i] = new Object[_metaClass.outputs().length];
                         for (int j = 0; j < _metaClass.outputs().length; j++) {
                             result[i][j] = internalReverseOutput(extractedOutputs[i][j], _metaClass.outputs()[j]);
                         }
