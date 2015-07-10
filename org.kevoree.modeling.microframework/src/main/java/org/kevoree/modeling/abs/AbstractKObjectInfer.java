@@ -166,7 +166,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     }
 
     private double internalConvertOutput(Object output, KMetaInferOutput metaOutput) {
-        if(output == null){
+        if (output == null) {
             return 0;
         }
         if (metaOutput.type() == KPrimitiveTypes.BOOL) {
