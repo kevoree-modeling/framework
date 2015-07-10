@@ -37,7 +37,7 @@ public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name
 #end
 
     private Meta${classDeclaration.name}() {
-        super("${classDeclaration.fqn}", ${classDeclaration.index});
+        super("${classDeclaration.fqn}", ${classDeclaration.index}, null);
         org.kevoree.modeling.meta.KMeta[] temp_all = new org.kevoree.modeling.meta.KMeta[${classDeclaration.attributes.size()}+${classDeclaration.references.size()}+${classDeclaration.operations.size()}];
 #set($i = 0)
 #foreach($attribute in $classDeclaration.attributes)
