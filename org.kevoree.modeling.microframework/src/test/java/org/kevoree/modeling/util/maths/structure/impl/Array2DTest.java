@@ -40,16 +40,24 @@ public class Array2DTest {
         segment.extendInfer(mc.dependencies().index(), nbLines * nbColumn, mc);
         //attach a wrapper
         KArray2D array = new Array2D(nbLines, nbColumn, 0, mc.dependencies().index(), segment, mc);
+
+        //fill it
+        int count=0;
+
         //fill it
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
-                array.set(i, j, i * j);
+                array.set(i, j, count);
+                count++;
             }
         }
         //test content
+        count=0;
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
-                Assert.assertTrue(array.get(i,j) == i*j);
+                Assert.assertTrue(array.get(i,j) == count);
+                Assert.assertTrue(segment.getInferElem(mc.dependencies().index(),count,mc)==count);
+                count++;
             }
         }
 

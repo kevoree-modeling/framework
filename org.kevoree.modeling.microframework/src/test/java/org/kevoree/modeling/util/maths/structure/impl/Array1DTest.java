@@ -39,12 +39,18 @@ public class Array1DTest {
         //attach a wrapper
         KArray1D array = new Array1D(arraySize, 0, mc.dependencies().index(), segment, mc);
         //fill it
+        int count=0;
         for (int i = 0; i < arraySize; i++) {
-            array.set(i, i);
+            array.set(i, count);
+            count++;
         }
         //test content
+
+        count=0;
         for (int i = 0; i < arraySize; i++) {
-            Assert.assertTrue(array.get(i) == i);
+            Assert.assertTrue(array.get(i) == count);
+            Assert.assertTrue(segment.getInferElem(mc.dependencies().index(),count,mc)==count);
+            count++;
         }
         //test raw array
         Assert.assertTrue(arraySize == segment.getInferSize(mc.dependencies().index(), mc));

@@ -42,18 +42,23 @@ public class Array3DTest {
         //attach a wrapper
         KArray3D array = new Array3D(nbLines, nbColumn, nbDeep, 0, mc.dependencies().index(), segment, mc);
         //fill it
+        int count=0;
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
                 for (int h = 0; h < nbDeep; h++) {
-                    array.set(i, j, h, (i + 3 * j + 7 * h));
+                    array.set(i, j, h, count);
+                    count++;
                 }
             }
         }
         //test content
+        count=0;
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
                 for (int h = 0; h < nbDeep; h++) {
-                    Assert.assertTrue(array.get(i, j, h) == (i + 3 * j + 7 * h));
+                    Assert.assertTrue(array.get(i, j, h) == count);
+                    Assert.assertTrue(segment.getInferElem(mc.dependencies().index(), count, mc)==count);
+                    count++;
                 }
             }
         }
