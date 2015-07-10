@@ -318,7 +318,7 @@ public class MemoryManager implements KMemoryManager {
     @Override
     public KMemorySegment segment(long universe, long requestedTime, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace) {
         long time = requestedTime;
-        if(metaClass.temporalResolution() != 1){
+        if (metaClass.temporalResolution() != 1) {
             time = time - (time % metaClass.temporalResolution());
         }
         KMemorySegment currentEntry = (KMemorySegment) _cache.get(universe, time, uuid);
@@ -427,13 +427,12 @@ public class MemoryManager implements KMemoryManager {
 
     @Override
     public void lookupAllobjects(long universe, long time, long[] uuids, final KCallback<KObject[]> callback) {
-        this._scheduler.dispatch(new LookupAllRunnable(universe, time, uuids, callback, this));
+        this._scheduler.dispatch(new LookupAllObjectsRunnable(universe, time, uuids, callback, this));
     }
 
     @Override
-    public void lookupAlltimes(long universe, long[] time, long uuid, KCallback<KObject[]> callback) {
-        throw new RuntimeException("Not Implemented Yet !");
-        //this._scheduler.dispatch(new LookupAllRunnable(universe,time, uuids, callback, this));
+    public void lookupAlltimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
+        this._scheduler.dispatch(new LookupAllTimesRunnable(universe, times, uuid, callback, this));
     }
 
     @Override

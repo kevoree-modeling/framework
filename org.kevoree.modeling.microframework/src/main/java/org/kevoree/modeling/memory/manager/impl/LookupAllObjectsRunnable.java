@@ -10,7 +10,7 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 
-public class LookupAllRunnable implements Runnable {
+public class LookupAllObjectsRunnable implements Runnable {
 
     private long _universe;
     private long _time;
@@ -19,7 +19,7 @@ public class LookupAllRunnable implements Runnable {
     private KCallback<KObject[]> _callback;
     private MemoryManager _store;
 
-    public LookupAllRunnable(long p_universe, long p_time, long[] p_keys, KCallback<KObject[]> p_callback, MemoryManager p_store) {
+    public LookupAllObjectsRunnable(long p_universe, long p_time, long[] p_keys, KCallback<KObject[]> p_callback, MemoryManager p_store) {
         this._universe = p_universe;
         this._time = p_time;
 

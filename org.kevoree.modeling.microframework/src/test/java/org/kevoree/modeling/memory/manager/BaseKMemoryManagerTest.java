@@ -38,6 +38,16 @@ public class BaseKMemoryManagerTest {
                     @Override
                     public void on(long[] times) {
                         Assert.assertEquals(times.length, 10);
+                        origin.manager().lookupAlltimes(origin.universe(), times, origin.uuid(), new KCallback<KObject[]>() {
+                            @Override
+                            public void on(KObject[] kObjects) {
+                                for(int i=0;i<kObjects.length;i++){
+                                    long lastVal = times[i]+9;
+                                    Assert.assertEquals("{\"universe\":0,\"time\":" + times[i] + ",\"uuid\":1,\"data\":{\"name\":\"Sensor#1\",\"value\":" + lastVal + "}}", kObjects[i].toJSON());
+                                }
+                            }
+                        });
+
                     }
                 });
             }
