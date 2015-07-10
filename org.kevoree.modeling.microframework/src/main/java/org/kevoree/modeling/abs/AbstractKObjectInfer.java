@@ -104,13 +104,13 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                         e.printStackTrace();
                     }
                 }
-                double[][] extracted = _metaClass.inferAlg().infer(extractedInputs, selfObject);
-                if (extracted[0].length != _metaClass.outputs().length) {
+                double[][] extractedOutputs = _metaClass.inferAlg().infer(extractedInputs, selfObject);
+                if (extractedOutputs[0].length != _metaClass.outputs().length) {
                     callback.on(null);
                 } else {
-                    Object[] result = new Object[extracted.length];
-                    for (int i = 0; i < extracted.length; i++) {
-                        result[i] = internalReverseOutput(extracted[0][i], _metaClass.outputs()[i]);
+                    Object[] result = new Object[extractedOutputs.length];
+                    for (int i = 0; i < extractedOutputs.length; i++) {
+                        result[i] = internalReverseOutput(extractedOutputs[0][i], _metaClass.outputs()[i]);
                     }
                     callback.on(result);
                 }
