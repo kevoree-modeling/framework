@@ -127,10 +127,12 @@ public class GaussianClassificationAlg implements KInferAlg {
 
 
         double[][] result = new double[features.length][1];
-        double maxprob=0;
-        double prob=0;
+
+
 
         for(int j=0;j<features.length;j++) {
+            double maxprob=0;
+            double prob=0;
             for (int output = 0; output < maxOutput; output++) {
                 prob = getProba(features[j], output, state, origin.metaClass().dependencies());
                 if (prob > maxprob) {
