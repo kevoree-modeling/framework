@@ -7,7 +7,7 @@
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <!--<script src="./java.js"></script>-->
     <script src="./org.kevoree.modeling.test.datastore-all.js"></script>
-    <script src="./org.kevoree.modeling.database.websocket.WebSocket.js"></script>
+    <script src="./org.kevoree.modeling.drivers.websocket.js"></script>
 </head>
 <body>
 
@@ -17,18 +17,18 @@
 
 <script>
 
-    var dataBaseConnection = new org.kevoree.modeling.database.websocket.WebSocketClient("ws://localhost:23664");
+    var dataBaseConnection = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://localhost:23664");
     var geometryModel  = new geometry.GeometryModel();
     geometryModel.setContentDeliveryDriver(dataBaseConnection);
 
     console.log("Connecting");
 
-    geometryModel.connect().then(function(err){
+    geometryModel.connect(function(err){
         console.log("Connected:", err);
         if(err == null) {
             var dimension = geometryModel.universe(0);
             var view = dimension.time(0);
-            view.getRoot().then(function(root){
+            view.getRoot(function(root){
                 if(root == null) {
                     console.error("No root found.", root)
                 } else {
@@ -57,7 +57,7 @@
     function displayShapes(lib) {
 
         var shapesContainer = $('#shapesContainer');
-        lib.getShapes().then(function(shapes){
+        lib.getShapes(function(shapes){
             if(shapes != null) {
                 for(var i = 0; i < shapes.length; i++) {
                     if(shapesContainer.find('div#'+ shapes[i].getName()).length == 0) {
@@ -80,7 +80,7 @@
     function addNewShape() {
         var dimension = geometryModel.universe(0);
         var view = dimension.time(0);
-        view.getRoot().then(function (root) {
+        view.getRoot(function (root) {
             if (root === undefined) {
                 console.error("No root found.", root)
             } else {
@@ -92,7 +92,7 @@
                 newShape.setColor("grey");
                 try {
                     lib.addShapes(newShape);
-                    geometryModel.save().then(function (err) {
+                    geometryModel.save(function (err) {
                         if (err) {
                             console.error(err);
                         }
@@ -107,7 +107,7 @@
     function addNewShapeOperation() {
         var dimension = geometryModel.universe(0);
         var view = dimension.time(0);
-        view.getRoot().then(function (root) {
+        view.getRoot(function (root) {
             if (root === undefined) {
                 console.error("No root found.", root)
             } else {

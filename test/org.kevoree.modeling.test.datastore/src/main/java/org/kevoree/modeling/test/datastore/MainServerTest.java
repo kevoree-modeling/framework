@@ -67,7 +67,7 @@ public class MainServerTest {
                             if (kObject == null) {
                                 Library lib = geoFactory.createLibrary();
                                 KMemorySegment libEntry = lib.manager().segment(lib.universe(), lib.now(), lib.uuid(), false, lib.metaClass(), null);
-                                long[] uuids = (long[]) libEntry.get(MetaLibrary.REF_SHAPES.index(), kObject.metaClass());
+                                long[] uuids = (long[]) libEntry.get(MetaLibrary.REF_SHAPES.index(), lib.metaClass());
                                 geoFactory.setRoot(lib, new KCallback<Throwable>() {
                                     @Override
                                     public void on(Throwable throwable) {
