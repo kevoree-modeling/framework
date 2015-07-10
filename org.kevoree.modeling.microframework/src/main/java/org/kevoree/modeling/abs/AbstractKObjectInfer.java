@@ -35,13 +35,13 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         KObject[][] all_dependencies = new KObject[1][dependencies.length];
         all_dependencies[0] = dependencies;
         //wrap output
-        Object[][] all_expectedOutputs;
+        Object[][] all_expectedOutputs = null;
         if (expectedOutputs != null) {
             all_expectedOutputs = new Object[1][expectedOutputs.length];
             all_expectedOutputs[0] = expectedOutputs;
         }
         //call the trainAll method
-        trainAll(all_dependencies, all_dependencies, callback);
+        trainAll(all_dependencies, all_expectedOutputs, callback);
     }
 
     @Override
@@ -166,20 +166,69 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     }
 
     private double internalConvertOutput(Object output, KMetaInferOutput metaOutput) {
+        if(output == null){
+            return 0;
+        }
         if (metaOutput.type() == KPrimitiveTypes.BOOL) {
             if (output.equals(true)) {
                 return 1.0;
             } else {
                 return 0.0;
             }
-        } else {
-            //TODO implement here all the case study
-            //default case
-            return 0;
         }
+        if (metaOutput.type() == KPrimitiveTypes.DOUBLE) {
+            return (double) output;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.INT) {
+            return (double) output;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.FLOAT) {
+            return (double) output;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.CONTINUOUS) {
+            return (double) output;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.LONG) {
+            return (double) output;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.SHORT) {
+            return (double) output;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.STRING) {
+            throw new RuntimeException("String are not managed yet");
+        }
+        return 0;
     }
 
     private Object internalReverseOutput(double inferred, KMetaInferOutput metaOutput) {
+        if (metaOutput.type() == KPrimitiveTypes.BOOL) {
+            if (inferred >= 0.5) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        if (metaOutput.type() == KPrimitiveTypes.DOUBLE) {
+            return inferred;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.INT) {
+            return (int) inferred;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.FLOAT) {
+            return (float) inferred;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.CONTINUOUS) {
+            return inferred;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.LONG) {
+            return (long) inferred;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.SHORT) {
+            return (short) inferred;
+        }
+        if (metaOutput.type() == KPrimitiveTypes.STRING) {
+            throw new RuntimeException("String are not managed yet");
+        }
         return null;
     }
 

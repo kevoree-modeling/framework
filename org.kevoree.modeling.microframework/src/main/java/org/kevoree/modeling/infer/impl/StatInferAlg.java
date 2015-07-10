@@ -3,12 +3,9 @@ package org.kevoree.modeling.infer.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaDependencies;
-import org.kevoree.modeling.meta.MetaType;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 
-//TODO
 public class StatInferAlg implements KInferAlg {
 
     private static int MIN = 0;
@@ -59,7 +56,7 @@ public class StatInferAlg implements KInferAlg {
     public double[][] infer(double[][] features, KObject origin) {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         double[][] result = new double[1][];
-        result[0]=getAvgAll(ks, origin.metaClass().dependencies());
+        result[0] = getAvgAll(ks, origin.metaClass().dependencies());
         return result;
     }
 
