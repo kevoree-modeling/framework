@@ -25,9 +25,10 @@ public class Array1DTest {
             }
 
             @Override
-            public double[] infer(double[] features, KObject currentInferObject) {
-                return new double[0];
+            public double[][] infer(double[][] features, KObject currentInferObject) {
+                return new double[0][];
             }
+
         });
         KMemorySegment segment = new HeapMemorySegment();
         segment.initMetaClass(mc);
