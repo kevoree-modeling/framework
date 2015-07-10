@@ -37,7 +37,6 @@
                         <configuration>
                             <metaModelFile>metamodel/Geometry.mm</metaModelFile>
                             <js>true</js>
-                            <jsWorkingDir>${project.basedir}/src/main/resources</jsWorkingDir>
                         </configuration>
                     </execution>
                 </executions>
