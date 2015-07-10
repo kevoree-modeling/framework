@@ -41,13 +41,13 @@ public class TscRunner {
                 }
             }
         }
-
-        File targetTSCBIN = new File(target, "tsc.js");
+        File targetTSCBIN = new File(src, "tsc.js");
+/*
+        File targetLIBD = new File(src, "lib.d.ts");
         Files.copy(TscRunner.class.getClassLoader().getResourceAsStream("tsc.js"), targetTSCBIN.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         File targetLIBD = null;
         if (copyLibDTs) {
-            targetLIBD = new File(target, "lib.d.ts");
             Files.copy(TscRunner.class.getClassLoader().getResourceAsStream("tsc/lib.d.ts"), targetLIBD.toPath(), StandardCopyOption.REPLACE_EXISTING);
             boolean founded = false;
             for (String alreadyAdded : paramsCol) {
@@ -58,7 +58,7 @@ public class TscRunner {
             if (!founded) {
                 paramsCol.add(targetLIBD.getAbsolutePath());
             }
-        }
+        }*/
 
         paramsCol.add("--outDir");
         paramsCol.add(target.getAbsolutePath());
@@ -108,12 +108,13 @@ public class TscRunner {
                 if (node != null) {
                     node.stop();
                 }
+                /*
                 if (targetTSCBIN != null) {
                     targetTSCBIN.delete();
                 }
                 if (targetLIBD != null) {
                     targetLIBD.delete();
-                }
+                }*/
             }
         }
     }

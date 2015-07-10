@@ -128,7 +128,7 @@ public class GenModelPlugin extends AbstractMojo {
                 sourceTranslator.translateSources(targetSrcGenDir.getAbsolutePath(), jsWorkingDir.getAbsolutePath(), project.getArtifactId());
 
                 TscRunner runner = new TscRunner();
-                runner.runTsc(jsWorkingDir, classesDirectory, null, true);
+                runner.runTsc(jsWorkingDir, jsWorkingDir, null, false);
                 final StringBuilder sb = new StringBuilder();
                 Files.lines(javaLibJs).forEachOrdered(new Consumer<String>() {
                     @Override
