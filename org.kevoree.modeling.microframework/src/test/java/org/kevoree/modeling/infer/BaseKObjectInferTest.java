@@ -1,5 +1,6 @@
 package org.kevoree.modeling.infer;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
@@ -46,6 +47,13 @@ public class BaseKObjectInferTest {
                 KObjectInfer sensorProfile = (KObjectInfer) model.createByName("SensorProfile", 0, 0);
                 sensorProfile.train(new KObject[]{sensor1}, null, null);
                 sensorProfile.train(new KObject[]{sensor2}, null, null);
+
+                sensorProfile.infer(new KObject[]{sensor2}, new KCallback<Object[]>() {
+                    @Override
+                    public void on(Object[] objects) {
+                        Assert.assertEquals(objects[0], 0.32);
+                    }
+                });
 
             }
         });
