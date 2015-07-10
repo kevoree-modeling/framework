@@ -88,7 +88,7 @@ public class App {
                         System.out.print("Transpile to JS using TSC...");
                         TscRunner runner = new TscRunner();
                         Path tscPath = Paths.get(jsDir.toPath().toString(), GenModelPlugin.TSC_JS);
-                        runner.runTsc(tscPath.toFile().getAbsolutePath(), jsDir.toPath(), Paths.get(jsDir.toPath().toString(), ctx.getMetaModelName() + ".js"));
+                        runner.runTsc(jsDir, jsDir, null, true);
                         System.out.println("done");
                         final StringBuilder sb = new StringBuilder();
                         Files.lines(javaLibJs).forEachOrdered(new Consumer<String>() {
