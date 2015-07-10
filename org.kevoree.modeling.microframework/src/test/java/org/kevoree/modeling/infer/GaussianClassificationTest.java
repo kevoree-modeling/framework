@@ -210,9 +210,6 @@ public class GaussianClassificationTest {
                     irisInstance.setByName("petalLength", irisdataset[i + 2]);
                     irisInstance.setByName("petalWidth", irisdataset[i + 3]);
                     irisInstance.setByName("type", irisdataset[i + 4]);
-                    if (irisdataset[i + 4] != 0) {
-                        int x = 0;
-                    }
 
                     Object[] output = new Object[1];
                     output[0] = irisdataset[i + 4];

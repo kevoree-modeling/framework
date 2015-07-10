@@ -60,11 +60,15 @@ public class GaussianClassificationAlg implements KInferAlg {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
+        int size=(maxOutput+1)*(origin.metaClass().inputs().length*NUMOFFIELDS+1);
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
-            ks.extendInfer(origin.metaClass().dependencies().index(),maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),origin.metaClass());
+            ks.extendInfer(origin.metaClass().dependencies().index(),size,origin.metaClass());
+            for(int i=0;i<size;i++){
+                ks.setInferElem(dependenciesIndex,i,0,origin.metaClass());
+            }
         }
 
-        Array1D state = new Array1D(maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
+        Array1D state = new Array1D(size,0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
 
         //update the state
         for(int i=0;i<trainingSet.length;i++) {
@@ -76,6 +80,7 @@ public class GaussianClassificationAlg implements KInferAlg {
                     state.set(getIndex(j,output,MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
                     state.set(getIndex(j,output,SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
                     state.set(getIndex(j,output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+
                 } else {
                     if (trainingSet[i][j] < state.get(getIndex(j, output, MIN, origin.metaClass().dependencies()))) {
                         state.set(getIndex(j,output,MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
@@ -86,9 +91,29 @@ public class GaussianClassificationAlg implements KInferAlg {
                     state.add(getIndex(j,output,SUM, origin.metaClass().dependencies()) , trainingSet[i][j]);
                     state.add(getIndex(j,output, SUMSQUARE, origin.metaClass().dependencies()) , trainingSet[i][j] * trainingSet[i][j]);
                 }
+
+                //update global stat
+                if (state.get(getCounter(maxOutput, origin.metaClass().dependencies())) == 0) {
+                    state.set(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j, maxOutput, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j, maxOutput, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                } else {
+                    if (trainingSet[i][j] < state.get(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j,maxOutput,MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    }
+                    if (trainingSet[i][j] > state.get(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j,maxOutput,MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    }
+                    state.add(getIndex(j,maxOutput,SUM, origin.metaClass().dependencies()) , trainingSet[i][j]);
+                    state.add(getIndex(j,maxOutput, SUMSQUARE, origin.metaClass().dependencies()) , trainingSet[i][j] * trainingSet[i][j]);
+                }
+
             }
-            //Global counter
+
+            //Update Global counters
             state.add(getCounter(output, origin.metaClass().dependencies()),1);
+            state.add(getCounter(maxOutput, origin.metaClass().dependencies()),1);
         }
     }
 

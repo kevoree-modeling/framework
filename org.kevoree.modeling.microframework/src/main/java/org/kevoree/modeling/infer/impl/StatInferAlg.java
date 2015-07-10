@@ -22,7 +22,10 @@ public class StatInferAlg implements KInferAlg {
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
-            ks.extendInfer(dependenciesIndex, NUMOFFIELDS * trainingSet[0].length + 1, origin.metaClass());
+            ks.extendInfer(dependenciesIndex, NUMOFFIELDS * origin.metaClass().inputs().length+ 1, origin.metaClass());
+            for(int i=0;i<NUMOFFIELDS * origin.metaClass().inputs().length+ 1;i++){
+                ks.setInferElem(dependenciesIndex,i,0,origin.metaClass());
+            }
         }
         Array1D state = new Array1D(NUMOFFIELDS * trainingSet[0].length + 1, 0, dependenciesIndex, ks, origin.metaClass());
 
