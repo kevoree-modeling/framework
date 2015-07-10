@@ -316,7 +316,11 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public KMemorySegment segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace) {
+    public KMemorySegment segment(long universe, long requestedTime, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace) {
+        long time = requestedTime;
+        if(metaClass.temporalResolution() != 1){
+            time = time % metaClass.temporalResolution();
+        }
         KMemorySegment currentEntry = (KMemorySegment) _cache.get(universe, time, uuid);
         if (currentEntry != null) {
             if (resolutionTrace != null) {

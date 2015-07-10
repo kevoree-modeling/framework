@@ -38,4 +38,8 @@ public interface KMetaClass extends KMeta {
 
     KMetaInferOutput[] outputs();
 
+    long temporalResolution();
+
+    void setTemporalResolution(long tempo);
+
 }

@@ -23,6 +23,12 @@ public class MetaClass implements KMetaClass {
 
     private KInferAlg _alg;
 
+    private KMetaInferInput[] _cachedInputs = null;
+
+    private KMetaInferOutput[] _cachedOutputs = null;
+
+    private long _temporalResolution = 1;
+
     protected MetaClass(String p_name, int p_index, KInferAlg p_alg) {
         this._name = p_name;
         this._index = p_index;
@@ -224,17 +230,15 @@ public class MetaClass implements KMetaClass {
         return (KMetaDependencies) metaByName(MetaDependencies.DEPENDENCIES_NAME);
     }
 
-    private KMetaInferInput[] _cachedInputs = null;
-
     @Override
     public KMetaInferInput[] inputs() {
-        if(_cachedInputs == null){
+        if (_cachedInputs == null) {
             cacheInputs();
         }
         return this._cachedInputs;
     }
 
-    private synchronized void cacheInputs(){
+    private synchronized void cacheInputs() {
         int nb = 0;
         for (int i = 0; i < _meta.length; i++) {
             if (_meta[i].metaType().equals(MetaType.INPUT)) {
@@ -251,17 +255,26 @@ public class MetaClass implements KMetaClass {
         }
     }
 
-    private KMetaInferOutput[] _cachedOutputs = null;
 
     @Override
     public KMetaInferOutput[] outputs() {
-        if(_cachedOutputs == null){
+        if (_cachedOutputs == null) {
             cacheOuputs();
         }
         return _cachedOutputs;
     }
 
-    private synchronized void cacheOuputs(){
+    @Override
+    public long temporalResolution() {
+        return _temporalResolution;
+    }
+
+    @Override
+    public void setTemporalResolution(long p_tempo) {
+        this._temporalResolution = p_tempo;
+    }
+
+    private synchronized void cacheOuputs() {
         int nb = 0;
         for (int i = 0; i < _meta.length; i++) {
             if (_meta[i].metaType().equals(MetaType.OUTPUT)) {
@@ -278,7 +291,7 @@ public class MetaClass implements KMetaClass {
         }
     }
 
-    private void clearCached(){
+    private void clearCached() {
         this._cachedOutputs = null;
         this._cachedInputs = null;
     }
