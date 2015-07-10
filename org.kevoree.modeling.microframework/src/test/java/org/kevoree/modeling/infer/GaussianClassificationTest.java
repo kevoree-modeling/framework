@@ -219,6 +219,7 @@ public class GaussianClassificationTest {
 
                 KObject[][] irisInstanceTest = new KObject[3][1];
               // Test class 0
+                irisInstanceTest[0]=new KObject[1];
                 irisInstanceTest[0][0] = model.createByName("Iris", 0, 0);
                 irisInstanceTest[0][0].setByName("sepalLength", 5.006 );
                 irisInstanceTest[0][0].setByName("sepalWidth", 3.418);
@@ -226,13 +227,15 @@ public class GaussianClassificationTest {
                 irisInstanceTest[0][0].setByName("petalWidth", 0.244);
 
                 // Test class 1
+                irisInstanceTest[1]=new KObject[1];
                 irisInstanceTest[1][0] = model.createByName("Iris", 0, 0);
                 irisInstanceTest[1][0].setByName("sepalLength", 5.936);
                 irisInstanceTest[1][0].setByName("sepalWidth", 2.77);
                 irisInstanceTest[1][0].setByName("petalLength", 4.26);
                 irisInstanceTest[1][0].setByName("petalWidth", 1.326);
 
-                // Test class 2 			
+                // Test class 2
+                irisInstanceTest[2]=new KObject[1];
                 irisInstanceTest[2][0] = model.createByName("Iris", 0, 0);
                 irisInstanceTest[2][0].setByName("sepalLength", 6.588);
                 irisInstanceTest[2][0].setByName("sepalWidth", 2.974);
