@@ -19,7 +19,7 @@ public class GaussianClassificationAlg implements KInferAlg {
     //to keep updated
     private static int NUMOFFIELDS = 4;
 
-    private int maxOutput=3;
+    private int maxOutput=4;
 
 
 
@@ -124,13 +124,10 @@ public class GaussianClassificationAlg implements KInferAlg {
     public  double[][] infer(double[][] features, KObject origin) {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         Array1D state = new Array1D(maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
-
-
         double[][] result = new double[features.length][1];
 
-
-
         for(int j=0;j<features.length;j++) {
+            result[j]=new double[1];
             double maxprob=0;
             double prob=0;
             for (int output = 0; output < maxOutput; output++) {

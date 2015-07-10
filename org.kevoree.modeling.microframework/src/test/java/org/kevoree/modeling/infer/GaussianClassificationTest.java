@@ -238,8 +238,10 @@ public class GaussianClassificationTest {
                 irisInstanceTest[2][0].setByName("sepalWidth", 2.974);
                 irisInstanceTest[2][0].setByName("petalLength", 5.552);
                 irisInstanceTest[2][0].setByName("petalWidth", 2.026);
-                
-          
+
+
+                //for debug KMemorySegment ks = gaussianProfile.manager().segment(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
+
 
                 
                 gaussianProfile.inferAll(irisInstanceTest, new KCallback<Object[][]>() {
