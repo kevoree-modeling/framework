@@ -14,7 +14,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         super(p_universe, p_time, p_uuid, p_metaClass, p_manager);
     }
 
-    private KTraversalIndexResolver dependenciesResolver(KObject[] dependencies){
+    private KTraversalIndexResolver dependenciesResolver(KObject[] dependencies) {
         return new KTraversalIndexResolver() {
             @Override
             public KObject[] resolve(String indexName) {
@@ -36,7 +36,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         all_dependencies[0] = dependencies;
         //wrap output
         Object[][] all_expectedOutputs;
-        if(expectedOutputs != null){
+        if (expectedOutputs != null) {
             all_expectedOutputs = new Object[1][expectedOutputs.length];
             all_expectedOutputs[0] = expectedOutputs;
         }
@@ -46,18 +46,18 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
 
     @Override
     public void trainAll(KObject[][] p_dependencies, Object[][] p_outputs, KCallback callback) {
-        if(p_dependencies == null){
+        if (p_dependencies == null) {
             throw new RuntimeException("Dependencies are mandatory for KObjectInfer");
         }
         final KObjectInfer selfObject = this;
         KDefer waiter = this.manager().model().defer();
-        for(int i=0;i<p_dependencies.length;i++){
+        for (int i = 0; i < p_dependencies.length; i++) {
             if (p_dependencies[i].length != _metaClass.dependencies().allDependencies().length) {
                 throw new RuntimeException("Bad number of arguments for allDependencies");
             }
             KTraversalIndexResolver resolver = dependenciesResolver(p_dependencies[i]);
             for (int j = 0; j < _metaClass.inputs().length; j++) {
-                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.wait(i+","+j));
+                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.wait(i + "," + j));
             }
         }
         waiter.then(new KCallback() {
@@ -98,46 +98,65 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
 
     @Override
     public void infer(KObject[] dependencies, KCallback<Object[]> callback) {
-        final KObjectInfer selfObject = this;
-        if (dependencies == null || dependencies.length != _metaClass.dependencies().allDependencies().length) {
+        //wrap input
+        KObject[][] all_dependencies = new KObject[1][dependencies.length];
+        all_dependencies[0] = dependencies;
+        //call the trainAll method
+        inferAll(all_dependencies, new KCallback<Object[][]>() {
+            @Override
+            public void on(Object[][] objects) {
+                callback.on(objects[0]);
+            }
+        });
+    }
+
+    @Override
+    public void inferAll(KObject[][] p_dependencies, KCallback<Object[][]> callback) {
+        if (p_dependencies == null) {
             throw new RuntimeException("Bad number of arguments for allDependencies");
         }
-        KTraversalIndexResolver resolver = dependenciesResolver(dependencies);
+        final KObjectInfer selfObject = this;
         KDefer waiter = this.manager().model().defer();
-        for (int i = 0; i < _metaClass.inputs().length; i++) {
-            _metaClass.inputs()[i].extractor().exec(null, resolver, waiter.wait("" + i));
+        for (int i = 0; i < p_dependencies.length; i++) {
+            if (p_dependencies[i].length != _metaClass.dependencies().allDependencies().length) {
+                throw new RuntimeException("Bad number of arguments for allDependencies");
+            }
+            KTraversalIndexResolver resolver = dependenciesResolver(p_dependencies[i]);
+            for (int j = 0; j < _metaClass.inputs().length; j++) {
+                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.wait(i + "," + j));
+            }
         }
         waiter.then(new KCallback() {
             @Override
             public void on(Object o) {
-                double[][] extractedInputs = new double[1][_metaClass.inputs().length];
-                for (int i = 0; i < _metaClass.inputs().length; i++) {
-                    try {
-                        Object[] extracted = (Object[]) waiter.getResult("" + i);
-                        if (extracted != null && extracted.length > 0) {
-                            extractedInputs[0][i] = (double) extracted[0];
+                //collect output
+                double[][] extractedInputs = new double[p_dependencies.length][_metaClass.inputs().length];
+                for (int i = 0; i < p_dependencies.length; i++) {
+                    for (int j = 0; j < _metaClass.inputs().length; j++) {
+                        try {
+                            Object[] extracted = (Object[]) waiter.getResult(i + "," + j);
+                            if (extracted != null && extracted.length > 0) {
+                                extractedInputs[i][j] = (double) extracted[0];
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
                 double[][] extractedOutputs = _metaClass.inferAlg().infer(extractedInputs, selfObject);
                 if (extractedOutputs[0].length != _metaClass.outputs().length) {
                     callback.on(null);
                 } else {
-                    Object[] result = new Object[extractedOutputs.length];
-                    for (int i = 0; i < extractedOutputs.length; i++) {
-                        result[i] = internalReverseOutput(extractedOutputs[0][i], _metaClass.outputs()[i]);
+                    Object[][] result = new Object[extractedOutputs.length][_metaClass.outputs().length];
+                    for (int i = 0; i < _metaClass.outputs().length; i++) {
+                        for (int j = 0; j < _metaClass.outputs().length; j++) {
+                            result[i][j] = internalReverseOutput(extractedOutputs[i][j], _metaClass.outputs()[i]);
+                        }
                     }
                     callback.on(result);
                 }
             }
         });
-    }
-
-    @Override
-    public void inferAll(KObject[][] features, KCallback<Object[][]> callback) {
-
     }
 
     @Override
