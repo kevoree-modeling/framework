@@ -32,8 +32,8 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     @Override
     public void train(KObject[] dependencies, Object[] expectedOutputs, KCallback callback) {
         final KObjectInfer selfObject = this;
-        if (dependencies == null || dependencies.length != _metaClass.dependencies().dependencies().length) {
-            throw new RuntimeException("Bad number of arguments for dependencies");
+        if (dependencies == null || dependencies.length != _metaClass.dependencies().allDependencies().length) {
+            throw new RuntimeException("Bad number of arguments for allDependencies");
         }
         if (expectedOutputs != null && expectedOutputs.length != _metaClass.outputs().length) {
             throw new RuntimeException("Bad number of arguments for output");
@@ -75,15 +75,64 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     }
 
     @Override
-    public void trainAll(KObject[][] p_trainingSet, Object[][] p_expectedResultSet, KCallback callback) {
-        //if(p_trainingSet)
+    public void trainAll(KObject[][] p_dependencies, Object[][] p_outputs, KCallback callback) {
+        if(p_dependencies == null){
+            throw new RuntimeException("Dependencies are mandatory for KObjectInfer");
+        }
+        final KObjectInfer selfObject = this;
+        KDefer waiter = this.manager().model().defer();
+        for(int i=0;i<p_dependencies.length;i++){
+            if (p_dependencies[i].length != _metaClass.dependencies().allDependencies().length) {
+                throw new RuntimeException("Bad number of arguments for allDependencies");
+            }
+            KTraversalIndexResolver resolver = dependenciesResolver(p_dependencies[i]);
+            for (int j = 0; j < _metaClass.inputs().length; j++) {
+                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.wait(i+","+j));
+            }
+        }
+        waiter.then(new KCallback() {
+            @Override
+            public void on(Object o) {
+                //collect output
+                double[][] extractedInputs = new double[p_dependencies.length][_metaClass.inputs().length];
+                for (int i = 0; i < p_dependencies.length; i++) {
+                    for (int j = 0; j < _metaClass.inputs().length; j++) {
+                        try {
+                            Object[] extracted = (Object[]) waiter.getResult(i + "," + j);
+                            if (extracted != null && extracted.length > 0) {
+                                extractedInputs[i][j] = (double) extracted[0];
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                double[][] extractedOutputs = new double[1][_metaClass.outputs().length];
+                for (int i = 0; i < p_dependencies.length; i++) {
+                    for (int j = 0; j < _metaClass.outputs().length; j++) {
+                        KMetaInferOutput metaInferOutput = _metaClass.outputs()[j];
+                        Object currentOutputObject = null;
+                        if (p_outputs != null) {
+                            currentOutputObject = p_outputs[i][j];
+                        }
+                        extractedOutputs[i][j] = internalConvertOutput(currentOutputObject, metaInferOutput);
+                    }
+                }
+
+
+                _metaClass.inferAlg().train(extractedInputs, extractedOutputs, selfObject);
+                if (callback != null) {
+                    callback.on(null);
+                }
+            }
+        });
     }
 
     @Override
     public void infer(KObject[] dependencies, KCallback<Object[]> callback) {
         final KObjectInfer selfObject = this;
-        if (dependencies == null || dependencies.length != _metaClass.dependencies().dependencies().length) {
-            throw new RuntimeException("Bad number of arguments for dependencies");
+        if (dependencies == null || dependencies.length != _metaClass.dependencies().allDependencies().length) {
+            throw new RuntimeException("Bad number of arguments for allDependencies");
         }
         KTraversalIndexResolver resolver = dependenciesResolver(dependencies);
         KDefer waiter = this.manager().model().defer();

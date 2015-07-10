@@ -10,7 +10,7 @@ public class MetaDependencies implements KMetaDependencies {
 
     private KMetaClass _origin;
     private KMetaDependency[] _dependencies;
-    public static final String DEPENDENCIES_NAME = "dependencies";
+    public static final String DEPENDENCIES_NAME = "allDependencies";
     private int _index;
     private KStringMap<Integer> _indexes = null;
 
@@ -27,7 +27,7 @@ public class MetaDependencies implements KMetaDependencies {
     }
 
     @Override
-    public KMetaDependency[] dependencies() {
+    public KMetaDependency[] allDependencies() {
         return _dependencies;
     }
 
@@ -60,8 +60,8 @@ public class MetaDependencies implements KMetaDependencies {
     public synchronized KMetaDependency addDependency(String p_dependencyName, KMetaClass p_type, String op_name) {
         if (op_name != null) {
             throw new RuntimeException("Not Implemented Yet!");
-            //KMetaDependencies dependencies = ((MetaClass) p_type).initDependencies();
-            //dependencies.addDependency(op_name, origin(), null);
+            //KMetaDependencies allDependencies = ((MetaClass) p_type).initDependencies();
+            //allDependencies.addDependency(op_name, origin(), null);
         }
         KMetaDependency newDependency = new MetaDependency(p_dependencyName, _dependencies.length, this, new KLazyResolver() {
             @Override

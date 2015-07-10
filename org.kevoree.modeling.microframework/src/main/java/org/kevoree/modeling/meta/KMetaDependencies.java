@@ -4,7 +4,7 @@ public interface KMetaDependencies extends KMeta {
 
     KMetaClass origin();
 
-    KMetaDependency[] dependencies();
+    KMetaDependency[] allDependencies();
 
     KMetaDependency dependencyByName(String dependencyName);
 
