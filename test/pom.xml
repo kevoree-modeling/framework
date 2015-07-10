@@ -21,7 +21,7 @@
 
     <properties>
         <kmf.version>4.18.5-SNAPSHOT</kmf.version>
-        <java2typescript.plugin.version>28</java2typescript.plugin.version>
+        <java2typescript.plugin.version>33</java2typescript.plugin.version>
     </properties>
 
     <developers>

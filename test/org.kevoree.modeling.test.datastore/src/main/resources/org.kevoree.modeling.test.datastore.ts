@@ -196,7 +196,7 @@ module geometry {
             }
 
             constructor() {
-                super("geometry.Library", 0);
+                super("geometry.Library", 0, null);
                 var temp_all: org.kevoree.modeling.meta.KMeta[] = new Array();
                 var temp_references: org.kevoree.modeling.meta.KMetaReference[] = new Array();
                 temp_all[0] = MetaLibrary.REF_SHAPES;
@@ -225,7 +225,7 @@ module geometry {
             }
 
             constructor() {
-                super("geometry.Shape", 1);
+                super("geometry.Shape", 1, null);
                 var temp_all: org.kevoree.modeling.meta.KMeta[] = new Array();
                 temp_all[0] = MetaShape.ATT_COLOR;
                 temp_all[1] = MetaShape.ATT_NAME;

@@ -77,13 +77,13 @@ public class SaveXMITest {
                 if (error != null) {
                     error.printStackTrace();
                 } else {
-                    loadView.select("/",new KCallback<KObject[]>() {
+                    loadView.select("/",new KCallback<Object[]>() {
                         @Override
-                        public void on(KObject[] kObjects) {
+                        public void on(Object[] kObjects) {
                             System.out.println("Roots:" + kObjects.length);
                             if (kObjects.length == 1) {
 
-                                KObject kObject = kObjects[0];
+                                KObject kObject = (KObject) kObjects[0];
                                 kObject.visit(new KModelVisitor() {
                                     @Override
                                     public KVisitResult visit(KObject elem) {

@@ -4,9 +4,7 @@ import geometry.*;
 import geometry.meta.MetaLibrary;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.databases.websocket.WebSocketWrapper;
-import org.kevoree.modeling.memory.manager.AccessMode;
+import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.operation.KOperation;
 
@@ -28,7 +26,7 @@ public class MainServerTest {
         //MemoryKContentDeliveryDriver.DEBUG = true;
 
         GeometryModel geoModel = new GeometryModel();
-        geoModel.setContentDeliveryDriver(new WebSocketWrapper(geoModel.manager().cdn(), 23664));
+        WebSocketGateway.exposeModel(geoModel, 23664).start();
 
 
         geoModel.setOperation(MetaLibrary.OP_ADDSHAPE, new KOperation() {
@@ -68,7 +66,7 @@ public class MainServerTest {
                         public void on(KObject kObject) {
                             if (kObject == null) {
                                 Library lib = geoFactory.createLibrary();
-                                KMemorySegment libEntry = lib.manager().segment(lib.universe(), lib.now(), lib.uuid(), AccessMode.RESOLVE, lib.metaClass());
+                                KMemorySegment libEntry = lib.manager().segment(lib.universe(), lib.now(), lib.uuid(), false, lib.metaClass(), null);
                                 long[] uuids = (long[]) libEntry.get(MetaLibrary.REF_SHAPES.index(), kObject.metaClass());
                                 geoFactory.setRoot(lib, new KCallback<Throwable>() {
                                     @Override
@@ -117,7 +115,7 @@ public class MainServerTest {
                                 System.err.println("Root not found");
                             } else {
                                 Library root = (Library) kObject;
-                                KMemorySegment entry = root.manager().segment(root.universe(), root.now(), root.uuid(), AccessMode.RESOLVE, root.metaClass());
+                                KMemorySegment entry = root.manager().segment(root.universe(), root.now(), root.uuid(), false, root.metaClass(), null);
                                 root.getShapes((shapes) -> {
                                     System.out.println("Shapes:" + shapes.length);
                                     if (shapes != null) {

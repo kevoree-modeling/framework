@@ -24,10 +24,10 @@ var System = (function () {
     };
     System.err = {
         println: function (obj) {
-            console.log(obj);
+            console.error(obj);
         },
         print: function (obj) {
-            console.log(obj);
+            console.error(obj);
         }
     };
     return System;
@@ -148,7 +148,8 @@ var java;
                 this.error = new Error(message);
             }
             Throwable.prototype.printStackTrace = function () {
-                console.error(this.error['stack']);
+                //console.error(this.error['stack']);
+                console.error(this.error);
             };
             return Throwable;
         })();
@@ -329,6 +330,25 @@ var java;
             return LinkedList;
         })(List);
         util.LinkedList = LinkedList;
+        var Stack = (function () {
+            function Stack() {
+                this.content = new Array();
+            }
+            Stack.prototype.pop = function () {
+                return this.content.pop();
+            };
+            Stack.prototype.push = function (t) {
+                this.content.push(t);
+            };
+            Stack.prototype.isEmpty = function () {
+                return this.content.length == 0;
+            };
+            Stack.prototype.peek = function () {
+                return this.content.slice(-1)[0];
+            };
+            return Stack;
+        })();
+        util.Stack = Stack;
         var Map = (function () {
             function Map() {
             }
@@ -444,6 +464,32 @@ var org;
         var Assert = (function () {
             function Assert() {
             }
+            Assert.assertArrayEquals = function (p, p2) {
+                if (p == null || p == undefined) {
+                    if (p2 == null || p2 == undefined) {
+                        return;
+                    }
+                    else {
+                        throw "Assert Error " + p + " and " + p2 + " must be equals";
+                    }
+                }
+                if (p2 == null || p2 == undefined) {
+                    if (p == null || p == undefined) {
+                        return;
+                    }
+                    else {
+                        throw "Assert Error " + p + " and " + p2 + " must be equals";
+                    }
+                }
+                if (p.length != p2.length) {
+                    throw "Assert Error " + p + " and " + p2 + " must be equals";
+                }
+                for (var i = 0; i < p.length; i++) {
+                    if (p[i] != p2[i]) {
+                        throw "Assert Error " + p + " and " + p2 + " must be equals";
+                    }
+                }
+            };
             Assert.assertNotNull = function (p) {
                 if (p == null) {
                     throw "Assert Error " + p + " must not be null";
@@ -455,6 +501,22 @@ var org;
                 }
             };
             Assert.assertEquals = function (p, p2) {
+                if (p == null) {
+                    if (p2 == null) {
+                        return;
+                    }
+                    else {
+                        throw "Assert Error \n" + p + "\n must be equal to \n" + p2 + "\n";
+                    }
+                }
+                if (p2 == null) {
+                    if (p == null) {
+                        return;
+                    }
+                    else {
+                        throw "Assert Error \n" + p + "\n must be equal to \n" + p2 + "\n";
+                    }
+                }
                 if (p.equals !== undefined) {
                     if (!p.equals(p2)) {
                         throw "Assert Error \n" + p + "\n must be equal to \n" + p2 + "\n";
@@ -493,3 +555,4 @@ var org;
         junit.Assert = Assert;
     })(junit = org.junit || (org.junit = {}));
 })(org || (org = {}));
+//# sourceMappingURL=java.js.map

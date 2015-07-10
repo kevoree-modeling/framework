@@ -137,7 +137,7 @@ var geometry;
         var MetaLibrary = (function (_super) {
             __extends(MetaLibrary, _super);
             function MetaLibrary() {
-                _super.call(this, "geometry.Library", 0);
+                _super.call(this, "geometry.Library", 0, null);
                 var temp_all = new Array();
                 var temp_references = new Array();
                 temp_all[0] = MetaLibrary.REF_SHAPES;
@@ -166,7 +166,7 @@ var geometry;
         var MetaShape = (function (_super) {
             __extends(MetaShape, _super);
             function MetaShape() {
-                _super.call(this, "geometry.Shape", 1);
+                _super.call(this, "geometry.Shape", 1, null);
                 var temp_all = new Array();
                 temp_all[0] = MetaShape.ATT_COLOR;
                 temp_all[1] = MetaShape.ATT_NAME;
@@ -194,4 +194,3 @@ var geometry;
         meta.MetaShape = MetaShape;
     })(meta = geometry.meta || (geometry.meta = {}));
 })(geometry || (geometry = {}));
-//# sourceMappingURL=org.kevoree.modeling.test.datastore.js.map

@@ -1,10 +1,7 @@
 package org.kevoree.modeling.test.datastore;
 
 import geometry.GeometryModel;
-import org.kevoree.modeling.api.KEventListener;
-import org.kevoree.modeling.api.KObject;
-import org.kevoree.modeling.api.meta.Meta;
-import org.kevoree.modeling.databases.websocket.WebSocketWrapper;
+import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
 
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
@@ -20,7 +17,9 @@ public class MainClientTest {
         Semaphore s = new Semaphore(0);
 
         GeometryModel geoModel = new GeometryModel();
-        geoModel.setContentDeliveryDriver(new WebSocketWrapper(geoModel.manager().cdn(), 23665));
+
+        WebSocketGateway.exposeModel(geoModel, 23665).start();
+
 
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {

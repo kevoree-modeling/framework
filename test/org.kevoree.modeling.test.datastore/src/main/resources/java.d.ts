@@ -127,6 +127,13 @@ declare module java {
         }
         class LinkedList<T> extends List<T> {
         }
+        class Stack<T> {
+            content: any[];
+            pop(): T;
+            push(t: T): void;
+            isEmpty(): boolean;
+            peek(): T;
+        }
         class Map<K, V> {
             get(key: K): V;
             put(key: K, value: V): V;
@@ -156,6 +163,7 @@ declare module java {
 declare module org {
     module junit {
         class Assert {
+            static assertArrayEquals(p: Array<any>, p2: Array<any>): void;
             static assertNotNull(p: any): void;
             static assertNull(p: any): void;
             static assertEquals(p: any, p2: any): void;
