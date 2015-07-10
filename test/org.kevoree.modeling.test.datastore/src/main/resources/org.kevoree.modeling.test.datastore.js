@@ -194,3 +194,4 @@ var geometry;
         meta.MetaShape = MetaShape;
     })(meta = geometry.meta || (geometry.meta = {}));
 })(geometry || (geometry = {}));
+//# sourceMappingURL=org.kevoree.modeling.test.datastore.js.map

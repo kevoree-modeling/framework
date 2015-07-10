@@ -45,7 +45,7 @@ public class Array3DTest {
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
                 for (int h = 0; h < nbDeep; h++) {
-                    array.set(i, j, h, (i + j + h));
+                    array.set(i, j, h, (i+3*j+7*h));
                 }
             }
         }
@@ -53,7 +53,7 @@ public class Array3DTest {
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
                 for (int h = 0; h < nbDeep; h++) {
-                    Assert.assertTrue(array.get(i, j, h) == (i + j + h));
+                    Assert.assertTrue(array.get(i, j, h) == (i+3*j+7*h));
                 }
             }
         }
