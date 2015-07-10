@@ -285,7 +285,7 @@ public class MetaClass implements KMetaClass {
 
     /**
      * @native ts
-     * clearCached();
+     * this.clearCached();
      * this._meta[p_new_meta.index()] = p_new_meta;
      * this._indexes.put(p_new_meta.metaName(), p_new_meta.index());
      */
