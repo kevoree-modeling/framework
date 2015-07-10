@@ -95,9 +95,6 @@ public class Traversal implements KTraversal {
 
     @Override
     public void then(KCallback<KObject[]> cb) {
-        //set the terminal leaf action
-        internal_chain_action(new FinalAction(cb));
-        _terminated = true;
         //execute the first element of the chain of actions
         if (_initObjs != null) {
             _initAction.execute(new TraversalContext(_initObjs, null, new KCallback<Object[]>() {

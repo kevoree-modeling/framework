@@ -31,47 +31,14 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
 
     @Override
     public void train(KObject[] dependencies, Object[] expectedOutputs, KCallback callback) {
-        final KObjectInfer selfObject = this;
-        if (dependencies == null || dependencies.length != _metaClass.dependencies().allDependencies().length) {
-            throw new RuntimeException("Bad number of arguments for allDependencies");
-        }
-        if (expectedOutputs != null && expectedOutputs.length != _metaClass.outputs().length) {
-            throw new RuntimeException("Bad number of arguments for output");
-        }
-        KTraversalIndexResolver resolver = dependenciesResolver(dependencies);
-        KDefer waiter = this.manager().model().defer();
-        for (int i = 0; i < _metaClass.inputs().length; i++) {
-            _metaClass.inputs()[i].extractor().exec(null, resolver, waiter.wait("" + i));
-        }
-        waiter.then(new KCallback() {
-            @Override
-            public void on(Object o) {
-                double[][] extractedInputs = new double[1][_metaClass.inputs().length];
-                for (int i = 0; i < _metaClass.inputs().length; i++) {
-                    try {
-                        Object[] extracted = (Object[]) waiter.getResult("" + i);
-                        if (extracted != null && extracted.length > 0) {
-                            extractedInputs[0][i] = (double) extracted[0];
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                double[][] extractedOutputs = new double[1][_metaClass.outputs().length];
-                for (int i = 0; i < _metaClass.outputs().length; i++) {
-                    KMetaInferOutput metaInferOutput = _metaClass.outputs()[i];
-                    Object currentOutputObject = null;
-                    if (expectedOutputs != null) {
-                        currentOutputObject = expectedOutputs[i];
-                    }
-                    extractedOutputs[0][i] = internalConvertOutput(currentOutputObject, metaInferOutput);
-                }
-                _metaClass.inferAlg().train(extractedInputs, extractedOutputs, selfObject);
-                if (callback != null) {
-                    callback.on(null);
-                }
-            }
-        });
+        //wrap input
+        KObject[][] all_dependencies = new KObject[1][dependencies.length];
+        all_dependencies[0] = dependencies;
+        //wrap output
+        Object[][] all_expectedOutputs = new Object[1][expectedOutputs.length];
+        all_expectedOutputs[0] = expectedOutputs;
+        //call the trainAll method
+        trainAll(all_dependencies, all_dependencies, callback);
     }
 
     @Override
@@ -118,8 +85,6 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                         extractedOutputs[i][j] = internalConvertOutput(currentOutputObject, metaInferOutput);
                     }
                 }
-
-
                 _metaClass.inferAlg().train(extractedInputs, extractedOutputs, selfObject);
                 if (callback != null) {
                     callback.on(null);

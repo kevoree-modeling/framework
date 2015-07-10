@@ -42,7 +42,11 @@ public class DeepCollectAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         if (context.inputObjects() == null || context.inputObjects().length == 0) {
-            _next.execute(context);
+            if(_next != null){
+                _next.execute(context);
+            } else {
+                context.finalCallback().on(context.inputObjects());
+            }
         } else {
             _alreadyPassed = new ArrayLongMap<KObject>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
             _finalElements = new ArrayLongMap<KObject>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
@@ -79,8 +83,12 @@ public class DeepCollectAction implements KTraversalAction {
                                 nbInserted[0]++;
                             }
                         });
-                        context.setInputObjects(trimmed);
-                        _next.execute(context);
+                        if (_next == null) {
+                            context.finalCallback().on(trimmed);
+                        } else {
+                            context.setInputObjects(trimmed);
+                            _next.execute(context);
+                        }
                     }
                 }
             };

@@ -32,8 +32,11 @@ public class TraverseAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         if (context.inputObjects() == null || context.inputObjects().length == 0) {
-            _next.execute(context);
-            return;
+            if(_next != null){
+                _next.execute(context);
+            } else {
+                context.finalCallback().on(context.inputObjects());
+            }
         } else {
             final AbstractKObject currentObject = (AbstractKObject) context.inputObjects()[0];
             KLongLongMap nextIds = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
@@ -84,8 +87,12 @@ public class TraverseAction implements KTraversalAction {
             currentObject._manager.lookupAllobjects(currentObject.universe(), currentObject.now(), trimmed, new KCallback<KObject[]>() {
                 @Override
                 public void on(KObject[] kObjects) {
-                    context.setInputObjects(kObjects);
-                    _next.execute(context);
+                    if (_next == null) {
+                        context.finalCallback().on(kObjects);
+                    } else {
+                        context.setInputObjects(kObjects);
+                        _next.execute(context);
+                    }
                 }
             });
         }

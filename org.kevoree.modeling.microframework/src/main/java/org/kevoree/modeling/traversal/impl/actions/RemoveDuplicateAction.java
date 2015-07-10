@@ -31,8 +31,12 @@ public class RemoveDuplicateAction implements KTraversalAction {
                 nbInserted[0]++;
             }
         });
-        context.setInputObjects(trimmed);
-        _next.execute(context);
+        if (_next == null) {
+            context.finalCallback().on(trimmed);
+        } else {
+            context.setInputObjects(trimmed);
+            _next.execute(context);
+        }
     }
 
 }

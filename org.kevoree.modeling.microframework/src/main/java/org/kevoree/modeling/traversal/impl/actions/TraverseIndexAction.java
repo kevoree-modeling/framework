@@ -32,8 +32,12 @@ public class TraverseIndexAction implements KTraversalAction {
                     public void on(KObject root) {
                         KObject[] selectedElems = new KObject[1];
                         selectedElems[0] = root;
-                        context.setInputObjects(selectedElems);
-                        _next.execute(context);
+                        if (_next == null) {
+                            context.finalCallback().on(selectedElems);
+                        } else {
+                            context.setInputObjects(selectedElems);
+                            _next.execute(context);
+                        }
                     }
                 });
             }
@@ -42,11 +46,19 @@ public class TraverseIndexAction implements KTraversalAction {
             if(resolver != null){
                 KObject[] resolved = resolver.resolve(this._indexName);
                 if(resolved != null){
-                    context.setInputObjects(resolved);
-                    _next.execute(context);
+                    if (_next == null) {
+                        context.finalCallback().on(resolved);
+                    } else {
+                        context.setInputObjects(resolved);
+                        _next.execute(context);
+                    }
                 }
             } else {
-                _next.execute(context);
+                if (_next == null) {
+                    context.finalCallback().on(context.inputObjects());
+                } else {
+                    _next.execute(context);
+                }
             }
         }
     }

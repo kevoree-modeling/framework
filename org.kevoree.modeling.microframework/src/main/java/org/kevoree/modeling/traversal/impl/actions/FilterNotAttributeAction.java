@@ -30,7 +30,11 @@ public class FilterNotAttributeAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         if (context.inputObjects() == null || context.inputObjects().length == 0) {
-            _next.execute(context);
+            if(_next != null){
+                _next.execute(context);
+            } else {
+                context.finalCallback().on(context.inputObjects());
+            }
         } else {
             boolean[] selectedIndexes = new boolean[context.inputObjects().length];
             int nbSelected = 0;
@@ -116,8 +120,12 @@ public class FilterNotAttributeAction implements KTraversalAction {
                     inserted++;
                 }
             }
-            context.setInputObjects(nextStepElement);
-            _next.execute(context);
+            if (_next == null) {
+                context.finalCallback().on(nextStepElement);
+            } else {
+                context.setInputObjects(nextStepElement);
+                _next.execute(context);
+            }
         }
     }
 

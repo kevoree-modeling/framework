@@ -42,8 +42,12 @@ public class FilterAction implements KTraversalAction {
                 inserted++;
             }
         }
-        context.setInputObjects(nextStepElement);
-        _next.execute(context);
+        if (_next == null) {
+            context.finalCallback().on(nextStepElement);
+        } else {
+            context.setInputObjects(nextStepElement);
+            _next.execute(context);
+        }
     }
 
 }

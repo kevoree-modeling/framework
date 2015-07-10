@@ -34,8 +34,11 @@ public class TraverseQueryAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         if (context.inputObjects() == null || context.inputObjects().length == 0) {
-            _next.execute(context);
-            return;
+            if (_next != null) {
+                _next.execute(context);
+            } else {
+                context.finalCallback().on(context.inputObjects());
+            }
         } else {
             AbstractKObject currentFirstObject = (AbstractKObject) context.inputObjects()[0];
             KLongLongMap nextIds = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
@@ -73,7 +76,7 @@ public class TraverseQueryAction implements KTraversalAction {
                                                 break;
                                             }
                                         } else {
-                                            if (metaReference.metaName().matches("^"+queries[k]+"$")) {
+                                            if (metaReference.metaName().matches("^" + queries[k] + "$")) {
                                                 selected = true;
                                                 break;
                                             }
@@ -107,9 +110,13 @@ public class TraverseQueryAction implements KTraversalAction {
             //call
             currentFirstObject._manager.lookupAllobjects(currentFirstObject.universe(), currentFirstObject.now(), trimmed, new KCallback<KObject[]>() {
                 @Override
-                public void on(KObject[] kObjects) {
-                    context.setInputObjects(kObjects);
-                    _next.execute(context);
+                public void on(KObject[] nextStepElement) {
+                    if (_next == null) {
+                        context.finalCallback().on(nextStepElement);
+                    } else {
+                        context.setInputObjects(nextStepElement);
+                        _next.execute(context);
+                    }
                 }
             });
         }
