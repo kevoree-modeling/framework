@@ -14,10 +14,9 @@ import org.kevoree.modeling.generator.Generator;
 import org.kevoree.modeling.java2typescript.SourceTranslator;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Consumer;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresDependencyResolution = ResolutionScope.COMPILE)
@@ -102,6 +101,7 @@ public class GenModelPlugin extends AbstractMojo {
             Generator generator = new Generator();
             generator.execute(ctx);
             if (js) {
+                deleteRecusive(jsWorkingDir.toPath());
                 Files.createDirectories(jsWorkingDir.toPath());
 
                 Path javaLibJs = Paths.get(jsWorkingDir.toPath().toString(), JAVA_LIB_JS);
@@ -181,4 +181,29 @@ public class GenModelPlugin extends AbstractMojo {
         project.addCompileSourceRoot(targetSrcGenDir.getAbsolutePath());
 
     }
+
+
+    private void deleteRecusive(Path directory) {
+        try {
+            if (Files.exists(directory)) {
+                Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                        Files.delete(dir);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
