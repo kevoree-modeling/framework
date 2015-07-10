@@ -145,7 +145,7 @@ public class DeepCollectAction implements KTraversalAction {
             }
         });
         //call
-        currentObject._manager.lookupAllobjects(currentObject.universe(), currentObject.now(), trimmed, new KCallback<KObject[]>() {
+        currentObject._manager.lookupAllObjects(currentObject.universe(), currentObject.now(), trimmed, new KCallback<KObject[]>() {
             @Override
             public void on(KObject[] kObjects) {
                 private_callback.on(kObjects);

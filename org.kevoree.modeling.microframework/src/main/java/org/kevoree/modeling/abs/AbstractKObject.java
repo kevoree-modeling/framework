@@ -99,7 +99,7 @@ public abstract class AbstractKObject implements KObject {
                     indexI[0]++;
                 }
             });
-            _manager.lookupAllobjects(_universe, _time, flatCollected, new KCallback<KObject[]>() {
+            _manager.lookupAllObjects(_universe, _time, flatCollected, new KCallback<KObject[]>() {
                 @Override
                 public void on(KObject[] resolved) {
                     for (int i = 0; i < resolved.length; i++) {
@@ -216,7 +216,7 @@ public abstract class AbstractKObject implements KObject {
                     if (setOpposite) {
                         if (previous != null) {
                             KObject self = this;
-                            _manager.lookupAllobjects(_universe, _time, previous, new KCallback<KObject[]>() {
+                            _manager.lookupAllObjects(_universe, _time, previous, new KCallback<KObject[]>() {
                                 @Override
                                 public void on(KObject[] kObjects) {
                                     for (int i = 0; i < kObjects.length; i++) {
@@ -239,7 +239,7 @@ public abstract class AbstractKObject implements KObject {
                 if (setOpposite) {
                     if (previousKid != null) {
                         final KObject self = this;
-                        _manager.lookupAllobjects(_universe, _time, previousKid, new KCallback<KObject[]>() {
+                        _manager.lookupAllObjects(_universe, _time, previousKid, new KCallback<KObject[]>() {
                             @Override
                             public void on(KObject[] resolvedParams) {
                                 if (resolvedParams != null) {
@@ -305,7 +305,7 @@ public abstract class AbstractKObject implements KObject {
                 if (o == null) {
                     cb.on(new KObject[0]);
                 } else {
-                    _manager.lookupAllobjects(_universe, _time, o, cb);
+                    _manager.lookupAllObjects(_universe, _time, o, cb);
                 }
             }
         }
@@ -373,7 +373,7 @@ public abstract class AbstractKObject implements KObject {
                     inserted[0]++;
                 }
             });
-            _manager.lookupAllobjects(_universe, _time, trimmed, new KCallback<KObject[]>() {
+            _manager.lookupAllObjects(_universe, _time, trimmed, new KCallback<KObject[]>() {
                 @Override
                 public void on(KObject[] resolvedArr) {
                     final List<KObject> nextDeep = new ArrayList<KObject>();

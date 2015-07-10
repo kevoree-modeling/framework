@@ -74,7 +74,7 @@ public abstract class AbstractKView implements KView {
 
     @Override
     public void lookupAll(long[] keys, KCallback<KObject[]> cb) {
-        _manager.lookupAllobjects(_universe, _time, keys, cb);
+        _manager.lookupAllObjects(_universe, _time, keys, cb);
     }
 
     @Override

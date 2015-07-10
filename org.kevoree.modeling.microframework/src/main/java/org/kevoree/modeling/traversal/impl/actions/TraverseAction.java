@@ -84,7 +84,7 @@ public class TraverseAction implements KTraversalAction {
                 }
             });
             //call
-            currentObject._manager.lookupAllobjects(currentObject.universe(), currentObject.now(), trimmed, new KCallback<KObject[]>() {
+            currentObject._manager.lookupAllObjects(currentObject.universe(), currentObject.now(), trimmed, new KCallback<KObject[]>() {
                 @Override
                 public void on(KObject[] kObjects) {
                     if (_next == null) {

@@ -19,9 +19,11 @@ public interface KMemoryManager {
 
     void lookup(long universe, long time, long uuid, KCallback<KObject> callback);
 
-    void lookupAllobjects(long universe, long time, long[] uuid, KCallback<KObject[]> callback);
+    void lookupAllObjects(long universe, long time, long[] uuid, KCallback<KObject[]> callback);
 
-    void lookupAlltimes(long universe, long[] time, long uuid, KCallback<KObject[]> callback);
+    void lookupAllTimes(long universe, long[] time, long uuid, KCallback<KObject[]> callback);
+
+    void lookupAllObjectsTimes(long universe, long[] time, long[] uuid, KCallback<KObject[]> callback);
 
     KMemorySegment segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace);
 

@@ -409,7 +409,7 @@ public class MemoryManager implements KMemoryManager {
     public void lookup(long universe, long time, long uuid, KCallback<KObject> callback) {
         long[] keys = new long[1];
         keys[0] = uuid;
-        lookupAllobjects(universe, time, keys, new KCallback<KObject[]>() {
+        lookupAllObjects(universe, time, keys, new KCallback<KObject[]>() {
             @Override
             public void on(KObject[] kObjects) {
                 if (kObjects.length == 1) {
@@ -426,13 +426,18 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public void lookupAllobjects(long universe, long time, long[] uuids, final KCallback<KObject[]> callback) {
+    public void lookupAllObjects(long universe, long time, long[] uuids, final KCallback<KObject[]> callback) {
         this._scheduler.dispatch(new LookupAllObjectsRunnable(universe, time, uuids, callback, this));
     }
 
     @Override
-    public void lookupAlltimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
+    public void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         this._scheduler.dispatch(new LookupAllTimesRunnable(universe, times, uuid, callback, this));
+    }
+
+    @Override
+    public void lookupAllObjectsTimes(long universe, long[] times, long[] uuid, KCallback<KObject[]> callback) {
+        this._scheduler.dispatch(new LookupAllObjectsTimesRunnable(universe, times, uuid, callback, this));
     }
 
     @Override

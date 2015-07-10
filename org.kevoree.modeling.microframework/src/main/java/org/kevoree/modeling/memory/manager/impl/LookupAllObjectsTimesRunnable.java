@@ -41,9 +41,8 @@ public class LookupAllObjectsTimesRunnable implements Runnable {
                 for (int i = 0; i < _keys.length; i++) {
                     for (int j = 0; j < _times.length; j++) {
                         if (universeIndexes[i] != null) {
-                            long closestUniverse = ResolutionHelper.resolve_universe(_store.globalUniverseOrder(), (KUniverseOrderMap) universeIndexes[i], _times[j], _universe);
-                            //TODO check duplicate
-                            tempKeys2[(i * _times.length) + j] = KContentKey.createTimeTree(closestUniverse, _keys[i]);
+                            //TODO check optimize for duplicate
+                            tempKeys2[(i * _times.length) + j] = KContentKey.createTimeTree(ResolutionHelper.resolve_universe(_store.globalUniverseOrder(), (KUniverseOrderMap) universeIndexes[i], _times[j], _universe), _keys[i]);
                         }
                     }
                 }
@@ -58,13 +57,13 @@ public class LookupAllObjectsTimesRunnable implements Runnable {
                                     KLongTree cachedIndexTree = (KLongTree) timeIndexes[i];
                                     long resolvedNode = cachedIndexTree.previousOrEqual(_times[j]);
                                     if (resolvedNode != KConfig.NULL_LONG) {
-                                        resolvedContentKey = KContentKey.createObject(tempKeys[i].universe, resolvedNode, _keys[i]);
+                                        resolvedContentKey = KContentKey.createObject(tempKeys2[i].universe, resolvedNode, _keys[i]);
                                     }
                                 }
                                 tempKeys2[(i * _times.length) + j] = resolvedContentKey;
                             }
                         }
-                        _store.bumpKeysToCache(tempKeys, new KCallback<KMemoryElement[]>() {
+                        _store.bumpKeysToCache(tempKeys2, new KCallback<KMemoryElement[]>() {
                             @Override
                             public void on(KMemoryElement[] cachedObjects) {
                                 KObject[] proxies = new KObject[_keys.length * _times.length];
