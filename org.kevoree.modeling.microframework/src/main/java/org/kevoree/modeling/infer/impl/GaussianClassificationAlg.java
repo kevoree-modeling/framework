@@ -123,13 +123,19 @@ public class GaussianClassificationAlg implements KInferAlg {
     @Override
     public  double[][] infer(double[][] features, KObject origin) {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
-        Array1D state = new Array1D(maxOutput*(origin.metaClass().inputs().length*NUMOFFIELDS+1),0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
+        int dependenciesIndex = origin.metaClass().dependencies().index();
+        //check if segment is empty
+        int size = (maxOutput + 1) * (origin.metaClass().inputs().length * NUMOFFIELDS + 1);
+        if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+            return null;
+        }
+        Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
         double[][] result = new double[features.length][1];
 
-        for(int j=0;j<features.length;j++) {
-            result[j]=new double[1];
-            double maxprob=0;
-            double prob=0;
+        for (int j = 0; j < features.length; j++) {
+            result[j] = new double[1];
+            double maxprob = 0;
+            double prob = 0;
             for (int output = 0; output < maxOutput; output++) {
                 prob = getProba(features[j], output, state, origin.metaClass().dependencies());
                 if (prob > maxprob) {
