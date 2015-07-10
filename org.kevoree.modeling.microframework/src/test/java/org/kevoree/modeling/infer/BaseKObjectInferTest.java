@@ -47,7 +47,6 @@ public class BaseKObjectInferTest {
                 sensorProfile.train(new KObject[]{sensor1}, null, null);
                 sensorProfile.train(new KObject[]{sensor2}, null, null);
 
-
             }
         });
     }

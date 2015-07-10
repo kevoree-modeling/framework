@@ -35,8 +35,11 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         KObject[][] all_dependencies = new KObject[1][dependencies.length];
         all_dependencies[0] = dependencies;
         //wrap output
-        Object[][] all_expectedOutputs = new Object[1][expectedOutputs.length];
-        all_expectedOutputs[0] = expectedOutputs;
+        Object[][] all_expectedOutputs;
+        if(expectedOutputs != null){
+            all_expectedOutputs = new Object[1][expectedOutputs.length];
+            all_expectedOutputs[0] = expectedOutputs;
+        }
         //call the trainAll method
         trainAll(all_dependencies, all_dependencies, callback);
     }
