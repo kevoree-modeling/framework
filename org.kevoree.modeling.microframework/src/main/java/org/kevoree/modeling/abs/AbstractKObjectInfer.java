@@ -148,9 +148,9 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                     callback.on(null);
                 } else {
                     Object[][] result = new Object[extractedOutputs.length][_metaClass.outputs().length];
-                    for (int i = 0; i < _metaClass.outputs().length; i++) {
+                    for (int i = 0; i < extractedOutputs.length; i++) {
                         for (int j = 0; j < _metaClass.outputs().length; j++) {
-                            result[i][j] = internalReverseOutput(extractedOutputs[i][j], _metaClass.outputs()[i]);
+                            result[i][j] = internalReverseOutput(extractedOutputs[i][j], _metaClass.outputs()[j]);
                         }
                     }
                     callback.on(result);
