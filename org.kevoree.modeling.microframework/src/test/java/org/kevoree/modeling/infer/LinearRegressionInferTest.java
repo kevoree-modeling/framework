@@ -23,16 +23,16 @@ public class LinearRegressionInferTest {
         KMetaModel metaModel = new MetaModel("GaussianClassificationTestMM");
 
 
-        KMetaClass metaClassIris = metaModel.addMetaClass("House");
-        metaClassIris.addAttribute("length", KPrimitiveTypes.DOUBLE);
-        metaClassIris.addAttribute("width", KPrimitiveTypes.DOUBLE);
-        metaClassIris.addAttribute("height", KPrimitiveTypes.DOUBLE);
-        metaClassIris.addAttribute("numOfRooms", KPrimitiveTypes.DOUBLE);
+        KMetaClass metaClassHouse = metaModel.addMetaClass("House");
+        metaClassHouse.addAttribute("length", KPrimitiveTypes.DOUBLE);
+        metaClassHouse.addAttribute("width", KPrimitiveTypes.DOUBLE);
+        metaClassHouse.addAttribute("height", KPrimitiveTypes.DOUBLE);
+        metaClassHouse.addAttribute("numOfRooms", KPrimitiveTypes.DOUBLE);
 
-        metaClassIris.addAttribute("price", KPrimitiveTypes.DOUBLE);
+        metaClassHouse.addAttribute("price", KPrimitiveTypes.DOUBLE);
 
         KMetaClass inferGaussian = metaModel.addInferMetaClass("RegressionProfile", new LinearRegressionAlg());
-        inferGaussian.addDependency("House", metaClassIris, null);
+        inferGaussian.addDependency("House", metaClassHouse, null);
 
         inferGaussian.addInput("length", "@House | =length");
         inferGaussian.addInput("width", "@House | =width");
@@ -45,23 +45,23 @@ public class LinearRegressionInferTest {
     }
 
     private double getPrice(double length, double width, double height, double rooms) {
-        return 410*length+2*width+0.01*height+10*rooms-10;
+        return 13*length+21*width+0.01*height+15*rooms-20;
     }
 
     private static Random rand=new Random();
     private static KMetaModel mm;
     private static KModel model;
 
-    private int count=0;
+
 
     private KObject createHouse() {
         KObject house = model.createByName("House", 0, 0);
         double length=rand.nextDouble();
         double width=rand.nextDouble();
         double height=rand.nextDouble();
-        double rooms=count;
+        double rooms=rand.nextDouble();
         double price=getPrice(length, width, height, rooms);
-        count++;
+
 
         house.setByName("length", length);
         house.setByName("width", width) ;
@@ -80,7 +80,7 @@ public class LinearRegressionInferTest {
             public void on(Object o) {
                 KObjectInfer regProfile = (KObjectInfer) model.createByName("RegressionProfile", 0, 0);
 
-                int trainingSize=1000000;
+                int trainingSize=1000;
 
                 for (int i = 0; i < trainingSize; i++) {
                     KObject house=createHouse();
@@ -98,6 +98,9 @@ public class LinearRegressionInferTest {
                     public void on(Object[] objects) {
                         double price=Double.parseDouble(test[0].getByName("price").toString());
                         double calcPrice=Double.parseDouble(objects[0].toString());
+
+                        Assert.assertTrue(Math.abs(price-calcPrice)<1);
+
 
                         KMemorySegment ks = regProfile.manager().segment(0, 0, regProfile.uuid(), false, regProfile.metaClass(), null);
 
