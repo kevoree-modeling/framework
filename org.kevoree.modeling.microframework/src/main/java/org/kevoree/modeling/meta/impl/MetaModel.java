@@ -4,9 +4,7 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.struct.map.KStringMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
-import org.kevoree.modeling.meta.KMetaClass;
-import org.kevoree.modeling.meta.KMetaModel;
-import org.kevoree.modeling.meta.MetaType;
+import org.kevoree.modeling.meta.*;
 
 public class MetaModel implements KMetaModel {
 
@@ -17,6 +15,10 @@ public class MetaModel implements KMetaModel {
     private KMetaClass[] _metaClasses;
 
     private KStringMap<Integer> _metaClasses_indexes = null;
+
+    private KMetaEnum[] _metaTypes;
+
+    private KStringMap<Integer> _metaTypes_indexes = null;
 
     @Override
     public int index() {
@@ -36,7 +38,10 @@ public class MetaModel implements KMetaModel {
     public MetaModel(String p_name) {
         this._name = p_name;
         this._index = 0;
+        this._metaClasses = new KMetaClass[0];
+        this._metaTypes = new KMetaEnum[0];
         this._metaClasses_indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        this._metaTypes_indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
     public void init(KMetaClass[] p_metaClasses) {
@@ -83,6 +88,31 @@ public class MetaModel implements KMetaModel {
         return internal_addmetaclass(metaClassName, inferAlg);
     }
 
+    @Override
+    public KMetaEnum[] metaTypes() {
+        return this._metaTypes;
+    }
+
+    @Override
+    public KMetaEnum metaTypeByName(String p_name) {
+        if (this._metaTypes == null) {
+            return null;
+        }
+        Integer resolved = this._metaTypes_indexes.get(p_name);
+        if (resolved == null) {
+            return null;
+        } else {
+            return _metaTypes[resolved];
+        }
+    }
+
+    @Override
+    public KMetaEnum addMetaEnum(String enumName) {
+        KMetaEnum newEnumType = new MetaEnum(enumName, _metaTypes.length);
+        internal_add_type(newEnumType);
+        return newEnumType;
+    }
+
     private synchronized KMetaClass internal_addmetaclass(String metaClassName, KInferAlg alg) {
         if (_metaClasses_indexes.contains(metaClassName)) {
             return metaClassByName(metaClassName);
@@ -94,7 +124,7 @@ public class MetaModel implements KMetaModel {
                 return _metaClasses[0];
             } else {
                 KMetaClass newMetaClass = new MetaClass(metaClassName, _metaClasses.length, alg);
-                interal_add_meta_class(newMetaClass);
+                internal_add_meta_class(newMetaClass);
                 return newMetaClass;
             }
         }
@@ -105,12 +135,25 @@ public class MetaModel implements KMetaModel {
      * this._metaClasses[p_newMetaClass.index()] = p_newMetaClass;
      * this._metaClasses_indexes.put(p_newMetaClass.metaName(), p_newMetaClass.index());
      */
-    private void interal_add_meta_class(KMetaClass p_newMetaClass) {
+    private void internal_add_meta_class(KMetaClass p_newMetaClass) {
         KMetaClass[] incArray = new KMetaClass[_metaClasses.length + 1];
         System.arraycopy(_metaClasses, 0, incArray, 0, _metaClasses.length);
         incArray[_metaClasses.length] = p_newMetaClass;
         _metaClasses = incArray;
         _metaClasses_indexes.put(p_newMetaClass.metaName(), p_newMetaClass.index());
+    }
+
+    /**
+     * @native ts
+     * this._metaTypes[p_newType.index()] = p_newType;
+     * this._metaTypes_indexes.put(p_newType.metaName(), p_newType.index());
+     */
+    private void internal_add_type(KMetaEnum p_newType) {
+        KMetaEnum[] incArray = new KMetaEnum[_metaTypes.length + 1];
+        System.arraycopy(_metaTypes, 0, incArray, 0, _metaTypes.length);
+        incArray[_metaTypes.length] = p_newType;
+        _metaTypes = incArray;
+        _metaTypes_indexes.put(p_newType.name(), p_newType.index());
     }
 
     @Override

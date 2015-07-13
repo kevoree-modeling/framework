@@ -9,5 +9,7 @@ public enum MetaType {
     OUTPUT,
     OPERATION,
     CLASS,
-    MODEL
+    MODEL,
+    ENUM,
+    LITERAL
 }

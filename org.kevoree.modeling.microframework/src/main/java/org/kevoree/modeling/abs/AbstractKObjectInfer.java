@@ -6,6 +6,7 @@ import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.meta.*;
+import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.traversal.KTraversalIndexResolver;
 
 public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfer {
@@ -105,7 +106,11 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         inferAll(all_dependencies, new KCallback<Object[][]>() {
             @Override
             public void on(Object[][] objects) {
-                callback.on(objects[0]);
+                if (objects != null && objects.length > 0) {
+                    callback.on(objects[0]);
+                } else {
+                    callback.on(null);
+                }
             }
         });
     }
@@ -199,6 +204,17 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         if (metaOutput.type() == KPrimitiveTypes.STRING) {
             throw new RuntimeException("String are not managed yet");
         }
+        if (metaOutput.type().isEnum()) {
+            KMetaEnum metaEnum = (KMetaEnum) metaOutput.type();
+            if (output instanceof MetaLiteral) {
+                return (double) ((MetaLiteral) output).index();
+            } else {
+                KMeta literal = metaEnum.literalByName(output.toString());
+                if (literal != null) {
+                    return (double) literal.index();
+                }
+            }
+        }
         return 0;
     }
 
@@ -231,7 +247,20 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         if (metaOutput.type() == KPrimitiveTypes.STRING) {
             throw new RuntimeException("String are not managed yet");
         }
+        if (metaOutput.type().isEnum()) {
+            int ceiledInferred = math_ceil(inferred);
+            KMetaEnum metaEnum = (KMetaEnum) metaOutput.type();
+            return metaEnum.literal(ceiledInferred);
+        }
         return null;
     }
+
+    /** @native ts
+     * return Math.round(toCeilValue);
+     * */
+    private int math_ceil(double toCeilValue){
+        return (int) Math.round(toCeilValue);
+    }
+
 
 }

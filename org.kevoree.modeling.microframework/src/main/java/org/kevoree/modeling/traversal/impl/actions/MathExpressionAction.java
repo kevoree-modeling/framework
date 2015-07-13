@@ -1,5 +1,6 @@
 package org.kevoree.modeling.traversal.impl.actions;
 
+import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
@@ -42,10 +43,14 @@ public class MathExpressionAction implements KTraversalAction {
                         }
                         Object resolved = context.inputObjects()[finalI].getByName(potentialVarName);
                         if (resolved != null) {
-                            try {
-                                return Double.parseDouble(resolved.toString());
-                            } catch (Exception e) {
-                                //noop
+                            if (resolved instanceof MetaLiteral) {
+                                return (double) ((MetaLiteral) resolved).index();
+                            } else {
+                                try {
+                                    return Double.parseDouble(resolved.toString());
+                                } catch (Exception e) {
+                                    //noop
+                                }
                             }
                         }
                         return null;
@@ -54,7 +59,7 @@ public class MathExpressionAction implements KTraversalAction {
                 selected[finalI] = _engine.eval(this._expression);
             }
         }
-        if(context.finalCallback() != null){
+        if (context.finalCallback() != null) {
             context.finalCallback().on(selected);
         }
     }
