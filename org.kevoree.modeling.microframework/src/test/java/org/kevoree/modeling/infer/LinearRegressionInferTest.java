@@ -100,11 +100,7 @@ public class LinearRegressionInferTest {
                         double calcPrice=Double.parseDouble(objects[0].toString());
 
                         Assert.assertTrue(Math.abs(price-calcPrice)<10);
-
-
-                        KMemorySegment ks = regProfile.manager().segment(0, 0, regProfile.uuid(), false, regProfile.metaClass(), null);
-
-
+                    //    KMemorySegment ks = regProfile.manager().segment(0, 0, regProfile.uuid(), false, regProfile.metaClass(), null);
                     }
                 });
 
