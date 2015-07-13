@@ -32,7 +32,7 @@ public class LinearRegressionInferTest {
         metaClassIris.addAttribute("price", KPrimitiveTypes.DOUBLE);
 
         KMetaClass inferGaussian = metaModel.addInferMetaClass("RegressionProfile", new LinearRegressionAlg());
-        inferGaussian.addDependency("Iris", metaClassIris, null);
+        inferGaussian.addDependency("House", metaClassIris, null);
 
         inferGaussian.addInput("length", "@House | =length");
         inferGaussian.addInput("width", "@House | =width");
