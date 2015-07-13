@@ -45,21 +45,23 @@ public class LinearRegressionInferTest {
     }
 
     private double getPrice(double length, double width, double height, double rooms) {
-        return 4*length+2*width+0.01*height+10*rooms;
+        return 410*length+2*width+0.01*height+10*rooms-10;
     }
 
     private static Random rand=new Random();
     private static KMetaModel mm;
     private static KModel model;
 
+    private int count=0;
+
     private KObject createHouse() {
         KObject house = model.createByName("House", 0, 0);
         double length=rand.nextDouble();
         double width=rand.nextDouble();
         double height=rand.nextDouble();
-        double rooms=rand.nextDouble();
-
+        double rooms=count;
         double price=getPrice(length, width, height, rooms);
+        count++;
 
         house.setByName("length", length);
         house.setByName("width", width) ;
@@ -78,7 +80,7 @@ public class LinearRegressionInferTest {
             public void on(Object o) {
                 KObjectInfer regProfile = (KObjectInfer) model.createByName("RegressionProfile", 0, 0);
 
-                int trainingSize=100000;
+                int trainingSize=1000000;
 
                 for (int i = 0; i < trainingSize; i++) {
                     KObject house=createHouse();

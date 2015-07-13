@@ -13,7 +13,7 @@ public class LinearRegressionAlg implements KInferAlg {
     //TODO meta-learning parameters to be passed from K-Infer somehow
     private double alpha=0.005; //learning rate
     private double gamma =0.000; //regularization parameter
-    private int iterations=100; //iterations
+    private int iterations=1; //iterations
 
     private static Random rand= new Random();
     @Override
