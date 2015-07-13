@@ -80,7 +80,7 @@ public class LinearRegressionInferTest {
             public void on(Object o) {
                 KObjectInfer regProfile = (KObjectInfer) model.createByName("RegressionProfile", 0, 0);
 
-                int trainingSize=1000;
+                int trainingSize=10000;
 
                 for (int i = 0; i < trainingSize; i++) {
                     KObject house=createHouse();
@@ -99,7 +99,7 @@ public class LinearRegressionInferTest {
                         double price=Double.parseDouble(test[0].getByName("price").toString());
                         double calcPrice=Double.parseDouble(objects[0].toString());
 
-                        Assert.assertTrue(Math.abs(price-calcPrice)<1);
+                        Assert.assertTrue(Math.abs(price-calcPrice)<10);
 
 
                         KMemorySegment ks = regProfile.manager().segment(0, 0, regProfile.uuid(), false, regProfile.metaClass(), null);
