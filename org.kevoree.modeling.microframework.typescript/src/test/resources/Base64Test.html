@@ -1,0 +1,64 @@
+<script>
+
+    var encodeArray = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'];
+    var decodeArray = [];
+    var i = 0;
+    for (var c = 'A'.charCodeAt(0); c <= 'Z'.charCodeAt(0); c++) {
+        decodeArray[String.fromCharCode(c)] = i;
+        i++;
+    }
+
+    for (var c = 'a'.charCodeAt(0); c <= 'z'.charCodeAt(0); c++) {
+        decodeArray[String.fromCharCode(c)] = i;
+        i++;
+    }
+    for (var c = '0'.charCodeAt(0); c <= '9'.charCodeAt(0); c++) {
+        decodeArray[String.fromCharCode(c)] = i;
+        i++;
+    }
+    decodeArray['+'] = i;
+    i++;
+    decodeArray['/'] = i;
+
+
+    function encode(l) {
+        var result = "";
+        var tmp = ( l < 0) ? (l * -1) + 0x0020000000000000 : l;
+        for(var i = 48; i >= 0; i-=6) {
+            result += encodeArray[(tmp / (Math.pow(2,i))) & 0x3F];
+        }
+        return result;
+    }
+
+    function decode(s) {
+        var result = 0;
+        result += (decodeArray[s.charAt(0)] & 0x1F) * Math.pow(2,48) ;
+        for(var i = 1; i < s.length;i++) {
+            result += (decodeArray[s.charAt(i)] & 0xFF) * Math.pow(2,48-(6*i));
+        }
+        if((decodeArray[s.charAt(0)] & 0x0020) != 0) {
+            result *= -1;
+        }
+        return result;
+    }
+
+
+    var timeBegin = -0x001FFFFFFFFFFFFE;
+    var timeNULL = 0x001FFFFFFFFFFFFF;
+    var timeEND = 0x001FFFFFFFFFFFFE;
+
+
+    var s = encode(timeBegin);
+    var dec = decode(s);
+    console.log("L=>64:"+ s + "      64=>L:"+ dec+"     ("+timeBegin+")");
+
+
+    s = encode(timeEND);
+    dec = decode(s);
+    console.log("L=>64:"+ s + "      64=>L:"+ dec+"     ("+timeEND+")");
+
+
+</script>
+
+
+
