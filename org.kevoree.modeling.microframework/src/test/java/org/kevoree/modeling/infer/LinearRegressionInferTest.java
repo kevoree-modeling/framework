@@ -29,7 +29,7 @@ public class LinearRegressionInferTest {
         metaClassIris.addAttribute("height", KPrimitiveTypes.DOUBLE);
         metaClassIris.addAttribute("numOfRooms", KPrimitiveTypes.DOUBLE);
 
-        metaClassIris.addAttribute("Price", KPrimitiveTypes.DOUBLE);
+        metaClassIris.addAttribute("price", KPrimitiveTypes.DOUBLE);
 
         KMetaClass inferGaussian = metaModel.addInferMetaClass("RegressionProfile", new LinearRegressionAlg());
         inferGaussian.addDependency("Iris", metaClassIris, null);
@@ -67,7 +67,7 @@ public class LinearRegressionInferTest {
         house.setByName("width", width) ;
         house.setByName("height", height );
         house.setByName("numOfRooms", rooms);
-        house.setByName("Price", price);
+        house.setByName("price", price);
         return house;
     }
 
@@ -86,7 +86,7 @@ public class LinearRegressionInferTest {
                     KObject house=createHouse();
 
                     Object[] output=new Object[1];
-                    output[0] = Double.parseDouble(house.getByName("Price").toString());
+                    output[0] = Double.parseDouble(house.getByName("price").toString());
                     regProfile.train(new KObject[]{house}, output, null);
                 }
 
@@ -96,7 +96,7 @@ public class LinearRegressionInferTest {
                 regProfile.infer(test, new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] objects) {
-                        double price=Double.parseDouble(test[0].getByName("Price").toString());
+                        double price=Double.parseDouble(test[0].getByName("price").toString());
                         double calcPrice=Double.parseDouble(objects[0].toString());
 
                         KMemorySegment ks = regProfile.manager().segment(0, 0, regProfile.uuid(), false, regProfile.metaClass(), null);
