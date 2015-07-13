@@ -3,6 +3,7 @@ package org.kevoree.modeling.meta.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.struct.map.KStringMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.meta.KLiteral;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.MetaType;
@@ -13,24 +14,24 @@ public class MetaEnum implements KMetaEnum {
 
     private int _index;
 
-    private KMeta[] _literals;
+    private KLiteral[] _literals;
 
     private KStringMap<Integer> _indexes = null;
 
     public MetaEnum(String p_name, int p_index) {
         this._name = p_name;
         this._index = p_index;
-        this._literals = new KMeta[0];
+        this._literals = new KLiteral[0];
         _indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
     @Override
-    public KMeta[] literals() {
+    public KLiteral[] literals() {
         return this._literals;
     }
 
     @Override
-    public KMeta literalByName(String p_name) {
+    public KLiteral literalByName(String p_name) {
         if (_indexes != null) {
             Integer resolvedIndex = _indexes.get(p_name);
             if (resolvedIndex != null) {
@@ -41,12 +42,12 @@ public class MetaEnum implements KMetaEnum {
     }
 
     @Override
-    public KMeta literal(int p_index) {
+    public KLiteral literal(int p_index) {
         return this._literals[p_index];
     }
 
     @Override
-    public KMeta addLiteral(String p_name) {
+    public KLiteral addLiteral(String p_name) {
         MetaLiteral newLiteral = new MetaLiteral(p_name, _literals.length, this);
         internal_add_meta(newLiteral);
         return newLiteral;
@@ -82,8 +83,8 @@ public class MetaEnum implements KMetaEnum {
      * this._literals[p_new_meta.index()] = p_new_meta;
      * this._indexes.put(p_new_meta.metaName(), p_new_meta.index());
      */
-    private void internal_add_meta(KMeta p_new_meta) {
-        KMeta[] incArray = new KMeta[_literals.length + 1];
+    private void internal_add_meta(KLiteral p_new_meta) {
+        KLiteral[] incArray = new KLiteral[_literals.length + 1];
         System.arraycopy(_literals, 0, incArray, 0, _literals.length);
         incArray[_literals.length] = p_new_meta;
         _literals = incArray;

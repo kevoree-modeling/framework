@@ -4,12 +4,12 @@ import org.kevoree.modeling.KType;
 
 public interface KMetaEnum extends KType, KMeta {
 
-    KMeta[] literals();
+    KLiteral[] literals();
 
-    KMeta literalByName(String name);
+    KLiteral literalByName(String name);
 
-    KMeta literal(int index);
+    KLiteral literal(int index);
 
-    KMeta addLiteral(String name);
+    KLiteral addLiteral(String name);
 
 }

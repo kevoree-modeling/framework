@@ -40,6 +40,10 @@ public class BasicEnumInferTest {
                 KObject sensor1 = model.createByName("Sensor", 0, 0);
                 sensor1.setByName("name", "sensor#1");
                 sensor1.setByName("state", mm.metaTypeByName("State").literalByName("OK"));
+                Assert.assertEquals(sensor1.getByName("state"), mm.metaTypeByName("State").literalByName("OK"));
+                sensor1.setByName("state", "NOK");
+                Assert.assertEquals(sensor1.getByName("state"), mm.metaTypeByName("State").literalByName("NOK"));
+                sensor1.setByName("state", "OK");
 
                 KObject sensor2 = model.createByName("Sensor", 0, 0);
                 sensor2.setByName("name", "sensor#2");
