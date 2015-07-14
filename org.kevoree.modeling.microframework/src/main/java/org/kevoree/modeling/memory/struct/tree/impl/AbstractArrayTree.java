@@ -25,27 +25,27 @@ public abstract class AbstractArrayTree {
     private static final char RED_LEFT = '[';
     private static final char RED_RIGHT = ']';
 
+    protected int kvSize = 1;
+
     public AbstractArrayTree() {
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
     }
-
-    abstract int kvSize();
 
     private static final int META_SIZE = 3;
 
     private void allocate(int capacity) {
         _back_colors = new boolean[capacity];
         _back_meta = new int[capacity * META_SIZE];
-        _back_kv = new long[capacity * kvSize()];
+        _back_kv = new long[capacity * kvSize];
         _threshold = (int) (capacity * _loadFactor);
     }
 
     protected void reallocate(int newCapacity) {
         _threshold = (int) (newCapacity * _loadFactor);
         //copy KV_BACK
-        long[] new_back_kv = new long[newCapacity * kvSize()];
+        long[] new_back_kv = new long[newCapacity * kvSize];
         if (_back_kv != null) {
-            System.arraycopy(_back_kv, 0, new_back_kv, 0, _size * kvSize());
+            System.arraycopy(_back_kv, 0, new_back_kv, 0, _size * kvSize);
         }
         this._back_kv = new_back_kv;
         //copy COLOR_BACK
@@ -80,22 +80,22 @@ public abstract class AbstractArrayTree {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return this._back_kv[p_currentIndex * kvSize()];
+        return this._back_kv[p_currentIndex * kvSize];
     }
 
     protected void setKey(int p_currentIndex, long p_paramIndex) {
-        this._back_kv[p_currentIndex * kvSize()] = p_paramIndex;
+        this._back_kv[p_currentIndex * kvSize] = p_paramIndex;
     }
 
     protected long value(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return this._back_kv[(p_currentIndex * kvSize()) + 1];
+        return this._back_kv[(p_currentIndex * kvSize) + 1];
     }
 
     protected void setValue(int p_currentIndex, long p_paramIndex) {
-        this._back_kv[(p_currentIndex * kvSize()) + 1] = p_paramIndex;
+        this._back_kv[(p_currentIndex * kvSize) + 1] = p_paramIndex;
     }
 
     protected int left(int p_currentIndex) {
@@ -471,7 +471,7 @@ public abstract class AbstractArrayTree {
                 if (parentIndex != -1) {
                     builder.append(parentIndex);
                 }
-                if (kvSize() > 1) {
+                if (kvSize > 1) {
                     builder.append(',');
                     Base64.encodeToBuffer(value(i), builder);
                 }

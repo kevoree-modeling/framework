@@ -10,11 +10,7 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
         this._back_colors = null;
         this._back_meta = null;
         this._back_kv = null;
-    }
-
-    @Override
-    int kvSize() {
-        return 2;
+        this.kvSize = 2;
     }
 
     @Override

@@ -12,11 +12,6 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
         this._back_kv = null;
     }
 
-    @Override
-    int kvSize() {
-        return 1;
-    }
-
     public long previousOrEqual(long key) {
         int result = internal_previousOrEqual_index(key);
         if (result != -1) {
