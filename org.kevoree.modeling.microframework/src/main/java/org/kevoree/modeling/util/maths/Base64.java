@@ -13,10 +13,10 @@ package org.kevoree.modeling.util.maths;
  * return result;
  * }
  *
- * public static encodeToBuffer( l : number, buffer : string) {
+ * public static encodeToBuffer( l : number, buffer : java.lang.StringBuilder) {
  * var tmp = (l < 0 ? (l * -1) | 0x0020000000000000 : l);
  * for (var i = 48; i >= 0; i -= 6) {
- * buffer += Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F];
+ * buffer.append(Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F]);
  * }
  * }
  *

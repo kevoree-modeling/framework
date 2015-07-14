@@ -12,6 +12,8 @@ public abstract class AbstractArrayTree {
     protected int _threshold = 0;
     protected float _loadFactor;
     protected long[] _back = null;
+    protected long[] _back = null;
+
     private boolean _dirty = true;
     private int _counter = 0;
 
