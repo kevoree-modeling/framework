@@ -50,6 +50,15 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         _threshold = (int) (size() * _loadFactor);
     }
 
+
+    private static final int ATT_SIZE_LEN = 8;
+
+    private static final int ATT_DIRTY_LEN = 4;
+
+
+
+
+
     protected int internal_size_base_segment() {
         return 8 + 4 + 1 + 4; // root index, size, dirty, counter
     }
