@@ -9,11 +9,11 @@ import org.kevoree.modeling.KConfig;
  */
 public class Base64Test {
 
-/*
     @Test
     public void beginingOfTimeEncodingTest() {
         Assert.assertEquals(KConfig.BEGINNING_OF_TIME, Base64.decode(Base64.encode(KConfig.BEGINNING_OF_TIME)));
     }
+
 
     @Test
     public void endOfTimeEncodingTest() {
@@ -32,7 +32,7 @@ public class Base64Test {
     public void zeroEncodingTest() {
         Assert.assertEquals(0, Base64.decode(Base64.encode(0)));
     }
-    */
+
 
 /*
     private String printBits(Long val) {
@@ -44,5 +44,25 @@ public class Base64Test {
         }
         return res + toString;
     }
+
+
+    public static void main(String[] args) {
+        String res = "";
+        int i = 0;
+        for(char c= 'A'; c <='Z'; c++) {
+            res += "\""+c+"\":" + i + ", "; i++;
+        }
+        for(char c= 'a'; c <='z'; c++) {
+            res += "\""+c+"\":" + i + ", "; i++;
+        }
+        for(char c= '0'; c <='9'; c++) {
+            res += "\""+c+"\":" + i + ", "; i++;
+        }
+        res += "\"+\":" + i + ", "; i++;
+        res += "\"/\":" + i;
+        System.out.println(res);
+    }
+
+
     */
 }
