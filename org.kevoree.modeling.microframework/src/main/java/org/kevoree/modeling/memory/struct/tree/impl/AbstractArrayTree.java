@@ -7,130 +7,167 @@ import org.kevoree.modeling.util.maths.Base64;
 
 public abstract class AbstractArrayTree {
 
-    protected long _root_index = -1;
+    protected int _root_index = -1;
     protected int _size = 0;
     protected int _threshold = 0;
     protected float _loadFactor;
-    protected long[] _back = null;
-    protected long[] _back = null;
+
+    //back end arrays
+    protected int[] _back_meta = null;
+    protected long[] _back_kv = null;
+    protected boolean[] _back_colors = null;
 
     private boolean _dirty = true;
     private int _counter = 0;
+
+    private static final char BLACK_LEFT = '{';
+    private static final char BLACK_RIGHT = '}';
+    private static final char RED_LEFT = '[';
+    private static final char RED_RIGHT = ']';
 
     public AbstractArrayTree() {
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
     }
 
-    abstract int ELEM_SIZE();
+    abstract int kvSize();
+
+    private static final int META_SIZE = 3;
 
     private void allocate(int capacity) {
-        _back = new long[capacity * ELEM_SIZE()];
+        _back_colors = new boolean[capacity];
+        _back_meta = new int[capacity * META_SIZE];
+        _back_kv = new long[capacity * kvSize()];
         _threshold = (int) (capacity * _loadFactor);
+    }
+
+    protected void reallocate(int newCapacity) {
+        _threshold = (int) (newCapacity * _loadFactor);
+        //copy KV_BACK
+        long[] new_back_kv = new long[newCapacity * kvSize()];
+        if (_back_kv != null) {
+            System.arraycopy(_back_kv, 0, new_back_kv, 0, _size * kvSize());
+        }
+        this._back_kv = new_back_kv;
+        //copy COLOR_BACK
+        boolean[] new_back_colors = new boolean[newCapacity];
+        if (_back_colors != null) {
+            System.arraycopy(_back_colors, 0, new_back_colors, 0, _size);
+        }
+        this._back_colors = new_back_colors;
+        //copy META BACK
+        int[] new_back_meta = new int[newCapacity * META_SIZE];
+        if (_back_meta != null) {
+            System.arraycopy(_back_meta, 0, new_back_meta, 0, _size * META_SIZE);
+            for(int i=_size * META_SIZE;i<newCapacity * META_SIZE;i++){
+                new_back_meta[i] = -1;
+            }
+        }
+        this._back_meta = new_back_meta;
     }
 
     public int size() {
         return _size;
     }
 
-    protected long key(long p_currentIndex) {
+    protected long key(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return _back[(int) p_currentIndex];
+        return this._back_kv[p_currentIndex * kvSize()];
     }
 
-    protected void setKey(long p_currentIndex, long p_paramIndex) {
-        _back[(int) p_currentIndex] = p_paramIndex;
+    protected void setKey(int p_currentIndex, long p_paramIndex) {
+        this._back_kv[p_currentIndex * kvSize()] = p_paramIndex;
     }
 
-    protected long left(long p_currentIndex) {
+    protected long value(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return _back[(int) p_currentIndex + 1];
+        return this._back_kv[(p_currentIndex * kvSize()) + 1];
     }
 
-    protected void setLeft(long p_currentIndex, long p_paramIndex) {
-        _back[(int) p_currentIndex + 1] = p_paramIndex;
+    protected void setValue(int p_currentIndex, long p_paramIndex) {
+        this._back_kv[(p_currentIndex * kvSize()) + 1] = p_paramIndex;
     }
 
-    protected long right(long p_currentIndex) {
+    protected int left(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return _back[(int) p_currentIndex + 2];
+        return this._back_meta[p_currentIndex * META_SIZE];
     }
 
-    protected void setRight(long p_currentIndex, long p_paramIndex) {
-        _back[(int) p_currentIndex + 2] = p_paramIndex;
+    protected void setLeft(int p_currentIndex, int p_paramIndex) {
+        this._back_meta[p_currentIndex * META_SIZE] = p_paramIndex;
     }
 
-    private long parent(long p_currentIndex) {
+    protected int right(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return _back[(int) p_currentIndex + 3];
+        return this._back_meta[(p_currentIndex * META_SIZE) + 1];
     }
 
-    protected void setParent(long p_currentIndex, long p_paramIndex) {
-        _back[(int) p_currentIndex + 3] = p_paramIndex;
+    protected void setRight(int p_currentIndex, int p_paramIndex) {
+        this._back_meta[(p_currentIndex * META_SIZE) + 1] = p_paramIndex;
     }
 
-    private long color(long currentIndex) {
-        if (currentIndex == -1) {
+    private int parent(int p_currentIndex) {
+        if (p_currentIndex == -1) {
             return -1;
         }
-        return _back[(int) currentIndex + 4];
+        return this._back_meta[(p_currentIndex * META_SIZE) + 2];
     }
 
-    protected void setColor(long currentIndex, long paramIndex) {
-        _back[(int) currentIndex + 4] = paramIndex;
+    protected void setParent(int p_currentIndex, int p_paramIndex) {
+        this._back_meta[(p_currentIndex * META_SIZE) + 2] = p_paramIndex;
     }
 
-    protected long value(long currentIndex) {
-        if (currentIndex == -1) {
+    private boolean color(int p_currentIndex) {
+        if (p_currentIndex == -1) {
+            return true;
+        }
+        return this._back_colors[p_currentIndex];
+    }
+
+    protected void setColor(int p_currentIndex, boolean p_paramIndex) {
+        this._back_colors[p_currentIndex] = p_paramIndex;
+    }
+
+    public int grandParent(int p_currentIndex) {
+        if (p_currentIndex == -1) {
             return -1;
         }
-        return _back[(int) currentIndex + 5];
-    }
-
-    protected void setValue(long currentIndex, long paramIndex) {
-        _back[(int) currentIndex + 5] = paramIndex;
-    }
-
-    public long grandParent(long currentIndex) {
-        if (currentIndex == -1) {
-            return -1;
-        }
-        if (parent(currentIndex) != -1) {
-            return parent(parent(currentIndex));
+        if (parent(p_currentIndex) != -1) {
+            return parent(parent(p_currentIndex));
         } else {
             return -1;
         }
     }
 
-    public long sibling(long currentIndex) {
-        if (parent(currentIndex) == -1) {
+    public int sibling(int p_currentIndex) {
+        if (parent(p_currentIndex) == -1) {
             return -1;
         } else {
-            if (currentIndex == left(parent(currentIndex))) {
-                return right(parent(currentIndex));
+            if (p_currentIndex == left(parent(p_currentIndex))) {
+                return right(parent(p_currentIndex));
             } else {
-                return left(parent(currentIndex));
+                return left(parent(p_currentIndex));
             }
         }
     }
 
-    public long uncle(long currentIndex) {
-        if (parent(currentIndex) != -1) {
-            return sibling(parent(currentIndex));
+    public int uncle(int p_currentIndex) {
+        if (parent(p_currentIndex) != -1) {
+            return sibling(parent(p_currentIndex));
         } else {
             return -1;
         }
     }
 
-    private long previous(long p_index) {
-        long p = p_index;
+    private int previous(int p_index) {
+        int p = p_index;
         if (left(p) != -1) {
             p = left(p);
             while (right(p) != -1) {
@@ -155,7 +192,7 @@ public abstract class AbstractArrayTree {
 
     /* Time never use direct lookup, sadly for performance, anyway this method is private to ensure the correctness of caching mechanism */
     public long lookup(long p_key) {
-        long n = _root_index;
+        int n = _root_index;
         if (n == -1) {
             return KConfig.NULL_LONG;
         }
@@ -174,15 +211,15 @@ public abstract class AbstractArrayTree {
     }
 
     public void range(long startKey, long endKey, KTreeWalker walker) {
-        long indexEnd = internal_previousOrEqual_index(endKey);
+        int indexEnd = internal_previousOrEqual_index(endKey);
         while (indexEnd != -1 && key(indexEnd) >= startKey) {
             walker.elem(key(indexEnd));
             indexEnd = previous(indexEnd);
         }
     }
 
-    protected long internal_previousOrEqual_index(long p_key) {
-        long p = _root_index;
+    protected int internal_previousOrEqual_index(long p_key) {
+        int p = _root_index;
         if (p == -1) {
             return p;
         }
@@ -200,7 +237,7 @@ public abstract class AbstractArrayTree {
                 if (left(p) != -1) {
                     p = left(p);
                 } else {
-                    long parent = parent(p);
+                    int parent = parent(p);
                     long ch = p;
                     while (parent != -1 && ch == left(parent)) {
                         ch = parent;
@@ -213,8 +250,8 @@ public abstract class AbstractArrayTree {
         return -1;
     }
 
-    private void rotateLeft(long n) {
-        long r = right(n);
+    private void rotateLeft(int n) {
+        int r = right(n);
         replaceNode(n, r);
         setRight(n, left(r));
         if (left(r) != -1) {
@@ -224,8 +261,8 @@ public abstract class AbstractArrayTree {
         setParent(n, r);
     }
 
-    private void rotateRight(long n) {
-        long l = left(n);
+    private void rotateRight(int n) {
+        int l = left(n);
         replaceNode(n, l);
         setLeft(n, right(l));
         if (right(l) != -1) {
@@ -235,7 +272,7 @@ public abstract class AbstractArrayTree {
         setParent(n, l);
     }
 
-    private void replaceNode(long oldn, long newn) {
+    private void replaceNode(int oldn, int newn) {
         if (parent(oldn) == -1) {
             _root_index = newn;
         } else {
@@ -250,35 +287,35 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    protected void insertCase1(long n) {
+    protected void insertCase1(int n) {
         if (parent(n) == -1) {
-            setColor(n, 1);
+            setColor(n, true);
         } else {
             insertCase2(n);
         }
     }
 
-    private void insertCase2(long n) {
-        if (nodeColor(parent(n)) == true) {
+    private void insertCase2(int n) {
+        if (color(parent(n)) == true) {
             return;
         } else {
             insertCase3(n);
         }
     }
 
-    private void insertCase3(long n) {
-        if (nodeColor(uncle(n)) == false) {
-            setColor(parent(n), 1);
-            setColor(uncle(n), 1);
-            setColor(grandParent(n), 0);
+    private void insertCase3(int n) {
+        if (color(uncle(n)) == false) {
+            setColor(parent(n), true);
+            setColor(uncle(n), true);
+            setColor(grandParent(n), false);
             insertCase1(grandParent(n));
         } else {
             insertCase4(n);
         }
     }
 
-    private void insertCase4(long n_n) {
-        long n = n_n;
+    private void insertCase4(int n_n) {
+        int n = n_n;
         if (n == right(parent(n)) && parent(n) == left(grandParent(n))) {
             rotateLeft(parent(n));
             n = left(n);
@@ -291,9 +328,9 @@ public abstract class AbstractArrayTree {
         insertCase5(n);
     }
 
-    private void insertCase5(long n) {
-        setColor(parent(n), 1);
-        setColor(grandParent(n), 0);
+    private void insertCase5(int n) {
+        setColor(parent(n), true);
+        setColor(grandParent(n), false);
         if (n == left(parent(n)) && parent(n) == left(grandParent(n))) {
             rotateRight(grandParent(n));
         } else {
@@ -395,20 +432,6 @@ public abstract class AbstractArrayTree {
         }
     }*/
 
-    private boolean nodeColor(long n) {
-        if (n == -1) {
-            return true;
-        } else {
-            return color(n) == 1;
-        }
-    }
-
-    private static final char BLACK_LEFT = '{';
-    private static final char BLACK_RIGHT = '}';
-    private static final char RED_LEFT = '[';
-    private static final char RED_RIGHT = ']';
-
-
     public String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
         if (_root_index == -1) {
@@ -416,39 +439,34 @@ public abstract class AbstractArrayTree {
         } else {
             builder.append(_size);
             builder.append(',');
-            int elemSize = ELEM_SIZE();
-            builder.append(_root_index / elemSize);
+            builder.append(_root_index);
             for (int i = 0; i < _size; i++) {
-                int nextSegmentBegin = i * elemSize;
-                long beginParent = parent(nextSegmentBegin);
+                int parentIndex = parent(i);
                 boolean isOnLeft = false;
-                if (beginParent != -1) {
-                    isOnLeft = left(beginParent) == nextSegmentBegin;
+                if (parentIndex != -1) {
+                    isOnLeft = left(parentIndex) == i;
                 }
-                if (color(nextSegmentBegin) == 0) {
+                if (color(i) == false) {
                     if (isOnLeft) {
                         builder.append(BLACK_LEFT);
                     } else {
                         builder.append(BLACK_RIGHT);
                     }
-                } else {
-                    //red
+                } else {//red
                     if (isOnLeft) {
                         builder.append(RED_LEFT);
                     } else {
                         builder.append(RED_RIGHT);
                     }
                 }
-                //builder.append(key(nextSegmentBegin));
-                Base64.encodeToBuffer(key(nextSegmentBegin), builder);
+                Base64.encodeToBuffer(key(i), builder);
                 builder.append(',');
-                if (beginParent != -1) {
-                    builder.append(beginParent / elemSize);
+                if (parentIndex != -1) {
+                    builder.append(parentIndex);
                 }
-                if (elemSize > 5) {
+                if (kvSize() > 1) {
                     builder.append(',');
-                    //builder.append(value(nextSegmentBegin));
-                    Base64.encodeToBuffer(value(nextSegmentBegin), builder);
+                    Base64.encodeToBuffer(value(i), builder);
                 }
             }
         }
@@ -459,7 +477,6 @@ public abstract class AbstractArrayTree {
         if (payload == null || payload.length() == 0) {
             return;
         }
-        int elemSize = ELEM_SIZE();
         int initPos = 0;
         int cursor = 0;
         while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
@@ -473,49 +490,49 @@ public abstract class AbstractArrayTree {
         while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
-        _root_index = Integer.parseInt(payload.substring(initPos, cursor)) * elemSize;
+        _root_index = Integer.parseInt(payload.substring(initPos, cursor));
         allocate(_size);
-        for (int i = 0; i < _size * elemSize; i++) {
-            _back[i] = -1;
+        for (int i = 0; i < _size; i++) {
+            int offsetI = i * META_SIZE;
+            this._back_meta[offsetI] = -1;
+            this._back_meta[offsetI + 1] = -1;
+            this._back_meta[offsetI + 2] = -1;
         }
-        int _back_index = 0;
+        int currentLoopIndex = 0;
         while (cursor < payload.length()) {
             while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
                 cursor++;
             }
             if (cursor < payload.length()) {
                 char elem = payload.charAt(cursor);
-                int currentBlock = _back_index * elemSize;
                 boolean isOnLeft = false;
                 if (elem == BLACK_LEFT || elem == RED_LEFT) {
                     isOnLeft = true;
                 }
                 if (elem == BLACK_LEFT || elem == BLACK_RIGHT) {
-                    setColor(currentBlock, 0);
+                    setColor(currentLoopIndex, false);
                 } else {
-                    setColor(currentBlock, 1);
+                    setColor(currentLoopIndex, true);
                 }
                 cursor++;
                 int beginChunk = cursor;
                 while (cursor < payload.length() && payload.charAt(cursor) != ',') {
                     cursor++;
                 }
-                //long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
                 long loopKey = Base64.decodeWithBounds(payload, beginChunk, cursor);
-                setKey(currentBlock, loopKey);
+                setKey(currentLoopIndex, loopKey);
                 cursor++;
                 beginChunk = cursor;
                 while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
                     cursor++;
                 }
                 if (cursor > beginChunk) {
-                    long parentRaw = Long.parseLong(payload.substring(beginChunk, cursor));
-                    long parentValue = parentRaw * elemSize;
-                    setParent(currentBlock, parentValue);
+                    int parentRaw = Integer.parseInt(payload.substring(beginChunk, cursor));
+                    setParent(currentLoopIndex, parentRaw);
                     if (isOnLeft) {
-                        setLeft(parentValue, currentBlock);
+                        setLeft(parentRaw, currentLoopIndex);
                     } else {
-                        setRight(parentValue, currentBlock);
+                        setRight(parentRaw, currentLoopIndex);
                     }
                 }
                 if (cursor < payload.length() && payload.charAt(cursor) == ',') {
@@ -525,12 +542,11 @@ public abstract class AbstractArrayTree {
                         cursor++;
                     }
                     if (cursor > beginChunk) {
-                        //long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
                         long currentValue = Base64.decodeWithBounds(payload, beginChunk, cursor);
-                        setValue(currentBlock, currentValue);
+                        setValue(currentLoopIndex, currentValue);
                     }
                 }
-                _back_index++;
+                currentLoopIndex++;
             }
         }
     }
@@ -560,7 +576,9 @@ public abstract class AbstractArrayTree {
     }
 
     public void free(KMetaModel p_metaModel) {
-        this._back = null;
+        this._back_colors = null;
+        this._back_meta = null;
+        this._back_kv = null;
         this._threshold = 0;
     }
 

@@ -5,21 +5,21 @@ import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 
 public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTree {
 
-    private static final int SIZE_NODE = 6;
-
     public ArrayLongLongTree() {
         super();
-        _back = null;
+        this._back_colors = null;
+        this._back_meta = null;
+        this._back_kv = null;
     }
 
     @Override
-    int ELEM_SIZE() {
-        return SIZE_NODE;
+    int kvSize() {
+        return 2;
     }
 
     @Override
     public long previousOrEqualValue(long p_key) {
-        long result = internal_previousOrEqual_index(p_key);
+        int result = internal_previousOrEqual_index(p_key);
         if (result != -1) {
             return value(result);
         } else {
@@ -29,7 +29,7 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
 
     @Override
     public long lookupValue(long p_key) {
-        long n = _root_index;
+        int n = _root_index;
         if (n == -1) {
             return KConfig.NULL_LONG;
         }
@@ -51,38 +51,33 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
     public synchronized void insert(long p_key, long p_value) {
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
-            long[] new_back = new long[length * SIZE_NODE];
-            if (_back != null) {
-                System.arraycopy(_back, 0, new_back, 0, _size * SIZE_NODE);
-            }
-            _threshold = (int) (length * _loadFactor);
-            _back = new_back;
+            reallocate(length);
         }
-        long insertedNode = (_size) * SIZE_NODE;
-        if (_size == 0) {
+        int newIndex = _size;
+        if (newIndex == 0) {
+            setKey(newIndex, p_key);
+            setValue(newIndex, p_value);
+            setColor(newIndex, false);
+            setLeft(newIndex, -1);
+            setRight(newIndex, -1);
+            setParent(newIndex, -1);
+            _root_index = newIndex;
             _size = 1;
-            setKey(insertedNode, p_key);
-            setValue(insertedNode, p_value);
-            setColor(insertedNode, 0);
-            setLeft(insertedNode, -1);
-            setRight(insertedNode, -1);
-            setParent(insertedNode, -1);
-            _root_index = insertedNode;
         } else {
-            long n = _root_index;
+            int n = _root_index;
             while (true) {
                 if (p_key == key(n)) {
                     //nop _size
                     return;
                 } else if (p_key < key(n)) {
                     if (left(n) == -1) {
-                        setKey(insertedNode, p_key);
-                        setValue(insertedNode, p_value);
-                        setColor(insertedNode, 0);
-                        setLeft(insertedNode, -1);
-                        setRight(insertedNode, -1);
-                        setParent(insertedNode, -1);
-                        setLeft(n, insertedNode);
+                        setKey(newIndex, p_key);
+                        setValue(newIndex, p_value);
+                        setColor(newIndex, false);
+                        setLeft(newIndex, -1);
+                        setRight(newIndex, -1);
+                        setParent(newIndex, -1);
+                        setLeft(n, newIndex);
                         _size++;
                         break;
                     } else {
@@ -90,13 +85,13 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
                     }
                 } else {
                     if (right(n) == -1) {
-                        setKey(insertedNode, p_key);
-                        setValue(insertedNode, p_value);
-                        setColor(insertedNode, 0);
-                        setLeft(insertedNode, -1);
-                        setRight(insertedNode, -1);
-                        setParent(insertedNode, -1);
-                        setRight(n, insertedNode);
+                        setKey(newIndex, p_key);
+                        setValue(newIndex, p_value);
+                        setColor(newIndex, false);
+                        setLeft(newIndex, -1);
+                        setRight(newIndex, -1);
+                        setParent(newIndex, -1);
+                        setRight(n, newIndex);
                         _size++;
                         break;
                     } else {
@@ -104,9 +99,9 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
                     }
                 }
             }
-            setParent(insertedNode, n);
+            setParent(newIndex, n);
         }
-        insertCase1(insertedNode);
+        insertCase1(newIndex);
     }
 
 }
