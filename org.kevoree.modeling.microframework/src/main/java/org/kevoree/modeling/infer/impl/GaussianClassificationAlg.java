@@ -4,6 +4,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.meta.KMetaDependencies;
+import org.kevoree.modeling.meta.impl.MetaEnum;
 import org.kevoree.modeling.util.maths.Distribution;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 
@@ -19,7 +20,7 @@ public class GaussianClassificationAlg implements KInferAlg {
     //to keep updated
     private static int NUMOFFIELDS = 4;
 
-    private int maxOutput=4;
+    private int maxOutput=0;
 
 
 
@@ -62,6 +63,7 @@ public class GaussianClassificationAlg implements KInferAlg {
         //Create initial segment if empty
         int size=(maxOutput+1)*(origin.metaClass().inputs().length*NUMOFFIELDS+1);
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+            maxOutput=((MetaEnum)origin.metaClass().outputs()[0].type()).literals().length;
             ks.extendInfer(origin.metaClass().dependencies().index(),size,origin.metaClass());
             for(int i=0;i<size;i++){
                 ks.setInferElem(dependenciesIndex,i,0,origin.metaClass());
@@ -108,7 +110,6 @@ public class GaussianClassificationAlg implements KInferAlg {
                     state.add(getIndex(j,maxOutput,SUM, origin.metaClass().dependencies()) , trainingSet[i][j]);
                     state.add(getIndex(j,maxOutput, SUMSQUARE, origin.metaClass().dependencies()) , trainingSet[i][j] * trainingSet[i][j]);
                 }
-
             }
 
             //Update Global counters

@@ -9,8 +9,10 @@ import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.infer.impl.GaussianClassificationAlg;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.meta.KMetaClass;
+import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
+import org.kevoree.modeling.meta.impl.MetaEnum;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
 public class GaussianClassificationTest {
@@ -24,6 +26,12 @@ public class GaussianClassificationTest {
         metaClassIris.addAttribute("petalLength", KPrimitiveTypes.DOUBLE);
         metaClassIris.addAttribute("petalWidth", KPrimitiveTypes.DOUBLE);
 
+        KMetaEnum metaEnumIrisType = metaModel.addMetaEnum("IrisType");
+        metaEnumIrisType.addLiteral("IRISSETOSA");
+        metaEnumIrisType.addLiteral("IRISVERSICOLOUR");
+        metaEnumIrisType.addLiteral("IRISVIRGINICA");
+
+
         metaClassIris.addAttribute("type", KPrimitiveTypes.DOUBLE);
 
         KMetaClass inferGaussian = metaModel.addInferMetaClass("GaussianProfile", new GaussianClassificationAlg());
@@ -34,7 +42,7 @@ public class GaussianClassificationTest {
         inferGaussian.addInput("petalLength", "@Iris | =petalLength");
         inferGaussian.addInput("petalWidth", "@Iris | =petalWidth");
 
-        inferGaussian.addOutput("type", KPrimitiveTypes.DOUBLE);
+        inferGaussian.addOutput("type", metaEnumIrisType);
 
         return metaModel;
     }
@@ -210,10 +218,10 @@ public class GaussianClassificationTest {
                     irisInstance.setByName("sepalWidth", irisdataset[i + 1]);
                     irisInstance.setByName("petalLength", irisdataset[i + 2]);
                     irisInstance.setByName("petalWidth", irisdataset[i + 3]);
-                    irisInstance.setByName("type", irisdataset[i + 4]);
+                    irisInstance.setByName("type", ((KMetaEnum)mm.metaTypeByName("IrisType")).literal((int)irisdataset[i + 4]));
 
                     Object[] output = new Object[1];
-                    output[0] = irisdataset[i + 4];
+                    output[0] = irisInstance.getByName("type");
                     gaussianProfile.train(new KObject[]{irisInstance}, output, null);
                 }
 
@@ -243,7 +251,8 @@ public class GaussianClassificationTest {
                 irisInstanceTest[2][0].setByName("petalWidth", 2.026);
 
 
-                //for debug KMemorySegment ks = gaussianProfile.manager().segment(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
+                //for debug
+                KMemorySegment ks = gaussianProfile.manager().segment(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
 
 
                 
@@ -251,9 +260,9 @@ public class GaussianClassificationTest {
                     @Override
                     public void on(Object[][] objects) {
                         //to replace by iris type later
-                        Assert.assertTrue((double)objects[0][0]==0);
-                        Assert.assertTrue((double)objects[1][0]==1);
-                        Assert.assertTrue((double)objects[2][0]==2);
+                        Assert.assertTrue(objects[0][0]==((KMetaEnum)mm.metaTypeByName("IrisType")).literalByName("IRISSETOSA"));
+                        Assert.assertTrue(objects[1][0] == ((KMetaEnum) mm.metaTypeByName("IrisType")).literalByName("IRISVERSICOLOUR"));
+                        Assert.assertTrue(objects[2][0] == ((KMetaEnum) mm.metaTypeByName("IrisType")).literalByName("IRISVIRGINICA"));
                     }
                 });
             }
