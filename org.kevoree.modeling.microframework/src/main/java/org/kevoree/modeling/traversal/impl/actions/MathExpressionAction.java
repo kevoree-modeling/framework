@@ -46,10 +46,18 @@ public class MathExpressionAction implements KTraversalAction {
                             if (resolved instanceof MetaLiteral) {
                                 return (double) ((MetaLiteral) resolved).index();
                             } else {
-                                try {
-                                    return Double.parseDouble(resolved.toString());
-                                } catch (Exception e) {
-                                    //noop
+                                if (resolved instanceof Boolean) {
+                                    if (((Boolean) resolved)) {
+                                        return 1.0;
+                                    } else {
+                                        return 0.0;
+                                    }
+                                } else {
+                                    try {
+                                        return Double.parseDouble(resolved.toString());
+                                    } catch (Exception e) {
+                                        //noop
+                                    }
                                 }
                             }
                         }
