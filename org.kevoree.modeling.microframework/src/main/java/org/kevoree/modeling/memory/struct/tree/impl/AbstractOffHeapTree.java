@@ -4,13 +4,14 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.struct.tree.KTreeWalker;
 import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
 /**
  * @ignore ts
- *
+ * <p/>
  * OffHeap implementation of AbstractOffHeapTree
  * - memory structure:  | root index (8) | size (4) | dirty (1) | counter (4) | back (size * node size * 8) |
  * - back:              | key (8)        | left (8) | right (8) | parent (8)  | color (8)   | value (8)     |
@@ -491,7 +492,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
                         builder.append(RED_RIGHT);
                     }
                 }
-                builder.append(key(nextNodeIndex));
+                //builder.append(key(nextNodeIndex));
+                Base64.encodeToBuffer(key(nextNodeIndex), builder);
                 builder.append(',');
                 if (parentNodeIndex != -1) {
                     //builder.append(beginParent / elemSize);
@@ -499,7 +501,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
                 }
                 if (elemSize > 5) {
                     builder.append(',');
-                    builder.append(value(nextNodeIndex));
+                    //builder.append(value(nextNodeIndex));
+                    Base64.encodeToBuffer(value(nextNodeIndex), builder);
                 }
             }
         }
@@ -555,7 +558,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
                 while (cursor < payload.length() && payload.charAt(cursor) != ',') {
                     cursor++;
                 }
-                long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
+                //long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
+                long loopKey = Base64.decodeWithBounds(payload, beginChunk, cursor);
                 setKey(_back_index, loopKey);
                 cursor++;
                 beginChunk = cursor;
@@ -579,7 +583,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
                         cursor++;
                     }
                     if (cursor > beginChunk) {
-                        long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
+                        //long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
+                        long currentValue = Base64.decodeWithBounds(payload, beginChunk, cursor);
                         setValue(_back_index, currentValue);
                     }
                 }
