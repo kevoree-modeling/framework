@@ -36,7 +36,6 @@ public abstract class AbstractArrayTree {
         this._back_kv = null;
     }
 
-
     private void allocate(int capacity) {
         _back_colors = new boolean[capacity];
         _back_meta = new int[capacity * META_SIZE];
@@ -655,7 +654,7 @@ public abstract class AbstractArrayTree {
         insertCase1(newIndex);
     }
 
-    protected final long internal_lookup_value(long p_key){
+    protected final long internal_lookup_value(long p_key) {
         int n = _root_index;
         if (n == -1) {
             return KConfig.NULL_LONG;
