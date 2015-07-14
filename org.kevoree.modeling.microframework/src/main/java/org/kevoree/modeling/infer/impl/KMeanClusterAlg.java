@@ -4,6 +4,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
+import java.util.Random;
 
 public class KMeanClusterAlg implements KInferAlg {
 
@@ -35,31 +36,38 @@ public class KMeanClusterAlg implements KInferAlg {
         for(int iter=0;iter<iterations;iter++) {
             int temporalClassification;
             double[][] centroids = new double[k][origin.metaClass().inputs().length];
-            int[] counters=new int[k];
+            int[] counters = new int[k];
 
-            for(int j=0;j<k;j++){
-                centroids[j]=new double[origin.metaClass().inputs().length];
-                counters[j]=0;
+            for (int j = 0; j < k; j++) {
+                centroids[j] = new double[origin.metaClass().inputs().length];
+                counters[j] = 0;
             }
 
-            for(int i=0;i<trainingSet.length;i++){
+            for (int i = 0; i < trainingSet.length; i++) {
                 //Step 1, classify according to current centroids
-                temporalClassification=classify(trainingSet[i],state);
+                temporalClassification = classify(trainingSet[i], state);
 
                 //Step 2 update the centroids in live
-                for(int j=0;j<origin.metaClass().inputs().length;j++){
-                    centroids[temporalClassification][j]+=trainingSet[i][j];
+                for (int j = 0; j < origin.metaClass().inputs().length; j++) {
+                    centroids[temporalClassification][j] += trainingSet[i][j];
                 }
                 counters[temporalClassification]++;
             }
 
             //Step 3 replace the current state by the new centroids
-            for(int i=0;i<k;i++) {
-                for (int j = 0; j < origin.metaClass().inputs().length; j++) {
-                    state.set(j + i * origin.metaClass().inputs().length,centroids[i][j]/counters[i]);
+            for (int i = 0; i < k; i++) {
+                if (counters[i] != 0) {
+                    for (int j = 0; j < origin.metaClass().inputs().length; j++) {
+                        state.set(j + i * origin.metaClass().inputs().length, centroids[i][j] / counters[i]);
+                    }
+                } else {
+                    Random rand = new Random();
+                    int pos=rand.nextInt(trainingSet.length);
+                    for (int j = 0; j < origin.metaClass().inputs().length; j++) {
+                        state.set(j + i * origin.metaClass().inputs().length, trainingSet[pos][j]);
+                    }
                 }
             }
-
         }
     }
 
@@ -99,7 +107,7 @@ public class KMeanClusterAlg implements KInferAlg {
 
         for(int inst=0;inst<features.length;inst++){
             result[inst]=new double[1];
-            result[inst][0]=classify(features[inst],state);
+            result[inst][0]=classify(features[inst], state);
         }
         return result;
     }
