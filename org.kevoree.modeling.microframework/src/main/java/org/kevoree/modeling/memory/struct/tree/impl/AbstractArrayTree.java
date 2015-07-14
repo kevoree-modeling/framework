@@ -469,14 +469,14 @@ public abstract class AbstractArrayTree {
                         builder.append(RED_RIGHT);
                     }
                 }
-                Base64.encodeToBuffer(key(i), builder);
+                Base64.encodeLongToBuffer(key(i), builder);
                 builder.append(',');
                 if (parentIndex != -1) {
                     builder.append(parentIndex);
                 }
                 if (kvSize > 1) {
                     builder.append(',');
-                    Base64.encodeToBuffer(value(i), builder);
+                    Base64.encodeLongToBuffer(value(i), builder);
                 }
             }
         }
@@ -529,7 +529,7 @@ public abstract class AbstractArrayTree {
                 while (cursor < payload.length() && payload.charAt(cursor) != ',') {
                     cursor++;
                 }
-                long loopKey = Base64.decodeWithBounds(payload, beginChunk, cursor);
+                long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
                 setKey(currentLoopIndex, loopKey);
                 cursor++;
                 beginChunk = cursor;
@@ -552,7 +552,7 @@ public abstract class AbstractArrayTree {
                         cursor++;
                     }
                     if (cursor > beginChunk) {
-                        long currentValue = Base64.decodeWithBounds(payload, beginChunk, cursor);
+                        long currentValue = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
                         setValue(currentLoopIndex, currentValue);
                     }
                 }
