@@ -20,7 +20,6 @@ public class GaussianClassificationAlg implements KInferAlg {
     //to keep updated
     private static int NUMOFFIELDS = 4;
 
-    private int maxOutput=0;
 
 
 
@@ -58,12 +57,12 @@ public class GaussianClassificationAlg implements KInferAlg {
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin){
+        int maxOutput=((MetaEnum)origin.metaClass().outputs()[0].type()).literals().length;
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
         int size=(maxOutput+1)*(origin.metaClass().inputs().length*NUMOFFIELDS+1);
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
-            maxOutput=((MetaEnum)origin.metaClass().outputs()[0].type()).literals().length;
             ks.extendInfer(origin.metaClass().dependencies().index(),size,origin.metaClass());
             for(int i=0;i<size;i++){
                 ks.setInferElem(dependenciesIndex,i,0,origin.metaClass());
@@ -123,6 +122,7 @@ public class GaussianClassificationAlg implements KInferAlg {
 
     @Override
     public  double[][] infer(double[][] features, KObject origin) {
+        int maxOutput=((MetaEnum)origin.metaClass().outputs()[0].type()).literals().length;
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //check if segment is empty
@@ -156,7 +156,7 @@ public class GaussianClassificationAlg implements KInferAlg {
         return prob;
     }
 
-    public double[] getAllProba (double[] features,  Array1D state, KMetaDependencies meta){
+    public double[] getAllProba (double[] features,  Array1D state, KMetaDependencies meta, int maxOutput){
         double[] results = new double[maxOutput];
         for(int i=0;i<maxOutput;i++){
             results[i]=getProba(features,i,state,meta);
