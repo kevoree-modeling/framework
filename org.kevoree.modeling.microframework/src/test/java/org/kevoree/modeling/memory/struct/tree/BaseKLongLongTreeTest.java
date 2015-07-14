@@ -43,7 +43,7 @@ public abstract class BaseKLongLongTreeTest {
     public void cacheEffectTest() {
         KLongLongTree tree = createKLongLongTree();
         tree.init(null, null);
-        
+
         for (long i = 0; i <= 6; i++) {
             tree.insert(i, i);
         }

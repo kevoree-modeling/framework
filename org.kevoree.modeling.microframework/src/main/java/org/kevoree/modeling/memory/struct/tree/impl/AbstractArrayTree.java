@@ -3,6 +3,7 @@ package org.kevoree.modeling.memory.struct.tree.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.struct.tree.KTreeWalker;
 import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.util.maths.Base64;
 
 public abstract class AbstractArrayTree {
 
@@ -436,14 +437,16 @@ public abstract class AbstractArrayTree {
                         builder.append(RED_RIGHT);
                     }
                 }
-                builder.append(key(nextSegmentBegin));
+                //builder.append(key(nextSegmentBegin));
+                Base64.encodeToBuffer(key(nextSegmentBegin), builder);
                 builder.append(',');
                 if (beginParent != -1) {
                     builder.append(beginParent / elemSize);
                 }
                 if (elemSize > 5) {
                     builder.append(',');
-                    builder.append(value(nextSegmentBegin));
+                    //builder.append(value(nextSegmentBegin));
+                    Base64.encodeToBuffer(value(nextSegmentBegin), builder);
                 }
             }
         }
@@ -495,7 +498,8 @@ public abstract class AbstractArrayTree {
                 while (cursor < payload.length() && payload.charAt(cursor) != ',') {
                     cursor++;
                 }
-                long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
+                //long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
+                long loopKey = Base64.decodeWithBounds(payload, beginChunk, cursor);
                 setKey(currentBlock, loopKey);
                 cursor++;
                 beginChunk = cursor;
@@ -519,7 +523,8 @@ public abstract class AbstractArrayTree {
                         cursor++;
                     }
                     if (cursor > beginChunk) {
-                        long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
+                        //long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
+                        long currentValue = Base64.decodeWithBounds(payload, beginChunk, cursor);
                         setValue(currentBlock, currentValue);
                     }
                 }

@@ -33,7 +33,7 @@ public abstract class BaseKLongTreeTest {
         }
 
         String saved0 = tree.serialize(null);
-        Assert.assertEquals("3,1{0,1]1,}2,1", saved0);
+        Assert.assertEquals("3,1{AAAAAAAAA,1]AAAAAAAAB,}AAAAAAAAC,1", saved0);
 
         KLongTree treeBis = createKLongTree();
         treeBis.init(saved0, null);
@@ -53,7 +53,6 @@ public abstract class BaseKLongTreeTest {
         for (long j = MIN; j <= MAX; j++) {
             KLongTree tree = createKLongTree();
             tree.init(null, null);
-
             for (long i = MIN; i <= j; i++) {
                 if ((i % 3) == 0L) {
                     tree.insert(i);

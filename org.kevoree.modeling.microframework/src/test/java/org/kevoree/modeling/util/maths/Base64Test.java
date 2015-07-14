@@ -33,6 +33,11 @@ public class Base64Test {
         Assert.assertEquals(0, Base64.decode(Base64.encode(0)));
     }
 
+    @Test
+    public void oneEncodingTest() {
+        Assert.assertEquals(1, Base64.decode(Base64.encode(1)));
+    }
+
 
 /*
     private String printBits(Long val) {
