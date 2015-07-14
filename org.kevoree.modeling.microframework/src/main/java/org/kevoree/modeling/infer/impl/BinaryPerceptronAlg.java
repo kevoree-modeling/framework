@@ -11,7 +11,6 @@ import java.util.Random;
 public class BinaryPerceptronAlg implements KInferAlg {
     private int iterations=20;
 
-    private Random rand =new Random();
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin) {
@@ -22,7 +21,7 @@ public class BinaryPerceptronAlg implements KInferAlg {
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
             ks.extendInfer(origin.metaClass().dependencies().index(),size,origin.metaClass());
             for(int i=0;i<size;i++){
-                ks.setInferElem(dependenciesIndex,i,rand.nextDouble(),origin.metaClass());
+                ks.setInferElem(dependenciesIndex,i,0,origin.metaClass());
             }
         }
         Array1D state = new Array1D(size,0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
