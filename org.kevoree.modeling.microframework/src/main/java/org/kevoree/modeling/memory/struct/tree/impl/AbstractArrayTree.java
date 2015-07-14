@@ -7,15 +7,15 @@ import org.kevoree.modeling.util.maths.Base64;
 
 public abstract class AbstractArrayTree {
 
-    protected int _root_index = -1;
-    protected int _size = 0;
-    protected int _threshold = 0;
-    protected float _loadFactor;
+    private int _root_index = -1;
+    private int _size = 0;
+    private int _threshold = 0;
+    private float _loadFactor;
 
     //back end arrays
-    protected int[] _back_meta = null;
-    protected long[] _back_kv = null;
-    protected boolean[] _back_colors = null;
+    private int[] _back_meta = null;
+    private long[] _back_kv = null;
+    private boolean[] _back_colors = null;
 
     private boolean _dirty = true;
     private int _counter = 0;
@@ -27,11 +27,15 @@ public abstract class AbstractArrayTree {
 
     protected int kvSize = 1;
 
+    private static final int META_SIZE = 3;
+
     public AbstractArrayTree() {
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
+        this._back_colors = null;
+        this._back_meta = null;
+        this._back_kv = null;
     }
 
-    private static final int META_SIZE = 3;
 
     private void allocate(int capacity) {
         _back_colors = new boolean[capacity];
@@ -40,7 +44,7 @@ public abstract class AbstractArrayTree {
         _threshold = (int) (capacity * _loadFactor);
     }
 
-    protected void reallocate(int newCapacity) {
+    private void reallocate(int newCapacity) {
         _threshold = (int) (newCapacity * _loadFactor);
         //copy KV_BACK
         long[] new_back_kv = new long[newCapacity * kvSize];
@@ -51,8 +55,8 @@ public abstract class AbstractArrayTree {
         //copy COLOR_BACK
         boolean[] new_back_colors = new boolean[newCapacity];
         if (_back_colors != null) {
-            for(int i=0;i<newCapacity;i++){
-                if(i<_size){
+            for (int i = 0; i < newCapacity; i++) {
+                if (i < _size) {
                     new_back_colors[i] = _back_colors[i];
                 } else {
                     new_back_colors[i] = false;
@@ -65,7 +69,7 @@ public abstract class AbstractArrayTree {
         int[] new_back_meta = new int[newCapacity * META_SIZE];
         if (_back_meta != null) {
             System.arraycopy(_back_meta, 0, new_back_meta, 0, _size * META_SIZE);
-            for(int i=_size * META_SIZE;i<newCapacity * META_SIZE;i++){
+            for (int i = _size * META_SIZE; i < newCapacity * META_SIZE; i++) {
                 new_back_meta[i] = -1;
             }
         }
@@ -76,47 +80,47 @@ public abstract class AbstractArrayTree {
         return _size;
     }
 
-    protected long key(int p_currentIndex) {
+    protected final long key(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
         return this._back_kv[p_currentIndex * kvSize];
     }
 
-    protected void setKey(int p_currentIndex, long p_paramIndex) {
+    private void setKey(int p_currentIndex, long p_paramIndex) {
         this._back_kv[p_currentIndex * kvSize] = p_paramIndex;
     }
 
-    protected long value(int p_currentIndex) {
+    protected final long value(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
         return this._back_kv[(p_currentIndex * kvSize) + 1];
     }
 
-    protected void setValue(int p_currentIndex, long p_paramIndex) {
+    private void setValue(int p_currentIndex, long p_paramIndex) {
         this._back_kv[(p_currentIndex * kvSize) + 1] = p_paramIndex;
     }
 
-    protected int left(int p_currentIndex) {
+    private int left(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
         return this._back_meta[p_currentIndex * META_SIZE];
     }
 
-    protected void setLeft(int p_currentIndex, int p_paramIndex) {
+    private void setLeft(int p_currentIndex, int p_paramIndex) {
         this._back_meta[p_currentIndex * META_SIZE] = p_paramIndex;
     }
 
-    protected int right(int p_currentIndex) {
+    private int right(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
         return this._back_meta[(p_currentIndex * META_SIZE) + 1];
     }
 
-    protected void setRight(int p_currentIndex, int p_paramIndex) {
+    private void setRight(int p_currentIndex, int p_paramIndex) {
         this._back_meta[(p_currentIndex * META_SIZE) + 1] = p_paramIndex;
     }
 
@@ -127,7 +131,7 @@ public abstract class AbstractArrayTree {
         return this._back_meta[(p_currentIndex * META_SIZE) + 2];
     }
 
-    protected void setParent(int p_currentIndex, int p_paramIndex) {
+    private void setParent(int p_currentIndex, int p_paramIndex) {
         this._back_meta[(p_currentIndex * META_SIZE) + 2] = p_paramIndex;
     }
 
@@ -138,11 +142,11 @@ public abstract class AbstractArrayTree {
         return this._back_colors[p_currentIndex];
     }
 
-    protected void setColor(int p_currentIndex, boolean p_paramIndex) {
+    private void setColor(int p_currentIndex, boolean p_paramIndex) {
         this._back_colors[p_currentIndex] = p_paramIndex;
     }
 
-    public int grandParent(int p_currentIndex) {
+    private int grandParent(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
@@ -153,7 +157,7 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    public int sibling(int p_currentIndex) {
+    private int sibling(int p_currentIndex) {
         if (parent(p_currentIndex) == -1) {
             return -1;
         } else {
@@ -165,7 +169,7 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    public int uncle(int p_currentIndex) {
+    private int uncle(int p_currentIndex) {
         if (parent(p_currentIndex) != -1) {
             return sibling(parent(p_currentIndex));
         } else {
@@ -198,7 +202,7 @@ public abstract class AbstractArrayTree {
     }
 
     /* Time never use direct lookup, sadly for performance, anyway this method is private to ensure the correctness of caching mechanism */
-    public long lookup(long p_key) {
+    public final long lookup(long p_key) {
         int n = _root_index;
         if (n == -1) {
             return KConfig.NULL_LONG;
@@ -217,7 +221,7 @@ public abstract class AbstractArrayTree {
         return n;
     }
 
-    public void range(long startKey, long endKey, KTreeWalker walker) {
+    public final void range(long startKey, long endKey, KTreeWalker walker) {
         int indexEnd = internal_previousOrEqual_index(endKey);
         while (indexEnd != -1 && key(indexEnd) >= startKey) {
             walker.elem(key(indexEnd));
@@ -225,7 +229,7 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    protected int internal_previousOrEqual_index(long p_key) {
+    protected final int internal_previousOrEqual_index(long p_key) {
         int p = _root_index;
         if (p == -1) {
             return p;
@@ -294,7 +298,7 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    protected void insertCase1(int n) {
+    private void insertCase1(int n) {
         if (parent(n) == -1) {
             setColor(n, true);
         } else {
@@ -439,7 +443,7 @@ public abstract class AbstractArrayTree {
         }
     }*/
 
-    public String serialize(KMetaModel metaModel) {
+    public final String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
         if (_root_index == -1) {
             builder.append("0");
@@ -480,7 +484,7 @@ public abstract class AbstractArrayTree {
         return builder.toString();
     }
 
-    public void init(String payload, KMetaModel metaModel) {
+    public final void init(String payload, KMetaModel metaModel) {
         if (payload == null || payload.length() == 0) {
             return;
         }
@@ -558,35 +562,116 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    public boolean isDirty() {
+    public final boolean isDirty() {
         return _dirty;
     }
 
-    public void setClean(KMetaModel p_metaModel) {
+    public final void setClean(KMetaModel p_metaModel) {
         _dirty = false;
     }
 
-    public void setDirty() {
+    public final void setDirty() {
         _dirty = true;
     }
 
-    public int counter() {
+    public final int counter() {
         return this._counter;
     }
 
-    public void inc() {
+    public final void inc() {
         this._counter--;
     }
 
-    public void dec() {
+    public final void dec() {
         this._counter--;
     }
 
-    public void free(KMetaModel p_metaModel) {
+    public final void free(KMetaModel p_metaModel) {
         this._back_colors = null;
         this._back_meta = null;
         this._back_kv = null;
         this._threshold = 0;
+    }
+
+    protected final void internal_insert(long p_key, long p_value) {
+        if ((_size + 1) > _threshold) {
+            int length = (_size == 0 ? 1 : _size << 1);
+            reallocate(length);
+        }
+        int newIndex = _size;
+        if (newIndex == 0) {
+            setKey(newIndex, p_key);
+            if (kvSize == 2) {
+                setValue(newIndex, p_value);
+            }
+            setColor(newIndex, false);
+            setLeft(newIndex, -1);
+            setRight(newIndex, -1);
+            setParent(newIndex, -1);
+            _root_index = newIndex;
+            _size = 1;
+        } else {
+            int n = _root_index;
+            while (true) {
+                if (p_key == key(n)) {
+                    //nop _size
+                    return;
+                } else if (p_key < key(n)) {
+                    if (left(n) == -1) {
+                        setKey(newIndex, p_key);
+                        if (kvSize == 2) {
+                            setValue(newIndex, p_value);
+                        }
+                        setColor(newIndex, false);
+                        setLeft(newIndex, -1);
+                        setRight(newIndex, -1);
+                        setParent(newIndex, -1);
+                        setLeft(n, newIndex);
+                        _size++;
+                        break;
+                    } else {
+                        n = left(n);
+                    }
+                } else {
+                    if (right(n) == -1) {
+                        setKey(newIndex, p_key);
+                        if (kvSize == 2) {
+                            setValue(newIndex, p_value);
+                        }
+                        setColor(newIndex, false);
+                        setLeft(newIndex, -1);
+                        setRight(newIndex, -1);
+                        setParent(newIndex, -1);
+                        setRight(n, newIndex);
+                        _size++;
+                        break;
+                    } else {
+                        n = right(n);
+                    }
+                }
+            }
+            setParent(newIndex, n);
+        }
+        insertCase1(newIndex);
+    }
+
+    protected final long internal_lookup_value(long p_key){
+        int n = _root_index;
+        if (n == -1) {
+            return KConfig.NULL_LONG;
+        }
+        while (n != -1) {
+            if (p_key == key(n)) {
+                return value(n);
+            } else {
+                if (p_key < key(n)) {
+                    n = left(n);
+                } else {
+                    n = right(n);
+                }
+            }
+        }
+        return n;
     }
 
 }
