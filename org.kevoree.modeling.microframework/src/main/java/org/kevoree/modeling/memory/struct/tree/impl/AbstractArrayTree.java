@@ -51,7 +51,14 @@ public abstract class AbstractArrayTree {
         //copy COLOR_BACK
         boolean[] new_back_colors = new boolean[newCapacity];
         if (_back_colors != null) {
-            System.arraycopy(_back_colors, 0, new_back_colors, 0, _size);
+            for(int i=0;i<newCapacity;i++){
+                if(i<_size){
+                    new_back_colors[i] = _back_colors[i];
+                } else {
+                    new_back_colors[i] = false;
+                }
+            }
+            //System.arraycopy(_back_colors, 0, new_back_colors, 0, _size);
         }
         this._back_colors = new_back_colors;
         //copy META BACK
