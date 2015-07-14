@@ -175,6 +175,20 @@ public class Base64 {
     }
 
 
+    public static void encodeIntToBuffer(int l, StringBuilder buffer) {
+        boolean empty = true;
+        long tmp = l;
+        if (l < 0) {
+            tmp = -tmp;
+        }
+        for (int i = 29; i >= 5; i -= 6) {
+            if (!(empty && ((int) (tmp >> i) & 0x3F) == 0)) {
+                buffer.append(encodeArray[(int) (tmp >> i) & 0x3F]);
+            }
+        }
+        buffer.append(Base64.encodeArray[(int) ((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)]);
+    }
+
     public static long decodeToLong(String s) {
         return decodeToLongWithBounds(s, 0, s.length());
     }
