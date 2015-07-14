@@ -348,100 +348,6 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    /*
-    public void delete(long key) {
-        TreeNode n = lookup(key);
-        if (n == null) {
-            return;
-        } else {
-            _size--;
-            if (n.getLeft() != null && n.getRight() != null) {
-                // Copy domainKey/value from predecessor and done delete it instead
-                TreeNode pred = n.getLeft();
-                while (pred.getRight() != null) {
-                    pred = pred.getRight();
-                }
-                n.key = pred.key;
-                n = pred;
-            }
-            TreeNode child;
-            if (n.getRight() == null) {
-                child = n.getLeft();
-            } else {
-                child = n.getRight();
-            }
-            if (nodeColor(n) == true) {
-                n.color = nodeColor(child);
-                deleteCase1(n);
-            }
-            replaceNode(n, child);
-        }
-    }
-
-    private void deleteCase1(TreeNode n) {
-        if (n.getParent() == null) {
-            return;
-        } else {
-            deleteCase2(n);
-        }
-    }
-
-    private void deleteCase2(TreeNode n) {
-        if (nodeColor(n.sibling()) == false) {
-            n.getParent().color = false;
-            n.sibling().color = true;
-            if (n == n.getParent().getLeft()) {
-                rotateLeft(n.getParent());
-            } else {
-                rotateRight(n.getParent());
-            }
-        }
-        deleteCase3(n);
-    }
-
-    private void deleteCase3(TreeNode n) {
-        if (nodeColor(n.getParent()) == true && nodeColor(n.sibling()) == true && nodeColor(n.sibling().getLeft()) == true && nodeColor(n.sibling().getRight()) == true) {
-            n.sibling().color = false;
-            deleteCase1(n.getParent());
-        } else {
-            deleteCase4(n);
-        }
-    }
-
-    private void deleteCase4(TreeNode n) {
-        if (nodeColor(n.getParent()) == false && nodeColor(n.sibling()) == true && nodeColor(n.sibling().getLeft()) == true && nodeColor(n.sibling().getRight()) == true) {
-            n.sibling().color = false;
-            n.getParent().color = true;
-        } else {
-            deleteCase5(n);
-        }
-    }
-
-    private void deleteCase5(TreeNode n) {
-        if (n == n.getParent().getLeft() && nodeColor(n.sibling()) == true && nodeColor(n.sibling().getLeft()) == false && nodeColor(n.sibling().getRight()) == true) {
-            n.sibling().color = false;
-            n.sibling().getLeft().color = true;
-            rotateRight(n.sibling());
-        } else if (n == n.getParent().getRight() && nodeColor(n.sibling()) == true && nodeColor(n.sibling().getRight()) == false && nodeColor(n.sibling().getLeft()) == true) {
-            n.sibling().color = false;
-            n.sibling().getRight().color = true;
-            rotateLeft(n.sibling());
-        }
-        deleteCase6(n);
-    }
-
-    private void deleteCase6(TreeNode n) {
-        n.sibling().color = nodeColor(n.getParent());
-        n.getParent().color = true;
-        if (n == n.getParent().getLeft()) {
-            n.sibling().getRight().color = true;
-            rotateLeft(n.getParent());
-        } else {
-            n.sibling().getLeft().color = true;
-            rotateRight(n.getParent());
-        }
-    }*/
-
     public final String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
         if (_root_index == -1) {
@@ -672,5 +578,99 @@ public abstract class AbstractArrayTree {
         }
         return n;
     }
+
+     /*
+    public void delete(long key) {
+        TreeNode n = lookup(key);
+        if (n == null) {
+            return;
+        } else {
+            _size--;
+            if (n.getLeft() != null && n.getRight() != null) {
+                // Copy domainKey/value from predecessor and done delete it instead
+                TreeNode pred = n.getLeft();
+                while (pred.getRight() != null) {
+                    pred = pred.getRight();
+                }
+                n.key = pred.key;
+                n = pred;
+            }
+            TreeNode child;
+            if (n.getRight() == null) {
+                child = n.getLeft();
+            } else {
+                child = n.getRight();
+            }
+            if (nodeColor(n) == true) {
+                n.color = nodeColor(child);
+                deleteCase1(n);
+            }
+            replaceNode(n, child);
+        }
+    }
+
+    private void deleteCase1(TreeNode n) {
+        if (n.getParent() == null) {
+            return;
+        } else {
+            deleteCase2(n);
+        }
+    }
+
+    private void deleteCase2(TreeNode n) {
+        if (nodeColor(n.sibling()) == false) {
+            n.getParent().color = false;
+            n.sibling().color = true;
+            if (n == n.getParent().getLeft()) {
+                rotateLeft(n.getParent());
+            } else {
+                rotateRight(n.getParent());
+            }
+        }
+        deleteCase3(n);
+    }
+
+    private void deleteCase3(TreeNode n) {
+        if (nodeColor(n.getParent()) == true && nodeColor(n.sibling()) == true && nodeColor(n.sibling().getLeft()) == true && nodeColor(n.sibling().getRight()) == true) {
+            n.sibling().color = false;
+            deleteCase1(n.getParent());
+        } else {
+            deleteCase4(n);
+        }
+    }
+
+    private void deleteCase4(TreeNode n) {
+        if (nodeColor(n.getParent()) == false && nodeColor(n.sibling()) == true && nodeColor(n.sibling().getLeft()) == true && nodeColor(n.sibling().getRight()) == true) {
+            n.sibling().color = false;
+            n.getParent().color = true;
+        } else {
+            deleteCase5(n);
+        }
+    }
+
+    private void deleteCase5(TreeNode n) {
+        if (n == n.getParent().getLeft() && nodeColor(n.sibling()) == true && nodeColor(n.sibling().getLeft()) == false && nodeColor(n.sibling().getRight()) == true) {
+            n.sibling().color = false;
+            n.sibling().getLeft().color = true;
+            rotateRight(n.sibling());
+        } else if (n == n.getParent().getRight() && nodeColor(n.sibling()) == true && nodeColor(n.sibling().getRight()) == false && nodeColor(n.sibling().getLeft()) == true) {
+            n.sibling().color = false;
+            n.sibling().getRight().color = true;
+            rotateLeft(n.sibling());
+        }
+        deleteCase6(n);
+    }
+
+    private void deleteCase6(TreeNode n) {
+        n.sibling().color = nodeColor(n.getParent());
+        n.getParent().color = true;
+        if (n == n.getParent().getLeft()) {
+            n.sibling().getRight().color = true;
+            rotateLeft(n.getParent());
+        } else {
+            n.sibling().getLeft().color = true;
+            rotateRight(n.getParent());
+        }
+    }*/
 
 }
