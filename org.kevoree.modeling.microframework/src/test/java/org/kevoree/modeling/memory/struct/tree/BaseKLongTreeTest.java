@@ -24,7 +24,7 @@ public abstract class BaseKLongTreeTest {
         Assert.assertEquals(tree.size(), treeBis.size());
     }
 
-   @Test
+    @Test
     public void saveLoad() throws Exception {
         KLongTree tree = createKLongTree();
         tree.init(null, null);
