@@ -7,34 +7,32 @@ package org.kevoree.modeling.util.maths;
  *
  * public static encode(l:number) {
  * var result = "";
- * var tmp;
+ * var tmp = l;
  * if(l < 0) {
- * tmp = ((l * -1) * 2) + 0x1;
- * } else {
- * tmp = l * 2;
+ * tmp = -tmp;
  * }
- * for (var i = 48; i >= 0; i -= 6) {
- * if (!(result.equals("") && ((tmp / Math.pow(2, i)) & 0x3F) == 0) || (i == 0)) {
+ * for (var i = 47; i >= 5; i -= 6) {
+ * if (!(result.equals("") && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
  * result += Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F];
  * }
  * }
+ * result += Base64.encodeArray[(tmp & 0x1F)*2 + (l<0?1:0)];
  * return result;
  * }
  *
  * public static encodeToBuffer(l:number, buffer:java.lang.StringBuilder) {
  * var empty=true;
- * var tmp;
+ * var tmp = l;
  * if(l < 0) {
- * tmp = ((l * -1) * 2) + 0x1;
- * } else {
- * tmp = l * 2;
+ * tmp = -tmp;
  * }
- * for (var i = 48; i >= 0; i -= 6) {
- * if (!(empty && ((tmp / Math.pow(2, i)) & 0x3F) == 0) || (i == 0)) {
+ * for (var i = 47; i >= 5; i -= 6) {
+ * if (!(empty && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
  * empty = false;
  * buffer.append(Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F]);
  * }
  * }
+ * buffer.append(Base64.encodeArray[(tmp & 0x1F)*2 + (l<0?1:0)]);
  * }
  *
  * public static decode(s) {
@@ -43,13 +41,13 @@ package org.kevoree.modeling.util.maths;
  *
  * public static decodeWithBounds(s:string, offsetBegin:number, offsetEnd:number) {
  * var result = 0;
- * for (var i = 0; i < (offsetEnd - offsetBegin); i++) {
- * result += (Base64.decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF) * Math.pow(2, (6 * i));
+ * result += (Base64.decodeArray[s.charAt((offsetEnd - 1))] & 0xFF) / 2;
+ * for (var i = 1; i < (offsetEnd - offsetBegin); i++) {
+ * result += (Base64.decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF) * Math.pow(2, (6 * i)-1);
  * }
- * if ((result & 0x1) != 0) {
- * result = (result & 0xFFFFFFFFFFFFFFFE) * -1;
+ * if (((Base64.decodeArray[s.charAt((offsetEnd - 1))] & 0xFF) & 0x1) != 0) {
+ * result = -result;
  * }
- * result = result / 2;
  * return result;
  * }
  */
