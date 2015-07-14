@@ -33,7 +33,7 @@ public abstract class BaseKLongTreeTest {
         }
 
         String saved0 = tree.serialize(null);
-        Assert.assertEquals("3,1{A,1]C,}E,1", saved0);
+        Assert.assertEquals("G,C{A,C]C,}E,C", saved0);
 
         KLongTree treeBis = createKLongTree();
         treeBis.init(saved0, null);

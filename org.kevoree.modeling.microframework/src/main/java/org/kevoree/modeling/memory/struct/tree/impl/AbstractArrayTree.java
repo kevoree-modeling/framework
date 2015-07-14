@@ -447,9 +447,9 @@ public abstract class AbstractArrayTree {
         if (_root_index == -1) {
             builder.append("0");
         } else {
-            builder.append(_size);
+            Base64.encodeIntToBuffer(_size, builder);
             builder.append(',');
-            builder.append(_root_index);
+            Base64.encodeIntToBuffer(_root_index, builder);
             for (int i = 0; i < _size; i++) {
                 int parentIndex = parent(i);
                 boolean isOnLeft = false;
@@ -472,7 +472,7 @@ public abstract class AbstractArrayTree {
                 Base64.encodeLongToBuffer(key(i), builder);
                 builder.append(',');
                 if (parentIndex != -1) {
-                    builder.append(parentIndex);
+                    Base64.encodeIntToBuffer(parentIndex, builder);
                 }
                 if (kvSize > 1) {
                     builder.append(',');
@@ -493,14 +493,14 @@ public abstract class AbstractArrayTree {
             cursor++;
         }
         if (payload.charAt(cursor) == ',') {//className to parse
-            _size = Integer.parseInt(payload.substring(initPos, cursor));
+            _size = Base64.decodeToIntWithBounds(payload, initPos, cursor);
             cursor++;
             initPos = cursor;
         }
         while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
-        _root_index = Integer.parseInt(payload.substring(initPos, cursor));
+        _root_index = Base64.decodeToIntWithBounds(payload, initPos, cursor);
         allocate(_size);
         for (int i = 0; i < _size; i++) {
             int offsetI = i * META_SIZE;
@@ -537,7 +537,7 @@ public abstract class AbstractArrayTree {
                     cursor++;
                 }
                 if (cursor > beginChunk) {
-                    int parentRaw = Integer.parseInt(payload.substring(beginChunk, cursor));
+                    int parentRaw = Base64.decodeToIntWithBounds(payload, beginChunk, cursor);
                     setParent(currentLoopIndex, parentRaw);
                     if (isOnLeft) {
                         setLeft(parentRaw, currentLoopIndex);

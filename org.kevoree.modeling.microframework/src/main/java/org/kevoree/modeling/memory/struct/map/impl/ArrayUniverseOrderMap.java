@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.struct.map.impl;
 
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.util.maths.Base64;
 
 /**
  * @native ts
@@ -14,20 +15,38 @@ import org.kevoree.modeling.meta.KMetaModel;
  * public dec():void { this._counter--; }
  * public free():void {  }
  * public size():number { return Object.keys(this).length-3; }
- * public serialize(m): string {
- * var buffer = "";
- * if(this._className != null){ buffer = buffer + this._className + ','; }
- * buffer = buffer + this.size() + JSON.stringify(this, function (k, v) {if(k[0]!='_'){return v;}else{undefined}});
- * return buffer;
+ * public serialize(metaModel: org.kevoree.modeling.meta.KMetaModel): string {
+ * var buffer: java.lang.StringBuilder = new java.lang.StringBuilder();
+ * if (this._className != null) {buffer.append(this._className);buffer.append(',');}
+ * org.kevoree.modeling.util.maths.Base64.encodeIntToBuffer(this.size(),buffer);
+ * buffer.append('/');
+ * var isFirst: boolean = true;
+ * for (var propKey in this) { if(this.hasOwnProperty(propKey) && propKey[0] != '_'){
+ * if (!isFirst) {buffer.append(",");} isFirst = false;
+ * org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(propKey, buffer);
+ * buffer.append(":");
+ * org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(this[propKey], buffer);
+ * }}
+ * return buffer.toString();
  * }
  * public init(payload: string, metaModel: org.kevoree.modeling.meta.KMetaModel): void {
  * if (payload == null || payload.length == 0) { return; }
- * var initPos = 0; var cursor = 0;
- * while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '{') { cursor++; }
+ * var initPos: number = 0; var cursor: number = 0;
+ * while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '/'){ cursor++; }
+ * if (cursor >= payload.length) { return; }
  * if (payload.charAt(cursor) == ',') { this._className = payload.substring(initPos, cursor);cursor++;initPos = cursor;}
- * while (cursor < payload.length && payload.charAt(cursor) != '{') { cursor++; }
- * var newParsedElem = JSON.parse(payload.substring(cursor));
- * for(var el in newParsedElem){ this[el] = newParsedElem[el]; }
+ * while (cursor < payload.length && payload.charAt(cursor) != '/'){cursor++;}
+ * var nbElement: number = java.lang.Integer.parseInt(payload.substring(initPos, cursor));
+ * while (cursor < payload.length){
+ * cursor++;
+ * var beginChunk: number = cursor;
+ * while (cursor < payload.length && payload.charAt(cursor) != ':'){cursor++;}
+ * var middleChunk: number = cursor;
+ * while (cursor < payload.length && payload.charAt(cursor) != ','){cursor++;}
+ * var loopKey: number = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
+ * var loopVal: number = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
+ * this[loopKey] = loopVal;
+ * }
  * }
  */
 public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverseOrderMap {
@@ -83,10 +102,10 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
         }
         int initPos = 0;
         int cursor = 0;
-        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '{') {
+        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '/') {
             cursor++;
         }
-        if(cursor >= payload.length()){
+        if (cursor >= payload.length()) {
             return;
         }
         if (payload.charAt(cursor) == ',') {//className to parse
@@ -94,10 +113,10 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
             cursor++;
             initPos = cursor;
         }
-        while (cursor < payload.length() && payload.charAt(cursor) != '{') {
+        while (cursor < payload.length() && payload.charAt(cursor) != '/') {
             cursor++;
         }
-        int nbElement = Integer.parseInt(payload.substring(initPos, cursor));
+        int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
         rehashCapacity(nbElement);
         while (cursor < payload.length()) {
             cursor++;
@@ -109,21 +128,8 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
             while (cursor < payload.length() && payload.charAt(cursor) != ',') {
                 cursor++;
             }
-            int cleanedBegin = beginChunk;
-            if (payload.charAt(beginChunk) == '"') {
-                cleanedBegin++;
-            }
-            int cleanedMiddleChunk = middleChunk;
-            if (payload.charAt(middleChunk - 1) == '"') {
-                cleanedMiddleChunk--;
-            }
-            long loopKey = Long.parseLong(payload.substring(cleanedBegin, cleanedMiddleChunk));
-            int cleanedCursor = cursor;
-            if (payload.charAt(cleanedCursor - 1) == '}') {
-                cleanedCursor--;
-            }
-            long loopVal = Long.parseLong(payload.substring(middleChunk + 1, cleanedCursor));
-
+            long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
+            long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
             //insert K/V
             Entry entry = null;
             int index = -1;
@@ -151,31 +157,28 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
             buffer.append(_className);
             buffer.append(',');
         }
-        buffer.append(elementCount);
-        buffer.append('{');
+        Base64.encodeIntToBuffer(elementCount, buffer);
+        buffer.append('/');
         boolean isFirst = true;
         for (int i = 0; i < elementDataSize; i++) {
             if (elementData[i] != null) {
                 Entry current = elementData[i];
-                if (isFirst) {
-                    buffer.append('"');
-                    isFirst = false;
-                } else {
-                    buffer.append(",\"");
+                if (!isFirst) {
+                    buffer.append(",");
                 }
-                buffer.append(current.key);
-                buffer.append("\":");
-                buffer.append(current.value);
+                isFirst = false;
+                Base64.encodeLongToBuffer(current.key, buffer);
+                buffer.append(":");
+                Base64.encodeLongToBuffer(current.value, buffer);
                 while (current.next != null) {
                     current = current.next;
-                    buffer.append(",\"");
-                    buffer.append(current.key);
-                    buffer.append("\":");
-                    buffer.append(current.value);
+                    buffer.append(",");
+                    Base64.encodeLongToBuffer(current.key, buffer);
+                    buffer.append(":");
+                    Base64.encodeLongToBuffer(current.value, buffer);
                 }
             }
         }
-        buffer.append('}');
         return buffer.toString();
     }
 
