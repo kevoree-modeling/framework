@@ -7,21 +7,21 @@ import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 
 import java.util.Random;
 
-
-public class LinearRegressionAlg implements KInferAlg {
-
+public class WinnowAlg implements KInferAlg {
     //TODO to replace by meta-learning parameters
-    private double alpha=0.005; //learning rate
-    private double gamma =0.000; //regularization parameter
-    private int iterations=10; //iterations
+    private double alpha=2; // the reward parameter
+    private double beta = 2; //the penalty parameter
+    private int iterations=1;
 
-    private static Random rand= new Random();
+    private Random rand =new Random();
+
+
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin) {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
-        int size=origin.metaClass().inputs().length+1;
+        int size=origin.metaClass().inputs().length;
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
             ks.extendInfer(origin.metaClass().dependencies().index(),size,origin.metaClass());
             for(int i=0;i<size;i++){
@@ -30,46 +30,56 @@ public class LinearRegressionAlg implements KInferAlg {
         }
         Array1D state = new Array1D(size,0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
 
-        for(int i=0;i<iterations;i++){
-            for(int row=0;row<trainingSet.length;row++){
-                double h=estimate(trainingSet[row],state);
-                double error=-alpha*(h-expectedResultSet[row][0]);
+        for(int iter=0;iter<iterations;iter++){
+            for(int inst=0;inst<trainingSet.length;inst++){
+                if(calculate(trainingSet[inst],state)==expectedResultSet[inst][0])
+                    continue;
 
-                for (int feature = 0; feature < origin.metaClass().inputs().length; feature++) {
-                    state.set(feature, state.get(feature) * (1 - alpha * gamma) + error * trainingSet[row][feature]);
+                //Else update the weights
+                if(expectedResultSet[inst][0]==0) {
+                    for (int i = 0; i < size; i++) {
+                        state.set(i,state.get(i)/beta);
+                    }
                 }
-                state.add(origin.metaClass().inputs().length,error);
+                else{
+                    for (int i = 0; i < size; i++) {
+                        state.set(i,state.get(i)*alpha);
+                    }
+                }
+
             }
         }
-
-
-
     }
 
-    private double estimate(double[] training, Array1D state){
+    private double calculate(double[] features, Array1D state) {
         double result=0;
-        for(int i=0;i<training.length;i++){
-            result=result+training[i]*state.get(i);
+        for(int i=0; i<features.length;i++){
+            result+= state.get(i)*features[i];
         }
-        result=result+state.get(training.length);
-        return result;
+        if(result>=features.length){
+            return 1.0;
+        }
+        else{
+            return 0.0;
+        }
     }
 
     @Override
     public double[][] infer(double[][] features, KObject origin) {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
-        int size=origin.metaClass().inputs().length+1;
+        int size=origin.metaClass().inputs().length;
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;
         }
         Array1D state = new Array1D(size,0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
 
-        double[][] results = new double[features.length][1];
-        for(int i=0;i<features.length;i++){
-            results[i]=new double[1];
-            results[i][0]=estimate(features[i],state);
+        double[][] result = new double[features.length][1];
+
+        for(int inst=0;inst<features.length;inst++){
+            result[inst]=new double[1];
+            result[inst][0]=calculate(features[inst],state);
         }
-        return results;
+        return result;
     }
 }

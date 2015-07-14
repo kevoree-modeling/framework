@@ -7,12 +7,10 @@ import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 
 public class StatInferAlg implements KInferAlg {
-
     private static int MIN = 0;
     private static int MAX = 1;
     private static int SUM = 2;
     private static int SUMSQuare = 3;
-    //to keep updated
     private static int NUMOFFIELDS = 4;
 
 
