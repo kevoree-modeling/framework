@@ -62,21 +62,34 @@ public class Base64 {
 
 
     /**
-     * Encodes a long in a base-64 9-chars string. Sign is encoded on bit 54 of the long => MS bit of the left-most char of the string. 1 for negative; 0 otherwise.
+     * Encodes a long in a base-64 string. Sign is encoded on bit 0 of the long => LS bit of the right-most char of the string. 1 for negative; 0 otherwise.
+     *
      * @param l the long to encode
      * @return the encoded string
      */
     public static String encode(long l) {
         String result = "";
-        long tmp = (l < 0 ? (l * -1) | 0x0020000000000000l : l);
+        long tmp;
+        if (l < 0) {
+            tmp = ((l * -1) << 1) | 0x0000000000000001l;
+        } else {
+            tmp = l << 1;
+        }
         for (int i = 48; i >= 0; i -= 6) {
-            result += encodeArray[(int) (tmp >> i) & 0x3F];
+            if (!(result.equals("") && ((int) (tmp >> i) & 0x3F) == 0) || (i == 0)) {
+                result += encodeArray[(int) (tmp >> i) & 0x3F];
+            }
         }
         return result;
     }
 
     public static void encodeToBuffer(long l, StringBuilder buffer) {
-        long tmp = (l < 0 ? (l * -1) | 0x0020000000000000l : l);
+        long tmp;
+        if (l < 0) {
+            tmp = ((l * -1) << 1) | 0x0000000000000001l;
+        } else {
+            tmp = l << 1;
+        }
         for (int i = 48; i >= 0; i -= 6) {
             buffer.append(encodeArray[(int) (tmp >> i) & 0x3F]);
         }
@@ -88,14 +101,15 @@ public class Base64 {
 
     public static long decodeWithBounds(String s, int offsetBegin, int offsetEnd) {
         long result = 0;
-        result += ((long) (decodeArray[s.charAt(offsetBegin)] & 0x1F)) << 48;
-        for (int i = 1; i < (offsetEnd - offsetBegin); i++) {
-            result |= ((long) (decodeArray[s.charAt(offsetBegin + i)] & 0xFF)) << (48 - (6 * i));
+        for (int i = 0; i < (offsetEnd - offsetBegin); i++) {
+            result |= ((long) (decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF)) << (6 * i);
         }
-        if ((decodeArray[s.charAt(offsetBegin)] & 0x0020) != 0) {
-            result *= -1;
+        if ((result & 0x1) != 0) {
+            result = (result & 0xFFFFFFFFFFFFFFFEl) * -1;
         }
+        result = result >> 1;
         return result;
     }
+
 
 }
