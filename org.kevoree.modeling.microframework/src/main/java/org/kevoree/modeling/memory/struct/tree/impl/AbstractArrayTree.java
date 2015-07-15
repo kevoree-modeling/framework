@@ -61,6 +61,7 @@ public abstract class AbstractArrayTree {
                     new_back_colors[i] = false;
                 }
             }
+            //not activated for JS transpile reasons
             //System.arraycopy(_back_colors, 0, new_back_colors, 0, _size);
         }
         this._back_colors = new_back_colors;
