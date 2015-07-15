@@ -105,7 +105,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public KMemorySegment clone(KMetaClass metaClass) {
+    public final KMemorySegment clone(KMetaClass metaClass) {
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
 
         OffHeapMemorySegment clonedEntry = new OffHeapMemorySegment();
@@ -190,7 +190,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public void set(int index, Object content, KMetaClass metaClass) {
+    public final void set(int index, Object content, KMetaClass metaClass) {
         try {
             MetaType type = metaClass.meta(index).metaType();
             long ptr = internal_ptr_raw_for_index(index, metaClass);
@@ -239,7 +239,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public long[] getRef(int index, KMetaClass metaClass) {
+    public final long[] getRef(int index, KMetaClass metaClass) {
         long[] result = null;
 
         KMeta meta = metaClass.meta(index);
@@ -260,7 +260,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public boolean addRef(int index, long newRef, KMetaClass metaClass) {
+    public final boolean addRef(int index, long newRef, KMetaClass metaClass) {
         boolean result = false;
 
         KMeta meta = metaClass.meta(index);
@@ -288,7 +288,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public boolean removeRef(int index, long ref, KMetaClass metaClass) {
+    public final boolean removeRef(int index, long ref, KMetaClass metaClass) {
         boolean result = false;
 
         KMeta meta = metaClass.meta(index);
@@ -327,7 +327,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public void clearRef(int index, KMetaClass metaClass) {
+    public final void clearRef(int index, KMetaClass metaClass) {
         KMeta meta = metaClass.meta(index);
         long ptr = internal_ptr_raw_for_index(index, metaClass);
 
@@ -343,7 +343,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public double[] getInfer(int index, KMetaClass metaClass) {
+    public final double[] getInfer(int index, KMetaClass metaClass) {
         double[] infer = null;
         long ptr = internal_ptr_raw_for_index(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
@@ -358,7 +358,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public int getInferSize(int index, KMetaClass metaClass) {
+    public final int getInferSize(int index, KMetaClass metaClass) {
         int size = 0;
         double[] infer = getInfer(index, metaClass);
         if (infer != null) {
@@ -368,12 +368,12 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public double getInferElem(int index, int arrayIndex, KMetaClass metaClass) {
+    public final double getInferElem(int index, int arrayIndex, KMetaClass metaClass) {
         return getInfer(index, metaClass)[arrayIndex];
     }
 
     @Override
-    public void setInferElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
+    public final void setInferElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
         long ptr = internal_ptr_raw_for_index(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
 
@@ -391,7 +391,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public void extendInfer(int index, int newSize, KMetaClass metaClass) {
+    public final void extendInfer(int index, int newSize, KMetaClass metaClass) {
         long ptr = internal_ptr_raw_for_index(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
 
@@ -409,7 +409,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public Object get(int index, KMetaClass metaClass) {
+    public final Object get(int index, KMetaClass metaClass) {
         Object result = null;
 
         try {
@@ -453,7 +453,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public int[] modifiedIndexes(KMetaClass metaClass) {
+    public final int[] modifiedIndexes(KMetaClass metaClass) {
         int nbModified = 0;
         long ptr = _start_address + OFFSET_MODIFIED_INDEXES;
 
@@ -478,7 +478,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public void initMetaClass(KMetaClass metaClass) {
+    public final void initMetaClass(KMetaClass metaClass) {
         int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = internal_size_of_modifiedIndexes_segment(metaClass);
         int rawSegment = internal_size_of_raw_segment(metaClass);
@@ -493,17 +493,17 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
 
 
     @Override
-    public int metaClassIndex() {
+    public final int metaClassIndex() {
         return UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX);
     }
 
     @Override
-    public boolean isDirty() {
+    public final boolean isDirty() {
         return UNSAFE.getByte(_start_address + OFFSET_DIRTY) != 0;
     }
 
     @Override
-    public String serialize(KMetaModel metaModel) {
+    public final String serialize(KMetaModel metaModel) {
         KMetaClass metaClass = metaModel.metaClass(metaClassIndex());
 
         StringBuilder builder = new StringBuilder();
@@ -584,7 +584,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public void init(String payload, KMetaModel metaModel) {
+    public final void init(String payload, KMetaModel metaModel) {
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);
@@ -664,37 +664,37 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public void setClean(KMetaModel model) {
+    public final void setClean(KMetaModel model) {
         KMetaClass metaClass = model.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
         UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
         UNSAFE.setMemory(_start_address + OFFSET_MODIFIED_INDEXES, metaClass.metaElements().length, (byte) 0);
     }
 
     @Override
-    public void setDirty() {
+    public final void setDirty() {
         UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 1);
     }
 
 
     @Override
-    public int counter() {
+    public final int counter() {
         return UNSAFE.getInt(_start_address + OFFSET_COUNTER);
     }
 
     @Override
-    public void inc() {
+    public final void inc() {
         int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
         UNSAFE.putInt(_start_address + OFFSET_COUNTER, c + 1);
     }
 
     @Override
-    public void dec() {
+    public final void dec() {
         int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
         UNSAFE.putInt(_start_address + OFFSET_COUNTER, c - 1);
     }
 
     @Override
-    public void free(KMetaModel metaModel) {
+    public final void free(KMetaModel metaModel) {
         KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
 
         for (int i = 0; i < metaClass.metaElements().length; i++) {
@@ -739,7 +739,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
 
 
     @Override
-    public int getRefSize(int index, KMetaClass metaClass) {
+    public final int getRefSize(int index, KMetaClass metaClass) {
         int size = 0;
         long[] refs = getRef(index, metaClass);
         if (refs != null) {
@@ -749,7 +749,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public long getRefElem(int index, int refIndex, KMetaClass metaClass) {
+    public final long getRefElem(int index, int refIndex, KMetaClass metaClass) {
         long elem = KConfig.NULL_LONG;
         long[] refs = getRef(index, metaClass);
         if (refs != null) {
@@ -772,12 +772,12 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public long getMemoryAddress() {
+    public final long getMemoryAddress() {
         return _start_address;
     }
 
     @Override
-    public void setMemoryAddress(long address) {
+    public final void setMemoryAddress(long address) {
         _start_address = address;
     }
 

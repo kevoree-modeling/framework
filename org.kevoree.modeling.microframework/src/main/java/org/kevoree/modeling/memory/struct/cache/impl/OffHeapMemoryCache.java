@@ -61,7 +61,7 @@ public class OffHeapMemoryCache implements KCache {
 
     private KObjectWeakReference rootReference = null;
 
-    private static long _start_address;
+    private long _start_address;
     private int _allocated_segments = 0;
 
     public OffHeapMemoryCache() {
@@ -87,13 +87,13 @@ public class OffHeapMemoryCache implements KCache {
         return _start_address + OFFSET_STARTADDRESS_ELEM_DATA + index * BYTE;
     }
 
-    private static final int internal_inc_elementCount() {
+    private final int internal_inc_elementCount() {
         int c = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT) + 1;
         UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, c);
         return c;
     }
 
-    private static final int internal_dec_elementCount() {
+    private final int internal_dec_elementCount() {
         int c = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT) - 1;
         UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, c);
         return c;
