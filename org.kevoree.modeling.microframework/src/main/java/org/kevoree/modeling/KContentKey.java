@@ -1,5 +1,7 @@
 package org.kevoree.modeling;
 
+import org.kevoree.modeling.util.maths.Base64;
+
 public class KContentKey {
 
     public long universe;
@@ -65,7 +67,7 @@ public class KContentKey {
                 if (payload.charAt(i) == KConfig.KEY_SEP) {
                     if (indexStartElem != -1) {
                         try {
-                            temp[indexElem] = Long.parseLong(payload.substring(indexStartElem, i));
+                            temp[indexElem] = Base64.decodeToLongWithBounds(payload, indexStartElem, i);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -80,7 +82,7 @@ public class KContentKey {
             }
             if (indexStartElem != -1) {
                 try {
-                    temp[indexElem] = Long.parseLong(payload.substring(indexStartElem, maxRead));
+                    temp[indexElem] = Base64.decodeToLongWithBounds(payload, indexStartElem, maxRead);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -93,15 +95,15 @@ public class KContentKey {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         if (universe != KConfig.NULL_LONG) {
-            buffer.append(universe);
+            Base64.encodeLongToBuffer(universe, buffer);
         }
         buffer.append(KConfig.KEY_SEP);
         if (time != KConfig.NULL_LONG) {
-            buffer.append(time);
+            Base64.encodeLongToBuffer(time, buffer);
         }
         buffer.append(KConfig.KEY_SEP);
         if (obj != KConfig.NULL_LONG) {
-            buffer.append(obj);
+            Base64.encodeLongToBuffer(obj, buffer);
         }
         return buffer.toString();
     }
