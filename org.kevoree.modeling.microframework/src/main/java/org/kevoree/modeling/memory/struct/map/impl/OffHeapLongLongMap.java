@@ -41,16 +41,19 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
     private static final int BASE_SEGMENT_SIZE = ATT_ELEM_COUNT_LEN + ATT_ELEM_DATA_SIZE_LEN + ATT_DIRTY_LEN;
 
+    private static final int BYTE = 8;
+
+
     private long internal_ptr_elem_data_idx(int index) {
         return internal_ptr_elem_data_idx(_start_address + OFFSET_DIRTY + 1, index);
     }
 
     private long internal_ptr_elem_data_idx(long startAddress, int index) {
-        return startAddress + index * 8 * 3;
+        return startAddress + index * BYTE * 3;
     }
 
     private int internal_size_data_segment(int capacity) {
-        return capacity * 8 * 3;
+        return capacity * BYTE * 3;
     }
 
 
@@ -73,7 +76,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         if (UNSAFE.getInt(_start_address + OFFSET_DIRTY) > 0) {
             UNSAFE.putInt(_start_address + OFFSET_DIRTY, 0);
 
-            long bytes = BASE_SEGMENT_SIZE + _initalCapacity * 8;
+            long bytes = BASE_SEGMENT_SIZE + _initalCapacity * BYTE;
             _start_address = UNSAFE.reallocateMemory(_start_address, bytes);
 
             UNSAFE.putInt(_start_address + OFFSET_ELEM_DATA_SIZE, _initalCapacity);
@@ -106,7 +109,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         int index = (hash & 0x7FFFFFFF) % UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE);
         m = findNonNullKeyEntry(key, index);
         if (m != KConfig.NULL_LONG) {
-            return UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_VALUE * 8);
+            return UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_VALUE * BYTE);
         }
         return KConfig.NULL_LONG;
     }
@@ -114,10 +117,10 @@ public class OffHeapLongLongMap implements KLongLongMap {
     final long findNonNullKeyEntry(long key, int index) {
         long m = UNSAFE.getLong(internal_ptr_elem_data_idx(index));
         while (m != -1) {
-            if (key == UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_KEY * 8)) {
+            if (key == UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_KEY * BYTE)) {
                 return m;
             }
-            m = UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_NEXT * 8);
+            m = UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_NEXT * BYTE);
         }
         return KConfig.NULL_LONG;
     }
@@ -128,15 +131,15 @@ public class OffHeapLongLongMap implements KLongLongMap {
             if (UNSAFE.getLong(internal_ptr_elem_data_idx(i)) != -1) {
                 long current_ptr = internal_ptr_elem_data_idx(i);
 
-                long current_key = UNSAFE.getLong(current_ptr + POS_KEY * 8);
-                long current_value = UNSAFE.getLong(current_ptr + POS_VALUE * 8);
-                long current_next = UNSAFE.getLong(current_ptr + POS_NEXT * 8);
+                long current_key = UNSAFE.getLong(current_ptr + POS_KEY * BYTE);
+                long current_value = UNSAFE.getLong(current_ptr + POS_VALUE * BYTE);
+                long current_next = UNSAFE.getLong(current_ptr + POS_NEXT * BYTE);
 
                 callback.on(current_key, current_value);
                 while (current_next == KConfig.NULL_LONG) {
                     current_ptr = current_next;
-                    current_key = UNSAFE.getLong(current_ptr + POS_KEY * 8);
-                    current_value = UNSAFE.getLong(current_ptr + POS_VALUE * 8);
+                    current_key = UNSAFE.getLong(current_ptr + POS_KEY * BYTE);
+                    current_value = UNSAFE.getLong(current_ptr + POS_VALUE * BYTE);
 
                     callback.on(current_key, current_value);
                 }
@@ -165,13 +168,13 @@ public class OffHeapLongLongMap implements KLongLongMap {
             entry = createHashedEntry(key, index);
         }
 
-        UNSAFE.putLong(entry + POS_VALUE * 8, value);
+        UNSAFE.putLong(entry + POS_VALUE * BYTE, value);
     }
 
     long createHashedEntry(long key, int index) {
         long entry_pos = internal_ptr_elem_data_idx(index);
-        UNSAFE.putLong(entry_pos + POS_KEY * 8, key);
-        UNSAFE.putLong(entry_pos + POS_VALUE * 8, KConfig.NULL_LONG);
+        UNSAFE.putLong(entry_pos + POS_KEY * BYTE, key);
+        UNSAFE.putLong(entry_pos + POS_VALUE * BYTE, KConfig.NULL_LONG);
 
 //        if (index >= 1) {
 //            long prev_pos = internal_ptr_elem_data_idx(index - 1);
@@ -192,11 +195,11 @@ public class OffHeapLongLongMap implements KLongLongMap {
         for (int i = 0; i < UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE); i++) {
             long entry_pos = internal_ptr_elem_data_idx(i);
             while (entry_pos != -1) {
-                long entry_key = UNSAFE.getLong(entry_pos + POS_KEY * 8);
+                long entry_key = UNSAFE.getLong(entry_pos + POS_KEY * BYTE);
                 int index = ((int) entry_key & 0x7FFFFFFF) % length;
 
-                long next = UNSAFE.getLong(entry_pos + POS_NEXT * 8);
-                UNSAFE.putLong(entry_pos + POS_NEXT * 8, UNSAFE.getLong(internal_ptr_elem_data_idx(_new_data_start, index)));
+                long next = UNSAFE.getLong(entry_pos + POS_NEXT * BYTE);
+                UNSAFE.putLong(entry_pos + POS_NEXT * BYTE, UNSAFE.getLong(internal_ptr_elem_data_idx(_new_data_start, index)));
                 UNSAFE.putLong(internal_ptr_elem_data_idx(_new_data_start, index), entry_pos);
 
                 entry_pos = next;
@@ -228,18 +231,18 @@ public class OffHeapLongLongMap implements KLongLongMap {
         index = (hash & 0x7FFFFFFF) % elementDataSize;
 
         entry_pos = internal_ptr_elem_data_idx(index);
-        long entry_key = UNSAFE.getLong(entry_pos + POS_KEY * 8);
+        long entry_key = UNSAFE.getLong(entry_pos + POS_KEY * BYTE);
         while (entry_pos != KConfig.NULL_LONG && !(/*((int)segment.key) == hash &&*/ key == entry_key)) {
             last_pos = entry_pos;
-            entry_pos = UNSAFE.getLong(entry_pos + POS_NEXT * 8);
+            entry_pos = UNSAFE.getLong(entry_pos + POS_NEXT * BYTE);
         }
         if (entry_pos == KConfig.NULL_LONG) {
             return;
         }
         if (last_pos == KConfig.NULL_LONG) {
-            UNSAFE.putLong(internal_ptr_elem_data_idx(index), UNSAFE.getLong(entry_pos + POS_NEXT * 8));
+            UNSAFE.putLong(internal_ptr_elem_data_idx(index), UNSAFE.getLong(entry_pos + POS_NEXT * BYTE));
         } else {
-            UNSAFE.putLong(last_pos + POS_NEXT * 8, UNSAFE.getLong(entry_pos + POS_NEXT * 8));
+            UNSAFE.putLong(last_pos + POS_NEXT * BYTE, UNSAFE.getLong(entry_pos + POS_NEXT * BYTE));
         }
         UNSAFE.putInt(_start_address + OFFSET_DIRTY, UNSAFE.getInt(_start_address + OFFSET_DIRTY) - 1);
     }
