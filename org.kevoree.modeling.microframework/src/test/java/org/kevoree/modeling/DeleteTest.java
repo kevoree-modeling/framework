@@ -69,7 +69,7 @@ public class DeleteTest {
                                                                                             n42.delete(null);
 
                                                                                             CloudView factory2_2 = universe.time(1l);
-                                                                                            factory2_2.select("/", new KCallback<Object[]>() {
+                                                                                            factory2_2.select("@root", new KCallback<Object[]>() {
                                                                                                 @Override
                                                                                                 public void on(Object[] results) {
                                                                                                     if (results != null && results.length > 0) {

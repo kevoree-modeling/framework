@@ -45,11 +45,11 @@ public class KContentKey {
     }
 
     public static KContentKey createLastObjectIndexFromPrefix(Short prefix) {
-        return new KContentKey(KConfig.END_OF_TIME, KConfig.NULL_LONG, Long.parseLong(prefix.toString()));
+        return new KContentKey(KConfig.END_OF_TIME, KConfig.NULL_LONG, prefix);
     }
 
     public static KContentKey createLastUniverseIndexFromPrefix(Short prefix) {
-        return new KContentKey(KConfig.END_OF_TIME, KConfig.NULL_LONG, Long.parseLong(prefix.toString()));
+        return new KContentKey(KConfig.END_OF_TIME, KConfig.NULL_LONG, prefix);
     }
 
     public static KContentKey create(String payload) {

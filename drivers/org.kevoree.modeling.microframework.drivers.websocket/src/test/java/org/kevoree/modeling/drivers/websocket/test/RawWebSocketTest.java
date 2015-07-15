@@ -35,13 +35,13 @@ public class RawWebSocketTest {
         ContentPutRequest putRequest = new ContentPutRequest(2);
         putRequest.put(KContentKey.createGlobalUniverseTree(), "GlobalUniverseTree");
 
-        Events eventsMessage = new Events(1,0);
+        Events eventsMessage = new Events(1, 0);
         int[] meta = new int[1];
         meta[0] = 42;
         eventsMessage.setEvent(0, KContentKey.createGlobalUniverseTree(), meta);
 
         model.setContentDeliveryDriver(mock);
-        WebSocketGateway wrapper = WebSocketGateway.exposeModel(model,PORT);
+        WebSocketGateway wrapper = WebSocketGateway.exposeModel(model, PORT);
         wrapper.start();
 
         CountDownLatch latch = new CountDownLatch(3);
@@ -49,10 +49,11 @@ public class RawWebSocketTest {
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
-                WebSocketCDNClient client = new WebSocketCDNClient("ws://localhost:" + PORT);
+                WebSocketCDNClient client = new WebSocketCDNClient("ws://localhost:" + PORT + "/cdn");
                 client.connect(new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
+
 
                         client.get(getRequest, new KCallback<String[]>() {
                             @Override
@@ -83,11 +84,12 @@ public class RawWebSocketTest {
                             }
                         });
                         client.send(eventsMessage);
+
+
                     }
                 });
             }
         });
-
 
         try {
             mock.msgCounter.await(4000, TimeUnit.MILLISECONDS);
@@ -104,6 +106,8 @@ public class RawWebSocketTest {
         Assert.assertEquals(latch.getCount(), 0);
 
         Assert.assertEquals(mock.msgCounter.getCount(), 0);
+
+
         wrapper.stop();
     }
 

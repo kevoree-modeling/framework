@@ -270,7 +270,7 @@ public class TimeTest {
         });
 
         CloudView t0_2 = universe.time(0L);
-        t0_2.select("/", new KCallback<Object[]>() {
+        t0_2.select("@root", new KCallback<Object[]>() {
             @Override
             public void on(Object[] kObjects) {
                 if (kObjects != null && kObjects.length > 0) {
@@ -311,7 +311,7 @@ public class TimeTest {
         CloudView t1 = universe.time(1L);
         final Element element = t1.createElement();
         element.setName("Element1");
-        t1.select("/", new KCallback<Object[]>() {
+        t1.select("@root", new KCallback<Object[]>() {
             @Override
             public void on(Object[] kObjects) {
                 if (kObjects != null && kObjects.length > 0) {
@@ -335,7 +335,7 @@ public class TimeTest {
         });
 
         CloudView t0_2 = universe.time(0L);
-        t0_2.select("/", new KCallback<Object[]>() {
+        t0_2.select("@root", new KCallback<Object[]>() {
             @Override
             public void on(Object[] kObjects) {
                 if (kObjects != null && kObjects.length > 0) {
