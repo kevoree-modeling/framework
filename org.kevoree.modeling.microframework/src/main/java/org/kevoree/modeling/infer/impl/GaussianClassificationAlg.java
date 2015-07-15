@@ -21,9 +21,6 @@ public class GaussianClassificationAlg implements KInferAlg {
     private static int NUMOFFIELDS = 4;
 
 
-
-
-
     private int getIndex(int input, int output, int field, KMetaDependencies meta ){
         return output*(NUMOFFIELDS*meta.origin().inputs().length+1)+NUMOFFIELDS*input+field;
     }

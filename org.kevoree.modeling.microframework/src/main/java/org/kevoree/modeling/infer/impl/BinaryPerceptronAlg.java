@@ -9,8 +9,10 @@ import java.util.Random;
 
 
 public class BinaryPerceptronAlg implements KInferAlg {
-    private int iterations=20;
+    private int iterations=50;
 
+    //TODO to replace by meta-learning parameters
+    private double alpha=0.005; //learning rate
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin) {
@@ -27,16 +29,14 @@ public class BinaryPerceptronAlg implements KInferAlg {
         Array1D state = new Array1D(size,0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
 
         for(int iter=0; iter<iterations; iter++){
-            for(int i=0;i<trainingSet.length;i++){
-                double a= calculate(trainingSet[i],state);
-                if(a==0){
-                    a=-1;
-                }
-                if(a*expectedResultSet[i][0]<=0){
+            for(int row=0;row<trainingSet.length;row++){
+                double h= calculate(trainingSet[row],state);
+                double error=-alpha*(h-expectedResultSet[row][0]);
+                if(error!=0){
                     for(int j=0; j<origin.metaClass().inputs().length;j++){
-                        state.add(j,expectedResultSet[i][0]*trainingSet[i][j]);
+                        state.add(j,error*trainingSet[row][j]);
                     }
-                    state.add(origin.metaClass().inputs().length,expectedResultSet[i][0]);
+                    state.add(origin.metaClass().inputs().length,error);
                 }
             }
         }
@@ -61,8 +61,8 @@ public class BinaryPerceptronAlg implements KInferAlg {
     @Override
     public double[][] infer(double[][] features, KObject origin) {
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
-        int dependenciesIndex = origin.metaClass().dependencies().index()+1;
-        int size=origin.metaClass().inputs().length;
+        int dependenciesIndex = origin.metaClass().dependencies().index();
+        int size=origin.metaClass().inputs().length+1;
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;
         }
