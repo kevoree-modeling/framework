@@ -57,7 +57,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         NODE_SIZE = 0;
     }
 
-    private void internal_allocate(int size) {
+    private final void internal_allocate(int size) {
         long bytes = BASE_SEGMENT_LEN + internal_size_raw_segment(size);
 
         _start_address = UNSAFE.allocateMemory(bytes);
@@ -78,7 +78,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         return _start_address + OFFSET_BACK + idx * BYTE * NODE_SIZE;
     }
 
-    public int size() {
+    public final int size() {
         return UNSAFE.getInt(_start_address + OFFSET_SIZE);
     }
 
@@ -204,7 +204,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
     }
 
     /* Time never use direct lookup, sadly for performance, anyway this method is private to ensure the correctness of caching mechanism */
-    public long lookup(long p_key) {
+    public final long lookup(long p_key) {
         long n = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
         if (n == UNDEFINED) {
             return KConfig.NULL_LONG;
@@ -223,7 +223,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         return n;
     }
 
-    public void range(long startKey, long endKey, KTreeWalker walker) {
+    public final void range(long startKey, long endKey, KTreeWalker walker) {
         long indexEnd = internal_previousOrEqual_index(endKey);
         while (indexEnd != UNDEFINED && key(indexEnd) >= startKey) {
             walker.elem(key(indexEnd));
@@ -231,7 +231,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         }
     }
 
-    protected long internal_previousOrEqual_index(long p_key) {
+    protected final long internal_previousOrEqual_index(long p_key) {
         long p = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
         if (p == UNDEFINED) {
             return p;
