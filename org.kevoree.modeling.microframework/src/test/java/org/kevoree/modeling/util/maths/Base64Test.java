@@ -129,19 +129,4 @@ public class Base64Test {
         */
 
 
-    @Benchmark
-    public void parseLongTest(){
-
-
-    }
-
-    String hello = "prefix/"+Base64.encodeLong(KConfig.END_OF_TIME);
-
-    @Benchmark
-    public void base64longTest(){
-
-
-    }
-
-
 }
