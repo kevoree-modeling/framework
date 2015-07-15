@@ -79,7 +79,7 @@ public class OffHeapMemoryCache implements KCache {
         this._threshold = (int) (UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE) * this._loadFactor);
     }
 
-    private static final int internal_size_base(int length) {
+    private int internal_size_base(int length) {
         return ATT_ELEM_COUNT_LEN + ATT_ELEM_DATA_SIZE_LEN + length * BYTE;
     }
 
@@ -87,13 +87,13 @@ public class OffHeapMemoryCache implements KCache {
         return _start_address + OFFSET_STARTADDRESS_ELEM_DATA + index * BYTE;
     }
 
-    private final int internal_inc_elementCount() {
+    private int internal_inc_elementCount() {
         int c = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT) + 1;
         UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, c);
         return c;
     }
 
-    private final int internal_dec_elementCount() {
+    private int internal_dec_elementCount() {
         int c = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT) - 1;
         UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, c);
         return c;
@@ -158,7 +158,7 @@ public class OffHeapMemoryCache implements KCache {
         UNSAFE.putLong(entry_ptr + OFFSET_ENTRYPTR_SEGMENT_PTR, memoryElement.getMemoryAddress());
     }
 
-    private final synchronized long complex_insert(int previousIndex, int hash, long universe, long time, long obj) {
+    private synchronized long complex_insert(int previousIndex, int hash, long universe, long time, long obj) {
         int index = previousIndex;
         int newElementCount = internal_inc_elementCount();
 
@@ -242,7 +242,7 @@ public class OffHeapMemoryCache implements KCache {
         common_clean_monitor(null, metaModel);
     }
 
-    private final synchronized void common_clean_monitor(KObject origin, KMetaModel p_metaModel) {
+    private synchronized void common_clean_monitor(KObject origin, KMetaModel p_metaModel) {
         if (origin != null) {
             if (rootReference != null) {
                 rootReference.next = new KObjectWeakReference(origin);
@@ -286,7 +286,7 @@ public class OffHeapMemoryCache implements KCache {
         }
     }
 
-    private final void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
+    private void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
         int hash = (int) (universe ^ time ^ obj);
