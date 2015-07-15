@@ -22,32 +22,25 @@ import java.lang.reflect.Field;
 public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryElement {
     private static final Unsafe UNSAFE = getUnsafe();
 
+    private static final int ATT_META_CLASS_INDEX_LEN = 4;
+    private static final int ATT_COUNTER_LEN = 4;
+    private static final int ATT_DIRTY_LEN = 1;
+
+    private static final int OFFSET_META_CLASS_INDEX = 0;
+    private static final int OFFSET_COUNTER = OFFSET_META_CLASS_INDEX + ATT_META_CLASS_INDEX_LEN;
+    private static final int OFFSET_DIRTY = OFFSET_COUNTER + ATT_COUNTER_LEN;
+    private static final int OFFSET_MODIFIED_INDEXES = OFFSET_DIRTY + ATT_DIRTY_LEN;
+
+    private static final int BASE_SEGMENT_SIZE = ATT_META_CLASS_INDEX_LEN + ATT_COUNTER_LEN + ATT_DIRTY_LEN;
+
+    private static final int BYTE = 8;
+
     // native pointer to the start of the memory segment
     private long _start_address;
     private int _allocated_segments = 0;
 
-    private long internal_ptr_metaClassIndex() {
-        return _start_address;
-    }
-
-    private long internal_ptr_counter() {
-        return internal_ptr_metaClassIndex() + 4;
-    }
-
-    private long internal_ptr_dirty() {
-        return internal_ptr_counter() + 4;
-    }
-
-    private long internal_ptr_modifiedIndexes() {
-        return internal_ptr_dirty() + 1;
-    }
-
     private long internal_ptr_raw(KMetaClass metaClass) {
-        return internal_ptr_modifiedIndexes() + metaClass.metaElements().length;
-    }
-
-    private int internal_size_of_base_segment() {
-        return 4 + 4 + 1; // meta class index, counter, and dirty flag
+        return _start_address + OFFSET_MODIFIED_INDEXES + metaClass.metaElements().length;
     }
 
     private int internal_size_of_modifiedIndexes_segment(KMetaClass metaClass) {
@@ -116,7 +109,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
 
         OffHeapMemorySegment clonedEntry = new OffHeapMemorySegment();
-        int baseSegment = internal_size_of_base_segment();
+        int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = internal_size_of_modifiedIndexes_segment(metaClass);
         int rawSegment = internal_size_of_raw_segment(metaClass);
         int cloneBytes = baseSegment + modifiedIndexSegment + rawSegment;
@@ -142,7 +135,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                         if (clone_ptr_str_segment != 0) {
                             // copy the segment
                             int str_size = UNSAFE.getInt(clone_ptr_str_segment);
-                            int bytes = 4 + str_size * 8;
+                            int bytes = 4 + str_size * BYTE;
                             long new_ref_segment = UNSAFE.allocateMemory(bytes);
                             clonedEntry._allocated_segments++;
                             UNSAFE.copyMemory(clone_ptr_str_segment, new_ref_segment, bytes);
@@ -160,7 +153,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                         if (clone_ptr_str_segment != 0) {
                             // copy the segment
                             int str_size = UNSAFE.getInt(clone_ptr_str_segment);
-                            int bytes = 4 + str_size * 8;
+                            int bytes = 4 + str_size * BYTE;
                             long new_ref_segment = UNSAFE.allocateMemory(bytes);
                             clonedEntry._allocated_segments++;
                             UNSAFE.copyMemory(clone_ptr_str_segment, new_ref_segment, bytes);
@@ -179,7 +172,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                     if (clone_ptr_ref_segment != 0) {
                         // copy the segment
                         int size = UNSAFE.getInt(clone_ptr_ref_segment);
-                        int bytes = 4 + size * 8;
+                        int bytes = 4 + size * BYTE;
                         long new_ref_segment = UNSAFE.allocateMemory(bytes);
                         clonedEntry._allocated_segments++;
                         UNSAFE.copyMemory(clone_ptr_ref_segment, new_ref_segment, bytes);
@@ -208,12 +201,12 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                 if (content instanceof String) {
                     String s = (String) content;
                     int size = s.length();
-                    long newSegment = UNSAFE.allocateMemory(4 + size * 8); // size + the actual string
+                    long newSegment = UNSAFE.allocateMemory(4 + size * BYTE); // size + the actual string
                     _allocated_segments++;
                     byte[] bytes = s.getBytes("UTF-8");
                     UNSAFE.putInt(newSegment, size);
                     for (int i = 0; i < bytes.length; i++) {
-                        UNSAFE.putByte(newSegment + 4 + i * 8, bytes[i]);
+                        UNSAFE.putByte(newSegment + 4 + i * BYTE, bytes[i]);
                     }
                     UNSAFE.putLong(ptr, newSegment);
 
@@ -232,7 +225,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                 }
 
                 setDirty();
-                UNSAFE.putByte(internal_ptr_modifiedIndexes() + index, (byte) 1);
+                UNSAFE.putByte(_start_address + OFFSET_MODIFIED_INDEXES + index, (byte) 1);
             }
 
         } catch (
@@ -258,7 +251,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                 int size = UNSAFE.getInt(ptr_ref_segment);
                 result = new long[size];
                 for (int i = 0; i < size; i++) {
-                    result[i] = UNSAFE.getLong(ptr_ref_segment + 4 + i * 8);
+                    result[i] = UNSAFE.getLong(ptr_ref_segment + 4 + i * BYTE);
                 }
             }
         }
@@ -278,9 +271,9 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
             long new_ref_ptr;
             if (ptr_ref_segment != 0) {
                 int newSize = UNSAFE.getInt(ptr_ref_segment) + 1;
-                new_ref_ptr = UNSAFE.reallocateMemory(ptr_ref_segment, 4 + newSize * 8);
+                new_ref_ptr = UNSAFE.reallocateMemory(ptr_ref_segment, 4 + newSize * BYTE);
                 UNSAFE.putInt(new_ref_ptr, newSize); // size
-                UNSAFE.putLong(new_ref_ptr + 4 + (newSize - 1) * 8, newRef); // content
+                UNSAFE.putLong(new_ref_ptr + 4 + (newSize - 1) * BYTE, newRef); // content
 
             } else {
                 new_ref_ptr = UNSAFE.allocateMemory(4 + 8);
@@ -306,13 +299,13 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
             if (ptr_ref_segment != 0) {
                 int size = UNSAFE.getInt(ptr_ref_segment);
                 if (size > 1) {
-                    long new_ref_ptr = UNSAFE.allocateMemory((size - 1) * 8);
+                    long new_ref_ptr = UNSAFE.allocateMemory((size - 1) * BYTE);
                     _allocated_segments++;
                     int j = 0;
                     for (int i = 0; i < size; i++) {
-                        long value = UNSAFE.getLong(ptr_ref_segment + 4 + i * 8);
+                        long value = UNSAFE.getLong(ptr_ref_segment + 4 + i * BYTE);
                         if (value != ref) {
-                            UNSAFE.putLong(new_ref_ptr + 4 + j * 8, value);
+                            UNSAFE.putLong(new_ref_ptr + 4 + j * BYTE, value);
                             j++;
                         }
                     }
@@ -358,7 +351,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
             int size = UNSAFE.getInt(ptr_segment);
             infer = new double[size];
             for (int i = 0; i < size; i++) {
-                infer[i] = UNSAFE.getDouble(ptr_segment + 4 + i * 8);
+                infer[i] = UNSAFE.getDouble(ptr_segment + 4 + i * BYTE);
             }
         }
         return infer;
@@ -392,7 +385,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
             throw new IndexOutOfBoundsException();
         }
 
-        UNSAFE.putDouble(ptr_segment + 4 + arrayIndex * 8, valueToInsert);
+        UNSAFE.putDouble(ptr_segment + 4 + arrayIndex * BYTE, valueToInsert);
 
         setDirty();
     }
@@ -404,9 +397,9 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
 
         long new_ptr_segment;
         if (ptr_segment != 0) {
-            new_ptr_segment = UNSAFE.reallocateMemory(ptr_segment, 4 + newSize * 8);
+            new_ptr_segment = UNSAFE.reallocateMemory(ptr_segment, 4 + newSize * BYTE);
         } else {
-            new_ptr_segment = UNSAFE.allocateMemory(4 + newSize * 8);
+            new_ptr_segment = UNSAFE.allocateMemory(4 + newSize * BYTE);
             _allocated_segments++;
         }
         UNSAFE.putInt(new_ptr_segment, newSize); // update size
@@ -432,7 +425,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                         int size = UNSAFE.getInt(ptr_str_segment);
                         byte[] bytes = new byte[size];
                         for (int i = 0; i < size; i++) {
-                            bytes[i] = UNSAFE.getByte(ptr_str_segment + 4 + i * 8);
+                            bytes[i] = UNSAFE.getByte(ptr_str_segment + 4 + i * BYTE);
                         }
                         result = new String(bytes, "UTF-8");
                     }
@@ -462,16 +455,16 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     @Override
     public int[] modifiedIndexes(KMetaClass metaClass) {
         int nbModified = 0;
-        long ptr = internal_ptr_modifiedIndexes();
+        long ptr = _start_address + OFFSET_MODIFIED_INDEXES;
 
         for (int i = 0; i < metaClass.metaElements().length; i++) {
             if (UNSAFE.getByte(ptr) != 0) {
                 nbModified = nbModified + 1;
             }
-            ptr = ptr + 8; // inc pointer
+            ptr = ptr + BYTE; // inc pointer
         }
 
-        ptr = internal_ptr_modifiedIndexes(); // reset pointer
+        ptr = _start_address + OFFSET_MODIFIED_INDEXES; // reset pointer
         int[] result = new int[nbModified];
         int inserted = 0;
         for (int i = 0; i < metaClass.metaElements().length; i++) {
@@ -479,14 +472,14 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                 result[inserted] = i;
                 inserted = inserted + 1;
             }
-            ptr = ptr + 8; // inc pointer
+            ptr = ptr + BYTE; // inc pointer
         }
         return result;
     }
 
     @Override
     public void initMetaClass(KMetaClass metaClass) {
-        int baseSegment = internal_size_of_base_segment();
+        int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = internal_size_of_modifiedIndexes_segment(metaClass);
         int rawSegment = internal_size_of_raw_segment(metaClass);
 
@@ -495,18 +488,18 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
         _start_address = UNSAFE.allocateMemory(bytes);
         _allocated_segments++;
         UNSAFE.setMemory(_start_address, bytes, (byte) 0);
-        UNSAFE.putInt(internal_ptr_metaClassIndex(), metaClass.index());
+        UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, metaClass.index());
     }
 
 
     @Override
     public int metaClassIndex() {
-        return UNSAFE.getInt(internal_ptr_metaClassIndex());
+        return UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX);
     }
 
     @Override
     public boolean isDirty() {
-        return UNSAFE.getByte(internal_ptr_dirty()) != 0;
+        return UNSAFE.getByte(_start_address + OFFSET_DIRTY) != 0;
     }
 
     @Override
@@ -595,7 +588,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);
-            KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(internal_ptr_metaClassIndex()));
+            KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
             initMetaClass(metaClass);
             String[] metaKeys = objectReader.keys();
             for (int i = 0; i < metaKeys.length; i++) {
@@ -666,43 +659,43 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
             }
         }
         // should not be dirty after unserialization
-        UNSAFE.putByte(internal_ptr_dirty(), (byte) 0);
+        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
 
     }
 
     @Override
     public void setClean(KMetaModel model) {
-        KMetaClass metaClass = model.metaClass(UNSAFE.getInt(internal_ptr_metaClassIndex()));
-        UNSAFE.putByte(internal_ptr_dirty(), (byte) 0);
-        UNSAFE.setMemory(internal_ptr_modifiedIndexes(), metaClass.metaElements().length, (byte) 0);
+        KMetaClass metaClass = model.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
+        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
+        UNSAFE.setMemory(_start_address + OFFSET_MODIFIED_INDEXES, metaClass.metaElements().length, (byte) 0);
     }
 
     @Override
     public void setDirty() {
-        UNSAFE.putByte(internal_ptr_dirty(), (byte) 1);
+        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 1);
     }
 
 
     @Override
     public int counter() {
-        return UNSAFE.getInt(internal_ptr_counter());
+        return UNSAFE.getInt(_start_address + OFFSET_COUNTER);
     }
 
     @Override
     public void inc() {
-        int c = UNSAFE.getInt(internal_ptr_counter());
-        UNSAFE.putInt(internal_ptr_counter(), c + 1);
+        int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
+        UNSAFE.putInt(_start_address + OFFSET_COUNTER, c + 1);
     }
 
     @Override
     public void dec() {
-        int c = UNSAFE.getInt(internal_ptr_counter());
-        UNSAFE.putInt(internal_ptr_counter(), c - 1);
+        int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
+        UNSAFE.putInt(_start_address + OFFSET_COUNTER, c - 1);
     }
 
     @Override
     public void free(KMetaModel metaModel) {
-        KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(internal_ptr_metaClassIndex()));
+        KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
 
         for (int i = 0; i < metaClass.metaElements().length; i++) {
             KMeta meta = metaClass.metaElements()[i];

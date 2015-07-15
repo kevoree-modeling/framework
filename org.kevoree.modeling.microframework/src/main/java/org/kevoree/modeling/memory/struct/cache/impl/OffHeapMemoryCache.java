@@ -230,7 +230,7 @@ public class OffHeapMemoryCache implements KCache {
         if (UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT) > 0) {
             UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, 0);
 
-            long size = 4 + 4 + KConfig.CACHE_INIT_SIZE * BYTE;
+            long size = internal_size_base(KConfig.CACHE_INIT_SIZE);
             this._start_address = UNSAFE.reallocateMemory(_start_address, size);
             UNSAFE.setMemory(_start_address, size, (byte) 0);
             UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, this._initalCapacity);
