@@ -446,7 +446,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         }
     }
 
-    public void delete(long p_key) {
+    public final void delete(long p_key) {
         //TODO
     }
 
@@ -458,7 +458,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         }
     }
 
-    public String serialize(KMetaModel metaModel) {
+    public final String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
         long rootIndex = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
         if (rootIndex == UNDEFINED) {
@@ -504,7 +504,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         return builder.toString();
     }
 
-    public void init(String payload, KMetaModel metaModel) {
+    public final void init(String payload, KMetaModel metaModel) {
         if (payload == null || payload.length() == 0) {
             internal_allocate(0);
             return;
@@ -561,8 +561,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                     cursor++;
                 }
                 if (cursor > beginChunk) {
-                    long parentRaw = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
-                    long parentValue = parentRaw; //* elemSize;
+                    long parentValue = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
                     setParent(_back_index, parentValue);
                     if (isOnLeft) {
                         setLeft(parentValue, _back_index);
@@ -586,57 +585,54 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         }
     }
 
-    public boolean isDirty() {
+    public final boolean isDirty() {
         return UNSAFE.getByte(_start_address + OFFSET_DIRTY) != 0;
     }
 
-    public void setClean(KMetaModel p_metaModel) {
+    public final void setClean(KMetaModel p_metaModel) {
         UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
     }
 
-    public void setDirty() {
+    public final void setDirty() {
         UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 1);
     }
 
-    public int counter() {
+    public final int counter() {
         return UNSAFE.getInt(_start_address + OFFSET_COUNTER);
     }
 
-    public void inc() {
+    public final void inc() {
         int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
         UNSAFE.putInt(_start_address + OFFSET_COUNTER, c + 1);
     }
 
-    public void dec() {
+    public final void dec() {
         int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
         UNSAFE.putInt(_start_address + OFFSET_COUNTER, c - 1);
     }
 
-    public void free(KMetaModel p_metaModel) {
+    public final void free(KMetaModel p_metaModel) {
         UNSAFE.freeMemory(_start_address);
     }
 
-
     @SuppressWarnings("restriction")
-    protected static Unsafe getUnsafe() {
+    protected final static Unsafe getUnsafe() {
         try {
-
             Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafe.setAccessible(true);
             return (Unsafe) theUnsafe.get(null);
-
         } catch (Exception e) {
             throw new RuntimeException("ERROR: unsafe operations are not available");
         }
     }
 
     @Override
-    public long getMemoryAddress() {
+    public final long getMemoryAddress() {
         return _start_address;
     }
 
     @Override
-    public void setMemoryAddress(long address) {
+    public final void setMemoryAddress(long address) {
         _start_address = address;
 
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;

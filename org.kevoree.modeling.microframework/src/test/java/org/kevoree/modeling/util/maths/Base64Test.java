@@ -82,6 +82,19 @@ public class Base64Test {
         Assert.assertEquals(0x7fffffff, dec);
     }
 
+    @Test
+    public void randomBigNumTest() {
+        //System.out.println("Encode");
+        String enc = Base64.encodeLong(68719476737l);
+        //System.out.println("Decode");
+        long dec = Base64.decodeToLong(enc);
+        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(68719476737l, dec);
+    }
+
+
+
+
     /*
         private String printBits(Long val) {
             String toString = Long.toBinaryString(val);
