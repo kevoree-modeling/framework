@@ -30,16 +30,16 @@ public class OffHeapLongTree3 extends AbstractOffHeapTree3 implements KLongTree,
         }
     }
 
-    @Override
-    public long getMemoryAddress() {
-        return _start_address;
-    }
-
-    @Override
-    public void setMemoryAddress(long address) {
-        _start_address = address;
-
-        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        _threshold = (int) (size() * _loadFactor);
-    }
+//    @Override
+//    public long getMemoryAddress() {
+//        return _start_address;
+//    }
+//
+//    @Override
+//    public void setMemoryAddress(long address) {
+//        _start_address = address;
+//
+//        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
+//        _threshold = (int) (size() * _loadFactor);
+//    }
 }

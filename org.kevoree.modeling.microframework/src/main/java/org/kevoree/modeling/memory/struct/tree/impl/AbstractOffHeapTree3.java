@@ -73,9 +73,9 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         return size * BYTE * NODE_SIZE;
     }
 
-    private static final long internal_ptr_back_idx(long idx) {
-        return _start_address + OFFSET_BACK + idx * BYTE * NODE_SIZE;
-    }
+//    private static final long internal_ptr_back_idx(long idx) {
+//        return _start_address + OFFSET_BACK + idx * BYTE * NODE_SIZE;
+//    }
 
     public final int size() {
         return UNSAFE.getInt(_start_address + OFFSET_SIZE);
@@ -85,66 +85,78 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_KEY * BYTE);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        return UNSAFE.getLong(addr + POS_KEY * BYTE);
     }
 
     private static final void setKey(long p_nodeIndex, long p_key) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_KEY * BYTE, p_key);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        UNSAFE.putLong(addr + POS_KEY * BYTE, p_key);
     }
 
     private static final long left(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_LEFT * BYTE);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        return UNSAFE.getLong(addr + POS_LEFT * BYTE);
     }
 
     private static final void setLeft(long p_nodeIndex, long p_leftNodeIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_LEFT * BYTE, p_leftNodeIndex);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        UNSAFE.putLong(addr + POS_LEFT * BYTE, p_leftNodeIndex);
     }
 
     private static final long right(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_RIGHT * BYTE);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        return UNSAFE.getLong(addr + POS_RIGHT * BYTE);
     }
 
     private static final void setRight(long p_nodeIndex, long p_rightNodeIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_RIGHT * BYTE, p_rightNodeIndex);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        UNSAFE.putLong(addr + POS_RIGHT * BYTE, p_rightNodeIndex);
     }
 
     private static final long parent(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_PARENT * BYTE);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        return UNSAFE.getLong(addr + POS_PARENT * BYTE);
     }
 
     private static final void setParent(long p_nodeIndex, long p_parentNodeIndex) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_PARENT * BYTE, p_parentNodeIndex);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        UNSAFE.putLong(addr + POS_PARENT * BYTE, p_parentNodeIndex);
     }
 
     private static final long color(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_COLOR * BYTE);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        return UNSAFE.getLong(addr + POS_COLOR * BYTE);
     }
 
     private static final void setColor(long p_nodeIndex, long p_color) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_COLOR * BYTE, p_color);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        UNSAFE.putLong(addr + POS_COLOR * BYTE, p_color);
     }
 
     protected static final long value(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        return UNSAFE.getLong(internal_ptr_back_idx(p_nodeIndex) + POS_VALUE * BYTE);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        return UNSAFE.getLong(addr + POS_VALUE * BYTE);
     }
 
     private static final void setValue(long p_nodeIndex, long p_value) {
-        UNSAFE.putLong(internal_ptr_back_idx(p_nodeIndex) + POS_VALUE * BYTE, p_value);
+        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        UNSAFE.putLong(addr + POS_VALUE * BYTE, p_value);
     }
 
     private static final long grandParent(long currentIndex) {
