@@ -33,8 +33,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
     private static final int POS_COLOR = 4;
     private static final int POS_VALUE = 5;
 
-    private static final int ZERO = 0;
-    private static final int UNDEFINED = -1;
+    private static final long UNDEFINED = -1;
     private static final int BYTE = 8;
 
     private static final int ATT_ROOT_INDEX_LEN = 8;
@@ -47,7 +46,6 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
     private static final int OFFSET_DIRTY = OFFSET_SIZE + ATT_SIZE_LEN;
     private static final int OFFSET_COUNTER = OFFSET_DIRTY + ATT_DIRTY_LEN;
     private static final int OFFSET_BACK = OFFSET_COUNTER + ATT_COUNTER_LEN;
-
 
     private static final int BASE_SEGMENT_LEN = ATT_ROOT_INDEX_LEN + ATT_SIZE_LEN + ATT_DIRTY_LEN + ATT_COUNTER_LEN;
 
@@ -63,7 +61,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         long bytes = BASE_SEGMENT_LEN + internal_size_raw_segment(size);
 
         _start_address = UNSAFE.allocateMemory(bytes);
-        UNSAFE.setMemory(_start_address, bytes, (byte) ZERO);
+        UNSAFE.setMemory(_start_address, bytes, (byte) 0);
 
         UNSAFE.putLong(_start_address + OFFSET_ROOT_INDEX, UNDEFINED);
         UNSAFE.putInt(_start_address + OFFSET_SIZE, size);
@@ -466,10 +464,10 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
         if (rootIndex == UNDEFINED) {
             builder.append("0");
         } else {
-            builder.append(size());
+            Base64.encodeIntToBuffer(size(), builder);
             builder.append(',');
+            Base64.encodeLongToBuffer(rootIndex, builder);
             int elemSize = NODE_SIZE;
-            builder.append(key(rootIndex));
             for (int i = 0; i < size(); i++) {
                 long nextNodeIndex = i; /*i * elemSize;*/
                 long parentNodeIndex = parent(nextNodeIndex);
@@ -495,12 +493,10 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                 Base64.encodeLongToBuffer(key(nextNodeIndex), builder);
                 builder.append(',');
                 if (parentNodeIndex != UNDEFINED) {
-                    //builder.append(beginParent / elemSize);
-                    builder.append(key(parentNodeIndex));
+                    Base64.encodeLongToBuffer(parentNodeIndex, builder);
                 }
                 if (elemSize > 5) {
                     builder.append(',');
-                    //builder.append(value(nextNodeIndex));
                     Base64.encodeLongToBuffer(value(nextNodeIndex), builder);
                 }
             }
@@ -519,7 +515,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
             cursor++;
         }
 
-        int s = Integer.parseInt(payload.substring(initPos, cursor));
+        int s = Base64.decodeToIntWithBounds(payload, initPos, cursor);
         internal_allocate(s);
 
         if (payload.charAt(cursor) == ',') {//className to parse
@@ -531,7 +527,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
             cursor++;
         }
 
-        UNSAFE.putLong(_start_address + OFFSET_ROOT_INDEX, Integer.parseInt(payload.substring(initPos, cursor)));
+        UNSAFE.putLong(_start_address + OFFSET_ROOT_INDEX, Base64.decodeToIntWithBounds(payload, initPos, cursor));
         UNSAFE.setMemory(_start_address + OFFSET_BACK, internal_size_raw_segment(s), (byte) UNDEFINED);
 
         int _back_index = 0;
@@ -556,7 +552,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                 while (cursor < payload.length() && payload.charAt(cursor) != ',') {
                     cursor++;
                 }
-                //long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
+
                 long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
                 setKey(_back_index, loopKey);
                 cursor++;
@@ -565,7 +561,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                     cursor++;
                 }
                 if (cursor > beginChunk) {
-                    long parentRaw = Long.parseLong(payload.substring(beginChunk, cursor));
+                    long parentRaw = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
                     long parentValue = parentRaw; //* elemSize;
                     setParent(_back_index, parentValue);
                     if (isOnLeft) {
@@ -581,7 +577,6 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                         cursor++;
                     }
                     if (cursor > beginChunk) {
-                        //long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
                         long currentValue = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
                         setValue(_back_index, currentValue);
                     }

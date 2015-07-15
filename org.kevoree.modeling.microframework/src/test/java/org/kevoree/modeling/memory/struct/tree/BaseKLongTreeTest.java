@@ -14,9 +14,12 @@ public abstract class BaseKLongTreeTest {
         KLongTree tree = createKLongTree();
         tree.init(null, null);
 
-        for (long i = 0; i <= 6; i++) {
+        long start = System.currentTimeMillis();
+        for (long i = 0; i <= 100000; i++) {
             tree.insert(i);
         }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start + " ms");
 
         KLongTree treeBis = createKLongTree();
         treeBis.init(tree.serialize(null), null);
