@@ -45,23 +45,21 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
 
     private long internal_ptr_elem_data_idx(int index) {
-        return internal_ptr_elem_data_idx(_start_address + OFFSET_DIRTY + 1, index);
+        return internal_ptr_elem_data_idx(_start_address + OFFSET_ELEM_DATA, index);
     }
 
     private long internal_ptr_elem_data_idx(long startAddress, int index) {
         return startAddress + index * BYTE * 3;
     }
 
-    private int internal_size_data_segment(int capacity) {
-        return capacity * BYTE * 3;
-    }
-
-
     public OffHeapLongLongMap(int p_initalCapacity, float p_loadFactor) {
         this._initalCapacity = p_initalCapacity;
         this._loadFactor = p_loadFactor;
 
-        int bytes = BASE_SEGMENT_SIZE + internal_size_data_segment(p_initalCapacity);
+        int sizeBaseSegment = BASE_SEGMENT_SIZE;
+        int sizeDataSegment = p_initalCapacity * BYTE * 3;
+        int bytes = sizeBaseSegment + sizeDataSegment;
+
         _start_address = UNSAFE.allocateMemory(bytes);
         _allocated_segments++;
         UNSAFE.setMemory(_start_address, bytes, (byte) -1);
@@ -69,7 +67,8 @@ public class OffHeapLongLongMap implements KLongLongMap {
         UNSAFE.putInt(_start_address + OFFSET_DIRTY, 0);
         UNSAFE.putInt(_start_address + OFFSET_ELEM_DATA_SIZE, _initalCapacity);
 
-        computeMaxSize();
+        // update threshold
+        _threshold = (int) (UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE) * _loadFactor);
     }
 
     public final void clear() {
@@ -81,10 +80,6 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
             UNSAFE.putInt(_start_address + OFFSET_ELEM_DATA_SIZE, _initalCapacity);
         }
-    }
-
-    private void computeMaxSize() {
-        _threshold = (int) (UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE) * _loadFactor);
     }
 
     @Override
@@ -187,7 +182,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
     public final void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
 
-        long bytes = internal_size_data_segment(length);
+        long bytes = length * BYTE * 3;
         long _new_data_start = UNSAFE.allocateMemory(bytes);
         _allocated_segments++;
         UNSAFE.setMemory(_new_data_start, bytes, (byte) -1);
@@ -212,7 +207,9 @@ public class OffHeapLongLongMap implements KLongLongMap {
         _allocated_segments--;
 
         UNSAFE.putInt(_start_address + OFFSET_ELEM_DATA_SIZE, length);
-        computeMaxSize();
+
+        // update threshold
+        _threshold = (int) (UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE) * _loadFactor);
     }
 
     public final void rehash() {
