@@ -19,8 +19,6 @@ import java.lang.reflect.Field;
 public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
     protected static final Unsafe UNSAFE = getUnsafe();
 
-    protected static int NODE_SIZE;
-
     private static final char BLACK_LEFT = '{';
     private static final char BLACK_RIGHT = '}';
     private static final char RED_LEFT = '[';
@@ -52,6 +50,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
     protected static long _start_address;
     protected int _threshold;
     protected float _loadFactor;
+    protected static int NODE_SIZE;
 
     protected AbstractOffHeapTree3() {
         NODE_SIZE = 0;
