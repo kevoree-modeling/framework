@@ -61,7 +61,7 @@ public class OffHeapMemoryCache implements KCache {
 
     private KObjectWeakReference rootReference = null;
 
-    private long _start_address;
+    private static long _start_address;
     private int _allocated_segments = 0;
 
     public OffHeapMemoryCache() {
@@ -79,7 +79,7 @@ public class OffHeapMemoryCache implements KCache {
         this._threshold = (int) (UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE) * this._loadFactor);
     }
 
-    private int internal_size_base(int length) {
+    private static final int internal_size_base(int length) {
         return ATT_ELEM_COUNT_LEN + ATT_ELEM_DATA_SIZE_LEN + length * BYTE;
     }
 
@@ -87,40 +87,20 @@ public class OffHeapMemoryCache implements KCache {
         return _start_address + OFFSET_STARTADDRESS_ELEM_DATA + index * BYTE;
     }
 
-    private long internal_ptr_entry_next(long entry_ptr) {
-        return entry_ptr + OFFSET_ENTRYPTR_NEXT_PTR;
-    }
-
-    private long internal_ptr_entry_universe(long entry_ptr) {
-        return entry_ptr + OFFSET_ENTRYPTR_UNIVERSE;
-    }
-
-    private long internal_ptr_entry_time(long entry_ptr) {
-        return entry_ptr + OFFSET_ENTRYPTR_TIME;
-    }
-
-    private long internal_ptr_entry_obj(long entry_ptr) {
-        return entry_ptr + OFFSET_ENTRYPTR_OBJ;
-    }
-
-    private long internal_ptr_entry_value(long entry_ptr) {
-        return entry_ptr + OFFSET_ENTRYPTR_SEGMENT_PTR;
-    }
-
-    private int internal_inc_elementCount() {
+    private static final int internal_inc_elementCount() {
         int c = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT) + 1;
         UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, c);
         return c;
     }
 
-    private int internal_dec_elementCount() {
+    private static final int internal_dec_elementCount() {
         int c = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT) - 1;
         UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, c);
         return c;
     }
 
     @Override
-    public KMemoryElement get(long universe, long time, long obj) {
+    public final KMemoryElement get(long universe, long time, long obj) {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
         if (elementDataSize == 0) {
             return null;
@@ -128,9 +108,9 @@ public class OffHeapMemoryCache implements KCache {
         int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % elementDataSize;
         long m_entry_ptr = UNSAFE.getLong(internal_ptr_elementData(index));
         while (m_entry_ptr != 0) {
-            long m_universe = UNSAFE.getLong(internal_ptr_entry_universe(m_entry_ptr));
-            long m_time = UNSAFE.getLong(internal_ptr_entry_time(m_entry_ptr));
-            long m_obj = UNSAFE.getLong(internal_ptr_entry_obj(m_entry_ptr));
+            long m_universe = UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_UNIVERSE);
+            long m_time = UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_TIME);
+            long m_obj = UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_OBJ);
             if (m_universe == universe && m_time == time && m_obj == obj) {
 
                 KMemoryElement elem = factory.newFromKey(m_universe, m_time, m_obj);
@@ -138,16 +118,16 @@ public class OffHeapMemoryCache implements KCache {
                     throw new RuntimeException("OffHeapMemoryCache only supports OffHeapMemoryElements");
                 }
                 KOffHeapMemoryElement offHeapElem = (KOffHeapMemoryElement) elem;
-                offHeapElem.setMemoryAddress(UNSAFE.getLong(internal_ptr_entry_value(m_entry_ptr)));
+                offHeapElem.setMemoryAddress(UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_SEGMENT_PTR));
                 return elem;
             }
-            m_entry_ptr = UNSAFE.getLong(internal_ptr_entry_next(m_entry_ptr));
+            m_entry_ptr = UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_NEXT_PTR);
         }
         return null;
     }
 
     @Override
-    public void put(long universe, long time, long obj, KMemoryElement payload) {
+    public final void put(long universe, long time, long obj, KMemoryElement payload) {
         if (!(payload instanceof KOffHeapMemoryElement)) {
             throw new RuntimeException("OffHeapMemoryCache only supports OffHeapMemoryElements");
         }
@@ -160,14 +140,14 @@ public class OffHeapMemoryCache implements KCache {
         if (elementDataSize != 0) {
             long m_entry_ptr = UNSAFE.getLong(internal_ptr_elementData(index));
             while (m_entry_ptr != 0) {
-                long m_universe = UNSAFE.getLong(internal_ptr_entry_universe(m_entry_ptr));
-                long m_time = UNSAFE.getLong(internal_ptr_entry_time(m_entry_ptr));
-                long m_obj = UNSAFE.getLong(internal_ptr_entry_obj(m_entry_ptr));
+                long m_universe = UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_UNIVERSE);
+                long m_time = UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_TIME);
+                long m_obj = UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_OBJ);
                 if (m_universe == universe && m_time == time && m_obj == obj) {
                     entry_ptr = m_entry_ptr;
                     break;
                 }
-                m_entry_ptr = UNSAFE.getLong(internal_ptr_entry_next(m_entry_ptr));
+                m_entry_ptr = UNSAFE.getLong(m_entry_ptr + OFFSET_ENTRYPTR_NEXT_PTR);
             }
         }
         if (entry_ptr == 0) {
@@ -175,10 +155,10 @@ public class OffHeapMemoryCache implements KCache {
         }
 
         KOffHeapMemoryElement memoryElement = (KOffHeapMemoryElement) payload;
-        UNSAFE.putLong(internal_ptr_entry_value(entry_ptr), memoryElement.getMemoryAddress());
+        UNSAFE.putLong(entry_ptr + OFFSET_ENTRYPTR_SEGMENT_PTR, memoryElement.getMemoryAddress());
     }
 
-    private synchronized long complex_insert(int previousIndex, int hash, long universe, long time, long obj) {
+    private final synchronized long complex_insert(int previousIndex, int hash, long universe, long time, long obj) {
         int index = previousIndex;
         int newElementCount = internal_inc_elementCount();
 
@@ -191,13 +171,13 @@ public class OffHeapMemoryCache implements KCache {
                 long entry_ptr = internal_ptr_elementData(i);
 
                 while (entry_ptr != 0) {
-                    long entry_universe = internal_ptr_entry_universe(entry_ptr);
-                    long entry_time = internal_ptr_entry_time(entry_ptr);
-                    long entry_obj = internal_ptr_entry_obj(entry_ptr);
+                    long entry_universe = entry_ptr + OFFSET_ENTRYPTR_UNIVERSE;
+                    long entry_time = entry_ptr + OFFSET_ENTRYPTR_TIME;
+                    long entry_obj = entry_ptr + OFFSET_ENTRYPTR_OBJ;
 
                     index = ((int) (entry_universe ^ entry_time ^ entry_obj) & 0x7FFFFFFF) % length;
-                    long next_ptr = internal_ptr_entry_next(entry_ptr);
-                    UNSAFE.putLong(internal_ptr_entry_next(entry_ptr), UNSAFE.getLong(internal_ptr_elementData(index)));
+                    long next_ptr = entry_ptr + OFFSET_ENTRYPTR_NEXT_PTR;
+                    UNSAFE.putLong(entry_ptr + OFFSET_ENTRYPTR_NEXT_PTR, UNSAFE.getLong(internal_ptr_elementData(index)));
                     UNSAFE.putLong(internal_ptr_elementData(index), entry_ptr);
                     entry_ptr = next_ptr;
                 }
@@ -211,10 +191,10 @@ public class OffHeapMemoryCache implements KCache {
         long entry_ptr = UNSAFE.allocateMemory(5 * BYTE); // next, universe, time, obj, value pointers
         this._allocated_segments++;
 
-        UNSAFE.putLong(internal_ptr_entry_universe(entry_ptr), universe);
-        UNSAFE.putLong(internal_ptr_entry_time(entry_ptr), time);
-        UNSAFE.putLong(internal_ptr_entry_obj(entry_ptr), obj);
-        UNSAFE.putLong(internal_ptr_entry_next(entry_ptr), internal_ptr_elementData(index));
+        UNSAFE.putLong(entry_ptr + OFFSET_ENTRYPTR_UNIVERSE, universe);
+        UNSAFE.putLong(entry_ptr + OFFSET_ENTRYPTR_TIME, time);
+        UNSAFE.putLong(entry_ptr + OFFSET_ENTRYPTR_OBJ, obj);
+        UNSAFE.putLong(entry_ptr + OFFSET_ENTRYPTR_NEXT_PTR, internal_ptr_elementData(index));
 
         UNSAFE.putLong(internal_ptr_elementData(index), entry_ptr);
 
@@ -222,19 +202,19 @@ public class OffHeapMemoryCache implements KCache {
     }
 
     @Override
-    public KCacheDirty[] dirties() {
+    public final KCacheDirty[] dirties() {
         return new KCacheDirty[0];
     }
 
     @Override
-    public void clear(KMetaModel metaModel) {
+    public final void clear(KMetaModel metaModel) {
         for (int i = 0; i < UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT); i++) {
             long e_ptr = UNSAFE.getLong(internal_ptr_elementData(i));
             while (e_ptr != 0) {
 
-                long e_universe = UNSAFE.getLong(internal_ptr_entry_universe(e_ptr));
-                long e_time = UNSAFE.getLong(internal_ptr_entry_time(e_ptr));
-                long e_obj = UNSAFE.getLong(internal_ptr_entry_obj(e_ptr));
+                long e_universe = UNSAFE.getLong(e_ptr + OFFSET_ENTRYPTR_UNIVERSE);
+                long e_time = UNSAFE.getLong(e_ptr + OFFSET_ENTRYPTR_TIME);
+                long e_obj = UNSAFE.getLong(e_ptr + OFFSET_ENTRYPTR_OBJ);
 
                 KMemoryElement elem = factory.newFromKey(e_universe, e_time, e_obj);
                 if (!(elem instanceof KOffHeapMemoryElement)) {
@@ -244,7 +224,7 @@ public class OffHeapMemoryCache implements KCache {
                 KOffHeapMemoryElement offHeapElem = (KOffHeapMemoryElement) elem;
                 offHeapElem.setMemoryAddress(e_ptr);
                 offHeapElem.free(metaModel);
-                e_ptr = UNSAFE.getLong(internal_ptr_entry_next(e_ptr));
+                e_ptr = UNSAFE.getLong(e_ptr + OFFSET_ENTRYPTR_NEXT_PTR);
             }
         }
         if (UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT) > 0) {
@@ -258,11 +238,11 @@ public class OffHeapMemoryCache implements KCache {
     }
 
     @Override
-    public void clean(KMetaModel metaModel) {
+    public final void clean(KMetaModel metaModel) {
         common_clean_monitor(null, metaModel);
     }
 
-    private synchronized void common_clean_monitor(KObject origin, KMetaModel p_metaModel) {
+    private final synchronized void common_clean_monitor(KObject origin, KMetaModel p_metaModel) {
         if (origin != null) {
             if (rootReference != null) {
                 rootReference.next = new KObjectWeakReference(origin);
@@ -306,7 +286,7 @@ public class OffHeapMemoryCache implements KCache {
         }
     }
 
-    private void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
+    private final void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
         int hash = (int) (universe ^ time ^ obj);
@@ -315,14 +295,14 @@ public class OffHeapMemoryCache implements KCache {
             long previous = 0;
             long m = UNSAFE.getLong(internal_ptr_elementData(index));
             while (m != 0) {
-                long m_universe = UNSAFE.getLong(internal_ptr_entry_universe(m));
-                long m_time = UNSAFE.getLong(internal_ptr_entry_time(m));
-                long m_obj = UNSAFE.getLong(internal_ptr_entry_obj(m));
+                long m_universe = UNSAFE.getLong(m + OFFSET_ENTRYPTR_UNIVERSE);
+                long m_time = UNSAFE.getLong(m + OFFSET_ENTRYPTR_TIME);
+                long m_obj = UNSAFE.getLong(m + OFFSET_ENTRYPTR_OBJ);
 
                 if (m_universe == universe && m_time == time && m_obj == obj) {
                     internal_dec_elementCount();
                     try {
-                        long m_value = UNSAFE.getLong(internal_ptr_entry_value(m));
+                        long m_value = UNSAFE.getLong(m + OFFSET_ENTRYPTR_SEGMENT_PTR);
                         KOffHeapMemoryElement memoryElement = (KOffHeapMemoryElement) factory.newFromKey(m_universe, m_time, m_obj);
                         memoryElement.setMemoryAddress(m_value);
                         memoryElement.free(p_metaModel);
@@ -331,27 +311,27 @@ public class OffHeapMemoryCache implements KCache {
                         e.printStackTrace();
                     }
                     if (previous == 0) {
-                        long m_next = UNSAFE.getLong(internal_ptr_entry_next(m));
+                        long m_next = UNSAFE.getLong(m + OFFSET_ENTRYPTR_NEXT_PTR);
                         UNSAFE.putLong(internal_ptr_elementData(index), m_next);
                     } else {
-                        long m_next = UNSAFE.getLong(internal_ptr_entry_next(m));
-                        UNSAFE.putLong(internal_ptr_entry_next(previous), m_next);
+                        long m_next = UNSAFE.getLong(m + OFFSET_ENTRYPTR_NEXT_PTR);
+                        UNSAFE.putLong(previous + OFFSET_ENTRYPTR_NEXT_PTR, m_next);
                     }
                 }
                 previous = m;
-                m = UNSAFE.getLong(internal_ptr_entry_next(m));
+                m = UNSAFE.getLong(m + OFFSET_ENTRYPTR_NEXT_PTR);
             }
         }
     }
 
 
-    public void monitor(KObject origin) {
+    public final void monitor(KObject origin) {
         common_clean_monitor(origin, null);
     }
 
 
     @Override
-    public int size() {
+    public final int size() {
         return 0;
     }
 
