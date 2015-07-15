@@ -1,6 +1,7 @@
-package org.kevoree.modeling.memory.struct.tree.impl;
+package org.kevoree.modeling;
 
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
+import org.kevoree.modeling.memory.struct.tree.impl.OffHeapLongTree;
 import org.openjdk.jmh.annotations.Benchmark;
 
 public class OffHeapLongTreeBenchmark {

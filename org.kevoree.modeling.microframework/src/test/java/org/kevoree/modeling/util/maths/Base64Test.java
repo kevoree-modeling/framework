@@ -3,11 +3,7 @@ package org.kevoree.modeling.util.maths;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
-import org.openjdk.jmh.annotations.Benchmark;
 
-/**
- * Created by gnain on 10/07/15.
- */
 public class Base64Test {
 
     @Test

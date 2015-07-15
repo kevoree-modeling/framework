@@ -1,21 +1,15 @@
-package org.kevoree.modeling.benchmarks;
+package org.kevoree.modeling;
 
-import org.junit.Test;
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KModel;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.openjdk.jmh.annotations.Benchmark;
 
 public class MassiveInsertTest {
 
-    /**
-     * @native ts
-     */
-    //@Test
+    @Benchmark
     public void test() {
 
         KMetaModel metaModel = new MetaModel("IoTModel");

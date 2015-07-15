@@ -77,6 +77,8 @@
         <!-- MicroFramework -->
         <module>org.kevoree.modeling.microframework</module>
         <module>org.kevoree.modeling.microframework.typescript</module>
+        <module>org.kevoree.modeling.microframework.benchmark</module>
+
         <!-- CodeGenerator and associated tools -->
         <module>org.kevoree.modeling.ast</module>
         <module>org.kevoree.modeling.generator</module>
@@ -126,9 +128,6 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <compilerArguments>
-                        <profile>compact1</profile>
-                    </compilerArguments>
                 </configuration>
             </plugin>
             <plugin>

@@ -1,6 +1,7 @@
-package org.kevoree.modeling.util.maths;
+package org.kevoree.modeling;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.util.maths.Base64;
 import org.openjdk.jmh.annotations.Benchmark;
 
 public class Base64BenchmarkTest {

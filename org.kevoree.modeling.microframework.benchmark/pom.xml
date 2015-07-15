@@ -2,8 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.kevoree.modeling.microframework</artifactId>
-    <name>Kevoree :: Modeling :: MicroFramework</name>
+    <artifactId>org.kevoree.modeling.microframework.benchmark</artifactId>
+    <name>Kevoree :: Modeling :: MicroFramework :: Benchmark</name>
+    <packaging>jar</packaging>
 
     <parent>
         <artifactId>org.kevoree.modeling.root</artifactId>
@@ -14,9 +15,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.kevoree.modeling</groupId>
             <artifactId>org.kevoree.modeling.microframework</artifactId>
-            <version>4.18.5-SNAPSHOT</version>
+            <groupId>org.kevoree.modeling</groupId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
@@ -34,23 +35,7 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <compilerArguments>
-                        <profile>compact1</profile>
-                    </compilerArguments>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <executions>
-                    <execution>
-                        <id>test-jar</id>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
