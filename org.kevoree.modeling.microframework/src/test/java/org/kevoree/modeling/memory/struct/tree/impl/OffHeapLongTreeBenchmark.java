@@ -14,11 +14,9 @@ public class OffHeapLongTreeBenchmark {
         KLongTree tree = createKLongTree();
         tree.init(null, null);
 
-        //long time = System.currentTimeMillis();
         for (long i = 0; i <= 10000; i++) {
             tree.insert(i);
         }
-        //System.out.println("duration: " + (System.currentTimeMillis() - time) + " ms");
     }
 
 }
