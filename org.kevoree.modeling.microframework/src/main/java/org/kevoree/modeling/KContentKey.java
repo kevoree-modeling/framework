@@ -56,24 +56,35 @@ public class KContentKey {
         if (payload == null || payload.length() == 0) {
             return null;
         } else {
-            long[] temp = new long[KConfig.KEY_SIZE];
-            for (int i = 0; i < KConfig.KEY_SIZE; i++) {
-                temp[i] = KConfig.NULL_LONG;
-            }
+            KContentKey key = new KContentKey(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
             int maxRead = payload.length();
             int indexStartElem = -1;
             int indexElem = 0;
+            int partIndex = 0;
             for (int i = 0; i < maxRead; i++) {
                 if (payload.charAt(i) == KConfig.KEY_SEP) {
                     if (indexStartElem != -1) {
                         try {
-                            temp[indexElem] = Base64.decodeToLongWithBounds(payload, indexStartElem, i);
+                            switch (partIndex) {
+                                case 0:
+                                    key.universe = Base64.decodeToLongWithBounds(payload, indexStartElem, i);
+                                    break;
+                                case 1:
+                                    key.time = Base64.decodeToLongWithBounds(payload, indexStartElem, i);
+                                    break;
+                                case 2:
+                                    key.obj = Base64.decodeToLongWithBounds(payload, indexStartElem, i);
+                                    break;
+                                default:
+                                    break;
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                     indexStartElem = -1;
                     indexElem = indexElem + 1;
+                    partIndex++;
                 } else {
                     if (indexStartElem == -1) {
                         indexStartElem = i;
@@ -82,12 +93,24 @@ public class KContentKey {
             }
             if (indexStartElem != -1) {
                 try {
-                    temp[indexElem] = Base64.decodeToLongWithBounds(payload, indexStartElem, maxRead);
+                    switch (partIndex) {
+                        case 0:
+                            key.universe = Base64.decodeToLongWithBounds(payload, indexStartElem, maxRead);
+                            break;
+                        case 1:
+                            key.time = Base64.decodeToLongWithBounds(payload, indexStartElem, maxRead);
+                            break;
+                        case 2:
+                            key.obj = Base64.decodeToLongWithBounds(payload, indexStartElem, maxRead);
+                            break;
+                        default:
+                            break;
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-            return new KContentKey(temp[0], temp[1], temp[2]);
+            return key;
         }
     }
 

@@ -492,7 +492,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                     }
                 }
                 //builder.append(key(nextNodeIndex));
-                Base64.encodeToBuffer(key(nextNodeIndex), builder);
+                Base64.encodeLongToBuffer(key(nextNodeIndex), builder);
                 builder.append(',');
                 if (parentNodeIndex != UNDEFINED) {
                     //builder.append(beginParent / elemSize);
@@ -501,7 +501,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                 if (elemSize > 5) {
                     builder.append(',');
                     //builder.append(value(nextNodeIndex));
-                    Base64.encodeToBuffer(value(nextNodeIndex), builder);
+                    Base64.encodeLongToBuffer(value(nextNodeIndex), builder);
                 }
             }
         }
@@ -557,7 +557,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                     cursor++;
                 }
                 //long loopKey = Long.parseLong(payload.substring(beginChunk, cursor));
-                long loopKey = Base64.decodeWithBounds(payload, beginChunk, cursor);
+                long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
                 setKey(_back_index, loopKey);
                 cursor++;
                 beginChunk = cursor;
@@ -582,7 +582,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
                     }
                     if (cursor > beginChunk) {
                         //long currentValue = Long.parseLong(payload.substring(beginChunk, cursor));
-                        long currentValue = Base64.decodeWithBounds(payload, beginChunk, cursor);
+                        long currentValue = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
                         setValue(_back_index, currentValue);
                     }
                 }
