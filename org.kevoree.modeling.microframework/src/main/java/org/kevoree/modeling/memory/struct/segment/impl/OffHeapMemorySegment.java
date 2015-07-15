@@ -39,23 +39,13 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     private long _start_address;
     private int _allocated_segments = 0;
 
-    private long internal_ptr_raw(KMetaClass metaClass) {
-        return _start_address + OFFSET_MODIFIED_INDEXES + metaClass.metaElements().length;
-    }
-
-    private int internal_size_of_modifiedIndexes_segment(KMetaClass metaClass) {
-        return metaClass.metaElements().length; // modified indexes
-    }
-
     private int internal_size_of_raw_segment(KMetaClass metaClass) {
         int rawSegment = 0;
 
         for (int i = 0; i < metaClass.metaElements().length; i++) {
             KMeta meta = metaClass.metaElements()[i];
-
             rawSegment += internal_size_of(meta.index(), metaClass);
         }
-
         return rawSegment;
     }
 
@@ -101,7 +91,8 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                 }
             }
         }
-        return internal_ptr_raw(metaClass) + offset;
+        long addr_raw_data = _start_address + OFFSET_MODIFIED_INDEXES + metaClass.metaElements().length;
+        return addr_raw_data + offset;
     }
 
     @Override
@@ -110,7 +101,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
 
         OffHeapMemorySegment clonedEntry = new OffHeapMemorySegment();
         int baseSegment = BASE_SEGMENT_SIZE;
-        int modifiedIndexSegment = internal_size_of_modifiedIndexes_segment(metaClass);
+        int modifiedIndexSegment = metaClass.metaElements().length;
         int rawSegment = internal_size_of_raw_segment(metaClass);
         int cloneBytes = baseSegment + modifiedIndexSegment + rawSegment;
 
@@ -480,7 +471,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     @Override
     public final void initMetaClass(KMetaClass metaClass) {
         int baseSegment = BASE_SEGMENT_SIZE;
-        int modifiedIndexSegment = internal_size_of_modifiedIndexes_segment(metaClass);
+        int modifiedIndexSegment = metaClass.metaElements().length;
         int rawSegment = internal_size_of_raw_segment(metaClass);
 
         int bytes = baseSegment + modifiedIndexSegment + rawSegment;
