@@ -72,7 +72,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         computeMaxSize();
     }
 
-    public void clear() {
+    public final void clear() {
         if (UNSAFE.getInt(_start_address + OFFSET_DIRTY) > 0) {
             UNSAFE.putInt(_start_address + OFFSET_DIRTY, 0);
 
@@ -88,7 +88,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public boolean contains(long key) {
+    public final boolean contains(long key) {
         if (UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE) == 0) {
             return false;
         }
@@ -100,7 +100,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public long get(long key) {
+    public final long get(long key) {
         if (UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE) == 0) {
             return KConfig.NULL_LONG;
         }
@@ -114,7 +114,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         return KConfig.NULL_LONG;
     }
 
-    final long findNonNullKeyEntry(long key, int index) {
+    public final long findNonNullKeyEntry(long key, int index) {
         long m = UNSAFE.getLong(internal_ptr_elem_data_idx(index));
         while (m != -1) {
             if (key == UNSAFE.getLong(internal_ptr_elem_data_idx(index) + POS_KEY * BYTE)) {
@@ -126,7 +126,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public void each(KLongLongMapCallBack callback) {
+    public final void each(KLongLongMapCallBack callback) {
         for (int i = 0; i < UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE); i++) {
             if (UNSAFE.getLong(internal_ptr_elem_data_idx(i)) != -1) {
                 long current_ptr = internal_ptr_elem_data_idx(i);
@@ -148,7 +148,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public synchronized void put(long key, long value) {
+    public final synchronized void put(long key, long value) {
         UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 1);
 
         long entry = KConfig.NULL_LONG;
@@ -171,7 +171,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         UNSAFE.putLong(entry + POS_VALUE * BYTE, value);
     }
 
-    long createHashedEntry(long key, int index) {
+    public final long createHashedEntry(long key, int index) {
         long entry_pos = internal_ptr_elem_data_idx(index);
         UNSAFE.putLong(entry_pos + POS_KEY * BYTE, key);
         UNSAFE.putLong(entry_pos + POS_VALUE * BYTE, KConfig.NULL_LONG);
@@ -184,7 +184,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         return entry_pos;
     }
 
-    void rehashCapacity(int capacity) {
+    public final void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
 
         long bytes = internal_size_data_segment(length);
@@ -215,11 +215,11 @@ public class OffHeapLongLongMap implements KLongLongMap {
         computeMaxSize();
     }
 
-    void rehash() {
+    public final void rehash() {
         rehashCapacity(UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE));
     }
 
-    public void remove(long key) {
+    public final void remove(long key) {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_ELEM_DATA_SIZE);
         if (elementDataSize == 0) {
             return;
@@ -247,7 +247,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         UNSAFE.putInt(_start_address + OFFSET_DIRTY, UNSAFE.getInt(_start_address + OFFSET_DIRTY) - 1);
     }
 
-    public int size() {
+    public final int size() {
         return UNSAFE.getInt(_start_address + OFFSET_DIRTY);
     }
 
