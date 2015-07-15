@@ -6,9 +6,9 @@ import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 /**
  * @ignore ts
  */
-public class OffHeapLongLongTree3 extends AbstractOffHeapTree3 implements KLongLongTree {
+public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLongTree {
 
-    public OffHeapLongLongTree3() {
+    public OffHeapLongLongTree() {
         super();
         NODE_SIZE = 6;
     }

@@ -3,14 +3,13 @@ package org.kevoree.modeling.memory.struct.tree.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
-import sun.misc.Unsafe;
 
 /**
  * @ignore ts
  */
-public class OffHeapLongTree3 extends AbstractOffHeapTree3 implements KLongTree, KOffHeapMemoryElement {
+public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, KOffHeapMemoryElement {
 
-    public OffHeapLongTree3() {
+    public OffHeapLongTree() {
         super();
         NODE_SIZE = 5;
     }

@@ -16,7 +16,7 @@ import java.lang.reflect.Field;
  * - memory structure:  | root index (8) | size (4) | dirty (1) | counter (4) | back (size * node size * 8) |
  * - back:              | key (8)        | left (8) | right (8) | parent (8)  | color (8)   | value (8)     |
  */
-public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
+public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
     protected static final Unsafe UNSAFE = getUnsafe();
 
     private static final char BLACK_LEFT = '{';
@@ -52,7 +52,7 @@ public abstract class AbstractOffHeapTree3 implements KOffHeapMemoryElement {
     protected float _loadFactor;
     protected static int NODE_SIZE;
 
-    protected AbstractOffHeapTree3() {
+    protected AbstractOffHeapTree() {
         NODE_SIZE = 0;
     }
 
