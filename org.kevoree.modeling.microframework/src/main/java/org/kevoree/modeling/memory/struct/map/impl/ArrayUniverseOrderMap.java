@@ -130,18 +130,18 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
             }
             long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
             long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
-            int index = (((int) (loopKey)) & 0x7FFFFFFF) % elementDataSize;
+            int index = (((int) (loopKey)) & 0x7FFFFFFF) % state.elementDataSize;
             //insert K/V
             int newIndex = this.elementCount;
-            this.elementKV[newIndex * 2] = loopKey;
-            this.elementKV[newIndex * 2 + 1] = loopVal;
-            int currentHashedIndex = this.elementHash[index];
+            state.elementKV[newIndex * 2] = loopKey;
+            state.elementKV[newIndex * 2 + 1] = loopVal;
+            int currentHashedIndex = state.elementHash[index];
             if (currentHashedIndex != -1) {
-                this.elementNext[newIndex] = currentHashedIndex;
+                state.elementNext[newIndex] = currentHashedIndex;
             } else {
-                this.elementNext[newIndex] = -2; //special char to tag used values
+                state.elementNext[newIndex] = -2; //special char to tag used values
             }
-            this.elementHash[index] = newIndex;
+            state.elementHash[index] = newIndex;
             this.elementCount++;
         }
     }
@@ -156,10 +156,11 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.append('/');
         boolean isFirst = true;
-        for (int i = 0; i < this.elementNext.length; i++) {
-            if (this.elementNext[i] != -1) { //there is a real value
-                long loopKey = this.elementKV[i * 2];
-                long loopValue = this.elementKV[i * 2 + 1];
+        InternalState internalState = state;
+        for (int i = 0; i < internalState.elementNext.length; i++) {
+            if (internalState.elementNext[i] != -1) { //there is a real value
+                long loopKey = internalState.elementKV[i * 2];
+                long loopValue = internalState.elementKV[i * 2 + 1];
                 if (!isFirst) {
                     buffer.append(",");
                 }

@@ -24,15 +24,9 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected volatile int elementCount;
 
-    protected volatile int elementDataSize;
+    protected volatile InternalState state = null;
 
     protected int threshold;
-
-    protected volatile long[] elementKV;
-
-    protected volatile int[] elementNext;
-
-    protected int[] elementHash;
 
     private final int initialCapacity;
 
@@ -40,40 +34,56 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected boolean _isDirty = false;
 
+    /** @native ts
+     * */
+    class InternalState {
+
+        public final int elementDataSize;
+
+        public final long[] elementKV;
+
+        public final int[] elementNext;
+
+        public final int[] elementHash;
+
+        public InternalState(int elementDataSize, long[] elementKV, int[] elementNext, int[] elementHash) {
+            this.elementDataSize = elementDataSize;
+            this.elementKV = elementKV;
+            this.elementNext = elementNext;
+            this.elementHash = elementHash;
+        }
+    }
+
     public ArrayLongLongMap(int p_initalCapacity, float p_loadFactor) {
         this.initialCapacity = p_initalCapacity;
         this.loadFactor = p_loadFactor;
         this.elementCount = 0;
-        this.elementKV = new long[initialCapacity * 2];
-        this.elementNext = new int[initialCapacity];
-        this.elementHash = new int[initialCapacity];
+        InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
         for (int i = 0; i < initialCapacity; i++) {
-            this.elementNext[i] = -1;
-            this.elementHash[i] = -1;
+            newstate.elementNext[i] = -1;
+            newstate.elementHash[i] = -1;
         }
-        this.elementDataSize = initialCapacity;
-        this.threshold = (int) (elementDataSize * loadFactor);
+        this.state = newstate;
+        this.threshold = (int) (state.elementDataSize * loadFactor);
     }
 
     public void clear() {
         if (elementCount > 0) {
             this.elementCount = 0;
-            this.elementKV = new long[initialCapacity * 2];
-            this.elementNext = new int[initialCapacity];
-            this.elementHash = new int[initialCapacity];
+            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
             for (int i = 0; i < initialCapacity; i++) {
-                this.elementNext[i] = -1;
-                this.elementHash[i] = -1;
+                newstate.elementNext[i] = -1;
+                newstate.elementHash[i] = -1;
             }
-            this.elementDataSize = initialCapacity;
-            this.threshold = (int) (elementDataSize * loadFactor);
+            this.state = newstate;
+            this.threshold = (int) (state.elementDataSize * loadFactor);
         }
     }
 
     void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
         long[] newElementKV = new long[length * 2];
-        System.arraycopy(this.elementKV, 0, newElementKV, 0, this.elementKV.length);
+        System.arraycopy(state.elementKV, 0, newElementKV, 0, state.elementKV.length);
         int[] newElementNext = new int[length];
         int[] newElementHash = new int[length];
         for (int i = 0; i < length; i++) {
@@ -81,9 +91,9 @@ public class ArrayLongLongMap implements KLongLongMap {
             newElementHash[i] = -1;
         }
         //rehashEveryThing
-        for (int i = 0; i < this.elementNext.length; i++) {
-            if (this.elementNext[i] != -1) { //there is a real value
-                int index = ((int) this.elementKV[i * 2] & 0x7FFFFFFF) % length;
+        for (int i = 0; i < state.elementNext.length; i++) {
+            if (state.elementNext[i] != -1) { //there is a real value
+                int index = ((int) state.elementKV[i * 2] & 0x7FFFFFFF) % length;
                 int currentHashedIndex = newElementHash[index];
                 if (currentHashedIndex != -1) {
                     newElementNext[i] = currentHashedIndex;
@@ -94,63 +104,54 @@ public class ArrayLongLongMap implements KLongLongMap {
             }
         }
         //set value for all
-
-        //should be an atomic operation
-        //TODO
-        this.elementKV = newElementKV;
-        this.elementHash = newElementHash;
-        this.elementNext = newElementNext;
-        this.elementDataSize = length;
-        //TODO END ATOMIC OPERATION
-        //should be an atomic operation
-
-        this.threshold = (int) (elementDataSize * loadFactor);
+        state = new InternalState(length, newElementKV, newElementNext, newElementHash);
+        this.threshold = (int) (length * loadFactor);
     }
 
     @Override
     public void each(KLongLongMapCallBack callback) {
-        for (int i = 0; i < this.elementNext.length; i++) {
-            if (this.elementNext[i] != -1) { //there is a real value
-                callback.on(this.elementKV[i * 2], this.elementKV[i * 2 + 1]);
+        InternalState internalState = state;
+        for (int i = 0; i < internalState.elementNext.length; i++) {
+            if (internalState.elementNext[i] != -1) { //there is a real value
+                callback.on(internalState.elementKV[i * 2], internalState.elementKV[i * 2 + 1]);
             }
         }
     }
 
     @Override
     public boolean contains(long key) {
-        if (elementDataSize == 0) {
+        if (state.elementDataSize == 0) {
             return false;
         }
+        InternalState internalState = state;
         int hash = (int) (key);
-        int index = (hash & 0x7FFFFFFF) % elementDataSize;
-        int m = findNonNullKeyEntry(key, index);
+        int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
+        int m = internalState.elementHash[index];
+        while (m >= 0) {
+            if (key == internalState.elementKV[m * 2] /* getKey */) {
+                return m != -1;
+            }
+            m = internalState.elementNext[m];
+        }
         return m != -1;
     }
 
     @Override
     public long get(long key) {
-        if (elementDataSize == 0) {
+        if (state.elementDataSize == 0) {
             return KConfig.NULL_LONG;
         }
-        int m;
-        int hash = (int) (key);
-        int index = (hash & 0x7FFFFFFF) % elementDataSize;
-        m = findNonNullKeyEntry(key, index);
-        if (m != -1) {
-            return this.elementKV[(m * 2) + 1] /* getValue */;
+        InternalState internalState = state;
+        int index = ((int) (key) & 0x7FFFFFFF) % internalState.elementDataSize;
+        int m = internalState.elementHash[index];
+        while (m >= 0) {
+            if (key == internalState.elementKV[m * 2] /* getKey */) {
+                return internalState.elementKV[(m * 2) + 1]; /* getValue */
+            } else {
+                m = internalState.elementNext[m];
+            }
         }
         return KConfig.NULL_LONG;
-    }
-
-    final int findNonNullKeyEntry(long key, int index) {
-        int m = this.elementHash[index];
-        while (m >= 0) {
-            if (key == this.elementKV[m * 2] /* getKey */) {
-                return m;
-            }
-            m = this.elementNext[m];
-        }
-        return -1;
     }
 
     @Override
@@ -159,29 +160,40 @@ public class ArrayLongLongMap implements KLongLongMap {
         int entry = -1;
         int index = -1;
         int hash = (int) (key);
-        if (elementDataSize != 0) {
-            index = (hash & 0x7FFFFFFF) % elementDataSize;
+        if (state.elementDataSize != 0) {
+            index = (hash & 0x7FFFFFFF) % state.elementDataSize;
             entry = findNonNullKeyEntry(key, index);
         }
         if (entry == -1) {
             if (++elementCount > threshold) {
-                rehashCapacity(elementDataSize);
-                index = (hash & 0x7FFFFFFF) % elementDataSize;
+                rehashCapacity(state.elementDataSize);
+                index = (hash & 0x7FFFFFFF) % state.elementDataSize;
             }
             int newIndex = (this.elementCount - 1);
-            this.elementKV[newIndex * 2] = key;
-            this.elementKV[newIndex * 2 + 1] = value;
-            int currentHashedIndex = this.elementHash[index];
+            state.elementKV[newIndex * 2] = key;
+            state.elementKV[newIndex * 2 + 1] = value;
+            int currentHashedIndex = state.elementHash[index];
             if (currentHashedIndex != -1) {
-                this.elementNext[newIndex] = currentHashedIndex;
+                state.elementNext[newIndex] = currentHashedIndex;
             } else {
-                this.elementNext[newIndex] = -2; //special char to tag used values
+                state.elementNext[newIndex] = -2; //special char to tag used values
             }
             //now the object is reachable to other thread everything should be ready
-            this.elementHash[index] = newIndex;
+            state.elementHash[index] = newIndex;
         } else {
-            this.elementKV[entry + 1] = value;/*setValue*/
+            state.elementKV[entry + 1] = value;/*setValue*/
         }
+    }
+
+    final int findNonNullKeyEntry(long key, int index) {
+        int m = state.elementHash[index];
+        while (m >= 0) {
+            if (key == state.elementKV[m * 2] /* getKey */) {
+                return m;
+            }
+            m = state.elementNext[m];
+        }
+        return -1;
     }
 
     public void remove(long key) {
@@ -221,8 +233,8 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
 
-    /*
 
+/*
     public static void main(String[] args) {
 
 
