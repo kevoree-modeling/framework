@@ -51,23 +51,31 @@ import org.kevoree.modeling.util.maths.Base64;
  */
 public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverseOrderMap {
 
-    private int _counter = 0;
+    private volatile int _counter = 0;
 
     private String _className;
 
     @Override
-    public int counter() {
-        return _counter;
+    public final int counter() {
+        return this._counter;
     }
 
     @Override
-    public void inc() {
-        _counter++;
+    public final void inc() {
+        internal_counter(true);
     }
 
     @Override
-    public void dec() {
-        _counter--;
+    public final void dec() {
+        internal_counter(false);
+    }
+
+    private synchronized void internal_counter(boolean inc) {
+        if (inc) {
+            this._counter++;
+        } else {
+            this._counter--;
+        }
     }
 
     public ArrayUniverseOrderMap(int p_initalCapacity, float p_loadFactor, String p_className) {

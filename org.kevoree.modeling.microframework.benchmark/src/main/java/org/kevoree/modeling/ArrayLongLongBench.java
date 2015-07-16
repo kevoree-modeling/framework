@@ -60,14 +60,14 @@ public class ArrayLongLongBench {
         long time = 0;
         for (int j = 0; j < 30; j++) {
             long before = System.currentTimeMillis();
-            //HashMap<Long, Long> op_map = new HashMap<Long, Long>();
-            op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-            nb = 1000000;
+            HashMap<Long, Long> op_map2 = new HashMap<Long, Long>();
+            //ArrayLongLongMap op_map2 = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+            nb = 10000000;
             for (long i = 0; i < nb; i++) {
-                op_map.put(i, i);
+                op_map2.put(i, i);
             }
             for (long i = 0; i < nb; i++) {
-                long resolved = op_map.get(i);
+                long resolved = op_map2.get(i);
                 if (resolved != i) {
                     throw new RuntimeException("WTF " + i + "-" + resolved);
                 }

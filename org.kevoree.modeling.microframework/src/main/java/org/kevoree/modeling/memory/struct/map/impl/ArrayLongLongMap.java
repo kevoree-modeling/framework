@@ -28,11 +28,12 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected int threshold;
 
+    protected boolean _isDirty = false;
+
     private final int initialCapacity;
 
     private final float loadFactor;
 
-    protected boolean _isDirty = false;
 
     /** @native ts
      * */
@@ -67,7 +68,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         this.threshold = (int) (state.elementDataSize * loadFactor);
     }
 
-    public void clear() {
+    public final void clear() {
         if (elementCount > 0) {
             this.elementCount = 0;
             InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
@@ -80,7 +81,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
     }
 
-    void rehashCapacity(int capacity) {
+    protected final void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
         long[] newElementKV = new long[length * 2];
         System.arraycopy(state.elementKV, 0, newElementKV, 0, state.elementKV.length);
@@ -109,7 +110,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public void each(KLongLongMapCallBack callback) {
+    public final void each(KLongLongMapCallBack callback) {
         InternalState internalState = state;
         for (int i = 0; i < internalState.elementNext.length; i++) {
             if (internalState.elementNext[i] != -1) { //there is a real value
@@ -119,7 +120,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public boolean contains(long key) {
+    public final boolean contains(long key) {
         if (state.elementDataSize == 0) {
             return false;
         }
@@ -137,7 +138,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public long get(long key) {
+    public final long get(long key) {
         if (state.elementDataSize == 0) {
             return KConfig.NULL_LONG;
         }
@@ -155,7 +156,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public synchronized void put(long key, long value) {
+    public final synchronized void put(long key, long value) {
         this._isDirty = true;
         int entry = -1;
         int index = -1;
@@ -196,7 +197,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         return -1;
     }
 
-    public void remove(long key) {
+    public final void remove(long key) {
         /*
         if (elementDataSize == 0) {
             return;
@@ -228,10 +229,10 @@ public class ArrayLongLongMap implements KLongLongMap {
         */
     }
 
-    public int size() {
+    public final int size() {
         return this.elementCount;
     }
-    
+
 }
 
 

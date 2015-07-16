@@ -7,73 +7,71 @@ import org.kevoree.modeling.util.maths.Base64;
 
 public abstract class AbstractArrayTree {
 
-    private int _root_index = -1;
-    private int _size = 0;
-    private int _threshold = 0;
-    private float _loadFactor;
-
-    //back end arrays
-    private int[] _back_meta = null;
-    private long[] _back_kv = null;
-    private boolean[] _back_colors = null;
-
-    private boolean _dirty = true;
-    private int _counter = 0;
-
+    //constants definition
     private static final char BLACK_LEFT = '{';
     private static final char BLACK_RIGHT = '}';
     private static final char RED_LEFT = '[';
     private static final char RED_RIGHT = ']';
+    private static final int META_SIZE = 3;
 
+    private final float _loadFactor;
     protected int kvSize = 1;
 
-    private static final int META_SIZE = 3;
+    private int _threshold = 0;
+    private boolean _dirty = true;
+
+    //volatile variables
+    private volatile int _counter = 0;
+    private volatile int _root_index = -1;
+    private volatile int _size = 0;
+    private volatile InternalState state;
 
     public AbstractArrayTree() {
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        this._back_colors = null;
-        this._back_meta = null;
-        this._back_kv = null;
+    }
+
+    class InternalState {
+
+        public InternalState(int[] _back_meta, long[] _back_kv, boolean[] _back_colors) {
+            this._back_meta = _back_meta;
+            this._back_kv = _back_kv;
+            this._back_colors = _back_colors;
+        }
+
+        final int[] _back_meta;
+        final long[] _back_kv;
+        final boolean[] _back_colors;
     }
 
     private void allocate(int capacity) {
-        _back_colors = new boolean[capacity];
-        _back_meta = new int[capacity * META_SIZE];
-        _back_kv = new long[capacity * kvSize];
+        state = new InternalState(new int[capacity * META_SIZE], new long[capacity * kvSize], new boolean[capacity]);
         _threshold = (int) (capacity * _loadFactor);
     }
 
     private void reallocate(int newCapacity) {
         _threshold = (int) (newCapacity * _loadFactor);
-        //copy KV_BACK
         long[] new_back_kv = new long[newCapacity * kvSize];
-        if (_back_kv != null) {
-            System.arraycopy(_back_kv, 0, new_back_kv, 0, _size * kvSize);
+        if (state != null && state._back_kv != null) {
+            System.arraycopy(state._back_kv, 0, new_back_kv, 0, _size * kvSize);
         }
-        this._back_kv = new_back_kv;
-        //copy COLOR_BACK
         boolean[] new_back_colors = new boolean[newCapacity];
-        if (_back_colors != null) {
+        if (state != null && state._back_colors != null) {
             for (int i = 0; i < newCapacity; i++) {
                 if (i < _size) {
-                    new_back_colors[i] = _back_colors[i];
+                    new_back_colors[i] = state._back_colors[i];
                 } else {
                     new_back_colors[i] = false;
                 }
             }
-            //not activated for JS transpile reasons
-            //System.arraycopy(_back_colors, 0, new_back_colors, 0, _size);
         }
-        this._back_colors = new_back_colors;
-        //copy META BACK
         int[] new_back_meta = new int[newCapacity * META_SIZE];
-        if (_back_meta != null) {
-            System.arraycopy(_back_meta, 0, new_back_meta, 0, _size * META_SIZE);
+        if (state != null && state._back_meta != null) {
+            System.arraycopy(state._back_meta, 0, new_back_meta, 0, _size * META_SIZE);
             for (int i = _size * META_SIZE; i < newCapacity * META_SIZE; i++) {
                 new_back_meta[i] = -1;
             }
         }
-        this._back_meta = new_back_meta;
+        state = new InternalState(new_back_meta, new_back_kv, new_back_colors);
     }
 
     public int size() {
@@ -84,66 +82,66 @@ public abstract class AbstractArrayTree {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return this._back_kv[p_currentIndex * kvSize];
+        return state._back_kv[p_currentIndex * kvSize];
     }
 
     private void setKey(int p_currentIndex, long p_paramIndex) {
-        this._back_kv[p_currentIndex * kvSize] = p_paramIndex;
+        state._back_kv[p_currentIndex * kvSize] = p_paramIndex;
     }
 
     protected final long value(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return this._back_kv[(p_currentIndex * kvSize) + 1];
+        return state._back_kv[(p_currentIndex * kvSize) + 1];
     }
 
     private void setValue(int p_currentIndex, long p_paramIndex) {
-        this._back_kv[(p_currentIndex * kvSize) + 1] = p_paramIndex;
+        state._back_kv[(p_currentIndex * kvSize) + 1] = p_paramIndex;
     }
 
     private int left(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return this._back_meta[p_currentIndex * META_SIZE];
+        return state._back_meta[p_currentIndex * META_SIZE];
     }
 
     private void setLeft(int p_currentIndex, int p_paramIndex) {
-        this._back_meta[p_currentIndex * META_SIZE] = p_paramIndex;
+        state._back_meta[p_currentIndex * META_SIZE] = p_paramIndex;
     }
 
     private int right(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return this._back_meta[(p_currentIndex * META_SIZE) + 1];
+        return state._back_meta[(p_currentIndex * META_SIZE) + 1];
     }
 
     private void setRight(int p_currentIndex, int p_paramIndex) {
-        this._back_meta[(p_currentIndex * META_SIZE) + 1] = p_paramIndex;
+        state._back_meta[(p_currentIndex * META_SIZE) + 1] = p_paramIndex;
     }
 
     private int parent(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return this._back_meta[(p_currentIndex * META_SIZE) + 2];
+        return state._back_meta[(p_currentIndex * META_SIZE) + 2];
     }
 
     private void setParent(int p_currentIndex, int p_paramIndex) {
-        this._back_meta[(p_currentIndex * META_SIZE) + 2] = p_paramIndex;
+        state._back_meta[(p_currentIndex * META_SIZE) + 2] = p_paramIndex;
     }
 
     private boolean color(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return true;
         }
-        return this._back_colors[p_currentIndex];
+        return state._back_colors[p_currentIndex];
     }
 
     private void setColor(int p_currentIndex, boolean p_paramIndex) {
-        this._back_colors[p_currentIndex] = p_paramIndex;
+        state._back_colors[p_currentIndex] = p_paramIndex;
     }
 
     private int grandParent(int p_currentIndex) {
@@ -409,9 +407,9 @@ public abstract class AbstractArrayTree {
         allocate(_size);
         for (int i = 0; i < _size; i++) {
             int offsetI = i * META_SIZE;
-            this._back_meta[offsetI] = -1;
-            this._back_meta[offsetI + 1] = -1;
-            this._back_meta[offsetI + 2] = -1;
+            state._back_meta[offsetI] = -1;
+            state._back_meta[offsetI + 1] = -1;
+            state._back_meta[offsetI + 2] = -1;
         }
         int currentLoopIndex = 0;
         while (cursor < payload.length()) {
@@ -483,21 +481,28 @@ public abstract class AbstractArrayTree {
     }
 
     public final void inc() {
-        this._counter--;
+        internal_counter(true);
     }
 
     public final void dec() {
-        this._counter--;
+        internal_counter(false);
+    }
+
+    private synchronized void internal_counter(boolean inc) {
+        if (inc) {
+            this._counter++;
+        } else {
+            this._counter--;
+        }
     }
 
     public final void free(KMetaModel p_metaModel) {
-        this._back_colors = null;
-        this._back_meta = null;
-        this._back_kv = null;
+        this.state = null;
+        this._size = 0;
         this._threshold = 0;
     }
 
-    protected final void internal_insert(long p_key, long p_value) {
+    protected final synchronized void internal_insert(long p_key, long p_value) {
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             reallocate(length);

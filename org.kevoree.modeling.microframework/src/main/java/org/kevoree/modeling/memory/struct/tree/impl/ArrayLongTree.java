@@ -14,7 +14,7 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
         }
     }
 
-    public synchronized void insert(long p_key) {
+    public void insert(long p_key) {
         internal_insert(p_key,p_key);
     }
 
