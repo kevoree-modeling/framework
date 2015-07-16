@@ -11,7 +11,7 @@ import java.util.Random;
 /**
  * @native ts
  * private _isDirty = false;
- * constructor(initalCapacity: number, loadFactor : number) { }
+ * constructor(initialCapacity: number, loadFactor : number) { }
  * public clear():void { for(var p in this){ this._isDirty=true;if(this.hasOwnProperty(p) && p.indexOf('_') != 0){ delete this[p];}} }
  * public get(key:number):number { return this[key]; }
  * public put(key:number, pval : number):void { this._isDirty=true; this[key] = pval;}
@@ -25,7 +25,11 @@ import java.util.Random;
  */
 public class ArrayLongLongMap implements KLongLongMap {
 
-    protected int elementCount;
+    protected volatile int elementCount;
+
+    protected int elementDataSize;
+
+    protected int threshold;
 
     protected long[] elementKV;
 
@@ -33,42 +37,38 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected int[] elementHash;
 
-    protected int elementDataSize;
-
-    protected int threshold;
-
-    private final int initalCapacity;
+    private final int initialCapacity;
 
     private final float loadFactor;
 
     protected boolean _isDirty = false;
 
     public ArrayLongLongMap(int p_initalCapacity, float p_loadFactor) {
-        this.initalCapacity = p_initalCapacity;
+        this.initialCapacity = p_initalCapacity;
         this.loadFactor = p_loadFactor;
         this.elementCount = 0;
-        this.elementKV = new long[initalCapacity * 2];
-        this.elementNext = new int[initalCapacity];
-        this.elementHash = new int[initalCapacity];
-        for (int i = 0; i < initalCapacity; i++) {
+        this.elementKV = new long[initialCapacity * 2];
+        this.elementNext = new int[initialCapacity];
+        this.elementHash = new int[initialCapacity];
+        for (int i = 0; i < initialCapacity; i++) {
             this.elementNext[i] = -1;
             this.elementHash[i] = -1;
         }
-        this.elementDataSize = initalCapacity;
+        this.elementDataSize = initialCapacity;
         this.threshold = (int) (elementDataSize * loadFactor);
     }
 
     public void clear() {
         if (elementCount > 0) {
             this.elementCount = 0;
-            this.elementKV = new long[initalCapacity * 2];
-            this.elementNext = new int[initalCapacity];
-            this.elementHash = new int[initalCapacity];
-            for (int i = 0; i < initalCapacity; i++) {
+            this.elementKV = new long[initialCapacity * 2];
+            this.elementNext = new int[initialCapacity];
+            this.elementHash = new int[initialCapacity];
+            for (int i = 0; i < initialCapacity; i++) {
                 this.elementNext[i] = -1;
                 this.elementHash[i] = -1;
             }
-            this.elementDataSize = initalCapacity;
+            this.elementDataSize = initialCapacity;
             this.threshold = (int) (elementDataSize * loadFactor);
         }
     }
@@ -76,9 +76,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
         long[] newElementKV = new long[length * 2];
-        if(elementDataSize > 0){
-            System.arraycopy(this.elementKV, 0, newElementKV, 0, this.elementKV.length);
-        }
+        System.arraycopy(this.elementKV, 0, newElementKV, 0, this.elementKV.length);
         int[] newElementNext = new int[length];
         int[] newElementHash = new int[length];
         for (int i = 0; i < length; i++) {
@@ -218,8 +216,10 @@ public class ArrayLongLongMap implements KLongLongMap {
         return this.elementCount;
     }
 
+
     public static void main(String[] args) {
 
+        /*
         HashMap<Long, Long> op_map_ref = new HashMap<Long, Long>();
         ArrayLongLongMap op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         int nb = 1000000;
@@ -231,14 +231,14 @@ public class ArrayLongLongMap implements KLongLongMap {
             op_map_ref.put(key, value);
         }
 
-        for(Long key : op_map_ref.keySet()){
+        for (Long key : op_map_ref.keySet()) {
             long resolved = op_map.get(key);
             long resolved2 = op_map_ref.get(key);
             if (resolved != resolved2) {
                 throw new RuntimeException("WTF " + resolved2 + "-" + resolved);
             }
         }
-
+*/
 
 
         /*
