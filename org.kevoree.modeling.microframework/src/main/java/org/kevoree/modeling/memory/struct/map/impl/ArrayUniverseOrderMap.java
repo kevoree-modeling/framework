@@ -130,23 +130,19 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
             }
             long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
             long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
+            int index = (((int) (loopKey)) & 0x7FFFFFFF) % elementDataSize;
             //insert K/V
-            Entry entry = null;
-            int index = -1;
-            int hash = (int) (loopKey);
-            if (elementDataSize != 0) {
-                index = (hash & 0x7FFFFFFF) % elementDataSize;
-                entry = findNonNullKeyEntry(loopKey, index);
+            int newIndex = this.elementCount;
+            this.elementKV[newIndex * 2] = loopKey;
+            this.elementKV[newIndex * 2 + 1] = loopVal;
+            int currentHashedIndex = this.elementHash[index];
+            if (currentHashedIndex != -1) {
+                this.elementNext[newIndex] = currentHashedIndex;
+            } else {
+                this.elementNext[newIndex] = -2; //special char to tag used values
             }
-            if (entry == null) {
-                if (++elementCount > threshold) {
-                    rehash();
-                    index = (hash & 0x7FFFFFFF) % elementDataSize;
-                }
-                entry = createHashedEntry(loopKey, index);
-            }
-            entry.value = loopVal;
-
+            this.elementHash[index] = newIndex;
+            this.elementCount++;
         }
     }
 
@@ -160,23 +156,17 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.append('/');
         boolean isFirst = true;
-        for (int i = 0; i < elementDataSize; i++) {
-            if (elementData[i] != null) {
-                Entry current = elementData[i];
+        for (int i = 0; i < this.elementNext.length; i++) {
+            if (this.elementNext[i] != -1) { //there is a real value
+                long loopKey = this.elementKV[i * 2];
+                long loopValue = this.elementKV[i * 2 + 1];
                 if (!isFirst) {
                     buffer.append(",");
                 }
                 isFirst = false;
-                Base64.encodeLongToBuffer(current.key, buffer);
+                Base64.encodeLongToBuffer(loopKey, buffer);
                 buffer.append(":");
-                Base64.encodeLongToBuffer(current.value, buffer);
-                while (current.next != null) {
-                    current = current.next;
-                    buffer.append(",");
-                    Base64.encodeLongToBuffer(current.key, buffer);
-                    buffer.append(":");
-                    Base64.encodeLongToBuffer(current.value, buffer);
-                }
+                Base64.encodeLongToBuffer(loopValue, buffer);
             }
         }
         return buffer.toString();
@@ -184,7 +174,7 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
 
     @Override
     public void free(KMetaModel metaModel) {
-        this.elementData = null;
+        clear();
     }
 
 }

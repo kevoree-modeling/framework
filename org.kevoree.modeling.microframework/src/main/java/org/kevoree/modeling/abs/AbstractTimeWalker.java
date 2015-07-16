@@ -47,7 +47,6 @@ public class AbstractTimeWalker implements KTimeWalker {
                                 KLongTree timeTree = (KLongTree) timeTrees[i];
                                 if (timeTree != null) {
                                     long currentDivergenceTime = objUniverse.get(collectedUniverse[i]);
-                                    final int finalI = i;
                                     final long finalPreviousDivergenceTime = previousDivergenceTime;
                                     timeTree.range(currentDivergenceTime, previousDivergenceTime, new KTreeWalker() {
                                         @Override

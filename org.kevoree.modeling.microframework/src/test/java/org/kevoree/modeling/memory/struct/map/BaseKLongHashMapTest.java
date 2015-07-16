@@ -11,7 +11,6 @@ public abstract class BaseKLongHashMapTest {
 
     @Test
     public void test() {
-
         KLongMap<String> map = createKLongHashMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         for (long i = 0; i < SIZE; i++) {
             map.put(i, "" + i);
@@ -32,4 +31,5 @@ public abstract class BaseKLongHashMapTest {
         map.clear();
         Assert.assertEquals(map.size(), 0);
     }
+
 }

@@ -72,4 +72,12 @@ public abstract class BaseKUniverseOrderMapTest {
 
     }
 
+    @Test
+    public void testInitThenPut() {
+        KUniverseOrderMap map = createKUniverseOrderMap(0, KConfig.CACHE_LOAD_FACTOR, "org.kevoree.modeling.Hello");
+        map.init(null, null);
+        map.put(0, 0);
+        map.put(1, 1);
+    }
+
 }

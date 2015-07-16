@@ -307,15 +307,13 @@ public abstract class AbstractArrayTree {
     }
 
     private void insertCase2(int n) {
-        if (color(parent(n)) == true) {
-            return;
-        } else {
+        if (!color(parent(n))) {
             insertCase3(n);
         }
     }
 
     private void insertCase3(int n) {
-        if (color(uncle(n)) == false) {
+        if (!color(uncle(n))) {
             setColor(parent(n), true);
             setColor(uncle(n), true);
             setColor(grandParent(n), false);
@@ -363,7 +361,7 @@ public abstract class AbstractArrayTree {
                 if (parentIndex != -1) {
                     isOnLeft = left(parentIndex) == i;
                 }
-                if (color(i) == false) {
+                if (!color(i)) {
                     if (isOnLeft) {
                         builder.append(BLACK_LEFT);
                     } else {

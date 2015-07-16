@@ -5,6 +5,9 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 
+import java.util.HashMap;
+import java.util.Random;
+
 /**
  * @native ts
  * private _isDirty = false;
@@ -24,7 +27,11 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected int elementCount;
 
-    protected Entry[] elementData;
+    protected long[] elementKV;
+
+    protected int[] elementNext;
+
+    protected int[] elementHash;
 
     protected int elementDataSize;
 
@@ -36,39 +43,76 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected boolean _isDirty = false;
 
-    /**
-     * @ignore ts
-     */
-    static final class Entry {
-        Entry next;
-        long key;
-        long value;
-
-        Entry(long theKey, long theValue) {
-            this.key = theKey;
-            this.value = theValue;
-        }
-    }
-
     public ArrayLongLongMap(int p_initalCapacity, float p_loadFactor) {
         this.initalCapacity = p_initalCapacity;
         this.loadFactor = p_loadFactor;
-        elementCount = 0;
-        elementData = new Entry[initalCapacity];
-        elementDataSize = initalCapacity;
-        computeMaxSize();
+        this.elementCount = 0;
+        this.elementKV = new long[initalCapacity * 2];
+        this.elementNext = new int[initalCapacity];
+        this.elementHash = new int[initalCapacity];
+        for (int i = 0; i < initalCapacity; i++) {
+            this.elementNext[i] = -1;
+            this.elementHash[i] = -1;
+        }
+        this.elementDataSize = initalCapacity;
+        this.threshold = (int) (elementDataSize * loadFactor);
     }
 
     public void clear() {
         if (elementCount > 0) {
-            elementCount = 0;
-            this.elementData = new Entry[initalCapacity];
+            this.elementCount = 0;
+            this.elementKV = new long[initalCapacity * 2];
+            this.elementNext = new int[initalCapacity];
+            this.elementHash = new int[initalCapacity];
+            for (int i = 0; i < initalCapacity; i++) {
+                this.elementNext[i] = -1;
+                this.elementHash[i] = -1;
+            }
             this.elementDataSize = initalCapacity;
+            this.threshold = (int) (elementDataSize * loadFactor);
         }
     }
 
-    private void computeMaxSize() {
-        threshold = (int) (elementDataSize * loadFactor);
+    void rehashCapacity(int capacity) {
+        int length = (capacity == 0 ? 1 : capacity << 1);
+        long[] newElementKV = new long[length * 2];
+        if(elementDataSize > 0){
+            System.arraycopy(this.elementKV, 0, newElementKV, 0, this.elementKV.length);
+        }
+        int[] newElementNext = new int[length];
+        int[] newElementHash = new int[length];
+        for (int i = 0; i < length; i++) {
+            newElementNext[i] = -1;
+            newElementHash[i] = -1;
+        }
+        //rehashEveryThing
+        for (int i = 0; i < this.elementNext.length; i++) {
+            if (this.elementNext[i] != -1) { //there is a real value
+                int index = ((int) this.elementKV[i * 2] & 0x7FFFFFFF) % length;
+                int currentHashedIndex = newElementHash[index];
+                if (currentHashedIndex != -1) {
+                    newElementNext[i] = currentHashedIndex;
+                } else {
+                    newElementNext[i] = -2; //special char to tag used values
+                }
+                newElementHash[index] = i;
+            }
+        }
+        //set value for all
+        this.elementKV = newElementKV;
+        this.elementHash = newElementHash;
+        this.elementNext = newElementNext;
+        this.elementDataSize = length;
+        this.threshold = (int) (elementDataSize * loadFactor);
+    }
+
+    @Override
+    public void each(KLongLongMapCallBack callback) {
+        for (int i = 0; i < this.elementNext.length; i++) {
+            if (this.elementNext[i] != -1) { //there is a real value
+                callback.on(this.elementKV[i * 2], this.elementKV[i * 2 + 1]);
+            }
+        }
     }
 
     @Override
@@ -78,8 +122,8 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
         int hash = (int) (key);
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
-        Entry m = findNonNullKeyEntry(key, index);
-        return m != null;
+        int m = findNonNullKeyEntry(key, index);
+        return m != -1;
     }
 
     @Override
@@ -87,117 +131,140 @@ public class ArrayLongLongMap implements KLongLongMap {
         if (elementDataSize == 0) {
             return KConfig.NULL_LONG;
         }
-        Entry m;
+        int m;
         int hash = (int) (key);
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
         m = findNonNullKeyEntry(key, index);
-        if (m != null) {
-            return m.value;
+        if (m != -1) {
+            return this.elementKV[(m * 2) + 1] /* getValue */;
         }
         return KConfig.NULL_LONG;
     }
 
-    final Entry findNonNullKeyEntry(long key, int index) {
-        Entry m = elementData[index];
-        while (m != null) {
-            if (key == m.key) {
+    final int findNonNullKeyEntry(long key, int index) {
+        int m = this.elementHash[index];
+        while (m >= 0) {
+            if (key == this.elementKV[m * 2] /* getKey */) {
                 return m;
             }
-            m = m.next;
+            m = this.elementNext[m];
         }
-        return null;
-    }
-
-    @Override
-    public void each(KLongLongMapCallBack callback) {
-        for (int i = 0; i < elementDataSize; i++) {
-            if (elementData[i] != null) {
-                Entry current = elementData[i];
-                callback.on(elementData[i].key, elementData[i].value);
-                while (current.next != null) {
-                    current = current.next;
-                    callback.on(current.key, current.value);
-                }
-            }
-        }
+        return -1;
     }
 
     @Override
     public synchronized void put(long key, long value) {
-        _isDirty = true;
-        Entry entry = null;
+        this._isDirty = true;
+        int entry = -1;
         int index = -1;
         int hash = (int) (key);
         if (elementDataSize != 0) {
             index = (hash & 0x7FFFFFFF) % elementDataSize;
             entry = findNonNullKeyEntry(key, index);
         }
-        if (entry == null) {
+        if (entry == -1) {
             if (++elementCount > threshold) {
-                rehash();
+                rehashCapacity(elementDataSize);
                 index = (hash & 0x7FFFFFFF) % elementDataSize;
             }
-            entry = createHashedEntry(key, index);
-        }
-        entry.value = value;
-    }
-
-    Entry createHashedEntry(long key, int index) {
-        Entry entry = new Entry(key, KConfig.NULL_LONG);
-        entry.next = elementData[index];
-        elementData[index] = entry;
-        return entry;
-    }
-
-    void rehashCapacity(int capacity) {
-        int length = (capacity == 0 ? 1 : capacity << 1);
-        Entry[] newData = new Entry[length];
-        for (int i = 0; i < elementDataSize; i++) {
-            Entry entry = elementData[i];
-            while (entry != null) {
-                int index = ((int) entry.key & 0x7FFFFFFF) % length;
-                Entry next = entry.next;
-                entry.next = newData[index];
-                newData[index] = entry;
-                entry = next;
+            int newIndex = (this.elementCount - 1);
+            this.elementKV[newIndex * 2] = key;
+            this.elementKV[newIndex * 2 + 1] = value;
+            int currentHashedIndex = this.elementHash[index];
+            if (currentHashedIndex != -1) {
+                this.elementNext[newIndex] = currentHashedIndex;
+            } else {
+                this.elementNext[newIndex] = -2; //special char to tag used values
             }
+            this.elementHash[index] = newIndex;
+        } else {
+            this.elementKV[entry + 1] = value;/*setValue*/
         }
-        elementData = newData;
-        elementDataSize = length;
-        computeMaxSize();
-    }
-
-    void rehash() {
-        rehashCapacity(elementDataSize);
     }
 
     public void remove(long key) {
+        /*
         if (elementDataSize == 0) {
             return;
         }
-        int index = 0;
-        Entry entry;
-        Entry last = null;
+        int index;
+        int entry;
+        int last = -1;
         int hash = (int) (key);
         index = (hash & 0x7FFFFFFF) % elementDataSize;
-        entry = elementData[index];
-        while (entry != null && !(/*((int)segment.key) == hash &&*/ key == entry.key)) {
+        entry = this.elementHash[index];
+        while (entry != -1 && !(key == entry.key)) {
             last = entry;
-            entry = entry.next;
+            entry = this.elementNext[entry];
         }
-        if (entry == null) {
+        if (entry == -1) {
             return;
         }
-        if (last == null) {
+        if (last == -1) {
+
+
             elementData[index] = entry.next;
         } else {
+            this.elementNext[]
+            this.elementHash[]
+
             last.next = entry.next;
         }
         elementCount--;
+        */
     }
 
     public int size() {
-        return elementCount;
+        return this.elementCount;
+    }
+
+    public static void main(String[] args) {
+
+        HashMap<Long, Long> op_map_ref = new HashMap<Long, Long>();
+        ArrayLongLongMap op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        int nb = 1000000;
+        Random random = new Random();
+        for (long i = 0; i < nb; i++) {
+            long key = random.nextLong();
+            long value = random.nextLong();
+            op_map.put(key, value);
+            op_map_ref.put(key, value);
+        }
+
+        for(Long key : op_map_ref.keySet()){
+            long resolved = op_map.get(key);
+            long resolved2 = op_map_ref.get(key);
+            if (resolved != resolved2) {
+                throw new RuntimeException("WTF " + resolved2 + "-" + resolved);
+            }
+        }
+
+
+
+        /*
+        long time = 0;
+        for (int j = 0; j < 30; j++) {
+            long before = System.currentTimeMillis();
+            HashMap<Long, Long> op_map = new HashMap<Long, Long>();
+            //ArrayLongLongMap op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+            int nb = 10000000;
+            for (long i = 0; i < nb; i++) {
+                op_map.put(i, i);
+            }
+            for (long i = 0; i < nb; i++) {
+                long resolved = op_map.get(i);
+                if (resolved != i) {
+                    throw new RuntimeException("WTF " + i + "-" + resolved);
+                }
+            }
+            if (j >= 10) {
+                time += System.currentTimeMillis() - before;
+            }
+        }
+        System.err.println((time / 20) + "ms");
+        */
+
+
     }
 
 }

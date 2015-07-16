@@ -23,10 +23,10 @@ public class JSONLoadTest {
                 "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"@root\":true,\"name\":\"root\",\"children\":[2,3]},\n" +
                 "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":2,\"name\":\"n1\"},\n" +
                 "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":3,\"name\":\"n2\"}\n" +
-                "]\n",new KCallback<Throwable>() {
+                "]\n", new KCallback<Throwable>() {
             @Override
             public void on(Throwable res) {
-                time0.lookup(1l,new KCallback<KObject>() {
+                time0.lookup(1l, new KCallback<KObject>() {
                     @Override
                     public void on(KObject r) {
                         Assert.assertNotNull(r);
@@ -34,7 +34,7 @@ public class JSONLoadTest {
                         passed[0]++;
                     }
                 });
-                time0.lookup(2l,new KCallback<KObject>() {
+                time0.lookup(2l, new KCallback<KObject>() {
                     @Override
                     public void on(KObject r) {
                         Assert.assertNotNull(r);
@@ -47,11 +47,11 @@ public class JSONLoadTest {
 
         Assert.assertEquals(passed[0], 2);
 
-        time0.select("@root",new KCallback<Object[]>() {
+        time0.select("@root", new KCallback<Object[]>() {
             @Override
             public void on(Object[] kObjects) {
 
-                time0.json().save((KObject) kObjects[0],new KCallback<String>() {
+                time0.json().save((KObject) kObjects[0], new KCallback<String>() {
                     @Override
                     public void on(String s) {
 
