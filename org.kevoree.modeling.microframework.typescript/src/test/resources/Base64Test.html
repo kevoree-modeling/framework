@@ -1,62 +1,142 @@
 <script>
 
-    var encodeArray = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'];
-    var decodeArray = [];
-    var i = 0;
-    for (var c = 'A'.charCodeAt(0); c <= 'Z'.charCodeAt(0); c++) {
-        decodeArray[String.fromCharCode(c)] = i;
-        i++;
-    }
+    var Base64 = {};
+    Base64.encodeArray = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'];
+    Base64.decodeArray = {
+        "A": 0,
+        "B": 1,
+        "C": 2,
+        "D": 3,
+        "E": 4,
+        "F": 5,
+        "G": 6,
+        "H": 7,
+        "I": 8,
+        "J": 9,
+        "K": 10,
+        "L": 11,
+        "M": 12,
+        "N": 13,
+        "O": 14,
+        "P": 15,
+        "Q": 16,
+        "R": 17,
+        "S": 18,
+        "T": 19,
+        "U": 20,
+        "V": 21,
+        "W": 22,
+        "X": 23,
+        "Y": 24,
+        "Z": 25,
+        "a": 26,
+        "b": 27,
+        "c": 28,
+        "d": 29,
+        "e": 30,
+        "f": 31,
+        "g": 32,
+        "h": 33,
+        "i": 34,
+        "j": 35,
+        "k": 36,
+        "l": 37,
+        "m": 38,
+        "n": 39,
+        "o": 40,
+        "p": 41,
+        "q": 42,
+        "r": 43,
+        "s": 44,
+        "t": 45,
+        "u": 46,
+        "v": 47,
+        "w": 48,
+        "x": 49,
+        "y": 50,
+        "z": 51,
+        "0": 52,
+        "1": 53,
+        "2": 54,
+        "3": 55,
+        "4": 56,
+        "5": 57,
+        "6": 58,
+        "7": 59,
+        "8": 60,
+        "9": 61,
+        "+": 62,
+        "/": 63
+    };
 
-    for (var c = 'a'.charCodeAt(0); c <= 'z'.charCodeAt(0); c++) {
-        decodeArray[String.fromCharCode(c)] = i;
-        i++;
-    }
-    for (var c = '0'.charCodeAt(0); c <= '9'.charCodeAt(0); c++) {
-        decodeArray[String.fromCharCode(c)] = i;
-        i++;
-    }
-    decodeArray['+'] = i;
-    i++;
-    decodeArray['/'] = i;
 
-
-    function encode(l) {
-        var result = "";
-        var tmp = ( l < 0) ? (l * -1) + 0x0020000000000000 : l;
-        for(var i = 48; i >= 0; i-=6) {
-            result += encodeArray[(tmp / (Math.pow(2,i))) & 0x3F];
-        }
-        return result;
-    }
-
-    function decode(s) {
-        var result = 0;
-        result += (decodeArray[s.charAt(0)] & 0x1F) * Math.pow(2,48) ;
-        for(var i = 1; i < s.length;i++) {
-            result += (decodeArray[s.charAt(i)] & 0xFF) * Math.pow(2,48-(6*i));
-        }
-        if((decodeArray[s.charAt(0)] & 0x0020) != 0) {
-            result *= -1;
-        }
-        return result;
-    }
-
-    var doubleMin = 0b0000000000000000000000000000000000000000000000000000000000000001;
-
+    var doubleMin = "0000000000000000000000000000000000000000000000000000000000000001";
+    var doubleMax = "0111111111101111111111111111111111111111111111111111111111111111";
+    /*
+     var doubleMaxHex = 0x1.fffffffffffffp1023;
+     var doubleMinHex = 0x0.0000000000001p-1022;
+     */
     var timeBegin = -0x001FFFFFFFFFFFFE;
     var timeNULL = 0x001FFFFFFFFFFFFF;
     var timeEND = 0x001FFFFFFFFFFFFE;
 
 
-    var s = encode(timeBegin);
-    var dec = decode(s);
-    console.log("L=>64:"+ s + "      64=>L:"+ dec+"     ("+timeBegin+")");
+    var doubleMaxString = "f+P////////";
+
+    console.log("Max: " + Number.MAX_VALUE + " MinValue: " + Number.MIN_VALUE);
+    var enc = encodeDouble(Number.MIN_VALUE+1);
+    console.log("encode", enc);
+    console.log("decode", decodeToDouble(enc));
+    //console.log(Number.MIN_VALUE.toString(2));
+    //console.log(decodeToDouble(encodeDouble(Number.MIN_VALUE)).toString(2));
+
+    function decodeToDouble(s) {
+        return decodeToDoubleWithBounds(s, 0, s.length);
+    }
+
+    function decodeToDoubleWithBounds(s, offsetBegin, offsetEnd) {
+        var signAdndExp = ((Base64.decodeArray[s.charAt(0)] & 0xFF) * Math.pow(2, 6)) + (Base64.decodeArray[s.charAt(1)] & 0xFF)
+        var sign = ((signAdndExp & 0x800) != 0 ? -1 : 1);
+        var exp = signAdndExp & 0x7FF;
+        //Mantisse
+        var mantissaBits = 0;
+        for (var i = 0; i < (offsetEnd - offsetBegin) - 2; i++) {
+            mantissaBits += (Base64.decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF) * Math.pow(2, 6 * i);
+        }
+        //console.log(sign.toString(2), exp.toString(2), signAdndExp.toString(2));
+        return (exp != 0) ? sign * Math.pow(2, exp - 1023) * (1 + (mantissaBits / Math.pow(2, 52))) : sign * Math.pow(2, -1022) * (0 + (mantissaBits / Math.pow(2, 52)));
+    }
 
 
-    s = encode(timeEND);
-    dec = decode(s);
-    console.log("L=>64:"+ s + "      64=>L:"+ dec+"     ("+timeEND+")");
+    function encodeDouble(d) {
+        var result = "";
+        console.log(d.toString(2));
+        var sign = (d < 0) ? 1 : 0;
+        if (d < 0) {
+            d = -d;
+        }
+        var exp = 0;
+        if(d >= 1) {
+           exp = -(1 - (Math.log(d) / Math.log(2)));
+            console.log("exp:", exp);
+            d = (d / Math.pow(2, exp)) - 1;
+            d = d * Math.pow(2, 52);
+        }
+            var signAndExp = (sign * Math.pow(2, 11)) + (exp == 0 ? 0 : (exp + 1023));
+
+
+        console.log(signAndExp);
+        //encode sign + exp
+        result += Base64.encodeArray[(signAndExp / Math.pow(2, 6)) & 0x3F];
+        result += Base64.encodeArray[signAndExp & 0x3F];
+
+        result += Base64.encodeArray[(d / Math.pow(2, 48)) & 0x0F];
+        for (var i = 42; i >= 0; i -= 6) {
+            result += Base64.encodeArray[(d / Math.pow(2, i)) & 0x3F];
+            console.log((d & 0x3F).toString(2));
+        }
+        return result;
+    }
 
 
 </script>

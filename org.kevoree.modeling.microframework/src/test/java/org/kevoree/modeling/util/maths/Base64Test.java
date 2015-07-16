@@ -92,31 +92,65 @@ public class Base64Test {
     }
 
 
-    /** @ignore ts */
+    /** @native ts
+     * var enc = Base64.encodeDouble(Number.MAX_VALUE);
+     * var dec = Base64.decodeToDouble(enc);
+     * org.junit.Assert.assertEquals(Number.MAX_VALUE, dec);
+     * */
     @Test
     public void maxDoubleEncodingTest() {
         //System.out.println("Encode");
         String enc = Base64.encodeDouble(Double.MAX_VALUE);
         //System.out.println("Decode");
         double dec = Base64.decodeToDouble(enc);
-        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
+        //System.out.println(Double.toHexString(Double.MAX_VALUE) + " -> " + enc + " -> " + Double.toHexString(dec));
         Assert.assertEquals(Double.MAX_VALUE, dec, 0);
     }
 
-    /** @ignore ts */
+    /** @ignore ts
+     * var enc = Base64.encodeDouble(Number.MIN_VALUE);
+     * var dec = Base64.decodeToDouble(enc);
+     * org.junit.Assert.assertEquals(Number.MIN_VALUE, dec);
+     * */
     @Test
     public void minDoubleEncodingTest() {
         //System.out.println("Encode");
-        //System.out.println("DoubleMin: " + printBits(Double.doubleToLongBits(Double.MIN_VALUE)));
         String enc = Base64.encodeDouble(Double.MIN_VALUE);
         //System.out.println("Decode");
         double dec = Base64.decodeToDouble(enc);
-        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
+        System.out.println(Double.MIN_VALUE + " -> " + enc + " -> " + dec);
         Assert.assertEquals(Double.MIN_VALUE, dec, 0);
     }
 
+    /** @ignore ts
+     * var enc = Base64.encodeDouble(-Number.MAX_VALUE);
+     * var dec = Base64.decodeToDouble(enc);
+     * org.junit.Assert.assertEquals(-Number.MAX_VALUE, dec);
+     * */
+    @Test
+    public void negMaxDoubleEncodingTest() {
+        //System.out.println("Encode");
+        String enc = Base64.encodeDouble(-Double.MAX_VALUE);
+        //System.out.println("Decode");
+        double dec = Base64.decodeToDouble(enc);
+        //System.out.println(Double.toHexString(Double.MAX_VALUE) + " -> " + enc + " -> " + Double.toHexString(dec));
+        Assert.assertEquals(-Double.MAX_VALUE, dec, 0);
+    }
 
-
+    /** @ignore ts
+     * var enc = Base64.encodeDouble(-Number.MIN_VALUE);
+     * var dec = Base64.decodeToDouble(enc);
+     * org.junit.Assert.assertEquals(-Number.MIN_VALUE, dec);
+     * */
+    @Test
+    public void negMinDoubleEncodingTest() {
+        //System.out.println("Encode");
+        String enc = Base64.encodeDouble(-Double.MIN_VALUE);
+        //System.out.println("Decode");
+        double dec = Base64.decodeToDouble(enc);
+        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(-Double.MIN_VALUE, dec, 0);
+    }
 
     @Test
     public void boolArrayEncodingTest() {
@@ -142,8 +176,8 @@ public class Base64Test {
         }
     }
 
-
     /*
+
         private String printBits(Long val) {
             String toString = Long.toBinaryString(val);
             String res = "";
