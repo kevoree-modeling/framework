@@ -107,6 +107,7 @@ public class Base64Test {
     @Test
     public void minDoubleEncodingTest() {
         //System.out.println("Encode");
+        //System.out.println("DoubleMin: " + printBits(Double.doubleToLongBits(Double.MIN_VALUE)));
         String enc = Base64.encodeDouble(Double.MIN_VALUE);
         //System.out.println("Decode");
         double dec = Base64.decodeToDouble(enc);
