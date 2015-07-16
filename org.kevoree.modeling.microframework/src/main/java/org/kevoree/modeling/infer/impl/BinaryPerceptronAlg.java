@@ -12,7 +12,7 @@ public class BinaryPerceptronAlg implements KInferAlg {
     private int iterations=50;
 
     //TODO to replace by meta-learning parameters
-    private double alpha=0.005; //learning rate
+    private double alpha=0.01; //learning rate
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin) {
