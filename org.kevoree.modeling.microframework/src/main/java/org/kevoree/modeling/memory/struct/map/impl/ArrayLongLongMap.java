@@ -27,13 +27,13 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected volatile int elementCount;
 
-    protected int elementDataSize;
+    protected volatile int elementDataSize;
 
     protected int threshold;
 
-    protected long[] elementKV;
+    protected volatile long[] elementKV;
 
-    protected int[] elementNext;
+    protected volatile int[] elementNext;
 
     protected int[] elementHash;
 
@@ -241,13 +241,13 @@ public class ArrayLongLongMap implements KLongLongMap {
 */
 
 
-        /*
+
         long time = 0;
         for (int j = 0; j < 30; j++) {
             long before = System.currentTimeMillis();
-            HashMap<Long, Long> op_map = new HashMap<Long, Long>();
-            //ArrayLongLongMap op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-            int nb = 10000000;
+            //HashMap<Long, Long> op_map = new HashMap<Long, Long>();
+            ArrayLongLongMap op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+            int nb = 1000000;
             for (long i = 0; i < nb; i++) {
                 op_map.put(i, i);
             }
@@ -262,7 +262,7 @@ public class ArrayLongLongMap implements KLongLongMap {
             }
         }
         System.err.println((time / 20) + "ms");
-        */
+
 
 
     }
