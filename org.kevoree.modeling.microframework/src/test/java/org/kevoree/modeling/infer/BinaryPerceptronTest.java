@@ -81,8 +81,6 @@ public class BinaryPerceptronTest {
             result=result+test();
         }
         result=result/10;
-        System.out.println("h: "+h+" uh: "+uh);
-        System.out.println(result);
         Assert.assertTrue(result>50);
     }
 
