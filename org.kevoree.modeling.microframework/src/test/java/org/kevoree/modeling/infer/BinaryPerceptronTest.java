@@ -74,12 +74,25 @@ public class BinaryPerceptronTest {
 
     }
 
-
     @Test
-    public void test() {
+    public void test2(){
+        double result=0;
+        for(int i=0;i<10;i++){
+            result=result+test();
+        }
+        result=result/10;
+        System.out.println("h: "+h+" uh: "+uh);
+        System.out.println(result);
+        Assert.assertTrue(result>75);
+    }
+
+    public int test() {
 
         KMetaModel mm = createMetaModel();
         KModel model = mm.model();
+        final int[] correct=new int[1];
+        correct[0]=0;
+
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -96,7 +109,7 @@ public class BinaryPerceptronTest {
                     perceptronProfile.train(person,output,null);
                 }
 
-                int[] correct=new int[1];
+
                 for(int i=0;i<100;i++) {
                     KObject[] testPerson = new KObject[1];
                     testPerson[0] = createPerson(model, mm);
@@ -109,12 +122,10 @@ public class BinaryPerceptronTest {
                         }
                     });
                 }
-                System.out.println(correct[0]);
-                Assert.assertTrue(correct[0]>50);
+                //System.out.println(correct[0]);
+                //Assert.assertTrue(correct[0]>50);
             }
-
         });
-
-
+        return correct[0];
     }
 }

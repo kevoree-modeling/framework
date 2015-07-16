@@ -9,10 +9,10 @@ import java.util.Random;
 
 
 public class BinaryPerceptronAlg implements KInferAlg {
-    private int iterations=100;
+    private int iterations=5;
 
     //TODO to replace by meta-learning parameters
-    private double alpha=0.5; //learning rate
+    private double alpha=1; //learning rate
 
     private Random rand=new Random();
 
