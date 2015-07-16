@@ -24,6 +24,8 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected volatile int elementCount;
 
+    protected volatile int droppedCount;
+
     protected volatile InternalState state = null;
 
     protected int threshold;
@@ -35,8 +37,9 @@ public class ArrayLongLongMap implements KLongLongMap {
     private final float loadFactor;
 
 
-    /** @native ts
-     * */
+    /**
+     * @native ts
+     */
     class InternalState {
 
         public final int elementDataSize;
@@ -59,6 +62,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         this.initialCapacity = p_initalCapacity;
         this.loadFactor = p_loadFactor;
         this.elementCount = 0;
+        this.droppedCount = 0;
         InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
         for (int i = 0; i < initialCapacity; i++) {
             newstate.elementNext[i] = -1;
@@ -71,6 +75,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     public final void clear() {
         if (elementCount > 0) {
             this.elementCount = 0;
+            this.droppedCount = 0;
             InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate.elementNext[i] = -1;
@@ -170,7 +175,7 @@ public class ArrayLongLongMap implements KLongLongMap {
                 rehashCapacity(state.elementDataSize);
                 index = (hash & 0x7FFFFFFF) % state.elementDataSize;
             }
-            int newIndex = (this.elementCount - 1);
+            int newIndex = (this.elementCount + this.droppedCount - 1);
             state.elementKV[newIndex * 2] = key;
             state.elementKV[newIndex * 2 + 1] = value;
             int currentHashedIndex = state.elementHash[index];
@@ -197,36 +202,37 @@ public class ArrayLongLongMap implements KLongLongMap {
         return -1;
     }
 
-    public final void remove(long key) {
-        /*
-        if (elementDataSize == 0) {
+    //TODO check intersection of remove and put
+    public synchronized final void remove(long key) {
+        InternalState internalState = state;
+        if (state.elementDataSize == 0) {
             return;
         }
-        int index;
-        int entry;
+        int index = ((int) (key) & 0x7FFFFFFF) % internalState.elementDataSize;
+        int m = state.elementHash[index];
         int last = -1;
-        int hash = (int) (key);
-        index = (hash & 0x7FFFFFFF) % elementDataSize;
-        entry = this.elementHash[index];
-        while (entry != -1 && !(key == entry.key)) {
-            last = entry;
-            entry = this.elementNext[entry];
+        while (m >= 0) {
+            if (key == state.elementKV[m * 2] /* getKey */) {
+                break;
+            }
+            last = m;
+            m = state.elementNext[m];
         }
-        if (entry == -1) {
+        if (m == -1) {
             return;
         }
         if (last == -1) {
-
-
-            elementData[index] = entry.next;
+            if (state.elementNext[m] > 0) {
+                state.elementHash[index] = m;
+            } else {
+                state.elementHash[index] = -1;
+            }
         } else {
-            this.elementNext[]
-            this.elementHash[]
-
-            last.next = entry.next;
+            state.elementNext[last] = state.elementNext[m];
         }
-        elementCount--;
-        */
+        state.elementNext[m] = -1;//flag to dropped value
+        this.elementCount--;
+        this.droppedCount++;
     }
 
     public final int size() {

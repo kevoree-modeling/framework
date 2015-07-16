@@ -254,33 +254,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
             throw new RuntimeException("ERROR: unsafe operations are not available");
         }
     }
-
-    public static void main(String[] args) {
-
-        long time = 0;
-        for (int j = 0; j < 30; j++) {
-            long before = System.currentTimeMillis();
-            HashMap<Long, Long> op_map = new HashMap<Long, Long>();
-            //ArrayLongLongMap op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-            int nb = 10000000;
-            for (long i = 0; i < nb; i++) {
-                op_map.put(i, i);
-            }
-            for (long i = 0; i < nb; i++) {
-                long resolved = op_map.get(i);
-                if (resolved != i) {
-                    throw new RuntimeException("WTF " + i + "-" + resolved);
-                }
-            }
-            if (j >= 10) {
-                time += System.currentTimeMillis() - before;
-            }
-        }
-        System.err.println((time / 20) + "ms");
-
-
-    }
-
+    
 }
 
 
