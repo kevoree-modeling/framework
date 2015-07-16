@@ -95,6 +95,7 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
         this._isDirty = true;
     }
 
+    /* warning: this method is not thread safe */
     @Override
     public void init(String payload, KMetaModel metaModel) {
         if (payload == null || payload.length() == 0) {
