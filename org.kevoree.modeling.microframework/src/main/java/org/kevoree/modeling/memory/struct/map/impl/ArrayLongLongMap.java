@@ -94,10 +94,16 @@ public class ArrayLongLongMap implements KLongLongMap {
             }
         }
         //set value for all
+
+        //should be an atomic operation
+        //TODO
         this.elementKV = newElementKV;
         this.elementHash = newElementHash;
         this.elementNext = newElementNext;
         this.elementDataSize = length;
+        //TODO END ATOMIC OPERATION
+        //should be an atomic operation
+
         this.threshold = (int) (elementDataSize * loadFactor);
     }
 
@@ -171,6 +177,7 @@ public class ArrayLongLongMap implements KLongLongMap {
             } else {
                 this.elementNext[newIndex] = -2; //special char to tag used values
             }
+            //now the object is reachable to other thread everything should be ready
             this.elementHash[index] = newIndex;
         } else {
             this.elementKV[entry + 1] = value;/*setValue*/
