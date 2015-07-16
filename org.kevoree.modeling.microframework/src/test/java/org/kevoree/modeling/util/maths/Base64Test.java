@@ -107,7 +107,7 @@ public class Base64Test {
         Assert.assertEquals(Double.MAX_VALUE, dec, 0);
     }
 
-    /** @ignore ts
+    /** @native ts
      * var enc = Base64.encodeDouble(Number.MIN_VALUE);
      * var dec = Base64.decodeToDouble(enc);
      * org.junit.Assert.assertEquals(Number.MIN_VALUE, dec);
@@ -122,7 +122,7 @@ public class Base64Test {
         Assert.assertEquals(Double.MIN_VALUE, dec, 0);
     }
 
-    /** @ignore ts
+    /** @native ts
      * var enc = Base64.encodeDouble(-Number.MAX_VALUE);
      * var dec = Base64.decodeToDouble(enc);
      * org.junit.Assert.assertEquals(-Number.MAX_VALUE, dec);
@@ -137,7 +137,7 @@ public class Base64Test {
         Assert.assertEquals(-Double.MAX_VALUE, dec, 0);
     }
 
-    /** @ignore ts
+    /** @native ts
      * var enc = Base64.encodeDouble(-Number.MIN_VALUE);
      * var dec = Base64.decodeToDouble(enc);
      * org.junit.Assert.assertEquals(-Number.MIN_VALUE, dec);
@@ -151,6 +151,23 @@ public class Base64Test {
         //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
         Assert.assertEquals(-Double.MIN_VALUE, dec, 0);
     }
+
+
+    /** @native ts
+     * var enc = Base64.encodeDouble(0);
+     * var dec = Base64.decodeToDouble(enc);
+     * org.junit.Assert.assertEquals(0, dec);
+     * */
+    @Test
+    public void zeroDoubleEncodingTest() {
+        //System.out.println("Encode");
+        String enc = Base64.encodeDouble(0);
+        //System.out.println("Decode");
+        double dec = Base64.decodeToDouble(enc);
+        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(0, dec, 0);
+    }
+
 
     @Test
     public void boolArrayEncodingTest() {

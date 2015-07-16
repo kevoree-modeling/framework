@@ -101,50 +101,46 @@ package org.kevoree.modeling.util.maths;
  * 
  * public static encodeDouble(d : number) {
  * var result = "";
- * if (d < 0) {
- * d = -d;
- * }
- * var exp = -(1 - (Math.log(d) / Math.log(2)));
- * d = (d / Math.pow(2, exp)) - 1;
- * d = d * Math.pow(2, 52);
- * var signAndExp;
- * if(d < 1) {
- *     signAndExp = ((d < 0) ? 1 : 0) * Math.pow(2, 11);
- * } else {
- *  signAndExp = (((d < 0) ? 1 : 0) * Math.pow(2, 11)) + (exp + 1023);
- * }
- * 
+ * var float = new Float64Array(1);
+ * var bytes = new Uint8Array(float.buffer);
+ * float[0] = d;
+ * var exponent = ((bytes[7] & 0x7f) << 4 | bytes[6] >> 4) - 0x3ff;
+ * var signAndExp = (((bytes[7] >> 7)&0x1) << 11) + (exponent + 1023);
  * //encode sign + exp
- * result += Base64.encodeArray[(signAndExp / Math.pow(2, 6)) & 0x3F];
+ * result += Base64.encodeArray[(signAndExp >> 6) & 0x3F];
  * result += Base64.encodeArray[signAndExp & 0x3F];
+ * result += Base64.encodeArray[bytes[6] & 0x0F];
+ * result += Base64.encodeArray[(bytes[5] >> 2) & 0x3F];
+ * result += Base64.encodeArray[(bytes[5] & 0x3)<<4 | bytes[4] >> 4];
+ * result += Base64.encodeArray[(bytes[4] & 0x0F)<<2 | bytes[3] >> 6];
+ * result += Base64.encodeArray[(bytes[3] & 0x3F)];
+ * result += Base64.encodeArray[(bytes[2] >> 2) & 0x3F];
+ * result += Base64.encodeArray[(bytes[2] & 0x3)<<4 | bytes[1] >> 4];
+ * result += Base64.encodeArray[(bytes[1] & 0x0F)<<2 | bytes[0] >> 6];
+ * result += Base64.encodeArray[(bytes[0] & 0x3F)];
  * 
- * result += Base64.encodeArray[(d / Math.pow(2, 48)) & 0x0F];
- * for (var i = 42; i >= 0; i -= 6) {
- * result += Base64.encodeArray[(d / Math.pow(2, i)) & 0x3F];
- * }
  * return result;
  * }
  * 
  * 
  * public static encodeDoubleToBuffer(d : number, buffer : java.lang.StringBuilder) {
- * var result = "";
- * if (d < 0) {
- * d = -d;
- * }
- * var exp = -(1 - (Math.log(d) / Math.log(2)));
- * d = (d / Math.pow(2, exp)) - 1;
- * d = d * Math.pow(2, 52);
- * var signAndExp = (((d < 0) ? 1 : 0) * Math.pow(2, 11)) + (exp + 1023);
- * 
+ * var float = new Float64Array(1);
+ * var bytes = new Uint8Array(float.buffer);
+ * float[0] = d;
+ * var exponent = ((bytes[7] & 0x7f) << 4 | bytes[6] >> 4) - 0x3ff;
+ * var signAndExp = (((bytes[7] >> 7)&0x1) << 11) + (exponent + 1023);
  * //encode sign + exp
- * buffer.append(Base64.encodeArray[(signAndExp / Math.pow(2, 6)) & 0x3F]);
+ * buffer.append(Base64.encodeArray[(signAndExp >> 6) & 0x3F]);
  * buffer.append(Base64.encodeArray[signAndExp & 0x3F]);
- * 
- * buffer.append(Base64.encodeArray[(d / Math.pow(2, 48)) & 0x0F]);
- * for (var i = 42; i >= 0; i -= 6) {
- * buffer.append(Base64.encodeArray[(d / Math.pow(2, i)) & 0x3F]);
- * }
- * return result;
+ * buffer.append(Base64.encodeArray[bytes[6] & 0x0F]);
+ * buffer.append(Base64.encodeArray[(bytes[5] >> 2) & 0x3F]);
+ * buffer.append(Base64.encodeArray[(bytes[5] & 0x3)<<4 | bytes[4] >> 4]);
+ * buffer.append(Base64.encodeArray[(bytes[4] & 0x0F)<<2 | bytes[3] >> 6]);
+ * buffer.append(Base64.encodeArray[(bytes[3] & 0x3F)]);
+ * buffer.append(Base64.encodeArray[(bytes[2] >> 2) & 0x3F]);
+ * buffer.append(Base64.encodeArray[(bytes[2] & 0x3)<<4 | bytes[1] >> 4]);
+ * buffer.append(Base64.encodeArray[(bytes[1] & 0x0F)<<2 | bytes[0] >> 6]);
+ * buffer.append(Base64.encodeArray[(bytes[0] & 0x3F)]);
  * }
  * 
  * 
