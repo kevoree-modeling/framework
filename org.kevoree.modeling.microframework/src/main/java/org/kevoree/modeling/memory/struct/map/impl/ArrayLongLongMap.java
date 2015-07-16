@@ -5,9 +5,6 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 
-import java.util.HashMap;
-import java.util.Random;
-
 /**
  * @native ts
  * private _isDirty = false;
@@ -217,18 +214,50 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
 
+    /*
+
     public static void main(String[] args) {
 
-        /*
+
         HashMap<Long, Long> op_map_ref = new HashMap<Long, Long>();
         ArrayLongLongMap op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         int nb = 1000000;
         Random random = new Random();
+
+        ExecutorService service = Executors.newFixedThreadPool(1000);
+
         for (long i = 0; i < nb; i++) {
-            long key = random.nextLong();
-            long value = random.nextLong();
-            op_map.put(key, value);
+            final long key = random.nextLong();
+            final long value = random.nextLong();
             op_map_ref.put(key, value);
+
+            final long finalI = i;
+            service.submit(new Runnable() {
+                @Override
+                public void run() {
+
+                    //System.err.println(finalI);
+
+                    try {
+                        op_map.put(key, value);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        }
+
+        service.shutdown();
+        try {
+            service.awaitTermination(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (op_map_ref.size() != op_map.size()) {
+            throw new RuntimeException("WTF SIZE != " + op_map_ref.size() + "-" + op_map.size());
         }
 
         for (Long key : op_map_ref.keySet()) {
@@ -238,7 +267,7 @@ public class ArrayLongLongMap implements KLongLongMap {
                 throw new RuntimeException("WTF " + resolved2 + "-" + resolved);
             }
         }
-*/
+
 
 
 
@@ -265,7 +294,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
 
 
-    }
+    }*/
 
 }
 
