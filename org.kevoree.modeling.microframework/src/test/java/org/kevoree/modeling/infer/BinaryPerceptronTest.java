@@ -84,7 +84,7 @@ public class BinaryPerceptronTest {
             public void on(Object o) {
 
                 KObjectInfer perceptronProfile = (KObjectInfer) model.createByName("PerceptronProfile", 0, 0);
-                int size=10000;
+                int size=100000;
 
                 for (int i = 0; i < size; i++) {
                     KObject[] person = new KObject[1];
@@ -94,15 +94,22 @@ public class BinaryPerceptronTest {
                     output[0] = person[0].getByName("healthy");
                     perceptronProfile.train(person,output,null);
                 }
-                KObject[] testPerson = new KObject[1];
-                testPerson[0]=createPerson(model,mm);
-                perceptronProfile.infer(testPerson, new KCallback<Object[]>() {
-                    @Override
-                    public void on(Object[] objects) {
-                        //to replace by iris type later
-                       // Assert.assertTrue(objects[0] == ((MetaLiteral) testPerson[0].getByName("healthy")));
-                    }
-                });
+
+                int[] correct=new int[1];
+                for(int i=0;i<1000;i++) {
+                    KObject[] testPerson = new KObject[1];
+                    testPerson[0] = createPerson(model, mm);
+                    perceptronProfile.infer(testPerson, new KCallback<Object[]>() {
+                        @Override
+                        public void on(Object[] objects) {
+                            if(objects[0] == ((MetaLiteral) testPerson[0].getByName("healthy"))){
+                                correct[0]++;
+                            }
+                        }
+                    });
+                }
+                //System.out.println(correct[0]);
+                Assert.assertTrue(correct[0]>900);
             }
 
         });
