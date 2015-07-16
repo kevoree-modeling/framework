@@ -12,7 +12,7 @@ public class HeapMemorySegment implements KMemorySegment {
 
     private Object[] raw;
 
-    private int _counter = 0;
+    private volatile int _counter = 0;
 
     private int _metaClassIndex = -1;
 
@@ -207,18 +207,26 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public int counter() {
-        return _counter;
+    public final int counter() {
+        return this._counter;
     }
 
     @Override
-    public void inc() {
-        _counter++;
+    public final void inc() {
+        internal_counter(true);
     }
 
     @Override
-    public void dec() {
-        _counter--;
+    public final void dec() {
+        internal_counter(false);
+    }
+
+    private synchronized void internal_counter(boolean inc) {
+        if (inc) {
+            this._counter++;
+        } else {
+            this._counter--;
+        }
     }
 
     @Override

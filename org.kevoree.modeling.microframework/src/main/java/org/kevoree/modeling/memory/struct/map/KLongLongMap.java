@@ -8,6 +8,8 @@ public interface KLongLongMap {
 
     void put(long key, long value);
 
+    void remove(long key);
+
     void each(KLongLongMapCallBack callback);
 
     int size();
