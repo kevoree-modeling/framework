@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
 
+import java.util.Arrays;
+
 public class Base64Test {
 
     @Test
@@ -90,6 +92,54 @@ public class Base64Test {
     }
 
 
+    /** @ignore ts */
+    @Test
+    public void maxDoubleEncodingTest() {
+        //System.out.println("Encode");
+        String enc = Base64.encodeDouble(Double.MAX_VALUE);
+        //System.out.println("Decode");
+        double dec = Base64.decodeToDouble(enc);
+        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(Double.MAX_VALUE, dec, 0);
+    }
+
+    /** @ignore ts */
+    @Test
+    public void minDoubleEncodingTest() {
+        //System.out.println("Encode");
+        String enc = Base64.encodeDouble(Double.MIN_VALUE);
+        //System.out.println("Decode");
+        double dec = Base64.decodeToDouble(enc);
+        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(Double.MIN_VALUE, dec, 0);
+    }
+
+
+
+
+    @Test
+    public void boolArrayEncodingTest() {
+
+        for(int i = 0; i < 255; i++) {
+            boolean[] tmpArray = new boolean[i];
+            for(int j = 0; j < i; j++) {
+                tmpArray[j] = Math.random() < 0.5;
+            }
+            boolArrayInnerTest(tmpArray);
+        }
+    }
+
+    private void boolArrayInnerTest(boolean[] array) {
+        String enc = Base64.encodeBoolArray(array);
+        //System.out.println("Decode");
+        boolean[] dec = Base64.decodeBoolArray(enc, array.length);
+        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
+        Assert.assertTrue(array.length == dec.length);
+        for(int i = 0; i < array.length; i++) {
+           // Assert.assertEquals("\n" + Arrays.toString(array) + "\n -> "+ enc +" -> \n" + Arrays.toString(dec),array[i], dec[i]);
+            Assert.assertEquals(array[i], dec[i]);
+        }
+    }
 
 
     /*
