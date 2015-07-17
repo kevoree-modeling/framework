@@ -503,6 +503,7 @@ public abstract class AbstractArrayTree {
     }
 
     protected final synchronized void internal_insert(long p_key, long p_value) {
+        this._dirty = true;
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             reallocate(length);
