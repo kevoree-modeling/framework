@@ -236,6 +236,7 @@ public class Base64 {
         }
         for (int i = 47; i >= 5; i -= 6) {
             if (!(empty && ((int) (tmp >> i) & 0x3F) == 0)) {
+                empty = false;
                 buffer.append(encodeArray[(int) (tmp >> i) & 0x3F]);
             }
         }
@@ -266,6 +267,7 @@ public class Base64 {
         }
         for (int i = 29; i >= 5; i -= 6) {
             if (!(empty && ((int) (tmp >> i) & 0x3F) == 0)) {
+                empty = false;
                 buffer.append(encodeArray[(tmp >> i) & 0x3F]);
             }
         }
