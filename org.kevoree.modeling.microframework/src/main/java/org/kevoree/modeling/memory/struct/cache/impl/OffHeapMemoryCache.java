@@ -127,6 +127,15 @@ public class OffHeapMemoryCache implements KCache {
     }
 
     @Override
+    public void putAndReplace(long universe, long time, long obj, KMemoryElement payload) {
+        //TODO
+    }
+
+    @Override
+    public KMemoryElement getOrPut(long universe, long time, long obj, KMemoryElement payload) {
+        return null;
+    }
+
     public final void put(long universe, long time, long obj, KMemoryElement payload) {
         if (!(payload instanceof KOffHeapMemoryElement)) {
             throw new RuntimeException("OffHeapMemoryCache only supports OffHeapMemoryElements");

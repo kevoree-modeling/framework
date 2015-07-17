@@ -72,7 +72,7 @@ public class ArrayLongLongMap implements KLongLongMap {
             newstate.elementHash[i] = -1;
         }
         this.state = newstate;
-        this.threshold = (int) (state.elementDataSize * loadFactor);
+        this.threshold = (int) (newstate.elementDataSize * loadFactor);
     }
 
     public final void clear() {
@@ -85,7 +85,7 @@ public class ArrayLongLongMap implements KLongLongMap {
                 newstate.elementHash[i] = -1;
             }
             this.state = newstate;
-            this.threshold = (int) (state.elementDataSize * loadFactor);
+            this.threshold = (int) (newstate.elementDataSize * loadFactor);
         }
     }
 
@@ -129,10 +129,10 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public final boolean contains(long key) {
+        InternalState internalState = state;
         if (state.elementDataSize == 0) {
             return false;
         }
-        InternalState internalState = state;
         int hash = (int) (key);
         int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
@@ -147,10 +147,10 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public final long get(long key) {
+        InternalState internalState = state;
         if (state.elementDataSize == 0) {
             return KConfig.NULL_LONG;
         }
-        InternalState internalState = state;
         int index = ((int) (key) & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
         while (m >= 0) {

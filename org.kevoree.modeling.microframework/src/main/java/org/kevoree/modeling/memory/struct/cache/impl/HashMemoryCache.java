@@ -47,7 +47,16 @@ public class HashMemoryCache implements KCache {
     }
 
     @Override
-    public void put(long universe, long time, long obj, KMemoryElement payload) {
+    public void putAndReplace(long universe, long time, long obj, KMemoryElement payload) {
+        internal_put(universe, time, obj, payload, true);
+    }
+
+    @Override
+    public KMemoryElement getOrPut(long universe, long time, long obj, KMemoryElement payload) {
+        return internal_put(universe, time, obj, payload, false);
+    }
+
+    private final KMemoryElement internal_put(long universe, long time, long obj, KMemoryElement payload, boolean force) {
         Entry entry = null;
         int hash = (int) (universe ^ time ^ obj);
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
@@ -63,8 +72,13 @@ public class HashMemoryCache implements KCache {
         }
         if (entry == null) {
             entry = complex_insert(index, hash, universe, time, obj);
+            entry.value = payload;
+        } else {
+            if (force) {
+                entry.value = payload;
+            }
         }
-        entry.value = payload;
+        return entry.value;
     }
 
     private synchronized Entry complex_insert(int previousIndex, int hash, long universe, long time, long obj) {

@@ -23,8 +23,6 @@ public class ArrayMemoryCache implements KCache {
 
     protected boolean _isDirty = false;
 
-    private final int initialCapacity;
-
     private final float loadFactor;
 
     class InternalState {
@@ -54,7 +52,7 @@ public class ArrayMemoryCache implements KCache {
     private KObjectWeakReference rootReference = null;
 
     public ArrayMemoryCache() {
-        this.initialCapacity = KConfig.CACHE_INIT_SIZE;
+        int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this.loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this.elementCount = 0;
         this.droppedCount = 0;
@@ -69,27 +67,27 @@ public class ArrayMemoryCache implements KCache {
 
     protected final void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
+
         long[] newElementKV = new long[length * 3];
-        System.arraycopy(state.elementK3, 0, newElementKV, 0, state.elementK3.length);
+        System.arraycopy(state.elementK3, 0, newElementKV, 0, state.elementDataSize * 3);
+
         KMemoryElement[] newValues = new KMemoryElement[length];
-        System.arraycopy(state.values, 0, newValues, 0, state.values.length);
+        System.arraycopy(state.values, 0, newValues, 0, state.elementDataSize);
+
         int[] newElementNext = new int[length];
+
         int[] newElementHash = new int[length];
+
         for (int i = 0; i < length; i++) {
             newElementNext[i] = -1;
             newElementHash[i] = -1;
         }
         //rehashEveryThing
-        for (int i = 0; i < state.elementNext.length; i++) {
-            if (state.elementNext[i] != -1) { //there is a real value
+        for (int i = 0; i < state.elementDataSize; i++) {
+            if (state.values[i] != null) { //there is a real value
                 int hash = (int) (state.elementK3[(i * 3)] ^ state.elementK3[(i * 3) + 1] ^ state.elementK3[(i * 3) + 2]);
                 int index = (hash & 0x7FFFFFFF) % length;
-                int currentHashedIndex = newElementHash[index];
-                if (currentHashedIndex != -1) {
-                    newElementNext[i] = currentHashedIndex;
-                } else {
-                    newElementNext[i] = -2; //special char to tag used values
-                }
+                newElementNext[i] = newElementHash[index];
                 newElementHash[index] = i;
             }
         }
@@ -104,7 +102,7 @@ public class ArrayMemoryCache implements KCache {
         if (internalState.elementDataSize == 0) {
             return null;
         }
-        int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % state.elementDataSize;
+        int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
         while (m >= 0) {
             if (universe == internalState.elementK3[m * 3] && time == internalState.elementK3[(m * 3) + 1] && obj == internalState.elementK3[(m * 3) + 2]) {
@@ -117,36 +115,46 @@ public class ArrayMemoryCache implements KCache {
     }
 
     @Override
-    public void put(long universe, long time, long obj, KMemoryElement payload) {
-        InternalState internalState = state;
+    public void putAndReplace(long universe, long time, long obj, KMemoryElement payload) {
+        internal_put(universe, time, obj, payload, true);
+    }
+
+    @Override
+    public KMemoryElement getOrPut(long universe, long time, long obj, KMemoryElement payload) {
+        return internal_put(universe, time, obj, payload, false);
+    }
+
+    private final KMemoryElement internal_put(long universe, long time, long obj, KMemoryElement payload, boolean force) {
         this._isDirty = true;
         int entry = -1;
         int index = -1;
         int hash = (int) (universe ^ time ^ obj);
         if (state.elementDataSize != 0) {
             index = (hash & 0x7FFFFFFF) % state.elementDataSize;
-            entry = findNonNullKeyEntry(universe, time, obj, index, internalState);
+            entry = findNonNullKeyEntry(universe, time, obj, index, state);
         }
         if (entry == -1) {
             if (++elementCount > threshold) {
                 rehashCapacity(state.elementDataSize);
                 index = (hash & 0x7FFFFFFF) % state.elementDataSize;
             }
-            int newIndex = (this.elementCount + this.droppedCount - 1);
+            int newIndex = (this.elementCount - 1 + this.droppedCount);
             state.elementK3[newIndex * 3] = universe;
             state.elementK3[(newIndex * 3) + 1] = time;
             state.elementK3[(newIndex * 3) + 2] = obj;
             state.values[newIndex] = payload;
-            int currentHashedIndex = state.elementHash[index];
-            if (currentHashedIndex != -1) {
-                state.elementNext[newIndex] = currentHashedIndex;
-            } else {
-                state.elementNext[newIndex] = -2; //special char to tag used values
-            }
+            state.elementNext[newIndex] = state.elementHash[index];
+            state.elementHash[index] = newIndex;
             //now the object is reachable to other thread everything should be ready
             state.elementHash[index] = newIndex;
+            return payload;
         } else {
-            state.values[entry] = payload;/*setValue*/
+            if (force) {
+                state.values[entry] = payload;/*setValue*/
+                return payload;
+            } else {
+                return state.values[entry];
+            }
         }
     }
 
@@ -165,7 +173,7 @@ public class ArrayMemoryCache implements KCache {
     public KCacheDirty[] dirties() {
         int nbDirties = 0;
         InternalState internalState = state;
-        for (int i = 0; i < internalState.values.length; i++) {
+        for (int i = 0; i < internalState.elementDataSize; i++) {
             if (internalState.values[i] != null) {
                 if (internalState.values[i].isDirty()) {
                     nbDirties++;
@@ -174,7 +182,7 @@ public class ArrayMemoryCache implements KCache {
         }
         KCacheDirty[] collectedDirties = new KCacheDirty[nbDirties];
         nbDirties = 0;
-        for (int i = 0; i < internalState.values.length; i++) {
+        for (int i = 0; i < internalState.elementDataSize; i++) {
             if (internalState.values[i] != null) {
                 if (internalState.values[i].isDirty()) {
                     KCacheDirty dirty = new KCacheDirty(new KContentKey(internalState.elementK3[i * 3], internalState.elementK3[(i * 3) + 1], internalState.elementK3[(i * 3) + 2]), internalState.values[i]);
@@ -204,7 +212,7 @@ public class ArrayMemoryCache implements KCache {
 
     @Override
     public int size() {
-        return elementCount;
+        return this.elementCount;
     }
 
     private void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
@@ -291,20 +299,20 @@ public class ArrayMemoryCache implements KCache {
 
     public void clear(KMetaModel metaModel) {
         InternalState internalState = state;
-        for (int i = 0; i < internalState.values.length; i++) {
+        for (int i = 0; i < internalState.elementDataSize; i++) {
             if (internalState.values[i] != null) {
                 internalState.values[i].free(metaModel);
             }
         }
         if (elementCount > 0) {
-            this.elementCount = 0;
-            this.droppedCount = 0;
             int initialCapacity = KConfig.CACHE_INIT_SIZE;
-            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity], new KMemoryElement[initialCapacity]);
+            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 3], new int[initialCapacity], new int[initialCapacity], new KMemoryElement[initialCapacity]);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate.elementNext[i] = -1;
                 newstate.elementHash[i] = -1;
             }
+            this.elementCount = 0;
+            this.droppedCount = 0;
             this.state = newstate;
             this.threshold = (int) (state.elementDataSize * loadFactor);
         }

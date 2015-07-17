@@ -226,9 +226,9 @@ public class MemoryManager implements KMemoryManager {
         universeTree.inc();
         universeTree.put(obj.universe(), obj.now());
         //save related objects to cache
-        _cache.put(obj.universe(), KConfig.NULL_LONG, obj.uuid(), timeTree);
-        _cache.put(KConfig.NULL_LONG, KConfig.NULL_LONG, obj.uuid(), universeTree);
-        _cache.put(obj.universe(), obj.now(), obj.uuid(), cacheEntry);
+        _cache.getOrPut(obj.universe(), KConfig.NULL_LONG, obj.uuid(), timeTree);
+        _cache.getOrPut(KConfig.NULL_LONG, KConfig.NULL_LONG, obj.uuid(), universeTree);
+        _cache.getOrPut(obj.universe(), obj.now(), obj.uuid(), cacheEntry);
     }
 
     @Override
@@ -282,7 +282,7 @@ public class MemoryManager implements KMemoryManager {
                                                         } else {
                                                             globalUniverseTree = _factory.newUniverseMap(KConfig.CACHE_INIT_SIZE, null);
                                                         }
-                                                        _cache.put(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, globalUniverseTree);
+                                                        _cache.getOrPut(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, globalUniverseTree);
                                                         long newUniIndex = Long.parseLong(uniIndexPayload);
                                                         long newObjIndex = Long.parseLong(objIndexPayload);
                                                         _universeKeyCalculator = new KeyCalculator(prefix, newUniIndex);
@@ -362,7 +362,7 @@ public class MemoryManager implements KMemoryManager {
                 return entry;
             } else {
                 KMemorySegment clonedEntry = entry.clone(metaClass);
-                _cache.put(universe, time, uuid, clonedEntry);
+                clonedEntry = (KMemorySegment) _cache.getOrPut(universe, time, uuid, clonedEntry);
                 if (!needUniverseCopy) {
                     timeTree.insert(time);
                 } else {
@@ -370,7 +370,7 @@ public class MemoryManager implements KMemoryManager {
                     newTemporalTree.insert(time);
                     newTemporalTree.inc();
                     timeTree.dec();
-                    _cache.put(universe, KConfig.NULL_LONG, uuid, newTemporalTree);
+                    _cache.getOrPut(universe, KConfig.NULL_LONG, uuid, newTemporalTree);
                     objectUniverseTree.put(universe, time);//insert this time as a divergence point for this object
                 }
                 entry.dec();
@@ -500,7 +500,7 @@ public class MemoryManager implements KMemoryManager {
                 KUniverseOrderMap cleanedTree = (KUniverseOrderMap) globalRootTree;
                 if (cleanedTree == null) {
                     cleanedTree = _factory.newUniverseMap(KConfig.CACHE_INIT_SIZE, null);
-                    _cache.put(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME, cleanedTree);
+                    cleanedTree = (KUniverseOrderMap) _cache.getOrPut(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME, cleanedTree);
                 }
                 long closestUniverse = ResolutionHelper.resolve_universe(globalUniverseOrder(), cleanedTree, newRoot.now(), newRoot.universe());
                 cleanedTree.put(newRoot.universe(), newRoot.now());
@@ -508,7 +508,7 @@ public class MemoryManager implements KMemoryManager {
                     KLongLongTree newTimeTree = _factory.newLongLongTree();
                     newTimeTree.insert(newRoot.now(), newRoot.uuid());
                     KContentKey universeTreeRootKey = KContentKey.createRootTimeTree(newRoot.universe());
-                    _cache.put(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, (KMemoryElement) newTimeTree);
+                    _cache.getOrPut(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, (KMemoryElement) newTimeTree);
                     if (callback != null) {
                         callback.on(null);
                     }
@@ -520,7 +520,7 @@ public class MemoryManager implements KMemoryManager {
                             KLongLongTree initializedTree = (KLongLongTree) resolvedRootTimeTree;
                             if (initializedTree == null) {
                                 initializedTree = _factory.newLongLongTree();
-                                _cache.put(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, (KMemoryElement) initializedTree);
+                                initializedTree = (KLongLongTree) _cache.getOrPut(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, (KMemoryElement) initializedTree);
                             }
                             initializedTree.insert(newRoot.now(), newRoot.uuid());
                             if (callback != null) {
@@ -555,7 +555,7 @@ public class MemoryManager implements KMemoryManager {
                             cachedObj = internal_unserialize(correspondingKey, strings[i]);
                             if (cachedObj != null) {
                                 //replace the cache value
-                                _cache.put(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, cachedObj);
+                                _cache.putAndReplace(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, cachedObj);
                             }
                         }
                     }
@@ -593,7 +593,7 @@ public class MemoryManager implements KMemoryManager {
                     if (strings[0] != null) {
                         KMemoryElement newObject = internal_unserialize(contentKey, strings[0]);
                         if (newObject != null) {
-                            _cache.put(contentKey.universe, contentKey.time, contentKey.obj, newObject);
+                            newObject = _cache.getOrPut(contentKey.universe, contentKey.time, contentKey.obj, newObject);
                         }
                         callback.on(newObject);
                     } else {
@@ -641,7 +641,7 @@ public class MemoryManager implements KMemoryManager {
                             KContentKey newObjKey = toLoadDbKeys[i];
                             KMemoryElement newObject = internal_unserialize(newObjKey, payloads[i]);
                             if (newObject != null) {
-                                _cache.put(newObjKey.universe, newObjKey.time, newObjKey.obj, newObject);
+                                newObject = _cache.getOrPut(newObjKey.universe, newObjKey.time, newObjKey.obj, newObject);
                                 int originIndex = originIndexes[i];
                                 result[originIndex] = newObject;
                             }

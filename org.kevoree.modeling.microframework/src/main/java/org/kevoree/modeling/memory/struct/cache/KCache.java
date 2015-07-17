@@ -9,7 +9,9 @@ public interface KCache {
 
     KMemoryElement get(long universe, long time, long obj);
 
-    void put(long universe, long time, long obj, KMemoryElement payload);
+    void putAndReplace(long universe, long time, long obj, KMemoryElement payload);
+
+    KMemoryElement getOrPut(long universe, long time, long obj, KMemoryElement payload);
 
     KCacheDirty[] dirties();
 

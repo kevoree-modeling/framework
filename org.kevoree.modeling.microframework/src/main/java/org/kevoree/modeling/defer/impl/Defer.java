@@ -9,13 +9,13 @@ import java.util.ArrayList;
 
 public class Defer implements KDefer {
 
-    private boolean _isDone = false;
-    protected boolean _isReady = false;
-    private int _nbRecResult = 0;
-    private int _nbExpectedResult = 0;
-    private ArrayList<KDefer> _nextTasks = null;
-    private ArrayStringMap<Object> _results = null;
-    private KCallback _thenCB = null;
+    private volatile boolean _isDone = false;
+    protected volatile boolean _isReady = false;
+    private volatile int _nbRecResult = 0;
+    private volatile int _nbExpectedResult = 0;
+    private volatile ArrayList<KDefer> _nextTasks = null;
+    private volatile ArrayStringMap<Object> _results = null;
+    private volatile KCallback _thenCB = null;
 
     public Defer() {
         _results = new ArrayStringMap<Object>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);

@@ -3,6 +3,7 @@ package org.kevoree.modeling.memory.struct;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.struct.cache.KCache;
+import org.kevoree.modeling.memory.struct.cache.impl.ArrayMemoryCache;
 import org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayUniverseOrderMap;
@@ -62,6 +63,7 @@ public class HeapMemoryFactory implements KMemoryFactory {
 
     @Override
     public KCache newCache() {
+       // return new ArrayMemoryCache();
         return new HashMemoryCache();
     }
 

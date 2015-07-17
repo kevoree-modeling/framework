@@ -55,13 +55,15 @@ public abstract class BaseKCacheTest {
 
             }
         };
-        cache.put(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, temp);
+        cache.putAndReplace(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, temp);
         Assert.assertEquals(temp, cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG));
-        cache.put(0, KConfig.NULL_LONG, KConfig.NULL_LONG, temp);
+        cache.putAndReplace(0, KConfig.NULL_LONG, KConfig.NULL_LONG, temp);
         Assert.assertEquals(temp, cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG));
         Assert.assertEquals(temp, cache.get(0, KConfig.NULL_LONG, KConfig.NULL_LONG));
-        cache.put(KConfig.NULL_LONG, KConfig.NULL_LONG, 2, temp);
+        cache.putAndReplace(KConfig.NULL_LONG, KConfig.NULL_LONG, 2, temp);
         Assert.assertEquals(temp, cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, 2));
+
+
     }
 }
 
