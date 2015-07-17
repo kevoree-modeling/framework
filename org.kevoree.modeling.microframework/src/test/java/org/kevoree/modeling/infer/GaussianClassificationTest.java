@@ -32,7 +32,7 @@ public class GaussianClassificationTest {
         metaEnumIrisType.addLiteral("IRISVIRGINICA");
 
 
-        metaClassIris.addAttribute("type", KPrimitiveTypes.DOUBLE);
+        metaClassIris.addAttribute("type", metaEnumIrisType);
 
         KMetaClass inferGaussian = metaModel.addInferMetaClass("GaussianProfile", new GaussianClassificationAlg());
         inferGaussian.addDependency("Iris", metaClassIris, null);

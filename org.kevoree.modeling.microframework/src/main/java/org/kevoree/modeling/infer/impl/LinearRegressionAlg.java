@@ -41,9 +41,6 @@ public class LinearRegressionAlg implements KInferAlg {
                 state.add(origin.metaClass().inputs().length,error);
             }
         }
-
-
-
     }
 
     private double estimate(double[] training, Array1D state){
