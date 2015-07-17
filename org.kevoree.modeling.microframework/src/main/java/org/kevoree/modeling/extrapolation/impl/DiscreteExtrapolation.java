@@ -7,6 +7,7 @@ import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.meta.KLiteral;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaEnum;
+import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 
 public class DiscreteExtrapolation implements Extrapolation {
@@ -51,9 +52,92 @@ public class DiscreteExtrapolation implements Extrapolation {
                     }
                 }
             } else {
-                internalPayload.set(attribute.index(), payload, current.metaClass());
+                if (payload == null) {
+                    internalPayload.set(attribute.index(), null, current.metaClass());
+                } else {
+                    internalPayload.set(attribute.index(), convert(attribute, payload), current.metaClass());
+                }
             }
         }
+    }
+
+    /**
+     * @native ts
+     * return payload;
+     */
+    private final Object convert(KMetaAttribute attribute, Object payload) {
+        if (attribute.attributeType() == KPrimitiveTypes.INT) {
+            if (payload instanceof Integer) {
+                return payload;
+            } else {
+                try {
+                    return Integer.parseInt(payload.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (attribute.attributeType() == KPrimitiveTypes.FLOAT) {
+            if (payload instanceof Float) {
+                return payload;
+            } else {
+                try {
+                    return Float.parseFloat(payload.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (attribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+            if (payload instanceof Double) {
+                return payload;
+            } else {
+                try {
+                    return Double.parseDouble(payload.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (attribute.attributeType() == KPrimitiveTypes.LONG) {
+            if (payload instanceof Long) {
+                return payload;
+            } else {
+                try {
+                    return Long.parseLong(payload.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (attribute.attributeType() == KPrimitiveTypes.SHORT) {
+            if (payload instanceof Short) {
+                return payload;
+            } else {
+                try {
+                    return Short.parseShort(payload.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (attribute.attributeType() == KPrimitiveTypes.STRING) {
+            if (payload instanceof String) {
+                return payload;
+            } else {
+                try {
+                    return payload.toString();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (attribute.attributeType() == KPrimitiveTypes.BOOL) {
+            if (payload instanceof Boolean) {
+                return payload;
+            } else {
+                try {
+                    return Boolean.parseBoolean(payload.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return payload;
     }
 
 }

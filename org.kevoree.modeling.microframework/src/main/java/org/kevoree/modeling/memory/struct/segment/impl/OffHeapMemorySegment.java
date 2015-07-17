@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaReference;
+import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
 
 import java.io.UnsupportedEncodingException;
@@ -494,21 +495,17 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final String serialize(KMetaModel metaModel) {
+    public final String toJSON(KMetaModel metaModel) {
         KMetaClass metaClass = metaModel.metaClass(metaClassIndex());
-
         StringBuilder builder = new StringBuilder();
         builder.append("{");
-
         boolean isFirst = true;
         KMeta[] metaElements = metaClass.metaElements();
         if (_start_address != 0 && metaElements != null) {
             for (int i = 0; i < metaElements.length; i++) {
                 KMeta meta = metaElements[i];
-
                 if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                     MetaAttribute metaAttribute = (MetaAttribute) meta;
-
                     if (metaAttribute.attributeType() != KPrimitiveTypes.CONTINUOUS) {
                         Object o = get(meta.index(), metaClass);
                         if (o != null) {
@@ -564,6 +561,123 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                                 builder.append(",");
                             }
                             builder.append(castedArr[j]);
+                        }
+                        builder.append("]");
+                    }
+                }
+            }
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
+    @Override
+    public String serialize(KMetaModel metaModel) {
+        KMetaClass metaClass = metaModel.metaClass(metaClassIndex());
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        boolean isFirst = true;
+        KMeta[] metaElements = metaClass.metaElements();
+        if (_start_address != 0 && metaElements != null) {
+            for (int i = 0; i < metaElements.length; i++) {
+                KMeta meta = metaElements[i];
+                if (metaElements[i].metaType() == MetaType.ATTRIBUTE) {
+                    KMetaAttribute metaAttribute = (KMetaAttribute) metaElements[i];
+                    Object o = get(meta.index(), metaClass);
+                    if (o != null) {
+                        if (isFirst) {
+                            builder.append("\"");
+                            isFirst = false;
+                        } else {
+                            builder.append(",\"");
+                        }
+                        builder.append(metaElements[i].metaName());
+                        builder.append("\":");
+                        if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                            builder.append("\"");
+                            builder.append(JsonString.encode((String) o));
+                            builder.append("\"");
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
+                            //TODO
+                            builder.append(o.toString());
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
+                            builder.append("\"");
+                            Base64.encodeLongToBuffer((long) o, builder);
+                            builder.append("\"");
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                            builder.append("[");
+                            double[] castedArr = (double[]) o;
+                            for (int j = 0; j < castedArr.length; j++) {
+                                if (j != 0) {
+                                    builder.append(",");
+                                }
+                                builder.append("\"");
+                                Base64.encodeDoubleToBuffer(castedArr[j], builder);
+                                builder.append("\"");
+                            }
+                            builder.append("]");
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
+                            if ((boolean) o) {
+                                builder.append("1");
+                            } else {
+                                builder.append("0");
+                            }
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+                            builder.append("\"");
+                            Base64.encodeDoubleToBuffer((double) o, builder);
+                            builder.append("\"");
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
+                            //TODO
+                            builder.append(o.toString());
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
+                            builder.append("\"");
+                            Base64.encodeIntToBuffer((int) o, builder);
+                            builder.append("\"");
+                        } else if (metaAttribute.attributeType().isEnum()) {
+                            Base64.encodeIntToBuffer((int) o, builder);
+                        }
+                    }
+                } else if (metaElements[i].metaType() == MetaType.REFERENCE) {
+                    long[] o = getRef(meta.index(), metaClass);
+                    if (o != null) {
+                        if (isFirst) {
+                            builder.append("\"");
+                            isFirst = false;
+                        } else {
+                            builder.append(",\"");
+                        }
+                        builder.append(metaElements[i].metaName());
+                        builder.append("\":");
+                        builder.append("[");
+                        for (int j = 0; j < o.length; j++) {
+                            if (j != 0) {
+                                builder.append(",");
+                            }
+                            builder.append("\"");
+                            Base64.encodeLongToBuffer(o[j], builder);
+                            builder.append("\"");
+                        }
+                        builder.append("]");
+                    }
+                } else if (metaElements[i].metaType() == MetaType.DEPENDENCIES || metaElements[i].metaType() == MetaType.INPUT || metaElements[i].metaType() == MetaType.OUTPUT) {
+                    double[] o = getInfer(meta.index(), metaClass);
+                    if (o != null) {
+                        if (isFirst) {
+                            builder.append("\"");
+                            isFirst = false;
+                        } else {
+                            builder.append(",\"");
+                        }
+                        builder.append(metaElements[i].metaName());
+                        builder.append("\":");
+                        builder.append("[");
+                        for (int j = 0; j < o.length; j++) {
+                            if (j != 0) {
+                                builder.append(",");
+                            }
+                            builder.append("\"");
+                            Base64.encodeDoubleToBuffer(o[j], builder);
+                            builder.append("\"");
                         }
                         builder.append("]");
                     }

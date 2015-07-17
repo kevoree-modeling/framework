@@ -7,6 +7,7 @@ import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.meta.*;
+import org.kevoree.modeling.util.maths.Base64;
 
 public class HeapMemorySegment implements KMemorySegment {
 
@@ -36,16 +37,6 @@ public class HeapMemorySegment implements KMemorySegment {
         return _dirty;
     }
 
-    /**
-     * @native ts
-     * var builder = {};
-     * var metaClass = metaModel.metaClass(this._metaClassIndex);
-     * var metaElements = metaClass.metaElements();
-     * for (var i = 0; i < this.raw.length; i++) {
-     * if(this.raw[i] != undefined && this.raw[i] != null){ builder[metaElements[i].metaName()] = this.raw[i]; }
-     * }
-     * return JSON.stringify(builder);
-     */
     @Override
     public String serialize(KMetaModel metaModel) {
         KMetaClass metaClass = metaModel.metaClass(_metaClassIndex);
@@ -65,55 +56,75 @@ public class HeapMemorySegment implements KMemorySegment {
                     }
                     builder.append(metaElements[i].metaName());
                     builder.append("\":");
-
-                    /*
-                    if(metaElements[i].metaType() == MetaType.ATTRIBUTE){
-
-                    } else if(metaElements[i].metaType() == MetaType.REFERENCE){
-
-                    } else if(metaElements[i].metaType() == MetaType.ENUM){
-
-                    } else if(metaElements[i].metaType() == MetaType.DEPENDENCIES || metaElements[i].metaType() == MetaType.INPUT || metaElements[i].metaType() == MetaType.OUTPUT){
-
-                    }
-
-
-
-
-
-                    if(metaElements[i] == KPrimitiveTypes.STRING){
-
-                  //  } else if(metaElements[i].metaType() == KPrimitiveTypes.STRING){
-
-                    }*/
-
-
-                    if (o instanceof String) {
-                        builder.append("\"");
-                        builder.append(JsonString.encode((String) o));
-                        builder.append("\"");
-                    } else if (o instanceof double[]) {
-                        builder.append("[");
-                        double[] castedArr = (double[]) o;
-                        for (int j = 0; j < castedArr.length; j++) {
-                            if (j != 0) {
-                                builder.append(",");
+                    if (metaElements[i].metaType() == MetaType.ATTRIBUTE) {
+                        KMetaAttribute metaAttribute = (KMetaAttribute) metaElements[i];
+                        if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                            builder.append("\"");
+                            builder.append(JsonString.encode((String) o));
+                            builder.append("\"");
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
+                            //TODO
+                            builder.append(o.toString());
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
+                            builder.append("\"");
+                            Base64.encodeLongToBuffer((long) o, builder);
+                            builder.append("\"");
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                            builder.append("[");
+                            double[] castedArr = (double[]) o;
+                            for (int j = 0; j < castedArr.length; j++) {
+                                if (j != 0) {
+                                    builder.append(",");
+                                }
+                                builder.append("\"");
+                                Base64.encodeDoubleToBuffer(castedArr[j], builder);
+                                builder.append("\"");
                             }
-                            builder.append(castedArr[j]);
+                            builder.append("]");
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
+                            if ((boolean) o) {
+                                builder.append("1");
+                            } else {
+                                builder.append("0");
+                            }
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+                            builder.append("\"");
+                            Base64.encodeDoubleToBuffer((double) o, builder);
+                            builder.append("\"");
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
+                            //TODO
+                            builder.append(o.toString());
+                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
+                            builder.append("\"");
+                            Base64.encodeIntToBuffer((int) o, builder);
+                            builder.append("\"");
+                        } else if (metaAttribute.attributeType().isEnum()) {
+                            Base64.encodeIntToBuffer((int) o, builder);
                         }
-                        builder.append("]");
-                    } else if (o instanceof long[]) {
+                    } else if (metaElements[i].metaType() == MetaType.REFERENCE) {
                         builder.append("[");
                         long[] castedArr = (long[]) o;
                         for (int j = 0; j < castedArr.length; j++) {
                             if (j != 0) {
                                 builder.append(",");
                             }
-                            builder.append(castedArr[j]);
+                            builder.append("\"");
+                            Base64.encodeLongToBuffer(castedArr[j], builder);
+                            builder.append("\"");
                         }
                         builder.append("]");
-                    } else {
-                        builder.append(o.toString());
+                    } else if (metaElements[i].metaType() == MetaType.DEPENDENCIES || metaElements[i].metaType() == MetaType.INPUT || metaElements[i].metaType() == MetaType.OUTPUT) {
+                        builder.append("[");
+                        double[] castedArr = (double[]) o;
+                        for (int j = 0; j < castedArr.length; j++) {
+                            if (j != 0) {
+                                builder.append(",");
+                            }
+                            builder.append("\"");
+                            Base64.encodeDoubleToBuffer(castedArr[j], builder);
+                            builder.append("\"");
+                        }
+                        builder.append("]");
                     }
                 }
             }
@@ -156,16 +167,6 @@ public class HeapMemorySegment implements KMemorySegment {
         _dirty = true;
     }
 
-    /**
-     * @native ts
-     * var rawElem = JSON.parse(payload);
-     * var metaClass = metaModel.metaClass(this._metaClassIndex);
-     * this.raw = [];
-     * for (var key in rawElem) {
-     * var elem = metaClass.metaByName(key);
-     * if(elem != null && elem != undefined){ this.raw[elem.index()] = rawElem[key]; }
-     * }
-     */
     @Override
     public void init(String payload, KMetaModel metaModel) {
         if (payload != null) {
@@ -174,8 +175,8 @@ public class HeapMemorySegment implements KMemorySegment {
             KMetaClass metaClass = metaModel.metaClass(_metaClassIndex);
             String[] metaKeys = objectReader.keys();
             for (int i = 0; i < metaKeys.length; i++) {
-                KMeta metaElement = metaClass.metaByName(metaKeys[i]);
                 Object insideContent = objectReader.get(metaKeys[i]);
+                KMeta metaElement = metaClass.metaByName(metaKeys[i]);
                 if (insideContent != null) {
                     if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
                         KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
@@ -183,23 +184,29 @@ public class HeapMemorySegment implements KMemorySegment {
                         if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
                             converted = JsonString.unescape((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                            converted = Long.parseLong((String) insideContent);
+                            converted = Base64.decodeToLong((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                            converted = Integer.parseInt((String) insideContent);
+                            converted = Base64.decodeToInt((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                            converted = Boolean.parseBoolean((String) insideContent);
+                            if (insideContent.equals("1")) {
+                                converted = true;
+                            } else {
+                                converted = false;
+                            }
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
+                            //TODO replace by Base64
                             converted = Short.parseShort((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                            converted = Double.parseDouble((String) insideContent);
+                            converted = Base64.decodeToDouble((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
+                            //TODO replace by Base64
                             converted = Float.parseFloat((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
                             String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
                             double[] convertedRaw = new double[plainRawSet.length];
                             for (int l = 0; l < plainRawSet.length; l++) {
                                 try {
-                                    convertedRaw[l] = Double.parseDouble(plainRawSet[l]);
+                                    convertedRaw[l] = Base64.decodeToDouble(plainRawSet[l]);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -207,13 +214,29 @@ public class HeapMemorySegment implements KMemorySegment {
                             converted = convertedRaw;
                         }
                         raw[metaAttribute.index()] = converted;
-                    } else if (metaElement != null && metaElement instanceof KMetaReference) {
+                    }
+                    if (metaElement != null && metaElement.metaType().equals(MetaType.REFERENCE)) {
                         try {
                             String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
                             long[] convertedRaw = new long[plainRawSet.length];
                             for (int l = 0; l < plainRawSet.length; l++) {
                                 try {
-                                    convertedRaw[l] = Long.parseLong(plainRawSet[l]);
+                                    convertedRaw[l] = Base64.decodeToLong(plainRawSet[l]);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            raw[metaElement.index()] = convertedRaw;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else if (metaElement != null && (metaElement.metaType().equals(MetaType.DEPENDENCIES) || metaElement.metaType().equals(MetaType.INPUT) || metaElement.metaType().equals(MetaType.OUTPUT))) {
+                        try {
+                            String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
+                            double[] convertedRaw = new double[plainRawSet.length];
+                            for (int l = 0; l < plainRawSet.length; l++) {
+                                try {
+                                    convertedRaw[l] = Base64.decodeToDouble(plainRawSet[l]);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -225,7 +248,6 @@ public class HeapMemorySegment implements KMemorySegment {
                     }
                 }
             }
-
         }
     }
 
@@ -474,6 +496,69 @@ public class HeapMemorySegment implements KMemorySegment {
             clonedEntry._metaClassIndex = _metaClassIndex;
             return clonedEntry;
         }
+    }
+
+    /**
+     * @native ts
+     * var builder = {};
+     * var metaClass = metaModel.metaClass(this._metaClassIndex);
+     * var metaElements = metaClass.metaElements();
+     * for (var i = 0; i < this.raw.length; i++) {
+     * if(this.raw[i] != undefined && this.raw[i] != null){ builder[metaElements[i].metaName()] = this.raw[i]; }
+     * }
+     * return JSON.stringify(builder);
+     */
+    @Override
+    public String toJSON(KMetaModel metaModel) {
+        KMetaClass metaClass = metaModel.metaClass(_metaClassIndex);
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        boolean isFirst = true;
+        KMeta[] metaElements = metaClass.metaElements();
+        if (raw != null && metaElements != null) {
+            for (int i = 0; i < raw.length && i < metaElements.length; i++) {
+                Object o = raw[i];
+                if (o != null) {
+                    if (isFirst) {
+                        builder.append("\"");
+                        isFirst = false;
+                    } else {
+                        builder.append(",\"");
+                    }
+                    builder.append(metaElements[i].metaName());
+                    builder.append("\":");
+                    if (o instanceof String) {
+                        builder.append("\"");
+                        builder.append(JsonString.encode((String) o));
+                        builder.append("\"");
+                    } else if (o instanceof double[]) {
+                        builder.append("[");
+                        double[] castedArr = (double[]) o;
+                        for (int j = 0; j < castedArr.length; j++) {
+                            if (j != 0) {
+                                builder.append(",");
+                            }
+                            builder.append(castedArr[j]);
+                        }
+                        builder.append("]");
+                    } else if (o instanceof long[]) {
+                        builder.append("[");
+                        long[] castedArr = (long[]) o;
+                        for (int j = 0; j < castedArr.length; j++) {
+                            if (j != 0) {
+                                builder.append(",");
+                            }
+                            builder.append(castedArr[j]);
+                        }
+                        builder.append("]");
+                    } else {
+                        builder.append(o.toString());
+                    }
+                }
+            }
+        }
+        builder.append("}");
+        return builder.toString();
     }
 
 }

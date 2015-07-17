@@ -218,7 +218,7 @@ public class GaussianClassificationTest {
                     irisInstance.setByName("sepalWidth", irisdataset[i + 1]);
                     irisInstance.setByName("petalLength", irisdataset[i + 2]);
                     irisInstance.setByName("petalWidth", irisdataset[i + 3]);
-                    irisInstance.setByName("type", ((KMetaEnum)mm.metaTypeByName("IrisType")).literal((int)irisdataset[i + 4]));
+                    irisInstance.setByName("type", (mm.metaTypeByName("IrisType")).literal((int)irisdataset[i + 4]));
 
                     Object[] output = new Object[1];
                     output[0] = irisInstance.getByName("type");
@@ -260,9 +260,9 @@ public class GaussianClassificationTest {
                     @Override
                     public void on(Object[][] objects) {
                         //to replace by iris type later
-                        Assert.assertTrue(objects[0][0]==((KMetaEnum)mm.metaTypeByName("IrisType")).literalByName("IRISSETOSA"));
-                        Assert.assertTrue(objects[1][0] == ((KMetaEnum) mm.metaTypeByName("IrisType")).literalByName("IRISVERSICOLOUR"));
-                        Assert.assertTrue(objects[2][0] == ((KMetaEnum) mm.metaTypeByName("IrisType")).literalByName("IRISVIRGINICA"));
+                        Assert.assertTrue(objects[0][0]==(mm.metaTypeByName("IrisType")).literalByName("IRISSETOSA"));
+                        Assert.assertTrue(objects[1][0] == ( mm.metaTypeByName("IrisType")).literalByName("IRISVERSICOLOUR"));
+                        Assert.assertTrue(objects[2][0] == (mm.metaTypeByName("IrisType")).literalByName("IRISVIRGINICA"));
                     }
                 });
             }

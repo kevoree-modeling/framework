@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.struct.segment;
 
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.meta.KMetaClass;
+import org.kevoree.modeling.meta.KMetaModel;
 
 public interface KMemorySegment extends KMemoryElement {
 
@@ -43,5 +44,7 @@ public interface KMemorySegment extends KMemoryElement {
     void initMetaClass(KMetaClass metaClass);
 
     int metaClassIndex();
+
+    String toJSON(KMetaModel metaModel);
 
 }

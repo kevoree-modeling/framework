@@ -442,7 +442,7 @@ public abstract class AbstractKObject implements KObject {
         KMemorySegment raw = _manager.segment(_universe, _time, _uuid, true, _metaClass, null);
         if (raw != null) {
             builder.append(",\"data\":");
-            builder.append(raw.serialize(_manager.model().metaModel()));
+            builder.append(raw.toJSON(_manager.model().metaModel()));
         }
         builder.append("}");
         return builder.toString();
