@@ -56,12 +56,9 @@ public abstract class AbstractArrayTree {
         }
         boolean[] new_back_colors = new boolean[newCapacity];
         if (state != null && state._back_colors != null) {
-            for (int i = 0; i < newCapacity; i++) {
-                if (i < _size) {
-                    new_back_colors[i] = state._back_colors[i];
-                } else {
-                    new_back_colors[i] = false;
-                }
+            System.arraycopy(state._back_colors, 0, new_back_colors, 0, _size);
+            for (int i = _size; i < newCapacity; i++) {
+                new_back_colors[i] = false;
             }
         }
         int[] new_back_meta = new int[newCapacity * META_SIZE];
@@ -346,18 +343,19 @@ public abstract class AbstractArrayTree {
     }
 
     public final String serialize(KMetaModel metaModel) {
-        StringBuilder builder = new StringBuilder();
         if (_root_index == -1) {
-            builder.append("0");
-        } else {
-            Base64.encodeIntToBuffer(_size, builder);
-            builder.append(',');
-            Base64.encodeIntToBuffer(_root_index, builder);
-            for (int i = 0; i < _size; i++) {
-                int parentIndex = parent(i);
+            return "0";
+        }
+        int savedRoot = _root_index;
+        InternalState internalState = state;
+        StringBuilder builder = new StringBuilder();
+        int treeSize = 0;
+        for (int i = 0; i < internalState._back_meta.length / META_SIZE; i++) {
+            int parentIndex = internalState._back_meta[(i * META_SIZE) + 2];
+            if (parentIndex != -1 || i == savedRoot) {
                 boolean isOnLeft = false;
                 if (parentIndex != -1) {
-                    isOnLeft = left(parentIndex) == i;
+                    isOnLeft = internalState._back_meta[parentIndex * META_SIZE] == i;
                 }
                 if (!color(i)) {
                     if (isOnLeft) {
@@ -372,18 +370,19 @@ public abstract class AbstractArrayTree {
                         builder.append(RED_RIGHT);
                     }
                 }
-                Base64.encodeLongToBuffer(key(i), builder);
+                Base64.encodeLongToBuffer(internalState._back_kv[i * kvSize], builder);
                 builder.append(',');
                 if (parentIndex != -1) {
                     Base64.encodeIntToBuffer(parentIndex, builder);
                 }
                 if (kvSize > 1) {
                     builder.append(',');
-                    Base64.encodeLongToBuffer(value(i), builder);
+                    Base64.encodeLongToBuffer(internalState._back_kv[(i * kvSize) + 1], builder);
                 }
+                treeSize++;
             }
         }
-        return builder.toString();
+        return Base64.encodeInt(treeSize) + "," + Base64.encodeInt(savedRoot) + builder.toString();
     }
 
     public final void init(String payload, KMetaModel metaModel) {
