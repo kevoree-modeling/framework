@@ -45,7 +45,7 @@ public class BaseKMemoryManagerTest {
                             public void on(KObject[] kObjects) {
                                 for (int i = 0; i < kObjects.length; i++) {
                                     long lastVal = times[i] + 9;
-                                    Assert.assertEquals("{\"universe\":0,\"time\":" + times[i] + ",\"uuid\":1,\"data\":{\"name\":\"Sensor#1\",\"value\":\"" + Base64.encodeDouble(lastVal) + "\"}}", kObjects[i].toJSON());
+                                    Assert.assertEquals("{\"universe\":0,\"time\":" + times[i] + ",\"uuid\":1,\"data\":{\"name\":\"Sensor#1\",\"value\":" + (double) lastVal + "}}", kObjects[i].toJSON());
                                 }
                             }
                         });
@@ -56,7 +56,7 @@ public class BaseKMemoryManagerTest {
                             public void on(KObject[] kObjects) {
                                 for (int i = 0; i < kObjects.length; i++) {
                                     long lastVal = times[i] + 9;
-                                    Assert.assertEquals("{\"universe\":0,\"time\":" + times[i] + ",\"uuid\":1,\"data\":{\"name\":\"Sensor#1\",\"value\":\"" + Base64.encodeDouble(lastVal) + "\"}}", kObjects[i].toJSON());
+                                    Assert.assertEquals("{\"universe\":0,\"time\":" + times[i] + ",\"uuid\":1,\"data\":{\"name\":\"Sensor#1\",\"value\":" + (double) lastVal + "}}", kObjects[i].toJSON());
                                 }
                             }
                         });
