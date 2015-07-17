@@ -4,7 +4,6 @@ package org.kevoree.modeling.util.maths;
  * @native ts
  * private static encodeArray = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'];
  * private static decodeArray = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9, "K":10, "L":11, "M":12, "N":13, "O":14, "P":15, "Q":16, "R":17, "S":18, "T":19, "U":20, "V":21, "W":22, "X":23, "Y":24, "Z":25, "a":26, "b":27, "c":28, "d":29, "e":30, "f":31, "g":32, "h":33, "i":34, "j":35, "k":36, "l":37, "m":38, "n":39, "o":40, "p":41, "q":42, "r":43, "s":44, "t":45, "u":46, "v":47, "w":48, "x":49, "y":50, "z":51, "0":52, "1":53, "2":54, "3":55, "4":56, "5":57, "6":58, "7":59, "8":60, "9":61, "+":62, "/":63};
- * 
  * public static encodeLong(l:number) {
  * var result = "";
  * var tmp = l;
@@ -19,7 +18,6 @@ package org.kevoree.modeling.util.maths;
  * result += Base64.encodeArray[(tmp & 0x1F)*2 + (l<0?1:0)];
  * return result;
  * }
- * 
  * public static encodeLongToBuffer(l:number, buffer:java.lang.StringBuilder) {
  * var empty=true;
  * var tmp = l;
@@ -34,9 +32,6 @@ package org.kevoree.modeling.util.maths;
  * }
  * buffer.append(Base64.encodeArray[(tmp & 0x1F)*2 + (l<0?1:0)]);
  * }
- * 
- * 
- * 
  * public static encodeInt(l:number) {
  * var result = "";
  * var tmp = l;
@@ -51,7 +46,6 @@ package org.kevoree.modeling.util.maths;
  * result += Base64.encodeArray[(tmp & 0x1F)*2 + (l<0?1:0)];
  * return result;
  * }
- * 
  * public static encodeIntToBuffer(l:number, buffer:java.lang.StringBuilder) {
  * var empty=true;
  * var tmp = l;
@@ -66,11 +60,9 @@ package org.kevoree.modeling.util.maths;
  * }
  * buffer.append(Base64.encodeArray[(tmp & 0x1F)*2 + (l<0?1:0)]);
  * }
- * 
  * public static decodeToLong(s) {
  * return Base64.decodeToLongWithBounds(s, 0, s.length);
  * }
- * 
  * public static decodeToLongWithBounds(s:string, offsetBegin:number, offsetEnd:number) {
  * var result = 0;
  * result += (Base64.decodeArray[s.charAt((offsetEnd - 1))] & 0xFF) / 2;
@@ -82,11 +74,9 @@ package org.kevoree.modeling.util.maths;
  * }
  * return result;
  * }
- * 
  * public static decodeToInt(s) {
  * return Base64.decodeToIntWithBounds(s, 0, s.length);
  * }
- * 
  * public static decodeToIntWithBounds(s:string, offsetBegin:number, offsetEnd:number) {
  * var result = 0;
  * result += (Base64.decodeArray[s.charAt((offsetEnd - 1))] & 0xFF) / 2;
@@ -98,7 +88,6 @@ package org.kevoree.modeling.util.maths;
  * }
  * return result;
  * }
- * 
  * public static encodeDouble(d : number) {
  * var result = "";
  * var float = new Float64Array(1);
@@ -118,11 +107,8 @@ package org.kevoree.modeling.util.maths;
  * result += Base64.encodeArray[(bytes[2] & 0x3)<<4 | bytes[1] >> 4];
  * result += Base64.encodeArray[(bytes[1] & 0x0F)<<2 | bytes[0] >> 6];
  * result += Base64.encodeArray[(bytes[0] & 0x3F)];
- * 
  * return result;
  * }
- * 
- * 
  * public static encodeDoubleToBuffer(d : number, buffer : java.lang.StringBuilder) {
  * var float = new Float64Array(1);
  * var bytes = new Uint8Array(float.buffer);
@@ -142,12 +128,9 @@ package org.kevoree.modeling.util.maths;
  * buffer.append(Base64.encodeArray[(bytes[1] & 0x0F)<<2 | bytes[0] >> 6]);
  * buffer.append(Base64.encodeArray[(bytes[0] & 0x3F)]);
  * }
- * 
- * 
  * public static decodeToDouble(s:string) {
  * return Base64.decodeToDoubleWithBounds(s, 0, s.length);
  * }
- * 
  * public static decodeToDoubleWithBounds(s : string, offsetBegin : number, offsetEnd : number) {
  * var signAndExp = ((Base64.decodeArray[s.charAt(0)] & 0xFF) * Math.pow(2, 6)) + (Base64.decodeArray[s.charAt(1)] & 0xFF);
  * var sign = ((signAndExp & 0x800) != 0 ? -1 : 1);
@@ -159,8 +142,6 @@ package org.kevoree.modeling.util.maths;
  * }
  * return (exp != 0) ? sign * Math.pow(2, exp - 1023) * (1 + (mantissaBits / Math.pow(2, 52))) : sign * Math.pow(2, -1022) * (0 + (mantissaBits / Math.pow(2, 52)));
  * }
- * 
- * 
  * public static encodeBoolArray(boolArr : Array<boolean>) {
  * var result = "";
  * var tmpVal = 0;
@@ -173,7 +154,6 @@ package org.kevoree.modeling.util.maths;
  * }
  * return result;
  * }
- * 
  * public static encodeBoolArrayToBuffer(boolArr : Array<boolean>, buffer : java.lang.StringBuilder) {
  * var tmpVal = 0;
  * for (var i = 0; i < boolArr.length; i++) {
@@ -184,11 +164,9 @@ package org.kevoree.modeling.util.maths;
  * }
  * }
  * }
- * 
  * public static decodeBoolArray(s : string, arraySize : number) {
  * return Base64.decodeToBoolArrayWithBounds(s, 0, s.length, arraySize);
  * }
- * 
  * public static decodeToBoolArrayWithBounds(s : string, offsetBegin : number, offsetEnd : number, arraySize : number) {
  * var resultTmp = [];
  * for (var i = 0; i < (offsetEnd - offsetBegin); i++) {
@@ -369,23 +347,16 @@ public class Base64 {
         return resultTmp;
     }
 
-
     public static String encodeDouble(double d) {
         String result = "";
         long l = Double.doubleToLongBits(d);
-
         //encode sign + exp
         result += Base64.encodeArray[(int) (l >> 58) & 0x3F];
         result += Base64.encodeArray[(int) (l >> 52) & 0x3F];
-
         //encode mantisse
-        //if (((l >> 48) & 0x0F) != 0) {
         result += Base64.encodeArray[(int) (l >> 48) & 0x0F];
-        //}
         for (int i = 42; i >= 0; i -= 6) {
-            //if (((l >> i) & 0x3F) != 0) {
             result += Base64.encodeArray[(int) (l >> i) & 0x3F];
-            //}
         }
         return result;
     }
@@ -396,13 +367,9 @@ public class Base64 {
         buffer.append(Base64.encodeArray[(int) (l >> 58) & 0x3F]);
         buffer.append(Base64.encodeArray[(int) (l >> 52) & 0x3F]);
         //encode mantisse
-        //if (((l >> i) & 0x0F) != 0) {
         buffer.append(Base64.encodeArray[(int) (l >> 48) & 0x0F]);
-        //}
         for (int i = 42; i >= 0; i -= 6) {
-            //if (((l >> i) & 0x3F) != 0) {
             buffer.append(Base64.encodeArray[(int) (l >> i) & 0x3F]);
-            //}
         }
     }
 
@@ -422,15 +389,7 @@ public class Base64 {
         return Double.longBitsToDouble(result);
     }
 
-
-    public static void main(String[] args) {
-        System.out.println("DoubleMIN: " + printBits(Double.doubleToLongBits(Double.MIN_VALUE)));
-        System.out.println("DoubleMAX: " + printBits(Double.doubleToLongBits(Double.MAX_VALUE)));
-        System.out.println("-DoubleMIN: " + printBits(Double.doubleToLongBits(-Double.MIN_VALUE)));
-        System.out.println("-DoubleMAX: " + printBits(Double.doubleToLongBits(-Double.MAX_VALUE)));
-        System.out.println(Double.toHexString(Double.MAX_VALUE) + "  " + Double.toHexString(Double.MIN_VALUE));
-    }
-
+    /*
     private static String printBits(long val) {
         String toString = Long.toBinaryString(val);
         String res = "";
@@ -439,18 +398,7 @@ public class Base64 {
             res += "0";
         }
         return res + toString;
-    }
-/*
+    }*/
 
-    private static String printBits(int val) {
-        String toString = Long.toBinaryString(val);
-        String res = "";
-
-        for (int i = 0; i < 32 - toString.length(); i++) {
-            res += "0";
-        }
-        return res + toString;
-    }
-*/
 
 }

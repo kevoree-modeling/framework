@@ -18,18 +18,18 @@ public abstract class BaseKLongLongHashMapTest {
         }
 
         Assert.assertEquals(map.size(), SIZE);
-       for (long i = 0; i < SIZE; i++) {
-           Assert.assertEquals(i, map.get(i));
-       }
+        for (long i = 0; i < SIZE; i++) {
+            Assert.assertEquals(i, map.get(i));
+        }
 
-       final int[] nbCall = {0};
-       map.each(new KLongLongMapCallBack() {
-           @Override
-           public void on(long key, long s) {
-               nbCall[0]++;
-               Assert.assertEquals(key, s);
-           }
-       });
+        final int[] nbCall = {0};
+        map.each(new KLongLongMapCallBack() {
+            @Override
+            public void on(long key, long s) {
+                nbCall[0]++;
+                Assert.assertEquals(key, s);
+            }
+        });
         Assert.assertEquals(SIZE, nbCall[0]);
         map.clear();
         Assert.assertEquals(0, map.size());
@@ -40,9 +40,9 @@ public abstract class BaseKLongLongHashMapTest {
         }
         Assert.assertEquals(SIZE, map.size());
         map.remove(5);
-        Assert.assertEquals(SIZE -1, map.size());
+        Assert.assertEquals(SIZE - 1, map.size());
         for (long i = 0; i < SIZE; i++) {
-            if(i != 5){
+            if (i != 5) {
                 Assert.assertEquals(i, map.get(i));
             } else {
                 Assert.assertEquals(KConfig.NULL_LONG, map.get(i));
@@ -51,7 +51,7 @@ public abstract class BaseKLongLongHashMapTest {
         map.put(SIZE, SIZE);
         Assert.assertEquals(SIZE, map.size());
         for (long i = 0; i <= SIZE; i++) {
-            if(i != 5){
+            if (i != 5) {
                 Assert.assertEquals(i, map.get(i));
             } else {
                 Assert.assertEquals(KConfig.NULL_LONG, map.get(i));

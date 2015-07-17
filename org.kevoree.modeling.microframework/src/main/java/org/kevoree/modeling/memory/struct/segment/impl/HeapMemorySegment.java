@@ -65,6 +65,29 @@ public class HeapMemorySegment implements KMemorySegment {
                     }
                     builder.append(metaElements[i].metaName());
                     builder.append("\":");
+
+                    /*
+                    if(metaElements[i].metaType() == MetaType.ATTRIBUTE){
+
+                    } else if(metaElements[i].metaType() == MetaType.REFERENCE){
+
+                    } else if(metaElements[i].metaType() == MetaType.ENUM){
+
+                    } else if(metaElements[i].metaType() == MetaType.DEPENDENCIES || metaElements[i].metaType() == MetaType.INPUT || metaElements[i].metaType() == MetaType.OUTPUT){
+
+                    }
+
+
+
+
+
+                    if(metaElements[i] == KPrimitiveTypes.STRING){
+
+                  //  } else if(metaElements[i].metaType() == KPrimitiveTypes.STRING){
+
+                    }*/
+
+
                     if (o instanceof String) {
                         builder.append("\"");
                         builder.append(JsonString.encode((String) o));
