@@ -10,7 +10,10 @@ import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
  * private _isDirty = false;
  * constructor(initialCapacity: number, loadFactor : number) { }
  * public clear():void { for(var p in this){ this._isDirty=true;if(this.hasOwnProperty(p) && p.indexOf('_') != 0){ delete this[p];}} }
- * public get(key:number):number { return this[key]; }
+ * public get(key:number):number {
+ * var resolved = this[key];
+ * if(resolved == undefined){ return org.kevoree.modeling.KConfig.NULL_LONG; } else { return resolved; }
+ * }
  * public put(key:number, pval : number):void { this._isDirty=true; this[key] = pval;}
  * public contains(key:number):boolean { return this.hasOwnProperty(<any>key);}
  * public remove(key:number):number { var tmp = this[key]; delete this[key]; return tmp; }
