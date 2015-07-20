@@ -2,9 +2,6 @@ package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.KConfig;
 
-/**
- * Created by gregory.nain on 02/12/14.
- */
 public class KeyCalculator {
 
     /**
@@ -12,7 +9,7 @@ public class KeyCalculator {
      * private _prefix: string;
      */
     private long _prefix;
-    private long _currentIndex;
+    private volatile long _currentIndex;
 
     /**
      * @param currentIndex
@@ -39,7 +36,7 @@ public class KeyCalculator {
      * }
      * return objectKey;
      */
-    public long nextKey() {
+    public synchronized long nextKey() {
         if (_currentIndex == KConfig.KEY_PREFIX_MASK) {
             throw new IndexOutOfBoundsException("Object Index could not be created because it exceeded the capacity of the current prefix. Ask for a new prefix.");
         }
@@ -47,7 +44,7 @@ public class KeyCalculator {
         //moves the prefix 53-size(short) times to the left;
         long objectKey = _prefix + _currentIndex;
         if (objectKey >= KConfig.NULL_LONG) {
-            throw new IndexOutOfBoundsException("Object Index exceeds teh maximum JavaScript number capacity. (2^"+ KConfig.LONG_SIZE+")");
+            throw new IndexOutOfBoundsException("Object Index exceeds teh maximum JavaScript number capacity. (2^" + KConfig.LONG_SIZE + ")");
         }
         return objectKey;
     }

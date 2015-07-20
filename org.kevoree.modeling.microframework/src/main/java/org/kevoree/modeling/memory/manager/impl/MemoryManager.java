@@ -85,36 +85,34 @@ public class MemoryManager implements KMemoryManager {
 
     /* Key Management Section */
     @Override
-    public synchronized long nextUniverseKey() {
+    public long nextUniverseKey() {
         if (_universeKeyCalculator == null) {
             throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
         }
-        long nextGeneratedKey = _universeKeyCalculator.nextKey();
-        if (nextGeneratedKey == KConfig.NULL_LONG || nextGeneratedKey == KConfig.END_OF_TIME) {
-            nextGeneratedKey = _universeKeyCalculator.nextKey();
-        }
-        return nextGeneratedKey;
+        return _universeKeyCalculator.nextKey();
     }
 
     @Override
-    public synchronized long nextObjectKey() {
+    public long nextObjectKey() {
         if (_objectKeyCalculator == null) {
             throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
         }
-        long nextGeneratedKey = _objectKeyCalculator.nextKey();
-        if (nextGeneratedKey == KConfig.NULL_LONG || nextGeneratedKey == KConfig.END_OF_TIME) {
-            nextGeneratedKey = _objectKeyCalculator.nextKey();
-        }
-        return nextGeneratedKey;
+        return _objectKeyCalculator.nextKey();
     }
 
     @Override
-    public synchronized long nextModelKey() {
+    public long nextModelKey() {
+        if (_modelKeyCalculator == null) {
+            throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
+        }
         return _modelKeyCalculator.nextKey();
     }
 
     @Override
-    public synchronized long nextGroupKey() {
+    public long nextGroupKey() {
+        if (_groupKeyCalculator == null) {
+            throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
+        }
         return _groupKeyCalculator.nextKey();
     }
 
