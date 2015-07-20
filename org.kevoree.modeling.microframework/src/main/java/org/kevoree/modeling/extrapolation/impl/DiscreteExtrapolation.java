@@ -76,16 +76,6 @@ public class DiscreteExtrapolation implements Extrapolation {
                     e.printStackTrace();
                 }
             }
-        } else if (attribute.attributeType() == KPrimitiveTypes.FLOAT) {
-            if (payload instanceof Float) {
-                return payload;
-            } else {
-                try {
-                    return Float.parseFloat(payload.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
         } else if (attribute.attributeType() == KPrimitiveTypes.DOUBLE) {
             if (payload instanceof Double) {
                 return payload;
@@ -102,16 +92,6 @@ public class DiscreteExtrapolation implements Extrapolation {
             } else {
                 try {
                     return Long.parseLong(payload.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } else if (attribute.attributeType() == KPrimitiveTypes.SHORT) {
-            if (payload instanceof Short) {
-                return payload;
-            } else {
-                try {
-                    return Short.parseShort(payload.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

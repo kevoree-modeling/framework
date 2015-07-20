@@ -158,12 +158,8 @@ public class JsonModelLoader {
                                     converted = Integer.parseInt(rawPayload);
                                 } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
                                     converted = Boolean.parseBoolean(rawPayload);
-                                } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
-                                    converted = Short.parseShort(rawPayload);
                                 } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
                                     converted = Double.parseDouble(rawPayload);
-                                } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                                    converted = Float.parseFloat(rawPayload);
                                 }
                                 raw.set(metaElement.index(), converted, current.metaClass());
                             }

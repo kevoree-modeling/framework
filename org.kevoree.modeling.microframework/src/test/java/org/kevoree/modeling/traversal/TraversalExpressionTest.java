@@ -16,7 +16,7 @@ public class TraversalExpressionTest {
         MetaModel metaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = metaModel.addMetaClass("Sensor");
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        sensorMetaClass.addAttribute("value", KPrimitiveTypes.FLOAT);
+        sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
         final KModel universe = metaModel.model();

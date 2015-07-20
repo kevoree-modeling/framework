@@ -189,16 +189,10 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         if (metaOutput.type() == KPrimitiveTypes.INT) {
             return (double) output;
         }
-        if (metaOutput.type() == KPrimitiveTypes.FLOAT) {
-            return (double) output;
-        }
         if (metaOutput.type() == KPrimitiveTypes.CONTINUOUS) {
             return (double) output;
         }
         if (metaOutput.type() == KPrimitiveTypes.LONG) {
-            return (double) output;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.SHORT) {
             return (double) output;
         }
         if (metaOutput.type() == KPrimitiveTypes.STRING) {
@@ -232,17 +226,11 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         if (metaOutput.type() == KPrimitiveTypes.INT) {
             return (int) inferred;
         }
-        if (metaOutput.type() == KPrimitiveTypes.FLOAT) {
-            return (float) inferred;
-        }
         if (metaOutput.type() == KPrimitiveTypes.CONTINUOUS) {
             return inferred;
         }
         if (metaOutput.type() == KPrimitiveTypes.LONG) {
             return (long) inferred;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.SHORT) {
-            return (short) inferred;
         }
         if (metaOutput.type() == KPrimitiveTypes.STRING) {
             throw new RuntimeException("String are not managed yet");
@@ -255,10 +243,11 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         return null;
     }
 
-    /** @native ts
+    /**
+     * @native ts
      * return Math.round(toCeilValue);
-     * */
-    private int math_ceil(double toCeilValue){
+     */
+    private int math_ceil(double toCeilValue) {
         return (int) Math.round(toCeilValue);
     }
 

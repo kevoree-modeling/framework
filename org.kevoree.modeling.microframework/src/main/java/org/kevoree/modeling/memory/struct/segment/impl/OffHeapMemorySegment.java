@@ -65,12 +65,8 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                 size = 4;
             } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
                 size = 1;
-            } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
-                size = 2;
             } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
                 size = 8;
-            } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                size = 4;
             } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
                 size = 8; // native pointer to the double[]
             }
@@ -428,12 +424,8 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                     result = UNSAFE.getInt(ptr);
                 } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
                     result = UNSAFE.getByte(ptr) != 0;
-                } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
-                    result = UNSAFE.getShort(ptr);
                 } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
                     result = UNSAFE.getLong(ptr);
-                } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                    result = UNSAFE.getFloat(ptr);
                 }
             }
 
@@ -597,9 +589,6 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                             builder.append("\"");
                             builder.append(JsonString.encode((String) o));
                             builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
-                            //TODO
-                            builder.append(o.toString());
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
                             builder.append("\"");
                             Base64.encodeLongToBuffer((long) o, builder);
@@ -626,9 +615,6 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                             builder.append("\"");
                             Base64.encodeDoubleToBuffer((double) o, builder);
                             builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                            //TODO
-                            builder.append(o.toString());
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
                             builder.append("\"");
                             Base64.encodeIntToBuffer((int) o, builder);
@@ -712,12 +698,8 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                             converted = Integer.parseInt((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
                             converted = Boolean.parseBoolean((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
-                            converted = Short.parseShort((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
                             converted = Double.parseDouble((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                            converted = Float.parseFloat((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
                             String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
                             double[] convertedRaw = new double[plainRawSet.length];

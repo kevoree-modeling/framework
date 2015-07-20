@@ -62,9 +62,6 @@ public class HeapMemorySegment implements KMemorySegment {
                             builder.append("\"");
                             builder.append(JsonString.encode((String) o));
                             builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
-                            //TODO
-                            builder.append(o.toString());
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
                             builder.append("\"");
                             Base64.encodeLongToBuffer((long) o, builder);
@@ -91,9 +88,6 @@ public class HeapMemorySegment implements KMemorySegment {
                             builder.append("\"");
                             Base64.encodeDoubleToBuffer((double) o, builder);
                             builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                            //TODO
-                            builder.append(o.toString());
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
                             builder.append("\"");
                             Base64.encodeIntToBuffer((int) o, builder);
@@ -193,14 +187,8 @@ public class HeapMemorySegment implements KMemorySegment {
                             } else {
                                 converted = false;
                             }
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.SHORT) {
-                            //TODO replace by Base64
-                            converted = Short.parseShort((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
                             converted = Base64.decodeToDouble((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                            //TODO replace by Base64
-                            converted = Float.parseFloat((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
                             String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
                             double[] convertedRaw = new double[plainRawSet.length];

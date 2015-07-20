@@ -25,12 +25,8 @@ public class PolynomialExtrapolation implements Extrapolation {
                 return extrapolatedValue;
             } else if (attribute.attributeType() == KPrimitiveTypes.LONG) {
                 return extrapolatedValue.longValue();
-            } else if (attribute.attributeType() == KPrimitiveTypes.FLOAT) {
-                return extrapolatedValue.floatValue();
             } else if (attribute.attributeType() == KPrimitiveTypes.INT) {
                 return extrapolatedValue.intValue();
-            } else if (attribute.attributeType() == KPrimitiveTypes.SHORT) {
-                return extrapolatedValue.shortValue();
             } else {
                 return null;
             }

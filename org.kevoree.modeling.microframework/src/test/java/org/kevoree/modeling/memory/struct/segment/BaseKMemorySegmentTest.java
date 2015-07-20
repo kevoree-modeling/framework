@@ -25,7 +25,7 @@ public abstract class BaseKMemorySegmentTest {
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        sensorMetaClass.addAttribute("value", KPrimitiveTypes.FLOAT);
+        sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
@@ -89,7 +89,7 @@ public abstract class BaseKMemorySegmentTest {
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        sensorMetaClass.addAttribute("value", KPrimitiveTypes.FLOAT);
+        sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
@@ -157,7 +157,7 @@ public abstract class BaseKMemorySegmentTest {
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        sensorMetaClass.addAttribute("value", KPrimitiveTypes.FLOAT);
+        sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
@@ -220,7 +220,7 @@ public abstract class BaseKMemorySegmentTest {
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        sensorMetaClass.addAttribute("value", KPrimitiveTypes.FLOAT);
+        sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
@@ -278,7 +278,7 @@ public abstract class BaseKMemorySegmentTest {
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        sensorMetaClass.addAttribute("value", KPrimitiveTypes.FLOAT);
+        sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");

@@ -22,7 +22,7 @@ public class ReflexiveTest {
         MetaModel metaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = metaModel.addMetaClass("Sensor");
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        sensorMetaClass.addAttribute("value", KPrimitiveTypes.FLOAT);
+        sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
         KMetaClass homeMetaClass = metaModel.addMetaClass("Home");
