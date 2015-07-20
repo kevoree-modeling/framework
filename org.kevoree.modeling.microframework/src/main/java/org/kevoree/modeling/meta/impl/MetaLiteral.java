@@ -1,7 +1,6 @@
 package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.meta.KLiteral;
-import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.MetaType;
 
 public class MetaLiteral implements KLiteral {
@@ -10,12 +9,12 @@ public class MetaLiteral implements KLiteral {
 
     private int _index;
 
-    private KMetaEnum _origin;
+    private String _className;
 
-    public MetaLiteral(String p_name, int p_index, KMetaEnum p_origin) {
+    public MetaLiteral(String p_name, int p_index, String p_className) {
         this._name = p_name;
         this._index = p_index;
-        this._origin = p_origin;
+        this._className = p_className;
     }
 
     @Override
@@ -34,13 +33,8 @@ public class MetaLiteral implements KLiteral {
     }
 
     @Override
-    public KMetaEnum origin() {
-        return this._origin;
-    }
-
-    @Override
-    public String toString(){
-        return "KLiteral@"+this._origin.name()+"."+this._name;
+    public String toString() {
+        return "KLiteral@" + this._className + "." + this._name;
     }
 
 }

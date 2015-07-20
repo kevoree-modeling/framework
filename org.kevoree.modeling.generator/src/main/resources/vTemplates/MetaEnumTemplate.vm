@@ -1,41 +1,31 @@
 package ${context.pack}.meta;
 
-public class Meta${context.getName()} extends org.kevoree.modeling.abs.AbstractDataType {
-
-    private Meta${context.getName()}(String p_name, boolean p_isEnum) {
-        super(p_name, p_isEnum);
-    }
+public class Meta${context.getName()} implements org.kevoree.modeling.KType {
 
     private static Meta${context.getName()} INSTANCE;
     public static Meta${context.getName()} getInstance() {
         if(INSTANCE == null) {
-            INSTANCE = new Meta${context.getName()}("${context.getFqn()}", true);
+            INSTANCE = new Meta${context.getName()}();
         }
         return INSTANCE;
     }
 
+#set($i = 0)
 #foreach($enumAtt in ${context.litterals})
-    private static final String _$enumAtt.toUpperCase() = "$enumAtt.toUpperCase()";
+    public static final org.kevoree.modeling.meta.KLiteral $enumAtt.toUpperCase() = new org.kevoree.modeling.meta.impl.MetaLiteral("$enumAtt.toUpperCase()",$i,"${context.getFqn()}");
+    #set($i = $i +1)
 #end
 
-
-    public Object load(String s) {
-#foreach($enumAtt in ${context.litterals})
-        if(s.equals(_$enumAtt.toUpperCase())) {
-            return ${context.pack}.${context.getName()}.$enumAtt.toUpperCase();
-        }
-#end
-        return null;
+    @Override
+    public String name() {
+        return "${context.getFqn()}";
     }
 
-    public String save(Object value) {
-#foreach($enumAtt in ${context.litterals})
-        if(value == ${context.pack}.${context.getName()}.$enumAtt.toUpperCase()) {
-            return _$enumAtt.toUpperCase();
-        }
-#end
-        return null;
+    @Override
+    public boolean isEnum() {
+        return true;
     }
+
 }
 
 #* @vtlvariable name="context" type="org.kevoree.modeling.ast.MModelEnum" *#

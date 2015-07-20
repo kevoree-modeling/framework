@@ -382,6 +382,7 @@ public class MemoryManager implements KMemoryManager {
                 if (strings != null && strings.length > 0 && strings[0] != null) {
                     KMemoryElement newObject = internal_unserialize(toReloadKeys[0], strings[0]);
                     KCache newCache = _factory.newCache();
+                    newCache.getOrPut(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, newObject);
                     //swapCache
                     KCache oldCache = _cache;
                     _cache = newCache;

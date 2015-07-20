@@ -2,9 +2,6 @@ package org.kevoree.modeling.ast;
 
 import java.util.*;
 
-/**
- * Created by gregory.nain on 14/10/2014.
- */
 public class MModelEnum extends MModelClassifier {
 
     private SortedSet<String> litterals = new TreeSet<>();

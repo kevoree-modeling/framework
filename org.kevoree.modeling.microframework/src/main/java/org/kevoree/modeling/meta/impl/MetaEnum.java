@@ -48,7 +48,7 @@ public class MetaEnum implements KMetaEnum {
 
     @Override
     public KLiteral addLiteral(String p_name) {
-        MetaLiteral newLiteral = new MetaLiteral(p_name, _literals.length, this);
+        MetaLiteral newLiteral = new MetaLiteral(p_name, _literals.length, _name);
         internal_add_meta(newLiteral);
         return newLiteral;
     }

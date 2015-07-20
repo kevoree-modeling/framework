@@ -605,8 +605,7 @@ var org;
                 KConfig.END_OF_TIME = 0x001FFFFFFFFFFFFE;
                 KConfig.NULL_LONG = 0x001FFFFFFFFFFFFF;
                 KConfig.KEY_PREFIX_MASK = 0x0000001FFFFFFFFF;
-                KConfig.KEY_SEP = '/';
-                KConfig.KEY_SIZE = 3;
+                KConfig.KEY_SEP = '|';
                 KConfig.CACHE_INIT_SIZE = 16;
                 KConfig.CACHE_LOAD_FACTOR = (75 / 100);
                 return KConfig;
@@ -640,28 +639,38 @@ var org;
                     return new org.kevoree.modeling.KContentKey(org.kevoree.modeling.KConfig.END_OF_TIME, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
                 };
                 KContentKey.createLastObjectIndexFromPrefix = function (prefix) {
-                    return new org.kevoree.modeling.KContentKey(org.kevoree.modeling.KConfig.END_OF_TIME, org.kevoree.modeling.KConfig.NULL_LONG, java.lang.Long.parseLong(prefix.toString()));
+                    return new org.kevoree.modeling.KContentKey(org.kevoree.modeling.KConfig.END_OF_TIME, org.kevoree.modeling.KConfig.NULL_LONG, prefix);
                 };
                 KContentKey.createLastUniverseIndexFromPrefix = function (prefix) {
-                    return new org.kevoree.modeling.KContentKey(org.kevoree.modeling.KConfig.END_OF_TIME, org.kevoree.modeling.KConfig.NULL_LONG, java.lang.Long.parseLong(prefix.toString()));
+                    return new org.kevoree.modeling.KContentKey(org.kevoree.modeling.KConfig.END_OF_TIME, org.kevoree.modeling.KConfig.NULL_LONG, prefix);
                 };
                 KContentKey.create = function (payload) {
                     if (payload == null || payload.length == 0) {
                         return null;
                     }
                     else {
-                        var temp = new Array();
-                        for (var i = 0; i < org.kevoree.modeling.KConfig.KEY_SIZE; i++) {
-                            temp[i] = org.kevoree.modeling.KConfig.NULL_LONG;
-                        }
+                        var key = new org.kevoree.modeling.KContentKey(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
                         var maxRead = payload.length;
                         var indexStartElem = -1;
                         var indexElem = 0;
+                        var partIndex = 0;
                         for (var i = 0; i < maxRead; i++) {
                             if (payload.charAt(i) == org.kevoree.modeling.KConfig.KEY_SEP) {
                                 if (indexStartElem != -1) {
                                     try {
-                                        temp[indexElem] = java.lang.Long.parseLong(payload.substring(indexStartElem, i));
+                                        switch (partIndex) {
+                                            case 0:
+                                                key.universe = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, indexStartElem, i);
+                                                break;
+                                            case 1:
+                                                key.time = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, indexStartElem, i);
+                                                break;
+                                            case 2:
+                                                key.obj = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, indexStartElem, i);
+                                                break;
+                                            default:
+                                                break;
+                                        }
                                     }
                                     catch ($ex$) {
                                         if ($ex$ instanceof java.lang.Exception) {
@@ -675,6 +684,7 @@ var org;
                                 }
                                 indexStartElem = -1;
                                 indexElem = indexElem + 1;
+                                partIndex++;
                             }
                             else {
                                 if (indexStartElem == -1) {
@@ -684,7 +694,19 @@ var org;
                         }
                         if (indexStartElem != -1) {
                             try {
-                                temp[indexElem] = java.lang.Long.parseLong(payload.substring(indexStartElem, maxRead));
+                                switch (partIndex) {
+                                    case 0:
+                                        key.universe = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, indexStartElem, maxRead);
+                                        break;
+                                    case 1:
+                                        key.time = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, indexStartElem, maxRead);
+                                        break;
+                                    case 2:
+                                        key.obj = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, indexStartElem, maxRead);
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
                             catch ($ex$) {
                                 if ($ex$ instanceof java.lang.Exception) {
@@ -696,21 +718,21 @@ var org;
                                 }
                             }
                         }
-                        return new org.kevoree.modeling.KContentKey(temp[0], temp[1], temp[2]);
+                        return key;
                     }
                 };
                 KContentKey.prototype.toString = function () {
                     var buffer = new java.lang.StringBuilder();
                     if (this.universe != org.kevoree.modeling.KConfig.NULL_LONG) {
-                        buffer.append(this.universe);
+                        org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(this.universe, buffer);
                     }
                     buffer.append(org.kevoree.modeling.KConfig.KEY_SEP);
                     if (this.time != org.kevoree.modeling.KConfig.NULL_LONG) {
-                        buffer.append(this.time);
+                        org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(this.time, buffer);
                     }
                     buffer.append(org.kevoree.modeling.KConfig.KEY_SEP);
                     if (this.obj != org.kevoree.modeling.KConfig.NULL_LONG) {
-                        buffer.append(this.obj);
+                        org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(this.obj, buffer);
                     }
                     return buffer.toString();
                 };
@@ -858,7 +880,9 @@ var org;
                         var selfPointer = this;
                         var rawPayload = this._manager.segment(this._universe, this._time, this._uuid, false, this._metaClass, null);
                         if (rawPayload == null) {
-                            cb(new java.lang.Exception(AbstractKObject.OUT_OF_CACHE_MSG));
+                            if (cb != null) {
+                                cb(new java.lang.Exception(AbstractKObject.OUT_OF_CACHE_MSG));
+                            }
                         }
                         else {
                             var collector = new org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
@@ -876,10 +900,10 @@ var org;
                             var indexI = new Array();
                             indexI[0] = 0;
                             collector.each(function (key, value) {
-                                flatCollected[indexI[0]] = key;
+                                flatCollected[indexI[0]] = value;
                                 indexI[0]++;
                             });
-                            this._manager.lookupAllobjects(this._universe, this._time, flatCollected, function (resolved) {
+                            this._manager.lookupAllObjects(this._universe, this._time, flatCollected, function (resolved) {
                                 for (var i = 0; i < resolved.length; i++) {
                                     if (resolved[i] != null) {
                                         var linkedReferences = resolved[i].referencesWith(selfPointer);
@@ -986,7 +1010,7 @@ var org;
                                         if (setOpposite) {
                                             if (previous != null) {
                                                 var self = this;
-                                                this._manager.lookupAllobjects(this._universe, this._time, previous, function (kObjects) {
+                                                this._manager.lookupAllObjects(this._universe, this._time, previous, function (kObjects) {
                                                     for (var i = 0; i < kObjects.length; i++) {
                                                         kObjects[i].internal_mutate(org.kevoree.modeling.KActionType.REMOVE, metaReference.opposite(), self, false);
                                                     }
@@ -1009,7 +1033,7 @@ var org;
                                         if (setOpposite) {
                                             if (previousKid != null) {
                                                 var self = this;
-                                                this._manager.lookupAllobjects(this._universe, this._time, previousKid, function (resolvedParams) {
+                                                this._manager.lookupAllObjects(this._universe, this._time, previousKid, function (resolvedParams) {
                                                     if (resolvedParams != null) {
                                                         for (var dd = 0; dd < resolvedParams.length; dd++) {
                                                             if (resolvedParams[dd] != null) {
@@ -1085,7 +1109,7 @@ var org;
                                     cb(new Array());
                                 }
                                 else {
-                                    this._manager.lookupAllobjects(this._universe, this._time, o, cb);
+                                    this._manager.lookupAllObjects(this._universe, this._time, o, cb);
                                 }
                             }
                         }
@@ -1153,7 +1177,7 @@ var org;
                                 trimmed[inserted[0]] = value;
                                 inserted[0]++;
                             });
-                            this._manager.lookupAllobjects(this._universe, this._time, trimmed, function (resolvedArr) {
+                            this._manager.lookupAllObjects(this._universe, this._time, trimmed, function (resolvedArr) {
                                 var nextDeep = new java.util.ArrayList();
                                 for (var i = 0; i < resolvedArr.length; i++) {
                                     var resolved = resolvedArr[i];
@@ -1217,7 +1241,7 @@ var org;
                         var raw = this._manager.segment(this._universe, this._time, this._uuid, true, this._metaClass, null);
                         if (raw != null) {
                             builder.append(",\"data\":");
-                            builder.append(raw.serialize(this._manager.model().metaModel()));
+                            builder.append(raw.toJSON(this._manager.model().metaModel()));
                         }
                         builder.append("}");
                         return builder.toString();
@@ -1359,12 +1383,12 @@ var org;
                     AbstractKObjectInfer.prototype.train = function (dependencies, expectedOutputs, callback) {
                         var all_dependencies = new Array(new Array());
                         all_dependencies[0] = dependencies;
-                        var all_expectedOutputs;
+                        var all_expectedOutputs = null;
                         if (expectedOutputs != null) {
                             all_expectedOutputs = new Array(new Array());
                             all_expectedOutputs[0] = expectedOutputs;
                         }
-                        this.trainAll(all_dependencies, all_dependencies, callback);
+                        this.trainAll(all_dependencies, all_expectedOutputs, callback);
                     };
                     AbstractKObjectInfer.prototype.trainAll = function (p_dependencies, p_outputs, callback) {
                         var _this = this;
@@ -1421,32 +1445,52 @@ var org;
                         });
                     };
                     AbstractKObjectInfer.prototype.infer = function (dependencies, callback) {
+                        var all_dependencies = new Array(new Array());
+                        all_dependencies[0] = dependencies;
+                        this.inferAll(all_dependencies, function (objects) {
+                            if (objects != null && objects.length > 0) {
+                                callback(objects[0]);
+                            }
+                            else {
+                                callback(null);
+                            }
+                        });
+                    };
+                    AbstractKObjectInfer.prototype.inferAll = function (p_dependencies, callback) {
                         var _this = this;
-                        var selfObject = this;
-                        if (dependencies == null || dependencies.length != this._metaClass.dependencies().allDependencies().length) {
+                        if (p_dependencies == null) {
                             throw new java.lang.RuntimeException("Bad number of arguments for allDependencies");
                         }
-                        var resolver = this.dependenciesResolver(dependencies);
+                        var selfObject = this;
                         var waiter = this.manager().model().defer();
-                        for (var i = 0; i < this._metaClass.inputs().length; i++) {
-                            this._metaClass.inputs()[i].extractor().exec(null, resolver, waiter.wait("" + i));
+                        for (var i = 0; i < p_dependencies.length; i++) {
+                            if (p_dependencies[i].length != this._metaClass.dependencies().allDependencies().length) {
+                                throw new java.lang.RuntimeException("Bad number of arguments for allDependencies");
+                            }
+                            var resolver = this.dependenciesResolver(p_dependencies[i]);
+                            for (var j = 0; j < this._metaClass.inputs().length; j++) {
+                                this._metaClass.inputs()[j].extractor().exec(null, resolver, waiter.wait(i + "," + j));
+                            }
                         }
                         waiter.then(function (o) {
                             var extractedInputs = new Array(new Array());
-                            for (var i = 0; i < _this._metaClass.inputs().length; i++) {
-                                try {
-                                    var extracted = waiter.getResult("" + i);
-                                    if (extracted != null && extracted.length > 0) {
-                                        extractedInputs[0][i] = extracted[0];
+                            for (var i = 0; i < p_dependencies.length; i++) {
+                                extractedInputs[i] = new Array();
+                                for (var j = 0; j < _this._metaClass.inputs().length; j++) {
+                                    try {
+                                        var extracted = waiter.getResult(i + "," + j);
+                                        if (extracted != null && extracted.length > 0) {
+                                            extractedInputs[i][j] = extracted[0];
+                                        }
                                     }
-                                }
-                                catch ($ex$) {
-                                    if ($ex$ instanceof java.lang.Exception) {
-                                        var e = $ex$;
-                                        e.printStackTrace();
-                                    }
-                                    else {
-                                        throw $ex$;
+                                    catch ($ex$) {
+                                        if ($ex$ instanceof java.lang.Exception) {
+                                            var e = $ex$;
+                                            e.printStackTrace();
+                                        }
+                                        else {
+                                            throw $ex$;
+                                        }
                                     }
                                 }
                             }
@@ -1455,20 +1499,24 @@ var org;
                                 callback(null);
                             }
                             else {
-                                var result = new Array();
+                                var result = new Array(new Array());
                                 for (var i = 0; i < extractedOutputs.length; i++) {
-                                    result[i] = _this.internalReverseOutput(extractedOutputs[0][i], _this._metaClass.outputs()[i]);
+                                    result[i] = new Array();
+                                    for (var j = 0; j < _this._metaClass.outputs().length; j++) {
+                                        result[i][j] = _this.internalReverseOutput(extractedOutputs[i][j], _this._metaClass.outputs()[j]);
+                                    }
                                 }
                                 callback(result);
                             }
                         });
                     };
-                    AbstractKObjectInfer.prototype.inferAll = function (features, callback) {
-                    };
                     AbstractKObjectInfer.prototype.resetLearning = function () {
                         throw new java.lang.RuntimeException("Not Implemented Yet!");
                     };
                     AbstractKObjectInfer.prototype.internalConvertOutput = function (output, metaOutput) {
+                        if (output == null) {
+                            return 0;
+                        }
                         if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.BOOL) {
                             if (output.equals(true)) {
                                 return 1.0;
@@ -1477,12 +1525,68 @@ var org;
                                 return 0.0;
                             }
                         }
-                        else {
-                            return 0;
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.DOUBLE) {
+                            return output;
                         }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.INT) {
+                            return output;
+                        }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.CONTINUOUS) {
+                            return output;
+                        }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.LONG) {
+                            return output;
+                        }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.STRING) {
+                            throw new java.lang.RuntimeException("String are not managed yet");
+                        }
+                        if (metaOutput.type().isEnum()) {
+                            var metaEnum = metaOutput.type();
+                            if (output instanceof org.kevoree.modeling.meta.impl.MetaLiteral) {
+                                return output.index();
+                            }
+                            else {
+                                var literal = metaEnum.literalByName(output.toString());
+                                if (literal != null) {
+                                    return literal.index();
+                                }
+                            }
+                        }
+                        return 0;
                     };
                     AbstractKObjectInfer.prototype.internalReverseOutput = function (inferred, metaOutput) {
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.BOOL) {
+                            if (inferred >= 0.5) {
+                                return true;
+                            }
+                            else {
+                                return false;
+                            }
+                        }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.DOUBLE) {
+                            return inferred;
+                        }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.INT) {
+                            return inferred;
+                        }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.CONTINUOUS) {
+                            return inferred;
+                        }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.LONG) {
+                            return inferred;
+                        }
+                        if (metaOutput.type() == org.kevoree.modeling.meta.KPrimitiveTypes.STRING) {
+                            throw new java.lang.RuntimeException("String are not managed yet");
+                        }
+                        if (metaOutput.type().isEnum()) {
+                            var ceiledInferred = this.math_ceil(inferred);
+                            var metaEnum = metaOutput.type();
+                            return metaEnum.literal(ceiledInferred);
+                        }
                         return null;
+                    };
+                    AbstractKObjectInfer.prototype.math_ceil = function (toCeilValue) {
+                        return Math.round(toCeilValue);
                     };
                     return AbstractKObjectInfer;
                 })(org.kevoree.modeling.abs.AbstractKObject);
@@ -1589,7 +1693,7 @@ var org;
                         this._manager.lookup(this._universe, this._time, kid, cb);
                     };
                     AbstractKView.prototype.lookupAll = function (keys, cb) {
-                        this._manager.lookupAllobjects(this._universe, this._time, keys, cb);
+                        this._manager.lookupAllObjects(this._universe, this._time, keys, cb);
                     };
                     AbstractKView.prototype.create = function (clazz) {
                         return this._manager.model().create(clazz, this._universe, this._time);
@@ -1647,7 +1751,6 @@ var org;
                                         var timeTree = timeTrees[i];
                                         if (timeTree != null) {
                                             var currentDivergenceTime = objUniverse.get(collectedUniverse[i]);
-                                            var finalI = i;
                                             var finalPreviousDivergenceTime = previousDivergenceTime;
                                             timeTree.range(currentDivergenceTime, previousDivergenceTime, function (t) {
                                                 if (collector.size() == 0) {
@@ -2155,7 +2258,12 @@ var org;
                         DiscreteExtrapolation.prototype.extrapolate = function (current, attribute) {
                             var payload = current._manager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), null);
                             if (payload != null) {
-                                return payload.get(attribute.index(), current.metaClass());
+                                if (attribute.attributeType().isEnum()) {
+                                    return attribute.attributeType().literal(payload.get(attribute.index(), current.metaClass()));
+                                }
+                                else {
+                                    return payload.get(attribute.index(), current.metaClass());
+                                }
                             }
                             else {
                                 return null;
@@ -2164,8 +2272,30 @@ var org;
                         DiscreteExtrapolation.prototype.mutate = function (current, attribute, payload) {
                             var internalPayload = current._manager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
                             if (internalPayload != null) {
-                                internalPayload.set(attribute.index(), payload, current.metaClass());
+                                if (attribute.attributeType().isEnum()) {
+                                    if (payload instanceof org.kevoree.modeling.meta.impl.MetaLiteral) {
+                                        internalPayload.set(attribute.index(), payload.index(), current.metaClass());
+                                    }
+                                    else {
+                                        var metaEnum = attribute.attributeType();
+                                        var foundLiteral = metaEnum.literalByName(payload.toString());
+                                        if (foundLiteral != null) {
+                                            internalPayload.set(attribute.index(), foundLiteral.index(), current.metaClass());
+                                        }
+                                    }
+                                }
+                                else {
+                                    if (payload == null) {
+                                        internalPayload.set(attribute.index(), null, current.metaClass());
+                                    }
+                                    else {
+                                        internalPayload.set(attribute.index(), this.convert(attribute, payload), current.metaClass());
+                                    }
+                                }
                             }
+                        };
+                        DiscreteExtrapolation.prototype.convert = function (attribute, payload) {
+                            return payload;
                         };
                         return DiscreteExtrapolation;
                     })();
@@ -2186,21 +2316,11 @@ var org;
                                         return extrapolatedValue.longValue();
                                     }
                                     else {
-                                        if (attribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.FLOAT) {
-                                            return extrapolatedValue.floatValue();
+                                        if (attribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.INT) {
+                                            return extrapolatedValue.intValue();
                                         }
                                         else {
-                                            if (attribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.INT) {
-                                                return extrapolatedValue.intValue();
-                                            }
-                                            else {
-                                                if (attribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.SHORT) {
-                                                    return extrapolatedValue.shortValue();
-                                                }
-                                                else {
-                                                    return null;
-                                                }
-                                            }
+                                            return null;
                                         }
                                     }
                                 }
@@ -2481,18 +2601,8 @@ var org;
                                                                 converted = java.lang.Boolean.parseBoolean(rawPayload);
                                                             }
                                                             else {
-                                                                if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.SHORT) {
-                                                                    converted = java.lang.Short.parseShort(rawPayload);
-                                                                }
-                                                                else {
-                                                                    if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.DOUBLE) {
-                                                                        converted = java.lang.Double.parseDouble(rawPayload);
-                                                                    }
-                                                                    else {
-                                                                        if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.FLOAT) {
-                                                                            converted = java.lang.Float.parseFloat(rawPayload);
-                                                                        }
-                                                                    }
+                                                                if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.DOUBLE) {
+                                                                    converted = java.lang.Double.parseDouble(rawPayload);
                                                                 }
                                                             }
                                                         }
@@ -3293,9 +3403,69 @@ var org;
             (function (infer) {
                 var impl;
                 (function (impl) {
+                    var BinaryPerceptronAlg = (function () {
+                        function BinaryPerceptronAlg() {
+                            this.iterations = 5;
+                            this.alpha = 1;
+                            this.rand = new java.util.Random();
+                        }
+                        BinaryPerceptronAlg.prototype.train = function (trainingSet, expectedResultSet, origin) {
+                            var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = origin.metaClass().inputs().length + 1;
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                ks.extendInfer(origin.metaClass().dependencies().index(), size, origin.metaClass());
+                                for (var i = 0; i < size; i++) {
+                                    ks.setInferElem(dependenciesIndex, i, this.rand.nextDouble(), origin.metaClass());
+                                }
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            for (var iter = 0; iter < this.iterations; iter++) {
+                                for (var row = 0; row < trainingSet.length; row++) {
+                                    var h = this.calculate(trainingSet[row], state);
+                                    var error = -this.alpha * (h - expectedResultSet[row][0]);
+                                    if (error != 0) {
+                                        for (var j = 0; j < origin.metaClass().inputs().length; j++) {
+                                            state.add(j, error * trainingSet[row][j]);
+                                        }
+                                        state.add(origin.metaClass().inputs().length, error);
+                                    }
+                                }
+                            }
+                        };
+                        BinaryPerceptronAlg.prototype.calculate = function (features, state) {
+                            var res = 0;
+                            for (var i = 0; i < features.length; i++) {
+                                res = res + state.get(i) * features[i];
+                            }
+                            res = res + state.get(features.length);
+                            if (res >= 0) {
+                                return 1.0;
+                            }
+                            else {
+                                return 0;
+                            }
+                        };
+                        BinaryPerceptronAlg.prototype.infer = function (features, origin) {
+                            var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = origin.metaClass().inputs().length + 1;
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                return null;
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            var result = new Array(new Array());
+                            for (var inst = 0; inst < features.length; inst++) {
+                                result[inst] = new Array();
+                                result[inst][0] = this.calculate(features[inst], state);
+                            }
+                            return result;
+                        };
+                        return BinaryPerceptronAlg;
+                    })();
+                    impl.BinaryPerceptronAlg = BinaryPerceptronAlg;
                     var GaussianClassificationAlg = (function () {
                         function GaussianClassificationAlg() {
-                            this.maxOutput = 3;
                         }
                         GaussianClassificationAlg.prototype.getIndex = function (input, output, field, meta) {
                             return output * (GaussianClassificationAlg.NUMOFFIELDS * meta.origin().inputs().length + 1) + GaussianClassificationAlg.NUMOFFIELDS * input + field;
@@ -3324,12 +3494,17 @@ var org;
                             return variances;
                         };
                         GaussianClassificationAlg.prototype.train = function (trainingSet, expectedResultSet, origin) {
+                            var maxOutput = origin.metaClass().outputs()[0].type().literals().length;
                             var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
                             var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = (maxOutput + 1) * (origin.metaClass().inputs().length * GaussianClassificationAlg.NUMOFFIELDS + 1);
                             if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
-                                ks.extendInfer(origin.metaClass().dependencies().index(), this.maxOutput * (origin.metaClass().inputs().length * GaussianClassificationAlg.NUMOFFIELDS + 1), origin.metaClass());
+                                ks.extendInfer(origin.metaClass().dependencies().index(), size, origin.metaClass());
+                                for (var i = 0; i < size; i++) {
+                                    ks.setInferElem(dependenciesIndex, i, 0, origin.metaClass());
+                                }
                             }
-                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(this.maxOutput * (origin.metaClass().inputs().length * GaussianClassificationAlg.NUMOFFIELDS + 1), 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
                             for (var i = 0; i < trainingSet.length; i++) {
                                 var output = expectedResultSet[i][0];
                                 for (var j = 0; j < origin.metaClass().inputs().length; j++) {
@@ -3349,18 +3524,42 @@ var org;
                                         state.add(this.getIndex(j, output, GaussianClassificationAlg.SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
                                         state.add(this.getIndex(j, output, GaussianClassificationAlg.SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
                                     }
+                                    if (state.get(this.getCounter(maxOutput, origin.metaClass().dependencies())) == 0) {
+                                        state.set(this.getIndex(j, maxOutput, GaussianClassificationAlg.MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                                        state.set(this.getIndex(j, maxOutput, GaussianClassificationAlg.MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                                        state.set(this.getIndex(j, maxOutput, GaussianClassificationAlg.SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
+                                        state.set(this.getIndex(j, maxOutput, GaussianClassificationAlg.SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                                    }
+                                    else {
+                                        if (trainingSet[i][j] < state.get(this.getIndex(j, maxOutput, GaussianClassificationAlg.MIN, origin.metaClass().dependencies()))) {
+                                            state.set(this.getIndex(j, maxOutput, GaussianClassificationAlg.MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                                        }
+                                        if (trainingSet[i][j] > state.get(this.getIndex(j, maxOutput, GaussianClassificationAlg.MAX, origin.metaClass().dependencies()))) {
+                                            state.set(this.getIndex(j, maxOutput, GaussianClassificationAlg.MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                                        }
+                                        state.add(this.getIndex(j, maxOutput, GaussianClassificationAlg.SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
+                                        state.add(this.getIndex(j, maxOutput, GaussianClassificationAlg.SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                                    }
                                 }
                                 state.add(this.getCounter(output, origin.metaClass().dependencies()), 1);
+                                state.add(this.getCounter(maxOutput, origin.metaClass().dependencies()), 1);
                             }
                         };
                         GaussianClassificationAlg.prototype.infer = function (features, origin) {
+                            var maxOutput = origin.metaClass().outputs()[0].type().literals().length;
                             var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
-                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(this.maxOutput * (origin.metaClass().inputs().length * GaussianClassificationAlg.NUMOFFIELDS + 1), 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = (maxOutput + 1) * (origin.metaClass().inputs().length * GaussianClassificationAlg.NUMOFFIELDS + 1);
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                return null;
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
                             var result = new Array(new Array());
-                            var maxprob = 0;
-                            var prob = 0;
                             for (var j = 0; j < features.length; j++) {
-                                for (var output = 0; output < this.maxOutput; output++) {
+                                result[j] = new Array();
+                                var maxprob = 0;
+                                var prob = 0;
+                                for (var output = 0; output < maxOutput; output++) {
                                     prob = this.getProba(features[j], output, state, origin.metaClass().dependencies());
                                     if (prob > maxprob) {
                                         maxprob = prob;
@@ -3377,9 +3576,9 @@ var org;
                             prob = org.kevoree.modeling.util.maths.Distribution.gaussian(features, avg, variance);
                             return prob;
                         };
-                        GaussianClassificationAlg.prototype.getAllProba = function (features, state, meta) {
+                        GaussianClassificationAlg.prototype.getAllProba = function (features, state, meta, maxOutput) {
                             var results = new Array();
-                            for (var i = 0; i < this.maxOutput; i++) {
+                            for (var i = 0; i < maxOutput; i++) {
                                 results[i] = this.getProba(features, i, state, meta);
                             }
                             return results;
@@ -3392,6 +3591,152 @@ var org;
                         return GaussianClassificationAlg;
                     })();
                     impl.GaussianClassificationAlg = GaussianClassificationAlg;
+                    var KMeanClusterAlg = (function () {
+                        function KMeanClusterAlg() {
+                            this.k = 3;
+                            this.iterations = 100;
+                        }
+                        KMeanClusterAlg.prototype.train = function (trainingSet, expectedResultSet, origin) {
+                            if (trainingSet.length < this.k) {
+                                throw new java.lang.RuntimeException("training set not enough");
+                            }
+                            var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = this.k * origin.metaClass().inputs().length;
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                ks.extendInfer(origin.metaClass().dependencies().index(), size, origin.metaClass());
+                                for (var i = 0; i < this.k; i++) {
+                                    for (var j = 0; j < origin.metaClass().inputs().length; j++) {
+                                        ks.setInferElem(dependenciesIndex, j + i * origin.metaClass().inputs().length, trainingSet[i][j], origin.metaClass());
+                                    }
+                                }
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            for (var iter = 0; iter < this.iterations; iter++) {
+                                var temporalClassification;
+                                var centroids = new Array(new Array());
+                                var counters = new Array();
+                                for (var j = 0; j < this.k; j++) {
+                                    centroids[j] = new Array();
+                                    counters[j] = 0;
+                                }
+                                for (var i = 0; i < trainingSet.length; i++) {
+                                    temporalClassification = this.classify(trainingSet[i], state);
+                                    for (var j = 0; j < origin.metaClass().inputs().length; j++) {
+                                        centroids[temporalClassification][j] += trainingSet[i][j];
+                                    }
+                                    counters[temporalClassification]++;
+                                }
+                                for (var i = 0; i < this.k; i++) {
+                                    if (counters[i] != 0) {
+                                        for (var j = 0; j < origin.metaClass().inputs().length; j++) {
+                                            state.set(j + i * origin.metaClass().inputs().length, centroids[i][j] / counters[i]);
+                                        }
+                                    }
+                                    else {
+                                        var rand = new java.util.Random();
+                                        var pos = rand.nextInt(trainingSet.length);
+                                        for (var j = 0; j < origin.metaClass().inputs().length; j++) {
+                                            state.set(j + i * origin.metaClass().inputs().length, trainingSet[pos][j]);
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                        KMeanClusterAlg.prototype.classify = function (features, state) {
+                            var maxdistance = -1;
+                            var classNum = -1;
+                            for (var i = 0; i < this.k; i++) {
+                                var currentdist = 0;
+                                for (var j = 0; j < features.length; j++) {
+                                    currentdist += (features[j] - state.get(i * features.length + j)) * (features[j] - state.get(i * features.length + j));
+                                }
+                                if (maxdistance < 0) {
+                                    maxdistance = currentdist;
+                                    classNum = i;
+                                }
+                                else {
+                                    if (currentdist < maxdistance) {
+                                        maxdistance = currentdist;
+                                        classNum = i;
+                                    }
+                                }
+                            }
+                            return classNum;
+                        };
+                        KMeanClusterAlg.prototype.infer = function (features, origin) {
+                            var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = this.k * origin.metaClass().inputs().length;
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                return null;
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            var result = new Array(new Array());
+                            for (var inst = 0; inst < features.length; inst++) {
+                                result[inst] = new Array();
+                                result[inst][0] = this.classify(features[inst], state);
+                            }
+                            return result;
+                        };
+                        return KMeanClusterAlg;
+                    })();
+                    impl.KMeanClusterAlg = KMeanClusterAlg;
+                    var LinearRegressionAlg = (function () {
+                        function LinearRegressionAlg() {
+                            this.alpha = 0.005;
+                            this.gamma = 0.000;
+                            this.iterations = 10;
+                        }
+                        LinearRegressionAlg.prototype.train = function (trainingSet, expectedResultSet, origin) {
+                            var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = origin.metaClass().inputs().length + 1;
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                ks.extendInfer(origin.metaClass().dependencies().index(), size, origin.metaClass());
+                                for (var i = 0; i < size; i++) {
+                                    ks.setInferElem(dependenciesIndex, i, LinearRegressionAlg.rand.nextDouble(), origin.metaClass());
+                                }
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            for (var i = 0; i < this.iterations; i++) {
+                                for (var row = 0; row < trainingSet.length; row++) {
+                                    var h = this.estimate(trainingSet[row], state);
+                                    var error = -this.alpha * (h - expectedResultSet[row][0]);
+                                    for (var feature = 0; feature < origin.metaClass().inputs().length; feature++) {
+                                        state.set(feature, state.get(feature) * (1 - this.alpha * this.gamma) + error * trainingSet[row][feature]);
+                                    }
+                                    state.add(origin.metaClass().inputs().length, error);
+                                }
+                            }
+                        };
+                        LinearRegressionAlg.prototype.estimate = function (training, state) {
+                            var result = 0;
+                            for (var i = 0; i < training.length; i++) {
+                                result = result + training[i] * state.get(i);
+                            }
+                            result = result + state.get(training.length);
+                            return result;
+                        };
+                        LinearRegressionAlg.prototype.infer = function (features, origin) {
+                            var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = origin.metaClass().inputs().length + 1;
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                return null;
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            var results = new Array(new Array());
+                            for (var i = 0; i < features.length; i++) {
+                                results[i] = new Array();
+                                results[i][0] = this.estimate(features[i], state);
+                            }
+                            return results;
+                        };
+                        LinearRegressionAlg.rand = new java.util.Random();
+                        return LinearRegressionAlg;
+                    })();
+                    impl.LinearRegressionAlg = LinearRegressionAlg;
                     var StatInferAlg = (function () {
                         function StatInferAlg() {
                         }
@@ -3399,7 +3744,10 @@ var org;
                             var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
                             var dependenciesIndex = origin.metaClass().dependencies().index();
                             if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
-                                ks.extendInfer(dependenciesIndex, StatInferAlg.NUMOFFIELDS * trainingSet[0].length + 1, origin.metaClass());
+                                ks.extendInfer(dependenciesIndex, StatInferAlg.NUMOFFIELDS * origin.metaClass().inputs().length + 1, origin.metaClass());
+                                for (var i = 0; i < StatInferAlg.NUMOFFIELDS * origin.metaClass().inputs().length + 1; i++) {
+                                    ks.setInferElem(dependenciesIndex, i, 0, origin.metaClass());
+                                }
                             }
                             var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(StatInferAlg.NUMOFFIELDS * trainingSet[0].length + 1, 0, dependenciesIndex, ks, origin.metaClass());
                             for (var i = 0; i < trainingSet.length; i++) {
@@ -3506,6 +3854,72 @@ var org;
                         return StatInferAlg;
                     })();
                     impl.StatInferAlg = StatInferAlg;
+                    var WinnowAlg = (function () {
+                        function WinnowAlg() {
+                            this.alpha = 2;
+                            this.beta = 2;
+                            this.iterations = 1;
+                            this.rand = new java.util.Random();
+                        }
+                        WinnowAlg.prototype.train = function (trainingSet, expectedResultSet, origin) {
+                            var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = origin.metaClass().inputs().length;
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                ks.extendInfer(origin.metaClass().dependencies().index(), size, origin.metaClass());
+                                for (var i = 0; i < size; i++) {
+                                    ks.setInferElem(dependenciesIndex, i, this.rand.nextDouble(), origin.metaClass());
+                                }
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            for (var iter = 0; iter < this.iterations; iter++) {
+                                for (var inst = 0; inst < trainingSet.length; inst++) {
+                                    if (this.calculate(trainingSet[inst], state) == expectedResultSet[inst][0]) {
+                                        continue;
+                                    }
+                                    if (expectedResultSet[inst][0] == 0) {
+                                        for (var i = 0; i < size; i++) {
+                                            state.set(i, state.get(i) / this.beta);
+                                        }
+                                    }
+                                    else {
+                                        for (var i = 0; i < size; i++) {
+                                            state.set(i, state.get(i) * this.alpha);
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                        WinnowAlg.prototype.calculate = function (features, state) {
+                            var result = 0;
+                            for (var i = 0; i < features.length; i++) {
+                                result += state.get(i) * features[i];
+                            }
+                            if (result >= features.length) {
+                                return 1.0;
+                            }
+                            else {
+                                return 0.0;
+                            }
+                        };
+                        WinnowAlg.prototype.infer = function (features, origin) {
+                            var ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+                            var dependenciesIndex = origin.metaClass().dependencies().index();
+                            var size = origin.metaClass().inputs().length;
+                            if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+                                return null;
+                            }
+                            var state = new org.kevoree.modeling.util.maths.structure.impl.Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+                            var result = new Array(new Array());
+                            for (var inst = 0; inst < features.length; inst++) {
+                                result[inst] = new Array();
+                                result[inst][0] = this.calculate(features[inst], state);
+                            }
+                            return result;
+                        };
+                        return WinnowAlg;
+                    })();
+                    impl.WinnowAlg = WinnowAlg;
                 })(impl = infer.impl || (infer.impl = {}));
             })(infer = modeling.infer || (modeling.infer = {}));
             var memory;
@@ -3540,15 +3954,15 @@ var org;
                             return KeyCalculator;
                         })();
                         impl.KeyCalculator = KeyCalculator;
-                        var LookupAllRunnable = (function () {
-                            function LookupAllRunnable(p_universe, p_time, p_keys, p_callback, p_store) {
+                        var LookupAllObjectsRunnable = (function () {
+                            function LookupAllObjectsRunnable(p_universe, p_time, p_keys, p_callback, p_store) {
                                 this._universe = p_universe;
                                 this._time = p_time;
                                 this._keys = p_keys;
                                 this._callback = p_callback;
                                 this._store = p_store;
                             }
-                            LookupAllRunnable.prototype.run = function () {
+                            LookupAllObjectsRunnable.prototype.run = function () {
                                 var _this = this;
                                 var tempKeys = new Array();
                                 for (var i = 0; i < this._keys.length; i++) {
@@ -3560,7 +3974,8 @@ var org;
                                     for (var i = 0; i < _this._keys.length; i++) {
                                         var toLoadKey = null;
                                         if (universeIndexes[i] != null) {
-                                            var closestUniverse = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(_this._store.globalUniverseOrder(), universeIndexes[i], _this._time, _this._universe);
+                                            var globalUniverseTree = _this._store.cache().get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
+                                            var closestUniverse = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(globalUniverseTree, universeIndexes[i], _this._time, _this._universe);
                                             toLoadKey = org.kevoree.modeling.KContentKey.createTimeTree(closestUniverse, _this._keys[i]);
                                         }
                                         tempKeys[i] = toLoadKey;
@@ -3596,9 +4011,143 @@ var org;
                                     });
                                 });
                             };
-                            return LookupAllRunnable;
+                            return LookupAllObjectsRunnable;
                         })();
-                        impl.LookupAllRunnable = LookupAllRunnable;
+                        impl.LookupAllObjectsRunnable = LookupAllObjectsRunnable;
+                        var LookupAllObjectsTimesRunnable = (function () {
+                            function LookupAllObjectsTimesRunnable(p_universe, p_times, p_keys, p_callback, p_store) {
+                                this._universe = p_universe;
+                                this._times = p_times;
+                                this._keys = p_keys;
+                                this._callback = p_callback;
+                                this._store = p_store;
+                            }
+                            LookupAllObjectsTimesRunnable.prototype.run = function () {
+                                var _this = this;
+                                var tempKeys = new Array();
+                                for (var i = 0; i < this._keys.length; i++) {
+                                    if (this._keys[i] != org.kevoree.modeling.KConfig.NULL_LONG) {
+                                        tempKeys[i] = org.kevoree.modeling.KContentKey.createUniverseTree(this._keys[i]);
+                                    }
+                                }
+                                this._store.bumpKeysToCache(tempKeys, function (universeIndexes) {
+                                    var tempKeys2 = new Array();
+                                    for (var i = 0; i < _this._keys.length; i++) {
+                                        for (var j = 0; j < _this._times.length; j++) {
+                                            if (universeIndexes[i] != null) {
+                                                var globalUniverseTree = _this._store.cache().get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
+                                                tempKeys2[(i * _this._times.length) + j] = org.kevoree.modeling.KContentKey.createTimeTree(org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(globalUniverseTree, universeIndexes[i], _this._times[j], _this._universe), _this._keys[i]);
+                                            }
+                                        }
+                                    }
+                                    _this._store.bumpKeysToCache(tempKeys2, function (timeIndexes) {
+                                        for (var i = 0; i < _this._keys.length; i++) {
+                                            for (var j = 0; j < _this._times.length; j++) {
+                                                var resolvedContentKey = null;
+                                                if (timeIndexes[i] != null) {
+                                                    var cachedIndexTree = timeIndexes[i];
+                                                    var resolvedNode = cachedIndexTree.previousOrEqual(_this._times[j]);
+                                                    if (resolvedNode != org.kevoree.modeling.KConfig.NULL_LONG) {
+                                                        resolvedContentKey = org.kevoree.modeling.KContentKey.createObject(tempKeys2[i].universe, resolvedNode, _this._keys[i]);
+                                                    }
+                                                }
+                                                tempKeys2[(i * _this._times.length) + j] = resolvedContentKey;
+                                            }
+                                        }
+                                        _this._store.bumpKeysToCache(tempKeys2, function (cachedObjects) {
+                                            var proxies = new Array();
+                                            for (var i = 0; i < _this._keys.length; i++) {
+                                                for (var j = 0; j < _this._times.length; j++) {
+                                                    if (cachedObjects[(i * _this._times.length) + j] != null) {
+                                                        proxies[(i * _this._times.length) + j] = _this._store.model().createProxy(_this._universe, _this._times[j], _this._keys[i], _this._store.model().metaModel().metaClasses()[cachedObjects[i].metaClassIndex()]);
+                                                        if (proxies[(i * _this._times.length) + j] != null) {
+                                                            var cachedIndexTree = timeIndexes[(i * _this._times.length) + j];
+                                                            cachedIndexTree.inc();
+                                                            var universeTree = universeIndexes[i];
+                                                            universeTree.inc();
+                                                            cachedObjects[(i * _this._times.length) + j].inc();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            _this._callback(proxies);
+                                        });
+                                    });
+                                });
+                            };
+                            return LookupAllObjectsTimesRunnable;
+                        })();
+                        impl.LookupAllObjectsTimesRunnable = LookupAllObjectsTimesRunnable;
+                        var LookupAllTimesRunnable = (function () {
+                            function LookupAllTimesRunnable(p_universe, p_times, p_key, p_callback, p_store) {
+                                this._universe = p_universe;
+                                this._times = p_times;
+                                this._uuid = p_key;
+                                this._callback = p_callback;
+                                this._store = p_store;
+                            }
+                            LookupAllTimesRunnable.prototype.run = function () {
+                                var _this = this;
+                                this._store.bumpKeyToCache(org.kevoree.modeling.KContentKey.createUniverseTree(this._uuid), function (universeIndex) {
+                                    var map = new org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
+                                    var mapReverse = new org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
+                                    var ii = [0];
+                                    for (var i = 0; i < _this._times.length; i++) {
+                                        if (universeIndex != null) {
+                                            var globalUniverseTree = _this._store.cache().get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
+                                            var resolved = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(globalUniverseTree, universeIndex, _this._times[i], _this._universe);
+                                            var alreadyInMap = map.get(resolved);
+                                            if (alreadyInMap == org.kevoree.modeling.KConfig.NULL_LONG) {
+                                                mapReverse.put(_this._times[i], ii[0]);
+                                                map.put(resolved, ii[0]);
+                                                ii[0]++;
+                                            }
+                                            else {
+                                                mapReverse.put(_this._times[i], alreadyInMap);
+                                            }
+                                        }
+                                    }
+                                    var tempKeys = new Array();
+                                    map.each(function (key, value) {
+                                        tempKeys[value] = org.kevoree.modeling.KContentKey.createTimeTree(key, _this._uuid);
+                                    });
+                                    _this._store.bumpKeysToCache(tempKeys, function (timeIndexes) {
+                                        var tempKeys2 = new Array();
+                                        for (var i = 0; i < _this._times.length; i++) {
+                                            var reversed = mapReverse.get(_this._times[i]);
+                                            var resolvedContentKey = null;
+                                            if (timeIndexes[reversed] != null) {
+                                                var cachedIndexTree = timeIndexes[reversed];
+                                                var resolvedNode = cachedIndexTree.previousOrEqual(_this._times[i]);
+                                                if (resolvedNode != org.kevoree.modeling.KConfig.NULL_LONG) {
+                                                    resolvedContentKey = org.kevoree.modeling.KContentKey.createObject(tempKeys[reversed].universe, resolvedNode, _this._uuid);
+                                                }
+                                            }
+                                            tempKeys2[i] = resolvedContentKey;
+                                        }
+                                        _this._store.bumpKeysToCache(tempKeys2, function (cachedObjects) {
+                                            var proxies = new Array();
+                                            for (var i = 0; i < _this._times.length; i++) {
+                                                if (cachedObjects[i] != null) {
+                                                    proxies[i] = _this._store.model().createProxy(_this._universe, _this._times[i], _this._uuid, _this._store.model().metaModel().metaClasses()[cachedObjects[i].metaClassIndex()]);
+                                                    if (proxies[i] != null) {
+                                                        var reversed = mapReverse.get(_this._times[i]);
+                                                        var cachedIndexTree = timeIndexes[reversed];
+                                                        cachedIndexTree.inc();
+                                                        var universeTree = universeIndex;
+                                                        universeTree.inc();
+                                                        cachedObjects[i].inc();
+                                                    }
+                                                }
+                                            }
+                                            _this._callback(proxies);
+                                        });
+                                    });
+                                });
+                            };
+                            return LookupAllTimesRunnable;
+                        })();
+                        impl.LookupAllTimesRunnable = LookupAllTimesRunnable;
                         var MemoryManager = (function () {
                             function MemoryManager(model) {
                                 this._objectKeyCalculator = null;
@@ -3633,33 +4182,28 @@ var org;
                                 if (this._universeKeyCalculator == null) {
                                     throw new java.lang.RuntimeException(MemoryManager.UNIVERSE_NOT_CONNECTED_ERROR);
                                 }
-                                var nextGeneratedKey = this._universeKeyCalculator.nextKey();
-                                if (nextGeneratedKey == org.kevoree.modeling.KConfig.NULL_LONG || nextGeneratedKey == org.kevoree.modeling.KConfig.END_OF_TIME) {
-                                    nextGeneratedKey = this._universeKeyCalculator.nextKey();
-                                }
-                                return nextGeneratedKey;
+                                return this._universeKeyCalculator.nextKey();
                             };
                             MemoryManager.prototype.nextObjectKey = function () {
                                 if (this._objectKeyCalculator == null) {
                                     throw new java.lang.RuntimeException(MemoryManager.UNIVERSE_NOT_CONNECTED_ERROR);
                                 }
-                                var nextGeneratedKey = this._objectKeyCalculator.nextKey();
-                                if (nextGeneratedKey == org.kevoree.modeling.KConfig.NULL_LONG || nextGeneratedKey == org.kevoree.modeling.KConfig.END_OF_TIME) {
-                                    nextGeneratedKey = this._objectKeyCalculator.nextKey();
-                                }
-                                return nextGeneratedKey;
+                                return this._objectKeyCalculator.nextKey();
                             };
                             MemoryManager.prototype.nextModelKey = function () {
+                                if (this._modelKeyCalculator == null) {
+                                    throw new java.lang.RuntimeException(MemoryManager.UNIVERSE_NOT_CONNECTED_ERROR);
+                                }
                                 return this._modelKeyCalculator.nextKey();
                             };
                             MemoryManager.prototype.nextGroupKey = function () {
+                                if (this._groupKeyCalculator == null) {
+                                    throw new java.lang.RuntimeException(MemoryManager.UNIVERSE_NOT_CONNECTED_ERROR);
+                                }
                                 return this._groupKeyCalculator.nextKey();
                             };
-                            MemoryManager.prototype.globalUniverseOrder = function () {
-                                return this._cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
-                            };
                             MemoryManager.prototype.initUniverse = function (p_universe, p_parent) {
-                                var cached = this.globalUniverseOrder();
+                                var cached = this._cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
                                 if (cached != null && !cached.contains(p_universe.key())) {
                                     if (p_parent == null) {
                                         cached.put(p_universe.key(), p_universe.key());
@@ -3670,7 +4214,7 @@ var org;
                                 }
                             };
                             MemoryManager.prototype.parentUniverseKey = function (currentUniverseKey) {
-                                var cached = this.globalUniverseOrder();
+                                var cached = this._cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
                                 if (cached != null) {
                                     return cached.get(currentUniverseKey);
                                 }
@@ -3679,7 +4223,7 @@ var org;
                                 }
                             };
                             MemoryManager.prototype.descendantsUniverseKeys = function (currentUniverseKey) {
-                                var cached = this.globalUniverseOrder();
+                                var cached = this._cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
                                 if (cached != null) {
                                     var temp = new org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
                                     cached.each(function (key, value) {
@@ -3735,9 +4279,9 @@ var org;
                                 universeTree.init(null, this.model().metaModel());
                                 universeTree.inc();
                                 universeTree.put(obj.universe(), obj.now());
-                                this._cache.put(obj.universe(), org.kevoree.modeling.KConfig.NULL_LONG, obj.uuid(), timeTree);
-                                this._cache.put(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, obj.uuid(), universeTree);
-                                this._cache.put(obj.universe(), obj.now(), obj.uuid(), cacheEntry);
+                                this._cache.getOrPut(obj.universe(), org.kevoree.modeling.KConfig.NULL_LONG, obj.uuid(), timeTree);
+                                this._cache.getOrPut(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, obj.uuid(), universeTree);
+                                this._cache.getOrPut(obj.universe(), obj.now(), obj.uuid(), cacheEntry);
                             };
                             MemoryManager.prototype.connect = function (connectCallback) {
                                 var _this = this;
@@ -3792,7 +4336,7 @@ var org;
                                                             else {
                                                                 globalUniverseTree = _this._factory.newUniverseMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, null);
                                                             }
-                                                            _this._cache.put(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, globalUniverseTree);
+                                                            _this._cache.getOrPut(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, globalUniverseTree);
                                                             var newUniIndex = java.lang.Long.parseLong(uniIndexPayload);
                                                             var newObjIndex = java.lang.Long.parseLong(objIndexPayload);
                                                             _this._universeKeyCalculator = new org.kevoree.modeling.memory.manager.impl.KeyCalculator(_this.prefix, newUniIndex);
@@ -3828,7 +4372,11 @@ var org;
                                     });
                                 }
                             };
-                            MemoryManager.prototype.segment = function (universe, time, uuid, resolvePreviousSegment, metaClass, resolutionTrace) {
+                            MemoryManager.prototype.segment = function (universe, requestedTime, uuid, resolvePreviousSegment, metaClass, resolutionTrace) {
+                                var time = requestedTime;
+                                if (metaClass.temporalResolution() != 1) {
+                                    time = time - (time % metaClass.temporalResolution());
+                                }
                                 var currentEntry = this._cache.get(universe, time, uuid);
                                 if (currentEntry != null) {
                                     if (resolutionTrace != null) {
@@ -3841,7 +4389,8 @@ var org;
                                     return currentEntry;
                                 }
                                 var objectUniverseTree = this._cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, uuid);
-                                var resolvedUniverse = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(this.globalUniverseOrder(), objectUniverseTree, time, universe);
+                                var globalUniverseTree = this._cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
+                                var resolvedUniverse = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(globalUniverseTree, objectUniverseTree, time, universe);
                                 var timeTree = this._cache.get(resolvedUniverse, org.kevoree.modeling.KConfig.NULL_LONG, uuid);
                                 if (timeTree == null) {
                                     throw new java.lang.RuntimeException(MemoryManager.OUT_OF_CACHE_MESSAGE + " : TimeTree not found for " + org.kevoree.modeling.KContentKey.createTimeTree(resolvedUniverse, uuid) + " from " + universe + "/" + resolvedUniverse);
@@ -3871,7 +4420,7 @@ var org;
                                     }
                                     else {
                                         var clonedEntry = entry.clone(metaClass);
-                                        this._cache.put(universe, time, uuid, clonedEntry);
+                                        clonedEntry = this._cache.getOrPut(universe, time, uuid, clonedEntry);
                                         if (!needUniverseCopy) {
                                             timeTree.insert(time);
                                         }
@@ -3880,7 +4429,7 @@ var org;
                                             newTemporalTree.insert(time);
                                             newTemporalTree.inc();
                                             timeTree.dec();
-                                            this._cache.put(universe, org.kevoree.modeling.KConfig.NULL_LONG, uuid, newTemporalTree);
+                                            this._cache.getOrPut(universe, org.kevoree.modeling.KConfig.NULL_LONG, uuid, newTemporalTree);
                                             objectUniverseTree.put(universe, time);
                                         }
                                         entry.dec();
@@ -3897,11 +4446,19 @@ var org;
                                 }
                             };
                             MemoryManager.prototype.discard = function (p_universe, callback) {
-                                this._cache.clear(this._model.metaModel());
-                                var globalUniverseTree = new Array();
-                                globalUniverseTree[0] = org.kevoree.modeling.KContentKey.createGlobalUniverseTree();
-                                this.reload(globalUniverseTree, function (throwable) {
-                                    callback(throwable);
+                                var _this = this;
+                                var toReloadKeys = new Array();
+                                toReloadKeys[0] = org.kevoree.modeling.KContentKey.createGlobalUniverseTree();
+                                this._db.get(toReloadKeys, function (strings) {
+                                    if (strings != null && strings.length > 0 && strings[0] != null) {
+                                        var newObject = _this.internal_unserialize(toReloadKeys[0], strings[0]);
+                                        var newCache = _this._factory.newCache();
+                                        newCache.getOrPut(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, newObject);
+                                        var oldCache = _this._cache;
+                                        _this._cache = newCache;
+                                        oldCache.delete(_this._model.metaModel());
+                                        callback(null);
+                                    }
                                 });
                             };
                             MemoryManager.prototype.delete = function (p_universe, callback) {
@@ -3910,7 +4467,7 @@ var org;
                             MemoryManager.prototype.lookup = function (universe, time, uuid, callback) {
                                 var keys = new Array();
                                 keys[0] = uuid;
-                                this.lookupAllobjects(universe, time, keys, function (kObjects) {
+                                this.lookupAllObjects(universe, time, keys, function (kObjects) {
                                     if (kObjects.length == 1) {
                                         if (callback != null) {
                                             callback(kObjects[0]);
@@ -3923,11 +4480,14 @@ var org;
                                     }
                                 });
                             };
-                            MemoryManager.prototype.lookupAllobjects = function (universe, time, uuids, callback) {
-                                this._scheduler.dispatch(new org.kevoree.modeling.memory.manager.impl.LookupAllRunnable(universe, time, uuids, callback, this));
+                            MemoryManager.prototype.lookupAllObjects = function (universe, time, uuids, callback) {
+                                this._scheduler.dispatch(new org.kevoree.modeling.memory.manager.impl.LookupAllObjectsRunnable(universe, time, uuids, callback, this));
                             };
-                            MemoryManager.prototype.lookupAlltimes = function (universe, time, uuid, callback) {
-                                throw new java.lang.RuntimeException("Not Implemented Yet !");
+                            MemoryManager.prototype.lookupAllTimes = function (universe, times, uuid, callback) {
+                                this._scheduler.dispatch(new org.kevoree.modeling.memory.manager.impl.LookupAllTimesRunnable(universe, times, uuid, callback, this));
+                            };
+                            MemoryManager.prototype.lookupAllObjectsTimes = function (universe, times, uuid, callback) {
+                                this._scheduler.dispatch(new org.kevoree.modeling.memory.manager.impl.LookupAllObjectsTimesRunnable(universe, times, uuid, callback, this));
                             };
                             MemoryManager.prototype.cdn = function () {
                                 return this._db;
@@ -3951,7 +4511,8 @@ var org;
                                         callback(null);
                                     }
                                     else {
-                                        var closestUniverse = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(_this.globalUniverseOrder(), rootGlobalUniverseIndex, time, universe);
+                                        var globalUniverseTree = _this._cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
+                                        var closestUniverse = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(globalUniverseTree, rootGlobalUniverseIndex, time, universe);
                                         var universeTreeRootKey = org.kevoree.modeling.KContentKey.createRootTimeTree(closestUniverse);
                                         _this.bumpKeyToCache(universeTreeRootKey, function (universeTree) {
                                             if (universeTree == null) {
@@ -3976,15 +4537,16 @@ var org;
                                     var cleanedTree = globalRootTree;
                                     if (cleanedTree == null) {
                                         cleanedTree = _this._factory.newUniverseMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, null);
-                                        _this._cache.put(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.END_OF_TIME, cleanedTree);
+                                        cleanedTree = _this._cache.getOrPut(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.END_OF_TIME, cleanedTree);
                                     }
-                                    var closestUniverse = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(_this.globalUniverseOrder(), cleanedTree, newRoot.now(), newRoot.universe());
+                                    var globalUniverseTree = _this._cache.get(org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG, org.kevoree.modeling.KConfig.NULL_LONG);
+                                    var closestUniverse = org.kevoree.modeling.memory.manager.impl.ResolutionHelper.resolve_universe(globalUniverseTree, cleanedTree, newRoot.now(), newRoot.universe());
                                     cleanedTree.put(newRoot.universe(), newRoot.now());
                                     if (closestUniverse != newRoot.universe()) {
                                         var newTimeTree = _this._factory.newLongLongTree();
                                         newTimeTree.insert(newRoot.now(), newRoot.uuid());
                                         var universeTreeRootKey = org.kevoree.modeling.KContentKey.createRootTimeTree(newRoot.universe());
-                                        _this._cache.put(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, newTimeTree);
+                                        _this._cache.getOrPut(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, newTimeTree);
                                         if (callback != null) {
                                             callback(null);
                                         }
@@ -3995,7 +4557,7 @@ var org;
                                             var initializedTree = resolvedRootTimeTree;
                                             if (initializedTree == null) {
                                                 initializedTree = _this._factory.newLongLongTree();
-                                                _this._cache.put(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, initializedTree);
+                                                initializedTree = _this._cache.getOrPut(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, initializedTree);
                                             }
                                             initializedTree.insert(newRoot.now(), newRoot.uuid());
                                             if (callback != null) {
@@ -4023,7 +4585,7 @@ var org;
                                             if (cachedObj != null && !cachedObj.isDirty()) {
                                                 cachedObj = _this.internal_unserialize(correspondingKey, strings[i]);
                                                 if (cachedObj != null) {
-                                                    _this._cache.put(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, cachedObj);
+                                                    _this._cache.putAndReplace(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, cachedObj);
                                                 }
                                             }
                                         }
@@ -4055,7 +4617,7 @@ var org;
                                         if (strings[0] != null) {
                                             var newObject = _this.internal_unserialize(contentKey, strings[0]);
                                             if (newObject != null) {
-                                                _this._cache.put(contentKey.universe, contentKey.time, contentKey.obj, newObject);
+                                                newObject = _this._cache.getOrPut(contentKey.universe, contentKey.time, contentKey.obj, newObject);
                                             }
                                             callback(newObject);
                                         }
@@ -4102,7 +4664,7 @@ var org;
                                                 var newObjKey = toLoadDbKeys[i];
                                                 var newObject = _this.internal_unserialize(newObjKey, payloads[i]);
                                                 if (newObject != null) {
-                                                    _this._cache.put(newObjKey.universe, newObjKey.time, newObjKey.obj, newObject);
+                                                    newObject = _this._cache.getOrPut(newObjKey.universe, newObjKey.time, newObjKey.obj, newObject);
                                                     var originIndex = originIndexes[i];
                                                     result[originIndex] = newObject;
                                                 }
@@ -4295,7 +4857,7 @@ var org;
                             return result;
                         };
                         HeapMemoryFactory.prototype.newCache = function () {
-                            return new org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache();
+                            return new org.kevoree.modeling.memory.struct.cache.impl.ArrayMemoryCache();
                         };
                         return HeapMemoryFactory;
                     })();
@@ -4304,183 +4866,260 @@ var org;
                     (function (cache) {
                         var impl;
                         (function (impl) {
-                            var HashMemoryCache = (function () {
-                                function HashMemoryCache() {
-                                    this.initalCapacity = org.kevoree.modeling.KConfig.CACHE_INIT_SIZE;
-                                    this.loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
-                                    this.elementCount = 0;
-                                    this.elementData = new Array();
-                                    this.elementDataSize = this.initalCapacity;
-                                    this.threshold = (this.elementDataSize * this.loadFactor);
+                            var ArrayMemoryCache = (function () {
+                                function ArrayMemoryCache() {
+                                    this._state = null;
+                                    var initialCapacity = org.kevoree.modeling.KConfig.CACHE_INIT_SIZE;
+                                    this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
+                                    this._elementCount = 0;
+                                    this._droppedCount = 0;
+                                    var newstate = new org.kevoree.modeling.memory.struct.cache.impl.ArrayMemoryCache.InternalState(initialCapacity, new Array(), new Array(), new Array(), new Array());
+                                    for (var i = 0; i < initialCapacity; i++) {
+                                        newstate.elementNext[i] = -1;
+                                        newstate.elementHash[i] = -1;
+                                    }
+                                    this._state = newstate;
+                                    this._threshold = (newstate.elementDataSize * this._loadFactor);
                                 }
-                                HashMemoryCache.prototype.get = function (universe, time, obj) {
-                                    if (this.elementDataSize == 0) {
+                                ArrayMemoryCache.prototype.rehashCapacity = function (capacity) {
+                                    var length = (capacity == 0 ? 1 : capacity << 1);
+                                    var newElementKV = new Array();
+                                    System.arraycopy(this._state.elementK3, 0, newElementKV, 0, this._state.elementDataSize * 3);
+                                    var newValues = new Array();
+                                    System.arraycopy(this._state.values, 0, newValues, 0, this._state.elementDataSize);
+                                    var newElementNext = new Array();
+                                    var newElementHash = new Array();
+                                    for (var i = 0; i < length; i++) {
+                                        newElementNext[i] = -1;
+                                        newElementHash[i] = -1;
+                                    }
+                                    for (var i = 0; i < this._state.elementDataSize; i++) {
+                                        if (this._state.values[i] != null) {
+                                            var hash = (this._state.elementK3[(i * 3)] ^ this._state.elementK3[(i * 3) + 1] ^ this._state.elementK3[(i * 3) + 2]);
+                                            var index = (hash & 0x7FFFFFFF) % length;
+                                            newElementNext[i] = newElementHash[index];
+                                            newElementHash[index] = i;
+                                        }
+                                    }
+                                    this._state = new org.kevoree.modeling.memory.struct.cache.impl.ArrayMemoryCache.InternalState(length, newElementKV, newElementNext, newElementHash, newValues);
+                                    this._threshold = (length * this._loadFactor);
+                                };
+                                ArrayMemoryCache.prototype.get = function (universe, time, obj) {
+                                    var internalState = this._state;
+                                    if (internalState.elementDataSize == 0) {
                                         return null;
                                     }
-                                    var index = ((universe ^ time ^ obj) & 0x7FFFFFFF) % this.elementDataSize;
-                                    var m = this.elementData[index];
-                                    while (m != null) {
-                                        if (m.universe == universe && m.time == time && m.obj == obj) {
-                                            return m.value;
+                                    var index = ((universe ^ time ^ obj) & 0x7FFFFFFF) % internalState.elementDataSize;
+                                    var m = internalState.elementHash[index];
+                                    while (m != -1) {
+                                        if (universe == internalState.elementK3[(m * 3)] && time == internalState.elementK3[((m * 3) + 1)] && obj == internalState.elementK3[((m * 3) + 2)]) {
+                                            return internalState.values[m];
                                         }
-                                        m = m.next;
+                                        else {
+                                            m = internalState.elementNext[m];
+                                        }
                                     }
                                     return null;
                                 };
-                                HashMemoryCache.prototype.put = function (universe, time, obj, payload) {
-                                    var entry = null;
-                                    var hash = (universe ^ time ^ obj);
-                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                    if (this.elementDataSize != 0) {
-                                        var m = this.elementData[index];
-                                        while (m != null) {
-                                            if (m.universe == universe && m.time == time && m.obj == obj) {
-                                                entry = m;
-                                                break;
-                                            }
-                                            m = m.next;
+                                ArrayMemoryCache.prototype.putAndReplace = function (universe, time, obj, payload) {
+                                    this.internal_put(universe, time, obj, payload, true);
+                                };
+                                ArrayMemoryCache.prototype.getOrPut = function (universe, time, obj, payload) {
+                                    return this.internal_put(universe, time, obj, payload, false);
+                                };
+                                ArrayMemoryCache.prototype.internal_put = function (universe, time, p_obj, payload, force) {
+                                    var entry = -1;
+                                    var index = -1;
+                                    var hash = (universe ^ time ^ p_obj);
+                                    if (this._state.elementDataSize != 0) {
+                                        index = (hash & 0x7FFFFFFF) % this._state.elementDataSize;
+                                        entry = this.findNonNullKeyEntry(universe, time, p_obj, index, this._state);
+                                    }
+                                    if (entry == -1) {
+                                        if (++this._elementCount > this._threshold) {
+                                            this.rehashCapacity(this._state.elementDataSize);
+                                            index = (hash & 0x7FFFFFFF) % this._state.elementDataSize;
+                                        }
+                                        var newIndex = (this._elementCount - 1 + this._droppedCount);
+                                        this._state.elementK3[(newIndex * 3)] = universe;
+                                        this._state.elementK3[((newIndex * 3) + 1)] = time;
+                                        this._state.elementK3[((newIndex * 3) + 2)] = p_obj;
+                                        this._state.values[newIndex] = payload;
+                                        this._state.elementNext[newIndex] = this._state.elementHash[index];
+                                        this._state.elementHash[index] = newIndex;
+                                        return payload;
+                                    }
+                                    else {
+                                        if (force) {
+                                            this._state.values[entry] = payload;
+                                            return payload;
+                                        }
+                                        else {
+                                            return this._state.values[entry];
                                         }
                                     }
-                                    if (entry == null) {
-                                        entry = this.complex_insert(index, hash, universe, time, obj);
-                                    }
-                                    entry.value = payload;
                                 };
-                                HashMemoryCache.prototype.complex_insert = function (previousIndex, hash, universe, time, obj) {
-                                    var index = previousIndex;
-                                    if (++this.elementCount > this.threshold) {
-                                        var length = (this.elementDataSize == 0 ? 1 : this.elementDataSize << 1);
-                                        var newData = new Array();
-                                        for (var i = 0; i < this.elementDataSize; i++) {
-                                            var entry = this.elementData[i];
-                                            while (entry != null) {
-                                                index = ((entry.universe ^ entry.time ^ entry.obj) & 0x7FFFFFFF) % length;
-                                                var next = entry.next;
-                                                entry.next = newData[index];
-                                                newData[index] = entry;
-                                                entry = next;
-                                            }
+                                ArrayMemoryCache.prototype.findNonNullKeyEntry = function (universe, time, obj, index, internalState) {
+                                    var m = this._state.elementHash[index];
+                                    while (m >= 0) {
+                                        if (universe == internalState.elementK3[m * 3] && time == internalState.elementK3[(m * 3) + 1] && obj == internalState.elementK3[(m * 3) + 2]) {
+                                            return m;
                                         }
-                                        this.elementData = newData;
-                                        this.elementDataSize = length;
-                                        this.threshold = (this.elementDataSize * this.loadFactor);
-                                        index = (hash & 0x7FFFFFFF) % this.elementDataSize;
+                                        m = this._state.elementNext[m];
                                     }
-                                    var entry = new org.kevoree.modeling.memory.struct.cache.impl.HashMemoryCache.Entry();
-                                    entry.universe = universe;
-                                    entry.time = time;
-                                    entry.obj = obj;
-                                    entry.next = this.elementData[index];
-                                    this.elementData[index] = entry;
-                                    return entry;
+                                    return -1;
                                 };
-                                HashMemoryCache.prototype.dirties = function () {
+                                ArrayMemoryCache.prototype.dirties = function () {
                                     var nbDirties = 0;
-                                    for (var i = 0; i < this.elementData.length; i++) {
-                                        if (this.elementData[i] != null) {
-                                            var current = this.elementData[i];
-                                            if (this.elementData[i].value.isDirty()) {
+                                    var internalState = this._state;
+                                    for (var i = 0; i < internalState.elementDataSize; i++) {
+                                        if (internalState.values[i] != null) {
+                                            if (internalState.values[i].isDirty()) {
                                                 nbDirties++;
-                                            }
-                                            while (current.next != null) {
-                                                current = current.next;
-                                                if (current.value.isDirty()) {
-                                                    nbDirties++;
-                                                }
                                             }
                                         }
                                     }
                                     var collectedDirties = new Array();
-                                    var dirtySize = nbDirties;
                                     nbDirties = 0;
-                                    for (var i = 0; i < this.elementData.length; i++) {
-                                        if (nbDirties < dirtySize) {
-                                            if (this.elementData[i] != null) {
-                                                var current = this.elementData[i];
-                                                if (this.elementData[i].value.isDirty()) {
-                                                    var dirty = new org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), this.elementData[i].value);
-                                                    collectedDirties[nbDirties] = dirty;
-                                                    nbDirties++;
-                                                }
-                                                while (current.next != null) {
-                                                    current = current.next;
-                                                    if (current.value.isDirty()) {
-                                                        var dirty = new org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(current.universe, current.time, current.obj), current.value);
-                                                        collectedDirties[nbDirties] = dirty;
-                                                        nbDirties++;
-                                                    }
-                                                }
+                                    for (var i = 0; i < internalState.elementDataSize; i++) {
+                                        if (internalState.values[i] != null) {
+                                            if (internalState.values[i].isDirty()) {
+                                                var dirty = new org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty(new org.kevoree.modeling.KContentKey(internalState.elementK3[i * 3], internalState.elementK3[(i * 3) + 1], internalState.elementK3[(i * 3) + 2]), internalState.values[i]);
+                                                collectedDirties[nbDirties] = dirty;
+                                                nbDirties++;
                                             }
                                         }
                                     }
                                     return collectedDirties;
                                 };
-                                HashMemoryCache.prototype.clean = function (metaModel) {
+                                ArrayMemoryCache.prototype.clean = function (metaModel) {
                                 };
-                                HashMemoryCache.prototype.monitor = function (origin) {
+                                ArrayMemoryCache.prototype.monitor = function (origin) {
                                 };
-                                HashMemoryCache.prototype.size = function () {
-                                    return this.elementCount;
+                                ArrayMemoryCache.prototype.size = function () {
+                                    return this._elementCount;
                                 };
-                                HashMemoryCache.prototype.remove = function (universe, time, obj, p_metaModel) {
+                                ArrayMemoryCache.prototype.remove = function (universe, time, obj, p_metaModel) {
+                                    var internalState = this._state;
                                     var hash = (universe ^ time ^ obj);
-                                    var index = (hash & 0x7FFFFFFF) % this.elementDataSize;
-                                    if (this.elementDataSize != 0) {
-                                        var previous = null;
-                                        var m = this.elementData[index];
-                                        while (m != null) {
-                                            if (m.universe == universe && m.time == time && m.obj == obj) {
-                                                this.elementCount--;
-                                                try {
-                                                    m.value.free(p_metaModel);
-                                                }
-                                                catch ($ex$) {
-                                                    if ($ex$ instanceof java.lang.Exception) {
-                                                        var e = $ex$;
-                                                        e.printStackTrace();
-                                                    }
-                                                    else {
-                                                        throw $ex$;
-                                                    }
-                                                }
-                                                if (previous == null) {
-                                                    this.elementData[index] = m.next;
-                                                }
-                                                else {
-                                                    previous.next = m.next;
-                                                }
+                                    var index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
+                                    if (this._state.elementDataSize == 0) {
+                                        return;
+                                    }
+                                    var m = this._state.elementHash[index];
+                                    var last = -1;
+                                    while (m >= 0) {
+                                        if (universe == internalState.elementK3[m * 3] && time == internalState.elementK3[(m * 3) + 1] && obj == internalState.elementK3[(m * 3) + 2]) {
+                                            break;
+                                        }
+                                        last = m;
+                                        m = this._state.elementNext[m];
+                                    }
+                                    if (m == -1) {
+                                        return;
+                                    }
+                                    if (last == -1) {
+                                        if (this._state.elementNext[m] != -1) {
+                                            this._state.elementHash[index] = m;
+                                        }
+                                        else {
+                                            this._state.elementHash[index] = -1;
+                                        }
+                                    }
+                                    else {
+                                        this._state.elementNext[last] = this._state.elementNext[m];
+                                    }
+                                    this._state.elementNext[m] = -1;
+                                    this._state.values[m].free(p_metaModel);
+                                    this._state.values[m] = null;
+                                    this._elementCount--;
+                                    this._droppedCount++;
+                                };
+                                ArrayMemoryCache.prototype.compact = function () {
+                                    var internalState = this._state;
+                                    if (this._droppedCount > 0) {
+                                        var length = (this._elementCount == 0 ? 1 : this._elementCount << 1);
+                                        var newValues = new Array();
+                                        var newElementNext = new Array();
+                                        var newElementHash = new Array();
+                                        var newElementKV = new Array();
+                                        var currentIndex = 0;
+                                        for (var i = 0; i < length; i++) {
+                                            newElementNext[i] = -1;
+                                            newElementHash[i] = -1;
+                                        }
+                                        for (var i = 0; i < internalState.elementDataSize; i++) {
+                                            var loopElement = internalState.values[i];
+                                            if (loopElement != null) {
+                                                var l_uni = internalState.elementK3[(i * 3)];
+                                                var l_time = internalState.elementK3[(i * 3) + 1];
+                                                var l_obj = internalState.elementK3[(i * 3) + 2];
+                                                newValues[currentIndex] = loopElement;
+                                                newElementKV[(currentIndex * 3)] = l_uni;
+                                                newElementKV[(currentIndex * 3) + 1] = l_time;
+                                                newElementKV[(currentIndex * 3) + 2] = l_obj;
+                                                var hash = (l_uni ^ l_time ^ l_obj);
+                                                var index = (hash & 0x7FFFFFFF) % length;
+                                                newElementNext[currentIndex] = newElementHash[index];
+                                                newElementHash[index] = currentIndex;
+                                                currentIndex++;
                                             }
-                                            previous = m;
-                                            m = m.next;
                                         }
+                                        this._state = new org.kevoree.modeling.memory.struct.cache.impl.ArrayMemoryCache.InternalState(length, newElementKV, newElementNext, newElementHash, newValues);
+                                        this._elementCount = currentIndex;
+                                        this._droppedCount = 0;
+                                        this._threshold = (length * this._loadFactor);
                                     }
                                 };
-                                HashMemoryCache.prototype.clear = function (metaModel) {
-                                    for (var i = 0; i < this.elementData.length; i++) {
-                                        var e = this.elementData[i];
-                                        while (e != null) {
-                                            e.value.free(metaModel);
-                                            e = e.next;
+                                ArrayMemoryCache.prototype.clear = function (metaModel) {
+                                    if (this._elementCount > 0) {
+                                        var internalState = this._state;
+                                        for (var i = 0; i < internalState.elementDataSize; i++) {
+                                            if (internalState.values[i] != null) {
+                                                internalState.values[i].free(metaModel);
+                                            }
                                         }
-                                    }
-                                    if (this.elementCount > 0) {
-                                        this.elementCount = 0;
-                                        this.elementData = new Array();
-                                        this.elementDataSize = this.initalCapacity;
+                                        var initialCapacity = org.kevoree.modeling.KConfig.CACHE_INIT_SIZE;
+                                        var newstate = new org.kevoree.modeling.memory.struct.cache.impl.ArrayMemoryCache.InternalState(initialCapacity, new Array(), new Array(), new Array(), new Array());
+                                        for (var i = 0; i < initialCapacity; i++) {
+                                            newstate.elementNext[i] = -1;
+                                            newstate.elementHash[i] = -1;
+                                        }
+                                        this._elementCount = 0;
+                                        this._droppedCount = 0;
+                                        this._state = newstate;
+                                        this._threshold = (newstate.elementDataSize * this._loadFactor);
                                     }
                                 };
-                                return HashMemoryCache;
+                                ArrayMemoryCache.prototype.delete = function (metaModel) {
+                                    var internalState = this._state;
+                                    this._state = null;
+                                    for (var i = 0; i < internalState.elementDataSize; i++) {
+                                        if (internalState.values[i] != null) {
+                                            internalState.values[i].free(metaModel);
+                                        }
+                                    }
+                                    this._elementCount = 0;
+                                    this._droppedCount = 0;
+                                    this._threshold = 0;
+                                };
+                                return ArrayMemoryCache;
                             })();
-                            impl.HashMemoryCache = HashMemoryCache;
-                            var HashMemoryCache;
-                            (function (HashMemoryCache) {
-                                var Entry = (function () {
-                                    function Entry() {
+                            impl.ArrayMemoryCache = ArrayMemoryCache;
+                            var ArrayMemoryCache;
+                            (function (ArrayMemoryCache) {
+                                var InternalState = (function () {
+                                    function InternalState(p_elementDataSize, p_elementKE, p_elementNext, p_elementHash, p_values) {
+                                        this.elementDataSize = p_elementDataSize;
+                                        this.elementK3 = p_elementKE;
+                                        this.elementNext = p_elementNext;
+                                        this.elementHash = p_elementHash;
+                                        this.values = p_values;
                                     }
-                                    return Entry;
+                                    return InternalState;
                                 })();
-                                HashMemoryCache.Entry = Entry;
-                            })(HashMemoryCache = impl.HashMemoryCache || (impl.HashMemoryCache = {}));
+                                ArrayMemoryCache.InternalState = InternalState;
+                            })(ArrayMemoryCache = impl.ArrayMemoryCache || (impl.ArrayMemoryCache = {}));
                             var KCacheDirty = (function () {
                                 function KCacheDirty(key, object) {
                                     this.key = key;
@@ -4510,14 +5149,14 @@ var org;
                                 ArrayIntMap.prototype.size = function () { return Object.keys(this).length; };
                                 ArrayIntMap.prototype.each = function (callback) { for (var p in this) {
                                     if (this.hasOwnProperty(p)) {
-                                        callback(p, this[p]);
+                                        callback(+p, this[p]);
                                     }
                                 } };
                                 return ArrayIntMap;
                             })();
                             impl.ArrayIntMap = ArrayIntMap;
                             var ArrayLongLongMap = (function () {
-                                function ArrayLongLongMap(initalCapacity, loadFactor) {
+                                function ArrayLongLongMap(initialCapacity, loadFactor) {
                                     this._isDirty = false;
                                 }
                                 ArrayLongLongMap.prototype.clear = function () { for (var p in this) {
@@ -4526,14 +5165,22 @@ var org;
                                         delete this[p];
                                     }
                                 } };
-                                ArrayLongLongMap.prototype.get = function (key) { return this[key]; };
+                                ArrayLongLongMap.prototype.get = function (key) {
+                                    var resolved = this[key];
+                                    if (resolved == undefined) {
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                    }
+                                    else {
+                                        return resolved;
+                                    }
+                                };
                                 ArrayLongLongMap.prototype.put = function (key, pval) { this._isDirty = true; this[key] = pval; };
                                 ArrayLongLongMap.prototype.contains = function (key) { return this.hasOwnProperty(key); };
                                 ArrayLongLongMap.prototype.remove = function (key) { var tmp = this[key]; delete this[key]; return tmp; };
                                 ArrayLongLongMap.prototype.size = function () { return Object.keys(this).length - 1; };
                                 ArrayLongLongMap.prototype.each = function (callback) { for (var p in this) {
                                     if (this.hasOwnProperty(p) && p.indexOf('_') != 0) {
-                                        callback(p, this[p]);
+                                        callback(+p, +this[p]);
                                     }
                                 } };
                                 ArrayLongLongMap.prototype.isDirty = function () { return this._isDirty; };
@@ -4542,6 +5189,15 @@ var org;
                                 return ArrayLongLongMap;
                             })();
                             impl.ArrayLongLongMap = ArrayLongLongMap;
+                            var ArrayLongLongMap;
+                            (function (ArrayLongLongMap) {
+                                var InternalState = (function () {
+                                    function InternalState() {
+                                    }
+                                    return InternalState;
+                                })();
+                                ArrayLongLongMap.InternalState = InternalState;
+                            })(ArrayLongLongMap = impl.ArrayLongLongMap || (impl.ArrayLongLongMap = {}));
                             var ArrayLongMap = (function () {
                                 function ArrayLongMap(initalCapacity, loadFactor) {
                                 }
@@ -4557,7 +5213,7 @@ var org;
                                 ArrayLongMap.prototype.size = function () { return Object.keys(this).length; };
                                 ArrayLongMap.prototype.each = function (callback) { for (var p in this) {
                                     if (this.hasOwnProperty(p)) {
-                                        callback(p, this[p]);
+                                        callback(+p, this[p]);
                                     }
                                 } };
                                 return ArrayLongMap;
@@ -4597,18 +5253,27 @@ var org;
                                 ArrayUniverseOrderMap.prototype.dec = function () { this._counter--; };
                                 ArrayUniverseOrderMap.prototype.free = function () { };
                                 ArrayUniverseOrderMap.prototype.size = function () { return Object.keys(this).length - 3; };
-                                ArrayUniverseOrderMap.prototype.serialize = function (m) {
-                                    var buffer = "";
+                                ArrayUniverseOrderMap.prototype.serialize = function (metaModel) {
+                                    var buffer = new java.lang.StringBuilder();
                                     if (this._className != null) {
-                                        buffer = buffer + this._className + ',';
+                                        buffer.append(this._className);
+                                        buffer.append(',');
                                     }
-                                    buffer = buffer + this.size() + JSON.stringify(this, function (k, v) { if (k[0] != '_') {
-                                        return v;
+                                    org.kevoree.modeling.util.maths.Base64.encodeIntToBuffer(this.size(), buffer);
+                                    buffer.append('/');
+                                    var isFirst = true;
+                                    for (var propKey in this) {
+                                        if (this.hasOwnProperty(propKey) && propKey[0] != '_') {
+                                            if (!isFirst) {
+                                                buffer.append(",");
+                                            }
+                                            isFirst = false;
+                                            org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(propKey, buffer);
+                                            buffer.append(":");
+                                            org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(this[propKey], buffer);
+                                        }
                                     }
-                                    else {
-                                        undefined;
-                                    } });
-                                    return buffer;
+                                    return buffer.toString();
                                 };
                                 ArrayUniverseOrderMap.prototype.init = function (payload, metaModel) {
                                     if (payload == null || payload.length == 0) {
@@ -4616,20 +5281,34 @@ var org;
                                     }
                                     var initPos = 0;
                                     var cursor = 0;
-                                    while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '{') {
+                                    while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '/') {
                                         cursor++;
+                                    }
+                                    if (cursor >= payload.length) {
+                                        return;
                                     }
                                     if (payload.charAt(cursor) == ',') {
                                         this._className = payload.substring(initPos, cursor);
                                         cursor++;
                                         initPos = cursor;
                                     }
-                                    while (cursor < payload.length && payload.charAt(cursor) != '{') {
+                                    while (cursor < payload.length && payload.charAt(cursor) != '/') {
                                         cursor++;
                                     }
-                                    var newParsedElem = JSON.parse(payload.substring(cursor));
-                                    for (var el in newParsedElem) {
-                                        this[el] = newParsedElem[el];
+                                    var nbElement = java.lang.Integer.parseInt(payload.substring(initPos, cursor));
+                                    while (cursor < payload.length) {
+                                        cursor++;
+                                        var beginChunk = cursor;
+                                        while (cursor < payload.length && payload.charAt(cursor) != ':') {
+                                            cursor++;
+                                        }
+                                        var middleChunk = cursor;
+                                        while (cursor < payload.length && payload.charAt(cursor) != ',') {
+                                            cursor++;
+                                        }
+                                        var loopKey = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
+                                        var loopVal = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
+                                        this[loopKey] = loopVal;
                                     }
                                 };
                                 return ArrayUniverseOrderMap;
@@ -4659,15 +5338,118 @@ var org;
                                     return this._dirty;
                                 };
                                 HeapMemorySegment.prototype.serialize = function (metaModel) {
-                                    var builder = {};
                                     var metaClass = metaModel.metaClass(this._metaClassIndex);
+                                    var builder = new java.lang.StringBuilder();
+                                    builder.append("{");
+                                    var isFirst = true;
                                     var metaElements = metaClass.metaElements();
-                                    for (var i = 0; i < this.raw.length; i++) {
-                                        if (this.raw[i] != undefined && this.raw[i] != null) {
-                                            builder[metaElements[i].metaName()] = this.raw[i];
+                                    if (this.raw != null && metaElements != null) {
+                                        for (var i = 0; i < this.raw.length && i < metaElements.length; i++) {
+                                            var o = this.raw[i];
+                                            if (o != null) {
+                                                if (isFirst) {
+                                                    builder.append("\"");
+                                                    isFirst = false;
+                                                }
+                                                else {
+                                                    builder.append(",\"");
+                                                }
+                                                builder.append(metaElements[i].metaName());
+                                                builder.append("\":");
+                                                if (metaElements[i].metaType() == org.kevoree.modeling.meta.MetaType.ATTRIBUTE) {
+                                                    var metaAttribute = metaElements[i];
+                                                    if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.STRING) {
+                                                        builder.append("\"");
+                                                        builder.append(org.kevoree.modeling.format.json.JsonString.encode(o));
+                                                        builder.append("\"");
+                                                    }
+                                                    else {
+                                                        if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.LONG) {
+                                                            builder.append("\"");
+                                                            org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(o, builder);
+                                                            builder.append("\"");
+                                                        }
+                                                        else {
+                                                            if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.CONTINUOUS) {
+                                                                builder.append("[");
+                                                                var castedArr = o;
+                                                                for (var j = 0; j < castedArr.length; j++) {
+                                                                    if (j != 0) {
+                                                                        builder.append(",");
+                                                                    }
+                                                                    builder.append("\"");
+                                                                    org.kevoree.modeling.util.maths.Base64.encodeDoubleToBuffer(castedArr[j], builder);
+                                                                    builder.append("\"");
+                                                                }
+                                                                builder.append("]");
+                                                            }
+                                                            else {
+                                                                if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.BOOL) {
+                                                                    if (o) {
+                                                                        builder.append("1");
+                                                                    }
+                                                                    else {
+                                                                        builder.append("0");
+                                                                    }
+                                                                }
+                                                                else {
+                                                                    if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.DOUBLE) {
+                                                                        builder.append("\"");
+                                                                        org.kevoree.modeling.util.maths.Base64.encodeDoubleToBuffer(o, builder);
+                                                                        builder.append("\"");
+                                                                    }
+                                                                    else {
+                                                                        if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.INT) {
+                                                                            builder.append("\"");
+                                                                            org.kevoree.modeling.util.maths.Base64.encodeIntToBuffer(o, builder);
+                                                                            builder.append("\"");
+                                                                        }
+                                                                        else {
+                                                                            if (metaAttribute.attributeType().isEnum()) {
+                                                                                org.kevoree.modeling.util.maths.Base64.encodeIntToBuffer(o, builder);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                else {
+                                                    if (metaElements[i].metaType() == org.kevoree.modeling.meta.MetaType.REFERENCE) {
+                                                        builder.append("[");
+                                                        var castedArr = o;
+                                                        for (var j = 0; j < castedArr.length; j++) {
+                                                            if (j != 0) {
+                                                                builder.append(",");
+                                                            }
+                                                            builder.append("\"");
+                                                            org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(castedArr[j], builder);
+                                                            builder.append("\"");
+                                                        }
+                                                        builder.append("]");
+                                                    }
+                                                    else {
+                                                        if (metaElements[i].metaType() == org.kevoree.modeling.meta.MetaType.DEPENDENCIES || metaElements[i].metaType() == org.kevoree.modeling.meta.MetaType.INPUT || metaElements[i].metaType() == org.kevoree.modeling.meta.MetaType.OUTPUT) {
+                                                            builder.append("[");
+                                                            var castedArr = o;
+                                                            for (var j = 0; j < castedArr.length; j++) {
+                                                                if (j != 0) {
+                                                                    builder.append(",");
+                                                                }
+                                                                builder.append("\"");
+                                                                org.kevoree.modeling.util.maths.Base64.encodeDoubleToBuffer(castedArr[j], builder);
+                                                                builder.append("\"");
+                                                            }
+                                                            builder.append("]");
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
-                                    return JSON.stringify(builder);
+                                    builder.append("}");
+                                    return builder.toString();
                                 };
                                 HeapMemorySegment.prototype.modifiedIndexes = function (p_metaClass) {
                                     if (this._modifiedIndexes == null) {
@@ -4699,13 +5481,132 @@ var org;
                                     this._dirty = true;
                                 };
                                 HeapMemorySegment.prototype.init = function (payload, metaModel) {
-                                    var rawElem = JSON.parse(payload);
-                                    var metaClass = metaModel.metaClass(this._metaClassIndex);
-                                    this.raw = [];
-                                    for (var key in rawElem) {
-                                        var elem = metaClass.metaByName(key);
-                                        if (elem != null && elem != undefined) {
-                                            this.raw[elem.index()] = rawElem[key];
+                                    if (payload != null) {
+                                        var objectReader = new org.kevoree.modeling.format.json.JsonObjectReader();
+                                        objectReader.parseObject(payload);
+                                        var metaClass = metaModel.metaClass(this._metaClassIndex);
+                                        var metaKeys = objectReader.keys();
+                                        for (var i = 0; i < metaKeys.length; i++) {
+                                            var insideContent = objectReader.get(metaKeys[i]);
+                                            var metaElement = metaClass.metaByName(metaKeys[i]);
+                                            if (insideContent != null) {
+                                                if (metaElement != null && metaElement.metaType().equals(org.kevoree.modeling.meta.MetaType.ATTRIBUTE)) {
+                                                    var metaAttribute = metaElement;
+                                                    var converted = null;
+                                                    if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.STRING) {
+                                                        converted = org.kevoree.modeling.format.json.JsonString.unescape(insideContent);
+                                                    }
+                                                    else {
+                                                        if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.LONG) {
+                                                            converted = org.kevoree.modeling.util.maths.Base64.decodeToLong(insideContent);
+                                                        }
+                                                        else {
+                                                            if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.INT) {
+                                                                converted = org.kevoree.modeling.util.maths.Base64.decodeToInt(insideContent);
+                                                            }
+                                                            else {
+                                                                if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.BOOL) {
+                                                                    if (insideContent.equals("1")) {
+                                                                        converted = true;
+                                                                    }
+                                                                    else {
+                                                                        converted = false;
+                                                                    }
+                                                                }
+                                                                else {
+                                                                    if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.DOUBLE) {
+                                                                        converted = org.kevoree.modeling.util.maths.Base64.decodeToDouble(insideContent);
+                                                                    }
+                                                                    else {
+                                                                        if (metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.CONTINUOUS) {
+                                                                            var plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
+                                                                            var convertedRaw = new Array();
+                                                                            for (var l = 0; l < plainRawSet.length; l++) {
+                                                                                try {
+                                                                                    convertedRaw[l] = org.kevoree.modeling.util.maths.Base64.decodeToDouble(plainRawSet[l]);
+                                                                                }
+                                                                                catch ($ex$) {
+                                                                                    if ($ex$ instanceof java.lang.Exception) {
+                                                                                        var e = $ex$;
+                                                                                        e.printStackTrace();
+                                                                                    }
+                                                                                    else {
+                                                                                        throw $ex$;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            converted = convertedRaw;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    this.raw[metaAttribute.index()] = converted;
+                                                }
+                                                if (metaElement != null && metaElement.metaType().equals(org.kevoree.modeling.meta.MetaType.REFERENCE)) {
+                                                    try {
+                                                        var plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
+                                                        var convertedRaw = new Array();
+                                                        for (var l = 0; l < plainRawSet.length; l++) {
+                                                            try {
+                                                                convertedRaw[l] = org.kevoree.modeling.util.maths.Base64.decodeToLong(plainRawSet[l]);
+                                                            }
+                                                            catch ($ex$) {
+                                                                if ($ex$ instanceof java.lang.Exception) {
+                                                                    var e = $ex$;
+                                                                    e.printStackTrace();
+                                                                }
+                                                                else {
+                                                                    throw $ex$;
+                                                                }
+                                                            }
+                                                        }
+                                                        this.raw[metaElement.index()] = convertedRaw;
+                                                    }
+                                                    catch ($ex$) {
+                                                        if ($ex$ instanceof java.lang.Exception) {
+                                                            var e = $ex$;
+                                                            e.printStackTrace();
+                                                        }
+                                                        else {
+                                                            throw $ex$;
+                                                        }
+                                                    }
+                                                }
+                                                else {
+                                                    if (metaElement != null && (metaElement.metaType().equals(org.kevoree.modeling.meta.MetaType.DEPENDENCIES) || metaElement.metaType().equals(org.kevoree.modeling.meta.MetaType.INPUT) || metaElement.metaType().equals(org.kevoree.modeling.meta.MetaType.OUTPUT))) {
+                                                        try {
+                                                            var plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
+                                                            var convertedRaw = new Array();
+                                                            for (var l = 0; l < plainRawSet.length; l++) {
+                                                                try {
+                                                                    convertedRaw[l] = org.kevoree.modeling.util.maths.Base64.decodeToDouble(plainRawSet[l]);
+                                                                }
+                                                                catch ($ex$) {
+                                                                    if ($ex$ instanceof java.lang.Exception) {
+                                                                        var e = $ex$;
+                                                                        e.printStackTrace();
+                                                                    }
+                                                                    else {
+                                                                        throw $ex$;
+                                                                    }
+                                                                }
+                                                            }
+                                                            this.raw[metaElement.index()] = convertedRaw;
+                                                        }
+                                                        catch ($ex$) {
+                                                            if ($ex$ instanceof java.lang.Exception) {
+                                                                var e = $ex$;
+                                                                e.printStackTrace();
+                                                            }
+                                                            else {
+                                                                throw $ex$;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 };
@@ -4713,10 +5614,18 @@ var org;
                                     return this._counter;
                                 };
                                 HeapMemorySegment.prototype.inc = function () {
-                                    this._counter++;
+                                    this.internal_counter(true);
                                 };
                                 HeapMemorySegment.prototype.dec = function () {
-                                    this._counter--;
+                                    this.internal_counter(false);
+                                };
+                                HeapMemorySegment.prototype.internal_counter = function (inc) {
+                                    if (inc) {
+                                        this._counter++;
+                                    }
+                                    else {
+                                        this._counter--;
+                                    }
                                 };
                                 HeapMemorySegment.prototype.free = function (metaModel) {
                                     this.raw = null;
@@ -4924,6 +5833,17 @@ var org;
                                         return clonedEntry;
                                     }
                                 };
+                                HeapMemorySegment.prototype.toJSON = function (metaModel) {
+                                    var builder = {};
+                                    var metaClass = metaModel.metaClass(this._metaClassIndex);
+                                    var metaElements = metaClass.metaElements();
+                                    for (var i = 0; i < this.raw.length; i++) {
+                                        if (this.raw[i] != undefined && this.raw[i] != null) {
+                                            builder[metaElements[i].metaName()] = this.raw[i];
+                                        }
+                                    }
+                                    return JSON.stringify(builder);
+                                };
                                 return HeapMemorySegment;
                             })();
                             impl.HeapMemorySegment = HeapMemorySegment;
@@ -4935,20 +5855,39 @@ var org;
                         (function (impl) {
                             var AbstractArrayTree = (function () {
                                 function AbstractArrayTree() {
-                                    this._root_index = -1;
-                                    this._size = 0;
+                                    this.kvSize = 1;
                                     this._threshold = 0;
-                                    this._back = null;
                                     this._dirty = true;
                                     this._counter = 0;
+                                    this._root_index = -1;
+                                    this._size = 0;
                                     this._loadFactor = org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR;
                                 }
-                                AbstractArrayTree.prototype.ELEM_SIZE = function () {
-                                    throw "Abstract method";
-                                };
                                 AbstractArrayTree.prototype.allocate = function (capacity) {
-                                    this._back = new Array();
+                                    this.state = new org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree.InternalState(new Array(), new Array(), new Array());
                                     this._threshold = (capacity * this._loadFactor);
+                                };
+                                AbstractArrayTree.prototype.reallocate = function (newCapacity) {
+                                    this._threshold = (newCapacity * this._loadFactor);
+                                    var new_back_kv = new Array();
+                                    if (this.state != null && this.state._back_kv != null) {
+                                        System.arraycopy(this.state._back_kv, 0, new_back_kv, 0, this._size * this.kvSize);
+                                    }
+                                    var new_back_colors = new Array();
+                                    if (this.state != null && this.state._back_colors != null) {
+                                        System.arraycopy(this.state._back_colors, 0, new_back_colors, 0, this._size);
+                                        for (var i = this._size; i < newCapacity; i++) {
+                                            new_back_colors[i] = false;
+                                        }
+                                    }
+                                    var new_back_meta = new Array();
+                                    if (this.state != null && this.state._back_meta != null) {
+                                        System.arraycopy(this.state._back_meta, 0, new_back_meta, 0, this._size * AbstractArrayTree.META_SIZE);
+                                        for (var i = this._size * AbstractArrayTree.META_SIZE; i < newCapacity * AbstractArrayTree.META_SIZE; i++) {
+                                            new_back_meta[i] = -1;
+                                        }
+                                    }
+                                    this.state = new org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree.InternalState(new_back_meta, new_back_kv, new_back_colors);
                                 };
                                 AbstractArrayTree.prototype.size = function () {
                                     return this._size;
@@ -4957,83 +5896,83 @@ var org;
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
-                                    return this._back[p_currentIndex];
+                                    return this.state._back_kv[p_currentIndex * this.kvSize];
                                 };
                                 AbstractArrayTree.prototype.setKey = function (p_currentIndex, p_paramIndex) {
-                                    this._back[p_currentIndex] = p_paramIndex;
+                                    this.state._back_kv[p_currentIndex * this.kvSize] = p_paramIndex;
+                                };
+                                AbstractArrayTree.prototype.value = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return -1;
+                                    }
+                                    return this.state._back_kv[(p_currentIndex * this.kvSize) + 1];
+                                };
+                                AbstractArrayTree.prototype.setValue = function (p_currentIndex, p_paramIndex) {
+                                    this.state._back_kv[(p_currentIndex * this.kvSize) + 1] = p_paramIndex;
                                 };
                                 AbstractArrayTree.prototype.left = function (p_currentIndex) {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
-                                    return this._back[p_currentIndex + 1];
+                                    return this.state._back_meta[p_currentIndex * AbstractArrayTree.META_SIZE];
                                 };
                                 AbstractArrayTree.prototype.setLeft = function (p_currentIndex, p_paramIndex) {
-                                    this._back[p_currentIndex + 1] = p_paramIndex;
+                                    this.state._back_meta[p_currentIndex * AbstractArrayTree.META_SIZE] = p_paramIndex;
                                 };
                                 AbstractArrayTree.prototype.right = function (p_currentIndex) {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
-                                    return this._back[p_currentIndex + 2];
+                                    return this.state._back_meta[(p_currentIndex * AbstractArrayTree.META_SIZE) + 1];
                                 };
                                 AbstractArrayTree.prototype.setRight = function (p_currentIndex, p_paramIndex) {
-                                    this._back[p_currentIndex + 2] = p_paramIndex;
+                                    this.state._back_meta[(p_currentIndex * AbstractArrayTree.META_SIZE) + 1] = p_paramIndex;
                                 };
                                 AbstractArrayTree.prototype.parent = function (p_currentIndex) {
                                     if (p_currentIndex == -1) {
                                         return -1;
                                     }
-                                    return this._back[p_currentIndex + 3];
+                                    return this.state._back_meta[(p_currentIndex * AbstractArrayTree.META_SIZE) + 2];
                                 };
                                 AbstractArrayTree.prototype.setParent = function (p_currentIndex, p_paramIndex) {
-                                    this._back[p_currentIndex + 3] = p_paramIndex;
+                                    this.state._back_meta[(p_currentIndex * AbstractArrayTree.META_SIZE) + 2] = p_paramIndex;
                                 };
-                                AbstractArrayTree.prototype.color = function (currentIndex) {
-                                    if (currentIndex == -1) {
+                                AbstractArrayTree.prototype.color = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
+                                        return true;
+                                    }
+                                    return this.state._back_colors[p_currentIndex];
+                                };
+                                AbstractArrayTree.prototype.setColor = function (p_currentIndex, p_paramIndex) {
+                                    this.state._back_colors[p_currentIndex] = p_paramIndex;
+                                };
+                                AbstractArrayTree.prototype.grandParent = function (p_currentIndex) {
+                                    if (p_currentIndex == -1) {
                                         return -1;
                                     }
-                                    return this._back[currentIndex + 4];
-                                };
-                                AbstractArrayTree.prototype.setColor = function (currentIndex, paramIndex) {
-                                    this._back[currentIndex + 4] = paramIndex;
-                                };
-                                AbstractArrayTree.prototype.value = function (currentIndex) {
-                                    if (currentIndex == -1) {
-                                        return -1;
-                                    }
-                                    return this._back[currentIndex + 5];
-                                };
-                                AbstractArrayTree.prototype.setValue = function (currentIndex, paramIndex) {
-                                    this._back[currentIndex + 5] = paramIndex;
-                                };
-                                AbstractArrayTree.prototype.grandParent = function (currentIndex) {
-                                    if (currentIndex == -1) {
-                                        return -1;
-                                    }
-                                    if (this.parent(currentIndex) != -1) {
-                                        return this.parent(this.parent(currentIndex));
+                                    if (this.parent(p_currentIndex) != -1) {
+                                        return this.parent(this.parent(p_currentIndex));
                                     }
                                     else {
                                         return -1;
                                     }
                                 };
-                                AbstractArrayTree.prototype.sibling = function (currentIndex) {
-                                    if (this.parent(currentIndex) == -1) {
+                                AbstractArrayTree.prototype.sibling = function (p_currentIndex) {
+                                    if (this.parent(p_currentIndex) == -1) {
                                         return -1;
                                     }
                                     else {
-                                        if (currentIndex == this.left(this.parent(currentIndex))) {
-                                            return this.right(this.parent(currentIndex));
+                                        if (p_currentIndex == this.left(this.parent(p_currentIndex))) {
+                                            return this.right(this.parent(p_currentIndex));
                                         }
                                         else {
-                                            return this.left(this.parent(currentIndex));
+                                            return this.left(this.parent(p_currentIndex));
                                         }
                                     }
                                 };
-                                AbstractArrayTree.prototype.uncle = function (currentIndex) {
-                                    if (this.parent(currentIndex) != -1) {
-                                        return this.sibling(this.parent(currentIndex));
+                                AbstractArrayTree.prototype.uncle = function (p_currentIndex) {
+                                    if (this.parent(p_currentIndex) != -1) {
+                                        return this.sibling(this.parent(p_currentIndex));
                                     }
                                     else {
                                         return -1;
@@ -5164,25 +6103,22 @@ var org;
                                 };
                                 AbstractArrayTree.prototype.insertCase1 = function (n) {
                                     if (this.parent(n) == -1) {
-                                        this.setColor(n, 1);
+                                        this.setColor(n, true);
                                     }
                                     else {
                                         this.insertCase2(n);
                                     }
                                 };
                                 AbstractArrayTree.prototype.insertCase2 = function (n) {
-                                    if (this.nodeColor(this.parent(n)) == true) {
-                                        return;
-                                    }
-                                    else {
+                                    if (!this.color(this.parent(n))) {
                                         this.insertCase3(n);
                                     }
                                 };
                                 AbstractArrayTree.prototype.insertCase3 = function (n) {
-                                    if (this.nodeColor(this.uncle(n)) == false) {
-                                        this.setColor(this.parent(n), 1);
-                                        this.setColor(this.uncle(n), 1);
-                                        this.setColor(this.grandParent(n), 0);
+                                    if (!this.color(this.uncle(n))) {
+                                        this.setColor(this.parent(n), true);
+                                        this.setColor(this.uncle(n), true);
+                                        this.setColor(this.grandParent(n), false);
                                         this.insertCase1(this.grandParent(n));
                                     }
                                     else {
@@ -5204,8 +6140,8 @@ var org;
                                     this.insertCase5(n);
                                 };
                                 AbstractArrayTree.prototype.insertCase5 = function (n) {
-                                    this.setColor(this.parent(n), 1);
-                                    this.setColor(this.grandParent(n), 0);
+                                    this.setColor(this.parent(n), true);
+                                    this.setColor(this.grandParent(n), false);
                                     if (n == this.left(this.parent(n)) && this.parent(n) == this.left(this.grandParent(n))) {
                                         this.rotateRight(this.grandParent(n));
                                     }
@@ -5213,32 +6149,22 @@ var org;
                                         this.rotateLeft(this.grandParent(n));
                                     }
                                 };
-                                AbstractArrayTree.prototype.nodeColor = function (n) {
-                                    if (n == -1) {
-                                        return true;
-                                    }
-                                    else {
-                                        return this.color(n) == 1;
-                                    }
-                                };
                                 AbstractArrayTree.prototype.serialize = function (metaModel) {
-                                    var builder = new java.lang.StringBuilder();
                                     if (this._root_index == -1) {
-                                        builder.append("0");
+                                        return "0";
                                     }
-                                    else {
-                                        builder.append(this._size);
-                                        builder.append(',');
-                                        var elemSize = this.ELEM_SIZE();
-                                        builder.append(this._root_index / elemSize);
-                                        for (var i = 0; i < this._size; i++) {
-                                            var nextSegmentBegin = i * elemSize;
-                                            var beginParent = this.parent(nextSegmentBegin);
+                                    var savedRoot = this._root_index;
+                                    var internalState = this.state;
+                                    var builder = new java.lang.StringBuilder();
+                                    var treeSize = 0;
+                                    for (var i = 0; i < internalState._back_meta.length / AbstractArrayTree.META_SIZE; i++) {
+                                        var parentIndex = internalState._back_meta[(i * AbstractArrayTree.META_SIZE) + 2];
+                                        if (parentIndex != -1 || i == savedRoot) {
                                             var isOnLeft = false;
-                                            if (beginParent != -1) {
-                                                isOnLeft = this.left(beginParent) == nextSegmentBegin;
+                                            if (parentIndex != -1) {
+                                                isOnLeft = internalState._back_meta[parentIndex * AbstractArrayTree.META_SIZE] == i;
                                             }
-                                            if (this.color(nextSegmentBegin) == 0) {
+                                            if (!this.color(i)) {
                                                 if (isOnLeft) {
                                                     builder.append(AbstractArrayTree.BLACK_LEFT);
                                                 }
@@ -5254,81 +6180,82 @@ var org;
                                                     builder.append(AbstractArrayTree.RED_RIGHT);
                                                 }
                                             }
-                                            builder.append(this.key(nextSegmentBegin));
+                                            org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(internalState._back_kv[i * this.kvSize], builder);
                                             builder.append(',');
-                                            if (beginParent != -1) {
-                                                builder.append(beginParent / elemSize);
+                                            if (parentIndex != -1) {
+                                                org.kevoree.modeling.util.maths.Base64.encodeIntToBuffer(parentIndex, builder);
                                             }
-                                            if (elemSize > 5) {
+                                            if (this.kvSize > 1) {
                                                 builder.append(',');
-                                                builder.append(this.value(nextSegmentBegin));
+                                                org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(internalState._back_kv[(i * this.kvSize) + 1], builder);
                                             }
+                                            treeSize++;
                                         }
                                     }
-                                    return builder.toString();
+                                    return org.kevoree.modeling.util.maths.Base64.encodeInt(treeSize) + "," + org.kevoree.modeling.util.maths.Base64.encodeInt(savedRoot) + builder.toString();
                                 };
                                 AbstractArrayTree.prototype.init = function (payload, metaModel) {
                                     if (payload == null || payload.length == 0) {
                                         return;
                                     }
-                                    var elemSize = this.ELEM_SIZE();
                                     var initPos = 0;
                                     var cursor = 0;
                                     while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
                                         cursor++;
                                     }
                                     if (payload.charAt(cursor) == ',') {
-                                        this._size = java.lang.Integer.parseInt(payload.substring(initPos, cursor));
+                                        this._size = org.kevoree.modeling.util.maths.Base64.decodeToIntWithBounds(payload, initPos, cursor);
                                         cursor++;
                                         initPos = cursor;
                                     }
                                     while (cursor < payload.length && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
                                         cursor++;
                                     }
-                                    this._root_index = java.lang.Integer.parseInt(payload.substring(initPos, cursor)) * elemSize;
+                                    this._root_index = org.kevoree.modeling.util.maths.Base64.decodeToIntWithBounds(payload, initPos, cursor);
                                     this.allocate(this._size);
-                                    for (var i = 0; i < this._size * elemSize; i++) {
-                                        this._back[i] = -1;
+                                    for (var i = 0; i < this._size; i++) {
+                                        var offsetI = i * AbstractArrayTree.META_SIZE;
+                                        this.state._back_meta[offsetI] = -1;
+                                        this.state._back_meta[offsetI + 1] = -1;
+                                        this.state._back_meta[offsetI + 2] = -1;
                                     }
-                                    var _back_index = 0;
+                                    var currentLoopIndex = 0;
                                     while (cursor < payload.length) {
                                         while (cursor < payload.length && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
                                             cursor++;
                                         }
                                         if (cursor < payload.length) {
                                             var elem = payload.charAt(cursor);
-                                            var currentBlock = _back_index * elemSize;
                                             var isOnLeft = false;
                                             if (elem == AbstractArrayTree.BLACK_LEFT || elem == AbstractArrayTree.RED_LEFT) {
                                                 isOnLeft = true;
                                             }
                                             if (elem == AbstractArrayTree.BLACK_LEFT || elem == AbstractArrayTree.BLACK_RIGHT) {
-                                                this.setColor(currentBlock, 0);
+                                                this.setColor(currentLoopIndex, false);
                                             }
                                             else {
-                                                this.setColor(currentBlock, 1);
+                                                this.setColor(currentLoopIndex, true);
                                             }
                                             cursor++;
                                             var beginChunk = cursor;
                                             while (cursor < payload.length && payload.charAt(cursor) != ',') {
                                                 cursor++;
                                             }
-                                            var loopKey = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
-                                            this.setKey(currentBlock, loopKey);
+                                            var loopKey = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
+                                            this.setKey(currentLoopIndex, loopKey);
                                             cursor++;
                                             beginChunk = cursor;
                                             while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != AbstractArrayTree.BLACK_LEFT && payload.charAt(cursor) != AbstractArrayTree.BLACK_RIGHT && payload.charAt(cursor) != AbstractArrayTree.RED_LEFT && payload.charAt(cursor) != AbstractArrayTree.RED_RIGHT) {
                                                 cursor++;
                                             }
                                             if (cursor > beginChunk) {
-                                                var parentRaw = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
-                                                var parentValue = parentRaw * elemSize;
-                                                this.setParent(currentBlock, parentValue);
+                                                var parentRaw = org.kevoree.modeling.util.maths.Base64.decodeToIntWithBounds(payload, beginChunk, cursor);
+                                                this.setParent(currentLoopIndex, parentRaw);
                                                 if (isOnLeft) {
-                                                    this.setLeft(parentValue, currentBlock);
+                                                    this.setLeft(parentRaw, currentLoopIndex);
                                                 }
                                                 else {
-                                                    this.setRight(parentValue, currentBlock);
+                                                    this.setRight(parentRaw, currentLoopIndex);
                                                 }
                                             }
                                             if (cursor < payload.length && payload.charAt(cursor) == ',') {
@@ -5338,11 +6265,11 @@ var org;
                                                     cursor++;
                                                 }
                                                 if (cursor > beginChunk) {
-                                                    var currentValue = java.lang.Long.parseLong(payload.substring(beginChunk, cursor));
-                                                    this.setValue(currentBlock, currentValue);
+                                                    var currentValue = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
+                                                    this.setValue(currentLoopIndex, currentValue);
                                                 }
                                             }
-                                            _back_index++;
+                                            currentLoopIndex++;
                                         }
                                     }
                                 };
@@ -5359,41 +6286,93 @@ var org;
                                     return this._counter;
                                 };
                                 AbstractArrayTree.prototype.inc = function () {
-                                    this._counter--;
+                                    this.internal_counter(true);
                                 };
                                 AbstractArrayTree.prototype.dec = function () {
-                                    this._counter--;
+                                    this.internal_counter(false);
                                 };
-                                AbstractArrayTree.prototype.free = function (p_metaModel) {
-                                    this._back = null;
-                                    this._threshold = 0;
-                                };
-                                AbstractArrayTree.BLACK_LEFT = '{';
-                                AbstractArrayTree.BLACK_RIGHT = '}';
-                                AbstractArrayTree.RED_LEFT = '[';
-                                AbstractArrayTree.RED_RIGHT = ']';
-                                return AbstractArrayTree;
-                            })();
-                            impl.AbstractArrayTree = AbstractArrayTree;
-                            var ArrayLongLongTree = (function (_super) {
-                                __extends(ArrayLongLongTree, _super);
-                                function ArrayLongLongTree() {
-                                    _super.call(this);
-                                    this._back = null;
-                                }
-                                ArrayLongLongTree.prototype.ELEM_SIZE = function () {
-                                    return ArrayLongLongTree.SIZE_NODE;
-                                };
-                                ArrayLongLongTree.prototype.previousOrEqualValue = function (p_key) {
-                                    var result = this.internal_previousOrEqual_index(p_key);
-                                    if (result != -1) {
-                                        return this.value(result);
+                                AbstractArrayTree.prototype.internal_counter = function (inc) {
+                                    if (inc) {
+                                        this._counter++;
                                     }
                                     else {
-                                        return org.kevoree.modeling.KConfig.NULL_LONG;
+                                        this._counter--;
                                     }
                                 };
-                                ArrayLongLongTree.prototype.lookupValue = function (p_key) {
+                                AbstractArrayTree.prototype.free = function (p_metaModel) {
+                                    this.state = null;
+                                    this._size = 0;
+                                    this._threshold = 0;
+                                };
+                                AbstractArrayTree.prototype.internal_insert = function (p_key, p_value) {
+                                    this._dirty = true;
+                                    if ((this._size + 1) > this._threshold) {
+                                        var length = (this._size == 0 ? 1 : this._size << 1);
+                                        this.reallocate(length);
+                                    }
+                                    var newIndex = this._size;
+                                    if (newIndex == 0) {
+                                        this.setKey(newIndex, p_key);
+                                        if (this.kvSize == 2) {
+                                            this.setValue(newIndex, p_value);
+                                        }
+                                        this.setColor(newIndex, false);
+                                        this.setLeft(newIndex, -1);
+                                        this.setRight(newIndex, -1);
+                                        this.setParent(newIndex, -1);
+                                        this._root_index = newIndex;
+                                        this._size = 1;
+                                    }
+                                    else {
+                                        var n = this._root_index;
+                                        while (true) {
+                                            if (p_key == this.key(n)) {
+                                                return;
+                                            }
+                                            else {
+                                                if (p_key < this.key(n)) {
+                                                    if (this.left(n) == -1) {
+                                                        this.setKey(newIndex, p_key);
+                                                        if (this.kvSize == 2) {
+                                                            this.setValue(newIndex, p_value);
+                                                        }
+                                                        this.setColor(newIndex, false);
+                                                        this.setLeft(newIndex, -1);
+                                                        this.setRight(newIndex, -1);
+                                                        this.setParent(newIndex, -1);
+                                                        this.setLeft(n, newIndex);
+                                                        this._size++;
+                                                        break;
+                                                    }
+                                                    else {
+                                                        n = this.left(n);
+                                                    }
+                                                }
+                                                else {
+                                                    if (this.right(n) == -1) {
+                                                        this.setKey(newIndex, p_key);
+                                                        if (this.kvSize == 2) {
+                                                            this.setValue(newIndex, p_value);
+                                                        }
+                                                        this.setColor(newIndex, false);
+                                                        this.setLeft(newIndex, -1);
+                                                        this.setRight(newIndex, -1);
+                                                        this.setParent(newIndex, -1);
+                                                        this.setRight(n, newIndex);
+                                                        this._size++;
+                                                        break;
+                                                    }
+                                                    else {
+                                                        n = this.right(n);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        this.setParent(newIndex, n);
+                                    }
+                                    this.insertCase1(newIndex);
+                                };
+                                AbstractArrayTree.prototype.internal_lookup_value = function (p_key) {
                                     var n = this._root_index;
                                     if (n == -1) {
                                         return org.kevoree.modeling.KConfig.NULL_LONG;
@@ -5413,85 +6392,55 @@ var org;
                                     }
                                     return n;
                                 };
-                                ArrayLongLongTree.prototype.insert = function (p_key, p_value) {
-                                    if ((this._size + 1) > this._threshold) {
-                                        var length = (this._size == 0 ? 1 : this._size << 1);
-                                        var new_back = new Array();
-                                        if (this._back != null) {
-                                            System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongLongTree.SIZE_NODE);
-                                        }
-                                        this._threshold = (length * this._loadFactor);
-                                        this._back = new_back;
+                                AbstractArrayTree.BLACK_LEFT = '{';
+                                AbstractArrayTree.BLACK_RIGHT = '}';
+                                AbstractArrayTree.RED_LEFT = '[';
+                                AbstractArrayTree.RED_RIGHT = ']';
+                                AbstractArrayTree.META_SIZE = 3;
+                                return AbstractArrayTree;
+                            })();
+                            impl.AbstractArrayTree = AbstractArrayTree;
+                            var AbstractArrayTree;
+                            (function (AbstractArrayTree) {
+                                var InternalState = (function () {
+                                    function InternalState(_back_meta, _back_kv, _back_colors) {
+                                        this._back_meta = _back_meta;
+                                        this._back_kv = _back_kv;
+                                        this._back_colors = _back_colors;
                                     }
-                                    var insertedNode = (this._size) * ArrayLongLongTree.SIZE_NODE;
-                                    if (this._size == 0) {
-                                        this._size = 1;
-                                        this.setKey(insertedNode, p_key);
-                                        this.setValue(insertedNode, p_value);
-                                        this.setColor(insertedNode, 0);
-                                        this.setLeft(insertedNode, -1);
-                                        this.setRight(insertedNode, -1);
-                                        this.setParent(insertedNode, -1);
-                                        this._root_index = insertedNode;
+                                    return InternalState;
+                                })();
+                                AbstractArrayTree.InternalState = InternalState;
+                            })(AbstractArrayTree = impl.AbstractArrayTree || (impl.AbstractArrayTree = {}));
+                            var ArrayLongLongTree = (function (_super) {
+                                __extends(ArrayLongLongTree, _super);
+                                function ArrayLongLongTree() {
+                                    _super.call(this);
+                                    this.kvSize = 2;
+                                }
+                                ArrayLongLongTree.prototype.previousOrEqualValue = function (p_key) {
+                                    var result = this.internal_previousOrEqual_index(p_key);
+                                    if (result != -1) {
+                                        return this.value(result);
                                     }
                                     else {
-                                        var n = this._root_index;
-                                        while (true) {
-                                            if (p_key == this.key(n)) {
-                                                return;
-                                            }
-                                            else {
-                                                if (p_key < this.key(n)) {
-                                                    if (this.left(n) == -1) {
-                                                        this.setKey(insertedNode, p_key);
-                                                        this.setValue(insertedNode, p_value);
-                                                        this.setColor(insertedNode, 0);
-                                                        this.setLeft(insertedNode, -1);
-                                                        this.setRight(insertedNode, -1);
-                                                        this.setParent(insertedNode, -1);
-                                                        this.setLeft(n, insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    }
-                                                    else {
-                                                        n = this.left(n);
-                                                    }
-                                                }
-                                                else {
-                                                    if (this.right(n) == -1) {
-                                                        this.setKey(insertedNode, p_key);
-                                                        this.setValue(insertedNode, p_value);
-                                                        this.setColor(insertedNode, 0);
-                                                        this.setLeft(insertedNode, -1);
-                                                        this.setRight(insertedNode, -1);
-                                                        this.setParent(insertedNode, -1);
-                                                        this.setRight(n, insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    }
-                                                    else {
-                                                        n = this.right(n);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        this.setParent(insertedNode, n);
+                                        return org.kevoree.modeling.KConfig.NULL_LONG;
                                     }
-                                    this.insertCase1(insertedNode);
                                 };
-                                ArrayLongLongTree.SIZE_NODE = 6;
+                                ArrayLongLongTree.prototype.lookupValue = function (p_key) {
+                                    return this.internal_lookup_value(p_key);
+                                };
+                                ArrayLongLongTree.prototype.insert = function (p_key, p_value) {
+                                    this.internal_insert(p_key, p_value);
+                                };
                                 return ArrayLongLongTree;
                             })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
                             impl.ArrayLongLongTree = ArrayLongLongTree;
                             var ArrayLongTree = (function (_super) {
                                 __extends(ArrayLongTree, _super);
                                 function ArrayLongTree() {
-                                    _super.call(this);
-                                    this._back = null;
+                                    _super.apply(this, arguments);
                                 }
-                                ArrayLongTree.prototype.ELEM_SIZE = function () {
-                                    return ArrayLongTree.SIZE_NODE;
-                                };
                                 ArrayLongTree.prototype.previousOrEqual = function (key) {
                                     var result = this.internal_previousOrEqual_index(key);
                                     if (result != -1) {
@@ -5501,70 +6450,9 @@ var org;
                                         return org.kevoree.modeling.KConfig.NULL_LONG;
                                     }
                                 };
-                                ArrayLongTree.prototype.insert = function (key) {
-                                    if ((this._size + 1) > this._threshold) {
-                                        var length = (this._size == 0 ? 1 : this._size << 1);
-                                        var new_back = new Array();
-                                        if (this._back != null) {
-                                            System.arraycopy(this._back, 0, new_back, 0, this._size * ArrayLongTree.SIZE_NODE);
-                                        }
-                                        this._threshold = (length * this._loadFactor);
-                                        this._back = new_back;
-                                    }
-                                    var insertedNode = (this._size) * ArrayLongTree.SIZE_NODE;
-                                    if (this._size == 0) {
-                                        this._size = 1;
-                                        this.setKey(insertedNode, key);
-                                        this.setColor(insertedNode, 0);
-                                        this.setLeft(insertedNode, -1);
-                                        this.setRight(insertedNode, -1);
-                                        this.setParent(insertedNode, -1);
-                                        this._root_index = insertedNode;
-                                    }
-                                    else {
-                                        var n = this._root_index;
-                                        while (true) {
-                                            if (key == this.key(n)) {
-                                                return;
-                                            }
-                                            else {
-                                                if (key < this.key(n)) {
-                                                    if (this.left(n) == -1) {
-                                                        this.setKey(insertedNode, key);
-                                                        this.setColor(insertedNode, 0);
-                                                        this.setLeft(insertedNode, -1);
-                                                        this.setRight(insertedNode, -1);
-                                                        this.setParent(insertedNode, -1);
-                                                        this.setLeft(n, insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    }
-                                                    else {
-                                                        n = this.left(n);
-                                                    }
-                                                }
-                                                else {
-                                                    if (this.right(n) == -1) {
-                                                        this.setKey(insertedNode, key);
-                                                        this.setColor(insertedNode, 0);
-                                                        this.setLeft(insertedNode, -1);
-                                                        this.setRight(insertedNode, -1);
-                                                        this.setParent(insertedNode, -1);
-                                                        this.setRight(n, insertedNode);
-                                                        this._size++;
-                                                        break;
-                                                    }
-                                                    else {
-                                                        n = this.right(n);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        this.setParent(insertedNode, n);
-                                    }
-                                    this.insertCase1(insertedNode);
+                                ArrayLongTree.prototype.insert = function (p_key) {
+                                    this.internal_insert(p_key, p_key);
                                 };
-                                ArrayLongTree.SIZE_NODE = 5;
                                 return ArrayLongTree;
                             })(org.kevoree.modeling.memory.struct.tree.impl.AbstractArrayTree);
                             impl.ArrayLongTree = ArrayLongTree;
@@ -6139,13 +7027,11 @@ var org;
                 var KPrimitiveTypes = (function () {
                     function KPrimitiveTypes() {
                     }
+                    KPrimitiveTypes.BOOL = new org.kevoree.modeling.abs.AbstractDataType("BOOL", false);
                     KPrimitiveTypes.STRING = new org.kevoree.modeling.abs.AbstractDataType("STRING", false);
                     KPrimitiveTypes.LONG = new org.kevoree.modeling.abs.AbstractDataType("LONG", false);
                     KPrimitiveTypes.INT = new org.kevoree.modeling.abs.AbstractDataType("INT", false);
-                    KPrimitiveTypes.BOOL = new org.kevoree.modeling.abs.AbstractDataType("BOOL", false);
-                    KPrimitiveTypes.SHORT = new org.kevoree.modeling.abs.AbstractDataType("SHORT", false);
                     KPrimitiveTypes.DOUBLE = new org.kevoree.modeling.abs.AbstractDataType("DOUBLE", false);
-                    KPrimitiveTypes.FLOAT = new org.kevoree.modeling.abs.AbstractDataType("FLOAT", false);
                     KPrimitiveTypes.CONTINUOUS = new org.kevoree.modeling.abs.AbstractDataType("CONTINUOUS", false);
                     return KPrimitiveTypes;
                 })();
@@ -6168,6 +7054,8 @@ var org;
                     MetaType.OPERATION = new MetaType();
                     MetaType.CLASS = new MetaType();
                     MetaType.MODEL = new MetaType();
+                    MetaType.ENUM = new MetaType();
+                    MetaType.LITERAL = new MetaType();
                     MetaType._MetaTypeVALUES = [
                         MetaType.ATTRIBUTE,
                         MetaType.REFERENCE,
@@ -6177,7 +7065,9 @@ var org;
                         MetaType.OUTPUT,
                         MetaType.OPERATION,
                         MetaType.CLASS,
-                        MetaType.MODEL
+                        MetaType.MODEL,
+                        MetaType.ENUM,
+                        MetaType.LITERAL
                     ];
                     return MetaType;
                 })();
@@ -6289,6 +7179,7 @@ var org;
                             this._indexes = null;
                             this._cachedInputs = null;
                             this._cachedOutputs = null;
+                            this._temporalResolution = 1;
                             this._name = p_name;
                             this._index = p_index;
                             this._meta = new Array();
@@ -6467,6 +7358,12 @@ var org;
                             }
                             return this._cachedOutputs;
                         };
+                        MetaClass.prototype.temporalResolution = function () {
+                            return this._temporalResolution;
+                        };
+                        MetaClass.prototype.setTemporalResolution = function (p_tempo) {
+                            this._temporalResolution = p_tempo;
+                        };
                         MetaClass.prototype.cacheOuputs = function () {
                             var nb = 0;
                             for (var i = 0; i < this._meta.length; i++) {
@@ -6585,6 +7482,56 @@ var org;
                         return MetaDependency;
                     })();
                     impl.MetaDependency = MetaDependency;
+                    var MetaEnum = (function () {
+                        function MetaEnum(p_name, p_index) {
+                            this._indexes = null;
+                            this._name = p_name;
+                            this._index = p_index;
+                            this._literals = new Array();
+                            this._indexes = new org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
+                        }
+                        MetaEnum.prototype.literals = function () {
+                            return this._literals;
+                        };
+                        MetaEnum.prototype.literalByName = function (p_name) {
+                            if (this._indexes != null) {
+                                var resolvedIndex = this._indexes.get(p_name);
+                                if (resolvedIndex != null) {
+                                    return this._literals[resolvedIndex];
+                                }
+                            }
+                            return null;
+                        };
+                        MetaEnum.prototype.literal = function (p_index) {
+                            return this._literals[p_index];
+                        };
+                        MetaEnum.prototype.addLiteral = function (p_name) {
+                            var newLiteral = new org.kevoree.modeling.meta.impl.MetaLiteral(p_name, this._literals.length, this._name);
+                            this.internal_add_meta(newLiteral);
+                            return newLiteral;
+                        };
+                        MetaEnum.prototype.name = function () {
+                            return this._name;
+                        };
+                        MetaEnum.prototype.isEnum = function () {
+                            return true;
+                        };
+                        MetaEnum.prototype.index = function () {
+                            return this._index;
+                        };
+                        MetaEnum.prototype.metaName = function () {
+                            return this._name;
+                        };
+                        MetaEnum.prototype.metaType = function () {
+                            return org.kevoree.modeling.meta.MetaType.ENUM;
+                        };
+                        MetaEnum.prototype.internal_add_meta = function (p_new_meta) {
+                            this._literals[p_new_meta.index()] = p_new_meta;
+                            this._indexes.put(p_new_meta.metaName(), p_new_meta.index());
+                        };
+                        return MetaEnum;
+                    })();
+                    impl.MetaEnum = MetaEnum;
                     var MetaInferInput = (function () {
                         function MetaInferInput(p_name, p_index, p_extractor) {
                             this._name = p_name;
@@ -6639,12 +7586,37 @@ var org;
                         return MetaInferOutput;
                     })();
                     impl.MetaInferOutput = MetaInferOutput;
+                    var MetaLiteral = (function () {
+                        function MetaLiteral(p_name, p_index, p_className) {
+                            this._name = p_name;
+                            this._index = p_index;
+                            this._className = p_className;
+                        }
+                        MetaLiteral.prototype.index = function () {
+                            return this._index;
+                        };
+                        MetaLiteral.prototype.metaName = function () {
+                            return this._name;
+                        };
+                        MetaLiteral.prototype.metaType = function () {
+                            return org.kevoree.modeling.meta.MetaType.LITERAL;
+                        };
+                        MetaLiteral.prototype.toString = function () {
+                            return "KLiteral@" + this._className + "." + this._name;
+                        };
+                        return MetaLiteral;
+                    })();
+                    impl.MetaLiteral = MetaLiteral;
                     var MetaModel = (function () {
                         function MetaModel(p_name) {
                             this._metaClasses_indexes = null;
+                            this._metaTypes_indexes = null;
                             this._name = p_name;
                             this._index = 0;
+                            this._metaClasses = new Array();
+                            this._metaTypes = new Array();
                             this._metaClasses_indexes = new org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
+                            this._metaTypes_indexes = new org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap(org.kevoree.modeling.KConfig.CACHE_INIT_SIZE, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
                         }
                         MetaModel.prototype.index = function () {
                             return this._index;
@@ -6689,6 +7661,26 @@ var org;
                         MetaModel.prototype.addInferMetaClass = function (metaClassName, inferAlg) {
                             return this.internal_addmetaclass(metaClassName, inferAlg);
                         };
+                        MetaModel.prototype.metaTypes = function () {
+                            return this._metaTypes;
+                        };
+                        MetaModel.prototype.metaTypeByName = function (p_name) {
+                            if (this._metaTypes == null) {
+                                return null;
+                            }
+                            var resolved = this._metaTypes_indexes.get(p_name);
+                            if (resolved == null) {
+                                return null;
+                            }
+                            else {
+                                return this._metaTypes[resolved];
+                            }
+                        };
+                        MetaModel.prototype.addMetaEnum = function (enumName) {
+                            var newEnumType = new org.kevoree.modeling.meta.impl.MetaEnum(enumName, this._metaTypes.length);
+                            this.internal_add_type(newEnumType);
+                            return newEnumType;
+                        };
                         MetaModel.prototype.internal_addmetaclass = function (metaClassName, alg) {
                             if (this._metaClasses_indexes.contains(metaClassName)) {
                                 return this.metaClassByName(metaClassName);
@@ -6702,14 +7694,18 @@ var org;
                                 }
                                 else {
                                     var newMetaClass = new org.kevoree.modeling.meta.impl.MetaClass(metaClassName, this._metaClasses.length, alg);
-                                    this.interal_add_meta_class(newMetaClass);
+                                    this.internal_add_meta_class(newMetaClass);
                                     return newMetaClass;
                                 }
                             }
                         };
-                        MetaModel.prototype.interal_add_meta_class = function (p_newMetaClass) {
+                        MetaModel.prototype.internal_add_meta_class = function (p_newMetaClass) {
                             this._metaClasses[p_newMetaClass.index()] = p_newMetaClass;
                             this._metaClasses_indexes.put(p_newMetaClass.metaName(), p_newMetaClass.index());
+                        };
+                        MetaModel.prototype.internal_add_type = function (p_newType) {
+                            this._metaTypes[p_newType.index()] = p_newType;
+                            this._metaTypes_indexes.put(p_newType.metaName(), p_newType.index());
                         };
                         MetaModel.prototype.model = function () {
                             return new org.kevoree.modeling.meta.impl.GenericModel(this);
@@ -7154,7 +8150,7 @@ var org;
                                     trimmed[inserted[0]] = key;
                                     inserted[0]++;
                                 });
-                                currentObject._manager.lookupAllobjects(currentObject.universe(), currentObject.now(), trimmed, function (kObjects) {
+                                currentObject._manager.lookupAllObjects(currentObject.universe(), currentObject.now(), trimmed, function (kObjects) {
                                     private_callback(kObjects);
                                 });
                             };
@@ -7680,15 +8676,31 @@ var org;
                                             }
                                             var resolved = context.inputObjects()[finalI].getByName(potentialVarName);
                                             if (resolved != null) {
-                                                try {
-                                                    return java.lang.Double.parseDouble(resolved.toString());
+                                                if (resolved instanceof org.kevoree.modeling.meta.impl.MetaLiteral) {
+                                                    return resolved.index();
                                                 }
-                                                catch ($ex$) {
-                                                    if ($ex$ instanceof java.lang.Exception) {
-                                                        var e = $ex$;
+                                                else {
+                                                    var valueString = resolved.toString();
+                                                    if (valueString.equals("true")) {
+                                                        return 1.0;
                                                     }
                                                     else {
-                                                        throw $ex$;
+                                                        if (valueString.equals("false")) {
+                                                            return 0.0;
+                                                        }
+                                                        else {
+                                                            try {
+                                                                return java.lang.Double.parseDouble(resolved.toString());
+                                                            }
+                                                            catch ($ex$) {
+                                                                if ($ex$ instanceof java.lang.Exception) {
+                                                                    var e = $ex$;
+                                                                }
+                                                                else {
+                                                                    throw $ex$;
+                                                                }
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -7800,7 +8812,7 @@ var org;
                                         trimmed[inserted[0]] = key;
                                         inserted[0]++;
                                     });
-                                    currentObject._manager.lookupAllobjects(currentObject.universe(), currentObject.now(), trimmed, function (kObjects) {
+                                    currentObject._manager.lookupAllObjects(currentObject.universe(), currentObject.now(), trimmed, function (kObjects) {
                                         if (_this._next == null) {
                                             context.finalCallback()(kObjects);
                                         }
@@ -7957,7 +8969,7 @@ var org;
                                         trimmed[inserted[0]] = key;
                                         inserted[0]++;
                                     });
-                                    currentFirstObject._manager.lookupAllobjects(currentFirstObject.universe(), currentFirstObject.now(), trimmed, function (nextStepElement) {
+                                    currentFirstObject._manager.lookupAllObjects(currentFirstObject.universe(), currentFirstObject.now(), trimmed, function (nextStepElement) {
                                         if (_this._next == null) {
                                             context.finalCallback()(nextStepElement);
                                         }
@@ -7971,6 +8983,21 @@ var org;
                             return TraverseQueryAction;
                         })();
                         actions.TraverseQueryAction = TraverseQueryAction;
+                        var TraverseTimeAction = (function () {
+                            function TraverseTimeAction(p_timeOffset, p_steps, p_continueCondition) {
+                                this._timeOffset = p_timeOffset;
+                                this._steps = p_steps;
+                                this._continueContition = p_continueCondition;
+                            }
+                            TraverseTimeAction.prototype.chain = function (p_next) {
+                                this._next = p_next;
+                            };
+                            TraverseTimeAction.prototype.execute = function (context) {
+                                throw new java.lang.RuntimeException("Not implemented Yet!");
+                            };
+                            return TraverseTimeAction;
+                        })();
+                        actions.TraverseTimeAction = TraverseTimeAction;
                     })(actions = impl.actions || (impl.actions = {}));
                 })(impl = traversal_1.impl || (traversal_1.impl = {}));
                 var query;
@@ -8201,6 +9228,192 @@ var org;
                         return AdjLinearSolverQr;
                     })();
                     maths.AdjLinearSolverQr = AdjLinearSolverQr;
+                    var Base64 = (function () {
+                        function Base64() {
+                        }
+                        Base64.encodeLong = function (l) {
+                            var result = "";
+                            var tmp = l;
+                            if (l < 0) {
+                                tmp = -tmp;
+                            }
+                            for (var i = 47; i >= 5; i -= 6) {
+                                if (!(result.equals("") && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
+                                    result += Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F];
+                                }
+                            }
+                            result += Base64.encodeArray[(tmp & 0x1F) * 2 + (l < 0 ? 1 : 0)];
+                            return result;
+                        };
+                        Base64.encodeLongToBuffer = function (l, buffer) {
+                            var empty = true;
+                            var tmp = l;
+                            if (l < 0) {
+                                tmp = -tmp;
+                            }
+                            for (var i = 47; i >= 5; i -= 6) {
+                                if (!(empty && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
+                                    empty = false;
+                                    buffer.append(Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F]);
+                                }
+                            }
+                            buffer.append(Base64.encodeArray[(tmp & 0x1F) * 2 + (l < 0 ? 1 : 0)]);
+                        };
+                        Base64.encodeInt = function (l) {
+                            var result = "";
+                            var tmp = l;
+                            if (l < 0) {
+                                tmp = -tmp;
+                            }
+                            for (var i = 29; i >= 5; i -= 6) {
+                                if (!(result.equals("") && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
+                                    result += Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F];
+                                }
+                            }
+                            result += Base64.encodeArray[(tmp & 0x1F) * 2 + (l < 0 ? 1 : 0)];
+                            return result;
+                        };
+                        Base64.encodeIntToBuffer = function (l, buffer) {
+                            var empty = true;
+                            var tmp = l;
+                            if (l < 0) {
+                                tmp = -tmp;
+                            }
+                            for (var i = 29; i >= 5; i -= 6) {
+                                if (!(empty && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
+                                    empty = false;
+                                    buffer.append(Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F]);
+                                }
+                            }
+                            buffer.append(Base64.encodeArray[(tmp & 0x1F) * 2 + (l < 0 ? 1 : 0)]);
+                        };
+                        Base64.decodeToLong = function (s) {
+                            return Base64.decodeToLongWithBounds(s, 0, s.length);
+                        };
+                        Base64.decodeToLongWithBounds = function (s, offsetBegin, offsetEnd) {
+                            var result = 0;
+                            result += (Base64.decodeArray[s.charAt((offsetEnd - 1))] & 0xFF) / 2;
+                            for (var i = 1; i < (offsetEnd - offsetBegin); i++) {
+                                result += (Base64.decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF) * Math.pow(2, (6 * i) - 1);
+                            }
+                            if (((Base64.decodeArray[s.charAt((offsetEnd - 1))] & 0xFF) & 0x1) != 0) {
+                                result = -result;
+                            }
+                            return result;
+                        };
+                        Base64.decodeToInt = function (s) {
+                            return Base64.decodeToIntWithBounds(s, 0, s.length);
+                        };
+                        Base64.decodeToIntWithBounds = function (s, offsetBegin, offsetEnd) {
+                            var result = 0;
+                            result += (Base64.decodeArray[s.charAt((offsetEnd - 1))] & 0xFF) / 2;
+                            for (var i = 1; i < (offsetEnd - offsetBegin); i++) {
+                                result += (Base64.decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF) * Math.pow(2, (6 * i) - 1);
+                            }
+                            if (((Base64.decodeArray[s.charAt((offsetEnd - 1))] & 0xFF) & 0x1) != 0) {
+                                result = -result;
+                            }
+                            return result;
+                        };
+                        Base64.encodeDouble = function (d) {
+                            var result = "";
+                            var float = new Float64Array(1);
+                            var bytes = new Uint8Array(float.buffer);
+                            float[0] = d;
+                            var exponent = ((bytes[7] & 0x7f) << 4 | bytes[6] >> 4) - 0x3ff;
+                            var signAndExp = (((bytes[7] >> 7) & 0x1) << 11) + (exponent + 1023);
+                            //encode sign + exp
+                            result += Base64.encodeArray[(signAndExp >> 6) & 0x3F];
+                            result += Base64.encodeArray[signAndExp & 0x3F];
+                            result += Base64.encodeArray[bytes[6] & 0x0F];
+                            result += Base64.encodeArray[(bytes[5] >> 2) & 0x3F];
+                            result += Base64.encodeArray[(bytes[5] & 0x3) << 4 | bytes[4] >> 4];
+                            result += Base64.encodeArray[(bytes[4] & 0x0F) << 2 | bytes[3] >> 6];
+                            result += Base64.encodeArray[(bytes[3] & 0x3F)];
+                            result += Base64.encodeArray[(bytes[2] >> 2) & 0x3F];
+                            result += Base64.encodeArray[(bytes[2] & 0x3) << 4 | bytes[1] >> 4];
+                            result += Base64.encodeArray[(bytes[1] & 0x0F) << 2 | bytes[0] >> 6];
+                            result += Base64.encodeArray[(bytes[0] & 0x3F)];
+                            return result;
+                        };
+                        Base64.encodeDoubleToBuffer = function (d, buffer) {
+                            var float = new Float64Array(1);
+                            var bytes = new Uint8Array(float.buffer);
+                            float[0] = d;
+                            var exponent = ((bytes[7] & 0x7f) << 4 | bytes[6] >> 4) - 0x3ff;
+                            var signAndExp = (((bytes[7] >> 7) & 0x1) << 11) + (exponent + 1023);
+                            //encode sign + exp
+                            buffer.append(Base64.encodeArray[(signAndExp >> 6) & 0x3F]);
+                            buffer.append(Base64.encodeArray[signAndExp & 0x3F]);
+                            buffer.append(Base64.encodeArray[bytes[6] & 0x0F]);
+                            buffer.append(Base64.encodeArray[(bytes[5] >> 2) & 0x3F]);
+                            buffer.append(Base64.encodeArray[(bytes[5] & 0x3) << 4 | bytes[4] >> 4]);
+                            buffer.append(Base64.encodeArray[(bytes[4] & 0x0F) << 2 | bytes[3] >> 6]);
+                            buffer.append(Base64.encodeArray[(bytes[3] & 0x3F)]);
+                            buffer.append(Base64.encodeArray[(bytes[2] >> 2) & 0x3F]);
+                            buffer.append(Base64.encodeArray[(bytes[2] & 0x3) << 4 | bytes[1] >> 4]);
+                            buffer.append(Base64.encodeArray[(bytes[1] & 0x0F) << 2 | bytes[0] >> 6]);
+                            buffer.append(Base64.encodeArray[(bytes[0] & 0x3F)]);
+                        };
+                        Base64.decodeToDouble = function (s) {
+                            return Base64.decodeToDoubleWithBounds(s, 0, s.length);
+                        };
+                        Base64.decodeToDoubleWithBounds = function (s, offsetBegin, offsetEnd) {
+                            var signAndExp = ((Base64.decodeArray[s.charAt(0)] & 0xFF) * Math.pow(2, 6)) + (Base64.decodeArray[s.charAt(1)] & 0xFF);
+                            var sign = ((signAndExp & 0x800) != 0 ? -1 : 1);
+                            var exp = signAndExp & 0x7FF;
+                            //Mantisse
+                            var mantissaBits = 0;
+                            for (var i = 0; i < (offsetEnd - offsetBegin) - 2; i++) {
+                                mantissaBits += (Base64.decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF) * Math.pow(2, 6 * i);
+                            }
+                            return (exp != 0) ? sign * Math.pow(2, exp - 1023) * (1 + (mantissaBits / Math.pow(2, 52))) : sign * Math.pow(2, -1022) * (0 + (mantissaBits / Math.pow(2, 52)));
+                        };
+                        Base64.encodeBoolArray = function (boolArr) {
+                            var result = "";
+                            var tmpVal = 0;
+                            for (var i = 0; i < boolArr.length; i++) {
+                                tmpVal = tmpVal | ((boolArr[i] ? 1 : 0) * Math.pow(2, i % 6));
+                                if (i % 6 == 5 || i == (boolArr.length - 1)) {
+                                    result += Base64.encodeArray[tmpVal];
+                                    tmpVal = 0;
+                                }
+                            }
+                            return result;
+                        };
+                        Base64.encodeBoolArrayToBuffer = function (boolArr, buffer) {
+                            var tmpVal = 0;
+                            for (var i = 0; i < boolArr.length; i++) {
+                                tmpVal = tmpVal | ((boolArr[i] ? 1 : 0) * Math.pow(2, i % 6));
+                                if (i % 6 == 5 || i == boolArr.length - 1) {
+                                    buffer.append(Base64.encodeArray[tmpVal]);
+                                    tmpVal = 0;
+                                }
+                            }
+                        };
+                        Base64.decodeBoolArray = function (s, arraySize) {
+                            return Base64.decodeToBoolArrayWithBounds(s, 0, s.length, arraySize);
+                        };
+                        Base64.decodeToBoolArrayWithBounds = function (s, offsetBegin, offsetEnd, arraySize) {
+                            var resultTmp = [];
+                            for (var i = 0; i < (offsetEnd - offsetBegin); i++) {
+                                var bitarray = Base64.decodeArray[s.charAt(offsetBegin + i)] & 0xFF;
+                                for (var bit_i = 0; bit_i < 6; bit_i++) {
+                                    if ((6 * i) + bit_i < arraySize) {
+                                        resultTmp[(6 * i) + bit_i] = (bitarray & (1 * Math.pow(2, bit_i))) != 0;
+                                    }
+                                    else {
+                                        break;
+                                    }
+                                }
+                            }
+                            return resultTmp;
+                        };
+                        Base64.encodeArray = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'];
+                        Base64.decodeArray = { "A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7, "I": 8, "J": 9, "K": 10, "L": 11, "M": 12, "N": 13, "O": 14, "P": 15, "Q": 16, "R": 17, "S": 18, "T": 19, "U": 20, "V": 21, "W": 22, "X": 23, "Y": 24, "Z": 25, "a": 26, "b": 27, "c": 28, "d": 29, "e": 30, "f": 31, "g": 32, "h": 33, "i": 34, "j": 35, "k": 36, "l": 37, "m": 38, "n": 39, "o": 40, "p": 41, "q": 42, "r": 43, "s": 44, "t": 45, "u": 46, "v": 47, "w": 48, "x": 49, "y": 50, "z": 51, "0": 52, "1": 53, "2": 54, "3": 55, "4": 56, "5": 57, "6": 58, "7": 59, "8": 60, "9": 61, "+": 62, "/": 63 };
+                        return Base64;
+                    })();
+                    maths.Base64 = Base64;
                     var Correlations = (function () {
                         function Correlations() {
                         }
@@ -9217,25 +10430,25 @@ var org;
                             })();
                             impl.Array1D = Array1D;
                             var Array2D = (function () {
-                                function Array2D(p_nbRaws, p_nbColumns, p_offset, p_segmentIndex, p_segment, p_metaClass) {
-                                    this._nbRaws = p_nbRaws;
+                                function Array2D(p_nbRows, p_nbColumns, p_offset, p_segmentIndex, p_segment, p_metaClass) {
+                                    this._nbRows = p_nbRows;
                                     this._nbColumns = p_nbColumns;
                                     this._offset = p_offset;
                                     this._segment = p_segment;
                                     this._segmentIndex = p_segmentIndex;
                                     this._metaClass = p_metaClass;
                                 }
-                                Array2D.prototype.nbRaws = function () {
-                                    return this._nbRaws;
+                                Array2D.prototype.nbRows = function () {
+                                    return this._nbRows;
                                 };
                                 Array2D.prototype.nbColumns = function () {
                                     return this._nbColumns;
                                 };
-                                Array2D.prototype.get = function (p_rawIndex, p_columnIndex) {
-                                    return this._segment.getInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns) + p_columnIndex, this._metaClass);
+                                Array2D.prototype.get = function (p_rowIndex, p_columnIndex) {
+                                    return this._segment.getInferElem(this._segmentIndex, this._offset + (p_rowIndex * this._nbColumns) + p_columnIndex, this._metaClass);
                                 };
-                                Array2D.prototype.set = function (p_rawIndex, p_columnIndex, value) {
-                                    this._segment.setInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns) + p_columnIndex, value, this._metaClass);
+                                Array2D.prototype.set = function (p_rowIndex, p_columnIndex, value) {
+                                    this._segment.setInferElem(this._segmentIndex, this._offset + (p_rowIndex * this._nbColumns) + p_columnIndex, value, this._metaClass);
                                     return value;
                                 };
                                 Array2D.prototype.add = function (rawIndex, columnIndex, value) {
@@ -9245,8 +10458,8 @@ var org;
                             })();
                             impl.Array2D = Array2D;
                             var Array3D = (function () {
-                                function Array3D(p_nbRaws, p_nbColumns, p_nbDeeps, p_offset, p_segmentIndex, p_segment, p_metaClass) {
-                                    this._nbRaws = p_nbRaws;
+                                function Array3D(p_nbrows, p_nbColumns, p_nbDeeps, p_offset, p_segmentIndex, p_segment, p_metaClass) {
+                                    this._nbrows = p_nbrows;
                                     this._nbColumns = p_nbColumns;
                                     this._nbDeeps = p_nbDeeps;
                                     this._offset = p_offset;
@@ -9254,8 +10467,8 @@ var org;
                                     this._segment = p_segment;
                                     this._metaClass = p_metaClass;
                                 }
-                                Array3D.prototype.nbRaws = function () {
-                                    return this._nbRaws;
+                                Array3D.prototype.nbRows = function () {
+                                    return this._nbrows;
                                 };
                                 Array3D.prototype.nbColumns = function () {
                                     return this._nbColumns;
@@ -9263,15 +10476,15 @@ var org;
                                 Array3D.prototype.nbDeeps = function () {
                                     return this._nbDeeps;
                                 };
-                                Array3D.prototype.get = function (p_rawIndex, p_columnIndex, p_deepIndex) {
-                                    return this._segment.getInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns * this._nbDeeps) + p_columnIndex + p_deepIndex, this._metaClass);
+                                Array3D.prototype.get = function (p_rowIndex, p_columnIndex, p_deepIndex) {
+                                    return this._segment.getInferElem(this._segmentIndex, this._offset + p_rowIndex * (this._nbColumns * this._nbDeeps) + p_columnIndex * this._nbDeeps + p_deepIndex, this._metaClass);
                                 };
-                                Array3D.prototype.set = function (p_rawIndex, p_columnIndex, p_deepIndex, p_value) {
-                                    this._segment.setInferElem(this._segmentIndex, this._offset + (p_rawIndex * this._nbColumns * this._nbDeeps) + p_columnIndex + p_deepIndex, p_value, this._metaClass);
+                                Array3D.prototype.set = function (p_rowIndex, p_columnIndex, p_deepIndex, p_value) {
+                                    this._segment.setInferElem(this._segmentIndex, this._offset + p_rowIndex * (this._nbColumns * this._nbDeeps) + p_columnIndex * this._nbDeeps + p_deepIndex, p_value, this._metaClass);
                                     return p_value;
                                 };
-                                Array3D.prototype.add = function (p_rawIndex, p_columnIndex, p_deepIndex, value) {
-                                    return this.set(p_rawIndex, p_columnIndex, p_deepIndex, this.get(p_rawIndex, p_columnIndex, p_deepIndex) + value);
+                                Array3D.prototype.add = function (p_rowIndex, p_columnIndex, p_deepIndex, value) {
+                                    return this.set(p_rowIndex, p_columnIndex, p_deepIndex, this.get(p_rowIndex, p_columnIndex, p_deepIndex) + value);
                                 };
                                 return Array3D;
                             })();
@@ -9405,6 +10618,13 @@ var cloud;
                 this.set(cloud.meta.MetaNode.ATT_NAME, p_obj);
                 return this;
             };
+            NodeImpl.prototype.getState = function () {
+                return this.get(cloud.meta.MetaNode.ATT_STATE);
+            };
+            NodeImpl.prototype.setState = function (p_obj) {
+                this.set(cloud.meta.MetaNode.ATT_STATE, p_obj);
+                return this;
+            };
             NodeImpl.prototype.getValue = function () {
                 return this.get(cloud.meta.MetaNode.ATT_VALUE);
             };
@@ -9499,11 +10719,12 @@ var cloud;
                 _super.call(this, "cloud.Node", 0, null);
                 var temp_all = new Array();
                 temp_all[0] = MetaNode.ATT_NAME;
-                temp_all[1] = MetaNode.ATT_VALUE;
+                temp_all[1] = MetaNode.ATT_STATE;
+                temp_all[2] = MetaNode.ATT_VALUE;
                 var temp_references = new Array();
-                temp_all[2] = MetaNode.REF_CHILDREN;
-                temp_all[3] = MetaNode.REF_OP_CHILDREN;
-                temp_all[4] = MetaNode.REF_ELEMENT;
+                temp_all[3] = MetaNode.REF_CHILDREN;
+                temp_all[4] = MetaNode.REF_OP_CHILDREN;
+                temp_all[5] = MetaNode.REF_ELEMENT;
                 var temp_operations = new Array();
                 this.init(temp_all);
             }
@@ -9515,18 +10736,19 @@ var cloud;
             };
             MetaNode.INSTANCE = null;
             MetaNode.ATT_NAME = new org.kevoree.modeling.meta.impl.MetaAttribute("name", 0, 0, true, org.kevoree.modeling.meta.KPrimitiveTypes.STRING, org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation.instance());
-            MetaNode.ATT_VALUE = new org.kevoree.modeling.meta.impl.MetaAttribute("value", 1, 0, false, org.kevoree.modeling.meta.KPrimitiveTypes.STRING, org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation.instance());
-            MetaNode.REF_CHILDREN = new org.kevoree.modeling.meta.impl.MetaReference("children", 2, true, false, function () {
+            MetaNode.ATT_STATE = new org.kevoree.modeling.meta.impl.MetaAttribute("state", 1, 0, false, cloud.meta.MetaState.getInstance(), org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation.instance());
+            MetaNode.ATT_VALUE = new org.kevoree.modeling.meta.impl.MetaAttribute("value", 2, 0, false, org.kevoree.modeling.meta.KPrimitiveTypes.STRING, org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation.instance());
+            MetaNode.REF_CHILDREN = new org.kevoree.modeling.meta.impl.MetaReference("children", 3, true, false, function () {
                 return cloud.meta.MetaNode.getInstance();
             }, "op_children", function () {
                 return cloud.meta.MetaNode.getInstance();
             });
-            MetaNode.REF_OP_CHILDREN = new org.kevoree.modeling.meta.impl.MetaReference("op_children", 3, false, false, function () {
+            MetaNode.REF_OP_CHILDREN = new org.kevoree.modeling.meta.impl.MetaReference("op_children", 4, false, false, function () {
                 return cloud.meta.MetaNode.getInstance();
             }, "children", function () {
                 return cloud.meta.MetaNode.getInstance();
             });
-            MetaNode.REF_ELEMENT = new org.kevoree.modeling.meta.impl.MetaReference("element", 4, true, true, function () {
+            MetaNode.REF_ELEMENT = new org.kevoree.modeling.meta.impl.MetaReference("element", 5, true, true, function () {
                 return cloud.meta.MetaElement.getInstance();
             }, "op_element", function () {
                 return cloud.meta.MetaNode.getInstance();
@@ -9534,5 +10756,25 @@ var cloud;
             return MetaNode;
         })(org.kevoree.modeling.meta.impl.MetaClass);
         meta.MetaNode = MetaNode;
+        var MetaState = (function () {
+            function MetaState() {
+            }
+            MetaState.getInstance = function () {
+                if (MetaState.INSTANCE == null) {
+                    MetaState.INSTANCE = new cloud.meta.MetaState();
+                }
+                return MetaState.INSTANCE;
+            };
+            MetaState.prototype.name = function () {
+                return "State";
+            };
+            MetaState.prototype.isEnum = function () {
+                return true;
+            };
+            MetaState.NOK = new org.kevoree.modeling.meta.impl.MetaLiteral("NOK", 0, "cloud.State");
+            MetaState.OK = new org.kevoree.modeling.meta.impl.MetaLiteral("OK", 1, "cloud.State");
+            return MetaState;
+        })();
+        meta.MetaState = MetaState;
     })(meta = cloud.meta || (cloud.meta = {}));
 })(cloud || (cloud = {}));

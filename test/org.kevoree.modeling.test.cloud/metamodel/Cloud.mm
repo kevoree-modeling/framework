@@ -4,6 +4,8 @@ class cloud.Node {
     value : String
     children : cloud.Node[0,*]
     element : cloud.Element
+
+    state : cloud.State
 }
 
 class cloud.Element {
@@ -18,3 +20,7 @@ class cloud.Element {
     func trigger(param : String, loop : Int) : String
 }
 
+enum cloud.State {
+OK
+NOK
+}

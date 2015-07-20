@@ -4,6 +4,7 @@ package ${classDeclaration.pack};
 public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#foreach($parent in $classDeclaration.parents), $parent.getFqn()#end {
 
 #foreach($attribute in $classDeclaration.attributes)
+
 #if($attribute.single)
     public $context.generationContext.getHelper().convertToJavaType(${attribute.getType()}) get${context.generationContext.helper.toCamelCase($attribute.getName())}();
     public ${classDeclaration.pack}.${classDeclaration.name} set${context.generationContext.helper.toCamelCase($attribute.getName())}($context.generationContext.getHelper().convertToJavaType(${attribute.getType()}) p_obj);
