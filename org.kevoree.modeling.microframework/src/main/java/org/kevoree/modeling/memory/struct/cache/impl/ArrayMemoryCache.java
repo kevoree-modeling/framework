@@ -254,7 +254,7 @@ public class ArrayMemoryCache implements KCache {
                 current = current.next;
             }
             //now we try to compact if deleted elements
-            compact(p_metaModel);
+            compact();
         }
     }
 
@@ -293,7 +293,7 @@ public class ArrayMemoryCache implements KCache {
         this._droppedCount++;
     }
 
-    private void compact(KMetaModel p_metaModel) {
+    private void compact() {
         InternalState internalState = _state;
         if (this._droppedCount > 0) {
             int length = (this._elementCount == 0 ? 1 : this._elementCount << 1); //take the next size of element count
