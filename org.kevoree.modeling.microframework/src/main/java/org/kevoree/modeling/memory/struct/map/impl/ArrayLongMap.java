@@ -13,7 +13,7 @@ import org.kevoree.modeling.memory.struct.map.KLongMapCallBack;
  * public contains(key:number):boolean { return this.hasOwnProperty(<any>key);}
  * public remove(key:number):V { var tmp = this[key]; delete this[key]; return tmp; }
  * public size():number { return Object.keys(this).length; }
- * public each(callback: (p : number, p1 : V) => void): void { for(var p in this){ if(this.hasOwnProperty(p)){ callback(<number>p,this[p]); } } }
+ * public each(callback: (p : number, p1 : V) => void): void { for(var p in this){ if(this.hasOwnProperty(p)){ callback(+p,this[p]); } } }
  */
 public class ArrayLongMap<V> implements KLongMap<V> {
 

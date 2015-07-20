@@ -23,4 +23,6 @@ public interface KCache {
 
     int size();
 
+    void delete(KMetaModel metaModel);
+
 }

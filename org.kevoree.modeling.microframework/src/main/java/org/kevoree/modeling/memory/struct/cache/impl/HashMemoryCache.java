@@ -279,6 +279,19 @@ public class HashMemoryCache implements KCache {
         }
     }
 
+    @Override
+    public void delete(KMetaModel metaModel) {
+        for (int i = 0; i < elementData.length; i++) {
+            Entry e = elementData[i];
+            while (e != null) {
+                e.value.free(metaModel);
+                e = e.next;
+            }
+        }
+        this.elementData = null;
+    }
+
+
 }
 
 

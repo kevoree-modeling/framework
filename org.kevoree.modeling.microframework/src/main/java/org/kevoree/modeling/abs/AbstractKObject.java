@@ -76,7 +76,9 @@ public abstract class AbstractKObject implements KObject {
         final KObject selfPointer = this;
         KMemorySegment rawPayload = _manager.segment(_universe, _time, _uuid, false, _metaClass, null);
         if (rawPayload == null) {
-            cb.on(new Exception(OUT_OF_CACHE_MSG));
+            if(cb != null){
+                cb.on(new Exception(OUT_OF_CACHE_MSG));
+            }
         } else {
             ArrayLongLongMap collector = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
             KMeta[] metaElements = _metaClass.metaElements();
@@ -95,7 +97,7 @@ public abstract class AbstractKObject implements KObject {
             collector.each(new KLongLongMapCallBack() {
                 @Override
                 public void on(long key, long value) {
-                    flatCollected[indexI[0]] = key;
+                    flatCollected[indexI[0]] = value;
                     indexI[0]++;
                 }
             });

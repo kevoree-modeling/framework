@@ -119,7 +119,7 @@ public class MemoryManager implements KMemoryManager {
     }
 
     /* End Key Management Section */
-    public KUniverseOrderMap globalUniverseOrder() {
+    public final KUniverseOrderMap globalUniverseOrder() {
         return (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
     }
 
@@ -387,15 +387,21 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public void discard(KUniverse p_universe, final KCallback<Throwable> callback) {
-        //save prefix to not negociate again prefix
-        _cache.clear(_model.metaModel());
-        KContentKey[] globalUniverseTree = new KContentKey[1];
-        globalUniverseTree[0] = KContentKey.createGlobalUniverseTree();
-        reload(globalUniverseTree, new KCallback<Throwable>() {
+    public synchronized void discard(KUniverse p_universe, final KCallback<Throwable> callback) {
+        KContentKey[] toReloadKeys = new KContentKey[1];
+        toReloadKeys[0] = KContentKey.createGlobalUniverseTree();
+        _db.get(toReloadKeys, new KCallback<String[]>() {
             @Override
-            public void on(Throwable throwable) {
-                callback.on(throwable);
+            public void on(String[] strings) {
+                if (strings != null && strings.length > 0 && strings[0] != null) {
+                    KMemoryElement newObject = internal_unserialize(toReloadKeys[0], strings[0]);
+                    KCache newCache = _factory.newCache();
+                    //swapCache
+                    KCache oldCache = _cache;
+                    _cache = newCache;
+                    oldCache.delete(_model.metaModel());
+                    callback.on(null);
+                }
             }
         });
     }

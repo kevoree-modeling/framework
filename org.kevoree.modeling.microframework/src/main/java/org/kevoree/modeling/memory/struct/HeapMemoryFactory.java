@@ -63,8 +63,8 @@ public class HeapMemoryFactory implements KMemoryFactory {
 
     @Override
     public KCache newCache() {
-       // return new ArrayMemoryCache();
-        return new HashMemoryCache();
+        return new ArrayMemoryCache();
+       // return new HashMemoryCache();
     }
 
 }

@@ -18,7 +18,7 @@ import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
  * public contains(key:number):boolean { return this.hasOwnProperty(<any>key);}
  * public remove(key:number):number { var tmp = this[key]; delete this[key]; return tmp; }
  * public size():number { return Object.keys(this).length-1; }
- * public each(callback: (p : number, p1 : number) => void): void { for(var p in this){ if(this.hasOwnProperty(p) && p.indexOf('_') != 0){ callback(<number>p,this[p]); } } }
+ * public each(callback: (p : number, p1 : number) => void): void { for(var p in this){ if(this.hasOwnProperty(p) && p.indexOf('_') != 0){ callback(+p,+this[p]); } } }
  * public isDirty():boolean { return this._isDirty; }
  * public setClean(mm):void { this._isDirty = false; }
  * public setDirty():void { this._isDirty = true; }

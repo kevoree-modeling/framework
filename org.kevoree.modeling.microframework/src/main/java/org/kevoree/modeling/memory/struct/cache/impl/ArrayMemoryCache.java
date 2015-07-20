@@ -13,17 +13,17 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 public class ArrayMemoryCache implements KCache {
 
-    protected volatile int elementCount;
+    protected volatile int _elementCount;
 
-    protected volatile int droppedCount;
+    protected volatile int _droppedCount;
 
-    protected volatile InternalState state = null;
+    protected volatile InternalState _state = null;
 
-    protected int threshold;
+    protected int _threshold;
 
     protected boolean _isDirty = false;
 
-    private final float loadFactor;
+    private final float _loadFactor;
 
     class InternalState {
 
@@ -53,26 +53,26 @@ public class ArrayMemoryCache implements KCache {
 
     public ArrayMemoryCache() {
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
-        this.loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        this.elementCount = 0;
-        this.droppedCount = 0;
+        this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
+        this._elementCount = 0;
+        this._droppedCount = 0;
         InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 3], new int[initialCapacity], new int[initialCapacity], new KMemoryElement[initialCapacity]);
         for (int i = 0; i < initialCapacity; i++) {
             newstate.elementNext[i] = -1;
             newstate.elementHash[i] = -1;
         }
-        this.state = newstate;
-        this.threshold = (int) (state.elementDataSize * loadFactor);
+        this._state = newstate;
+        this._threshold = (int) (newstate.elementDataSize * this._loadFactor);
     }
 
     protected final void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
 
         long[] newElementKV = new long[length * 3];
-        System.arraycopy(state.elementK3, 0, newElementKV, 0, state.elementDataSize * 3);
+        System.arraycopy(_state.elementK3, 0, newElementKV, 0, _state.elementDataSize * 3);
 
         KMemoryElement[] newValues = new KMemoryElement[length];
-        System.arraycopy(state.values, 0, newValues, 0, state.elementDataSize);
+        System.arraycopy(_state.values, 0, newValues, 0, _state.elementDataSize);
 
         int[] newElementNext = new int[length];
 
@@ -83,29 +83,29 @@ public class ArrayMemoryCache implements KCache {
             newElementHash[i] = -1;
         }
         //rehashEveryThing
-        for (int i = 0; i < state.elementDataSize; i++) {
-            if (state.values[i] != null) { //there is a real value
-                int hash = (int) (state.elementK3[(i * 3)] ^ state.elementK3[(i * 3) + 1] ^ state.elementK3[(i * 3) + 2]);
+        for (int i = 0; i < _state.elementDataSize; i++) {
+            if (_state.values[i] != null) { //there is a real value
+                int hash = (int) (_state.elementK3[(i * 3)] ^ _state.elementK3[(i * 3) + 1] ^ _state.elementK3[(i * 3) + 2]);
                 int index = (hash & 0x7FFFFFFF) % length;
                 newElementNext[i] = newElementHash[index];
                 newElementHash[index] = i;
             }
         }
         //set value for all
-        state = new InternalState(length, newElementKV, newElementNext, newElementHash, newValues);
-        this.threshold = (int) (length * loadFactor);
+        _state = new InternalState(length, newElementKV, newElementNext, newElementHash, newValues);
+        this._threshold = (int) (length * this._loadFactor);
     }
 
     @Override
     public KMemoryElement get(long universe, long time, long obj) {
-        InternalState internalState = state;
+        InternalState internalState = _state;
         if (internalState.elementDataSize == 0) {
             return null;
         }
         int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
-        while (m >= 0) {
-            if (universe == internalState.elementK3[m * 3] && time == internalState.elementK3[(m * 3) + 1] && obj == internalState.elementK3[(m * 3) + 2]) {
+        while (m != -1) {
+            if (universe == internalState.elementK3[(m * 3)] && time == internalState.elementK3[((m * 3) + 1)] && obj == internalState.elementK3[((m * 3) + 2)]) {
                 return internalState.values[m]; /* getValue */
             } else {
                 m = internalState.elementNext[m];
@@ -124,47 +124,46 @@ public class ArrayMemoryCache implements KCache {
         return internal_put(universe, time, obj, payload, false);
     }
 
-    private final KMemoryElement internal_put(long universe, long time, long obj, KMemoryElement payload, boolean force) {
+    private final KMemoryElement internal_put(long universe, long time, long p_obj, KMemoryElement payload, boolean force) {
         this._isDirty = true;
         int entry = -1;
         int index = -1;
-        int hash = (int) (universe ^ time ^ obj);
-        if (state.elementDataSize != 0) {
-            index = (hash & 0x7FFFFFFF) % state.elementDataSize;
-            entry = findNonNullKeyEntry(universe, time, obj, index, state);
+        int hash = (int) (universe ^ time ^ p_obj);
+        if (_state.elementDataSize != 0) {
+            index = (hash & 0x7FFFFFFF) % _state.elementDataSize;
+            entry = findNonNullKeyEntry(universe, time, p_obj, index, _state);
         }
         if (entry == -1) {
-            if (++elementCount > threshold) {
-                rehashCapacity(state.elementDataSize);
-                index = (hash & 0x7FFFFFFF) % state.elementDataSize;
+            if (++_elementCount > _threshold) {
+                rehashCapacity(_state.elementDataSize);
+                index = (hash & 0x7FFFFFFF) % _state.elementDataSize;
             }
-            int newIndex = (this.elementCount - 1 + this.droppedCount);
-            state.elementK3[newIndex * 3] = universe;
-            state.elementK3[(newIndex * 3) + 1] = time;
-            state.elementK3[(newIndex * 3) + 2] = obj;
-            state.values[newIndex] = payload;
-            state.elementNext[newIndex] = state.elementHash[index];
-            state.elementHash[index] = newIndex;
+            int newIndex = (this._elementCount - 1 + this._droppedCount);
+            _state.elementK3[(newIndex * 3)] = universe;
+            _state.elementK3[((newIndex * 3) + 1)] = time;
+            _state.elementK3[((newIndex * 3) + 2)] = p_obj;
+            _state.values[newIndex] = payload;
+            _state.elementNext[newIndex] = _state.elementHash[index];
             //now the object is reachable to other thread everything should be ready
-            state.elementHash[index] = newIndex;
+            _state.elementHash[index] = newIndex;
             return payload;
         } else {
             if (force) {
-                state.values[entry] = payload;/*setValue*/
+                _state.values[entry] = payload;/*setValue*/
                 return payload;
             } else {
-                return state.values[entry];
+                return _state.values[entry];
             }
         }
     }
 
     final int findNonNullKeyEntry(long universe, long time, long obj, int index, InternalState internalState) {
-        int m = state.elementHash[index];
+        int m = _state.elementHash[index];
         while (m >= 0) {
             if (universe == internalState.elementK3[m * 3] && time == internalState.elementK3[(m * 3) + 1] && obj == internalState.elementK3[(m * 3) + 2]) {
                 return m;
             }
-            m = state.elementNext[m];
+            m = _state.elementNext[m];
         }
         return -1;
     }
@@ -172,7 +171,7 @@ public class ArrayMemoryCache implements KCache {
     @Override
     public KCacheDirty[] dirties() {
         int nbDirties = 0;
-        InternalState internalState = state;
+        InternalState internalState = _state;
         for (int i = 0; i < internalState.elementDataSize; i++) {
             if (internalState.values[i] != null) {
                 if (internalState.values[i].isDirty()) {
@@ -212,42 +211,42 @@ public class ArrayMemoryCache implements KCache {
 
     @Override
     public int size() {
-        return this.elementCount;
+        return this._elementCount;
     }
 
     private void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
-        InternalState internalState = state;
+        InternalState internalState = _state;
         int hash = (int) (universe ^ time ^ obj);
         int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
-        if (state.elementDataSize == 0) {
+        if (_state.elementDataSize == 0) {
             return;
         }
-        int m = state.elementHash[index];
+        int m = _state.elementHash[index];
         int last = -1;
         while (m >= 0) {
             if (universe == internalState.elementK3[m * 3] && time == internalState.elementK3[(m * 3) + 1] && obj == internalState.elementK3[(m * 3) + 2]) {
                 break;
             }
             last = m;
-            m = state.elementNext[m];
+            m = _state.elementNext[m];
         }
         if (m == -1) {
             return;
         }
         if (last == -1) {
-            if (state.elementNext[m] > 0) {
-                state.elementHash[index] = m;
+            if (_state.elementNext[m] > 0) {
+                _state.elementHash[index] = m;
             } else {
-                state.elementHash[index] = -1;
+                _state.elementHash[index] = -1;
             }
         } else {
-            state.elementNext[last] = state.elementNext[m];
+            _state.elementNext[last] = _state.elementNext[m];
         }
-        state.elementNext[m] = -1;//flag to dropped value
-        state.values[m].free(p_metaModel);
-        state.values[m] = null;
-        this.elementCount--;
-        this.droppedCount++;
+        _state.elementNext[m] = -1;//flag to dropped value
+        _state.values[m].free(p_metaModel);
+        _state.values[m] = null;
+        this._elementCount--;
+        this._droppedCount++;
     }
 
     /**
@@ -297,28 +296,42 @@ public class ArrayMemoryCache implements KCache {
         }
     }
 
-    public void clear(KMetaModel metaModel) {
-        InternalState internalState = state;
-        for (int i = 0; i < internalState.elementDataSize; i++) {
-            if (internalState.values[i] != null) {
-                internalState.values[i].free(metaModel);
+    @Override
+    public final void clear(KMetaModel metaModel) {
+        if (_elementCount > 0) {
+            InternalState internalState = _state;
+            for (int i = 0; i < internalState.elementDataSize; i++) {
+                if (internalState.values[i] != null) {
+                    internalState.values[i].free(metaModel);
+                }
             }
-        }
-        if (elementCount > 0) {
             int initialCapacity = KConfig.CACHE_INIT_SIZE;
             InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 3], new int[initialCapacity], new int[initialCapacity], new KMemoryElement[initialCapacity]);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate.elementNext[i] = -1;
                 newstate.elementHash[i] = -1;
             }
-            this.elementCount = 0;
-            this.droppedCount = 0;
-            this.state = newstate;
-            this.threshold = (int) (state.elementDataSize * loadFactor);
+            this._elementCount = 0;
+            this._droppedCount = 0;
+            this._state = newstate;
+            this._threshold = (int) (newstate.elementDataSize * _loadFactor);
         }
 
     }
 
+    @Override
+    public void delete(KMetaModel metaModel) {
+        InternalState internalState = _state;
+        for (int i = 0; i < internalState.elementDataSize; i++) {
+            if (internalState.values[i] != null) {
+                internalState.values[i].free(metaModel);
+            }
+        }
+        this._elementCount = 0;
+        this._droppedCount = 0;
+        this._threshold = 0;
+        this._state = null;
+    }
 }
 
 

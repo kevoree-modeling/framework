@@ -344,6 +344,11 @@ public class OffHeapMemoryCache implements KCache {
         return 0;
     }
 
+    @Override
+    public void delete(KMetaModel metaModel) {
+
+    }
+
     @SuppressWarnings("restriction")
     private static Unsafe getUnsafe() {
         try {
