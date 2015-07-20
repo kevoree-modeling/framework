@@ -40,7 +40,8 @@ public class LookupAllTimesRunnable implements Runnable {
                 final int[] ii = {0};
                 for (int i = 0; i < _times.length; i++) {
                     if (universeIndex != null) {
-                        long resolved = ResolutionHelper.resolve_universe(_store.globalUniverseOrder(), (KUniverseOrderMap) universeIndex, _times[i], _universe);
+                        KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _store.cache().get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                        long resolved = ResolutionHelper.resolve_universe(globalUniverseTree, (KUniverseOrderMap) universeIndex, _times[i], _universe);
                         long alreadyInMap = map.get(resolved);
                         if (alreadyInMap == KConfig.NULL_LONG) {
                             mapReverse.put(_times[i], ii[0]);

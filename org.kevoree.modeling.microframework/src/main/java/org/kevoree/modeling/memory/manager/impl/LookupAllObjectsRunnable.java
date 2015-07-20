@@ -4,6 +4,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.abs.AbstractKModel;
+import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.KContentKey;
@@ -42,7 +43,8 @@ public class LookupAllObjectsRunnable implements Runnable {
                 for (int i = 0; i < _keys.length; i++) {
                     KContentKey toLoadKey = null;
                     if (universeIndexes[i] != null) {
-                        long closestUniverse = ResolutionHelper.resolve_universe(_store.globalUniverseOrder(), (KUniverseOrderMap) universeIndexes[i], _time, _universe);
+                        KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _store.cache().get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                        long closestUniverse = ResolutionHelper.resolve_universe(globalUniverseTree, (KUniverseOrderMap) universeIndexes[i], _time, _universe);
                         toLoadKey = KContentKey.createTimeTree(closestUniverse, _keys[i]);
                     }
                     tempKeys[i] = toLoadKey;

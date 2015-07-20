@@ -64,17 +64,17 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public KCache cache() {
+    public final KCache cache() {
         return _cache;
     }
 
     @Override
-    public KModel model() {
+    public final KModel model() {
         return _model;
     }
 
     @Override
-    public void close(KCallback<Throwable> callback) {
+    public final void close(KCallback<Throwable> callback) {
         isConnected = false;
         if (_db != null) {
             _db.close(callback);
@@ -85,7 +85,7 @@ public class MemoryManager implements KMemoryManager {
 
     /* Key Management Section */
     @Override
-    public long nextUniverseKey() {
+    public final long nextUniverseKey() {
         if (_universeKeyCalculator == null) {
             throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
         }
@@ -93,7 +93,7 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public long nextObjectKey() {
+    public final long nextObjectKey() {
         if (_objectKeyCalculator == null) {
             throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
         }
@@ -101,7 +101,7 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public long nextModelKey() {
+    public final long nextModelKey() {
         if (_modelKeyCalculator == null) {
             throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
         }
@@ -109,21 +109,16 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public long nextGroupKey() {
+    public final long nextGroupKey() {
         if (_groupKeyCalculator == null) {
             throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
         }
         return _groupKeyCalculator.nextKey();
     }
 
-    /* End Key Management Section */
-    public final KUniverseOrderMap globalUniverseOrder() {
-        return (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
-    }
-
     @Override
-    public void initUniverse(KUniverse p_universe, KUniverse p_parent) {
-        KLongLongMap cached = globalUniverseOrder();
+    public final void initUniverse(KUniverse p_universe, KUniverse p_parent) {
+        KUniverseOrderMap cached = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null && !cached.contains(p_universe.key())) {
             if (p_parent == null) {
                 cached.put(p_universe.key(), p_universe.key());
@@ -135,7 +130,7 @@ public class MemoryManager implements KMemoryManager {
 
     @Override
     public long parentUniverseKey(long currentUniverseKey) {
-        KLongLongMap cached = globalUniverseOrder();
+        KUniverseOrderMap cached = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null) {
             return cached.get(currentUniverseKey);
         } else {
@@ -145,7 +140,7 @@ public class MemoryManager implements KMemoryManager {
 
     @Override
     public long[] descendantsUniverseKeys(final long currentUniverseKey) {
-        KLongLongMap cached = globalUniverseOrder();
+        KUniverseOrderMap cached = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null) {
             final ArrayLongLongMap temp = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
             cached.each(new KLongLongMapCallBack() {
@@ -323,7 +318,8 @@ public class MemoryManager implements KMemoryManager {
             return currentEntry;
         }
         KUniverseOrderMap objectUniverseTree = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
-        long resolvedUniverse = ResolutionHelper.resolve_universe(globalUniverseOrder(), objectUniverseTree, time, universe);
+        KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        long resolvedUniverse = ResolutionHelper.resolve_universe(globalUniverseTree, objectUniverseTree, time, universe);
         KLongTree timeTree = (KLongTree) _cache.get(resolvedUniverse, KConfig.NULL_LONG, uuid);
         if (timeTree == null) {
             throw new RuntimeException(OUT_OF_CACHE_MESSAGE + " : TimeTree not found for " + KContentKey.createTimeTree(resolvedUniverse, uuid) + " from " + universe + "/" + resolvedUniverse);
@@ -466,7 +462,8 @@ public class MemoryManager implements KMemoryManager {
                 if (rootGlobalUniverseIndex == null) {
                     callback.on(null);
                 } else {
-                    long closestUniverse = ResolutionHelper.resolve_universe(globalUniverseOrder(), (KUniverseOrderMap) rootGlobalUniverseIndex, time, universe);
+                    KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                    long closestUniverse = ResolutionHelper.resolve_universe(globalUniverseTree, (KUniverseOrderMap) rootGlobalUniverseIndex, time, universe);
                     KContentKey universeTreeRootKey = KContentKey.createRootTimeTree(closestUniverse);
                     bumpKeyToCache(universeTreeRootKey, new KCallback<KMemoryElement>() {
                         @Override
@@ -498,7 +495,8 @@ public class MemoryManager implements KMemoryManager {
                     cleanedTree = _factory.newUniverseMap(KConfig.CACHE_INIT_SIZE, null);
                     cleanedTree = (KUniverseOrderMap) _cache.getOrPut(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME, cleanedTree);
                 }
-                long closestUniverse = ResolutionHelper.resolve_universe(globalUniverseOrder(), cleanedTree, newRoot.now(), newRoot.universe());
+                KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                long closestUniverse = ResolutionHelper.resolve_universe(globalUniverseTree, cleanedTree, newRoot.now(), newRoot.universe());
                 cleanedTree.put(newRoot.universe(), newRoot.now());
                 if (closestUniverse != newRoot.universe()) {
                     KLongLongTree newTimeTree = _factory.newLongLongTree();

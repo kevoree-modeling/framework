@@ -21,8 +21,6 @@ public class ArrayMemoryCache implements KCache {
 
     private int _threshold;
 
-    private boolean _isDirty = false;
-
     private final float _loadFactor;
 
     /**
@@ -119,8 +117,7 @@ public class ArrayMemoryCache implements KCache {
         return internal_put(universe, time, obj, payload, false);
     }
 
-    private KMemoryElement internal_put(long universe, long time, long p_obj, KMemoryElement payload, boolean force) {
-        this._isDirty = true;
+    private synchronized KMemoryElement internal_put(long universe, long time, long p_obj, KMemoryElement payload, boolean force) {
         int entry = -1;
         int index = -1;
         int hash = (int) (universe ^ time ^ p_obj);

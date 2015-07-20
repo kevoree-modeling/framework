@@ -6,6 +6,7 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
@@ -42,7 +43,8 @@ public class LookupAllObjectsTimesRunnable implements Runnable {
                     for (int j = 0; j < _times.length; j++) {
                         if (universeIndexes[i] != null) {
                             //TODO check optimize for duplicate
-                            tempKeys2[(i * _times.length) + j] = KContentKey.createTimeTree(ResolutionHelper.resolve_universe(_store.globalUniverseOrder(), (KUniverseOrderMap) universeIndexes[i], _times[j], _universe), _keys[i]);
+                            KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _store.cache().get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                            tempKeys2[(i * _times.length) + j] = KContentKey.createTimeTree(ResolutionHelper.resolve_universe(globalUniverseTree, (KUniverseOrderMap) universeIndexes[i], _times[j], _universe), _keys[i]);
                         }
                     }
                 }
