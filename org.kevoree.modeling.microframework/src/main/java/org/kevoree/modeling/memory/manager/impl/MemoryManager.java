@@ -178,14 +178,6 @@ public class MemoryManager implements KMemoryManager {
         final Events notificationMessages = new Events(dirtiesEntries.length, prefix);
         for (int i = 0; i < dirtiesEntries.length; i++) {
             KMemoryElement cachedObject = dirtiesEntries[i].object;
-            /*
-            int[] meta;
-            if (dirtiesEntries[i].object instanceof KMemorySegment) {
-                KMemorySegment segment = (KMemorySegment) dirtiesEntries[i].object;
-                meta = segment.modifiedIndexes(_model.metaModel().metaClasses()[segment.metaClassIndex()]);
-            } else {
-                meta = null;
-            }*/
             notificationMessages.setEvent(i, dirtiesEntries[i].key, null);
             request.put(dirtiesEntries[i].key, cachedObject.serialize(_model.metaModel()));
             cachedObject.setClean(_model.metaModel());
@@ -667,8 +659,6 @@ public class MemoryManager implements KMemoryManager {
                     ((KMemorySegment) newElement).initMetaClass(_model.metaModel().metaClassByName(alreadyLoadedOrder.metaClassName()));
                 }
             }
-
-
             newElement.init(payload, model().metaModel());
             newElement.setClean(model().metaModel());
             return newElement;
