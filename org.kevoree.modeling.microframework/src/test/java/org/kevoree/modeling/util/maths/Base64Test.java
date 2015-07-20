@@ -4,177 +4,163 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
 
-import java.util.Arrays;
-
 public class Base64Test {
 
     @Test
     public void beginingOfTimeEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeLong(KConfig.BEGINNING_OF_TIME);
-        //System.out.println("Decode");
-        long dec = Base64.decodeToLong(enc);
-        //System.out.println(KConfig.BEGINNING_OF_TIME + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(KConfig.BEGINNING_OF_TIME, dec);
+        testLong(KConfig.BEGINNING_OF_TIME);
     }
-
 
     @Test
     public void endOfTimeEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeLong(KConfig.END_OF_TIME);
-        //System.out.println("Decode");
-        long dec = Base64.decodeToLong(enc);
-        //System.out.println(KConfig.END_OF_TIME + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(KConfig.END_OF_TIME, dec);
+        testLong(KConfig.END_OF_TIME);
     }
-
 
     @Test
     public void nullEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeLong(KConfig.NULL_LONG);
-        //System.out.println("Decode");
-        long dec = Base64.decodeToLong(enc);
-        //System.out.println(KConfig.NULL_LONG + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(KConfig.NULL_LONG, dec);
+        testLong(KConfig.NULL_LONG);
     }
-
 
     @Test
     public void zeroEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeLong(0);
-        //System.out.println("Decode");
-        long dec = Base64.decodeToLong(enc);
-        //System.out.println(0 + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(0, dec);
+        testLong(0l);
     }
 
     @Test
     public void oneEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeLong(1);
-        //System.out.println("Decode");
-        long dec = Base64.decodeToLong(enc);
-        //System.out.println(1 + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(1, dec);
-    }
-
-    @Test
-    public void minIntEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeInt(0x80000000);
-        //System.out.println("Decode");
-        long dec = Base64.decodeToInt(enc);
-        //System.out.println(0x80000000 + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(0x80000000, dec);
-    }
-
-    @Test
-    public void maxIntEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeInt(0x7fffffff);
-        //System.out.println("Decode");
-        long dec = Base64.decodeToInt(enc);
-        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(0x7fffffff, dec);
+        testLong(1l);
     }
 
     @Test
     public void randomBigNumTest() {
+        testLong(68719476737l);
+    }
+
+    private void testLong(long val) {
         //System.out.println("Encode");
-        String enc = Base64.encodeLong(68719476737l);
+        String enc = Base64.encodeLong(val);
         //System.out.println("Decode");
         long dec = Base64.decodeToLong(enc);
-        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(68719476737l, dec);
+        //System.out.println(val + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(val, dec);
+
+        //System.out.println("Encode");
+        StringBuilder buffer = new StringBuilder();
+        Base64.encodeLongToBuffer(val, buffer);
+        //System.out.println("Decode");
+        dec = Base64.decodeToLong(buffer.toString());
+        //System.out.println(val + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(val, dec);
     }
 
 
-    /** @native ts
-     * var enc = Base64.encodeDouble(Number.MAX_VALUE);
-     * var dec = Base64.decodeToDouble(enc);
-     * org.junit.Assert.assertEquals(Number.MAX_VALUE, dec);
-     * */
+
+    @Test
+    public void minIntEncodingTest() {
+        testInt(0x80000000);
+    }
+
+    @Test
+    public void maxIntEncodingTest() {
+        testInt(0x7fffffff);
+    }
+
+    private void testInt(int val) {
+        //System.out.println("Encode");
+        String enc = Base64.encodeInt(val);
+        //System.out.println("Decode");
+        int dec = Base64.decodeToInt(enc);
+        //System.out.println(val + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(val, dec);
+
+        //System.out.println("Encode");
+        StringBuilder buffer = new StringBuilder();
+        Base64.encodeIntToBuffer(val, buffer);
+        //System.out.println("Decode");
+        dec = Base64.decodeToInt(buffer.toString());
+        //System.out.println(val + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(val, dec);
+    }
+
+
+    /**
+     * @native ts
+     * this.testDouble(Number.MAX_VALUE);
+     */
     @Test
     public void maxDoubleEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeDouble(Double.MAX_VALUE);
-        //System.out.println("Decode");
-        double dec = Base64.decodeToDouble(enc);
-        //System.out.println(Double.toHexString(Double.MAX_VALUE) + " -> " + enc + " -> " + Double.toHexString(dec));
-        Assert.assertEquals(Double.MAX_VALUE, dec, 0);
+        testDouble(Double.MAX_VALUE);
     }
 
-    /** @native ts
-     * var enc = Base64.encodeDouble(Number.MIN_VALUE);
-     * var dec = Base64.decodeToDouble(enc);
-     * org.junit.Assert.assertEquals(Number.MIN_VALUE, dec);
-     * */
+    /**
+     * @native ts
+     * this.testDouble(Number.MIN_VALUE);
+     */
     @Test
     public void minDoubleEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeDouble(Double.MIN_VALUE);
-        //System.out.println("Decode");
-        double dec = Base64.decodeToDouble(enc);
-        //System.out.println(Double.MIN_VALUE + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(Double.MIN_VALUE, dec, 0);
+        testDouble(Double.MIN_VALUE);
     }
 
-    /** @native ts
-     * var enc = Base64.encodeDouble(-Number.MAX_VALUE);
-     * var dec = Base64.decodeToDouble(enc);
-     * org.junit.Assert.assertEquals(-Number.MAX_VALUE, dec);
-     * */
+    /**
+     * @native ts
+     * this.testDouble(-Number.MAX_VALUE);
+     */
     @Test
     public void negMaxDoubleEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeDouble(-Double.MAX_VALUE);
-        //System.out.println("Decode");
-        double dec = Base64.decodeToDouble(enc);
-        //System.out.println(Double.toHexString(Double.MAX_VALUE) + " -> " + enc + " -> " + Double.toHexString(dec));
-        Assert.assertEquals(-Double.MAX_VALUE, dec, 0);
+        testDouble(-Double.MAX_VALUE);
     }
 
-    /** @native ts
-     * var enc = Base64.encodeDouble(-Number.MIN_VALUE);
-     * var dec = Base64.decodeToDouble(enc);
-     * org.junit.Assert.assertEquals(-Number.MIN_VALUE, dec);
-     * */
+    /**
+     * @native ts
+     * this.testDouble(-Number.MIN_VALUE);
+     */
     @Test
     public void negMinDoubleEncodingTest() {
-        //System.out.println("Encode");
-        String enc = Base64.encodeDouble(-Double.MIN_VALUE);
-        //System.out.println("Decode");
-        double dec = Base64.decodeToDouble(enc);
-        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(-Double.MIN_VALUE, dec, 0);
+        testDouble(-Double.MIN_VALUE);
     }
 
-
-    /** @native ts
-     * var enc = Base64.encodeDouble(0);
-     * var dec = Base64.decodeToDouble(enc);
-     * org.junit.Assert.assertEquals(0, dec);
-     * */
     @Test
     public void zeroDoubleEncodingTest() {
+        testDouble(0);
+    }
+
+    /**
+     * @native ts
+     * var enc = Base64.encodeDouble(val);
+     * var dec = Base64.decodeToDouble(enc);
+     * org.junit.Assert.assertEquals(val, dec);
+     *
+     * var buffer = new java.lang.StringBuilder();
+     * Base64.encodeDoubleToBuffer(val, buffer);
+     * dec = Base64.decodeToDouble(buffer.toString());
+     * org.junit.Assert.assertEquals(val, dec);
+     */
+    private void testDouble(double val) {
         //System.out.println("Encode");
-        String enc = Base64.encodeDouble(0);
+        String enc = Base64.encodeDouble(val);
         //System.out.println("Decode");
         double dec = Base64.decodeToDouble(enc);
-        //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(0, dec, 0);
+        //System.out.println(val + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(val, dec, 0);
+
+        //System.out.println("Encode");
+        StringBuilder buffer = new StringBuilder();
+        Base64.encodeDoubleToBuffer(val, buffer);
+        //System.out.println("Decode");
+        dec = Base64.decodeToDouble(buffer.toString());
+        //System.out.println(val + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(val, dec, 0);
     }
+
+
 
 
     @Test
     public void boolArrayEncodingTest() {
 
-        for(int i = 0; i < 255; i++) {
+        for (int i = 0; i < 255; i++) {
             boolean[] tmpArray = new boolean[i];
-            for(int j = 0; j < i; j++) {
+            for (int j = 0; j < i; j++) {
                 tmpArray[j] = Math.random() < 0.5;
             }
             boolArrayInnerTest(tmpArray);
@@ -187,8 +173,8 @@ public class Base64Test {
         boolean[] dec = Base64.decodeBoolArray(enc, array.length);
         //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
         Assert.assertTrue(array.length == dec.length);
-        for(int i = 0; i < array.length; i++) {
-           // Assert.assertEquals("\n" + Arrays.toString(array) + "\n -> "+ enc +" -> \n" + Arrays.toString(dec),array[i], dec[i]);
+        for (int i = 0; i < array.length; i++) {
+            // Assert.assertEquals("\n" + Arrays.toString(array) + "\n -> "+ enc +" -> \n" + Arrays.toString(dec),array[i], dec[i]);
             Assert.assertEquals(array[i], dec[i]);
         }
     }
