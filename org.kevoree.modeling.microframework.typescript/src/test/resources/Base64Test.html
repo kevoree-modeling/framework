@@ -120,6 +120,7 @@
         result += Base64.encodeArray[(signAndExp >> 6) & 0x3F];
         result += Base64.encodeArray[signAndExp & 0x3F];
         result += Base64.encodeArray[bytes[6] & 0x0F];
+
         result += Base64.encodeArray[(bytes[5] >> 2) & 0x3F];
         result += Base64.encodeArray[(bytes[5] & 0x3)<<4 | bytes[4] >> 4];
         result += Base64.encodeArray[(bytes[4] & 0x0F)<<2 | bytes[3] >> 6];
