@@ -3,13 +3,13 @@
     <parent>
         <artifactId>org.kevoree.modeling.root</artifactId>
         <groupId>org.kevoree.modeling</groupId>
-        <version>4.19.0</version>
+        <version>4.19.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.kevoree.modeling.generator</artifactId>
-  <version>4.19.0  </version>
+  <version>4.19.1-SNAPSHOT  </version>
     <name>Kevoree :: Modeling :: Generator</name>
 
     <dependencies>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>org.kevoree.modeling</groupId>
             <artifactId>org.kevoree.modeling.microframework</artifactId>
-            <version>4.19.0</version>
+            <version>4.19.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
