@@ -90,7 +90,7 @@ public class HashOperationManager implements KOperationManager {
         operationCall.opIndex = operation.index();
         operationCall.params = stringParams;
         remoteCallCallbacks.put(operationCall.id, callback);
-        _manager.cdn().send(operationCall);
+        //_manager.cdn().send(operationCall);
     }
 
     public synchronized long nextKey() {
@@ -124,7 +124,7 @@ public class HashOperationManager implements KOperationManager {
                                     operationResultMessage.key = operationCall.key;
                                     operationResultMessage.id = operationCall.id;
                                     operationResultMessage.value = o.toString();
-                                    _manager.cdn().send(operationResultMessage);
+                                    //_manager.cdn().send(operationResultMessage);
                                 }
                             });
                         }

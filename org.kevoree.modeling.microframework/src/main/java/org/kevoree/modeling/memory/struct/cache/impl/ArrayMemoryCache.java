@@ -161,7 +161,7 @@ public class ArrayMemoryCache implements KCache {
     }
 
     @Override
-    public KCacheDirty[] dirties() {
+    public KContentKey[] dirtyKeys() {
         int nbDirties = 0;
         InternalState internalState = _state;
         for (int i = 0; i < internalState.elementDataSize; i++) {
@@ -171,13 +171,12 @@ public class ArrayMemoryCache implements KCache {
                 }
             }
         }
-        KCacheDirty[] collectedDirties = new KCacheDirty[nbDirties];
+        KContentKey[] collectedDirties = new KContentKey[nbDirties];
         nbDirties = 0;
         for (int i = 0; i < internalState.elementDataSize; i++) {
             if (internalState.values[i] != null) {
                 if (internalState.values[i].isDirty()) {
-                    KCacheDirty dirty = new KCacheDirty(new KContentKey(internalState.elementK3[i * 3], internalState.elementK3[(i * 3) + 1], internalState.elementK3[(i * 3) + 2]), internalState.values[i]);
-                    collectedDirties[nbDirties] = dirty;
+                    collectedDirties[nbDirties] = new KContentKey(internalState.elementK3[i * 3], internalState.elementK3[(i * 3) + 1], internalState.elementK3[(i * 3) + 2]);
                     nbDirties++;
                 }
             }

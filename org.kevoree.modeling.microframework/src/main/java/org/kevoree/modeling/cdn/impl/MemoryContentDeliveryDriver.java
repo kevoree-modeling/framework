@@ -2,33 +2,19 @@ package org.kevoree.modeling.cdn.impl;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.cdn.KContentPutRequest;
-import org.kevoree.modeling.cdn.KMessageInterceptor;
-import org.kevoree.modeling.event.KEventListener;
-import org.kevoree.modeling.event.KEventMultiListener;
-import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.KUniverse;
+import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
-import org.kevoree.modeling.event.impl.LocalEventListeners;
-import org.kevoree.modeling.memory.struct.map.KIntMap;
 import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
 import org.kevoree.modeling.memory.struct.map.KStringMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
-import org.kevoree.modeling.message.KMessage;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Random;
 
 public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
     private final KStringMap<String> backend = new ArrayStringMap<String>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-    private LocalEventListeners _localEventListeners = new LocalEventListeners();
-
-    public static boolean DEBUG = false;
 
     @Override
     public void atomicGetIncrement(KContentKey key, KCallback<Short> cb) {
@@ -61,9 +47,6 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
             if (keys[i] != null) {
                 values[i] = backend.get(keys[i].toString());
             }
-            if (DEBUG) {
-                System.out.println("GET " + keys[i] + "->" + values[i]);
-            }
         }
         if (callback != null) {
             callback.on(values);
@@ -71,15 +54,26 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public synchronized void put(KContentPutRequest p_request, KCallback<Throwable> p_callback) {
-        for (int i = 0; i < p_request.size(); i++) {
-            backend.put(p_request.getKey(i).toString(), p_request.getContent(i));
-            if (DEBUG) {
-                System.out.println("PUT " + p_request.getKey(i).toString() + "->" + p_request.getContent(i));
+    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+        if (p_keys.length != p_values.length) {
+            p_callback.on(new Exception("Bad Put Usage !"));
+        } else {
+            for (int i = 0; i < p_keys.length; i++) {
+                backend.put(p_keys[i].toString(), p_values[i]);
             }
-        }
-        if (p_callback != null) {
-            p_callback.on(null);
+            if (additionalInterceptors != null) {
+                additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                    @Override
+                    public void on(int key, KContentUpdateListener value) {
+                        if (value != null && key != excludeListener) {
+                            value.on(p_keys);
+                        }
+                    }
+                });
+            }
+            if (p_callback != null) {
+                p_callback.on(null);
+            }
         }
     }
 
@@ -102,78 +96,40 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void close(KCallback<Throwable> callback) {
-        _localEventListeners.clear();
         backend.clear();
         callback.on(null);
     }
 
+    private ArrayIntMap<KContentUpdateListener> additionalInterceptors = null;
 
-    @Override
-    public void registerListener(long groupId, KObject p_origin, KEventListener p_listener) {
-        _localEventListeners.registerListener(groupId, p_origin, p_listener);
-    }
-
-    @Override
-    public void unregisterGroup(long groupId) {
-        _localEventListeners.unregister(groupId);
-    }
-
-    @Override
-    public void registerMultiListener(long groupId, KUniverse origin, long[] objects, KEventMultiListener listener) {
-        _localEventListeners.registerListenerAll(groupId, origin.key(), objects, listener);
-    }
-
-    @Override
-    public void send(KMessage msgs) {
-        //NO REMOTE MANAGEMENT
-        if (additionalInterceptors != null) {
-            additionalInterceptors.each(new KIntMapCallBack<KMessageInterceptor>() {
-                @Override
-                public void on(int key, KMessageInterceptor value) {
-                    if(value != null){
-                        if (value.on(msgs)) {
-                            return; //exit if intercepted
-                        }
-                    }
-                }
-            });
-        }
-        _localEventListeners.dispatch(msgs);
-    }
-
-    private ArrayIntMap<KMessageInterceptor> additionalInterceptors = null;
-
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private Random random = new Random();
 
-    /** @native ts
+    /**
+     * @native ts
      * return Math.random();
-     * */
-    private int randomInterceptorID(){
+     */
+    private int nextListenerID() {
         return random.nextInt();
     }
 
     @Override
-    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+    public synchronized int addUpdateListener(KContentUpdateListener p_interceptor) {
         if (additionalInterceptors == null) {
-            additionalInterceptors = new ArrayIntMap<KMessageInterceptor>(KConfig.CACHE_INIT_SIZE,KConfig.CACHE_LOAD_FACTOR);
+            additionalInterceptors = new ArrayIntMap<KContentUpdateListener>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         }
-        int newID = randomInterceptorID();
-        additionalInterceptors.put(newID,p_interceptor);
+        int newID = nextListenerID();
+        additionalInterceptors.put(newID, p_interceptor);
         return newID;
     }
 
     @Override
-    public synchronized void removeMessageInterceptor(int id) {
+    public synchronized void removeUpdateListener(int id) {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }
     }
-
-    @Override
-    public void setManager(KMemoryManager manager) {
-        _localEventListeners.setManager(manager);
-    }
-
 
 }

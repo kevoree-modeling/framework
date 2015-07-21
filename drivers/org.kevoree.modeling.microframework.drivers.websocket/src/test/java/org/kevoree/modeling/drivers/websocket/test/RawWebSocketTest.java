@@ -6,8 +6,6 @@ import org.junit.Test;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KModel;
-import org.kevoree.modeling.cdn.impl.ContentPutRequest;
-import org.kevoree.modeling.message.impl.Events;
 import org.kevoree.modeling.drivers.websocket.WebSocketCDNClient;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -32,14 +30,6 @@ public class RawWebSocketTest {
         getRequest[1] = KContentKey.createLastPrefix();
         getRequest[2] = KContentKey.createRootUniverseTree();
 
-        ContentPutRequest putRequest = new ContentPutRequest(2);
-        putRequest.put(KContentKey.createGlobalUniverseTree(), "GlobalUniverseTree");
-
-        Events eventsMessage = new Events(1, 0);
-        int[] meta = new int[1];
-        meta[0] = 42;
-        eventsMessage.setEvent(0, KContentKey.createGlobalUniverseTree(), meta);
-
         model.setContentDeliveryDriver(mock);
         WebSocketGateway wrapper = WebSocketGateway.exposeModel(model, PORT);
         wrapper.start();
@@ -54,7 +44,6 @@ public class RawWebSocketTest {
                     @Override
                     public void on(Throwable throwable) {
 
-
                         client.get(getRequest, new KCallback<String[]>() {
                             @Override
                             public void on(String[] resultPayloads) {
@@ -66,16 +55,13 @@ public class RawWebSocketTest {
                             }
                         });
 
-                        client.put(putRequest, new KCallback<Throwable>() {
+                        client.put(new KContentKey[]{KContentKey.createGlobalUniverseTree()}, new String[]{"GlobalUniverseTree"}, new KCallback<Throwable>() {
                             @Override
                             public void on(Throwable throwable) {
                                 latch.countDown();
-                                Assert.assertEquals(mock.alreadyPut.size(), putRequest.size());
-                                for (int i = 0; i < putRequest.size(); i++) {
-                                    Assert.assertEquals(putRequest.getContent(i), mock.alreadyPut.get(putRequest.getKey(i).toString()));
-                                }
+                                Assert.assertEquals(mock.alreadyPut.size(), 1);
                             }
-                        });
+                        }, -1);
                         client.atomicGetIncrement(KContentKey.createGlobalUniverseTree(), new KCallback<Short>() {
                             @Override
                             public void on(Short s) {
@@ -83,8 +69,6 @@ public class RawWebSocketTest {
                                 Assert.assertTrue(s == 0);
                             }
                         });
-                        client.send(eventsMessage);
-
 
                     }
                 });

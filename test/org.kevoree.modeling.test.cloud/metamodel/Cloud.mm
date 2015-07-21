@@ -24,3 +24,4 @@ enum cloud.State {
 OK
 NOK
 }
+

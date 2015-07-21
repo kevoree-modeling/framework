@@ -2,7 +2,6 @@ package org.kevoree.modeling.message;
 
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.KContentKey;
-import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.impl.*;
 
@@ -12,7 +11,6 @@ public class KMessageLoader {
     public static String OPERATION_NAME = "op";
     public static String KEY_NAME = "key";
     public static String KEYS_NAME = "keys";
-    public static String SENDER = "sender";
     public static String ID_NAME = "id";
     public static String VALUE_NAME = "value";
     public static String VALUES_NAME = "values";
@@ -47,10 +45,8 @@ public class KMessageLoader {
             Integer parsedType = Integer.parseInt(objectReader.get(TYPE_NAME).toString());
             if (parsedType == EVENTS_TYPE) {
                 Events eventsMessage = null;
-                if (objectReader.get(KEYS_NAME) != null && objectReader.get(SENDER) != null) {
-                    int sender = Integer.parseInt(objectReader.get(SENDER).toString());
+                if (objectReader.get(KEYS_NAME) != null) {
                     String[] objIdsRaw = objectReader.getAsStringArray(KEYS_NAME);
-                    eventsMessage = new Events(objIdsRaw.length,sender);
                     KContentKey[] keys = new KContentKey[objIdsRaw.length];
                     for (int i = 0; i < objIdsRaw.length; i++) {
                         try {
@@ -59,28 +55,7 @@ public class KMessageLoader {
                             e.printStackTrace();
                         }
                     }
-                    eventsMessage._objIds = keys;
-                    if (objectReader.get(VALUES_NAME) != null) {
-                        String[] metaInt = objectReader.getAsStringArray(VALUES_NAME);
-                        int[][] metaIndexes = new int[metaInt.length][];
-                        for (int i = 0; i < metaInt.length; i++) {
-                            try {
-                                if (metaInt[i] != null) {
-                                    String[] splitted = metaInt[i].split("%");
-                                    int[] newMeta = new int[splitted.length];
-                                    for (int h = 0; h < splitted.length; h++) {
-                                        if (splitted[h] != null && !splitted[h].isEmpty()) {
-                                            newMeta[h] = Integer.parseInt(splitted[h]);
-                                        }
-                                    }
-                                    metaIndexes[i] = newMeta;
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        eventsMessage._metaindexes = metaIndexes;
-                    }
+                    eventsMessage = new Events(keys);
                 }
                 return eventsMessage;
             } else if (parsedType == GET_REQ_TYPE) {
@@ -125,11 +100,11 @@ public class KMessageLoader {
                     toFlatValues = objectReader.getAsStringArray(VALUES_NAME);
                 }
                 if (toFlatKeys != null && toFlatValues != null && toFlatKeys.length == toFlatValues.length) {
-                    if (putRequest.request == null) {
-                        putRequest.request = new ContentPutRequest(toFlatKeys.length);
-                    }
+                    putRequest.keys = new KContentKey[toFlatKeys.length];
+                    putRequest.values = new String[toFlatKeys.length];
                     for (int i = 0; i < toFlatKeys.length; i++) {
-                        putRequest.request.put(KContentKey.create(toFlatKeys[i]), JsonString.unescape(toFlatValues[i]));
+                        putRequest.keys[i] = KContentKey.create(toFlatKeys[i]);
+                        putRequest.values[i] = JsonString.unescape(toFlatValues[i]);
                     }
                 }
                 return putRequest;
@@ -191,7 +166,7 @@ public class KMessageLoader {
                 if (objectReader.get(VALUE_NAME) != null) {
                     try {
                         atomicGetResultMessage.value = Short.parseShort(objectReader.get(VALUE_NAME).toString());
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KContentKey;
-import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 
 import java.io.IOException;
 
@@ -20,21 +19,22 @@ public class LevelDbTest {
         driver.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
-                ContentPutRequest request = new ContentPutRequest(3);
 
                 KContentKey k0 = KContentKey.createObject(0l, 1l, 2l);
                 KContentKey k1 = KContentKey.createObject(3l, 4l, 5l);
 
-                request.put(k0,"K0");
-                request.put(k1,"K1");
-                driver.put(request, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
-                        if(throwable!=null){
-                            throwable.printStackTrace();
-                        }
-                    }
-                });
+
+                driver.put(
+                        new KContentKey[]{k0, k1},
+                        new String[]{"K0", "K1"},
+                        new KCallback<Throwable>() {
+                            @Override
+                            public void on(Throwable throwable) {
+                                if (throwable != null) {
+                                    throwable.printStackTrace();
+                                }
+                            }
+                        }, -1);
 
                 KContentKey[] keys = new KContentKey[2];
                 keys[0] = k0;
@@ -43,7 +43,7 @@ public class LevelDbTest {
                 driver.get(keys, new KCallback<String[]>() {
                     @Override
                     public void on(String[] strings) {
-                        Assert.assertEquals(strings.length,2);
+                        Assert.assertEquals(strings.length, 2);
                         Assert.assertEquals(strings[0], "K0");
                         Assert.assertEquals(strings[1], "K1");
                     }

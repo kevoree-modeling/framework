@@ -115,6 +115,8 @@ public class ModelWebSocketTest {
         WebSocketGateway wrapper = WebSocketGateway.exposeModelAndResources(model, 8080, this.getClass().getClassLoader());
         wrapper.start();
 
+      //  Thread.sleep(100000);
+
         int result = launchRunner("MyTestRunner.js");
 
         // Assert.assertEquals(0, result);

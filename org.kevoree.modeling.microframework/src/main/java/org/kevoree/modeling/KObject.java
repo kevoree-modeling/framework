@@ -1,6 +1,5 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.event.KEventListener;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -21,8 +20,6 @@ public interface KObject {
     void delete(KCallback cb);
 
     void select(String query, KCallback<Object[]> cb);
-
-    void listen(long groupId, KEventListener listener);
 
     void visitAttributes(KModelAttributeVisitor visitor);
 

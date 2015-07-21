@@ -9,14 +9,9 @@ import com.mongodb.MongoClient;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.KContentKey;
-import org.kevoree.modeling.cdn.KContentPutRequest;
-import org.kevoree.modeling.cdn.KMessageInterceptor;
-import org.kevoree.modeling.event.KEventListener;
-import org.kevoree.modeling.event.KEventMultiListener;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.cdn.KContentUpdateListener;
+import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
-import org.kevoree.modeling.message.KMessage;
-import org.kevoree.modeling.event.impl.LocalEventListeners;
 
 import java.net.UnknownHostException;
 import java.util.Random;
@@ -81,7 +76,6 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
 
-
     @Override
     public void get(KContentKey[] keys, KCallback<String[]> callback) {
         String[] result = new String[keys.length];
@@ -100,17 +94,27 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void put(KContentPutRequest request, KCallback<Throwable> error) {
-        for (int i = 0; i < request.size(); i++) {
+    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+        for (int i = 0; i < p_keys.length; i++) {
             BasicDBObject originalObjectQuery = new BasicDBObject();
-            originalObjectQuery.put(KMF_KEY, request.getKey(i).toString());
+            originalObjectQuery.put(KMF_KEY, p_keys[i].toString());
             BasicDBObject newValue = new BasicDBObject();
-            newValue.append(KMF_KEY, request.getKey(i).toString());
-            newValue.append(KMF_VAL, request.getContent(i));
+            newValue.append(KMF_KEY, p_keys[i].toString());
+            newValue.append(KMF_VAL, p_values[i]);
             table.update(originalObjectQuery, newValue, true, false);
         }
-        if (error != null) {
-            error.on(null);
+        if (additionalInterceptors != null) {
+            additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                @Override
+                public void on(int key, KContentUpdateListener value) {
+                    if (value != null && key != excludeListener) {
+                        value.on(p_keys);
+                    }
+                }
+            });
+        }
+        if (p_callback != null) {
+            p_callback.on(null);
         }
     }
 
@@ -134,34 +138,6 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
         }
     }
 
-    private LocalEventListeners localEventListeners = new LocalEventListeners();
-
-    @Override
-    public void registerListener(long p_groupId, KObject p_origin, KEventListener p_listener) {
-        localEventListeners.registerListener(p_groupId, p_origin, p_listener);
-    }
-
-    @Override
-    public void registerMultiListener(long p_groupId, KUniverse p_origin, long[] p_objects, KEventMultiListener p_listener) {
-        localEventListeners.registerListenerAll(p_groupId, p_origin.key(), p_objects, p_listener);
-    }
-
-    @Override
-    public void unregisterGroup(long p_groupId) {
-        localEventListeners.unregister(p_groupId);
-    }
-
-    @Override
-    public void send(KMessage msgs) {
-        //No Remote send since LevelDB do not provide message brokering
-        localEventListeners.dispatch(msgs);
-    }
-
-    @Override
-    public void setManager(KMemoryManager manager) {
-        localEventListeners.setManager(manager);
-    }
-
     @Override
     public void connect(KCallback<Throwable> callback) {
         mongoClient = new MongoClient(host, port);
@@ -172,30 +148,33 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
         }
     }
 
-    private ArrayIntMap<KMessageInterceptor> additionalInterceptors = null;
+    private ArrayIntMap<KContentUpdateListener> additionalInterceptors = null;
 
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private Random random = new Random();
 
-    /** @native ts
+    /**
+     * @native ts
      * return Math.random();
-     * */
-    private int randomInterceptorID(){
+     */
+    private int randomInterceptorID() {
         return random.nextInt();
     }
 
     @Override
-    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+    public synchronized int addUpdateListener(KContentUpdateListener p_interceptor) {
         if (additionalInterceptors == null) {
-            additionalInterceptors = new ArrayIntMap<KMessageInterceptor>(KConfig.CACHE_INIT_SIZE,KConfig.CACHE_LOAD_FACTOR);
+            additionalInterceptors = new ArrayIntMap<KContentUpdateListener>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         }
         int newID = randomInterceptorID();
-        additionalInterceptors.put(newID,p_interceptor);
+        additionalInterceptors.put(newID, p_interceptor);
         return newID;
     }
 
     @Override
-    public synchronized void removeMessageInterceptor(int id) {
+    public synchronized void removeUpdateListener(int id) {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }

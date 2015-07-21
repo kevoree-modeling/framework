@@ -1,12 +1,6 @@
 package org.kevoree.modeling.abs;
 
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.event.KEventMultiListener;
-import org.kevoree.modeling.KModel;
-import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.KUniverse;
-import org.kevoree.modeling.KView;
+import org.kevoree.modeling.*;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 
 import java.util.ArrayList;
@@ -90,7 +84,8 @@ public abstract class AbstractKUniverse<A extends KView, B extends KUniverse, C 
     }
 
     @Override
-    public void listenAll(long groupId, long[] objects, KEventMultiListener multiListener) {
-        model().manager().cdn().registerMultiListener(groupId, this, objects, multiListener);
+    public KListener newListener() {
+        return _manager.newListener(_universe);
     }
+
 }

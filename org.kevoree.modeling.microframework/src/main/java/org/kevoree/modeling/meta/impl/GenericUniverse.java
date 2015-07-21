@@ -12,6 +12,7 @@ public class GenericUniverse extends AbstractKUniverse {
 
     @Override
     protected KView internal_create(long timePoint) {
-        return new GenericView(_universe,timePoint,_manager);
+        return new GenericView(_universe, timePoint, _manager);
     }
+
 }

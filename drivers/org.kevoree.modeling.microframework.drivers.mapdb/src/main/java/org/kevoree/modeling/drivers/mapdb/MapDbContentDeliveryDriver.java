@@ -3,14 +3,9 @@ package org.kevoree.modeling.drivers.mapdb;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.cdn.KContentPutRequest;
-import org.kevoree.modeling.cdn.KMessageInterceptor;
-import org.kevoree.modeling.event.KEventListener;
-import org.kevoree.modeling.event.KEventMultiListener;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
-import org.kevoree.modeling.event.impl.LocalEventListeners;
+import org.kevoree.modeling.cdn.KContentUpdateListener;
+import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
-import org.kevoree.modeling.message.KMessage;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 
@@ -65,11 +60,27 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void put(KContentPutRequest request, KCallback<Throwable> error) {
-        for (int i = 0; i < request.size(); i++) {
-            m.put(request.getKey(i).toString(), request.getContent(i).toString());
+    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+        if (p_keys.length != p_values.length) {
+            p_callback.on(new Exception("Bad Put Usage !"));
+        } else {
+            for (int i = 0; i < p_keys.length; i++) {
+                m.put(p_keys[i].toString(), p_values[i]);
+            }
+            if (additionalInterceptors != null) {
+                additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                    @Override
+                    public void on(int key, KContentUpdateListener value) {
+                        if (value != null && key != excludeListener) {
+                            value.on(p_keys);
+                        }
+                    }
+                });
+            }
+            if (p_callback != null) {
+                p_callback.on(null);
+            }
         }
-        error.on(null);
     }
 
     @Override
@@ -90,58 +101,33 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
         m = null;
     }
 
-    private LocalEventListeners localEventListeners = new LocalEventListeners();
+    private ArrayIntMap<KContentUpdateListener> additionalInterceptors = null;
 
-    @Override
-    public void registerListener(long p_groupId, KObject p_origin, KEventListener p_listener) {
-        localEventListeners.registerListener(p_groupId, p_origin, p_listener);
-    }
-
-    @Override
-    public void registerMultiListener(long p_groupId, KUniverse p_origin, long[] p_objects, KEventMultiListener p_listener) {
-        localEventListeners.registerListenerAll(p_groupId, p_origin.key(), p_objects, p_listener);
-    }
-
-    @Override
-    public void unregisterGroup(long p_groupId) {
-        localEventListeners.unregister(p_groupId);
-    }
-
-    @Override
-    public void send(KMessage msgs) {
-        //No Remote send since LevelDB do not provide message brokering
-        localEventListeners.dispatch(msgs);
-    }
-
-    @Override
-    public void setManager(KMemoryManager manager) {
-        localEventListeners.setManager(manager);
-    }
-
-    private ArrayIntMap<KMessageInterceptor> additionalInterceptors = null;
-
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private Random random = new Random();
 
-    /** @native ts
+    /**
+     * @native ts
      * return Math.random();
-     * */
-    private int randomInterceptorID(){
+     */
+    private int randomInterceptorID() {
         return random.nextInt();
     }
 
     @Override
-    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+    public synchronized int addUpdateListener(KContentUpdateListener p_interceptor) {
         if (additionalInterceptors == null) {
-            additionalInterceptors = new ArrayIntMap<KMessageInterceptor>(KConfig.CACHE_INIT_SIZE,KConfig.CACHE_LOAD_FACTOR);
+            additionalInterceptors = new ArrayIntMap<KContentUpdateListener>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         }
         int newID = randomInterceptorID();
-        additionalInterceptors.put(newID,p_interceptor);
+        additionalInterceptors.put(newID, p_interceptor);
         return newID;
     }
 
     @Override
-    public synchronized void removeMessageInterceptor(int id) {
+    public synchronized void removeUpdateListener(int id) {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }

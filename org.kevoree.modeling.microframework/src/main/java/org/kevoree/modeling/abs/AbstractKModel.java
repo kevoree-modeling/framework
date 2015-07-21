@@ -110,16 +110,6 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public void clearListenerGroup(long groupID) {
-        manager().cdn().unregisterGroup(groupID);
-    }
-
-    @Override
-    public long nextGroup() {
-        return this.manager().nextGroupKey();
-    }
-
-    @Override
     public KObject create(KMetaClass clazz, long universe, long time) {
         if (!Checker.isDefined(clazz)) {
             return null;

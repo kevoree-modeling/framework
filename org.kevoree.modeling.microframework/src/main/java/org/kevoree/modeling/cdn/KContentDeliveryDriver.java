@@ -1,10 +1,6 @@
 package org.kevoree.modeling.cdn;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.event.KEventListener;
-import org.kevoree.modeling.event.KEventMultiListener;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
-import org.kevoree.modeling.message.KMessage;
 
 public interface KContentDeliveryDriver {
 
@@ -12,7 +8,7 @@ public interface KContentDeliveryDriver {
 
     void atomicGetIncrement(KContentKey key, KCallback<Short> cb);
 
-    void put(KContentPutRequest request, KCallback<Throwable> error);
+    void put(KContentKey[] keys, String[] values, KCallback<Throwable> error, int excludeListener);
 
     void remove(String[] keys, KCallback<Throwable> error);
 
@@ -20,18 +16,8 @@ public interface KContentDeliveryDriver {
 
     void close(KCallback<Throwable> callback);
 
-    void registerListener(long groupId, KObject origin, KEventListener listener);
+    int addUpdateListener(KContentUpdateListener interceptor);
 
-    void registerMultiListener(long groupId, KUniverse origin, long[] objects, KEventMultiListener listener);
-
-    void unregisterGroup(long groupId);
-
-    void send(KMessage msgs);
-
-    int addMessageInterceptor(KMessageInterceptor interceptor);
-
-    void removeMessageInterceptor(int id);
-
-    void setManager(KMemoryManager manager);
+    void removeUpdateListener(int id);
 
 }

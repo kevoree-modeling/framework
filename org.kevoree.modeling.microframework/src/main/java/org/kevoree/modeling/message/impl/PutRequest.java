@@ -1,14 +1,15 @@
 package org.kevoree.modeling.message.impl;
 
-import org.kevoree.modeling.cdn.KContentPutRequest;
-import org.kevoree.modeling.cdn.impl.ContentPutRequest;
+import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.KMessageLoader;
 
 public class PutRequest implements KMessage {
 
-    public KContentPutRequest request;
+    public KContentKey[] keys;
+
+    public String[] values;
 
     public long id;
 
@@ -18,26 +19,26 @@ public class PutRequest implements KMessage {
         MessageHelper.printJsonStart(buffer);
         MessageHelper.printType(buffer, type());
         MessageHelper.printElem(id, KMessageLoader.ID_NAME, buffer);
-        if (request != null) {
+        if (keys != null && values != null) {
             buffer.append(",\"");
             buffer.append(KMessageLoader.KEYS_NAME).append("\":[");
-            for (int i = 0; i < request.size(); i++) {
+            for (int i = 0; i < keys.length; i++) {
                 if (i != 0) {
                     buffer.append(",");
                 }
                 buffer.append("\"");
-                buffer.append(request.getKey(i));
+                buffer.append(keys[i]);
                 buffer.append("\"");
             }
             buffer.append("]\n");
             buffer.append(",\"");
             buffer.append(KMessageLoader.VALUES_NAME).append("\":[");
-            for (int i = 0; i < request.size(); i++) {
+            for (int i = 0; i < keys.length; i++) {
                 if (i != 0) {
                     buffer.append(",");
                 }
                 buffer.append("\"");
-                buffer.append(JsonString.encode(request.getContent(i)));
+                buffer.append(JsonString.encode(values[i]));
                 buffer.append("\"");
             }
             buffer.append("]\n");

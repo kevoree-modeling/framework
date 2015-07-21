@@ -39,10 +39,6 @@ public interface KModel<A extends KUniverse> {
 
     void close(KCallback cb);
 
-    void clearListenerGroup(long groupID);
-
-    long nextGroup();
-
     KObject createByName(String metaClassName, long universe, long time);
 
     KObject create(KMetaClass clazz, long universe, long time);

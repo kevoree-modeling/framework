@@ -3,14 +3,9 @@ package org.kevoree.modeling.drivers.rocksdb;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.cdn.KContentPutRequest;
-import org.kevoree.modeling.cdn.KMessageInterceptor;
-import org.kevoree.modeling.event.KEventListener;
-import org.kevoree.modeling.event.KEventMultiListener;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
-import org.kevoree.modeling.event.impl.LocalEventListeners;
+import org.kevoree.modeling.cdn.KContentUpdateListener;
+import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
-import org.kevoree.modeling.message.KMessage;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -21,9 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-/**
- * Created by duke on 11/4/14.
- */
 public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     private Options options;
@@ -43,10 +35,10 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void put(KContentPutRequest request, KCallback<Throwable> error) {
+    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
         WriteBatch batch = new WriteBatch();
-        for (int i = 0; i < request.size(); i++) {
-            batch.put(request.getKey(i).toString().getBytes(), request.getContent(i).getBytes());
+        for (int i = 0; i < p_keys.length; i++) {
+            batch.put(p_keys[i].toString().getBytes(), p_values[i].getBytes());
         }
         WriteOptions options = new WriteOptions();
         options.setSync(true);
@@ -55,8 +47,18 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
-        if (error != null) {
-            error.on(null);
+        if (additionalInterceptors != null) {
+            additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                @Override
+                public void on(int key, KContentUpdateListener value) {
+                    if (value != null && key != excludeListener) {
+                        value.on(p_keys);
+                    }
+                }
+            });
+        }
+        if (p_callback != null) {
+            p_callback.on(null);
         }
     }
 
@@ -142,34 +144,6 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
         }
     }
 
-    private LocalEventListeners _localEventListeners = new LocalEventListeners();
-
-    @Override
-    public void registerListener(long p_groupId, KObject p_origin, KEventListener p_listener) {
-        _localEventListeners.registerListener(p_groupId, p_origin, p_listener);
-    }
-
-    @Override
-    public void registerMultiListener(long p_groupId, KUniverse p_origin, long[] p_objects, KEventMultiListener p_listener) {
-        _localEventListeners.registerListenerAll(p_groupId, p_origin.key(), p_objects, p_listener);
-    }
-
-    @Override
-    public void unregisterGroup(long p_groupId) {
-        _localEventListeners.unregister(p_groupId);
-    }
-
-    @Override
-    public void send(KMessage msg) {
-        //NO Remote op
-        _localEventListeners.dispatch(msg);
-    }
-
-    @Override
-    public void setManager(KMemoryManager manager) {
-        _localEventListeners.setManager(manager);
-    }
-
     @Override
     public void connect(KCallback<Throwable> callback) {
         //noop
@@ -178,30 +152,33 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
         }
     }
 
-    private ArrayIntMap<KMessageInterceptor> additionalInterceptors = null;
+    private ArrayIntMap<KContentUpdateListener> additionalInterceptors = null;
 
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private Random random = new Random();
 
-    /** @native ts
+    /**
+     * @native ts
      * return Math.random();
-     * */
-    private int randomInterceptorID(){
+     */
+    private int randomInterceptorID() {
         return random.nextInt();
     }
 
     @Override
-    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+    public synchronized int addUpdateListener(KContentUpdateListener p_interceptor) {
         if (additionalInterceptors == null) {
-            additionalInterceptors = new ArrayIntMap<KMessageInterceptor>(KConfig.CACHE_INIT_SIZE,KConfig.CACHE_LOAD_FACTOR);
+            additionalInterceptors = new ArrayIntMap<KContentUpdateListener>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         }
         int newID = randomInterceptorID();
-        additionalInterceptors.put(newID,p_interceptor);
+        additionalInterceptors.put(newID, p_interceptor);
         return newID;
     }
 
     @Override
-    public synchronized void removeMessageInterceptor(int id) {
+    public synchronized void removeUpdateListener(int id) {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }

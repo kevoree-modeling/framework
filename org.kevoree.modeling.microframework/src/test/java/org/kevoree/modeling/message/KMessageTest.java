@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
-import org.kevoree.modeling.cdn.impl.ContentPutRequest;
 import org.kevoree.modeling.message.impl.*;
 
 public class KMessageTest {
@@ -12,17 +11,11 @@ public class KMessageTest {
     @Test
     public void test() {
 
-        Events event = new Events(1,0);
-        int[] meta = new int[2];
-        meta[0] = 0;
-        meta[1] = 1;
-
-        event.setEvent(0, KContentKey.createObject(0l, 1l, 2l), meta);
+        Events event = new Events(new KContentKey[]{KContentKey.createObject(0l, 1l, 2l)});
 
         Assert.assertEquals("{\n" +
                 "\"type\":\"0\"\n" +
-                ",\"sender\":0,\"keys\":[\"A"+ KConfig.KEY_SEP+"C"+ KConfig.KEY_SEP+"E\"]\n" +
-                ",\"values\":[\"0%1\"]\n" +
+                ",\"keys\":[\"A|C|E\"]\n" +
                 "}\n", event.json());
         KMessage parsed = KMessageLoader.load(event.json());
         Assert.assertEquals(parsed.json(), event.json());
@@ -36,20 +29,26 @@ public class KMessageTest {
         Assert.assertEquals("{\n" +
                 "\"type\":\"1\"\n" +
                 ",\"id\":\"0\"\n" +
-                ",\"keys\":[\"A"+ KConfig.KEY_SEP+"C"+ KConfig.KEY_SEP+"E\",\"G"+ KConfig.KEY_SEP+"I"+ KConfig.KEY_SEP+"K\",\"M"+ KConfig.KEY_SEP+"O"+ KConfig.KEY_SEP+"Q\"]\n" +
+                ",\"keys\":[\"A" + KConfig.KEY_SEP + "C" + KConfig.KEY_SEP + "E\",\"G" + KConfig.KEY_SEP + "I" + KConfig.KEY_SEP + "K\",\"M" + KConfig.KEY_SEP + "O" + KConfig.KEY_SEP + "Q\"]\n" +
                 "}\n", msgGet.json());
         KMessage parsedGet = KMessageLoader.load(msgGet.json());
         Assert.assertEquals(parsedGet.json(), msgGet.json());
 
         PutRequest msgPut = new PutRequest();
         msgPut.id = 0l;
-        msgPut.request = new ContentPutRequest(2);
-        msgPut.request.put(KContentKey.createObject(0l, 1l, 2l), "hello0");
-        msgPut.request.put(KContentKey.createObject(3l, 4l, 5l), "hello1");
+        msgPut.keys = new KContentKey[2];
+        msgPut.values = new String[2];
+
+        msgPut.keys[0] = KContentKey.createObject(0l, 1l, 2l);
+        msgPut.values[0] = "hello0";
+
+        msgPut.keys[1] = KContentKey.createObject(3l, 4l, 5l);
+        msgPut.values[1] = "hello1";
+
         Assert.assertEquals("{\n" +
                 "\"type\":\"3\"\n" +
                 ",\"id\":\"0\"\n" +
-                ",\"keys\":[\"A"+ KConfig.KEY_SEP+"C"+ KConfig.KEY_SEP+"E\",\"G"+ KConfig.KEY_SEP+"I"+ KConfig.KEY_SEP+"K\"]\n" +
+                ",\"keys\":[\"A" + KConfig.KEY_SEP + "C" + KConfig.KEY_SEP + "E\",\"G" + KConfig.KEY_SEP + "I" + KConfig.KEY_SEP + "K\"]\n" +
                 ",\"values\":[\"hello0\",\"hello1\"]\n" +
                 "}\n", msgPut.json());
         KMessage parsedPut = KMessageLoader.load(msgPut.json());
@@ -67,7 +66,7 @@ public class KMessageTest {
         Assert.assertEquals("{\n" +
                 "\"type\":\"5\"\n" +
                 ",\"id\":\"1\"\n" +
-                ",\"key\":\"A"+ KConfig.KEY_SEP+"C"+ KConfig.KEY_SEP+"E\"\n" +
+                ",\"key\":\"A" + KConfig.KEY_SEP + "C" + KConfig.KEY_SEP + "E\"\n" +
                 ",\"class\":\"0\",\"op\":\"0\",\"params\":[\"param0\",\"param1\",\"param2\"]\n" +
                 "}\n", msgCall.json());
 
@@ -81,7 +80,7 @@ public class KMessageTest {
         Assert.assertEquals("{\n" +
                 "\"type\":\"6\"\n" +
                 ",\"id\":\"1\"\n" +
-                ",\"key\":\"A"+ KConfig.KEY_SEP+"C"+ KConfig.KEY_SEP+"E\"\n" +
+                ",\"key\":\"A" + KConfig.KEY_SEP + "C" + KConfig.KEY_SEP + "E\"\n" +
                 ",\"value\":\"hello\"\n" +
                 "}\n", msgResult.json());
 

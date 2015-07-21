@@ -1,23 +1,39 @@
 package org.kevoree.modeling.drivers.websocket;
 
-import io.undertow.websockets.core.*;
-import org.kevoree.modeling.*;
+import io.undertow.websockets.core.AbstractReceiveListener;
+import io.undertow.websockets.core.BufferedTextMessage;
+import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSocketVersion;
+import io.undertow.websockets.core.WebSockets;
+import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.cdn.KContentPutRequest;
-import org.kevoree.modeling.cdn.KMessageInterceptor;
-import org.kevoree.modeling.event.KEventListener;
-import org.kevoree.modeling.event.KEventMultiListener;
+import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
+import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
-import org.kevoree.modeling.message.*;
-import org.kevoree.modeling.message.impl.*;
-import org.kevoree.modeling.event.impl.LocalEventListeners;
-import org.xnio.*;
+import org.kevoree.modeling.message.KMessage;
+import org.kevoree.modeling.message.KMessageLoader;
+import org.kevoree.modeling.message.impl.AtomicGetIncrementRequest;
+import org.kevoree.modeling.message.impl.AtomicGetIncrementResult;
+import org.kevoree.modeling.message.impl.Events;
+import org.kevoree.modeling.message.impl.GetRequest;
+import org.kevoree.modeling.message.impl.GetResult;
+import org.kevoree.modeling.message.impl.PutRequest;
+import org.kevoree.modeling.message.impl.PutResult;
+import org.xnio.BufferAllocator;
+import org.xnio.ByteBufferSlicePool;
+import org.xnio.OptionMap;
+import org.xnio.Options;
+import org.xnio.Xnio;
+import org.xnio.XnioWorker;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 
@@ -27,8 +43,6 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
 
     private UndertowWSClient _client;
 
-    private LocalEventListeners _localEventListeners = new LocalEventListeners();
-    private KMemoryManager _manager;
     private AtomicInteger _atomicInteger = null;
 
     private final ArrayLongMap<Object> _callbacks = new ArrayLongMap<Object>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
@@ -101,12 +115,14 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
             break;
             case KMessageLoader.EVENTS_TYPE: {
                 Events eventsMessage = (Events) msg;
-                this._manager.reload(eventsMessage.allKeys(), new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
-                        WebSocketCDNClient.this._localEventListeners.dispatch(eventsMessage);
-                    }
-                });
+                if (additionalInterceptors != null) {
+                    additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                        @Override
+                        public void on(int key, KContentUpdateListener value) {
+                            value.on(eventsMessage.allKeys());
+                        }
+                    });
+                }
             }
             break;
             default: {
@@ -134,12 +150,23 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
     }
 
     @Override
-    public void put(KContentPutRequest request, KCallback<Throwable> error) {
+    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
         PutRequest putRequest = new PutRequest();
-        putRequest.request = request;
+        putRequest.keys = p_keys;
+        putRequest.values = p_values;
         putRequest.id = nextKey();
-        _callbacks.put(putRequest.id, error);
+        _callbacks.put(putRequest.id, p_callback);
         WebSockets.sendText(putRequest.json(), _client.getChannel(), null);
+        if (additionalInterceptors != null) {
+            additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                @Override
+                public void on(int key, KContentUpdateListener value) {
+                    if (value != null && key != excludeListener) {
+                        value.on(p_keys);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -147,56 +174,30 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
         //TODO
     }
 
-    @Override
-    public void registerListener(long p_groupId, KObject p_origin, KEventListener p_listener) {
-        _localEventListeners.registerListener(p_groupId, p_origin, p_listener);
+
+    private ArrayIntMap<KContentUpdateListener> additionalInterceptors = null;
+
+    private Random random = new Random();
+
+    private int nextListenerID() {
+        return random.nextInt();
     }
 
     @Override
-    public void registerMultiListener(long p_groupId, KUniverse p_origin, long[] p_objects, KEventMultiListener p_listener) {
-        _localEventListeners.registerListenerAll(p_groupId, p_origin.key(), p_objects, p_listener);
-    }
-
-    @Override
-    public void unregisterGroup(long p_groupId) {
-        _localEventListeners.unregister(p_groupId);
-    }
-
-    @Override
-    public void send(KMessage msg) {
-        _localEventListeners.dispatch(msg);
-        WebSockets.sendText(msg.json(), _client.getChannel(), null);
-    }
-
-    private KMessageInterceptor[] additionalInterceptors = null;
-
-    @Override
-    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+    public synchronized int addUpdateListener(KContentUpdateListener p_interceptor) {
         if (additionalInterceptors == null) {
-            additionalInterceptors = new KMessageInterceptor[1];
-            additionalInterceptors[0] = p_interceptor;
-            return 0;
-        } else {
-            int id = additionalInterceptors.length;
-            KMessageInterceptor[] newInterceptors = new KMessageInterceptor[id + 1];
-            System.arraycopy(additionalInterceptors, 0, newInterceptors, 0, id);
-            newInterceptors[id] = p_interceptor;
-            additionalInterceptors = newInterceptors;
-            return id;
+            additionalInterceptors = new ArrayIntMap<KContentUpdateListener>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         }
+        int newID = nextListenerID();
+        additionalInterceptors.put(newID, p_interceptor);
+        return newID;
     }
 
     @Override
-    public synchronized void removeMessageInterceptor(int id) {
+    public synchronized void removeUpdateListener(int id) {
         if (additionalInterceptors != null) {
-            additionalInterceptors[id] = null;
+            additionalInterceptors.remove(id);
         }
-    }
-
-    @Override
-    public void setManager(KMemoryManager p_manager) {
-        _manager = p_manager;
-        _localEventListeners.setManager(p_manager);
     }
 
     class UndertowWSClient {

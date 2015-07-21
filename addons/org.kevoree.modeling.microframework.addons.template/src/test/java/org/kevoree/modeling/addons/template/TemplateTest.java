@@ -1,6 +1,5 @@
 package org.kevoree.modeling.addons.template;
 
-import org.junit.Test;
 import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;

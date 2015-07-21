@@ -1,7 +1,5 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.event.KEventMultiListener;
-
 import java.util.List;
 
 public interface KUniverse<A extends KView, B extends KUniverse, C extends KModel> {
@@ -24,6 +22,6 @@ public interface KUniverse<A extends KView, B extends KUniverse, C extends KMode
 
     void lookupAllTimes(long uuid, long[] times, KCallback<KObject[]> cb);
 
-    void listenAll(long groupId, long[] objects, KEventMultiListener multiListener);
+    KListener newListener();
 
 }

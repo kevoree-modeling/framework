@@ -5,6 +5,7 @@ import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.KMemoryFactory;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.KOperationManager;
@@ -43,8 +44,6 @@ public interface KMemoryManager {
 
     long nextModelKey();
 
-    long nextGroupKey();
-
     void getRoot(long universe, long time, KCallback<KObject> callback);
 
     void setRoot(KObject newRoot, KCallback<Throwable> callback);
@@ -68,5 +67,7 @@ public interface KMemoryManager {
     void cleanCache();
 
     void setFactory(KMemoryFactory factory);
+
+    KListener newListener(long universe);
 
 }

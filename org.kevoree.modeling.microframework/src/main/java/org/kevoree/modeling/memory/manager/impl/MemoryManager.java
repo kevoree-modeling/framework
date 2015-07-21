@@ -2,7 +2,7 @@ package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.cdn.impl.ContentPutRequest;
+import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KMemoryFactory;
@@ -10,12 +10,10 @@ import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.struct.HeapMemoryFactory;
-import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.message.impl.Events;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -23,10 +21,6 @@ import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
-import org.kevoree.modeling.memory.struct.cache.impl.KCacheDirty;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MemoryManager implements KMemoryManager {
 
@@ -41,23 +35,25 @@ public class MemoryManager implements KMemoryManager {
     private KeyCalculator _objectKeyCalculator = null;
     private KeyCalculator _universeKeyCalculator = null;
     private KeyCalculator _modelKeyCalculator;
-    private KeyCalculator _groupKeyCalculator;
     private boolean isConnected = false;
     private KCache _cache;
     private Short prefix;
+
+    private ListenerManager _listenerManager;
 
     private static final int UNIVERSE_INDEX = 0;
     private static final int OBJ_INDEX = 1;
     private static final int GLO_TREE_INDEX = 2;
     private static final short zeroPrefix = 0;
 
+    private int currentCdnListener = -1;
+
     public MemoryManager(KModel model) {
+        this._listenerManager = new ListenerManager();
         this._factory = new HeapMemoryFactory();
         this._cache = _factory.newCache();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);
-        this._groupKeyCalculator = new KeyCalculator(zeroPrefix, 0);
-        this._db = new MemoryContentDeliveryDriver();
-        this._db.setManager(this);
+        setContentDeliveryDriver(new MemoryContentDeliveryDriver());
         this._operationManager = new HashOperationManager(this);
         this._scheduler = new DirectScheduler();
         this._model = model;
@@ -106,14 +102,6 @@ public class MemoryManager implements KMemoryManager {
             throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
         }
         return _modelKeyCalculator.nextKey();
-    }
-
-    @Override
-    public final long nextGroupKey() {
-        if (_groupKeyCalculator == null) {
-            throw new RuntimeException(UNIVERSE_NOT_CONNECTED_ERROR);
-        }
-        return _groupKeyCalculator.nextKey();
     }
 
     @Override
@@ -167,30 +155,34 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
+    public void reload(KContentKey[] keys, KCallback<Throwable> callback) {
+
+    }
+
+    @Override
     public synchronized void save(final KCallback<Throwable> callback) {
-        KCacheDirty[] dirtiesEntries = _cache.dirties();
-        ContentPutRequest request = new ContentPutRequest(dirtiesEntries.length + 2);
-        final Events notificationMessages = new Events(dirtiesEntries.length, prefix);
-        for (int i = 0; i < dirtiesEntries.length; i++) {
-            KMemoryElement cachedObject = dirtiesEntries[i].object;
-            notificationMessages.setEvent(i, dirtiesEntries[i].key, null);
-            request.put(dirtiesEntries[i].key, cachedObject.serialize(_model.metaModel()));
-            cachedObject.setClean(_model.metaModel());
-        }
-        //synchronize consumed counters
-        request.put(KContentKey.createLastObjectIndexFromPrefix(_objectKeyCalculator.prefix()), "" + _objectKeyCalculator.lastComputedIndex());
-        request.put(KContentKey.createLastUniverseIndexFromPrefix(_universeKeyCalculator.prefix()), "" + _universeKeyCalculator.lastComputedIndex());
-        _db.put(request, new KCallback<Throwable>() {
-            @Override
-            public void on(Throwable throwable) {
-                if (throwable == null) {
-                    _db.send(notificationMessages);
-                }
-                if (callback != null) {
-                    callback.on(throwable);
-                }
+        KContentKey[] dirtyKeys = _cache.dirtyKeys();
+        int dirtyKeysSize = dirtyKeys.length;
+        KContentKey[] savedKeys = new KContentKey[dirtyKeys.length + 2];
+        System.arraycopy(dirtyKeys, 0, savedKeys, 0, dirtyKeysSize);
+
+        String[] values = new String[dirtyKeysSize + 2];
+        for (int i = 0; i < dirtyKeysSize; i++) {
+            KMemoryElement cachedObject = _cache.get(dirtyKeys[i].universe, dirtyKeys[i].time, dirtyKeys[i].obj);
+            if (cachedObject != null) {
+                values[i] = cachedObject.serialize(_model.metaModel());
+                cachedObject.setClean(_model.metaModel());
+            } else {
+                values[i] = null;
             }
-        });
+
+        }
+        savedKeys[dirtyKeysSize] = KContentKey.createLastObjectIndexFromPrefix(_objectKeyCalculator.prefix());
+        values[dirtyKeysSize] = "" + _objectKeyCalculator.lastComputedIndex();
+        savedKeys[dirtyKeysSize + 1] = KContentKey.createLastUniverseIndexFromPrefix(_universeKeyCalculator.prefix());
+        values[dirtyKeysSize + 1] = "" + _universeKeyCalculator.lastComputedIndex();
+
+        _db.put(savedKeys, values, callback, this.currentCdnListener);
     }
 
     @Override
@@ -441,7 +433,57 @@ public class MemoryManager implements KMemoryManager {
     @Override
     public void setContentDeliveryDriver(KContentDeliveryDriver p_dataBase) {
         this._db = p_dataBase;
-        p_dataBase.setManager(this);
+        currentCdnListener = this._db.addUpdateListener(new KContentUpdateListener() {
+            @Override
+            public void on(KContentKey[] updatedKeys) {
+                KContentKey[] toReloadKey = new KContentKey[updatedKeys.length];
+                KContentKey[] toDispatchKeys = new KContentKey[updatedKeys.length];
+                int indexInsert = 0;
+                int insertIndex2 = 0;
+                for (int i = 0; i < updatedKeys.length; i++) {
+                    KMemoryElement cached = _cache.get(updatedKeys[i].universe, updatedKeys[i].time, updatedKeys[i].obj);
+                    if (cached != null && !cached.isDirty()) {
+                        toReloadKey[indexInsert] = updatedKeys[i];
+                        indexInsert++;
+                    }
+                    if (updatedKeys[i].universe != KConfig.NULL_LONG && updatedKeys[i].universe != KConfig.NULL_LONG && updatedKeys[i].universe != KConfig.NULL_LONG) {
+                        //now test if a listener is waiting for this object
+                        if (_listenerManager.isListened(updatedKeys[i])) {
+                            toDispatchKeys[insertIndex2] = updatedKeys[i];
+                            insertIndex2++;
+                        }
+                    }
+                }
+                final KContentKey[] pruned2ReloadKey = new KContentKey[indexInsert];
+                System.arraycopy(toReloadKey, 0, pruned2ReloadKey, 0, indexInsert);
+                final KContentKey[] pruned2DispatchKey = new KContentKey[insertIndex2];
+                System.arraycopy(toDispatchKeys, 0, pruned2DispatchKey, 0, insertIndex2);
+                _db.get(pruned2ReloadKey, new KCallback<String[]>() {
+                    @Override
+                    public void on(String[] strings) {
+                        for (int i = 0; i < strings.length; i++) {
+                            if (strings[i] != null) {
+                                KContentKey correspondingKey = pruned2ReloadKey[i];
+                                KMemoryElement cachedObj = _cache.get(correspondingKey.universe, correspondingKey.time, correspondingKey.obj);
+                                if (cachedObj != null && !cachedObj.isDirty()) {
+                                    cachedObj = internal_unserialize(correspondingKey, strings[i]);
+                                    if (cachedObj != null) {
+                                        //replace the cache value
+                                        _cache.putAndReplace(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, cachedObj);
+                                    }
+                                }
+                            }
+                        }
+                        //everything has been reloaded, now inform listener
+
+                        //TODO, here i need a lookup of tree and object and time
+                        //TODO
+                        //TODO
+
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -530,39 +572,6 @@ public class MemoryManager implements KMemoryManager {
     /* End of root section */
 
     @Override
-    public void reload(KContentKey[] keys, final KCallback<Throwable> callback) {
-        List<KContentKey> toReload = new ArrayList<KContentKey>();
-        for (int i = 0; i < keys.length; i++) {
-            KMemoryElement cached = _cache.get(keys[i].universe, keys[i].time, keys[i].obj);
-            if (cached != null && !cached.isDirty()) {
-                toReload.add(keys[i]);
-            }
-        }
-        final KContentKey[] toReload_flat = toReload.toArray(new KContentKey[toReload.size()]);
-        _db.get(toReload_flat, new KCallback<String[]>() {
-            @Override
-            public void on(String[] strings) {
-                for (int i = 0; i < strings.length; i++) {
-                    if (strings[i] != null) {
-                        KContentKey correspondingKey = toReload_flat[i];
-                        KMemoryElement cachedObj = _cache.get(correspondingKey.universe, correspondingKey.time, correspondingKey.obj);
-                        if (cachedObj != null && !cachedObj.isDirty()) {
-                            cachedObj = internal_unserialize(correspondingKey, strings[i]);
-                            if (cachedObj != null) {
-                                //replace the cache value
-                                _cache.putAndReplace(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, cachedObj);
-                            }
-                        }
-                    }
-                }
-                if (callback != null) {
-                    callback.on(null);
-                }
-            }
-        });
-    }
-
-    @Override
     public void cleanCache() {
         if (_cache != null) {
             _cache.clean(_model.metaModel());
@@ -573,6 +582,11 @@ public class MemoryManager implements KMemoryManager {
     public void setFactory(KMemoryFactory p_factory) {
         this._factory = p_factory;
         this._cache = _factory.newCache();
+    }
+
+    @Override
+    public KListener newListener(long p_universe) {
+        return this._listenerManager.createListener(p_universe);
     }
 
     public void bumpKeyToCache(final KContentKey contentKey, final KCallback<KMemoryElement> callback) {

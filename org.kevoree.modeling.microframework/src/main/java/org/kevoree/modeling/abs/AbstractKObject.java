@@ -3,7 +3,6 @@ package org.kevoree.modeling.abs;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.event.KEventListener;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.meta.*;
@@ -76,7 +75,7 @@ public abstract class AbstractKObject implements KObject {
         final KObject selfPointer = this;
         KMemorySegment rawPayload = _manager.segment(_universe, _time, _uuid, false, _metaClass, null);
         if (rawPayload == null) {
-            if(cb != null){
+            if (cb != null) {
                 cb.on(new Exception(OUT_OF_CACHE_MSG));
             }
         } else {
@@ -130,11 +129,6 @@ public abstract class AbstractKObject implements KObject {
             singleRoot[0] = this;
             QueryEngine.getINSTANCE().eval(query, singleRoot, cb);
         }
-    }
-
-    @Override
-    public void listen(long groupId, KEventListener listener) {
-        _manager.cdn().registerListener(groupId, this, listener);
     }
 
     @Override

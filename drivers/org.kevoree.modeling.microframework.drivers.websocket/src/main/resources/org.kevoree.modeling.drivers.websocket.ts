@@ -15,8 +15,6 @@ module org {
                         private _reconnectionDelay = 3000;
                         private _clientConnection:WebSocket;
                         private _connectionUri:string;
-                        private _manager:org.kevoree.modeling.memory.manager.KMemoryManager;
-                        private _localEventListeners = new org.kevoree.modeling.event.impl.LocalEventListeners();
 
                         private _getCallbacks:java.util.HashMap<number, (p1:string[], p2:java.lang.Throwable) => void> = new java.util.HashMap<number, (p1:string[], p2:java.lang.Throwable) => void>();
                         private _putCallbacks:java.util.HashMap<number, (p:java.lang.Throwable) => void> = new java.util.HashMap<number, (p1:java.lang.Throwable) => void>();
@@ -26,17 +24,17 @@ module org {
                             this._connectionUri = connectionUri;
                         }
 
-                        interceptors : Array<any> = new Array<any>();
+                        listeners : Array<any> = new Array<any>();
                         shouldBeConnected = false;
 
-                        public addMessageInterceptor(interceptor): number{
-                            var i = interceptor.length;
-                            this.interceptors.push(interceptor);
+                        public addUpdateListener(listener): number{
+                            var i = Math.random();
+                            this.listeners[i] = listener;
                             return i;
                         }
 
-                        public removeMessageInterceptor(id):void {
-                            delete this.interceptors[id];
+                        public removeUpdateListener(id):void {
+                            delete this.listeners[id];
                         }
 
 
@@ -76,19 +74,16 @@ module org {
                                     case org.kevoree.modeling.message.KMessageLoader.OPERATION_CALL_TYPE:
                                     case org.kevoree.modeling.message.KMessageLoader.OPERATION_RESULT_TYPE:
                                     {
-                                        this._manager.operationManager().operationEventReceived(<org.kevoree.modeling.message.KMessage>msg);
+                                        //this._manager.operationManager().operationEventReceived(<org.kevoree.modeling.message.KMessage>msg);
                                     }
                                         break;
                                     case org.kevoree.modeling.message.KMessageLoader.EVENTS_TYPE:
                                     {
                                         var eventsMsg = <org.kevoree.modeling.message.impl.Events>msg;
-                                        this._manager.reload(eventsMsg.allKeys(), (function (error) {
-                                            if (error != null) {
-                                                error.printStackTrace();
-                                            } else {
-                                                this._localEventListeners.dispatch(eventsMsg);
-                                            }
-                                        }).bind(this));
+                                        for(var id in this.listeners){
+                                            var listener = this.listeners[id];
+                                            listener(eventsMsg.allKeys());
+                                        }
                                     }
                                         break;
                                     default:
@@ -134,10 +129,11 @@ module org {
                             return this._callbackId;
                         }
 
-                        public put(request:org.kevoree.modeling.cdn.KContentPutRequest, error:(p:java.lang.Throwable) => void):void {
+                        public put(keys:org.kevoree.modeling.KContentKey[], values : string[], error:(p:java.lang.Throwable) => void, ignoreInterceptor):void {
                             var putRequest = new org.kevoree.modeling.message.impl.PutRequest();
                             putRequest.id = this.nextKey();
-                            putRequest.request = request;
+                            putRequest.keys = keys;
+                            putRequest.values = values;
                             this._putCallbacks.put(putRequest.id, error);
                             this._clientConnection.send(putRequest.json());
                         }
@@ -162,28 +158,6 @@ module org {
                             console.error("Not implemented yet");
                         }
 
-                        public registerListener(groupId:number, origin:org.kevoree.modeling.KObject, listener:(p:org.kevoree.modeling.KObject, p1:org.kevoree.modeling.meta.KMeta[]) => void):void {
-                            this._localEventListeners.registerListener(groupId, origin, listener);
-                        }
-
-                        public registerMultiListener(groupId:number, origin:org.kevoree.modeling.KUniverse<any,any,any>, objects:number[], listener:(objs:org.kevoree.modeling.KObject[])=>void) {
-                            this._localEventListeners.registerListenerAll(groupId, origin.key(), objects, listener);
-                        }
-
-                        public unregisterGroup(groupId:number) {
-                            this._localEventListeners.unregister(groupId);
-                        }
-
-                        public setManager(manager:org.kevoree.modeling.memory.manager.KMemoryManager):void {
-                            this._manager = manager;
-                            this._localEventListeners.setManager(manager);
-                        }
-
-                        public send(msg:org.kevoree.modeling.message.KMessage):void {
-                            //Send to remote
-                            this._localEventListeners.dispatch(msg);
-                            this._clientConnection.send(msg.json());
-                        }
                     }
                 }
             }

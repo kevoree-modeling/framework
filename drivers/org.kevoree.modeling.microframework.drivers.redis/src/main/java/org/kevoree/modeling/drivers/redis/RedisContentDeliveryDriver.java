@@ -3,16 +3,12 @@ package org.kevoree.modeling.drivers.redis;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.KContentKey;
-import org.kevoree.modeling.cdn.KContentPutRequest;
-import org.kevoree.modeling.cdn.KMessageInterceptor;
-import org.kevoree.modeling.event.KEventListener;
-import org.kevoree.modeling.event.KEventMultiListener;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.cdn.KContentUpdateListener;
+import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
-import org.kevoree.modeling.message.impl.Events;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.KMessageLoader;
-import org.kevoree.modeling.event.impl.LocalEventListeners;
+import org.kevoree.modeling.message.impl.Events;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
@@ -38,7 +34,14 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
                         @Override
                         public void onMessage(String channel, String message) {
                             KMessage msg = KMessageLoader.load(message);
-                            _localEventListeners.dispatch(msg);
+                            if (msg instanceof Events) {
+                                additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                                    @Override
+                                    public void on(int key, KContentUpdateListener value) {
+                                        value.on(((Events) msg).allKeys());
+                                    }
+                                });
+                            }
                         }
                     }, "kmf");
                 } catch (Exception e) {
@@ -49,8 +52,6 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
         });
         listenerThread.start();
     }
-
-    private LocalEventListeners _localEventListeners = new LocalEventListeners();
 
     @Override
     public void atomicGetIncrement(KContentKey key, KCallback<Short> cb) {
@@ -91,17 +92,19 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void put(KContentPutRequest request, KCallback<Throwable> error) {
-        String[] elems = new String[request.size() * 2];
-        for (int i = 0; i < request.size(); i++) {
-            elems[(i * 2)] = request.getKey(i).toString();
-            elems[(i * 2) + 1] = request.getContent(i);
+    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+        String[] elems = new String[p_keys.length * 2];
+        for (int i = 0; i < p_keys.length; i++) {
+            elems[(i * 2)] = p_keys[i].toString();
+            elems[(i * 2) + 1] = p_values[i];
         }
         if (jedis != null) {
             jedis.mset(elems);
         }
-        if (error != null) {
-            error.on(null);
+        Events events = new Events(p_keys);
+        jedis.publish("kmf", events.json());
+        if (p_callback != null) {
+            p_callback.on(null);
         }
     }
 
@@ -122,37 +125,6 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void registerListener(long p_groupId, KObject p_origin, KEventListener p_listener) {
-        _localEventListeners.registerListener(p_groupId, p_origin, p_listener);
-    }
-
-    @Override
-    public void registerMultiListener(long p_groupId, KUniverse p_origin, long[] p_objects, KEventMultiListener p_listener) {
-        _localEventListeners.registerListenerAll(p_groupId, p_origin.key(), p_objects, p_listener);
-    }
-
-    @Override
-    public void unregisterGroup(long groupId) {
-        throw new RuntimeException("Not Implemented Yet!");
-    }
-
-    @Override
-    public void send(KMessage msg) {
-        _localEventListeners.dispatch(msg);
-        if (msg instanceof Events) {
-            jedis.publish("kmf", msg.json());
-        }
-    }
-
-    private KMemoryManager _manager;
-
-    @Override
-    public void setManager(KMemoryManager p_manager) {
-        _manager = p_manager;
-        _localEventListeners.setManager(p_manager);
-    }
-
-    @Override
     public void connect(KCallback<Throwable> callback) {
         //noop
         if (callback != null) {
@@ -160,30 +132,33 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
         }
     }
 
-    private ArrayIntMap<KMessageInterceptor> additionalInterceptors = null;
+    private ArrayIntMap<KContentUpdateListener> additionalInterceptors = null;
 
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private Random random = new Random();
 
-    /** @native ts
+    /**
+     * @native ts
      * return Math.random();
-     * */
-    private int randomInterceptorID(){
+     */
+    private int randomInterceptorID() {
         return random.nextInt();
     }
 
     @Override
-    public synchronized int addMessageInterceptor(KMessageInterceptor p_interceptor) {
+    public synchronized int addUpdateListener(KContentUpdateListener p_interceptor) {
         if (additionalInterceptors == null) {
-            additionalInterceptors = new ArrayIntMap<KMessageInterceptor>(KConfig.CACHE_INIT_SIZE,KConfig.CACHE_LOAD_FACTOR);
+            additionalInterceptors = new ArrayIntMap<KContentUpdateListener>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         }
         int newID = randomInterceptorID();
-        additionalInterceptors.put(newID,p_interceptor);
+        additionalInterceptors.put(newID, p_interceptor);
         return newID;
     }
 
     @Override
-    public synchronized void removeMessageInterceptor(int id) {
+    public synchronized void removeUpdateListener(int id) {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }
