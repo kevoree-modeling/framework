@@ -58,24 +58,22 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             }
             KTraversalIndexResolver resolver = dependenciesResolver(p_dependencies[i]);
             for (int j = 0; j < _metaClass.inputs().length; j++) {
-                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.wait(i + "," + j));
+                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.waitResult());
             }
         }
-        waiter.then(new KCallback() {
+        waiter.then(new KCallback<Object[]>() {
             @Override
-            public void on(Object o) {
+            public void on(Object[] results) {
                 //collect output
                 double[][] extractedInputs = new double[p_dependencies.length][_metaClass.inputs().length];
+                int k = 0;
                 for (int i = 0; i < p_dependencies.length; i++) {
                     for (int j = 0; j < _metaClass.inputs().length; j++) {
-                        try {
-                            Object[] extracted = (Object[]) waiter.getResult(i + "," + j);
-                            if (extracted != null && extracted.length > 0) {
-                                extractedInputs[i][j] = (double) extracted[0];
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        Object[] extracted = (Object[]) results[k];
+                        if (extracted != null && extracted.length > 0) {
+                            extractedInputs[i][j] = (double) extracted[0];
                         }
+                        k++;
                     }
                 }
                 double[][] extractedOutputs = new double[1][_metaClass.outputs().length];
@@ -128,25 +126,23 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             }
             KTraversalIndexResolver resolver = dependenciesResolver(p_dependencies[i]);
             for (int j = 0; j < _metaClass.inputs().length; j++) {
-                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.wait(i + "," + j));
+                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.waitResult());
             }
         }
-        waiter.then(new KCallback() {
+        waiter.then(new KCallback<Object[]>() {
             @Override
-            public void on(Object o) {
+            public void on(Object[] results) {
                 //collect output
                 double[][] extractedInputs = new double[p_dependencies.length][_metaClass.inputs().length];
+                int k = 0;
                 for (int i = 0; i < p_dependencies.length; i++) {
                     extractedInputs[i] = new double[_metaClass.inputs().length];
                     for (int j = 0; j < _metaClass.inputs().length; j++) {
-                        try {
-                            Object[] extracted = (Object[]) waiter.getResult(i + "," + j);
-                            if (extracted != null && extracted.length > 0) {
-                                extractedInputs[i][j] = (double) extracted[0];
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        Object[] extracted = (Object[]) results[k];
+                        if (extracted != null && extracted.length > 0) {
+                            extractedInputs[i][j] = (double) extracted[0];
                         }
+                        k++;
                     }
                 }
                 double[][] extractedOutputs = _metaClass.inferAlg().infer(extractedInputs, selfObject);
