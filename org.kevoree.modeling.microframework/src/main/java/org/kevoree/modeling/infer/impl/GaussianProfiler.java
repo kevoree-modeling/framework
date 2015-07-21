@@ -20,6 +20,8 @@ public class GaussianProfiler implements KInferAlg {
     //to keep updated
     private static int NUMOFFIELDS = 4;
 
+    int maxTimeSlots=24; // divide time into 24 hours, 1 gaussian profile every hour
+
 
     private int getIndex(int input, int output, int field, KMetaDependencies meta ){
         return output*(NUMOFFIELDS*meta.origin().inputs().length+1)+NUMOFFIELDS*input+field;
@@ -52,13 +54,14 @@ public class GaussianProfiler implements KInferAlg {
         return variances;
     }
 
+    //in the trainingset, first value is time needs to be preprocessed into int 0-23, other values are electrical features, expectedResult is null
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin){
-        int maxOutput=((MetaEnum)origin.metaClass().outputs()[0].type()).literals().length;
+    public void train(double[][] trainingSet, double[][] expectedResult, KObject origin){
+
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
-        int size=(maxOutput+1)*(origin.metaClass().inputs().length*NUMOFFIELDS+1);
+        int size=(maxTimeSlots+1)*((origin.metaClass().inputs().length-1)*NUMOFFIELDS+1);
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
             ks.extendInfer(origin.metaClass().dependencies().index(),size,origin.metaClass());
             for(int i=0;i<size;i++){
@@ -70,8 +73,8 @@ public class GaussianProfiler implements KInferAlg {
 
         //update the state
         for(int i=0;i<trainingSet.length;i++) {
-            int output = (int) expectedResultSet[i][0];
-            for (int j = 0; j < origin.metaClass().inputs().length; j++) {
+            int output = (int) trainingSet[i][0];
+            for (int j = 1; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
                 if (state.get(getCounter(output, origin.metaClass().dependencies())) == 0) {
                     state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
@@ -91,39 +94,40 @@ public class GaussianProfiler implements KInferAlg {
                 }
 
                 //update global stat
-                if (state.get(getCounter(maxOutput, origin.metaClass().dependencies())) == 0) {
-                    state.set(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxOutput, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxOutput, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                if (state.get(getCounter(maxTimeSlots, origin.metaClass().dependencies())) == 0) {
+                    state.set(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    state.set(getIndex(j, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
                 } else {
-                    if (trainingSet[i][j] < state.get(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j,maxOutput,MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet[i][j] < state.get(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j,maxTimeSlots,MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
                     }
-                    if (trainingSet[i][j] > state.get(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j,maxOutput,MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet[i][j] > state.get(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j,maxTimeSlots,MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
                     }
-                    state.add(getIndex(j,maxOutput,SUM, origin.metaClass().dependencies()) , trainingSet[i][j]);
-                    state.add(getIndex(j,maxOutput, SUMSQUARE, origin.metaClass().dependencies()) , trainingSet[i][j] * trainingSet[i][j]);
+                    state.add(getIndex(j,maxTimeSlots,SUM, origin.metaClass().dependencies()) , trainingSet[i][j]);
+                    state.add(getIndex(j,maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()) , trainingSet[i][j] * trainingSet[i][j]);
                 }
             }
 
             //Update Global counters
             state.add(getCounter(output, origin.metaClass().dependencies()),1);
-            state.add(getCounter(maxOutput, origin.metaClass().dependencies()),1);
+            state.add(getCounter(maxTimeSlots, origin.metaClass().dependencies()),1);
         }
     }
 
 
 
+    // features: first element is time, other elements are electrical features
+    //result is the probability of every point of the profiler needs to be averaged afterward - threshold here is not defined.
 
     @Override
     public  double[][] infer(double[][] features, KObject origin) {
-        int maxOutput=((MetaEnum)origin.metaClass().outputs()[0].type()).literals().length;
         KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //check if segment is empty
-        int size = (maxOutput + 1) * (origin.metaClass().inputs().length * NUMOFFIELDS + 1);
+        int size=(maxTimeSlots+1)*((origin.metaClass().inputs().length-1)*NUMOFFIELDS+1);
         if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;
         }
@@ -132,15 +136,13 @@ public class GaussianProfiler implements KInferAlg {
 
         for (int j = 0; j < features.length; j++) {
             result[j] = new double[1];
-            double maxprob = 0;
-            double prob = 0;
-            for (int output = 0; output < maxOutput; output++) {
-                prob = getProba(features[j], output, state, origin.metaClass().dependencies());
-                if (prob > maxprob) {
-                    maxprob = prob;
-                    result[j][0] = output;
-                }
+            int output= (int)features[j][0];
+
+            double[] values=new double[features[j].length-1];
+            for(int i=0;i<features[j].length-1;i++){
+                values[i]=features[j][i+1];
             }
+            result[j][0] = getProba(values, output, state, origin.metaClass().dependencies());
         }
         return result;
     }
@@ -153,11 +155,5 @@ public class GaussianProfiler implements KInferAlg {
         return prob;
     }
 
-    public double[] getAllProba (double[] features,  Array1D state, KMetaDependencies meta, int maxOutput){
-        double[] results = new double[maxOutput];
-        for(int i=0;i<maxOutput;i++){
-            results[i]=getProba(features,i,state,meta);
-        }
-        return results;
-    }
+
 }
