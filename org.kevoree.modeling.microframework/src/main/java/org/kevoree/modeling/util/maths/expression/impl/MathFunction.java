@@ -163,6 +163,7 @@ public class MathFunction {
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
 
+    //January is 0, december is 11
     /** @native ts
      * var date = new Date(value);
      * return date.getMonth();
@@ -183,14 +184,15 @@ public class MathFunction {
         return calendar.get(Calendar.YEAR);
     }
 
+    //Sunday is 0, friday is 6
     /** @native ts
      * var date = new Date(value);
-     * return date.getDay()
+     * return date.getDay();
      */
     private double date_to_dayofweek(double value){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date((long)value));
-        return calendar.get(Calendar.DAY_OF_WEEK);
+        return calendar.get(Calendar.DAY_OF_WEEK)-1;
     }
 
 

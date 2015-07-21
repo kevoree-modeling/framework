@@ -18,6 +18,17 @@ public class DateMathExpressionTest {
         return new MathExpressionEngine();
     }
 
+
+    /** @native ts
+     * var date = new Date(2015,2,11,20,53,47,0);
+     * return date.getTime();
+     */
+    public double getDate(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2015, 02, 11, 20, 53, 47); // date of wednesday 11 march 2015, 20h:53min:47sec
+        return (double) calendar.getTimeInMillis();
+    }
+
     @Test
     public void date() {
         KMathExpressionEngine ex = createEngine();
@@ -25,9 +36,7 @@ public class DateMathExpressionTest {
             @Override
             public Double resolve(String potentialVarName) {
                 if (potentialVarName.equals("time")) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.set(2015, 02, 11, 20, 53, 47); // date of wednesday 11 march 2015, 20h:53min:47sec
-                    return (double) calendar.getTimeInMillis();
+                    return getDate();
                 }
                 return null;
             }
@@ -38,7 +47,7 @@ public class DateMathExpressionTest {
         Assert.assertTrue(ex.eval("DAY(time)") == 11);
         Assert.assertTrue(ex.eval("MONTH(time)") == 2);
         Assert.assertTrue(ex.eval("YEAR(time)") == 2015);
-        Assert.assertTrue(ex.eval("DAYOFWEEK(time)") == Calendar.WEDNESDAY);
+        Assert.assertTrue(ex.eval("DAYOFWEEK(time)") == 3);
 
 
     }
