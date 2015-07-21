@@ -1,5 +1,8 @@
 package org.kevoree.modeling.util.maths.expression.impl;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Abstract definition of a supported expression function. A function is
  * defined by a name, the number of parameters and the actual processing
@@ -76,19 +79,120 @@ public class MathFunction {
             return Math.log(p[0]);
         }
         else if(name.equals("ROUND")){
-            //todo round
+            long factor = (long) Math.pow(10, p[1]);
+            double value = p[0] * factor;
+            long tmp = Math.round(value);
+            return (double) tmp / factor;
         }
         else if(name.equals("FLOOR")) {
-            //todo floor
+            Math.floor(p[0]);
         }
         else if(name.equals("CEILING")){
-            //todo ceiling
+            Math.ceil(p[0]);
         }
         else if(name.equals("SQRT")){
             return Math.sqrt(p[0]);
         }
 
+        else if(name.equals("SECOND")){
+            return date_to_seconds(p[0]);
+        }
+        else if(name.equals("MINUTE")){
+            return date_to_minutes(p[0]);
+        }
+        else if(name.equals("HOUR")){
+            return date_to_hours(p[0]);
+        }
+        else if(name.equals("DAY")){
+            return date_to_days(p[0]);
+        }
+        else if(name.equals("MONTH")){
+            return date_to_months(p[0]);
+        }
+        else if(name.equals("YEAR")){
+            return date_to_year(p[0]);
+        }
+        else if(name.equals("DAYOFWEEK")){
+            return date_to_dayofweek(p[0]);
+        }
+
+
+
+
         return 0;
     }
+
+
+    /** @native ts
+     * var date = new Date(value);
+     * return date.getSeconds();
+     */
+    private double date_to_seconds(double value){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date((long)value));
+        return calendar.get(Calendar.SECOND);
+    }
+    /** @native ts
+     * var date = new Date(value);
+     * return date.getMinutes();
+     */
+    private double date_to_minutes(double value){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date((long)value));
+        return calendar.get(Calendar.MINUTE);
+    }
+
+    /** @native ts
+     * var date = new Date(value);
+     * return date.getHours();
+     */
+    private double date_to_hours(double value) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date((long)value));
+        return calendar.get(Calendar.HOUR_OF_DAY);
+    }
+
+
+    /** @native ts
+     * var date = new Date(value);
+     * return date.getDate();
+     */
+    private double date_to_days(double value){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date((long)value));
+        return calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    /** @native ts
+     * var date = new Date(value);
+     * return date.getMonth();
+     */
+    private double date_to_months(double value){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date((long)value));
+        return calendar.get(Calendar.MONTH);
+    }
+
+    /** @native ts
+     * var date = new Date(value);
+     * return date.getFullYear();
+     */
+    private double date_to_year(double value){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date((long)value));
+        return calendar.get(Calendar.YEAR);
+    }
+
+    /** @native ts
+     * var date = new Date(value);
+     * return date.getDay()
+     */
+    private double date_to_dayofweek(double value){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date((long)value));
+        return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
+
 
 }

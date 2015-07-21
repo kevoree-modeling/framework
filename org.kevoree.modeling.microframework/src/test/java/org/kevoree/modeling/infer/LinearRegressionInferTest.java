@@ -28,18 +28,20 @@ public class LinearRegressionInferTest {
         metaClassHouse.addAttribute("width", KPrimitiveTypes.DOUBLE);
         metaClassHouse.addAttribute("height", KPrimitiveTypes.DOUBLE);
         metaClassHouse.addAttribute("numOfRooms", KPrimitiveTypes.DOUBLE);
-
         metaClassHouse.addAttribute("price", KPrimitiveTypes.DOUBLE);
 
-        KMetaClass inferGaussian = metaModel.addInferMetaClass("RegressionProfile", new LinearRegressionAlg());
-        inferGaussian.addDependency("House", metaClassHouse, null);
 
-        inferGaussian.addInput("length", "@House | =length");
-        inferGaussian.addInput("width", "@House | =width");
-        inferGaussian.addInput("height", "@House | =height");
-        inferGaussian.addInput("numOfRooms", "@House | =numOfRooms");
 
-        inferGaussian.addOutput("type", KPrimitiveTypes.DOUBLE);
+        KMetaClass regressionProfile = metaModel.addInferMetaClass("RegressionProfile", new LinearRegressionAlg());
+        regressionProfile.addDependency("House", metaClassHouse, null);
+
+
+        regressionProfile.addInput("length", "@House | =length");
+        regressionProfile.addInput("width", "@House | =width");
+        regressionProfile.addInput("height", "@House | =height");
+        regressionProfile.addInput("numOfRooms", "@House | =numOfRooms");
+
+        regressionProfile.addOutput("price", KPrimitiveTypes.DOUBLE);
 
         return metaModel;
     }

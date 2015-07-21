@@ -54,6 +54,13 @@ public class MathEntities {
         functions.put("FLOOR", new MathFunction("FLOOR", 1));
         functions.put("CEILING", new MathFunction("CEILING", 1));
         functions.put("SQRT", new MathFunction("SQRT", 1));
+        functions.put("SECOND", new MathFunction("SECOND", 1));
+        functions.put("MINUTE", new MathFunction("MINUTE", 1));
+        functions.put("HOUR", new MathFunction("HOUR", 1));
+        functions.put("DAY", new MathFunction("DAY", 1));
+        functions.put("MONTH", new MathFunction("MONTH", 1));
+        functions.put("YEAR", new MathFunction("YEAR", 1));
+        functions.put("DAYOFWEEK", new MathFunction("DAYOFWEEK", 1));
 
     }
 
