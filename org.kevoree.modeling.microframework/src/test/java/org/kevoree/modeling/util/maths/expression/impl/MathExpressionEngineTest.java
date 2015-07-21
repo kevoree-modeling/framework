@@ -22,5 +22,4 @@ public class MathExpressionEngineTest extends BaseKMathExpressionEngineTest {
         }
         Assert.assertEquals(i, 13);
     }
-
 }

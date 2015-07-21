@@ -94,13 +94,13 @@ public class MathFunction {
             return Math.sqrt(p[0]);
         }
 
-        else if(name.equals("SECOND")){
+        else if(name.equals("SECONDS")){
             return date_to_seconds(p[0]);
         }
-        else if(name.equals("MINUTE")){
+        else if(name.equals("MINUTES")){
             return date_to_minutes(p[0]);
         }
-        else if(name.equals("HOUR")){
+        else if(name.equals("HOURS")){
             return date_to_hours(p[0]);
         }
         else if(name.equals("DAY")){
