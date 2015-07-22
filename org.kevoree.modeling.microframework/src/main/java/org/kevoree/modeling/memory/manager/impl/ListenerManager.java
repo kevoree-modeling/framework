@@ -6,8 +6,6 @@ import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
 
 public class ListenerManager {
 
-    private KMemoryManager _manager;
-
     private KeyCalculator _keyGen;
 
     public ArrayLongMap<HeapListener> _listeners;
@@ -92,10 +90,6 @@ public class ListenerManager {
         }
     }
 
-    public void setManager(KMemoryManager manager) {
-        this._manager = manager;
-    }
-
     public boolean isListened(KContentKey key) {
         long[] notifier = _obj2Listener.get(key.obj);
         if (notifier != null && notifier.length > 0) {
@@ -104,6 +98,20 @@ public class ListenerManager {
         return false;
     }
 
+    public void dispatch(KContentKey[] keys, KObject[] objects, int lastIndex) {
+        for (int i = 0; i < lastIndex; i++) {
+            long[] notifier = _obj2Listener.get(keys[i].obj);
+            if (notifier != null && notifier.length > 0) {
+                for (int j = 0; j < notifier.length; j++) {
+                    HeapListener ll = _listeners.get(notifier[j]);
+                    KCallback<KObject> cb = ll.cb;
+                    if(cb != null){
+                        cb.on(objects[i]);
+                    }
+                }
+            }
+        }
+    }
 
 }
 

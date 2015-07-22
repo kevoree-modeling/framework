@@ -1,6 +1,7 @@
 package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
@@ -436,31 +437,75 @@ public class MemoryManager implements KMemoryManager {
         currentCdnListener = this._db.addUpdateListener(new KContentUpdateListener() {
             @Override
             public void on(KContentKey[] updatedKeys) {
-                KContentKey[] toReloadKey = new KContentKey[updatedKeys.length];
-                KContentKey[] toDispatchKeys = new KContentKey[updatedKeys.length];
+                KContentKey[] toReloadKey = new KContentKey[updatedKeys.length * 2];
                 int indexInsert = 0;
-                int insertIndex2 = 0;
+                ArrayLongLongMap tempMap = null;
+                int nbDispatch = 0;
                 for (int i = 0; i < updatedKeys.length; i++) {
-                    KMemoryElement cached = _cache.get(updatedKeys[i].universe, updatedKeys[i].time, updatedKeys[i].obj);
-                    if (cached != null && !cached.isDirty()) {
-                        toReloadKey[indexInsert] = updatedKeys[i];
-                        indexInsert++;
-                    }
-                    if (updatedKeys[i].universe != KConfig.NULL_LONG && updatedKeys[i].universe != KConfig.NULL_LONG && updatedKeys[i].universe != KConfig.NULL_LONG) {
-                        //now test if a listener is waiting for this object
+                    //for segment only we check in all case if there are listened
+                    if (updatedKeys[i].universe != KConfig.NULL_LONG && updatedKeys[i].time != KConfig.NULL_LONG && updatedKeys[i].obj != KConfig.NULL_LONG) {
                         if (_listenerManager.isListened(updatedKeys[i])) {
-                            toDispatchKeys[insertIndex2] = updatedKeys[i];
-                            insertIndex2++;
+                            //if yes, tag it as event for KListener
+                            nbDispatch++;
+                            if (tempMap == null) {
+                                tempMap = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+                            }
+                            //check that the KUniverseTree will be ready
+                            if (!tempMap.contains(updatedKeys[i].obj)) {
+                                KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, updatedKeys[i].obj);
+                                if (alreadyLoadedOrder == null) {
+                                    toReloadKey[indexInsert] = KContentKey.createUniverseTree(updatedKeys[i].obj);
+                                    indexInsert++;
+                                    tempMap.put(updatedKeys[i].obj, updatedKeys[i].obj);
+                                }
+                            }
+                        }
+                    }
+                    KMemoryElement cached = _cache.get(updatedKeys[i].universe, updatedKeys[i].time, updatedKeys[i].obj);
+                    //first we check if the object is already in cache
+                    if (cached == null) {
+                        //if its a segment then investigate
+                        if (updatedKeys[i].universe != KConfig.NULL_LONG && updatedKeys[i].time != KConfig.NULL_LONG && updatedKeys[i].obj != KConfig.NULL_LONG) {
+                            //the segment has to be loaded anyway, because a listener is waiting for it
+                            if (_listenerManager.isListened(updatedKeys[i])) {
+                                toReloadKey[indexInsert] = updatedKeys[i];
+                                indexInsert++;
+                            }
+                        }
+                    } else {
+                        //check if the element is dirty, otherwise wait
+                        if (!cached.isDirty()) {
+                            //this is a UniverseTree, tag as reloaded to avoid duplicate
+                            if (updatedKeys[i].universe == KConfig.NULL_LONG && updatedKeys[i].time == KConfig.NULL_LONG) {
+                                if (tempMap == null) {
+                                    tempMap = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+                                }
+                                //reload if not already tagged as reload
+                                if (!tempMap.contains(updatedKeys[i].obj)) {
+                                    tempMap.put(updatedKeys[i].obj, updatedKeys[i].obj);
+                                    toReloadKey[indexInsert] = updatedKeys[i];
+                                    indexInsert++;
+                                }
+                                //otherwise just ask for reload
+                            } else {
+                                toReloadKey[indexInsert] = updatedKeys[i];
+                                indexInsert++;
+                            }
                         }
                     }
                 }
+                if (indexInsert == 0) {
+                    return;
+                }
                 final KContentKey[] pruned2ReloadKey = new KContentKey[indexInsert];
                 System.arraycopy(toReloadKey, 0, pruned2ReloadKey, 0, indexInsert);
-                final KContentKey[] pruned2DispatchKey = new KContentKey[insertIndex2];
-                System.arraycopy(toDispatchKeys, 0, pruned2DispatchKey, 0, insertIndex2);
+                final int finalNbDispatch = nbDispatch;
                 _db.get(pruned2ReloadKey, new KCallback<String[]>() {
                     @Override
                     public void on(String[] strings) {
+                        KObject[] updatedElems = new KObject[finalNbDispatch];
+                        KContentKey[] correspondingKeys = new KContentKey[finalNbDispatch];
+                        int insertUpdatedKeys = 0;
                         for (int i = 0; i < strings.length; i++) {
                             if (strings[i] != null) {
                                 KContentKey correspondingKey = pruned2ReloadKey[i];
@@ -472,14 +517,21 @@ public class MemoryManager implements KMemoryManager {
                                         _cache.putAndReplace(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, cachedObj);
                                     }
                                 }
+                                if (correspondingKey.universe != KConfig.NULL_LONG && correspondingKey.time != KConfig.NULL_LONG && correspondingKey.obj != KConfig.NULL_LONG) {
+                                    if (_listenerManager.isListened(updatedKeys[i])) {
+                                        KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, updatedKeys[i].obj);
+                                        if (alreadyLoadedOrder != null) {
+                                            correspondingKeys[insertUpdatedKeys] = correspondingKey;
+                                            updatedElems[insertUpdatedKeys] = ((AbstractKModel) _model).createProxy(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, _model.metaModel().metaClassByName(alreadyLoadedOrder.metaClassName()));
+                                            insertUpdatedKeys++;
+                                        }
+                                    }
+                                }
+
                             }
                         }
-                        //everything has been reloaded, now inform listener
-
-                        //TODO, here i need a lookup of tree and object and time
-                        //TODO
-                        //TODO
-
+                        //now dispatch to listeners
+                        _listenerManager.dispatch(correspondingKeys, updatedElems, insertUpdatedKeys);
                     }
                 });
             }

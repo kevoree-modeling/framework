@@ -10,6 +10,6 @@ public interface KListener {
 
     void delete();
 
-    void then(KCallback<KObject[]> updatedObjects);
+    void then(KCallback<KObject> updatedObjects);
 
 }

@@ -12,7 +12,7 @@ public class HeapListener implements KListener {
 
     private long _id;
 
-    public KCallback<KObject[]> cb;
+    public KCallback<KObject> cb;
 
     protected long listenerID() {
         return this._id;
@@ -36,16 +36,16 @@ public class HeapListener implements KListener {
 
     @Override
     public void listen(KObject obj) {
-        _listenerManager.manageRegistration(_id,obj);
+        _listenerManager.manageRegistration(_id, obj);
     }
 
     @Override
     public void delete() {
-        _listenerManager.manageRegistration(_id,null);
+        _listenerManager.manageRegistration(_id, null);
     }
 
     @Override
-    public void then(KCallback<KObject[]> p_cb) {
+    public void then(KCallback<KObject> p_cb) {
         this.cb = p_cb;
     }
 }
