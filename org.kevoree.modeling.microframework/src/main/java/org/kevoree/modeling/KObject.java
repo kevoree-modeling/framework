@@ -58,4 +58,6 @@ public interface KObject {
 
     KMemoryManager manager();
 
+    void save(KCallback cb);
+
 }

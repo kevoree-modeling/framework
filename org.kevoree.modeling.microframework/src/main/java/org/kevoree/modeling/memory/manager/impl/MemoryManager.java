@@ -161,29 +161,81 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public synchronized void save(final KCallback<Throwable> callback) {
-        KContentKey[] dirtyKeys = _cache.dirtyKeys();
-        int dirtyKeysSize = dirtyKeys.length;
-        KContentKey[] savedKeys = new KContentKey[dirtyKeys.length + 2];
-        System.arraycopy(dirtyKeys, 0, savedKeys, 0, dirtyKeysSize);
+    public synchronized void save(KObject src, final KCallback<Throwable> callback) {
+        if (src == null) {
+            KContentKey[] dirtyKeys = _cache.dirtyKeys();
+            int dirtyKeysSize = dirtyKeys.length;
+            KContentKey[] savedKeys = new KContentKey[dirtyKeys.length + 2];
+            System.arraycopy(dirtyKeys, 0, savedKeys, 0, dirtyKeysSize);
 
-        String[] values = new String[dirtyKeysSize + 2];
-        for (int i = 0; i < dirtyKeysSize; i++) {
-            KMemoryElement cachedObject = _cache.get(dirtyKeys[i].universe, dirtyKeys[i].time, dirtyKeys[i].obj);
-            if (cachedObject != null) {
-                values[i] = cachedObject.serialize(_model.metaModel());
-                cachedObject.setClean(_model.metaModel());
-            } else {
-                values[i] = null;
+            String[] values = new String[dirtyKeysSize + 2];
+            for (int i = 0; i < dirtyKeysSize; i++) {
+                KMemoryElement cachedObject = _cache.get(dirtyKeys[i].universe, dirtyKeys[i].time, dirtyKeys[i].obj);
+                if (cachedObject != null) {
+                    values[i] = cachedObject.serialize(_model.metaModel());
+                    cachedObject.setClean(_model.metaModel());
+                } else {
+                    values[i] = null;
+                }
+
             }
+            savedKeys[dirtyKeysSize] = KContentKey.createLastObjectIndexFromPrefix(_objectKeyCalculator.prefix());
+            values[dirtyKeysSize] = "" + _objectKeyCalculator.lastComputedIndex();
+            savedKeys[dirtyKeysSize + 1] = KContentKey.createLastUniverseIndexFromPrefix(_universeKeyCalculator.prefix());
+            values[dirtyKeysSize + 1] = "" + _universeKeyCalculator.lastComputedIndex();
 
+            _db.put(savedKeys, values, callback, this.currentCdnListener);
+        } else {
+            KMemoryElement cachedObject = _cache.get(src.universe(), src.now(), src.uuid());
+            if (cachedObject == null || !cachedObject.isDirty()) {
+                callback.on(null);
+            } else {
+                KMemoryElement cachedObjectTimeTree = _cache.get(src.universe(), KConfig.NULL_LONG, src.uuid());
+                KMemoryElement cachedObjectUniverseTree = _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, src.uuid());
+                KMemoryElement cachedObjectGlobalUniverseTree = _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+
+                int nbElemToSave = 1;
+                if (cachedObjectTimeTree != null && cachedObjectTimeTree.isDirty()) {
+                    nbElemToSave++;
+                }
+                if (cachedObjectUniverseTree != null && cachedObjectUniverseTree.isDirty()) {
+                    nbElemToSave++;
+                }
+                if (cachedObjectGlobalUniverseTree != null && cachedObjectGlobalUniverseTree.isDirty()) {
+                    nbElemToSave++;
+                }
+
+                KContentKey[] savedKeys = new KContentKey[nbElemToSave + 2];
+                String[] values = new String[nbElemToSave + 2];
+
+                savedKeys[0] = KContentKey.createObject(src.universe(), KConfig.NULL_LONG, src.uuid());
+                values[0] = cachedObject.serialize(_model.metaModel());
+
+                int indexToInsert = 1;
+                if (cachedObjectTimeTree != null && cachedObjectTimeTree.isDirty()) {
+                    savedKeys[indexToInsert] = KContentKey.createTimeTree(src.universe(), src.uuid());
+                    values[indexToInsert] = cachedObjectTimeTree.serialize(_model.metaModel());
+                    indexToInsert++;
+                }
+                if (cachedObjectUniverseTree != null && cachedObjectUniverseTree.isDirty()) {
+                    savedKeys[indexToInsert] = KContentKey.createUniverseTree(src.universe());
+                    values[indexToInsert] = cachedObjectUniverseTree.serialize(_model.metaModel());
+                    indexToInsert++;
+                }
+                if (cachedObjectGlobalUniverseTree != null && cachedObjectGlobalUniverseTree.isDirty()) {
+                    savedKeys[indexToInsert] = KContentKey.createGlobalUniverseTree();
+                    values[indexToInsert] = cachedObjectGlobalUniverseTree.serialize(_model.metaModel());
+                    indexToInsert++;
+                }
+                savedKeys[indexToInsert] = KContentKey.createLastObjectIndexFromPrefix(_objectKeyCalculator.prefix());
+                values[indexToInsert] = "" + _objectKeyCalculator.lastComputedIndex();
+                indexToInsert++;
+                savedKeys[indexToInsert] = KContentKey.createLastUniverseIndexFromPrefix(_universeKeyCalculator.prefix());
+                values[indexToInsert] = "" + _universeKeyCalculator.lastComputedIndex();
+
+                _db.put(savedKeys, values, callback, this.currentCdnListener);
+            }
         }
-        savedKeys[dirtyKeysSize] = KContentKey.createLastObjectIndexFromPrefix(_objectKeyCalculator.prefix());
-        values[dirtyKeysSize] = "" + _objectKeyCalculator.lastComputedIndex();
-        savedKeys[dirtyKeysSize + 1] = KContentKey.createLastUniverseIndexFromPrefix(_universeKeyCalculator.prefix());
-        values[dirtyKeysSize + 1] = "" + _universeKeyCalculator.lastComputedIndex();
-
-        _db.put(savedKeys, values, callback, this.currentCdnListener);
     }
 
     @Override

@@ -69,7 +69,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     @Override
     public void save(KCallback cb) {
-        _manager.save(cb);
+        _manager.save(null, cb);
     }
 
     @Override

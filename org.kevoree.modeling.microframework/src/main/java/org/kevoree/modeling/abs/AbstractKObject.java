@@ -588,4 +588,8 @@ public abstract class AbstractKObject implements KObject {
         return _manager;
     }
 
+    @Override
+    public void save(KCallback cb) {
+        //TODO
+    }
 }

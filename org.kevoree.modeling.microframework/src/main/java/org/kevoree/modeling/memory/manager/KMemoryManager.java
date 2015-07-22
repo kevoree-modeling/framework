@@ -28,7 +28,7 @@ public interface KMemoryManager {
 
     KMemorySegment segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace);
 
-    void save(KCallback<Throwable> callback);
+    void save(KObject src, KCallback<Throwable> callback);
 
     void discard(KUniverse universe, KCallback<Throwable> callback);
 
