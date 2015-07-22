@@ -208,7 +208,7 @@ public class MemoryManager implements KMemoryManager {
                 KContentKey[] savedKeys = new KContentKey[nbElemToSave + 2];
                 String[] values = new String[nbElemToSave + 2];
 
-                savedKeys[0] = KContentKey.createObject(src.universe(), KConfig.NULL_LONG, src.uuid());
+                savedKeys[0] = KContentKey.createObject(src.universe(), src.now(), src.uuid());
                 values[0] = cachedObject.serialize(_model.metaModel());
 
                 int indexToInsert = 1;
@@ -693,7 +693,7 @@ public class MemoryManager implements KMemoryManager {
         return this._listenerManager.createListener(p_universe);
     }
 
-    public void bumpKeyToCache(final KContentKey contentKey, final KCallback<KMemoryElement> callback) {
+    public final void bumpKeyToCache(final KContentKey contentKey, final KCallback<KMemoryElement> callback) {
         KMemoryElement cached = _cache.get(contentKey.universe, contentKey.time, contentKey.obj);
         if (cached != null) {
             callback.on(cached);
@@ -717,7 +717,7 @@ public class MemoryManager implements KMemoryManager {
         }
     }
 
-    public void bumpKeysToCache(KContentKey[] contentKeys, final KCallback<KMemoryElement[]> callback) {
+    public final void bumpKeysToCache(KContentKey[] contentKeys, final KCallback<KMemoryElement[]> callback) {
         boolean[] toLoadIndexes = null;
         int nbElem = 0;
         final KMemoryElement[] result = new KMemoryElement[contentKeys.length];

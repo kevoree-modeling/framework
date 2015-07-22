@@ -49,7 +49,7 @@ public class KContentKey {
     }
 
     public static KContentKey createLastUniverseIndexFromPrefix(Short prefix) {
-        return new KContentKey(KConfig.END_OF_TIME, KConfig.NULL_LONG, prefix);
+        return new KContentKey(KConfig.BEGINNING_OF_TIME, KConfig.NULL_LONG, prefix);
     }
 
     public static KContentKey create(String payload) {

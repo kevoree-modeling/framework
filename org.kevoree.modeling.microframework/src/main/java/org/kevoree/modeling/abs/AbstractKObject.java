@@ -590,6 +590,6 @@ public abstract class AbstractKObject implements KObject {
 
     @Override
     public void save(KCallback cb) {
-        //TODO
+        _manager.save(this, cb);
     }
 }

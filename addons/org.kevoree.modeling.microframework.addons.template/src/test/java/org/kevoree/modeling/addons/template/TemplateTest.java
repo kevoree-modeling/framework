@@ -31,7 +31,7 @@ public class TemplateTest {
                         System.err.println("Update : " + kObject.toJSON());
                         kObject.setByName("value",62);
                         kObject.save(null);
-                        model.save(null);
+                        //model.save(null);
                     }
                 });
 
