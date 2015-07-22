@@ -64,6 +64,11 @@ public class MetaEnum implements KMetaEnum {
     }
 
     @Override
+    public int id() {
+        return _index;
+    }
+
+    @Override
     public int index() {
         return this._index;
     }

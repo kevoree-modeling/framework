@@ -6,4 +6,6 @@ public interface KType {
 
     boolean isEnum();
 
+    int id();
+
 }

@@ -66,58 +66,61 @@ public class DiscreteExtrapolation implements Extrapolation {
      * return payload;
      */
     private final Object convert(KMetaAttribute attribute, Object payload) {
-        if (attribute.attributeType() == KPrimitiveTypes.INT) {
-            if (payload instanceof Integer) {
-                return payload;
-            } else {
-                try {
-                    return Integer.parseInt(payload.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
+        int attTypeId = attribute.attributeType().id();
+        switch (attTypeId) {
+            case KPrimitiveTypes.INT_ID:
+                if (payload instanceof Integer) {
+                    return payload;
+                } else {
+                    try {
+                        return Integer.parseInt(payload.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        } else if (attribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-            if (payload instanceof Double) {
-                return payload;
-            } else {
-                try {
-                    return Double.parseDouble(payload.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
+            case KPrimitiveTypes.DOUBLE_ID:
+                if (payload instanceof Double) {
+                    return payload;
+                } else {
+                    try {
+                        return Double.parseDouble(payload.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        } else if (attribute.attributeType() == KPrimitiveTypes.LONG) {
-            if (payload instanceof Long) {
-                return payload;
-            } else {
-                try {
-                    return Long.parseLong(payload.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
+            case KPrimitiveTypes.LONG_ID:
+                if (payload instanceof Long) {
+                    return payload;
+                } else {
+                    try {
+                        return Long.parseLong(payload.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        } else if (attribute.attributeType() == KPrimitiveTypes.STRING) {
-            if (payload instanceof String) {
-                return payload;
-            } else {
-                try {
-                    return payload.toString();
-                } catch (Exception e) {
-                    e.printStackTrace();
+            case KPrimitiveTypes.STRING_ID:
+                if (payload instanceof String) {
+                    return payload;
+                } else {
+                    try {
+                        return payload.toString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        } else if (attribute.attributeType() == KPrimitiveTypes.BOOL) {
-            if (payload instanceof Boolean) {
-                return payload;
-            } else {
-                try {
-                    return Boolean.parseBoolean(payload.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
+            case KPrimitiveTypes.BOOL_ID:
+                if (payload instanceof Boolean) {
+                    return payload;
+                } else {
+                    try {
+                        return Boolean.parseBoolean(payload.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
+            default:
+                return payload;
         }
-        return payload;
     }
 
 }

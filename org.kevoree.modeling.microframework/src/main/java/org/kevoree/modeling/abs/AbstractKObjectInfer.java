@@ -172,71 +172,68 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         if (output == null) {
             return 0;
         }
-        if (metaOutput.type() == KPrimitiveTypes.BOOL) {
-            if (output.equals(true)) {
-                return 1.0;
-            } else {
-                return 0.0;
-            }
-        }
-        if (metaOutput.type() == KPrimitiveTypes.DOUBLE) {
-            return (double) output;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.INT) {
-            return (double) output;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.CONTINUOUS) {
-            return (double) output;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.LONG) {
-            return (double) output;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.STRING) {
-            throw new RuntimeException("String are not managed yet");
-        }
-        if (metaOutput.type().isEnum()) {
-            KMetaEnum metaEnum = (KMetaEnum) metaOutput.type();
-            if (output instanceof MetaLiteral) {
-                return (double) ((MetaLiteral) output).index();
-            } else {
-                KMeta literal = metaEnum.literalByName(output.toString());
-                if (literal != null) {
-                    return (double) literal.index();
+        int typeId = metaOutput.type().id();
+        switch (typeId) {
+            case KPrimitiveTypes.BOOL_ID:
+                if (output.equals(true)) {
+                    return 1.0;
+                } else {
+                    return 0.0;
                 }
-            }
+            case KPrimitiveTypes.DOUBLE_ID:
+                return (double) output;
+            case KPrimitiveTypes.INT_ID:
+                return (double) output;
+            case KPrimitiveTypes.CONTINUOUS_ID:
+                return (double) output;
+            case KPrimitiveTypes.LONG_ID:
+                return (double) output;
+            case KPrimitiveTypes.STRING_ID:
+                throw new RuntimeException("String are not managed yet");
+            default:
+                if (metaOutput.type().isEnum()) {
+                    KMetaEnum metaEnum = (KMetaEnum) metaOutput.type();
+                    if (output instanceof MetaLiteral) {
+                        return (double) ((MetaLiteral) output).index();
+                    } else {
+                        KMeta literal = metaEnum.literalByName(output.toString());
+                        if (literal != null) {
+                            return (double) literal.index();
+                        }
+                    }
+                }
+                return 0;
         }
-        return 0;
     }
 
     private Object internalReverseOutput(double inferred, KMetaInferOutput metaOutput) {
-        if (metaOutput.type() == KPrimitiveTypes.BOOL) {
-            if (inferred >= 0.5) {
-                return true;
-            } else {
-                return false;
-            }
+        int typeId = metaOutput.type().id();
+        switch (typeId) {
+            case KPrimitiveTypes.BOOL_ID:
+                if (inferred >= 0.5) {
+                    return true;
+                } else {
+                    return false;
+                }
+            case KPrimitiveTypes.DOUBLE_ID:
+                return inferred;
+            case KPrimitiveTypes.INT_ID:
+                return (int) inferred;
+            case KPrimitiveTypes.CONTINUOUS_ID:
+                return inferred;
+            case KPrimitiveTypes.LONG_ID:
+                return inferred;
+            case KPrimitiveTypes.STRING_ID:
+                throw new RuntimeException("String are not managed yet");
+            default:
+                if (metaOutput.type().isEnum()) {
+                    int ceiledInferred = math_ceil(inferred);
+                    KMetaEnum metaEnum = (KMetaEnum) metaOutput.type();
+                    return metaEnum.literal(ceiledInferred);
+                }
+                return null;
+
         }
-        if (metaOutput.type() == KPrimitiveTypes.DOUBLE) {
-            return inferred;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.INT) {
-            return (int) inferred;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.CONTINUOUS) {
-            return inferred;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.LONG) {
-            return (long) inferred;
-        }
-        if (metaOutput.type() == KPrimitiveTypes.STRING) {
-            throw new RuntimeException("String are not managed yet");
-        }
-        if (metaOutput.type().isEnum()) {
-            int ceiledInferred = math_ceil(inferred);
-            KMetaEnum metaEnum = (KMetaEnum) metaOutput.type();
-            return metaEnum.literal(ceiledInferred);
-        }
-        return null;
     }
 
     /**

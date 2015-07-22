@@ -10,9 +10,12 @@ public class AbstractDataType implements KType {
 
     final private boolean _isEnum;
 
-    public AbstractDataType(String p_name, boolean p_isEnum) {
+    final private int _id;
+
+    public AbstractDataType(String p_name, boolean p_isEnum, int p_id) {
         this._name = p_name;
         this._isEnum = p_isEnum;
+        this._id = p_id;
     }
 
     @Override
@@ -25,12 +28,9 @@ public class AbstractDataType implements KType {
         return _isEnum;
     }
 
-    /*
-    public static void main(String[] args) {
-
-
-
-        System.err.println(Long.toHexString(Long.MAX_VALUE));
-    }*/
+    @Override
+    public int id() {
+        return _id;
+    }
 
 }
