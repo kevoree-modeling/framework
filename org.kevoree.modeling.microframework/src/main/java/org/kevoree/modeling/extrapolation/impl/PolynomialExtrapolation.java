@@ -21,14 +21,18 @@ public class PolynomialExtrapolation implements Extrapolation {
         KMemorySegment raw = ((AbstractKObject) current)._manager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
         if (raw != null) {
             Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), trace.getTime());
-            if (attribute.attributeType() == KPrimitiveTypes.CONTINUOUS || attribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                return extrapolatedValue;
-            } else if (attribute.attributeType() == KPrimitiveTypes.LONG) {
-                return extrapolatedValue.longValue();
-            } else if (attribute.attributeType() == KPrimitiveTypes.INT) {
-                return extrapolatedValue.intValue();
-            } else {
-                return null;
+            int attTypeId = attribute.attributeType().id();
+            switch (attTypeId){
+                case KPrimitiveTypes.CONTINUOUS_ID:
+                    return extrapolatedValue;
+                case KPrimitiveTypes.DOUBLE_ID:
+                    return extrapolatedValue;
+                case KPrimitiveTypes.LONG_ID:
+                    return extrapolatedValue.longValue();
+                case KPrimitiveTypes.INT_ID:
+                    return extrapolatedValue.intValue();
+                default:
+                    return null;
             }
         } else {
             return null;
