@@ -18,6 +18,7 @@ import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.meta.KMetaClass;
+import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
@@ -208,23 +209,29 @@ public class MemoryManager implements KMemoryManager {
                 KContentKey[] savedKeys = new KContentKey[nbElemToSave + 2];
                 String[] values = new String[nbElemToSave + 2];
 
+                KMetaModel mm = _model.metaModel();
+
                 savedKeys[0] = KContentKey.createObject(src.universe(), src.now(), src.uuid());
-                values[0] = cachedObject.serialize(_model.metaModel());
+                values[0] = cachedObject.serialize(mm);
+                cachedObject.setClean(mm);
 
                 int indexToInsert = 1;
                 if (cachedObjectTimeTree != null && cachedObjectTimeTree.isDirty()) {
                     savedKeys[indexToInsert] = KContentKey.createTimeTree(src.universe(), src.uuid());
-                    values[indexToInsert] = cachedObjectTimeTree.serialize(_model.metaModel());
+                    values[indexToInsert] = cachedObjectTimeTree.serialize(mm);
+                    cachedObjectTimeTree.setClean(mm);
                     indexToInsert++;
                 }
                 if (cachedObjectUniverseTree != null && cachedObjectUniverseTree.isDirty()) {
                     savedKeys[indexToInsert] = KContentKey.createUniverseTree(src.universe());
                     values[indexToInsert] = cachedObjectUniverseTree.serialize(_model.metaModel());
+                    cachedObjectUniverseTree.setClean(mm);
                     indexToInsert++;
                 }
                 if (cachedObjectGlobalUniverseTree != null && cachedObjectGlobalUniverseTree.isDirty()) {
                     savedKeys[indexToInsert] = KContentKey.createGlobalUniverseTree();
                     values[indexToInsert] = cachedObjectGlobalUniverseTree.serialize(_model.metaModel());
+                    cachedObjectGlobalUniverseTree.setClean(mm);
                     indexToInsert++;
                 }
                 savedKeys[indexToInsert] = KContentKey.createLastObjectIndexFromPrefix(_objectKeyCalculator.prefix());
