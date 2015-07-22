@@ -47,7 +47,7 @@
             //ex2, script based template
             var html = document.getElementById("temp2").innerHTML;
             var t = paperclip.template(html);
-            var v = t.view({elem: obj});
+            var v = t.view({elem: obj, model: model});
             document.body.appendChild(v.render());
 
             setTimeout(function () {

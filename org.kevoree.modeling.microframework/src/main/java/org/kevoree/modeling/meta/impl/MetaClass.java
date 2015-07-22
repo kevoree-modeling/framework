@@ -64,7 +64,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaAttribute attribute(String name) {
         KMeta resolved = metaByName(name);
-        if (resolved != null && resolved instanceof MetaAttribute) {
+        if (resolved != null && resolved.metaType() == MetaType.ATTRIBUTE) {
             return (KMetaAttribute) resolved;
         }
         return null;
@@ -73,7 +73,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaReference reference(String name) {
         KMeta resolved = metaByName(name);
-        if (resolved != null && resolved instanceof MetaReference) {
+        if (resolved != null && resolved.metaType() == MetaType.REFERENCE) {
             return (KMetaReference) resolved;
         }
         return null;
@@ -82,7 +82,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaOperation operation(String name) {
         KMeta resolved = metaByName(name);
-        if (resolved != null && resolved instanceof MetaOperation) {
+        if (resolved != null && resolved.metaType() == MetaType.OUTPUT) {
             return (KMetaOperation) resolved;
         }
         return null;
