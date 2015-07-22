@@ -27,10 +27,10 @@ public class TemplateTest {
                 sensor.set(sensorValueAtt, "42");
 
                 KObject sensor2 = model.create(sensorClass, 0, 0);
-                sensor2.set(sensorValueAtt, "42_2");
+                sensor2.set(sensorValueAtt, "43");
 
                 KObject sensor3 = model.create(sensorClass, 0, 0);
-                sensor3.set(sensorValueAtt, "42_3");
+                sensor3.set(sensorValueAtt, "44");
 
                 sensor.mutate(KActionType.ADD, sensorsRef, sensor2);
                 sensor.mutate(KActionType.ADD, sensorsRef, sensor3);

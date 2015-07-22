@@ -308,6 +308,26 @@ public abstract class AbstractKObject implements KObject {
     }
 
     @Override
+    public long[] getRefValuesByName(String p_refName) {
+        KMetaReference transposed = internal_transpose_ref(metaClass().reference(p_refName));
+        if (transposed == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_refName + " is not part of " + metaClass().metaName());
+        } else {
+            KMemorySegment raw = _manager.segment(_universe, _time, _uuid, true, _metaClass, null);
+            if (raw == null) {
+                return new long[0];
+            } else {
+                long[] o = raw.getRef(transposed.index(), _metaClass);
+                if (o == null) {
+                    return new long[0];
+                } else {
+                    return o;
+                }
+            }
+        }
+    }
+
+    @Override
     public void visitAttributes(KModelAttributeVisitor visitor) {
         if (!Checker.isDefined(visitor)) {
             return;

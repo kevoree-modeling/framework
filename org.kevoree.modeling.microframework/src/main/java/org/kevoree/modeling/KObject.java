@@ -33,6 +33,7 @@ public interface KObject {
 
     void ref(KMetaReference metaReference, KCallback<KObject[]> cb);
 
+
     KTraversal traversal();
 
     Object get(KMetaAttribute attribute);
@@ -42,6 +43,8 @@ public interface KObject {
     void set(KMetaAttribute attribute, Object payload);
 
     void setByName(String atributeName, Object payload);
+
+    long[] getRefValuesByName(String refName);
 
     String toJSON();
 

@@ -8,8 +8,6 @@
 <body>
 <script>
 
-    console.log(paperclip.accessors);
-
     var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
     var sensorClass = metaModel.addMetaClass("Sensor");
     sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
@@ -20,8 +18,8 @@
     model.setContentDeliveryDriver(wsClient);
     model.connect(function () {
         model.lookup(0, 0, 1, function (obj) {
-          //  var template = paperclip.template('<b>uuid:{{elem.uuid}}/value:{{elem.value}}</b><input class="form-control" type="text" value="{{ <~>value }}"></input><ul repeat.each="{{elem.sensors}}" repeat.as="i"><li>item {{i}} <br /></li></ul>');
-            var template = paperclip.template('elem({{elem.uuid}}),val={{elem.value}} <br /><input class="form-control" type="text" value="{{ <~>elem.value }}" />');
+            var template = paperclip.template('<b>uuid:{{elem.uuid}}/value:{{elem.value}}</b><input class="form-control" type="text" value="{{ <~>value }}"></input><ul repeat.each="{{elem.sensors}}" repeat.as="i"><li>item {{i}} <br /></li></ul>');
+            //var template = paperclip.template('elem({{elem.uuid}}),val={{elem.value}} <br /><input class="form-control" type="text" value="{{ <~>elem.value }}" />');
             var view = template.view({elem: obj });
             document.body.appendChild(view.render());
         });

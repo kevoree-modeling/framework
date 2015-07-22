@@ -165,7 +165,6 @@
          */
 
         get: function (object, path) {
-
             var keys = typeof path === "string" ? path.split(".") : path;
             var ct = object;
             var key;
@@ -183,7 +182,21 @@
                 } else if (lastKey == 'now') {
                     return ct.now();
                 } else {
-                    return ct.getByName(keys[keys.length - 1]);
+                    var getElemName = keys[keys.length - 1];
+                    var metaElem = ct.metaClass().metaByName(getElemName);
+                    if(metaElem != null){
+                        var metaType = metaElem.metaType();
+                        if(metaType==org.kevoree.modeling.meta.MetaType.ATTRIBUTE){
+                            return ct.getByName(getElemName);
+                        }
+                        if(metaType==org.kevoree.modeling.meta.MetaType.REFERENCE){
+                            var kref = {};
+                            kref._ksrc = ct;
+                            kref._elems = ct.getRefValuesByName(getElemName);
+                            return kref;
+                        }
+                    }
+                    return null;
                 }
             } else {
                 var pt = typeof path !== "string" ? path.join(".") : path;
@@ -960,10 +973,21 @@
      */
 
     function _each(target, iterate) {
-        if (Object.prototype.toString.call(target) === "[object Array]") {
-            for (var i = 0, n = target.length; i < n; i++) iterate(target[i], i);
+        if(target['_ksrc'] != undefined && target['_elems'] != undefined){
+            var refValues = target['_elems'];
+            var src = target['_ksrc'];
+            var manager = target['_ksrc'].manager();
+            manager.lookupAllObjects(src.universe(),src.now(),refValues, function(objs){
+                for (var key in objs){
+                    iterate(objs[key], key);
+                }
+            });
         } else {
-            for (var key in target) iterate(target[key], key);
+            if (Object.prototype.toString.call(target) === "[object Array]") {
+                for (var i = 0, n = target.length; i < n; i++) iterate(target[i], i);
+            } else {
+                for (var key in target) iterate(target[key], key);
+            }
         }
     }
 
