@@ -58,42 +58,53 @@ public class HeapMemorySegment implements KMemorySegment {
                     builder.append("\":");
                     if (metaElements[i].metaType() == MetaType.ATTRIBUTE) {
                         KMetaAttribute metaAttribute = (KMetaAttribute) metaElements[i];
-                        if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                            builder.append("\"");
-                            builder.append(JsonString.encode((String) o));
-                            builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                            builder.append("\"");
-                            Base64.encodeLongToBuffer((long) o, builder);
-                            builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                            builder.append("[");
-                            double[] castedArr = (double[]) o;
-                            for (int j = 0; j < castedArr.length; j++) {
-                                if (j != 0) {
-                                    builder.append(",");
+                        int metaAttId = metaAttribute.attributeType().id();
+                        switch (metaAttId) {
+                            case KPrimitiveTypes.STRING_ID:
+                                builder.append("\"");
+                                builder.append(JsonString.encode((String) o));
+                                builder.append("\"");
+                                break;
+                            case KPrimitiveTypes.LONG_ID:
+                                builder.append("\"");
+                                Base64.encodeLongToBuffer((long) o, builder);
+                                builder.append("\"");
+                                break;
+                            case KPrimitiveTypes.CONTINUOUS_ID:
+                                builder.append("[");
+                                double[] castedArr = (double[]) o;
+                                for (int j = 0; j < castedArr.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append("\"");
+                                    Base64.encodeDoubleToBuffer(castedArr[j], builder);
+                                    builder.append("\"");
                                 }
+                                builder.append("]");
+                                break;
+                            case KPrimitiveTypes.BOOL_ID:
+                                if ((boolean) o) {
+                                    builder.append("1");
+                                } else {
+                                    builder.append("0");
+                                }
+                                break;
+                            case KPrimitiveTypes.DOUBLE_ID:
                                 builder.append("\"");
-                                Base64.encodeDoubleToBuffer(castedArr[j], builder);
+                                Base64.encodeDoubleToBuffer((double) o, builder);
                                 builder.append("\"");
-                            }
-                            builder.append("]");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                            if ((boolean) o) {
-                                builder.append("1");
-                            } else {
-                                builder.append("0");
-                            }
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                            builder.append("\"");
-                            Base64.encodeDoubleToBuffer((double) o, builder);
-                            builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                            builder.append("\"");
-                            Base64.encodeIntToBuffer((int) o, builder);
-                            builder.append("\"");
-                        } else if (metaAttribute.attributeType().isEnum()) {
-                            Base64.encodeIntToBuffer((int) o, builder);
+                                break;
+                            case KPrimitiveTypes.INT_ID:
+                                builder.append("\"");
+                                Base64.encodeIntToBuffer((int) o, builder);
+                                builder.append("\"");
+                                break;
+                            default:
+                                if (metaAttribute.attributeType().isEnum()) {
+                                    Base64.encodeIntToBuffer((int) o, builder);
+                                }
+                                break;
                         }
                     } else if (metaElements[i].metaType() == MetaType.REFERENCE) {
                         builder.append("[");
@@ -175,31 +186,39 @@ public class HeapMemorySegment implements KMemorySegment {
                     if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
                         KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
                         Object converted = null;
-                        if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                            converted = JsonString.unescape((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                            converted = Base64.decodeToLong((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                            converted = Base64.decodeToInt((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                            if (insideContent.equals("1")) {
-                                converted = true;
-                            } else {
-                                converted = false;
-                            }
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                            converted = Base64.decodeToDouble((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                            String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
-                            double[] convertedRaw = new double[plainRawSet.length];
-                            for (int l = 0; l < plainRawSet.length; l++) {
-                                try {
-                                    convertedRaw[l] = Base64.decodeToDouble(plainRawSet[l]);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                        int metaAttId = metaAttribute.attributeType().id();
+                        switch (metaAttId) {
+                            case KPrimitiveTypes.STRING_ID:
+                                converted = JsonString.unescape((String) insideContent);
+                                break;
+                            case KPrimitiveTypes.LONG_ID:
+                                converted = Base64.decodeToLong((String) insideContent);
+                                break;
+                            case KPrimitiveTypes.INT_ID:
+                                converted = Base64.decodeToInt((String) insideContent);
+                                break;
+                            case KPrimitiveTypes.BOOL_ID:
+                                if (insideContent.equals("1")) {
+                                    converted = true;
+                                } else {
+                                    converted = false;
                                 }
-                            }
-                            converted = convertedRaw;
+                                break;
+                            case KPrimitiveTypes.DOUBLE_ID:
+                                converted = Base64.decodeToDouble((String) insideContent);
+                                break;
+                            case KPrimitiveTypes.CONTINUOUS_ID:
+                                String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
+                                double[] convertedRaw = new double[plainRawSet.length];
+                                for (int l = 0; l < plainRawSet.length; l++) {
+                                    try {
+                                        convertedRaw[l] = Base64.decodeToDouble(plainRawSet[l]);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                converted = convertedRaw;
+                                break;
                         }
                         raw[metaAttribute.index()] = converted;
                     }

@@ -136,32 +136,36 @@ public class JsonModelLoader {
                     if (payload_content != null) {
                         if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
                             KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
-                            if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                                String[] plainRawSet = (String[]) p_param.get(metaAttribute.metaName());
-                                double[] convertedRaw = new double[plainRawSet.length];
-                                for (int l = 0; l < plainRawSet.length; l++) {
-                                    try {
-                                        convertedRaw[l] = Double.parseDouble(plainRawSet[l]);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                            int metaAttId = metaAttribute.attributeType().id();
+                            switch (metaAttId){
+                                case KPrimitiveTypes.CONTINUOUS_ID:
+                                    String[] plainRawSet = (String[]) p_param.get(metaAttribute.metaName());
+                                    double[] convertedRaw = new double[plainRawSet.length];
+                                    for (int l = 0; l < plainRawSet.length; l++) {
+                                        try {
+                                            convertedRaw[l] = Double.parseDouble(plainRawSet[l]);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
                                     }
-                                }
-                                raw.set(metaElement.index(), convertedRaw, current.metaClass());
-                            } else {
-                                Object converted = null;
-                                String rawPayload = p_param.get(metaElement.metaName()).toString();
-                                if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                                    converted = JsonString.unescape(rawPayload);
-                                } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                                    converted = Long.parseLong(rawPayload);
-                                } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                                    converted = Integer.parseInt(rawPayload);
-                                } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                                    converted = Boolean.parseBoolean(rawPayload);
-                                } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                                    converted = Double.parseDouble(rawPayload);
-                                }
-                                raw.set(metaElement.index(), converted, current.metaClass());
+                                    raw.set(metaElement.index(), convertedRaw, current.metaClass());
+                                    break;
+                                default:
+                                    Object converted = null;
+                                    String rawPayload = p_param.get(metaElement.metaName()).toString();
+                                    if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                                        converted = JsonString.unescape(rawPayload);
+                                    } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
+                                        converted = Long.parseLong(rawPayload);
+                                    } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
+                                        converted = Integer.parseInt(rawPayload);
+                                    } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
+                                        converted = Boolean.parseBoolean(rawPayload);
+                                    } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+                                        converted = Double.parseDouble(rawPayload);
+                                    }
+                                    raw.set(metaElement.index(), converted, current.metaClass());
+                                    break;
                             }
                         } else if (metaElement != null && metaElement.metaType() == MetaType.REFERENCE) {
                             try {

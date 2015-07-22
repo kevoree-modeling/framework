@@ -46,7 +46,8 @@ public class JsonRaw {
             KMeta loopMeta = metaElements[i];
             if (loopMeta != null && loopMeta.metaType().equals(MetaType.ATTRIBUTE)) {
                 KMetaAttribute metaAttribute = (KMetaAttribute) loopMeta;
-                if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                int metaAttId = metaAttribute.attributeType().id();
+                if (metaAttId == KPrimitiveTypes.CONTINUOUS_ID) {
                     double[] inferAtt = raw.getInfer(loopMeta.index(), p_metaClass);
                     if (inferAtt != null) {
                         builder.append(",\"");
@@ -66,7 +67,7 @@ public class JsonRaw {
                         builder.append(",\"");
                         builder.append(loopMeta.metaName());
                         builder.append("\":\"");
-                        if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                        if (metaAttId == KPrimitiveTypes.STRING_ID) {
                             builder.append(JsonString.encode(payload_res.toString()));
                         } else {
                             builder.append(payload_res.toString());
