@@ -13,6 +13,7 @@
         <li>{{i.uuid}}:{{i.value}}</li>
     </repeat>
     </ul>
+
 </script>
 
 <script>
@@ -27,6 +28,12 @@
     model.connect(function () {
         model.lookup(0, 0, 1, function (obj) {
 
+            var listener = model.universe(0).createListener();
+            listener.listen(obj);
+            listener.then(function (updatedObj) {
+                console.log("update:" + updatedObj);
+            });
+
             var template = paperclip.template('' +
                     '<b>uuid:{{elem.uuid}}/value:{{elem.value}}</b>' +
                     '<input class="form-control" type="text" value="{{ <~>elem.value }}" />' +
@@ -40,8 +47,15 @@
             //ex2, script based template
             var html = document.getElementById("temp2").innerHTML;
             var t = paperclip.template(html);
-            var v = t.view({ elem: obj });
+            var v = t.view({elem: obj});
             document.body.appendChild(v.render());
+
+            setTimeout(function () {
+                obj.setByName("value", 52);
+                model.save(function () {
+                    console.log("Saved!");
+                });
+            }, 1000);
 
         });
     });

@@ -84,8 +84,8 @@ public abstract class AbstractKUniverse<A extends KView, B extends KUniverse, C 
     }
 
     @Override
-    public KListener newListener() {
-        return _manager.newListener(_universe);
+    public KListener createListener() {
+        return _manager.createListener(_universe);
     }
 
 }

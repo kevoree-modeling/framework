@@ -22,6 +22,6 @@ public interface KUniverse<A extends KView, B extends KUniverse, C extends KMode
 
     void lookupAllTimes(long uuid, long[] times, KCallback<KObject[]> cb);
 
-    KListener newListener();
+    KListener createListener();
 
 }

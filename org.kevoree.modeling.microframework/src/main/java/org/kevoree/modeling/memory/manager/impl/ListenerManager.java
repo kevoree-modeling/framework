@@ -1,7 +1,6 @@
 package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
 
 public class ListenerManager {
@@ -52,13 +51,13 @@ public class ListenerManager {
             if (!_obj2Listener.contains(origin.uuid())) {
                 long[] newRec = new long[1];
                 newRec[0] = listenerID;
-                _listener2Objects.put(origin.uuid(), newRec);
+                _obj2Listener.put(origin.uuid(), newRec);
             } else {
                 long[] previous = _obj2Listener.get(origin.uuid());
                 long[] newArrayRec = new long[previous.length + 1];
                 System.arraycopy(previous, 0, newArrayRec, 0, previous.length);
                 newArrayRec[previous.length] = listenerID;
-                _listener2Objects.put(origin.uuid(), newArrayRec);
+                _obj2Listener.put(origin.uuid(), newArrayRec);
             }
         } else {
             //unregisterAll

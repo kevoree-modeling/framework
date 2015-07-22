@@ -45,4 +45,6 @@ public interface KModel<A extends KUniverse> {
 
     void lookup(long universe, long time, long uuid, KCallback<KObject> cb);
 
+    KListener createListener(long universe);
+
 }

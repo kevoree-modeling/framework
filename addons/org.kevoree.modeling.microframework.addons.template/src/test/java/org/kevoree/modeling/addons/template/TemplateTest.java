@@ -1,9 +1,6 @@
 package org.kevoree.modeling.addons.template;
 
-import org.kevoree.modeling.KActionType;
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KModel;
-import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.*;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -12,7 +9,7 @@ public class TemplateTest {
 
     //@Test
     public static void main(String[] args) {
-        
+
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
@@ -26,6 +23,18 @@ public class TemplateTest {
                 KObject sensor = model.create(sensorClass, 0, 0);
                 sensor.set(sensorValueAtt, "42");
 
+                KListener listener = model.universe(0).createListener();
+                listener.listen(sensor);
+                listener.then(new KCallback<KObject>() {
+                    @Override
+                    public void on(KObject kObject) {
+                        System.err.println("Update : " + kObject.toJSON());
+                        kObject.setByName("value",62);
+                        kObject.save(null);
+                        model.save(null);
+                    }
+                });
+
                 KObject sensor2 = model.create(sensorClass, 0, 0);
                 sensor2.set(sensorValueAtt, "43");
 
@@ -38,7 +47,7 @@ public class TemplateTest {
                 model.save(new KCallback() {
                     @Override
                     public void on(Object o) {
-
+                        //done
                     }
                 });
 

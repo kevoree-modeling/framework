@@ -68,6 +68,6 @@ public interface KMemoryManager {
 
     void setFactory(KMemoryFactory factory);
 
-    KListener newListener(long universe);
+    KListener createListener(long universe);
 
 }

@@ -1,12 +1,9 @@
 package org.kevoree.modeling.abs;
 
-import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.*;
 import org.kevoree.modeling.defer.KDefer;
-import org.kevoree.modeling.KModel;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.operation.KOperation;
 import org.kevoree.modeling.scheduler.KScheduler;
-import org.kevoree.modeling.KUniverse;
 import org.kevoree.modeling.memory.manager.impl.MemoryManager;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
@@ -129,6 +126,11 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     @Override
     public void lookup(long p_universe, long p_time, long p_uuid, KCallback<KObject> cb) {
         _manager.lookup(p_universe, p_time, p_uuid, cb);
+    }
+
+    @Override
+    public KListener createListener(long universe){
+        return _manager.createListener(universe);
     }
 
 }

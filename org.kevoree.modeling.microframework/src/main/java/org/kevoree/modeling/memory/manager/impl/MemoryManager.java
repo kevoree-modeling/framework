@@ -689,7 +689,7 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public KListener newListener(long p_universe) {
+    public KListener createListener(long p_universe) {
         return this._listenerManager.createListener(p_universe);
     }
 
