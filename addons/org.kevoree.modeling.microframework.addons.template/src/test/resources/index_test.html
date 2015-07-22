@@ -7,6 +7,13 @@
 </head>
 <body>
 
+<script type="text/x-paperclip" id="temp2">
+    <ul>
+    <repeat each={{elem.sensors}} as="i">
+        <li>{{i.uuid}}:{{i.value}}</li>
+    </repeat>
+    </ul>
+</script>
 
 <script>
     var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
@@ -25,10 +32,17 @@
                     '<input class="form-control" type="text" value="{{ <~>elem.value }}" />' +
                     '<ul repeat.each="{{elem.sensors}}" repeat.as="i">' +
                     '<li>item {{i.uuid}} {{i.value}} {{i}} <input class="form-control" type="text" value="{{ <~>i.value }}" /></li>' +
-                    '</ul>');
-
+                    '</ul>' +
+                    '');
             var view = template.view({elem: obj});
             document.body.appendChild(view.render());
+
+            //ex2, script based template
+            var html = document.getElementById("temp2").innerHTML;
+            var t = paperclip.template(html);
+            var v = t.view({ elem: obj });
+            document.body.appendChild(v.render());
+
         });
     });
 </script>
