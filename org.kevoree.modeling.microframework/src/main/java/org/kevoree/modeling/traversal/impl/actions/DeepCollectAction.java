@@ -12,6 +12,7 @@ import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.MetaType;
 import org.kevoree.modeling.meta.impl.MetaReference;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
@@ -109,7 +110,7 @@ public class DeepCollectAction implements KTraversalAction {
                         if (_reference == null) {
                             KMeta[] metaElements = loopObj.metaClass().metaElements();
                             for (int j = 0; j < metaElements.length; j++) {
-                                if (metaElements[j] instanceof MetaReference) {
+                                if (metaElements[j] != null && metaElements[j].metaType() == MetaType.REFERENCE) {
                                     long[] resolved = raw.getRef(metaElements[j].index(), loopObj.metaClass());
                                     if (resolved != null) {
                                         for (int k = 0; k < resolved.length; k++) {

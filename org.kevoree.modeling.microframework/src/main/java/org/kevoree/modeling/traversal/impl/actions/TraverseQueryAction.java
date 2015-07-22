@@ -10,6 +10,7 @@ import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.MetaType;
 import org.kevoree.modeling.meta.impl.MetaReference;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
@@ -50,7 +51,7 @@ public class TraverseQueryAction implements KTraversalAction {
                     if (raw != null) {
                         if (_referenceQuery == null) {
                             for (int j = 0; j < metaElements.length; j++) {
-                                if (metaElements[j] instanceof MetaReference) {
+                                if (metaElements[j] != null && metaElements[j].metaType() == MetaType.REFERENCE) {
                                     long[] resolved = raw.getRef(metaElements[j].index(), loopObj.metaClass());
                                     if (resolved != null) {
                                         for (int k = 0; k < resolved.length; k++) {
@@ -66,7 +67,7 @@ public class TraverseQueryAction implements KTraversalAction {
                                 queries[k] = queries[k].replace("*", ".*");
                             }
                             for (int h = 0; h < metaElements.length; h++) {
-                                if (metaElements[h] instanceof MetaReference) {
+                                if (metaElements[h] != null && metaElements[h].metaType() == MetaType.REFERENCE) {
                                     KMetaReference metaReference = (KMetaReference) metaElements[h];
                                     boolean selected = false;
                                     for (int k = 0; k < queries.length; k++) {

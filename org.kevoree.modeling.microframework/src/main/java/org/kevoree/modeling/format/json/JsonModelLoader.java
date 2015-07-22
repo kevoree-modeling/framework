@@ -163,7 +163,7 @@ public class JsonModelLoader {
                                 }
                                 raw.set(metaElement.index(), converted, current.metaClass());
                             }
-                        } else if (metaElement != null && metaElement instanceof MetaReference) {
+                        } else if (metaElement != null && metaElement.metaType() == MetaType.REFERENCE) {
                             try {
                                 raw.set(metaElement.index(), transposeArr((ArrayList<String>) payload_content, p_mappedKeys), current.metaClass());
                             } catch (Exception e) {

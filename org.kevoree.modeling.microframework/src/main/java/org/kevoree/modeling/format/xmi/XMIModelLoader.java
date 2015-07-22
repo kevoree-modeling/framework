@@ -155,7 +155,7 @@ public class XMIModelLoader {
                     if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
                         modelElem.set((KMetaAttribute) metaElement, unescapeXml(valueAtt));
                     } else {
-                        if (metaElement != null && metaElement instanceof MetaReference) {
+                        if (metaElement != null && metaElement.metaType() == MetaType.REFERENCE) {
                             String[] referenceArray = valueAtt.split(" ");
                             for (int j = 0; j < referenceArray.length; j++) {
                                 String xmiRef = referenceArray[j];
