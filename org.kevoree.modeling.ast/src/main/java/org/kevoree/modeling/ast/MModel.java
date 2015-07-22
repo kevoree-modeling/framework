@@ -11,7 +11,8 @@ public class MModel {
 
     private HashMap<String, MModelClassifier> classifiers = new HashMap<>();
 
-    private Integer currentIndex = 0;
+    private Integer classIndex = 0;
+    private Integer enumIndex = 0;
 
     public Collection<MModelClassifier> getClassifiers() {
         return classifiers.values();
@@ -23,8 +24,13 @@ public class MModel {
 
     public void addClassifier(MModelClassifier classifier) {
         if (classifier instanceof MModelClass) {
-            classifier.setIndex(currentIndex);
-            currentIndex = currentIndex + 1;
+            classifier.setIndex(classIndex);
+            classIndex = classIndex + 1;
+        } else if (classifier instanceof MModelEnum) {
+            classifier.setIndex(enumIndex);
+            enumIndex = enumIndex + 1;
+        } else {
+
         }
         classifiers.put(classifier.getFqn(), classifier);
     }

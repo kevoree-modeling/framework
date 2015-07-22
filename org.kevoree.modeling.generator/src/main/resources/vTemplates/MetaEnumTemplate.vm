@@ -37,6 +37,11 @@ public class Meta${context.getName()} implements org.kevoree.modeling.KType {
         return true;
     }
 
+    @Override
+    public int id() {
+        return ${context.index};
+    }
+
 }
 
 #* @vtlvariable name="context" type="org.kevoree.modeling.ast.MModelEnum" *#
