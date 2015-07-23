@@ -240,7 +240,7 @@
             var currentValue;
             var firstCall = true;
 
-            return this._addWatcher(function() {
+            var watcher = this._addWatcher(function() {
                 var newValue = self.get(object, path);
                 if (!firstCall && newValue === currentValue && typeof newValue !== "function") return;
                 firstCall = false;
@@ -248,6 +248,27 @@
                 currentValue = newValue;
                 listener(newValue, currentValue);
             });
+
+            var keys = typeof path === "string" ? path.split(".") : path;
+            var ct = object;
+            var key;
+            for (var i = 0, n = keys.length - 1; i < n; i++) {
+                key = keys[i];
+                if (!ct[key]) {
+                    ct[key] = {};
+                }
+                ct = ct[key];
+            }
+            if (ct['_metaClass'] != undefined) {
+
+                var modelListener = ct.manager().model().createListener(ct.universe());
+                modelListener.listen(ct);
+                modelListener.then(function(){
+                    watcher.apply();
+                });
+            }
+
+            return watcher;
         },
 
         /**
