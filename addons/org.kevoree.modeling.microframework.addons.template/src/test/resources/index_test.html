@@ -13,7 +13,7 @@
         <li>{{i.uuid}}:{{i.value}}</li>
     </repeat>
     </ul>
-
+    <input type="button" class="form-control" onClick="{{model | save}}" value="Save Model"></input>
 </script>
 
 <script>
@@ -45,17 +45,18 @@
             document.body.appendChild(view.render());
 
             //ex2, script based template
+
+
+            paperclip.modifiers.save = function (elem) {
+                elem.save(function () {
+                    console.log("Model Saved!");
+                });
+            };
+
             var html = document.getElementById("temp2").innerHTML;
             var t = paperclip.template(html);
             var v = t.view({elem: obj, model: model});
             document.body.appendChild(v.render());
-
-            setTimeout(function () {
-                obj.setByName("value", 52);
-                model.save(function () {
-                    console.log("Saved!");
-                });
-            }, 1000);
 
         });
     });

@@ -29,9 +29,6 @@ public class TemplateTest {
                     @Override
                     public void on(KObject kObject) {
                         System.err.println("Update : " + kObject.toJSON());
-                        kObject.setByName("value",62);
-                        kObject.save(null);
-                        //model.save(null);
                     }
                 });
 
