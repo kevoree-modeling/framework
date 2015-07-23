@@ -29,7 +29,7 @@
     sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
     sensorClass.addReference("sensors", sensorClass, null, true);
 
-    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://localhost:8080/cdn");
+    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://"+window.location.hostname+":8080/cdn");
     var model = metaModel.model();
     model.setContentDeliveryDriver(wsClient);
     model.connect(function () {
@@ -38,7 +38,7 @@
             var listener = model.universe(0).createListener();
             listener.listen(obj);
             listener.then(function (updatedObj) {
-                console.log("update:" + updatedObj);
+               // console.log("update:" + updatedObj);
             });
 
             /*
