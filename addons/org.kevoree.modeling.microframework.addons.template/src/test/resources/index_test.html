@@ -4,13 +4,20 @@
     <script type="text/javascript" src="org.kevoree.modeling.microframework.typescript.js"></script>
     <script type="text/javascript" src="org.kevoree.modeling.drivers.websocket.js"></script>
     <script type="text/javascript" src="paperclip.js"></script>
+
+
+    <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.indigo-pink.min.css">
+    <script src="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
 </head>
 <body>
 
 <script type="text/x-paperclip" id="temp2">
+    <strong>{{elem.value}}</strong>
     <ul>
     <repeat each={{elem.sensors}} as="i">
-        <li>{{i.uuid}}, value:<input class="form-control" type="text" value="{{ <~>i.value }}" /></li>
+        <li>{{i.uuid}}, value:<input class="form-control mdl-textfield__input" pattern="-?[0-9]*(\.[0-9]+)?" type="text" value="{{ <~>i.value }}" /></li>
     </repeat>
     </ul>
     <input type="button" class="form-control" onClick="{{model | save}}" value="Save Model"></input>

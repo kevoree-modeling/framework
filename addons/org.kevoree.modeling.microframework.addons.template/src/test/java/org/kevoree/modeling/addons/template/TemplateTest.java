@@ -48,6 +48,25 @@ public class TemplateTest {
                     }
                 });
 
+
+                new Thread(){
+                    @Override
+                    public void run() {
+                        while (true) {
+                            sensor.setByName("value", System.currentTimeMillis());
+                            sensor2.setByName("value", System.currentTimeMillis());
+                            sensor3.setByName("value", System.currentTimeMillis());
+                            model.save(null);
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }.start();
+
+
             }
         });
         WebSocketGateway gateway = WebSocketGateway.exposeModelAndResources(model, 8080, TemplateTest.class.getClassLoader());
