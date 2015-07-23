@@ -8,10 +8,6 @@ public class DenseMatrix64F {
     public double[] data;
     public static int MULT_COLUMN_SWITCH = 15;
 
-
-
-
-
     public DenseMatrix64F(int numRows, int numCols){
         data = new double[numRows * numCols];
         this.numRows = numRows;

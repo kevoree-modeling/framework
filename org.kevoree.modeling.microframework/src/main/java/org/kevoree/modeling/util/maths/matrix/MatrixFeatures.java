@@ -21,10 +21,6 @@ public class MatrixFeatures {
         return (mat.getNumCols() == 1 || mat.getNumRows() == 1);
     }
 
-
-
-
-
     public static boolean isSquare( DenseMatrix64F mat ) {
         return mat.numCols == mat.numRows;
     }
