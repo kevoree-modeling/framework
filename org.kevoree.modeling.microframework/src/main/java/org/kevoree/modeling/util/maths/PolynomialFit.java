@@ -1,5 +1,8 @@
 package org.kevoree.modeling.util.maths;
 
+import org.kevoree.modeling.util.maths.matrix.AdjLinearSolverQr;
+import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
+
 public class PolynomialFit {
     // Vandermonde matrix
     DenseMatrix64F A;
@@ -23,9 +26,9 @@ public class PolynomialFit {
     }
 
     public void fit(double samplePoints[], double[] observations) {
-        y.reshape(observations.length, 1, false);
+        y.reshapeBoolean(observations.length, 1, false);
         System.arraycopy(observations, 0, y.data, 0, observations.length);
-        A.reshape(y.numRows, coef.numRows, false);
+        A.reshapeBoolean(y.numRows, coef.numRows, false);
         // cset up the A matrix
         for (int i = 0; i < observations.length; i++) {
             double obs = 1;

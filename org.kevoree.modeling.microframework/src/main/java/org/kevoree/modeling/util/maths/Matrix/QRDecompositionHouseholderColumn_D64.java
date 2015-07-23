@@ -1,4 +1,4 @@
-package org.kevoree.modeling.util.maths;
+package org.kevoree.modeling.util.maths.matrix;
 
 public class QRDecompositionHouseholderColumn_D64 {
 

@@ -1,4 +1,4 @@
-package org.kevoree.modeling.util.maths;
+package org.kevoree.modeling.util.maths.matrix;
 
 public class AdjLinearSolverQr {
 
@@ -20,8 +20,8 @@ public class AdjLinearSolverQr {
         if (!decomposer.decompose(A)) {
             return false;
         }
-        Q.reshape(numRows, numRows, false);
-        R.reshape(numRows, numCols, false);
+        Q.reshapeBoolean(numRows, numRows, false);
+        R.reshapeBoolean(numRows, numCols, false);
         decomposer.getQ(Q, false);
         decomposer.getR(R, false);
         return true;
@@ -41,17 +41,17 @@ public class AdjLinearSolverQr {
 
     public void solve(DenseMatrix64F B, DenseMatrix64F X) {
         int BnumCols = B.numCols;
-        Y.reshape(numRows, 1, false);
-        Z.reshape(numRows, 1, false);
+        Y.reshapeBoolean(numRows, 1, false);
+        Z.reshapeBoolean(numRows, 1, false);
         // solve each column one by one
         for (int colB = 0; colB < BnumCols; colB++) {
             // make a copy of this column in the vector
             for (int i = 0; i < numRows; i++) {
-                Y.data[i] = B.unsafe_get(i, colB);
+                Y.data[i] = B.get(i, colB);
             }
             // Solve Qa=b
             // a = Q'b
-            DenseMatrix64F.multTransA(Q, Y, Z);
+            MatrixMatrixMult.multTransA(Q, Y, Z);
             // solve for Rx = b using the standard upper triangular solver
             solveU(R.data, Z.data, numCols);
             // save the results

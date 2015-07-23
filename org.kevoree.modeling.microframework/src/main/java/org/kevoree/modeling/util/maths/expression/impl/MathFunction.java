@@ -115,10 +115,6 @@ public class MathFunction {
         else if(name.equals("DAYOFWEEK")){
             return date_to_dayofweek(p[0]);
         }
-
-
-
-
         return 0;
     }
 
@@ -193,6 +189,7 @@ public class MathFunction {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date((long)value));
         return calendar.get(Calendar.DAY_OF_WEEK)-1;
+
     }
 
 
