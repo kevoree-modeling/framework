@@ -6,7 +6,7 @@ public class MModelReference {
     private MModelClass type;
     private String opposite = null;
     private Integer index = -1;
-    private boolean single = false;
+    private boolean single = true;
     private boolean visible = true;
 
     public Integer getIndex() {
