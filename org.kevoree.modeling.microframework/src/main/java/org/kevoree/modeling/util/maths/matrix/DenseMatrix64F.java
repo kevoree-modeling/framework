@@ -79,8 +79,8 @@ public class DenseMatrix64F {
 
 
 
- /*   public static DenseMatrix64F wrap( int numRows , int numCols , double []data ) {
-        DenseMatrix64F s = new DenseMatrix64F(numRows,numCols);
+ /*   public static DenseMatrix64F wrap( int getNumRows , int getNumCols , double []data ) {
+        DenseMatrix64F s = new DenseMatrix64F(getNumRows,getNumCols);
         s.data = data;
         return s;
     }*/

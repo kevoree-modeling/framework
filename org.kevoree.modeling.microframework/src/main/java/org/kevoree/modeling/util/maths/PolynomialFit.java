@@ -1,6 +1,6 @@
 package org.kevoree.modeling.util.maths;
 
-import org.kevoree.modeling.util.maths.matrix.AdjLinearSolverQr;
+import org.kevoree.modeling.util.maths.matrix.solvers.AdjLinearSolverQr;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 
 public class PolynomialFit {
@@ -37,7 +37,7 @@ public class PolynomialFit {
                 obs *= samplePoints[i];
             }
         }
-        // process the A matrix and see if it failed
+        // processValues the A matrix and see if it failed
         solver.setA(A);
         solver.solve(y, coef);
     }

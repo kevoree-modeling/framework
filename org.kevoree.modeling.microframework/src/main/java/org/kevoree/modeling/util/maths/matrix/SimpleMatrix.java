@@ -1,5 +1,8 @@
 package org.kevoree.modeling.util.maths.matrix;
 
+import org.kevoree.modeling.util.maths.matrix.solvers.SimpleEVD;
+import org.kevoree.modeling.util.maths.matrix.solvers.SimpleSVD;
+
 public class SimpleMatrix{
 
     protected DenseMatrix64F mat;
@@ -9,24 +12,15 @@ public class SimpleMatrix{
     }
 
 /*
-    public SimpleMatrix mult( SimpleMatrix b ) {
-        SimpleMatrix ret = createMatrix(mat.numRows,b.getMatrix().numCols);
-        CommonOps.mult(mat, b.getMatrix(), ret.getMatrix());
-        return ret;
-    }
+
 
     public SimpleMatrix kron( SimpleMatrix B ) {
-        SimpleMatrix ret = createMatrix(mat.numRows * B.numRows(), mat.numCols * B.numCols());
+        SimpleMatrix ret = createMatrix(mat.getNumRows * B.getNumRows(), mat.getNumCols * B.getNumCols());
         CommonOps.kron(mat, B.getMatrix(), ret.getMatrix());
         return ret;
     }
 
 
-    public SimpleMatrix plus( SimpleMatrix b ) {
-        SimpleMatrix ret = copy();
-        CommonOps.addEquals(ret.getMatrix(), b.getMatrix());
-        return ret;
-    }
 
 
     public SimpleMatrix minus( SimpleMatrix b ) {
@@ -36,22 +30,10 @@ public class SimpleMatrix{
     }
 
 
-    public SimpleMatrix minus( double b ) {
-        SimpleMatrix ret = copy();
-
-        CommonOps.subtract(getMatrix(), b, ret.getMatrix());
-
-        return ret;
-    }
 
 
-    public SimpleMatrix plus( double beta ) {
-        SimpleMatrix ret = createMatrix(numRows(), numCols());
 
-        CommonOps.addval2mat(getMatrix(), beta, ret.getMatrix());
 
-        return ret;
-    }
 
 
     public SimpleMatrix plus( double beta , SimpleMatrix b ) {
@@ -75,7 +57,7 @@ public class SimpleMatrix{
 
 
     public boolean isVector() {
-        return mat.numRows == 1 || mat.numCols == 1;
+        return mat.getNumRows == 1 || mat.getNumCols == 1;
     }
 
 
@@ -116,24 +98,14 @@ public class SimpleMatrix{
 
 
 
-    public double trace() {
-        return CommonOps.trace(mat);
+
+
+
+    public void reshape( int getNumRows , int getNumCols ) {
+        mat.reshapeBoolean(getNumRows, getNumCols, false);
     }
 
 
-    public void reshape( int numRows , int numCols ) {
-        mat.reshapeBoolean(numRows, numCols, false);
-    }
-
-
-    public void set( int row , int col , double value ) {
-        mat.set(row, col, value);
-    }
-
-
-    public void set( int index , double value ) {
-        mat.setValueAtIndex(index, value);
-    }
 
 
     public void setRow( int row , int offset , double ...values ) {
@@ -159,15 +131,65 @@ public class SimpleMatrix{
     }
 
 */
+
+    public void setValue2D( int row , int col , double value ) {
+        mat.set(row, col, value);
+    }
+
+
+    public void setValue1D( int index , double value ) {
+        mat.setValueAtIndex(index, value);
+    }
+
+
+    public double getValue2D( int row , int col ) {
+        return mat.get(row,col);
+    }
+
+
+    public double getValue1D( int index ) {
+        return mat.data[ index ];
+    }
+
     public int getIndex( int row , int col ) {
         return row * mat.numCols + col;
     }
 
+    public SimpleMatrix mult( SimpleMatrix b ) {
+        SimpleMatrix ret = createMatrix(mat.numRows, b.getMatrix().numCols);
+        CommonOps.mult(mat, b.getMatrix(), ret.getMatrix());
+        return ret;
+    }
 
+    public SimpleMatrix scale( double val ) {
+        SimpleMatrix ret = copy();
 
+        CommonOps.scale(val, ret.getMatrix());
+
+        return ret;
+    }
+
+    public SimpleMatrix plus( SimpleMatrix b ) {
+        SimpleMatrix ret = copy();
+        CommonOps.addEquals(ret.getMatrix(), b.getMatrix());
+        return ret;
+    }
+
+    /*
+    public SimpleMatrix plus( double beta ) {
+        SimpleMatrix ret = createMatrix(getNumRows(), getNumCols());
+        CommonOps.addval2mat(getMatrix(), beta, ret.getMatrix());
+        return ret;
+    }
+
+    public SimpleMatrix minus( double b ) {
+        SimpleMatrix ret = copy();
+        CommonOps.subtract(getMatrix(), b, ret.getMatrix());
+        return ret;
+    }*/
 
     public SimpleMatrix copy() {
-        SimpleMatrix ret = createMatrix(mat.numRows,mat.numCols);
+        SimpleMatrix ret = createMatrix(mat.numRows, mat.numCols);
         ret.getMatrix().setMatrix(this.getMatrix());
         return ret;
     }
@@ -191,18 +213,20 @@ public class SimpleMatrix{
     {
         int N = Math.min(mat.numCols,mat.numRows);
 
-        SimpleMatrix diag = createMatrix(N,1);
+        SimpleMatrix diag = createMatrix(N, 1);
 
-        CommonOps.extractDiag(mat,diag.getMatrix());
+        CommonOps.extractDiag(mat, diag.getMatrix());
 
         return diag;
     }
 
-   /* public boolean isIdentical( SimpleMatrix  a, double tol) {
+    public boolean isIdentical( SimpleMatrix  a, double tol) {
         return MatrixFeatures.isIdentical(mat, a.getMatrix(), tol);
-    }*/
+    }
 
-
+    public double trace() {
+        return CommonOps.trace(mat);
+    }
 
     public double elementMaxAbs() {
         return CommonOps.elementMaxAbs(mat);
@@ -288,12 +312,12 @@ public class SimpleMatrix{
 
 
     public void printDimensions() {
-        System.out.println("[rows = "+numRows()+" , cols = "+numCols()+" ]");
+        System.out.println("[rows = " + numRows() + " , cols = " + numCols() + " ]");
     }
 
     /*
-    public SimpleMatrix(int numRows, int numCols, boolean rowMajor, double ...data) {
-        mat = new DenseMatrix64F(numRows,numCols, rowMajor, data);
+    public SimpleMatrix(int getNumRows, int getNumCols, boolean rowMajor, double ...data) {
+        mat = new DenseMatrix64F(getNumRows,getNumCols, rowMajor, data);
     }
 
 
@@ -313,6 +337,12 @@ public class SimpleMatrix{
         this.mat = orig.copy();
     }
 */
+
+    public SimpleMatrix transpose() {
+        SimpleMatrix ret = createMatrix(mat.numCols, mat.numRows);
+        CommonOps.transposeMatrix(mat, ret.getMatrix());
+        return ret;
+    }
 
 
     public SimpleMatrix(int numRows, int numCols) {
@@ -335,6 +365,24 @@ public class SimpleMatrix{
         return ret;
     }
 
+    public SimpleMatrix minus( SimpleMatrix b ) {
+        SimpleMatrix ret = copy();
+        CommonOps.subtract3mat(getMatrix(), b.getMatrix(), ret.getMatrix());
+        return ret;
+    }
+
+    public SimpleMatrix invert() {
+        SimpleMatrix ret = createMatrix(mat.numRows, mat.numCols);
+        CommonOps.invert(mat, ret.getMatrix());
+        return ret;
+    }
+
+
+   /* public SimpleMatrix pseudoInverse() {
+        SimpleMatrix ret = createMatrix(mat.getNumCols,mat.getNumRows);
+        CommonOps.pinv(mat, ret.getMatrix());
+        return ret;
+    }*/
 
     public static SimpleMatrix diag( double ...vals ) {
         DenseMatrix64F m = CommonOps.diag(vals);
@@ -342,6 +390,10 @@ public class SimpleMatrix{
         return ret;
     }
 
+    public double determinant() {
+        double ret = CommonOps.det(mat);
+        return ret;
+    }
 
 
     protected SimpleMatrix createMatrix( int numRows , int numCols ) {
@@ -349,18 +401,29 @@ public class SimpleMatrix{
         return sm;
     }
 
+    public SimpleMatrix extractVector( boolean extractRow , int element )
+    {
+        int length = extractRow ? mat.numCols : mat.numRows;
 
-    /*
+        SimpleMatrix ret = extractRow ? createMatrix(1,length) : createMatrix(length,1);
+
+        if( extractRow ) {
+            CommonOps.subvector(mat,element,0,length,true,0,ret.getMatrix());
+        } else {
+            CommonOps.subvector(mat,0,element,length,false,0,ret.getMatrix());
+        }
+        return ret;
+    }
+
+    public SimpleEVD eig() {
+        return new SimpleEVD(mat);
+    }
+
+    public SimpleSVD svd( boolean compact ) {
+        return new SimpleSVD(mat,compact);
+    }
 
     public SimpleMatrix combine( int insertRow, int insertCol, SimpleMatrix B) {
-
-        if( insertRow == SimpleMatrix.END ) {
-            insertRow = mat.numRows;
-        }
-
-        if( insertCol == SimpleMatrix.END ) {
-            insertCol = mat.numCols;
-        }
 
         int maxRow = insertRow + B.numRows();
         int maxCol = insertCol + B.numCols();
@@ -382,12 +445,24 @@ public class SimpleMatrix{
         return ret;
     }
 
+    public void insertIntoThis(int insertRow, int insertCol, SimpleMatrix B) {
+        CommonOps.insert(B.getMatrix(), mat, insertRow, insertCol);
+    }
+
+
+
+
+
+    /*
+
+
+
 
     public SimpleMatrix extractMatrix(int y0 , int y1, int x0 , int x1 ) {
-        if( y0 == SimpleMatrix.END ) y0 = mat.numRows;
-        if( y1 == SimpleMatrix.END ) y1 = mat.numRows;
-        if( x0 == SimpleMatrix.END ) x0 = mat.numCols;
-        if( x1 == SimpleMatrix.END ) x1 = mat.numCols;
+        if( y0 == SimpleMatrix.END ) y0 = mat.getNumRows;
+        if( y1 == SimpleMatrix.END ) y1 = mat.getNumRows;
+        if( x0 == SimpleMatrix.END ) x0 = mat.getNumCols;
+        if( x1 == SimpleMatrix.END ) x1 = mat.getNumCols;
 
         SimpleMatrix ret = createMatrix(y1-y0,x1-x0);
 
@@ -402,33 +477,13 @@ public class SimpleMatrix{
         return new MatrixIterator64F(mat,rowMajor, minRow, minCol, maxRow, maxCol);
     }
 
-    public SimpleMatrix transpose() {
-        SimpleMatrix ret = createMatrix(mat.numCols, mat.numRows);
-        CommonOps.transpose(mat, ret.getMatrix());
-        return ret;
-    }
-
-    public SimpleMatrix invert() {
-        SimpleMatrix ret = createMatrix(mat.numRows,mat.numCols);
-        if( !CommonOps.invert(mat,ret.getMatrix()) ) {
-            throw new SingularMatrixException();
-        }
-        if( MatrixFeatures.hasUncountable(ret.getMatrix()))
-            throw new SingularMatrixException("Solution has uncountable numbers");
-        return ret;
-    }
 
 
-    public SimpleMatrix pseudoInverse() {
-        SimpleMatrix ret = createMatrix(mat.numCols,mat.numRows);
-        CommonOps.pinv(mat, ret.getMatrix());
-        return ret;
-    }
 
 
     public SimpleMatrix solve( SimpleMatrix b )
     {
-        SimpleMatrix x = createMatrix(mat.numCols,b.getMatrix().numCols);
+        SimpleMatrix x = createMatrix(mat.getNumCols,b.getMatrix().getNumCols);
 
         if( !CommonOps.solve(mat, b.getMatrix(), x.getMatrix()) )
             throw new SingularMatrixException();
@@ -461,30 +516,10 @@ public class SimpleMatrix{
 
 
 
-    public SimpleMatrix extractVector( boolean extractRow , int element )
-    {
-        int length = extractRow ? mat.numCols : mat.numRows;
-
-        SimpleMatrix ret = extractRow ? createMatrix(1,length) : createMatrix(length,1);
-
-        if( extractRow ) {
-            SpecializedOps.subvector(mat,element,0,length,true,0,ret.getMatrix());
-        } else {
-            SpecializedOps.subvector(mat,0,element,length,false,0,ret.getMatrix());
-        }
-
-        return ret;
-    }
 
 
-    public SimpleSVD svd() {
-        return new SimpleSVD(mat,false);
-    }
 
 
-    public SimpleSVD svd( boolean compact ) {
-        return new SimpleSVD(mat,compact);
-    }
 
 
     public SimpleEVD eig() {
@@ -492,13 +527,9 @@ public class SimpleMatrix{
     }
 
 
-    public void insertIntoThis(int insertRow, int insertCol, SimpleMatrix B) {
-        CommonOps.insert(B.getMatrix(), mat, insertRow, insertCol);
-    }
 
-
-    public static SimpleMatrix random(int numRows, int numCols, double minValue, double maxValue, Random rand) {
-        SimpleMatrix ret = new SimpleMatrix(numRows,numCols);
+    public static SimpleMatrix random(int getNumRows, int getNumCols, double minValue, double maxValue, Random rand) {
+        SimpleMatrix ret = new SimpleMatrix(getNumRows,getNumCols);
         RandomMatrices.setRandom(ret.mat,minValue,maxValue,rand);
         return ret;
     }
@@ -507,7 +538,7 @@ public class SimpleMatrix{
     public static SimpleMatrix randomNormal( SimpleMatrix covariance , Random random ) {
         CovarianceRandomDraw draw = new CovarianceRandomDraw(random,covariance.getMatrix());
 
-        SimpleMatrix found = new SimpleMatrix(covariance.numRows(),1);
+        SimpleMatrix found = new SimpleMatrix(covariance.getNumRows(),1);
         draw.next(found.getMatrix());
 
         return found;

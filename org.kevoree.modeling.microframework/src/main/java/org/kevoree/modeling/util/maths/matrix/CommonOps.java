@@ -1,4 +1,8 @@
 package org.kevoree.modeling.util.maths.matrix;
+
+import org.kevoree.modeling.util.maths.matrix.solvers.LUDecompositionAlt_D64;
+import org.kevoree.modeling.util.maths.matrix.solvers.LinearSolverLu_D64;
+
 import java.util.Arrays;
 
 public class CommonOps {
@@ -8,6 +12,8 @@ public class CommonOps {
     public static int MULT_COLUMN_SWITCH = 15;
     public static int MULT_TRANAB_COLUMN_SWITCH = 40;
     public static int MULT_INNER_SWITCH = 100;
+    public static double EPS = Math.pow(2,-52);
+
 
     public static final double TOL32 = 1e-4;
     public static final double TOL64 = 1e-8;
@@ -29,6 +35,11 @@ public class CommonOps {
         }
     }
 
+    public static void memset( double[] data , double val ) {
+        for( int i = 0; i < data.length; i++ ) {
+            data[i] = val;
+        }
+    }
 
     public static void multalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -94,9 +105,9 @@ public class CommonOps {
                 MatrixVectorMult.multTransA_small(a,b,c);
             }
         } else if( a.numCols >= MULT_TRANAB_COLUMN_SWITCH ) {
-            MatrixMatrixMult.multTransAB_aux(a,b,c,null);
+            MatrixMatrixMult.multTransAB_aux(a, b, c, null);
         } else {
-            MatrixMatrixMult.multTransAB(a,b,c);
+            MatrixMatrixMult.multTransAB(a, b, c);
         }
     }
 
@@ -139,9 +150,9 @@ public class CommonOps {
             MatrixVectorMult.multAdd(a, b, c);
         } else {
             if( b.numCols >= MULT_COLUMN_SWITCH ) {
-                MatrixMatrixMult.multAdd_reorder(a,b,c);
+                MatrixMatrixMult.multAdd_reorder(a, b, c);
             } else {
-                MatrixMatrixMult.multAdd_small(a,b,c);
+                MatrixMatrixMult.multAdd_small(a, b, c);
             }
         }
     }
@@ -190,7 +201,7 @@ public class CommonOps {
 
     public static void multAddTransB( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
-        MatrixMatrixMult.multAddTransB(a,b,c);
+        MatrixMatrixMult.multAddTransB(a, b, c);
     }
 
     public static void multAddTransBalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
@@ -215,6 +226,98 @@ public class CommonOps {
         }
     }
 
+    public static void subvector(DenseMatrix64F A, int rowA, int colA, int length , boolean row, int offsetV, DenseMatrix64F v) {
+        if( row ) {
+            for( int i = 0; i < length; i++ ) {
+                v.setValueAtIndex(offsetV + i, A.get(rowA, colA + i));
+            }
+        } else {
+            for( int i = 0; i < length; i++ ) {
+                v.setValueAtIndex( offsetV +i , A.get(rowA+i,colA));
+            }
+        }
+    }
+
+    public static SimpleMatrix abs(SimpleMatrix matrix) {
+        for (int i = 0; i < matrix.numRows(); i++) {
+            for (int j = 0; j < matrix.numCols(); j++) {
+                matrix.setValue2D(i, j, Math.abs(matrix.getValue2D(i, j)));
+            }
+        }
+        return matrix;
+    }
+
+    public static SimpleMatrix elemSqrt(SimpleMatrix matrix) {
+        for (int i = 0; i < matrix.numRows(); i++) {
+            for (int j = 0; j < matrix.numCols(); j++) {
+                matrix.setValue2D(i, j, Math.sqrt(matrix.getValue2D(i, j)));
+            }
+        }
+        return matrix;
+    }
+
+    public static SimpleMatrix elemPow(SimpleMatrix matrix, double p) {
+        for (int i = 0; i < matrix.numRows(); i++) {
+            for (int j = 0; j < matrix.numCols(); j++) {
+                matrix.setValue2D(i, j, Math.pow(matrix.getValue2D(i, j), p));
+            }
+        }
+        return matrix;
+    }
+
+    public static SimpleMatrix deleteElementsFromVector(SimpleMatrix vector, double[] elements, int vectorSize) {
+        SimpleMatrix newVector = new SimpleMatrix(vectorSize, 1);
+        int j = 0;
+        for (int i = 0; i < vector.numRows(); i++)
+            if (elements[i] == 1)
+                newVector.setValue2D(j++, 0, vector.getValue1D(i));
+        return newVector;
+    }
+
+    public static SimpleMatrix ones(int rows, int cols) {
+        SimpleMatrix matrix = new SimpleMatrix(rows, cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < rows; j++) {
+                matrix.setValue2D(i, j, 1);
+            }
+        }
+        return matrix;
+    }
+
+    public static SimpleMatrix doubleListToMatrix(double[] valueList) {
+        SimpleMatrix m = new SimpleMatrix(1, valueList.length);
+        for (int i = 0; i < valueList.length; i++)
+            m.setValue2D(0, i, valueList[i]);
+        return m;
+    }
+
+    public static double[] setNegativeValuesToZero(double[] valueList) {
+        for (int i = 0; i < valueList.length; i++) {
+            if (valueList[i] < 0)
+                valueList[i]=0;
+        }
+        return valueList;
+    }
+
+    public static double maxVectorElement(SimpleMatrix matrix){
+        double d = Double.MIN_VALUE;
+        for (int i = 0; i < matrix.numRows(); i++) {
+            if(matrix.getValue2D(i, 0)>d)
+                d = matrix.getValue2D(i, 0);
+        }
+        return d;
+    }
+    public static int maxVectorElementIndex(SimpleMatrix matrix){
+        double d = Double.MIN_VALUE;
+        int row = 0;
+        for (int i = 0; i < matrix.numRows(); i++) {
+            if(matrix.getValue2D(i, 0)>d){
+                d = matrix.getValue2D(i,0);
+                row = i;
+            }
+        }
+        return row;
+    }
 
     public static void multAddTransABalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -238,19 +341,47 @@ public class CommonOps {
         return sum;
     }
 
+    public static DenseMatrix64F transposeMatrix( DenseMatrix64F A, DenseMatrix64F A_tran)
+    {
+        if( A_tran == null ) {
+            A_tran = new DenseMatrix64F(A.numCols,A.numRows);
+        } else {
+            if( A.numRows != A_tran.numCols || A.numCols != A_tran.numRows ) {
+                throw new RuntimeException("Incompatible matrix dimensions");
+            }
+        }
+        if( A.numRows > TRANSPOSE_SWITCH &&
+                A.numCols > TRANSPOSE_SWITCH )
+            TransposeAlgs.block(A,A_tran,BLOCK_WIDTH);
+        else
+            TransposeAlgs.standard(A,A_tran);
+
+        return A_tran;
+    }
+
+    public static void transpose( DenseMatrix64F mat ) {
+        if( mat.numCols == mat.numRows ){
+            TransposeAlgs.square(mat);
+        } else {
+            DenseMatrix64F b = new DenseMatrix64F(mat.numCols,mat.numRows);
+            transposeMatrix(mat,b);
+            mat.setMatrix(b);
+        }
+    }
+
 
 /*
   public static DenseMatrix64F rref( DenseMatrix64F A , int numUnknowns, DenseMatrix64F reduced ) {
         if( reduced == null ) {
-            reduced = new DenseMatrix64F(A.numRows,A.numCols);
-        } else if( reduced.numCols != A.numCols || reduced.numRows != A.numRows )
+            reduced = new DenseMatrix64F(A.getNumRows,A.getNumCols);
+        } else if( reduced.getNumCols != A.getNumCols || reduced.getNumRows != A.getNumRows )
             throw new RuntimeException("'re' must have the same shape as the original input matrix");
 
         if( numUnknowns <= 0 )
-            numUnknowns = Math.min(A.numCols,A.numRows);
+            numUnknowns = Math.min(A.getNumCols,A.getNumRows);
 
         ReducedRowEchelonForm<DenseMatrix64F> alg = new RrefGaussJordanRowPivot();
-        alg.setTolerance(elementMaxAbs(A)* UtilEjml.EPS*Math.max(A.numRows,A.numCols));
+        alg.setTolerance(elementMaxAbs(A)* UtilEjml.EPS*Math.max(A.getNumRows,A.getNumCols));
 
         reduced.set(A);
         alg.reduce(reduced, numUnknowns);
@@ -260,7 +391,7 @@ public class CommonOps {
 
     public static boolean solve( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F x )
     {
-        LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.general(a.numRows,a.numCols);
+        LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.general(a.getNumRows,a.getNumCols);
 
         // make sure the inputs 'a' and 'b' are not modified
         solver = new LinearSolverSafe<DenseMatrix64F>(solver);
@@ -273,35 +404,16 @@ public class CommonOps {
     }
 
 
-    public static void transpose( DenseMatrix64F mat ) {
-        if( mat.numCols == mat.numRows ){
-            TransposeAlgs.square(mat);
-        } else {
-            DenseMatrix64F b = new DenseMatrix64F(mat.numCols,mat.numRows);
-            transpose(mat,b);
-            mat.set(b);
-        }
-    }
 
-    public static DenseMatrix64F transpose( DenseMatrix64F A, DenseMatrix64F A_tran)
-    {
-        if( A_tran == null ) {
-            A_tran = new DenseMatrix64F(A.numCols,A.numRows);
-        } else {
-            if( A.numRows != A_tran.numCols || A.numCols != A_tran.numRows ) {
-                throw new RuntimeException("Incompatible matrix dimensions");
-            }
-        }
 
-        if( A.numRows > TRANSPOSE_SWITCH &&
-                A.numCols > TRANSPOSE_SWITCH )
-            TransposeAlgs.block(A,A_tran,BLOCK_WIDTH);
-        else
-            TransposeAlgs.standard(A,A_tran);
 
-        return A_tran;
-    }
 
+
+
+
+
+
+    */
 
 
     public static double det( DenseMatrix64F mat )
@@ -312,108 +424,91 @@ public class CommonOps {
 
         if( numCol != numRow ) {
             throw new RuntimeException("Must be a square matrix.");
-        } else if( numCol <= UnrolledDeterminantFromMinor.MAX ) {
-            // slight performance boost overall by doing it this way
-            // when it was the case statement the VM did some strange optimization
-            // and made case 2 about 1/2 the speed
-            if( numCol >= 2 ) {
-                return UnrolledDeterminantFromMinor.det(mat);
-            } else {
-                return mat.get(0);
-            }
+        } else if( numCol <= 1 ) {
+            return mat.getValueAtIndex(0);
         } else {
             LUDecompositionAlt_D64 alg = new LUDecompositionAlt_D64();
-
-            if( alg.inputModified() ) {
-                mat = mat.copy();
-            }
-
             if( !alg.decompose(mat) )
                 return 0.0;
-            return alg.computeDeterminant().real;
+            return alg.computeDeterminant();
         }
-    }
-
-
-    public static boolean invert( DenseMatrix64F mat) {
-        if( mat.numCols <= UnrolledInverseFromMinor.MAX ) {
-            if( mat.numCols != mat.numRows ) {
-                throw new RuntimeException("Must be a square matrix.");
-            }
-
-            if( mat.numCols >= 2 ) {
-                UnrolledInverseFromMinor.inv(mat,mat);
-            } else {
-                mat.set(0, 1.0/mat.get(0));
-            }
-        } else {
-            LUDecompositionAlt_D64 alg = new LUDecompositionAlt_D64();
-            LinearSolverLu_D64 solver = new LinearSolverLu_D64(alg);
-            if( solver.setA(mat) ) {
-                solver.invert(mat);
-            } else {
-                return false;
-            }
-        }
-        return true;
     }
 
 
     public static boolean invert( DenseMatrix64F mat, DenseMatrix64F result ) {
-        if( mat.numCols <= UnrolledInverseFromMinor.MAX ) {
-            if( mat.numCols != mat.numRows ) {
-                throw new RuntimeException("Must be a square matrix.");
-            }
-            if( result.numCols >= 2 ) {
-                UnrolledInverseFromMinor.inv(mat,result);
-            } else {
-                result.set(0,  1.0/mat.get(0));
-            }
-        } else {
-            LUDecompositionAlt_D64 alg = new LUDecompositionAlt_D64();
-            LinearSolverLu_D64 solver = new LinearSolverLu_D64(alg);
+        LUDecompositionAlt_D64 alg = new LUDecompositionAlt_D64();
+        LinearSolverLu_D64 solver = new LinearSolverLu_D64(alg);
+        if (solver.modifiesA())
+            mat = mat.copy();
 
-            if( solver.modifiesA() )
-                mat = mat.copy();
-
-            if( !solver.setA(mat))
-                return false;
-            solver.invert(result);
-        }
+        if (!solver.setA(mat))
+            return false;
+        solver.invert(result);
         return true;
     }
 
 
-    public static void pinv( DenseMatrix64F A , DenseMatrix64F invA )
+   /* public static boolean pinv( DenseMatrix64F A , DenseMatrix64F invA )
     {
         LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.pseudoInverse(true);
         if( solver.modifiesA())
             A = A.copy();
 
         if( !solver.setA(A) )
-            throw new RuntimeException("Invert failed, maybe a bug?");
+            return false;
 
         solver.invert(invA);
+        return true;
+    }*/
+
+
+    public static void extractImpl(DenseMatrix64F src,
+                               int srcY0, int srcX0,
+                               DenseMatrix64F dst,
+                               int dstY0, int dstX0,
+                               int numRows, int numCols)
+    {
+        for( int y = 0; y < numRows; y++ ) {
+            int indexSrc = src.getIndex(y+srcY0,srcX0);
+            int indexDst = dst.getIndex(y+dstY0,dstX0);
+            System.arraycopy(src.data,indexSrc,dst.data,indexDst, numCols);
+        }
     }
 
-        public static DenseMatrix64F extract( DenseMatrix64F src,
+
+    public static void extractInsert( DenseMatrix64F src,
+                                int srcY0, int srcY1,
+                                int srcX0, int srcX1,
+                                      DenseMatrix64F dst ,
+                                int dstY0, int dstX0 )
+    {
+
+        int w = srcX1-srcX0;
+        int h = srcY1-srcY0;
+        extractImpl(src, srcY0, srcX0, dst, dstY0, dstX0, h, w);
+
+    }
+
+    public static void insert( DenseMatrix64F src, DenseMatrix64F dest, int destY0, int destX0) {
+        extractInsert(src, 0, src.getNumRows(), 0, src.getNumCols(), dest, destY0, destX0);
+    }
+
+    public static DenseMatrix64F extract4Int( DenseMatrix64F src,
                                           int srcY0, int srcY1,
                                           int srcX0, int srcX1 )
     {
         if( srcY1 <= srcY0 || srcY0 < 0 || srcY1 > src.numRows )
-            throw new RuntimeException("srcY1 <= srcY0 || srcY0 < 0 || srcY1 > src.numRows");
+            throw new RuntimeException("srcY1 <= srcY0 || srcY0 < 0 || srcY1 > src.getNumRows");
         if( srcX1 <= srcX0 || srcX0 < 0 || srcX1 > src.numCols )
-            throw new RuntimeException("srcX1 <= srcX0 || srcX0 < 0 || srcX1 > src.numCols");
+            throw new RuntimeException("srcX1 <= srcX0 || srcX0 < 0 || srcX1 > src.getNumCols");
 
         int w = srcX1-srcX0;
         int h = srcY1-srcY0;
 
         DenseMatrix64F dst = new DenseMatrix64F(h,w);
-        ImplCommonOps_DenseMatrix64F.extract(src,srcY0,srcX0,dst,0,0, h, w);
+        extractImpl(src, srcY0, srcX0, dst, 0, 0, h, w);
         return dst;
     }
-    */
-
 
     public static DenseMatrix64F[] columnsToVector(DenseMatrix64F A, DenseMatrix64F[] v)
     {
@@ -474,7 +569,7 @@ public class CommonOps {
     {
         int width = mat.numRows < mat.numCols ? mat.numRows : mat.numCols;
 
-        Arrays.fill(mat.data,0,mat.getNumElements(),0);
+        Arrays.fill(mat.data, 0, mat.getNumElements(), 0);
 
         int index = 0;
         for( int i = 0; i < width; i++ , index += mat.numCols + 1) {
@@ -737,7 +832,7 @@ public class CommonOps {
 
         int size = A.getNumElements();
         for( int i = 0; i < size; i++ ) {
-            C.data[i] = Math.pow(A.data[i],B.data[i]);
+            C.data[i] = Math.pow(A.data[i], B.data[i]);
         }
     }
 
@@ -884,7 +979,7 @@ public class CommonOps {
         final int length = a.getNumElements();
 
         for( int i = 0; i < length; i++ ) {
-            a.plus( i , val);
+            a.plus(i, val);
         }
     }
 
@@ -1037,4 +1132,48 @@ public class CommonOps {
         Arrays.fill(a.data, 0, a.getNumElements(), value);
     }
 
+    public static void normalizeF( DenseMatrix64F A ) {
+        double val = normF(A);
+
+        if( val == 0 )
+            return;
+
+        int size = A.getNumElements();
+
+        for( int i = 0; i < size; i++) {
+            A.div(i , val);
+        }
+    }
+
+    public static double normF( DenseMatrix64F a ) {
+        double total = 0;
+
+        double scale = CommonOps.elementMaxAbs(a);
+
+        if( scale == 0.0 )
+            return 0.0;
+
+        final int size = a.getNumElements();
+
+        for( int i = 0; i < size; i++ ) {
+            double val = a.getValueAtIndex(i)/scale;
+            total += val*val;
+        }
+
+        return scale*Math.sqrt(total);
+    }
+
+    public static void extract6M ( DenseMatrix64F src,
+                                int srcY0, int srcY1,
+                                int srcX0, int srcX1,
+                                   DenseMatrix64F dst ,
+                                int dstY0, int dstX0 )
+    {
+
+
+        int w = srcX1-srcX0;
+        int h = srcY1-srcY0;
+            extractImpl(src,srcY0,srcX0,dst,dstY0,dstX0, h, w);
+
+    }
 }

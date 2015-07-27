@@ -135,7 +135,7 @@ public class MatrixFeatures {
         return true;
     }
 
-/*
+
     public static boolean isIdentical( DenseMatrix64F a, DenseMatrix64F b , double tol ) {
         if( a.numRows != b.numRows || a.numCols != b.numCols ) {
             return false;
@@ -150,24 +150,18 @@ public class MatrixFeatures {
 
             // if either is negative or positive infinity the result will be positive infinity
             // if either is NaN the result will be NaN
-            double diff = Math.abs(valA-valB);
+            double diff = Math.abs(valA - valB);
 
             // diff = NaN == false
             // diff = infinity == false
-            if( tol >= diff )
+            if (tol >= diff)
                 continue;
 
-            if( Double.isNaN(valA) ) {
-                return Double.isNaN(valB);
-            } else if( Double.isInfinite(valA) ) {
-                return valA == valB;
-            } else {
-                return false;
-            }
+            return false;
         }
 
         return true;
-    }*/
+    }
 
 
     public static boolean isIdentity( DenseMatrix64F mat , double tol )
@@ -251,9 +245,10 @@ public class MatrixFeatures {
 
 
 /*
+
     public static boolean isOrthogonal( DenseMatrix64F Q , double tol )
     {
-        if( Q.numRows < Q.numCols ) {
+        if( Q.getNumRows < Q.getNumCols ) {
             throw new RuntimeException("The number of rows must be more than or equal to the number of columns");
         }
 
@@ -289,12 +284,12 @@ public class MatrixFeatures {
         if( !isSquare(A))
             return false;
 
-        EigenDecomposition<DenseMatrix64F> eig = DecompositionFactory.eig(A.numCols,false);
+        EigenDecomposition<DenseMatrix64F> eig = DecompositionFactory.eig(A.getNumCols,false);
         if( eig.inputModified() )
             A = A.copy();
         eig.decompose(A);
 
-        for( int i = 0; i < A.numRows; i++ ) {
+        for( int i = 0; i < A.getNumRows; i++ ) {
             Complex64F v = eig.getEigenvalue(i);
 
             if( v.getReal() < 0 )
@@ -313,7 +308,7 @@ public class MatrixFeatures {
     public static boolean isRowsLinearIndependent( DenseMatrix64F A )
     {
         // LU decomposition
-        LUDecomposition<DenseMatrix64F> lu = DecompositionFactory.lu(A.numRows,A.numCols);
+        LUDecomposition<DenseMatrix64F> lu = DecompositionFactory.lu(A.getNumRows,A.getNumCols);
         if( lu.inputModified() )
             A = A.copy();
 
@@ -325,7 +320,7 @@ public class MatrixFeatures {
     }
 
     public static int rank( DenseMatrix64F A , double threshold ) {
-        SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(A.numRows,A.numCols,false,false,true);
+        SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(A.getNumRows,A.getNumCols,false,false,true);
 
         if( svd.inputModified() )
             A = A.copy();
@@ -342,7 +337,7 @@ public class MatrixFeatures {
 
 
     public static int nullity( DenseMatrix64F A , double threshold ) {
-        SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(A.numRows,A.numCols,false,false,true);
+        SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(A.getNumRows,A.getNumCols,false,false,true);
 
         if( svd.inputModified() )
             A = A.copy();

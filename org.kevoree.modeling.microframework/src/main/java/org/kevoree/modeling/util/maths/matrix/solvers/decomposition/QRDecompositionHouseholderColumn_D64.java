@@ -1,4 +1,6 @@
-package org.kevoree.modeling.util.maths.matrix;
+package org.kevoree.modeling.util.maths.matrix.solvers.decomposition;
+
+import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 
 public class QRDecompositionHouseholderColumn_D64 {
 
@@ -175,6 +177,11 @@ public class QRDecompositionHouseholderColumn_D64 {
             tau = -tau;
         }
         return tau;
+    }
+
+
+    public boolean inputModified() {
+        return false;
     }
 
     public static void rank1UpdateMultR(DenseMatrix64F A, double u[], double gamma, int colA0, int w0, int w1, double _temp[]) {

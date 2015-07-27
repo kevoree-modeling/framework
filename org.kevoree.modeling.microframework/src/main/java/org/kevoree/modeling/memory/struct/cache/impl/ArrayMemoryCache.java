@@ -219,12 +219,12 @@ public class ArrayMemoryCache implements KCache {
             KObjectWeakReference current = rootReference;
             KObjectWeakReference previous = null;
             while (current != null) {
-                //process current
+                //processValues current
                 if (current.get() == null) {
                     //check is dirty
                     HeapMemorySegment currentEntry = (HeapMemorySegment) this.get(current.universe, current.time, current.uuid);
                     if (currentEntry == null || !currentEntry.isDirty()) {
-                        //call the clean sub process for universe/time/uuid
+                        //call the clean sub processValues for universe/time/uuid
                         MemorySegmentResolutionTrace resolved = ResolutionHelper.resolve_trees(current.universe, current.time, current.uuid, this);
                         resolved.getUniverseTree().dec();
                         if (resolved.getUniverseTree().counter() <= 0) {

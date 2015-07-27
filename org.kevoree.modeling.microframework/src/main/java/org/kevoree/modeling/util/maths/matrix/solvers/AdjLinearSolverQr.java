@@ -1,4 +1,8 @@
-package org.kevoree.modeling.util.maths.matrix;
+package org.kevoree.modeling.util.maths.matrix.solvers;
+
+import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
+import org.kevoree.modeling.util.maths.matrix.MatrixMatrixMult;
+import org.kevoree.modeling.util.maths.matrix.solvers.decomposition.QRDecompositionHouseholderColumn_D64;
 
 public class AdjLinearSolverQr {
 

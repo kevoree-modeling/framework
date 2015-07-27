@@ -5537,7 +5537,7 @@ scope.isIE = isIE;
     },
 
     /**
-     * Splice Projection functions:
+     * Splice projection functions:
      *
      * A splice map is a representation of how a previous array of items
      * was transformed into a new array of items. Conceptually it is a list of
