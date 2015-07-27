@@ -3,7 +3,7 @@ package org.kevoree.modeling.util.maths.matrix.solvers.decomposition;
 import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 
-public class QRColPivDecompositionHouseholderColumn_D64
+public class QRxColPivDecompositionHouseholderColumn_D64
         extends QRDecompositionHouseholderColumn_D64
 
 {
@@ -26,7 +26,7 @@ public class QRColPivDecompositionHouseholderColumn_D64
         this.singularThreshold = singularThreshold;
     }*/
 
-    public QRColPivDecompositionHouseholderColumn_D64() {
+    public QRxColPivDecompositionHouseholderColumn_D64() {
         super();
     }
 

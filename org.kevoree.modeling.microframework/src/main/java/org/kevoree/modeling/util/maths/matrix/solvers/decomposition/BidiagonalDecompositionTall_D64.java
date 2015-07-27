@@ -6,7 +6,7 @@ import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 public class BidiagonalDecompositionTall_D64
         implements BidiagonalDecomposition<DenseMatrix64F>
 {
-    QRColPivDecompositionHouseholderColumn_D64 decompQRP = new QRColPivDecompositionHouseholderColumn_D64();
+    QRxColPivDecompositionHouseholderColumn_D64 decompQRP = new QRxColPivDecompositionHouseholderColumn_D64();
     BidiagonalDecomposition<DenseMatrix64F> decompBi = new BidiagonalDecompositionRow_D64(1);
 
     DenseMatrix64F B = new DenseMatrix64F(1,1);
