@@ -8,7 +8,6 @@ public class ${classDeclaration.name}Impl extends org.kevoree.modeling.abs.Abstr
     }
 
 #foreach($attribute in $classDeclaration.attributes)
-    #if($attribute.single)
 
     @Override
     public $context.generationContext.getHelper().convertToJavaType(${attribute.getType()}) get${context.generationContext.helper.toCamelCase($attribute.getName())}() {
@@ -20,25 +19,7 @@ public class ${classDeclaration.name}Impl extends org.kevoree.modeling.abs.Abstr
         set(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.ATT_${attribute.getName().toUpperCase()}, p_obj);
         return this;
     }
-    #{else}
 
-    @Override
-    public ${classDeclaration.pack}.${classDeclaration.name} add${context.generationContext.helper.toCamelCase(${attribute.getName()})}($context.generationContext.getHelper().convertToJavaType(${attribute.getType()}) p_obj) {
-        mutate(org.kevoree.modeling.KActionType.ADD, ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.ATT_${attribute.getName().toUpperCase()}, p_obj, true);
-        return this;
-    }
-
-    @Override
-    public ${classDeclaration.pack}.${classDeclaration.name} remove${context.generationContext.helper.toCamelCase(${attribute.getName()})}($context.generationContext.getHelper().convertToJavaType(${attribute.getType()}) p_obj) {
-        mutate(org.kevoree.modeling.KActionType.REMOVE, ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.ATT_${attribute.getName().toUpperCase()}, p_obj, true;
-        return this;
-    }
-
-    @Override
-    public void get${context.generationContext.helper.toCamelCase(${attribute.getName()})}(org.kevoree.modeling.KCallback<${context.generationContext.getHelper().convertToJavaType(${attribute.getType()})}[]> p_callback, org.kevoree.modeling.Callback<Throwable> p_end) {
-        each(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.ATT_${attribute.getName().toUpperCase()}, p_callback, p_end);
-    }
-    #end
 #end
 
 
