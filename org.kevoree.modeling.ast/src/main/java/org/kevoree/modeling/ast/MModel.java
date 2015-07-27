@@ -100,7 +100,7 @@ public class MModel {
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.ReferenceDeclarationContext refDecl : classDeclrContext.referenceDeclaration()) {
                     final MModelClass refType = model.getOrAddClass(refDecl.TYPE_NAME().getText());
-                    MModelReference reference = new MModelReference(refDecl.TYPE_NAME().toString(), refType);
+                    MModelReference reference = new MModelReference(refDecl.IDENT(0).getText(), refType);
                     if (refDecl.getText().trim().startsWith("ref*")) {
                         reference.setSingle(false);
                     }
