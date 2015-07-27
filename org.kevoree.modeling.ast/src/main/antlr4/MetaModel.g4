@@ -28,10 +28,10 @@ enumDeclr :
     'enum' TYPE_NAME '{' IDENT* '}';
 
 classDeclr :
-    'class' TYPE_NAME '{' (attributeDeclaration | referenceDeclaration | dependencyDeclaration | inputDeclaration | outputDeclaration)* '}' classParentDeclr?;
+    'class' TYPE_NAME classParentDeclr? '{' (attributeDeclaration | referenceDeclaration | dependencyDeclaration | inputDeclaration | outputDeclaration)* '}';
 
 classParentDeclr :
-    ':' TYPE_NAME (',' TYPE_NAME );
+    ':' TYPE_NAME (',' TYPE_NAME )*;
 
 attributeDeclaration : 'att' IDENT ':' attributeType ('precision' NUMBER)?;
 

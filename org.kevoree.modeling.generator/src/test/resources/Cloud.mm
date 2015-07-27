@@ -18,3 +18,7 @@ enum org.kevoree.cloud.CloudEnumTester {
     VAL1 VAL2 VAL3
 }
 
+
+class org.kevoree.cloud.SubElem : org.kevoree.cloud.Element {
+
+}
