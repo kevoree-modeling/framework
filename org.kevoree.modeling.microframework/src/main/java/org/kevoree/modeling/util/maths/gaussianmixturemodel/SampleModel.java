@@ -894,6 +894,15 @@ public class SampleModel{
     }
 
     public void removeSubDistributions(int index) {
-        //todo to implement
+        BaseSampleDistribution[] array2=new BaseSampleDistribution[mSubDistributions.length-1];
+        for(int i=0;i<mSubDistributions.length;i++){
+            if(i<index){
+                array2[i]=mSubDistributions[i];
+            }
+            else if(i>index){
+                array2[i]=mSubDistributions[i-1];
+            }
+            mSubDistributions=array2;
+        }
     }
 }
