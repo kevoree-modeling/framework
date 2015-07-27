@@ -20,7 +20,7 @@
     </licenses>
 
     <properties>
-        <kmf.version>4.19.0</kmf.version>
+        <kmf.version>4.19.1-SNAPSHOT</kmf.version>
         <java2typescript.plugin.version>34</java2typescript.plugin.version>
     </properties>
 
@@ -63,6 +63,7 @@
         <module>org.kevoree.modeling.test.datastore</module>
         <module>org.kevoree.modeling.test.diamond</module>
         <module>org.kevoree.modeling.test.kevoree</module>
+        <module>org.kevoree.modeling.test.kubi</module>
     </modules>
 
     <dependencies>
