@@ -85,7 +85,7 @@ class org.kubi.zwave.CommandClass {
 }
 
 class org.kubi.zwave.Parameter {
-    ref type : org.kubi.ParameterType
+    att type : org.kubi.ParameterType
     att name : String
     att help : String
     att genre : String
