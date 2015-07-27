@@ -1,10 +1,9 @@
 
-
 enum org.MyEnum {
-String
-Int
+String3
+Int3
 }
 
 class org.Foo {
-    bar : org.MyEnum
+    att bar : org.MyEnum
 }

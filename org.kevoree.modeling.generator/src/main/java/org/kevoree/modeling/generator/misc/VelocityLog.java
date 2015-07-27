@@ -3,9 +3,6 @@ package org.kevoree.modeling.generator.misc;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.log.LogChute;
 
-/**
- * Created by duke on 7/17/14.
- */
 public class VelocityLog implements LogChute {
 
     public static VelocityLog INSTANCE = new VelocityLog();

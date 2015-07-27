@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>org.kevoree.modeling.root</artifactId>
         <groupId>org.kevoree.modeling</groupId>
@@ -9,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.kevoree.modeling.generator</artifactId>
-  <version>4.19.1-SNAPSHOT  </version>
+    <version>4.19.1-SNAPSHOT</version>
     <name>Kevoree :: Modeling :: Generator</name>
 
     <dependencies>
@@ -17,11 +18,6 @@
             <groupId>org.kevoree.modeling</groupId>
             <artifactId>org.kevoree.modeling.ast</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kevoree.modeling.idea</groupId>
-            <artifactId>org.kevoree.modeling.idea.dsl</artifactId>
-            <version>${kmf.plugin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree.modeling</groupId>

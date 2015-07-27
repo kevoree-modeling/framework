@@ -1,17 +1,14 @@
 package org.kevoree.modeling.ast;
 
-/**
- * Created by gregory.nain on 14/10/2014.
- */
 public class MModelReference {
 
     private String name;
     private MModelClass type;
-    private MModelReference opposite = null;
+    private String opposite = null;
     private Integer index = -1;
     private boolean single = false;
     private boolean visible = true;
-    
+
     public Integer getIndex() {
         return index;
     }
@@ -41,11 +38,11 @@ public class MModelReference {
         this.single = single;
     }
 
-    public MModelReference getOpposite() {
+    public String getOpposite() {
         return opposite;
     }
 
-    public void setOpposite(MModelReference opposite) {
+    public void setOpposite(String opposite) {
         this.opposite = opposite;
     }
 

@@ -19,4 +19,19 @@ public class MModelEnum extends MModelClassifier {
     }
 
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Enum[ ");
+        int i=0;
+        for(String s : litterals){
+            if(i != 0){
+                sb.append(" , ");
+            }
+            sb.append(s);
+            i++;
+        }
+        sb.append(" ]\n");
+        return sb.toString();
+    }
+
 }

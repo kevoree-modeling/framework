@@ -1,10 +1,9 @@
 package org.kevoree.modeling.generator;
 
 import org.kevoree.modeling.ast.MModel;
-import org.kevoree.modeling.ast.MModelClassifier;
 
 import java.io.File;
-import java.util.HashMap;
+import java.io.IOException;
 
 public class GenerationContext {
 
@@ -63,7 +62,11 @@ public class GenerationContext {
         return helper;
     }
 
-    private MModel model = new MModel();
+    private MModel model = null;
+
+    public void setModel(File file) throws IOException {
+        model = MModel.build(file);
+    }
 
     public MModel getModel() {
         return model;

@@ -2,15 +2,16 @@ package org.kevoree.modeling.ast;
 
 import java.util.*;
 
-/**
- * Created by gregory.nain on 14/10/2014.
- */
 public class MModelClass extends MModelClassifier {
 
     private Map<String, MModelAttribute> attributes = new HashMap<String, MModelAttribute>();
     private Map<String, MModelReference> references = new HashMap<String, MModelReference>();
     private Map<String, MModelClass> parents = new HashMap<String, MModelClass>();
     private Map<String, MModelOperation> operations = new HashMap<String, MModelOperation>();
+
+    private Map<String, MModelDependency> dependencies = new HashMap<String, MModelDependency>();
+    private Map<String, MModelInput> inputs = new HashMap<String, MModelInput>();
+    private Map<String, MModelOutput> outputs = new HashMap<String, MModelOutput>();
 
     public MModelClass(String name) {
         this.name = name;
@@ -24,9 +25,9 @@ public class MModelClass extends MModelClassifier {
         HashMap<String, MModelAttribute> collected = new HashMap<String, MModelAttribute>();
         HashMap<String, MModelClass> passed = new HashMap<String, MModelClass>();
         deep_collect_atts(collected, passed);
-        for(String collectedKey : collected.keySet()){
-            if(!attributes.containsKey(collectedKey)){
-                attributes.put(collectedKey,collected.get(collectedKey).clone());
+        for (String collectedKey : collected.keySet()) {
+            if (!attributes.containsKey(collectedKey)) {
+                attributes.put(collectedKey, collected.get(collectedKey).clone());
             }
         }
         return attributes.values();
@@ -52,13 +53,37 @@ public class MModelClass extends MModelClassifier {
         references.put(ref.getName(), ref);
     }
 
+    public void addDependency(MModelDependency el) {
+        dependencies.put(el.getName(), el);
+    }
+
+    public Collection<MModelDependency> getDependencies() {
+        return dependencies.values();
+    }
+
+    public void addInput(MModelInput el) {
+        inputs.put(el.getName(), el);
+    }
+
+    public Collection<MModelInput> getInputs() {
+        return inputs.values();
+    }
+
+    public void addOutput(MModelOutput el) {
+        outputs.put(el.getName(), el);
+    }
+
+    public Collection<MModelOutput> getOutputs() {
+        return outputs.values();
+    }
+
     public Collection<MModelReference> getReferences() {
         HashMap<String, MModelReference> collected = new HashMap<String, MModelReference>();
         HashMap<String, MModelClass> passed = new HashMap<String, MModelClass>();
         deep_collect_refs(collected, passed);
-        for(String collectedKey : collected.keySet()){
-            if(!references.containsKey(collectedKey)){
-                references.put(collectedKey,collected.get(collectedKey).clone());
+        for (String collectedKey : collected.keySet()) {
+            if (!references.containsKey(collectedKey)) {
+                references.put(collectedKey, collected.get(collectedKey).clone());
             }
         }
         return references.values();
@@ -92,9 +117,9 @@ public class MModelClass extends MModelClassifier {
         HashMap<String, MModelOperation> collected = new HashMap<String, MModelOperation>();
         HashMap<String, MModelClass> passed = new HashMap<String, MModelClass>();
         deep_collect_ops(collected, passed);
-        for(String collectedKey : collected.keySet()){
-            if(!operations.containsKey(collectedKey)){
-                operations.put(collectedKey,collected.get(collectedKey).clone());
+        for (String collectedKey : collected.keySet()) {
+            if (!operations.containsKey(collectedKey)) {
+                operations.put(collectedKey, collected.get(collectedKey).clone());
             }
         }
         return operations.values();
@@ -128,28 +153,26 @@ public class MModelClass extends MModelClassifier {
         sb.append(getPack());
         sb.append(", parent:");
         sb.append(getParents());
-        sb.append(", attributes[");
+        sb.append(", attributes[\n");
         for (MModelAttribute att : attributes.values()) {
             sb.append(att.getName());
             sb.append(":");
             sb.append(att.getType());
-            sb.append(", ");
+            sb.append(",\n");
         }
         sb.append("]");
-        sb.append(", references:[");
+        sb.append(", references:[\n");
         for (MModelReference att : references.values()) {
             sb.append(att.getName());
             sb.append(":");
             sb.append(att.getType().getName());
             if (att.getOpposite() != null) {
-                sb.append("->");
-                sb.append(att.getOpposite().getName());
-                sb.append(":");
-                sb.append(att.getOpposite().getType().getFqn());
+                sb.append(" opposite ");
+                sb.append(att.getOpposite());
             }
-            sb.append(", ");
+            sb.append(",\n");
         }
-        sb.append("]]");
+        sb.append("]]\n");
         return sb.toString();
     }
 }

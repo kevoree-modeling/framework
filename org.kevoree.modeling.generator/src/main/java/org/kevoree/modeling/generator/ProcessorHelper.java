@@ -18,21 +18,10 @@
 package org.kevoree.modeling.generator;
 
 import org.kevoree.modeling.ast.*;
-import org.kevoree.modeling.idea.psi.MetaModelTypeDeclaration;
-import org.kevoree.modeling.util.PrimitiveTypes;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-/**
- * Created by IntelliJ IDEA.
- * User: Gregory NAIN
- * Date: 22/09/11
- * Time: 09:49
- */
 
 public class ProcessorHelper {
 
@@ -57,27 +46,46 @@ public class ProcessorHelper {
         }
     }
 
-    public boolean isPrimitive(MetaModelTypeDeclaration tDecl) {
-        return isPrimitive(tDecl.getName());
+    public static String toEcoreType(String originalName) {
+        if (originalName.equals("String")) {
+            return "java.lang.String";
+        }
+        if (originalName.equals("Bool")) {
+            return "java.lang.Boolean";
+        }
+        if (originalName.equals("Int")) {
+            return "java.lang.Integer";
+        }
+        if (originalName.equals("Long")) {
+            return "java.lang.Long";
+        }
+        if (originalName.equals("Double")) {
+            return "java.lang.Double";
+        }
+        if (originalName.equals("Continuous")) {
+            return "java.lang.Double";
+        }
+        return originalName;
     }
+
 
     public boolean isPrimitive(String tDecl) {
-        return PrimitiveTypes.isPrimitive(tDecl);
-    }
 
-    public boolean isEnum(GenerationContext context, MetaModelTypeDeclaration tDecl) {
-        MModelClassifier resolved = context.getModel().get(tDecl.getName());
-        return resolved != null && resolved instanceof MModelEnum;
-    }
 
+
+        if (toEcoreType(tDecl).startsWith("java.lang.")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public String convertToJavaType(String t) {
-        if (PrimitiveTypes.isPrimitive(t)) {
-            return PrimitiveTypes.toEcoreType(t);
+        if (isPrimitive(t)) {
+            return toEcoreType(t);
         } else {
             return "org.kevoree.modeling.meta.KLiteral";
         }
-        // return PrimitiveTypes.toEcoreType(t);
     }
 
     public void consolidate(MModel model) {

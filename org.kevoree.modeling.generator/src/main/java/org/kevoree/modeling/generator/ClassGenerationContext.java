@@ -2,9 +2,6 @@ package org.kevoree.modeling.generator;
 
 import org.kevoree.modeling.ast.MModelClassifier;
 
-/**
- * Created by gregory.nain on 14/10/2014.
- */
 public class ClassGenerationContext {
 
     public GenerationContext generationContext;

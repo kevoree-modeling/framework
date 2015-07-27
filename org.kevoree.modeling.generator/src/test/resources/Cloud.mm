@@ -1,20 +1,16 @@
 class org.kevoree.cloud.Cloud {
-    @contained
-    nodes : org.kevoree.cloud.Node[0,*]
-    @contained
-    elements : org.kevoree.cloud.Element[0,*]
+    ref* nodes : org.kevoree.cloud.Node
+    ref* elements : org.kevoree.cloud.Element
 }
 
 class org.kevoree.cloud.Node {
-    @id
-    name : String
-    value : String
+    att name : String
+    att value : String
 }
 
 class org.kevoree.cloud.Element {
-    @id
-    name : String
-    value : String
+    att name : String
+    att value : String
 }
 
 

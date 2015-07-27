@@ -1,15 +1,12 @@
 package org.kevoree.modeling.generator;
 
-import com.intellij.psi.PsiFile;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.kevoree.modeling.MetaModelLanguageType;
 import org.kevoree.modeling.ast.*;
 import org.kevoree.modeling.generator.misc.VelocityLog;
-import org.kevoree.modeling.util.StandaloneParser;
 
 import java.io.*;
 import java.nio.file.*;
@@ -26,7 +23,7 @@ public class Generator {
             throw new Exception("Input file not found at: " + context.getMetaModel().getAbsolutePath() + " ! Generation aborted");
         }
 
-        if (!context.getMetaModel().getAbsolutePath().endsWith(MetaModelLanguageType.DEFAULT_EXTENSION)) {
+        if (!context.getMetaModel().getAbsolutePath().endsWith(".mm")) {
             throw new UnsupportedOperationException("Only *.mm files are currently supported.");
         }
 
@@ -58,14 +55,8 @@ public class Generator {
         Files.createDirectories(output.toPath());
 
         try {
-            StandaloneParser parser = new StandaloneParser();
-            PsiFile psi = parser.parser(context.getMetaModel());
-            MMPsiVisitor MMPsiVisitor = new MMPsiVisitor(context, true);
-            psi.acceptChildren(MMPsiVisitor);
-            MMPsiVisitor MMPsiVisitorClasses = new MMPsiVisitor(context, false);
-            psi.acceptChildren(MMPsiVisitorClasses);
 
-            completeOppositeReferences();
+            context.setModel(context.getMetaModel());
 
             ProcessorHelper.getInstance().consolidate(context.getModel());
             generateUtilities();
@@ -97,6 +88,7 @@ public class Generator {
     }
 
 
+    /*
     private void completeOppositeReferences() {
         for (MModelClassifier classDecl : context.getModel().getClassifiers()) {
             if (classDecl instanceof MModelClass) {
@@ -118,7 +110,7 @@ public class Generator {
                 }
             }
         }
-    }
+    }*/
 
 
     private void generateUtilities() {

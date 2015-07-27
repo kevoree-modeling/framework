@@ -47,7 +47,7 @@ public class TemplateTest {
                         //done
                     }
                 });
-
+/*
 
                 new Thread(){
                     @Override
@@ -65,7 +65,7 @@ public class TemplateTest {
                         }
                     }
                 }.start();
-
+*/
 
             }
         });

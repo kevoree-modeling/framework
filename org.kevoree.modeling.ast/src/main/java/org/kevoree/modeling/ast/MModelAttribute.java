@@ -6,7 +6,6 @@ public class MModelAttribute {
     private String type;
     private boolean id = false;
     private double precision = -1;
-    private boolean single = true;
     private Integer index = -1;
 
     public Integer getIndex() {
@@ -26,10 +25,6 @@ public class MModelAttribute {
         this.id = id;
     }
 
-    public void setSingle(boolean single) {
-        this.single = single;
-    }
-
     public String getName() {
         return name;
     }
@@ -40,10 +35,6 @@ public class MModelAttribute {
 
     public boolean isId() {
         return id;
-    }
-
-    public boolean isSingle() {
-        return single;
     }
 
     public Double getPrecision() {
@@ -58,7 +49,6 @@ public class MModelAttribute {
         MModelAttribute cloned = new MModelAttribute(this.name, this.type);
         cloned.id = id;
         cloned.precision = precision;
-        cloned.single = single;
         return cloned;
     }
 
