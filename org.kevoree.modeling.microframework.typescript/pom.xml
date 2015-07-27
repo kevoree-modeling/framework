@@ -17,7 +17,7 @@
         <dependency>
             <artifactId>org.kevoree.modeling.microframework</artifactId>
             <groupId>org.kevoree.modeling</groupId>
-            <version>4.19.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree.modeling</groupId>
