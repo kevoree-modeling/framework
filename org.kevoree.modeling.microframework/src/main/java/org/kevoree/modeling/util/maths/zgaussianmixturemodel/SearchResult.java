@@ -3,7 +3,7 @@
  */
 
 
-package org.kevoree.modeling.util.maths.gaussianmixturemodel;
+package org.kevoree.modeling.util.maths.zgaussianmixturemodel;
 
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 

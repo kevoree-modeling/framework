@@ -3,13 +3,13 @@
  */
 
 
-package org.kevoree.modeling.util.maths.gaussianmixturemodel.projection;
+package org.kevoree.modeling.util.maths.zgaussianmixturemodel.projection;
 
 
-import org.kevoree.modeling.util.maths.gaussianmixturemodel.BaseSampleDistribution;
-import org.kevoree.modeling.util.maths.gaussianmixturemodel.MomentMatcher;
-import org.kevoree.modeling.util.maths.gaussianmixturemodel.SampleModel;
-import org.kevoree.modeling.util.maths.gaussianmixturemodel.TwoComponentDistribution;
+import org.kevoree.modeling.util.maths.zgaussianmixturemodel.BaseSampleDistribution;
+import org.kevoree.modeling.util.maths.zgaussianmixturemodel.MomentMatcher;
+import org.kevoree.modeling.util.maths.zgaussianmixturemodel.SampleModel;
+import org.kevoree.modeling.util.maths.zgaussianmixturemodel.TwoComponentDistribution;
 import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.matrix.solvers.SimpleSVD;
