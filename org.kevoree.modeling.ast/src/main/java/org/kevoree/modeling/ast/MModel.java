@@ -119,8 +119,22 @@ public class MModel {
                     newClass.addInput(input);
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.OutputDeclarationContext outputDeclarationContext : classDeclrContext.outputDeclaration()) {
-                    MModelOutput output = new MModelOutput(outputDeclarationContext.IDENT(0).getText(), outputDeclarationContext.IDENT(1).getText());
+                    org.kevoree.modeling.ast.MetaModelParser.AttributeTypeContext attType = outputDeclarationContext.attributeType();
+                    String typeName;
+                    if (attType.TYPE_NAME() != null) {
+                        typeName = attType.TYPE_NAME().getText();
+                    } else {
+                        typeName = attType.getText();
+                    }
+                    MModelOutput output = new MModelOutput(outputDeclarationContext.IDENT().getText(), typeName);
                     newClass.addOutput(output);
+                }
+                if (classDeclrContext.classParentDeclr() != null) {
+                    org.kevoree.modeling.ast.MetaModelParser.ClassParentDeclrContext parentDeclrContext = classDeclrContext.classParentDeclr();
+                    for (TerminalNode tt : parentDeclrContext.TYPE_NAME()) {
+                        final MModelClass newClassTT = model.getOrAddClass(tt.getText());
+                        newClass.addParent(newClassTT);
+                    }
                 }
             }
         }

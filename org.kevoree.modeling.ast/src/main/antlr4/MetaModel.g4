@@ -28,7 +28,10 @@ enumDeclr :
     'enum' TYPE_NAME '{' IDENT* '}';
 
 classDeclr :
-    'class' TYPE_NAME '{' (attributeDeclaration | referenceDeclaration | dependencyDeclaration | inputDeclaration | outputDeclaration)* '}';
+    'class' TYPE_NAME '{' (attributeDeclaration | referenceDeclaration | dependencyDeclaration | inputDeclaration | outputDeclaration)* '}' classParentDeclr?;
+
+classParentDeclr :
+    ':' TYPE_NAME (',' TYPE_NAME );
 
 attributeDeclaration : 'att' IDENT ':' attributeType ('precision' NUMBER)?;
 
@@ -40,6 +43,6 @@ dependencyDeclaration : 'dependency' IDENT ':' TYPE_NAME;
 
 inputDeclaration : 'input' IDENT STRING;
 
-outputDeclaration : 'output' IDENT ':' IDENT;
+outputDeclaration : 'output' IDENT ':' attributeType;
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines

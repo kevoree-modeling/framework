@@ -6,13 +6,12 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
-import org.kevoree.modeling.infer.impl.GaussianClassificationAlg;
+import org.kevoree.modeling.infer.impl.GaussianClassifierAlg;
 import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
-import org.kevoree.modeling.meta.impl.MetaEnum;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
 public class GaussianClassificationTest {
@@ -34,7 +33,7 @@ public class GaussianClassificationTest {
 
         metaClassIris.addAttribute("type", metaEnumIrisType);
 
-        KMetaClass inferGaussian = metaModel.addInferMetaClass("GaussianProfile", new GaussianClassificationAlg());
+        KMetaClass inferGaussian = metaModel.addInferMetaClass("GaussianProfile", new GaussianClassifierAlg());
         inferGaussian.addDependency("Iris", metaClassIris, null);
 
         inferGaussian.addInput("sepalLength", "@Iris | =sepalLength");

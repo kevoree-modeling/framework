@@ -11,7 +11,7 @@ import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 /**
  * Created by assaad on 08/07/15.
  */
-public class GaussianClassificationAlg implements KInferAlg {
+public class GaussianClassifierAlg implements KInferAlg {
 
     private static int MIN = 0;
     private static int MAX = 1;
