@@ -49,6 +49,11 @@ public class MModel {
         return classes;
     }
 
+    private static String cleanString(String in) {
+        String cleaned = in.substring(1,in.length()-1);
+        return cleaned;
+    }
+
     public static MModel build(File mmFile) throws IOException {
         MModel model = new MModel();
         ANTLRFileStream fileStream = new ANTLRFileStream(mmFile.getAbsolutePath());
@@ -101,11 +106,10 @@ public class MModel {
                     }
                     for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : refDecl.annotationDeclr()) {
                         if (annotDecl.IDENT().getText().toLowerCase().equals("opposite") && annotDecl.STRING() != null) {
-                           
-                            reference.setOpposite(annotDecl.STRING().getText());
+                            reference.setOpposite(cleanString(annotDecl.STRING().getText()));
                             MModelReference oppRef = model.getOrAddReference(refType, reference.getOpposite(), newClass);
-							oppRef.setVisible(true);
-							oppRef.setOpposite(reference.getName());
+                            oppRef.setVisible(true);
+                            oppRef.setOpposite(reference.getName());
                         }
                     }
                     newClass.addReference(reference);
@@ -116,7 +120,7 @@ public class MModel {
                     newClass.addDependency(dependency);
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.InputDeclarationContext inputDeclarationContext : classDeclrContext.inputDeclaration()) {
-                    MModelInput input = new MModelInput(inputDeclarationContext.IDENT().getText(), inputDeclarationContext.STRING().getText());
+                    MModelInput input = new MModelInput(inputDeclarationContext.IDENT().getText(), cleanString(inputDeclarationContext.STRING().getText()));
                     newClass.addInput(input);
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.OutputDeclarationContext outputDeclarationContext : classDeclrContext.outputDeclaration()) {
