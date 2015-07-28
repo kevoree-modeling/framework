@@ -17,6 +17,35 @@ public class MModelClass extends MModelClassifier {
         this.name = name;
     }
 
+    private String inference = null;
+    private Long temporalResolution = null;
+
+    public Long getTemporalLimit() {
+        return temporalLimit;
+    }
+
+    public void setTemporalLimit(Long temporalLimit) {
+        this.temporalLimit = temporalLimit;
+    }
+
+    public Long getTemporalResolution() {
+        return temporalResolution;
+    }
+
+    public void setTemporalResolution(Long temporalResolution) {
+        this.temporalResolution = temporalResolution;
+    }
+
+    public String getInference() {
+        return inference;
+    }
+
+    public void setInference(String inference) {
+        this.inference = inference;
+    }
+
+    private Long temporalLimit = null;
+
     public void addAttribute(MModelAttribute att) {
         attributes.put(att.getName(), att);
     }

@@ -13,6 +13,26 @@ import java.util.HashMap;
 
 public class MModel {
 
+    private String version = null;
+
+    private String kmfVersion = null;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getKmfVersion() {
+        return kmfVersion;
+    }
+
+    public void setKmfVersion(String kmfVersion) {
+        this.kmfVersion = kmfVersion;
+    }
+
     private HashMap<String, MModelClassifier> classifiers = new HashMap<>();
 
     private Integer classIndex = 0;
@@ -108,7 +128,6 @@ public class MModel {
                         builder.append("\\,");
                         break;
                 }
-
             } else {
                 if (builder != null) {
                     builder = builder.append(current);
@@ -130,8 +149,13 @@ public class MModel {
         org.kevoree.modeling.ast.MetaModelParser parser = new org.kevoree.modeling.ast.MetaModelParser(tokens);
         org.kevoree.modeling.ast.MetaModelParser.MetamodelContext mmctx = parser.metamodel();
         //first we do version
-        for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext decl : mmctx.annotationDeclr()) {
-            //TODO take into account Version for the compiler
+        for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotationDeclrContext : mmctx.annotationDeclr()) {
+            if (annotationDeclrContext.IDENT().getText().toLowerCase().equals("version") && annotationDeclrContext.STRING() != null) {
+                model.setVersion(cleanString(annotationDeclrContext.STRING().getText()));
+            }
+            if (annotationDeclrContext.IDENT().getText().toLowerCase().equals("kmfversion") && annotationDeclrContext.STRING() != null) {
+                model.setKmfVersion(cleanString(annotationDeclrContext.STRING().getText()));
+            }
         }
         //Second we do enum mapping
         for (org.kevoree.modeling.ast.MetaModelParser.DeclContext decl : mmctx.decl()) {
@@ -208,6 +232,17 @@ public class MModel {
                     for (TerminalNode tt : parentDeclrContext.TYPE_NAME()) {
                         final MModelClass newClassTT = model.getOrAddClass(tt.getText());
                         newClass.addParent(newClassTT);
+                    }
+                }
+                for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : classDeclrContext.annotationDeclr()) {
+                    if (annotDecl.IDENT().getText().toLowerCase().equals("temporalLimit") && annotDecl.NUMBER() != null) {
+                        newClass.setTemporalLimit(Long.parseLong(annotDecl.NUMBER().getText()));
+                    }
+                    if (annotDecl.IDENT().getText().toLowerCase().equals("temporalResolution") && annotDecl.NUMBER() != null) {
+                        newClass.setTemporalResolution(Long.parseLong(annotDecl.NUMBER().getText()));
+                    }
+                    if (annotDecl.IDENT().getText().toLowerCase().equals("inference") && annotDecl.STRING() != null) {
+                        newClass.setInference(cleanString(annotDecl.STRING().getText()));
                     }
                 }
             }
