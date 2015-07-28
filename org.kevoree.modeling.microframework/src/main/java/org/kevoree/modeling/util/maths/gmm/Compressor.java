@@ -1,8 +1,8 @@
-package org.kevoree.modeling.util.maths.zgaussianmixturemodel;
+package org.kevoree.modeling.util.maths.gmm;
 
 
-import org.kevoree.modeling.util.maths.zgaussianmixturemodel.projection.ProjectionData;
-import org.kevoree.modeling.util.maths.zgaussianmixturemodel.projection.Projector;
+import org.kevoree.modeling.util.maths.gmm.projection.ProjectionData;
+import org.kevoree.modeling.util.maths.gmm.projection.Projector;
 import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 

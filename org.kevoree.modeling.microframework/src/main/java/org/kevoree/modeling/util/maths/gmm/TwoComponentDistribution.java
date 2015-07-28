@@ -1,4 +1,4 @@
-package org.kevoree.modeling.util.maths.zgaussianmixturemodel;
+package org.kevoree.modeling.util.maths.gmm;
 
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 

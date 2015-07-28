@@ -1,7 +1,8 @@
-package org.kevoree.modeling.util.maths.zgaussianmixturemodel;
+package org.kevoree.modeling.util.maths.gmm;
 
 import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
+import org.kevoree.modeling.util.maths.matrix.SimpleMatrixHashable;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.matrix.solvers.SimpleEVD;
 import org.kevoree.modeling.util.maths.matrix.solvers.SimpleSVD;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 public class SampleModel{
 
     private static final double DEFAULT_NO_OF_COMPS_THRES = 6;
-    private HashMap<HashableSimpleMatrix, Double> mProbabilityCache = new HashMap<HashableSimpleMatrix, Double>();
+    private HashMap<SimpleMatrixHashable, Double> mProbabilityCache = new HashMap<SimpleMatrixHashable, Double>();
     // When mahalanobis distance gets bigger than this the component does not contribute
     // to the density that should be calculated
     // exp(-40) ~ 5E-18

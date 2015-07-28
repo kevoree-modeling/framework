@@ -1,10 +1,10 @@
-package org.kevoree.modeling.util.maths.zgaussianmixturemodel;
+package org.kevoree.modeling.util.maths.matrix;
 
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 
-public class HashableSimpleMatrix extends SimpleMatrix {
+public class SimpleMatrixHashable extends SimpleMatrix {
 
-    public HashableSimpleMatrix(SimpleMatrix m) {
+    public SimpleMatrixHashable(SimpleMatrix m) {
         super(m.numRows(),m.numCols());
         this.mat=m.getMatrix();
     }
