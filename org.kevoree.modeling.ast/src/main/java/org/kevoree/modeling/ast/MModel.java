@@ -49,9 +49,78 @@ public class MModel {
         return classes;
     }
 
+    private final static Character ESCAPE_CHAR = '\\';
+
     private static String cleanString(String in) {
-        String cleaned = in.substring(1,in.length()-1);
-        return cleaned;
+        String cleaned = in.substring(1, in.length() - 1);
+        if (cleaned.length() == 0) {
+            return cleaned;
+        }
+        StringBuilder builder = null;
+        int i = 0;
+        while (i < cleaned.length()) {
+            Character current = cleaned.charAt(i);
+            if (current == ESCAPE_CHAR) {
+                if (builder == null) {
+                    builder = new StringBuilder();
+                    builder.append(cleaned.substring(0, i));
+                }
+                i++;
+                Character current2 = cleaned.charAt(i);
+                switch (current2) {
+                    case '"':
+                        builder.append('\"');
+                        break;
+                    case '\\':
+                        builder.append(current2);
+                        break;
+                    case '/':
+                        builder.append(current2);
+                        break;
+                    case 'b':
+                        builder.append('\b');
+                        break;
+                    case 'f':
+                        builder.append('\f');
+                        break;
+                    case 'n':
+                        builder.append('\n');
+                        break;
+                    case 'r':
+                        builder.append('\r');
+                        break;
+                    case 't':
+                        builder.append('\t');
+                        break;
+                    case '{':
+                        builder.append("\\{");
+                        break;
+                    case '}':
+                        builder.append("\\}");
+                        break;
+                    case '[':
+                        builder.append("\\[");
+                        break;
+                    case ']':
+                        builder.append("\\]");
+                        break;
+                    case ',':
+                        builder.append("\\,");
+                        break;
+                }
+
+            } else {
+                if (builder != null) {
+                    builder = builder.append(current);
+                }
+            }
+            i++;
+        }
+        if (builder != null) {
+            return builder.toString();
+        } else {
+            return cleaned;
+        }
     }
 
     public static MModel build(File mmFile) throws IOException {
