@@ -1,7 +1,5 @@
 package org.kevoree.modeling.util.maths.matrix;
 
-import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
-
 public class SimpleMatrixHashable extends SimpleMatrix {
 
     public SimpleMatrixHashable(SimpleMatrix m) {
