@@ -106,6 +106,9 @@ public class MModel {
                     }
                     if (refDecl.IDENT().size() > 1) {
                         reference.setOpposite(refDecl.IDENT(refDecl.IDENT().size() - 1).getText());
+                        MModelReference oppRef = model.getOrAddReference(refType, reference.getOpposite(), newClass);
+                        oppRef.setOpposite(reference.getName());
+                        oppRef.setVisible(true);
                     }
                     newClass.addReference(reference);
                 }
@@ -138,6 +141,8 @@ public class MModel {
                 }
             }
         }
+        //opposite completion
+        model.completeOppositeReferences();
         return model;
     }
 
@@ -188,6 +193,25 @@ public class MModel {
                 return (MModelClass) resolved;
             } else {
                 throw new RuntimeException("Naming conflict for " + clazz + ", cannot merge an enum and a class declaration");
+            }
+        }
+    }
+
+    private void completeOppositeReferences() {
+        for (MModelClass classDecl : getClasses()) {
+            for (MModelReference ref : classDecl.getReferences().toArray(new MModelReference[classDecl.getReferences().size()])) {
+                if (ref.getOpposite() == null) {
+                    //Create opposite relation
+                    MModelReference op_ref = new MModelReference("op_" + classDecl.getName() + "_" + ref.getName(), classDecl);
+                    op_ref.setVisible(false);
+                    op_ref.setSingle(false);
+                    op_ref.setOpposite(ref.getName());
+
+                    //add the relation on  the other side
+                    ref.getType().addReference(op_ref);
+                    ref.setOpposite(op_ref.getName());
+
+                }
             }
         }
     }
