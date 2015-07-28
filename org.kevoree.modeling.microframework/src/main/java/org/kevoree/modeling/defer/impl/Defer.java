@@ -59,7 +59,7 @@ public class Defer implements KDefer {
             if (this._nbExpectedResult == this._nbRecResult) {
                 Object[] finalResults = this._results;
                 if (this._resultSize != this._nbExpectedResult) {
-                    Object[] newResults = new Object[this._resultSize];
+                    Object[] newResults = new Object[this._nbExpectedResult];
                     System.arraycopy(_results, 0, newResults, 0, this._nbExpectedResult);
                     finalResults = newResults;
                 }
