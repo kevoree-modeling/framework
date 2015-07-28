@@ -4,13 +4,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.struct.chunk.impl.HeapMemoryChunk;
 import org.kevoree.modeling.meta.KMetaClass;
-import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
-import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.KArray3D;
 
 public class Array3DTest {
@@ -31,14 +29,14 @@ public class Array3DTest {
             }
 
         });
-        KMemorySegment segment = new HeapMemorySegment();
+        KMemoryChunk segment = new HeapMemoryChunk();
         segment.initMetaClass(mc);
         segment.init(null, mm);
         int nbLines = 5;
         int nbColumn = 3;
         int nbDeep = 2;
         //allocate for 5 elem
-        segment.extendInfer(mc.dependencies().index(), nbLines * nbColumn * nbDeep, mc);
+        segment.extendDoubleArray(mc.dependencies().index(), nbLines * nbColumn * nbDeep, mc);
         //attach a wrapper
         KArray3D array = new Array3D(nbLines, nbColumn, nbDeep, 0, mc.dependencies().index(), segment, mc);
         //fill it
@@ -57,14 +55,14 @@ public class Array3DTest {
             for (int j = 0; j < nbColumn; j++) {
                 for (int h = 0; h < nbDeep; h++) {
                     Assert.assertTrue(array.get(i, j, h) == count);
-                    Assert.assertTrue(segment.getInferElem(mc.dependencies().index(), count, mc)==count);
+                    Assert.assertTrue(segment.getDoubleArrayElem(mc.dependencies().index(), count, mc)==count);
                     count++;
                 }
             }
         }
         //test raw array
-        Assert.assertTrue(nbLines * nbColumn * nbDeep == segment.getInferSize(mc.dependencies().index(), mc));
-        double[] copyArray = segment.getInfer(mc.dependencies().index(), mc);
+        Assert.assertTrue(nbLines * nbColumn * nbDeep == segment.getDoubleArraySize(mc.dependencies().index(), mc));
+        double[] copyArray = segment.getDoubleArray(mc.dependencies().index(), mc);
         Assert.assertTrue(nbLines * nbColumn * nbDeep == copyArray.length);
     }
 

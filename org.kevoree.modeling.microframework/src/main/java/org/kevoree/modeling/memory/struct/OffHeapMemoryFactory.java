@@ -7,8 +7,8 @@ import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.struct.cache.impl.OffHeapMemoryCache;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayUniverseOrderMap;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.memory.struct.segment.impl.OffHeapMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.struct.chunk.impl.OffHeapMemoryChunk;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.memory.struct.tree.impl.OffHeapLongLongTree;
@@ -20,8 +20,8 @@ import org.kevoree.modeling.memory.struct.tree.impl.OffHeapLongTree;
 public class OffHeapMemoryFactory implements KMemoryFactory {
 
     @Override
-    public KMemorySegment newCacheSegment() {
-        return new OffHeapMemorySegment();
+    public KMemoryChunk newCacheSegment() {
+        return new OffHeapMemoryChunk();
     }
 
     @Override

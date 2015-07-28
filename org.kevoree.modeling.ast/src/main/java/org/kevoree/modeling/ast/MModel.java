@@ -56,15 +56,8 @@ public class MModel {
         org.kevoree.modeling.ast.MetaModelParser parser = new org.kevoree.modeling.ast.MetaModelParser(tokens);
         org.kevoree.modeling.ast.MetaModelParser.MetamodelContext mmctx = parser.metamodel();
         //first we do version
-        for (org.kevoree.modeling.ast.MetaModelParser.DeclContext decl : mmctx.decl()) {
-            if (decl.versionDeclr() != null) {
-                //MetaModelParser.VersionDeclrContext versionDeclrContext = decl.versionDeclr();
-                //System.err.println(versionDeclrContext);
-            }
-            if (decl.kmfVersionDeclr() != null) {
-                //MetaModelParser.VersionDeclrContext versionDeclrContext = decl.versionDeclr();
-                //System.err.println(versionDeclrContext);
-            }
+        for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext decl : mmctx.annotationDeclr()) {
+            //TODO take into account Version for the compiler
         }
         //Second we do enum mapping
         for (org.kevoree.modeling.ast.MetaModelParser.DeclContext decl : mmctx.decl()) {
@@ -93,22 +86,27 @@ public class MModel {
                         value = attType.getText();
                     }
                     final MModelAttribute attribute = new MModelAttribute(name, value);
-                    if (attDecl.NUMBER() != null) {
-                        attribute.setPrecision(Double.parseDouble(attDecl.NUMBER().getText()));
+                    for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : attDecl.annotationDeclr()) {
+                        if (annotDecl.IDENT().getText().toLowerCase().equals("precision") && annotDecl.NUMBER() != null) {
+                            attribute.setPrecision(Double.parseDouble(annotDecl.NUMBER().getText()));
+                        }
                     }
                     newClass.addAttribute(attribute);
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.ReferenceDeclarationContext refDecl : classDeclrContext.referenceDeclaration()) {
                     final MModelClass refType = model.getOrAddClass(refDecl.TYPE_NAME().getText());
-                    MModelReference reference = new MModelReference(refDecl.IDENT(0).getText(), refType);
+                    MModelReference reference = new MModelReference(refDecl.IDENT().getText(), refType);
                     if (refDecl.getText().trim().startsWith("ref*")) {
                         reference.setSingle(false);
                     }
-                    if (refDecl.IDENT().size() > 1) {
-                        reference.setOpposite(refDecl.IDENT(refDecl.IDENT().size() - 1).getText());
-                        MModelReference oppRef = model.getOrAddReference(refType, reference.getOpposite(), newClass);
-                        oppRef.setOpposite(reference.getName());
-                        oppRef.setVisible(true);
+                    for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : refDecl.annotationDeclr()) {
+                        if (annotDecl.IDENT().getText().toLowerCase().equals("opposite") && annotDecl.STRING() != null) {
+                           
+                            reference.setOpposite(annotDecl.STRING().getText());
+                            MModelReference oppRef = model.getOrAddReference(refType, reference.getOpposite(), newClass);
+							oppRef.setVisible(true);
+							oppRef.setOpposite(reference.getName());
+                        }
                     }
                     newClass.addReference(reference);
                 }

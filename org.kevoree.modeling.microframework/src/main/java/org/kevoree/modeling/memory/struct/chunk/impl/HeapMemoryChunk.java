@@ -1,15 +1,13 @@
-package org.kevoree.modeling.memory.struct.segment.impl;
+package org.kevoree.modeling.memory.struct.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.format.json.JsonFormat;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.KContentKey;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.util.maths.Base64;
 
-public class HeapMemorySegment implements KMemorySegment {
+public class HeapMemoryChunk implements KMemoryChunk {
 
     private Object[] raw;
 
@@ -46,8 +44,7 @@ public class HeapMemorySegment implements KMemorySegment {
         KMeta[] metaElements = metaClass.metaElements();
         if (raw != null && metaElements != null) {
             for (int i = 0; i < raw.length && i < metaElements.length; i++) {
-                Object o = raw[i];
-                if (o != null) {
+                if (raw[i] != null) {
                     if (isFirst) {
                         builder.append("\"");
                         isFirst = false;
@@ -62,29 +59,19 @@ public class HeapMemorySegment implements KMemorySegment {
                         switch (metaAttId) {
                             case KPrimitiveTypes.STRING_ID:
                                 builder.append("\"");
-                                builder.append(JsonString.encode((String) o));
+                                builder.append(JsonString.encode((String) raw[i]));
                                 builder.append("\"");
                                 break;
                             case KPrimitiveTypes.LONG_ID:
                                 builder.append("\"");
-                                Base64.encodeLongToBuffer((long) o, builder);
+                                Base64.encodeLongToBuffer((long) raw[i], builder);
                                 builder.append("\"");
                                 break;
                             case KPrimitiveTypes.CONTINUOUS_ID:
-                                builder.append("[");
-                                double[] castedArr = (double[]) o;
-                                for (int j = 0; j < castedArr.length; j++) {
-                                    if (j != 0) {
-                                        builder.append(",");
-                                    }
-                                    builder.append("\"");
-                                    Base64.encodeDoubleToBuffer(castedArr[j], builder);
-                                    builder.append("\"");
-                                }
-                                builder.append("]");
+                                doubleArrayToBuffer(builder, i);
                                 break;
                             case KPrimitiveTypes.BOOL_ID:
-                                if ((boolean) o) {
+                                if ((boolean) raw[i]) {
                                     builder.append("1");
                                 } else {
                                     builder.append("0");
@@ -92,44 +79,24 @@ public class HeapMemorySegment implements KMemorySegment {
                                 break;
                             case KPrimitiveTypes.DOUBLE_ID:
                                 builder.append("\"");
-                                Base64.encodeDoubleToBuffer((double) o, builder);
+                                Base64.encodeDoubleToBuffer((double) raw[i], builder);
                                 builder.append("\"");
                                 break;
                             case KPrimitiveTypes.INT_ID:
                                 builder.append("\"");
-                                Base64.encodeIntToBuffer((int) o, builder);
+                                Base64.encodeIntToBuffer((int) raw[i], builder);
                                 builder.append("\"");
                                 break;
                             default:
                                 if (metaAttribute.attributeType().isEnum()) {
-                                    Base64.encodeIntToBuffer((int) o, builder);
+                                    Base64.encodeIntToBuffer((int) raw[i], builder);
                                 }
                                 break;
                         }
                     } else if (metaElements[i].metaType() == MetaType.REFERENCE) {
-                        builder.append("[");
-                        long[] castedArr = (long[]) o;
-                        for (int j = 0; j < castedArr.length; j++) {
-                            if (j != 0) {
-                                builder.append(",");
-                            }
-                            builder.append("\"");
-                            Base64.encodeLongToBuffer(castedArr[j], builder);
-                            builder.append("\"");
-                        }
-                        builder.append("]");
+                        longArrayToBuffer(builder, i);
                     } else if (metaElements[i].metaType() == MetaType.DEPENDENCIES || metaElements[i].metaType() == MetaType.INPUT || metaElements[i].metaType() == MetaType.OUTPUT) {
-                        builder.append("[");
-                        double[] castedArr = (double[]) o;
-                        for (int j = 0; j < castedArr.length; j++) {
-                            if (j != 0) {
-                                builder.append(",");
-                            }
-                            builder.append("\"");
-                            Base64.encodeDoubleToBuffer(castedArr[j], builder);
-                            builder.append("\"");
-                        }
-                        builder.append("]");
+                        doubleArrayToBuffer(builder, i);
                     }
                 }
             }
@@ -138,7 +105,34 @@ public class HeapMemorySegment implements KMemorySegment {
         return builder.toString();
     }
 
-    @Override
+    private void doubleArrayToBuffer(StringBuilder builder, int i) {
+        builder.append("[");
+        double[] castedArr = (double[]) raw[i];
+        for (int j = 0; j < castedArr.length; j++) {
+            if (j != 0) {
+                builder.append(",");
+            }
+            builder.append("\"");
+            Base64.encodeDoubleToBuffer(castedArr[j], builder);
+            builder.append("\"");
+        }
+        builder.append("]");
+    }
+
+    private void longArrayToBuffer(StringBuilder builder, int i) {
+        builder.append("[");
+        long[] castedArr = (long[]) raw[i];
+        for (int j = 0; j < castedArr.length; j++) {
+            if (j != 0) {
+                builder.append(",");
+            }
+            builder.append("\"");
+            Base64.encodeLongToBuffer(castedArr[j], builder);
+            builder.append("\"");
+        }
+        builder.append("]");
+    }
+
     public int[] modifiedIndexes(KMetaClass p_metaClass) {
         if (_modifiedIndexes == null) {
             return new int[0];
@@ -287,7 +281,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public Object get(int index, KMetaClass p_metaClass) {
+    public Object getPrimitiveType(int index, KMetaClass p_metaClass) {
         if (raw != null) {
             return raw[index];
         } else {
@@ -296,7 +290,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public int getRefSize(int index, KMetaClass metaClass) {
+    public int getLongArraySize(int index, KMetaClass metaClass) {
         long[] existing = (long[]) raw[index];
         if (existing != null) {
             return existing.length;
@@ -305,7 +299,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public long getRefElem(int index, int refIndex, KMetaClass metaClass) {
+    public long getLongArrayElem(int index, int refIndex, KMetaClass metaClass) {
         long[] existing = (long[]) raw[index];
         if (existing != null) {
             return existing[refIndex];
@@ -315,7 +309,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public long[] getRef(int index, KMetaClass p_metaClass) {
+    public long[] getLongArray(int index, KMetaClass p_metaClass) {
         if (raw != null) {
             Object previousObj = raw[index];
             if (previousObj != null) {
@@ -335,7 +329,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public boolean addRef(int index, long newRef, KMetaClass metaClass) {
+    public boolean addLongToArray(int index, long newRef, KMetaClass metaClass) {
         if (raw != null) {
             long[] previous = (long[]) raw[index];
             if (previous == null) {
@@ -364,7 +358,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public boolean removeRef(int index, long refToRemove, KMetaClass metaClass) {
+    public boolean removeLongToArray(int index, long refToRemove, KMetaClass metaClass) {
         if (raw != null) {
             long[] previous = (long[]) raw[index];
             if (previous != null) {
@@ -397,12 +391,12 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public void clearRef(int index, KMetaClass metaClass) {
+    public void clearLongArray(int index, KMetaClass metaClass) {
         raw[index] = null;
     }
 
     @Override
-    public double[] getInfer(int index, KMetaClass metaClass) {
+    public double[] getDoubleArray(int index, KMetaClass metaClass) {
         if (raw != null) {
             Object previousObj = raw[index];
             if (previousObj != null) {
@@ -422,7 +416,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public int getInferSize(int index, KMetaClass metaClass) {
+    public int getDoubleArraySize(int index, KMetaClass metaClass) {
         Object previousObj = raw[index];
         if (previousObj != null) {
             return ((double[]) previousObj).length;
@@ -437,8 +431,8 @@ public class HeapMemorySegment implements KMemorySegment {
      * return 0;
      */
     @Override
-    public double getInferElem(int index, int arrayIndex, KMetaClass metaClass) {
-        double[] res = getInfer(index, metaClass);
+    public double getDoubleArrayElem(int index, int arrayIndex, KMetaClass metaClass) {
+        double[] res = getDoubleArray(index, metaClass);
         if (res != null && arrayIndex >= 0 && arrayIndex < res.length) {
             return res[arrayIndex];
         }
@@ -452,8 +446,8 @@ public class HeapMemorySegment implements KMemorySegment {
      * this._dirty = true;
      */
     @Override
-    public void setInferElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
-        double[] res = getInfer(index, metaClass);
+    public void setDoubleArrayElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
+        double[] res = getDoubleArray(index, metaClass);
         if (res != null && arrayIndex >= 0 && arrayIndex < res.length) {
             res[arrayIndex] = valueToInsert;
             _dirty = true;
@@ -461,7 +455,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public void extendInfer(int index, int newSize, KMetaClass metaClass) {
+    public void extendDoubleArray(int index, int newSize, KMetaClass metaClass) {
         if (raw != null) {
             double[] previous = (double[]) raw[index];
             if (previous == null) {
@@ -481,7 +475,7 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public synchronized void set(int index, Object content, KMetaClass p_metaClass) {
+    public synchronized void setPrimitiveType(int index, Object content, KMetaClass p_metaClass) {
         raw[index] = content;
         _dirty = true;
         if (_modifiedIndexes == null) {
@@ -491,13 +485,13 @@ public class HeapMemorySegment implements KMemorySegment {
     }
 
     @Override
-    public KMemorySegment clone(KMetaClass p_metaClass) {
+    public KMemoryChunk clone(KMetaClass p_metaClass) {
         if (raw == null) {
-            return new HeapMemorySegment();
+            return new HeapMemoryChunk();
         } else {
             Object[] cloned = new Object[raw.length];
             System.arraycopy(raw, 0, cloned, 0, raw.length);
-            HeapMemorySegment clonedEntry = new HeapMemorySegment();
+            HeapMemoryChunk clonedEntry = new HeapMemoryChunk();
             clonedEntry._dirty = true;
             clonedEntry.raw = cloned;
             clonedEntry._metaClassIndex = _metaClassIndex;

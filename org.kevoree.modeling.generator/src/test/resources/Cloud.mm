@@ -15,10 +15,10 @@ class org.kevoree.cloud.Element {
 
 
 enum org.kevoree.cloud.CloudEnumTester {
-    VAL1 VAL2 VAL3
+    VAL1, VAL2, VAL3
 }
 
 
-class org.kevoree.cloud.SubElem : org.kevoree.cloud.Element {
+class org.kevoree.cloud.SubElem extends org.kevoree.cloud.Element {
 
 }

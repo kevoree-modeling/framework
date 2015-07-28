@@ -6,8 +6,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.meta.*;
-import org.kevoree.modeling.meta.impl.MetaReference;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.manager.KMemoryManager;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
@@ -125,7 +124,7 @@ public class JsonModelLoader {
         KMetaClass metaClass = manager.model().metaModel().metaClassByName(meta);
         KObject current = ((AbstractKModel) manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass);
         manager.initKObject(current);
-        KMemorySegment raw = manager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
+        KMemoryChunk raw = manager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
         p_param.each(new KStringMapCallBack<Object>() {
             @Override
             public void on(String metaKey, Object payload_content) {
@@ -148,7 +147,7 @@ public class JsonModelLoader {
                                             e.printStackTrace();
                                         }
                                     }
-                                    raw.set(metaElement.index(), convertedRaw, current.metaClass());
+                                    raw.setPrimitiveType(metaElement.index(), convertedRaw, current.metaClass());
                                     break;
                                 default:
                                     Object converted = null;
@@ -164,12 +163,12 @@ public class JsonModelLoader {
                                     } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
                                         converted = Double.parseDouble(rawPayload);
                                     }
-                                    raw.set(metaElement.index(), converted, current.metaClass());
+                                    raw.setPrimitiveType(metaElement.index(), converted, current.metaClass());
                                     break;
                             }
                         } else if (metaElement != null && metaElement.metaType() == MetaType.REFERENCE) {
                             try {
-                                raw.set(metaElement.index(), transposeArr((ArrayList<String>) payload_content, p_mappedKeys), current.metaClass());
+                                raw.setPrimitiveType(metaElement.index(), transposeArr((ArrayList<String>) payload_content, p_mappedKeys), current.metaClass());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

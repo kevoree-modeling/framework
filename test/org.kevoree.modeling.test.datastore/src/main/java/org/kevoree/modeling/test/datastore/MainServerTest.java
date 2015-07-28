@@ -5,7 +5,7 @@ import geometry.meta.MetaLibrary;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemorySegment;
 import org.kevoree.modeling.operation.KOperation;
 
 import java.util.concurrent.Executors;

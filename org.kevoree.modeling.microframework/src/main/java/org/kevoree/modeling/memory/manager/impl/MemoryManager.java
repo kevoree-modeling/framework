@@ -14,7 +14,7 @@ import org.kevoree.modeling.memory.struct.HeapMemoryFactory;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -247,7 +247,7 @@ public class MemoryManager implements KMemoryManager {
 
     @Override
     public void initKObject(KObject obj) {
-        KMemorySegment cacheEntry = _factory.newCacheSegment();
+        KMemoryChunk cacheEntry = _factory.newCacheSegment();
         cacheEntry.initMetaClass(obj.metaClass());
         cacheEntry.init(null, model().metaModel());
         cacheEntry.setDirty();
@@ -353,12 +353,12 @@ public class MemoryManager implements KMemoryManager {
     }
 
     @Override
-    public KMemorySegment segment(long universe, long requestedTime, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace) {
+    public KMemoryChunk segment(long universe, long requestedTime, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace) {
         long time = requestedTime;
         if (metaClass.temporalResolution() != 1) {
             time = time - (time % metaClass.temporalResolution());
         }
-        KMemorySegment currentEntry = (KMemorySegment) _cache.get(universe, time, uuid);
+        KMemoryChunk currentEntry = (KMemoryChunk) _cache.get(universe, time, uuid);
         if (currentEntry != null) {
             if (resolutionTrace != null) {
                 resolutionTrace.setSegment(currentEntry);
@@ -386,7 +386,7 @@ public class MemoryManager implements KMemoryManager {
         if (resolvedTime != KConfig.NULL_LONG) {
             boolean needTimeCopy = !resolvePreviousSegment && (resolvedTime != time);
             boolean needUniverseCopy = !resolvePreviousSegment && (resolvedUniverse != universe);
-            KMemorySegment entry = (KMemorySegment) _cache.get(resolvedUniverse, resolvedTime, uuid);
+            KMemoryChunk entry = (KMemoryChunk) _cache.get(resolvedUniverse, resolvedTime, uuid);
             if (entry == null) {
                 return null;
             }
@@ -399,8 +399,8 @@ public class MemoryManager implements KMemoryManager {
                 }
                 return entry;
             } else {
-                KMemorySegment clonedEntry = entry.clone(metaClass);
-                clonedEntry = (KMemorySegment) _cache.getOrPut(universe, time, uuid, clonedEntry);
+                KMemoryChunk clonedEntry = entry.clone(metaClass);
+                clonedEntry = (KMemoryChunk) _cache.getOrPut(universe, time, uuid, clonedEntry);
                 if (!needUniverseCopy) {
                     timeTree.insert(time);
                 } else {
@@ -780,7 +780,7 @@ public class MemoryManager implements KMemoryManager {
             if (key.universe != KConfig.NULL_LONG && key.time != KConfig.NULL_LONG && key.obj != KConfig.NULL_LONG) {
                 KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, key.obj);
                 if (alreadyLoadedOrder != null) {
-                    ((KMemorySegment) newElement).initMetaClass(_model.metaModel().metaClassByName(alreadyLoadedOrder.metaClassName()));
+                    ((KMemoryChunk) newElement).initMetaClass(_model.metaModel().metaClassByName(alreadyLoadedOrder.metaClassName()));
                 }
             }
             newElement.init(payload, model().metaModel());

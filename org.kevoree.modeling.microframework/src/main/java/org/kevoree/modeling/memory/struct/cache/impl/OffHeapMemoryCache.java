@@ -9,7 +9,7 @@ import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.manager.impl.ResolutionHelper;
 import org.kevoree.modeling.memory.struct.OffHeapMemoryFactory;
-import org.kevoree.modeling.memory.struct.segment.impl.OffHeapMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.impl.OffHeapMemoryChunk;
 import org.kevoree.modeling.meta.KMetaModel;
 import sun.misc.Unsafe;
 
@@ -266,7 +266,7 @@ public class OffHeapMemoryCache implements KCache {
                 //processValues current
                 if (current.get() == null) {
                     //check is dirty
-                    OffHeapMemorySegment currentEntry = (OffHeapMemorySegment) this.get(current.universe, current.time, current.uuid);
+                    OffHeapMemoryChunk currentEntry = (OffHeapMemoryChunk) this.get(current.universe, current.time, current.uuid);
                     if (currentEntry == null || !currentEntry.isDirty()) {
                         //call the clean sub processValues for universe/time/uuid
                         MemorySegmentResolutionTrace resolved = ResolutionHelper.resolve_trees(current.universe, current.time, current.uuid, this);

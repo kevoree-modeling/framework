@@ -383,7 +383,7 @@ public class CommonOps {
         ReducedRowEchelonForm<DenseMatrix64F> alg = new RrefGaussJordanRowPivot();
         alg.setTolerance(elementMaxAbs(A)* UtilEjml.EPS*Math.max(A.getNumRows,A.getNumCols));
 
-        reduced.set(A);
+        reduced.setPrimitiveType(A);
         alg.reduce(reduced, numUnknowns);
 
         return reduced;

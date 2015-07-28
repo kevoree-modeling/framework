@@ -1,6 +1,6 @@
 package org.kevoree.modeling.format.json;
 
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -21,18 +21,18 @@ public class JsonRaw {
      * if (metaElements[i] != null && metaElements[i].metaType() === org.kevoree.modeling.meta.MetaType.ATTRIBUTE) {
      * var metaAttribute = <org.kevoree.modeling.meta.KMetaAttribute>metaElements[i];
      * if(metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.CONTINUOUS){
-     * subElem = raw.getInfer(metaAttribute.index(),p_metaClass);
+     * subElem = raw.getDoubleArray(metaAttribute.index(),p_metaClass);
      * } else {
-     * subElem = raw.get(metaAttribute.index(),p_metaClass);
+     * subElem = raw.getPrimitiveType(metaAttribute.index(),p_metaClass);
      * }
      * } else {
-     * subElem = raw.getRef(metaElements[i].index(),p_metaClass);
+     * subElem = raw.getLongArray(metaElements[i].index(),p_metaClass);
      * }
      * if(subElem != null && subElem != undefined){ builder[metaElements[i].metaName()] = subElem; }
      * }
      * return JSON.stringify(builder);
      */
-    public static String encode(KMemorySegment raw, long uuid, KMetaClass p_metaClass, boolean isRoot) {
+    public static String encode(KMemoryChunk raw, long uuid, KMetaClass p_metaClass, boolean isRoot) {
         StringBuilder builder = new StringBuilder();
         builder.append("{\"@class\":\"");
         builder.append(p_metaClass.metaName());
@@ -48,7 +48,7 @@ public class JsonRaw {
                 KMetaAttribute metaAttribute = (KMetaAttribute) loopMeta;
                 int metaAttId = metaAttribute.attributeType().id();
                 if (metaAttId == KPrimitiveTypes.CONTINUOUS_ID) {
-                    double[] inferAtt = raw.getInfer(loopMeta.index(), p_metaClass);
+                    double[] inferAtt = raw.getDoubleArray(loopMeta.index(), p_metaClass);
                     if (inferAtt != null) {
                         builder.append(",\"");
                         builder.append(loopMeta.metaName());
@@ -62,7 +62,7 @@ public class JsonRaw {
                         builder.append("]");
                     }
                 } else {
-                    Object payload_res = raw.get(loopMeta.index(), p_metaClass);
+                    Object payload_res = raw.getPrimitiveType(loopMeta.index(), p_metaClass);
                     if (payload_res != null) {
                         builder.append(",\"");
                         builder.append(loopMeta.metaName());
@@ -76,7 +76,7 @@ public class JsonRaw {
                     }
                 }
             } else if (loopMeta != null && loopMeta.metaType().equals(MetaType.REFERENCE)) {
-                long[] refPayload = raw.getRef(loopMeta.index(), p_metaClass);
+                long[] refPayload = raw.getLongArray(loopMeta.index(), p_metaClass);
                 if (refPayload != null) {
                     builder.append(",\"");
                     builder.append(loopMeta.metaName());

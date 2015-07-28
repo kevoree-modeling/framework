@@ -49,13 +49,13 @@ public class MultiUniverseTest {
         assert (get(1, timeOrigine + unit) == 5);
 
         assert (get(0, timeOrigine + 5 * unit) == 8);
-        //  assert(get(1,timeOrigine+5*unit)==5);
+        //  assert(getPrimitiveType(1,timeOrigine+5*unit)==5);
         assert (get(1, timeOrigine + 5 * unit) == 8);
 
         insert(0, timeOrigine + 3 * unit, -2);
         assert (get(0, timeOrigine + 3 * unit) == -2);
         assert (get(1, timeOrigine + 3 * unit) == -2);
-        //assert(get(1,timeOrigine+3*unit)==5);
+        //assert(getPrimitiveType(1,timeOrigine+3*unit)==5);
 
         insert(1, timeOrigine + 3 * unit, 7);
         assert (get(0, timeOrigine + 3 * unit) == -2);
@@ -92,7 +92,7 @@ public class MultiUniverseTest {
         assert (get(0, timeOrigine + 40 * unit) == -20);
         assert (get(1, timeOrigine + 40 * unit) == 100);
         assert (get(2, timeOrigine + 40 * unit) == 100);
-        //assert(get(2,timeOrigine+40*unit)==7);
+        //assert(getPrimitiveType(2,timeOrigine+40*unit)==7);
         assert (get(3, timeOrigine + 40 * unit) == 78);
 
 
@@ -117,7 +117,7 @@ public class MultiUniverseTest {
 
     private void split(int parent, long splitTime) {
         KUniverse uni = model.universe(parent).diverge();
-        //double val = get(parent,splitTime);
+        //double val = getPrimitiveType(parent,splitTime);
         //insert(uni.key(),splitTime,val);
     }
 

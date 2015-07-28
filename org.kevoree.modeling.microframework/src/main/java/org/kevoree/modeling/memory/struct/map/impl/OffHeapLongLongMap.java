@@ -114,7 +114,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
                 newElementHash[index] = i;
             }
         }
-        //set value for all
+        //setPrimitiveType value for all
         this.elementKV = newElementKV;
         this.elementHash = newElementHash;
         this.elementNext = newElementNext;

@@ -108,7 +108,7 @@ public class Traversal implements KTraversal {
 
     @Override
     public void eval(String p_expression, KCallback<Object[]> callback) {
-        //set the terminal leaf action
+        //setPrimitiveType the terminal leaf action
         internal_chain_action(new MathExpressionAction(p_expression));
         _terminated = true;
         //execute the first element of the chain of actions
@@ -119,7 +119,7 @@ public class Traversal implements KTraversal {
 
     @Override
     public void map(KMetaAttribute attribute, KCallback<Object[]> cb) {
-        //set the terminal leaf action
+        //setPrimitiveType the terminal leaf action
         internal_chain_action(new MapAction(attribute));
         _terminated = true;
         //execute the first element of the chain of actions

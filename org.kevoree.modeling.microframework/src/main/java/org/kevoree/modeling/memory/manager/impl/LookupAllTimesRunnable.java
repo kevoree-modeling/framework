@@ -10,7 +10,7 @@ import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 
 public class LookupAllTimesRunnable implements Runnable {
@@ -81,7 +81,7 @@ public class LookupAllTimesRunnable implements Runnable {
                                 KObject[] proxies = new KObject[_times.length];
                                 for (int i = 0; i < _times.length; i++) {
                                     if (cachedObjects[i] != null) {
-                                        proxies[i] = ((AbstractKModel) _store.model()).createProxy(_universe, _times[i], _uuid, _store.model().metaModel().metaClasses()[((KMemorySegment) cachedObjects[i]).metaClassIndex()]);
+                                        proxies[i] = ((AbstractKModel) _store.model()).createProxy(_universe, _times[i], _uuid, _store.model().metaModel().metaClasses()[((KMemoryChunk) cachedObjects[i]).metaClassIndex()]);
                                         if (proxies[i] != null) {
                                             int reversed = (int)mapReverse.get(_times[i]);
                                             KLongTree cachedIndexTree = (KLongTree) timeIndexes[reversed];

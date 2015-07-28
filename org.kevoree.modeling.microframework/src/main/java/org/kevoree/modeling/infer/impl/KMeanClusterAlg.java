@@ -2,7 +2,7 @@ package org.kevoree.modeling.infer.impl;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 import java.util.Random;
 
@@ -15,19 +15,19 @@ public class KMeanClusterAlg implements KInferAlg {
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin) {
         if(trainingSet.length<k){
-            throw new RuntimeException("training set not enough");
+            throw new RuntimeException("training setPrimitiveType not enough");
         }
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
         int size=k*origin.metaClass().inputs().length;
-        if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
-            ks.extendInfer(origin.metaClass().dependencies().index(),size,origin.metaClass());
+        if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
+            ks.extendDoubleArray(origin.metaClass().dependencies().index(), size, origin.metaClass());
 
             //Start by selecting first K points as centroids
             for(int i=0;i<k;i++){
                 for(int j=0;j<origin.metaClass().inputs().length;j++) {
-                    ks.setInferElem(dependenciesIndex, j + i * origin.metaClass().inputs().length, trainingSet[i][j], origin.metaClass());
+                    ks.setDoubleArrayElem(dependenciesIndex, j + i * origin.metaClass().inputs().length, trainingSet[i][j], origin.metaClass());
                 }
             }
         }
@@ -95,10 +95,10 @@ public class KMeanClusterAlg implements KInferAlg {
 
     @Override
     public double[][] infer(double[][] features, KObject origin) {
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         int size=k*origin.metaClass().inputs().length;
-        if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+        if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;
         }
         Array1D state = new Array1D(size,0,origin.metaClass().dependencies().index(),ks,origin.metaClass());

@@ -18,7 +18,7 @@ public static Meta${classDeclaration.name} getInstance() {
 #else
     #set($dotIndex = ${attribute.getType().lastIndexOf('.')})
     #set($substringIndex = $dotIndex + 1)
-#*#set($attTypeValue = "${classDeclaration.pack}.meta.Meta${attribute.getType().substring($substringIndex)}.getInstance()")*#
+#*#setPrimitiveType($attTypeValue = "${classDeclaration.pack}.meta.Meta${attribute.getType().substring($substringIndex)}.getInstance()")*#
     #set($attTypeValue = "${attribute.getType().substring(0,$dotIndex)}.meta.Meta${attribute.getType().substring($substringIndex)}.getInstance()")
 #end
 #if($attribute.type == "Continuous")

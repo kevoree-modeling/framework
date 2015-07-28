@@ -5,7 +5,7 @@ import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 
 public class ResolutionHelper {
@@ -22,7 +22,7 @@ public class ResolutionHelper {
             result.setTimeTree(timeTree);
             long resolvedTime = timeTree.previousOrEqual(time);
             result.setTime(resolvedTime);
-            result.setSegment((KMemorySegment) cache.get(resolvedUniverse, resolvedTime, uuid));
+            result.setSegment((KMemoryChunk) cache.get(resolvedUniverse, resolvedTime, uuid));
         }
         return result;
     }

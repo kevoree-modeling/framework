@@ -2,7 +2,7 @@ package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 
 public class MemorySegmentResolutionTrace implements KMemorySegmentResolutionTrace {
@@ -15,7 +15,7 @@ public class MemorySegmentResolutionTrace implements KMemorySegmentResolutionTra
 
     private KLongTree _timeTree;
 
-    private KMemorySegment _segment;
+    private KMemoryChunk _segment;
 
     @Override
     public long getUniverse() {
@@ -58,12 +58,12 @@ public class MemorySegmentResolutionTrace implements KMemorySegmentResolutionTra
     }
 
     @Override
-    public KMemorySegment getSegment() {
+    public KMemoryChunk getSegment() {
         return this._segment;
     }
 
     @Override
-    public void setSegment(KMemorySegment p_segment) {
+    public void setSegment(KMemoryChunk p_segment) {
         this._segment = p_segment;
     }
 

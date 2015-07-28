@@ -122,7 +122,7 @@ public class SpeedTest {
                     sensor.jump2(i, new Callback<KObject>() {
                         @Override
                         public void on(KObject kObject) {
-                            kObject.get(att);
+                            kObject.getPrimitiveType(att);
                         }
                     });
                 }

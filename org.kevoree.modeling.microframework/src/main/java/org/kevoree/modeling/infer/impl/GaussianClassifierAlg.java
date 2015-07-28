@@ -2,7 +2,7 @@ package org.kevoree.modeling.infer.impl;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.meta.impl.MetaEnum;
 import org.kevoree.modeling.util.maths.Distribution;
@@ -55,14 +55,14 @@ public class GaussianClassifierAlg implements KInferAlg {
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin){
         int maxOutput=((MetaEnum)origin.metaClass().outputs()[0].type()).literals().length;
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
         int size=(maxOutput+1)*(origin.metaClass().inputs().length*NUMOFFIELDS+1);
-        if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
-            ks.extendInfer(origin.metaClass().dependencies().index(),size,origin.metaClass());
+        if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
+            ks.extendDoubleArray(origin.metaClass().dependencies().index(), size, origin.metaClass());
             for(int i=0;i<size;i++){
-                ks.setInferElem(dependenciesIndex,i,0,origin.metaClass());
+                ks.setDoubleArrayElem(dependenciesIndex, i, 0, origin.metaClass());
             }
         }
 
@@ -120,11 +120,11 @@ public class GaussianClassifierAlg implements KInferAlg {
     @Override
     public  double[][] infer(double[][] features, KObject origin) {
         int maxOutput=((MetaEnum)origin.metaClass().outputs()[0].type()).literals().length;
-        KMemorySegment ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //check if segment is empty
         int size = (maxOutput + 1) * (origin.metaClass().inputs().length * NUMOFFIELDS + 1);
-        if (ks.getInferSize(dependenciesIndex, origin.metaClass()) == 0) {
+        if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());

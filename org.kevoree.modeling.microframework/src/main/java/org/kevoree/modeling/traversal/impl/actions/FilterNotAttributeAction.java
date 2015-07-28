@@ -2,7 +2,7 @@ package org.kevoree.modeling.traversal.impl.actions;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
@@ -41,7 +41,7 @@ public class FilterNotAttributeAction implements KTraversalAction {
             for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];
-                    KMemorySegment raw = loopObj._manager.segment(loopObj.universe(),loopObj.now(),loopObj.uuid(), true,loopObj.metaClass(), null);
+                    KMemoryChunk raw = loopObj._manager.segment(loopObj.universe(),loopObj.now(),loopObj.uuid(), true,loopObj.metaClass(), null);
                     if (raw != null) {
                         if (_attribute == null) {
                             if (_expectedValue == null) {
@@ -53,7 +53,7 @@ public class FilterNotAttributeAction implements KTraversalAction {
                                 for (int j = 0; j < metaElements.length; j++) {
                                     if (metaElements[j] instanceof MetaAttribute) {
                                         KMetaAttribute ref = (KMetaAttribute) metaElements[j];
-                                        Object resolved = raw.get(ref.index(), loopObj.metaClass());
+                                        Object resolved = raw.getPrimitiveType(ref.index(), loopObj.metaClass());
                                         if (resolved == null) {
                                             if (_expectedValue.toString().equals("*")) {
                                                 addToNext = false;
@@ -77,7 +77,7 @@ public class FilterNotAttributeAction implements KTraversalAction {
                         } else {
                             KMetaAttribute translatedAtt = loopObj.internal_transpose_att(_attribute);
                             if (translatedAtt != null) {
-                                Object resolved = raw.get(translatedAtt.index(), loopObj.metaClass());
+                                Object resolved = raw.getPrimitiveType(translatedAtt.index(), loopObj.metaClass());
                                 if (_expectedValue == null) {
                                     if (resolved != null) {
                                         selectedIndexes[i] = true;

@@ -4,8 +4,7 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.KMemoryFactory;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
-import org.kevoree.modeling.message.KMessage;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.KOperationManager;
@@ -26,7 +25,7 @@ public interface KMemoryManager {
 
     void lookupAllObjectsTimes(long universe, long[] time, long[] uuid, KCallback<KObject[]> callback);
 
-    KMemorySegment segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace);
+    KMemoryChunk segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace);
 
     void save(KObject src, KCallback<Throwable> callback);
 

@@ -5,7 +5,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.struct.map.KLongLongMap;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
 import org.kevoree.modeling.memory.struct.map.KLongMapCallBack;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
@@ -13,7 +13,6 @@ import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.MetaType;
-import org.kevoree.modeling.meta.impl.MetaReference;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
 import org.kevoree.modeling.traversal.KTraversalFilter;
@@ -105,13 +104,13 @@ public class DeepCollectAction implements KTraversalAction {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) p_inputStep[i];
                     currentObject = loopObj;
-                    KMemorySegment raw = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
+                    KMemoryChunk raw = loopObj._manager.segment(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
                     if (raw != null) {
                         if (_reference == null) {
                             KMeta[] metaElements = loopObj.metaClass().metaElements();
                             for (int j = 0; j < metaElements.length; j++) {
                                 if (metaElements[j] != null && metaElements[j].metaType() == MetaType.REFERENCE) {
-                                    long[] resolved = raw.getRef(metaElements[j].index(), loopObj.metaClass());
+                                    long[] resolved = raw.getLongArray(metaElements[j].index(), loopObj.metaClass());
                                     if (resolved != null) {
                                         for (int k = 0; k < resolved.length; k++) {
                                             nextIds.put(resolved[k], resolved[k]);
@@ -122,7 +121,7 @@ public class DeepCollectAction implements KTraversalAction {
                         } else {
                             KMetaReference translatedRef = loopObj.internal_transpose_ref(_reference);
                             if (translatedRef != null) {
-                                long[] resolved = raw.getRef(translatedRef.index(), loopObj.metaClass());
+                                long[] resolved = raw.getLongArray(translatedRef.index(), loopObj.metaClass());
                                 if (resolved != null) {
                                     for (int j = 0; j < resolved.length; j++) {
                                         nextIds.put(resolved[j], resolved[j]);

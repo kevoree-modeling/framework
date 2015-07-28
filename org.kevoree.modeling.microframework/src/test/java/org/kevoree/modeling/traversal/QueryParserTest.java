@@ -11,62 +11,62 @@ public class QueryParserTest {
 //
 //        List<Query> queryList = Query.buildChain("children[*]");
 //        Assert.assertEquals(queryList.size(), 1);
-//        Assert.assertEquals(queryList.get(0).relationName, "children");
-//        Assert.assertEquals(queryList.get(0).params, "*");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, "*");
 //
 //        queryList = Query.buildChain("children");
 //        Assert.assertEquals(queryList.size(), 1);
-//        Assert.assertEquals(queryList.get(0).relationName, "children");
-//        Assert.assertEquals(queryList.get(0).params, null);
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, null);
 //
 //        queryList = Query.buildChain("children/children");
 //        Assert.assertEquals(queryList.size(), 2);
-//        Assert.assertEquals(queryList.get(0).relationName, "children");
-//        Assert.assertEquals(queryList.get(0).params, null);
-//        Assert.assertEquals(queryList.get(1).relationName, "children");
-//        Assert.assertEquals(queryList.get(1).params, null);
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, null);
+//        Assert.assertEquals(queryList.getPrimitiveType(1).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).params, null);
 //
 //        queryList = Query.buildChain("children[*]/children");
 //        Assert.assertEquals(queryList.size(), 2);
-//        Assert.assertEquals(queryList.get(0).relationName, "children");
-//        Assert.assertEquals(queryList.get(0).params, "*");
-//        Assert.assertEquals(queryList.get(1).relationName, "children");
-//        Assert.assertEquals(queryList.get(1).params, null);
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, "*");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).params, null);
 //
 //        queryList = Query.buildChain("children/children[*]");
 //        Assert.assertEquals(queryList.size(), 2);
-//        Assert.assertEquals(queryList.get(0).relationName, "children");
-//        Assert.assertEquals(queryList.get(0).params, null);
-//        Assert.assertEquals(queryList.get(1).relationName, "children");
-//        Assert.assertEquals(queryList.get(1).params, "*");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, null);
+//        Assert.assertEquals(queryList.getPrimitiveType(1).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).params, "*");
 //
 //        queryList = Query.buildChain("children[]/children[*]");
 //        Assert.assertEquals(queryList.size(), 2);
-//        Assert.assertEquals(queryList.get(0).relationName, "children");
-//        Assert.assertEquals(queryList.get(0).params, null);
-//        Assert.assertEquals(queryList.get(1).relationName, "children");
-//        Assert.assertEquals(queryList.get(1).params, "*");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, null);
+//        Assert.assertEquals(queryList.getPrimitiveType(1).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).params, "*");
 //
 //        queryList = Query.buildChain("children[*/children[*]");
 //        Assert.assertEquals(queryList.size(), 2);
-//        Assert.assertEquals(queryList.get(0).relationName, "children");
-//        Assert.assertEquals(queryList.get(0).params, "*");
-//        Assert.assertEquals(queryList.get(1).relationName, "children");
-//        Assert.assertEquals(queryList.get(1).params, "*");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, "*");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).params, "*");
 //
 //        queryList = Query.buildChain("children[]/children[*");
 //        Assert.assertEquals(queryList.size(), 2);
-//        Assert.assertEquals(queryList.get(0).relationName, "children");
-//        Assert.assertEquals(queryList.get(0).params, null);
-//        Assert.assertEquals(queryList.get(1).relationName, "children");
-//        Assert.assertEquals(queryList.get(1).params, "*");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, null);
+//        Assert.assertEquals(queryList.getPrimitiveType(1).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).params, "*");
 //
 //        queryList = Query.buildChain("childr\\/en[]/children[*");
 //        Assert.assertEquals(queryList.size(), 2);
-//        Assert.assertEquals(queryList.get(0).relationName, "childr\\/en");
-//        Assert.assertEquals(queryList.get(0).params, null);
-//        Assert.assertEquals(queryList.get(1).relationName, "children");
-//        Assert.assertEquals(queryList.get(1).params, "*");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).relationName, "childr\\/en");
+//        Assert.assertEquals(queryList.getPrimitiveType(0).params, null);
+//        Assert.assertEquals(queryList.getPrimitiveType(1).relationName, "children");
+//        Assert.assertEquals(queryList.getPrimitiveType(1).params, "*");
 //
 //    }
 

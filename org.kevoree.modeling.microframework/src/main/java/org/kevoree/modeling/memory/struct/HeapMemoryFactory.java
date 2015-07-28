@@ -6,9 +6,9 @@ import org.kevoree.modeling.memory.struct.cache.KCache;
 import org.kevoree.modeling.memory.struct.cache.impl.ArrayMemoryCache;
 import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.struct.map.impl.ArrayUniverseOrderMap;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.KMemoryFactory;
-import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.impl.HeapMemoryChunk;
 import org.kevoree.modeling.memory.struct.tree.KLongLongTree;
 import org.kevoree.modeling.memory.struct.tree.KLongTree;
 import org.kevoree.modeling.memory.struct.tree.impl.ArrayLongLongTree;
@@ -17,8 +17,8 @@ import org.kevoree.modeling.memory.struct.tree.impl.ArrayLongTree;
 public class HeapMemoryFactory implements KMemoryFactory {
 
     @Override
-    public KMemorySegment newCacheSegment() {
-        return new HeapMemorySegment();
+    public KMemoryChunk newCacheSegment() {
+        return new HeapMemoryChunk();
     }
 
     @Override

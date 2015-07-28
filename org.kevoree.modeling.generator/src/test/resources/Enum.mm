@@ -1,6 +1,6 @@
 
 enum org.MyEnum {
-String3
+String3,
 Int3
 }
 

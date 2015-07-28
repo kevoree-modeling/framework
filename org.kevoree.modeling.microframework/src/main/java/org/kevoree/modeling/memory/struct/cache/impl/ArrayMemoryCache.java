@@ -8,7 +8,7 @@ import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.manager.impl.ResolutionHelper;
 import org.kevoree.modeling.memory.struct.cache.KCache;
-import org.kevoree.modeling.memory.struct.segment.impl.HeapMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.impl.HeapMemoryChunk;
 import org.kevoree.modeling.meta.KMetaModel;
 
 public class ArrayMemoryCache implements KCache {
@@ -84,7 +84,7 @@ public class ArrayMemoryCache implements KCache {
                 newElementHash[index] = i;
             }
         }
-        //set value for all
+        //setPrimitiveType value for all
         _state = new InternalState(length, newElementKV, newElementNext, newElementHash, newValues);
         this._threshold = (int) (length * this._loadFactor);
     }
@@ -222,7 +222,7 @@ public class ArrayMemoryCache implements KCache {
                 //processValues current
                 if (current.get() == null) {
                     //check is dirty
-                    HeapMemorySegment currentEntry = (HeapMemorySegment) this.get(current.universe, current.time, current.uuid);
+                    HeapMemoryChunk currentEntry = (HeapMemoryChunk) this.get(current.universe, current.time, current.uuid);
                     if (currentEntry == null || !currentEntry.isDirty()) {
                         //call the clean sub processValues for universe/time/uuid
                         MemorySegmentResolutionTrace resolved = ResolutionHelper.resolve_trees(current.universe, current.time, current.uuid, this);

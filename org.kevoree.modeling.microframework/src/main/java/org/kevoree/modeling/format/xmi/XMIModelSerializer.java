@@ -34,9 +34,9 @@ public class XMIModelSerializer {
             KDefer addressCreationTask = context.model.visit(VisitRequest.CONTAINED, new ModelVisitor() {
                 @Override
                 public VisitResult visit(KObject elem) {
-                    String parentXmiAddress = context.addressTable.get(elem.parentUuid());
+                    String parentXmiAddress = context.addressTable.getPrimitiveType(elem.parentUuid());
                     String key = parentXmiAddress + "/@" + elem.referenceInParent().metaName();
-                    Integer i = context.elementsCount.get(key);
+                    Integer i = context.elementsCount.getPrimitiveType(key);
                     if (i == null) {
                         i = 0;
                         context.elementsCount.put(key, i);
@@ -64,7 +64,7 @@ public class XMIModelSerializer {
 
                     int index = 0;
                     while (index < context.packageList.size()) {
-                        context.printer.append(" xmlns:" + context.packageList.get(index).replace(".", "_") + "=\"http://" + context.packageList.get(index) + "\"");
+                        context.printer.append(" xmlns:" + context.packageList.getPrimitiveType(index).replace(".", "_") + "=\"http://" + context.packageList.getPrimitiveType(index) + "\"");
                         index++;
                     }
                     context.model.visitAttributes(context.attributesVisitor);
@@ -146,7 +146,7 @@ public class XMIModelSerializer {
                 try {
                     KObject[] objects = ((KObject[]) currentTask.resultByDefer(allTask));
                     for (int i = 0; i < objects.length; i++) {
-                        String adjustedAddress = p_context.addressTable.get(objects[i].uuid());
+                        String adjustedAddress = p_context.addressTable.getPrimitiveType(objects[i].uuid());
                         p_context.printer.append(" " + ref.metaName() + "=\"" + adjustedAddress + "\"");
                     }
                 } catch (Exception e) {

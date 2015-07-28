@@ -80,13 +80,13 @@ public class SimpleMatrix{
 
 
 
-    public void set( SimpleMatrix a ) {
+    public void setPrimitiveType( SimpleMatrix a ) {
         mat.setMatrix(a.getMatrix());
     }
 
 
 
-    public void set( double val ) {
+    public void setPrimitiveType( double val ) {
         CommonOps.fill(mat, val);
     }
 
@@ -110,23 +110,23 @@ public class SimpleMatrix{
 
     public void setRow( int row , int offset , double ...values ) {
         for( int i = 0; i < values.length; i++ ) {
-            mat.set(row,offset+i,values[i]);
+            mat.setPrimitiveType(row,offset+i,values[i]);
         }
     }
 
     public void setColumn( int column , int offset , double ...values ) {
         for( int i = 0; i < values.length; i++ ) {
-            mat.set(offset+i,column,values[i]);
+            mat.setPrimitiveType(offset+i,column,values[i]);
         }
     }
 
 
-    public double get( int row , int col ) {
-        return mat.get(row,col);
+    public double getPrimitiveType( int row , int col ) {
+        return mat.getPrimitiveType(row,col);
     }
 
 
-    public double get( int index ) {
+    public double getPrimitiveType( int index ) {
         return mat.data[ index ];
     }
 

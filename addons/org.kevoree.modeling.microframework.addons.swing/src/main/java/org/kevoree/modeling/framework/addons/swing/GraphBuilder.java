@@ -9,7 +9,7 @@ import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaReference;
 
 /**
@@ -56,11 +56,11 @@ public class GraphBuilder {
     }
 
     private static void createEdges(Graph graph, KObject elem) {
-        KMemorySegment rawPayload = elem.manager().segment(elem.universe(),elem.now(),elem.uuid(),true, elem.metaClass(),null);
+        KMemoryChunk rawPayload = elem.manager().segment(elem.universe(),elem.now(),elem.uuid(),true, elem.metaClass(),null);
         for (KMeta meta : elem.metaClass().metaElements()) {
             if (meta instanceof KMetaReference) {
                 KMetaReference metaRef = (KMetaReference) meta;
-                long[] relatedElems = rawPayload.getRef(metaRef.index(), elem.metaClass());
+                long[] relatedElems = rawPayload.getLongArray(metaRef.index(), elem.metaClass());
                 if (relatedElems != null) {
                     for (int i = 0; i < relatedElems.length; i++) {
                         Edge e = graph.addEdge(elem.uuid() + "_" + relatedElems[i] + "_" + metaRef.metaName(), elem.uuid() + "", relatedElems[i] + "");

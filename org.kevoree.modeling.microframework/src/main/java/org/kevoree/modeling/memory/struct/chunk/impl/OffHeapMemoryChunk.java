@@ -1,10 +1,10 @@
-package org.kevoree.modeling.memory.struct.segment.impl;
+package org.kevoree.modeling.memory.struct.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaReference;
@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
  * - Memory structure: |meta class index  |counter    |dirty    |modified indexes        |raw     |
  * -                   |(4 byte)          |(4 byte)   |(1 byte) |(meta class elem byte)  |(x byte)|
  */
-public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryElement {
+public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     private static final Unsafe UNSAFE = getUnsafe();
 
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
@@ -93,10 +93,10 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final KMemorySegment clone(KMetaClass metaClass) {
+    public final KMemoryChunk clone(KMetaClass metaClass) {
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
 
-        OffHeapMemorySegment clonedEntry = new OffHeapMemorySegment();
+        OffHeapMemoryChunk clonedEntry = new OffHeapMemoryChunk();
         int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = metaClass.metaElements().length;
         int rawSegment = internal_size_of_raw_segment(metaClass);
@@ -178,7 +178,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final void set(int index, Object content, KMetaClass metaClass) {
+    public final void setPrimitiveType(int index, Object content, KMetaClass metaClass) {
         try {
             MetaType type = metaClass.meta(index).metaType();
             long ptr = internal_ptr_raw_for_index(index, metaClass);
@@ -227,7 +227,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final long[] getRef(int index, KMetaClass metaClass) {
+    public final long[] getLongArray(int index, KMetaClass metaClass) {
         long[] result = null;
 
         KMeta meta = metaClass.meta(index);
@@ -248,7 +248,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final boolean addRef(int index, long newRef, KMetaClass metaClass) {
+    public final boolean addLongToArray(int index, long newRef, KMetaClass metaClass) {
         boolean result = false;
 
         KMeta meta = metaClass.meta(index);
@@ -276,7 +276,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final boolean removeRef(int index, long ref, KMetaClass metaClass) {
+    public final boolean removeLongToArray(int index, long ref, KMetaClass metaClass) {
         boolean result = false;
 
         KMeta meta = metaClass.meta(index);
@@ -297,7 +297,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                             j++;
                         }
                     }
-                    UNSAFE.putInt(new_ref_ptr, j); // set the new size
+                    UNSAFE.putInt(new_ref_ptr, j); // setPrimitiveType the new size
                     UNSAFE.freeMemory(ptr_ref_segment); // release the old memory zone
                     _allocated_segments--;
                     UNSAFE.putLong(ptr, new_ref_ptr); // update pointer
@@ -315,7 +315,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final void clearRef(int index, KMetaClass metaClass) {
+    public final void clearLongArray(int index, KMetaClass metaClass) {
         KMeta meta = metaClass.meta(index);
         long ptr = internal_ptr_raw_for_index(index, metaClass);
 
@@ -331,7 +331,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final double[] getInfer(int index, KMetaClass metaClass) {
+    public final double[] getDoubleArray(int index, KMetaClass metaClass) {
         double[] infer = null;
         long ptr = internal_ptr_raw_for_index(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
@@ -346,9 +346,9 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final int getInferSize(int index, KMetaClass metaClass) {
+    public final int getDoubleArraySize(int index, KMetaClass metaClass) {
         int size = 0;
-        double[] infer = getInfer(index, metaClass);
+        double[] infer = getDoubleArray(index, metaClass);
         if (infer != null) {
             size = infer.length;
         }
@@ -356,12 +356,12 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final double getInferElem(int index, int arrayIndex, KMetaClass metaClass) {
-        return getInfer(index, metaClass)[arrayIndex];
+    public final double getDoubleArrayElem(int index, int arrayIndex, KMetaClass metaClass) {
+        return getDoubleArray(index, metaClass)[arrayIndex];
     }
 
     @Override
-    public final void setInferElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
+    public final void setDoubleArrayElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
         long ptr = internal_ptr_raw_for_index(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
 
@@ -379,7 +379,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final void extendInfer(int index, int newSize, KMetaClass metaClass) {
+    public final void extendDoubleArray(int index, int newSize, KMetaClass metaClass) {
         long ptr = internal_ptr_raw_for_index(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
 
@@ -397,7 +397,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final Object get(int index, KMetaClass metaClass) {
+    public final Object getPrimitiveType(int index, KMetaClass metaClass) {
         Object result = null;
 
         try {
@@ -436,7 +436,6 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
         return result;
     }
 
-    @Override
     public final int[] modifiedIndexes(KMetaClass metaClass) {
         int nbModified = 0;
         long ptr = _start_address + OFFSET_MODIFIED_INDEXES;
@@ -499,7 +498,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                 if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                     MetaAttribute metaAttribute = (MetaAttribute) meta;
                     if (metaAttribute.attributeType() != KPrimitiveTypes.CONTINUOUS) {
-                        Object o = get(meta.index(), metaClass);
+                        Object o = getPrimitiveType(meta.index(), metaClass);
                         if (o != null) {
                             if (isFirst) {
                                 builder.append("\"");
@@ -520,7 +519,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                         }
 
                     } else {
-                        double[] o = getInfer(meta.index(), metaClass);
+                        double[] o = getDoubleArray(meta.index(), metaClass);
                         if (o != null) {
                             builder.append(",\"");
                             builder.append(metaAttribute.metaName());
@@ -540,7 +539,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
 
                 } else if (meta.metaType().equals(MetaType.REFERENCE)) {
                     MetaReference metaReference = (MetaReference) meta;
-                    long[] o = getRef(metaReference.index(), metaClass);
+                    long[] o = getLongArray(metaReference.index(), metaClass);
                     if (o != null) {
                         builder.append(",\"");
                         builder.append(metaElements[i].metaName());
@@ -575,7 +574,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                 KMeta meta = metaElements[i];
                 if (metaElements[i].metaType() == MetaType.ATTRIBUTE) {
                     KMetaAttribute metaAttribute = (KMetaAttribute) metaElements[i];
-                    Object o = get(meta.index(), metaClass);
+                    Object o = getPrimitiveType(meta.index(), metaClass);
                     if (o != null) {
                         if (isFirst) {
                             builder.append("\"");
@@ -624,7 +623,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                         }
                     }
                 } else if (metaElements[i].metaType() == MetaType.REFERENCE) {
-                    long[] o = getRef(meta.index(), metaClass);
+                    long[] o = getLongArray(meta.index(), metaClass);
                     if (o != null) {
                         if (isFirst) {
                             builder.append("\"");
@@ -646,7 +645,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                         builder.append("]");
                     }
                 } else if (metaElements[i].metaType() == MetaType.DEPENDENCIES || metaElements[i].metaType() == MetaType.INPUT || metaElements[i].metaType() == MetaType.OUTPUT) {
-                    double[] o = getInfer(meta.index(), metaClass);
+                    double[] o = getDoubleArray(meta.index(), metaClass);
                     if (o != null) {
                         if (isFirst) {
                             builder.append("\"");
@@ -715,12 +714,12 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
 
                         if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
                             double[] infer = (double[]) converted;
-                            extendInfer(metaAttribute.index(), infer.length, metaClass);
+                            extendDoubleArray(metaAttribute.index(), infer.length, metaClass);
                             for (int k = 0; k < infer.length; k++) {
-                                setInferElem(metaAttribute.index(), k, infer[k], metaClass);
+                                setDoubleArrayElem(metaAttribute.index(), k, infer[k], metaClass);
                             }
                         } else {
-                            set(metaAttribute.index(), converted, metaClass);
+                            setPrimitiveType(metaAttribute.index(), converted, metaClass);
                         }
 
                     } else if (metaElement != null && metaElement instanceof KMetaReference) {
@@ -735,7 +734,7 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
                                 }
                             }
                             for (int k = 0; k < convertedRaw.length; k++) {
-                                addRef(metaElement.index(), convertedRaw[k], metaClass);
+                                addLongToArray(metaElement.index(), convertedRaw[k], metaClass);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -826,9 +825,9 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
 
 
     @Override
-    public final int getRefSize(int index, KMetaClass metaClass) {
+    public final int getLongArraySize(int index, KMetaClass metaClass) {
         int size = 0;
-        long[] refs = getRef(index, metaClass);
+        long[] refs = getLongArray(index, metaClass);
         if (refs != null) {
             size = refs.length;
         }
@@ -836,9 +835,9 @@ public class OffHeapMemorySegment implements KMemorySegment, KOffHeapMemoryEleme
     }
 
     @Override
-    public final long getRefElem(int index, int refIndex, KMetaClass metaClass) {
+    public final long getLongArrayElem(int index, int refIndex, KMetaClass metaClass) {
         long elem = KConfig.NULL_LONG;
-        long[] refs = getRef(index, metaClass);
+        long[] refs = getLongArray(index, metaClass);
         if (refs != null) {
             elem = refs[refIndex];
         }

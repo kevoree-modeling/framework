@@ -7,7 +7,7 @@ import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.infer.impl.GaussianClassifierAlg;
-import org.kevoree.modeling.memory.struct.segment.KMemorySegment;
+import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -251,7 +251,7 @@ public class GaussianClassificationTest {
 
 
                 //for debug
-                KMemorySegment ks = gaussianProfile.manager().segment(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
+                KMemoryChunk ks = gaussianProfile.manager().segment(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
 
 
                 
