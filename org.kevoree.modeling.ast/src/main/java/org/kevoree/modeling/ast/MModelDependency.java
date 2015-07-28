@@ -30,5 +30,5 @@ public class MModelDependency {
     public MModelDependency clone() {
         return new MModelDependency(this.name, this.type);
     }
-
+    
 }

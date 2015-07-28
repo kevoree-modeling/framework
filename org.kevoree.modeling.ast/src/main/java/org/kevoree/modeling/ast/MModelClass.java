@@ -17,6 +17,10 @@ public class MModelClass extends MModelClassifier {
         this.name = name;
     }
 
+    public boolean isInferred(){
+        return this.inference != null;
+    }
+
     private String inference = null;
     private Long temporalResolution = null;
 

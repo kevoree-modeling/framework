@@ -26,6 +26,11 @@ public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#f
     public void ${operation.name}(#foreach($p in $operation.inputParams)$p.type $p.name, #{end}org.kevoree.modeling.KCallback<#if(${operation.returnParam})$operation.returnParam.type#{else}Boolean#end> result);
 #end
 
+#if($classDeclaration.isInferred())
+    #set($i = 0)
+    public void train(#foreach($dependency in $classDeclaration.dependencies) #if($i!=0),#end ${dependency.type.pack}.$dependency.type.name $dependency.name #set($i=$i+1) #end);
+#end
+
 }
 #* @vtlvariable name="context" type="org.kevoree.modeling.generator.ClassGenerationContext" *#
 #* @vtlvariable name="classDeclaration" type="org.kevoree.modeling.ast.MModelClass" *#

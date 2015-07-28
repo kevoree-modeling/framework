@@ -8,9 +8,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by duke on 16/07/15.
- */
 public class ArrayLongLongTreeBenchmark {
 
     public static void main(String[] args) {
@@ -41,11 +38,9 @@ public class ArrayLongLongTreeBenchmark {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
         if (tree.size() != referee.size()) {
             throw new RuntimeException("Size Are not equivalent " + tree.size() + "!=" + referee.size());
         }
-
         for (Long key : referee.keySet()) {
             long resolvedReferee = referee.get(key);
             long resolvedTree = tree.lookupValue(key);
