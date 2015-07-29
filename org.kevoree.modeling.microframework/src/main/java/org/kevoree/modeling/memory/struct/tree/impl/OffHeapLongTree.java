@@ -28,17 +28,4 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
             return KConfig.NULL_LONG;
         }
     }
-
-//    @Override
-//    public long getMemoryAddress() {
-//        return _start_address;
-//    }
-//
-//    @Override
-//    public void setMemoryAddress(long address) {
-//        _start_address = address;
-//
-//        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-//        _threshold = (int) (size() * _loadFactor);
-//    }
 }
