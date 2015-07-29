@@ -143,7 +143,8 @@ public class Compressor {
         revitalizeComponents(dist);
         //System.out.println("COMPRESS");
         int noOfCompsBeforeCompression = dist.getSubMeans().length;
-        SampleModel inputModelCopy = new SampleModel(dist);
+        SampleModel inputModelCopy = new SampleModel();
+        inputModelCopy.setSampleModel(dist);
         double compressionError = MAX;
         if(inputModelCopy.getSubDistributions().length > 1)
             compressionError = mergeTwoClosestComps(inputModelCopy);

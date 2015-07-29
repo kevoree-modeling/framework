@@ -127,10 +127,10 @@ public class SampleModel{
     }
 
 
-  /*  public SampleModel(double forgettingFactor, double compressionThreshold) {
+   public void setSampleModelForget(double forgettingFactor, double compressionThreshold) {
         mGlobalWeight = 0;
         mForgettingFactor = 0;
-        this.mSubDistributions = new BaseSampleDistribution[]();
+        this.mSubDistributions = new BaseSampleDistribution[0];
         this.mBandwidthMatrix = null;
         this.mGlobalCovariance = null;
         this.mGlobalMean = null;
@@ -142,14 +142,25 @@ public class SampleModel{
         this.mForgettingFactor = forgettingFactor;
         this.mCompressionThreshold = compressionThreshold;
         mNoOfCompsThreshold = DEFAULT_NO_OF_COMPS_THRES;
-    }*/
+    }
 
+    public SampleModel(){
 
-    public SampleModel(SampleModel dist)  {
+    }
+
+    public void setSampleModel(SampleModel dist)  {
         BaseSampleDistribution[] subDists = dist.getSubDistributions();
         BaseSampleDistribution[] copy = new BaseSampleDistribution[subDists.length];
+
+        for(int i=0;i<subDists.length;i++){
+          copy[i]=subDists[i];
+          /*  if(subDists[i] instanceof OneComponentDistribution){
+                copy[i]=new OneComponentDistribution();
+
+            }*/
+        }
         //todo fill copy
-        
+
         // copy the list of sub components
         // todo by assaad removed
         /*
@@ -248,6 +259,7 @@ public class SampleModel{
             subSpaceDist = projectToSubspace(this);
         }
         catch (Exception ex){
+            ex.printStackTrace();
 
         }
 
@@ -366,7 +378,8 @@ public class SampleModel{
 
     private static SampleModel projectToSubspace(SampleModel dist) throws Exception{
         double minBW = 1e-7;
-        SampleModel distribution = new SampleModel(dist);
+        SampleModel distribution = new SampleModel();
+        distribution.setSampleModel(dist);
         int[] subSpace = new int[1];
         MomentMatcher.matchMoments(distribution);
         SimpleMatrix overallCovariance = distribution.getGlobalCovariance();

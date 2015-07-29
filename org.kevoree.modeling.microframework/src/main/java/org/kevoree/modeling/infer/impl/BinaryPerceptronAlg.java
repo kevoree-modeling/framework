@@ -36,9 +36,9 @@ public class BinaryPerceptronAlg implements KInferAlg {
                 double error=-alpha*(h-expectedResultSet[row][0]);
                 if(error!=0){
                     for(int j=0; j<origin.metaClass().inputs().length;j++){
-                        state.add(j,error*trainingSet[row][j]);
+                        state.add(j,error*trainingSet[row][j]); //update for the wi
                     }
-                    state.add(origin.metaClass().inputs().length,error);
+                    state.add(origin.metaClass().inputs().length,error);//for the bias
                 }
             }
         }
@@ -58,6 +58,27 @@ public class BinaryPerceptronAlg implements KInferAlg {
         else {
             return 0;
         }
+    }
+
+    private double calculateSigmoid(double[] features, Array1D state) {
+        if(sigmoid(features,state)>=0.5){
+            return 1.0;
+        }
+        else {
+            return 0.0;
+        }
+    }
+
+    private double sigmoid(double[] features, Array1D state) {
+        double res=0;
+
+        for(int i=0; i<features.length;i++){
+            res = res + state.get(i)*features[i];
+        }
+        res = res + state.get(features.length);
+
+        res= 1/(1+ Math.exp(-res));
+        return  res;
     }
 
     @Override
