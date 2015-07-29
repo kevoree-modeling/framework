@@ -39,9 +39,9 @@ public class RecommendationSystemBench {
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
-                int maxUsers=2300;
-                int maxProducts=270;
-                int ratings=10000;
+                int maxUsers=23000; //add 0
+                int maxProducts=2700; // add 0
+                int ratingPerUser=9; // add 0 
 
                 KObject[] users= new KObject[maxUsers];
                 for(int i=0;i<maxUsers;i++){
@@ -57,10 +57,10 @@ public class RecommendationSystemBench {
                 System.out.println("Users and products created");
 
                 Random random=new Random();
-                int[] ratingPos=new int[ratings/maxUsers];
+                int[] ratingPos=new int[ratingPerUser];
 
                 for(int i=0;i<maxUsers;i++){
-                    for(int j=0;j<ratingPos.length;j++){
+                    for(int j=0;j<ratingPerUser;j++){
                         boolean b;
                         do {
                             ratingPos[j] = random.nextInt(maxProducts);
@@ -77,16 +77,16 @@ public class RecommendationSystemBench {
                     for(int j=0;j<ratingPos.length;j++){
                         KObject rating = model.createByName("Rating",0,0);
 
-                        rating.mutate(KActionType.SET, model.metaModel().metaClassByName("Rating").reference("ownerUser"),users[i]);
+                        rating.mutate(KActionType.SET, model.metaModel().metaClassByName("Rating").reference("ownerUser"), users[i]);
                         rating.mutate(KActionType.SET, model.metaModel().metaClassByName("Rating").reference("ratedProduct"), products[ratingPos[j]]);
                         rating.setByName("ratingValue",random.nextDouble()*5);
 
                     }
 
-                    System.out.println(users[i].getRefValuesByName("userRatings").length);
+                 //   System.out.println(users[i].getRefValuesByName("userRatings").length);
 
                 }
-
+                System.out.println("Done, created: "+maxUsers+" users, "+maxProducts+" products, "+(ratingPerUser*maxUsers)+" ratings!");
 
             }
         });
