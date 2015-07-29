@@ -24,62 +24,62 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
     private final float loadFactor;
 
-    private volatile long _start_address;
+    protected volatile long _start_address;
 
-    private static final int ATT_ELEM_COUNT_LEN = 4;
-    private static final int ATT_DROPPED_COUNT_LEN = 4;
-    private static final int ATT_DIRTY_LEN = 1;
-    private static final int ATT_ELEM_DATA_SIZE_LEN = 4;
+    protected static final int ATT_ELEM_COUNT_LEN = 4;
+    protected static final int ATT_DROPPED_COUNT_LEN = 4;
+    protected static final int ATT_DIRTY_LEN = 1;
+    protected static final int ATT_ELEM_DATA_SIZE_LEN = 4;
 
-    private static final int ATT_KEY_LEN = 8;
-    private static final int ATT_VALUE_LEN = 8;
-    private static final int ATT_NEXT_LEN = 8;
-    private static final int ATT_HASH_LEN = 4;
+    protected static final int ATT_KEY_LEN = 8;
+    protected static final int ATT_VALUE_LEN = 8;
+    protected static final int ATT_NEXT_LEN = 8;
+    protected static final int ATT_HASH_LEN = 4;
 
-    private static final int BASE_SEGMENT_LEN = ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN + ATT_DIRTY_LEN + ATT_ELEM_DATA_SIZE_LEN;
-    private static final int BACK_ELEM_ENTRY_LEN = ATT_KEY_LEN + ATT_VALUE_LEN + ATT_NEXT_LEN + ATT_HASH_LEN;
+    protected static final int BASE_SEGMENT_LEN = ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN + ATT_DIRTY_LEN + ATT_ELEM_DATA_SIZE_LEN;
+    protected static final int BACK_ELEM_ENTRY_LEN = ATT_KEY_LEN + ATT_VALUE_LEN + ATT_NEXT_LEN + ATT_HASH_LEN;
 
-    private static final int OFFSET_STARTADDRESS_ELEM_COUNT = 0;
-    private static final int OFFSET_STARTADDRESS_DROPPED_COUNT = OFFSET_STARTADDRESS_ELEM_COUNT + 4;
-    private static final int OFFSET_STARTADDRESS_DIRTY = OFFSET_STARTADDRESS_DROPPED_COUNT + 4;
-    private static final int OFFSET_STARTADDRESS_ELEM_DATA_SIZE = OFFSET_STARTADDRESS_DIRTY + 1;
-    private static final int OFFSET_STARTADDRESS_BACK = OFFSET_STARTADDRESS_ELEM_DATA_SIZE + 4;
+    protected static final int OFFSET_STARTADDRESS_ELEM_COUNT = 0;
+    protected static final int OFFSET_STARTADDRESS_DROPPED_COUNT = OFFSET_STARTADDRESS_ELEM_COUNT + 4;
+    protected static final int OFFSET_STARTADDRESS_DIRTY = OFFSET_STARTADDRESS_DROPPED_COUNT + 4;
+    protected static final int OFFSET_STARTADDRESS_ELEM_DATA_SIZE = OFFSET_STARTADDRESS_DIRTY + 1;
+    protected static final int OFFSET_STARTADDRESS_BACK = OFFSET_STARTADDRESS_ELEM_DATA_SIZE + 4;
 
-    private static final int OFFSET_BACK_KEY = 0;
-    private static final int OFFSET_BACK_VALUE = OFFSET_BACK_KEY + 8;
-    private static final int OFFSET_BACK_NEXT = OFFSET_BACK_VALUE + 8;
-    private static final int OFFSET_BACK_HASH = OFFSET_BACK_NEXT + 4;
+    protected static final int OFFSET_BACK_KEY = 0;
+    protected static final int OFFSET_BACK_VALUE = OFFSET_BACK_KEY + 8;
+    protected static final int OFFSET_BACK_NEXT = OFFSET_BACK_VALUE + 8;
+    protected static final int OFFSET_BACK_HASH = OFFSET_BACK_NEXT + 4;
 
     // TODO this methods are maybe a bottleneck if they are not inlined
-    private int internal_getHash(long startAddress, int index) {
+    protected int internal_getHash(long startAddress, int index) {
         return UNSAFE.getInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH));
     }
 
-    private void internal_setHash(long startAddress, int index, int hash) {
+    protected void internal_setHash(long startAddress, int index, int hash) {
         UNSAFE.putInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), hash);
     }
 
-    private long internal_getKey(long startAddress, int index) {
+    protected long internal_getKey(long startAddress, int index) {
         return UNSAFE.getLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY));
     }
 
-    private void internal_setKey(long startAddress, int index, long key) {
+    protected void internal_setKey(long startAddress, int index, long key) {
         UNSAFE.putLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY), key);
     }
 
-    private long internal_getValue(long startAddress, int index) {
+    protected long internal_getValue(long startAddress, int index) {
         return UNSAFE.getLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE));
     }
 
-    private void internal_setValue(long startAddress, int index, long value) {
+    protected void internal_setValue(long startAddress, int index, long value) {
         UNSAFE.putLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE), value);
     }
 
-    private int internal_getNext(long startAddress, int index) {
+    protected int internal_getNext(long startAddress, int index) {
         return UNSAFE.getInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT));
     }
 
-    private void internal_setNext(long startAddress, int index, int next) {
+    protected void internal_setNext(long startAddress, int index, int next) {
         UNSAFE.putInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT), next);
     }
 
@@ -247,7 +247,9 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
             if (elementCount > threshold) {
                 rehashCapacity(elementDataSize);
-                index = (hash & 0x7FFFFFFF) % elementDataSize;
+
+                int newElementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+                index = (hash & 0x7FFFFFFF) % newElementDataSize;
             }
             int newIndex = (elementCount + droppedCount - 1);
             internal_setKey(_start_address, newIndex, key);
