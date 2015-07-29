@@ -15,8 +15,6 @@ import java.lang.reflect.Field;
  * - memory structure:  | elem count (4) | dropped count (4) | dirty (1) | elem data size (4) | back (elem data size * 28) |
  * - back:              | key (8)   | value (8) | next (4) | hash (4) |
  */
-// TODO check for thread-safety
-// TODO document index based strategy for next
 public class OffHeapLongLongMap implements KLongLongMap {
     protected static final Unsafe UNSAFE = getUnsafe();
 
@@ -53,7 +51,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
     private static final int OFFSET_BACK_HASH = OFFSET_BACK_NEXT + 4;
 
     // TODO this methods are maybe a bottleneck if they are not inlined
-    private int internal_hash(long startAddress, int index) {
+    private int internal_getHash(long startAddress, int index) {
         return UNSAFE.getInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH));
     }
 
@@ -61,7 +59,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         UNSAFE.putInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), hash);
     }
 
-    private long internal_key(long startAddress, int index) {
+    private long internal_getKey(long startAddress, int index) {
         return UNSAFE.getLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY));
     }
 
@@ -69,7 +67,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         UNSAFE.putLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY), key);
     }
 
-    private long internal_value(long startAddress, int index) {
+    private long internal_getValue(long startAddress, int index) {
         return UNSAFE.getLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE));
     }
 
@@ -77,7 +75,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         UNSAFE.putLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE), value);
     }
 
-    private int internal_next(long startAddress, int index) {
+    private int internal_getNext(long startAddress, int index) {
         return UNSAFE.getInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT));
     }
 
@@ -111,22 +109,29 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
     public final void clear() {
         int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+
         if (elementCount > 0) {
 
             long bytes = BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN;
-            _start_address = UNSAFE.reallocateMemory(_start_address, bytes);
+            long newAddress = UNSAFE.allocateMemory(bytes);
 
-            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, initialCapacity);
-            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, 0);
-            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
+            UNSAFE.copyMemory(_start_address, newAddress, BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN);
+
+            UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_COUNT, 0);
+            UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
+            UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, initialCapacity);
 
             for (int i = 0; i < initialCapacity; i++) {
-                // next
-                UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_BACK + (i * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT), -1);
-                // hash
-                UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_BACK + (i * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), -1);
+                internal_setNext(newAddress, i, -1);
+                internal_setHash(newAddress, i, -1);
             }
-            this.threshold = (int) (initialCapacity * loadFactor);
+
+            long oldAddress = _start_address;
+            _start_address = newAddress;
+            UNSAFE.freeMemory(oldAddress);
+
+            long elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+            this.threshold = (int) (elementDataSize * loadFactor);
         }
     }
 
@@ -145,9 +150,9 @@ public class OffHeapLongLongMap implements KLongLongMap {
         }
         //rehashEveryThing
         for (int i = 0; i < elementDataSize; i++) {
-            if (internal_next(_start_address, i) != -1) { //there is a real value
-                int index = ((int) internal_key(_start_address, i) & 0x7FFFFFFF) % length;
-                int currentHashedIndex = internal_hash(newAddress, index);
+            if (internal_getNext(_start_address, i) != -1) { //there is a real value
+                int index = ((int) internal_getKey(_start_address, i) & 0x7FFFFFFF) % length;
+                int currentHashedIndex = internal_getHash(newAddress, index);
                 if (currentHashedIndex != -1) {
                     internal_setNext(newAddress, i, currentHashedIndex);
                 } else {
@@ -157,7 +162,6 @@ public class OffHeapLongLongMap implements KLongLongMap {
             }
         }
 
-        //setPrimitiveType value for all
         UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, length);
         long oldAddress = _start_address;
         _start_address = newAddress;
@@ -171,8 +175,8 @@ public class OffHeapLongLongMap implements KLongLongMap {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
         for (int i = 0; i < elementDataSize; i++) {
-            if (internal_next(_start_address, i) != -1) { //there is a real value
-                callback.on(internal_key(_start_address, i), internal_value(_start_address, i));
+            if (internal_getNext(_start_address, i) != -1) { //there is a real value
+                callback.on(internal_getKey(_start_address, i), internal_getValue(_start_address, i));
             }
         }
     }
@@ -187,13 +191,13 @@ public class OffHeapLongLongMap implements KLongLongMap {
         int hash = (int) (key);
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
 
-        int m = internal_hash(_start_address, index);
+        int m = internal_getHash(_start_address, index);
         while (m >= 0) {
-            long k = internal_key(_start_address, m);
+            long k = internal_getKey(_start_address, m);
             if (key == k) {
                 return m != -1;
             }
-            m = internal_next(_start_address, m);
+            m = internal_getNext(_start_address, m);
         }
         return m != -1;
     }
@@ -207,14 +211,14 @@ public class OffHeapLongLongMap implements KLongLongMap {
         }
         int index = ((int) (key) & 0x7FFFFFFF) % elementDataSize;
 
-        int m = internal_hash(_start_address, index);
+        int m = internal_getHash(_start_address, index);
         while (m >= 0) {
-            long k = internal_key(_start_address, m);
+            long k = internal_getKey(_start_address, m);
             if (key == k) {
-                long v = internal_value(_start_address, m);
+                long v = internal_getValue(_start_address, m);
                 return v;
             } else {
-                m = internal_next(_start_address, m);
+                m = internal_getNext(_start_address, m);
             }
         }
         return KConfig.NULL_LONG;
@@ -248,7 +252,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
             int newIndex = (elementCount + droppedCount - 1);
             internal_setKey(_start_address, newIndex, key);
             internal_setValue(_start_address, newIndex, value);
-            int currentHashedIndex = internal_hash(_start_address, index);
+            int currentHashedIndex = internal_getHash(_start_address, index);
             if (currentHashedIndex != -1) {
                 internal_setNext(_start_address, newIndex, currentHashedIndex);
             } else {
@@ -262,12 +266,12 @@ public class OffHeapLongLongMap implements KLongLongMap {
     }
 
     final int findNonNullKeyEntry(long key, int index) {
-        int m = internal_hash(_start_address, index);
+        int m = internal_getHash(_start_address, index);
         while (m >= 0) {
-            if (key == internal_key(_start_address, m)) {
+            if (key == internal_getKey(_start_address, m)) {
                 return m;
             }
-            m = internal_next(_start_address, m);
+            m = internal_getNext(_start_address, m);
         }
         return -1;
     }
@@ -281,26 +285,26 @@ public class OffHeapLongLongMap implements KLongLongMap {
             return;
         }
         int index = ((int) (key) & 0x7FFFFFFF) % elementDataSize;
-        int m = internal_hash(_start_address, index);
+        int m = internal_getHash(_start_address, index);
         int last = -1;
         while (m >= 0) {
-            if (key == internal_key(_start_address, m)) {
+            if (key == internal_getKey(_start_address, m)) {
                 break;
             }
             last = m;
-            m = internal_next(_start_address, m);
+            m = internal_getNext(_start_address, m);
         }
         if (m == -1) {
             return;
         }
         if (last == -1) {
-            if (internal_next(_start_address, m) > 0) {
+            if (internal_getNext(_start_address, m) > 0) {
                 internal_setHash(_start_address, index, m);
             } else {
                 internal_setHash(_start_address, index, -1);
             }
         } else {
-            internal_setNext(_start_address, last, internal_next(_start_address, m));
+            internal_setNext(_start_address, last, internal_getNext(_start_address, m));
         }
         internal_setNext(_start_address, m, -1); //flag to dropped value
         // decrease elem count
