@@ -17,8 +17,8 @@ import java.lang.reflect.Field;
 /**
  * @ignore ts
  * OffHeap implementation of KMemoryChunk
- * - Memory structure: |meta class index  |counter    |dirty    |modified indexes        |raw     |
- * -                   |(4 byte)          |(4 byte)   |(1 byte) |(meta class elem byte)  |(x byte)|
+ * - Memory structure: |meta class index  |counter    |dirty    |raw     |
+ * -                   |(4 byte)          |(4 byte)   |(1 byte) |(x byte)|
  */
 public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     private static final Unsafe UNSAFE = getUnsafe();
@@ -30,7 +30,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     private static final int OFFSET_META_CLASS_INDEX = 0;
     private static final int OFFSET_COUNTER = OFFSET_META_CLASS_INDEX + ATT_META_CLASS_INDEX_LEN;
     private static final int OFFSET_DIRTY = OFFSET_COUNTER + ATT_COUNTER_LEN;
-    private static final int OFFSET_MODIFIED_INDEXES = OFFSET_DIRTY + ATT_DIRTY_LEN;
+    private static final int OFFSET_RAW = OFFSET_DIRTY + 1;
 
     private static final int BASE_SEGMENT_SIZE = ATT_META_CLASS_INDEX_LEN + ATT_COUNTER_LEN + ATT_DIRTY_LEN;
 
@@ -88,8 +88,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                 }
             }
         }
-        long addr_raw_data = _start_address + OFFSET_MODIFIED_INDEXES + metaClass.metaElements().length;
-        return addr_raw_data + offset;
+        return _start_address + OFFSET_RAW + offset;
     }
 
     @Override
@@ -213,7 +212,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                 }
 
                 setDirty();
-                UNSAFE.putByte(_start_address + OFFSET_MODIFIED_INDEXES + index, (byte) 1);
+                //UNSAFE.putByte(_start_address + OFFSET_MODIFIED_INDEXES + index, (byte) 1);
             }
 
         } catch (
@@ -435,30 +434,6 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
             throw new RuntimeException(e);
         }
 
-        return result;
-    }
-
-    public final int[] modifiedIndexes(KMetaClass metaClass) {
-        int nbModified = 0;
-        long ptr = _start_address + OFFSET_MODIFIED_INDEXES;
-
-        for (int i = 0; i < metaClass.metaElements().length; i++) {
-            if (UNSAFE.getByte(ptr) != 0) {
-                nbModified = nbModified + 1;
-            }
-            ptr = ptr + BYTE; // inc pointer
-        }
-
-        ptr = _start_address + OFFSET_MODIFIED_INDEXES; // reset pointer
-        int[] result = new int[nbModified];
-        int inserted = 0;
-        for (int i = 0; i < metaClass.metaElements().length; i++) {
-            if (UNSAFE.getByte(ptr) != 0) {
-                result[inserted] = i;
-                inserted = inserted + 1;
-            }
-            ptr = ptr + BYTE; // inc pointer
-        }
         return result;
     }
 
@@ -772,7 +747,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     public final void setClean(KMetaModel model) {
         KMetaClass metaClass = model.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
         UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
-        UNSAFE.setMemory(_start_address + OFFSET_MODIFIED_INDEXES, metaClass.metaElements().length, (byte) 0);
+        //UNSAFE.setMemory(_start_address + OFFSET_MODIFIED_INDEXES, metaClass.metaElements().length, (byte) 0);
     }
 
     @Override
