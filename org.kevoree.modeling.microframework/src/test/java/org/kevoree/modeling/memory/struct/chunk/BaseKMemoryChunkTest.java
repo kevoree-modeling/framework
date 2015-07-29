@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public abstract class BaseKMemoryChunkTest {
 
-    public abstract KMemoryChunk createKMemorySegment();
+    public abstract KMemoryChunk createKMemoryChunk();
 
     @Test
     public void attributeTest() {
@@ -51,7 +51,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemorySegment();
+                KMemoryChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.initMetaClass(homeMetaClass);
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -117,7 +117,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemorySegment();
+                KMemoryChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.initMetaClass(homeMetaClass);
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -184,7 +184,7 @@ public abstract class BaseKMemoryChunkTest {
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
                 // cache entry
-                KMemoryChunk cacheEntry = createKMemorySegment();
+                KMemoryChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.initMetaClass(homeMetaClass);
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -246,7 +246,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemorySegment();
+                KMemoryChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.initMetaClass(homeMetaClass);
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -304,7 +304,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemorySegment();
+                KMemoryChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.initMetaClass(homeMetaClass);
 
                 Assert.assertFalse(cacheEntry.isDirty());
@@ -344,7 +344,7 @@ public abstract class BaseKMemoryChunkTest {
                 KObject sensor = model.universe(0).time(0).create(sensorMetaClass);
                 sensor.set(sensorMetaClass.attribute("name"), "Sensor#1");
 
-                KMemoryChunk cacheEntry = createKMemorySegment();
+                KMemoryChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.initMetaClass(sensorMetaClass);
 
                 Assert.assertFalse(cacheEntry.isDirty());
@@ -428,7 +428,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemorySegment();
+                KMemoryChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.initMetaClass(homeMetaClass);
 
                 Assert.assertFalse(cacheEntry.isDirty());
@@ -451,7 +451,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 Assert.assertEquals("{\"attr_long\":\"U\",\"sensors\":[\"E\",\"G\"],\"value\":[\"P7JmZmZmZma\",\"P/BmZmZmZma\",\"QAAzMzMzMzN\"]}", cacheEntry.serialize(dynamicMetaModel));
 
-                KMemoryChunk newCacheEntry = createKMemorySegment();
+                KMemoryChunk newCacheEntry = createKMemoryChunk();
                 newCacheEntry.initMetaClass(homeMetaClass);
 
                 try {

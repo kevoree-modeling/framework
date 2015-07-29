@@ -16,7 +16,7 @@ import java.lang.reflect.Field;
 
 /**
  * @ignore ts
- * OffHeap implementation of KMemorySegment
+ * OffHeap implementation of KMemoryChunk
  * - Memory structure: |meta class index  |counter    |dirty    |modified indexes        |raw     |
  * -                   |(4 byte)          |(4 byte)   |(1 byte) |(meta class elem byte)  |(x byte)|
  */
@@ -425,7 +425,9 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                 } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
                     result = UNSAFE.getByte(ptr) != 0;
                 } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                    result = UNSAFE.getLong(ptr);
+                    result = UNSAFE.getDouble(ptr);
+                } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                    result = getDoubleArray(index, metaClass);
                 }
             }
 
@@ -692,19 +694,19 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                         if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
                             converted = JsonString.unescape((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                            converted = Long.parseLong((String) insideContent);
+                            converted = Base64.decodeToLong((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                            converted = Integer.parseInt((String) insideContent);
+                            converted = Base64.decodeToInt((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
                             converted = Boolean.parseBoolean((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                            converted = Double.parseDouble((String) insideContent);
+                            converted = Base64.decodeToDouble((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
                             String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
                             double[] convertedRaw = new double[plainRawSet.length];
                             for (int l = 0; l < plainRawSet.length; l++) {
                                 try {
-                                    convertedRaw[l] = Double.parseDouble(plainRawSet[l]);
+                                    convertedRaw[l] = Base64.decodeToDouble(plainRawSet[l]);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -728,13 +730,30 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                             long[] convertedRaw = new long[plainRawSet.length];
                             for (int l = 0; l < plainRawSet.length; l++) {
                                 try {
-                                    convertedRaw[l] = Long.parseLong(plainRawSet[l]);
+                                    convertedRaw[l] = Base64.decodeToLong(plainRawSet[l]);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
                             for (int k = 0; k < convertedRaw.length; k++) {
                                 addLongToArray(metaElement.index(), convertedRaw[k], metaClass);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else if (metaElement != null && (metaElement.metaType().equals(MetaType.DEPENDENCIES) || metaElement.metaType().equals(MetaType.INPUT) || metaElement.metaType().equals(MetaType.OUTPUT))) {
+                        try {
+                            String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
+                            double[] convertedRaw = new double[plainRawSet.length];
+                            for (int l = 0; l < plainRawSet.length; l++) {
+                                try {
+                                    convertedRaw[l] = Base64.decodeToDouble(plainRawSet[l]);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            for (int k = 0; k < convertedRaw.length; k++) {
+                                setDoubleArrayElem(metaElement.index(), k, convertedRaw[k], metaClass);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
