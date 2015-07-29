@@ -76,8 +76,9 @@ public class RecommendationSystemBench {
 
                     for(int j=0;j<ratingPos.length;j++){
                         KObject rating = model.createByName("Rating",0,0);
-                        rating.setByName("ownerUser",users[i]);
-                        rating.setByName("ratedProduct",products[ratingPos[j]]);
+
+                        rating.mutate(KActionType.SET, model.metaModel().metaClassByName("Rating").reference("ownerUser"),users[i]);
+                        rating.mutate(KActionType.SET, model.metaModel().metaClassByName("Rating").reference("ratedProduct"), products[ratingPos[j]]);
                         rating.setByName("ratingValue",random.nextDouble()*5);
 
                     }
