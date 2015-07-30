@@ -1,6 +1,7 @@
 
 package org.kevoree.modeling.memory.map.impl;
 
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
 import sun.misc.Unsafe;

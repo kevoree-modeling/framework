@@ -1,7 +1,9 @@
 package org.kevoree.modeling.memory.struct.chunk.impl;
 
-import org.kevoree.modeling.memory.struct.chunk.BaseKMemoryChunkTest;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+
+import org.kevoree.modeling.memory.chunk.BaseKMemoryChunkTest;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.impl.HeapMemoryChunk;
 
 public class HeapMemoryChunkTest extends BaseKMemoryChunkTest {
 

@@ -66,7 +66,7 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
     private long _start_address;
     private int _allocated_segments = 0;
 
-    public OffHeapMemoryMemoryStorage() {
+    public OffHeapMemoryMemoryStorage(OffHeapMemoryStrategy offHeapMemoryStrategy) {
         this._initalCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
 

@@ -6,8 +6,7 @@ import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 public class HeapMemoryChunkTest extends BaseKMemoryChunkTest {
 
     @Override
-    public KMemoryChunk createKMemorySegment() {
+    public KMemoryChunk createKMemoryChunk() {
         return new HeapMemoryChunk();
     }
-
 }

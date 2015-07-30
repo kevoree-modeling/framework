@@ -64,7 +64,7 @@ public class HeapMemoryStrategy implements KMemoryStrategy {
 
     @Override
     public KMemoryStorage newStorage() {
-        return new ArrayMemoryMemoryStorage();
+        return new ArrayMemoryMemoryStorage(this);
     }
 
     @Override

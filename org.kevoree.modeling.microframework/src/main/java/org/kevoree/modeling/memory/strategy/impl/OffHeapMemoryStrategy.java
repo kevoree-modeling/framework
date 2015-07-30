@@ -2,13 +2,13 @@ package org.kevoree.modeling.memory.strategy.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.map.impl.OffHeapUniverseOrderMap;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.cache.KCache;
 import org.kevoree.modeling.memory.cache.impl.SingleChainWeakRefCache;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.storage.impl.OffHeapMemoryMemoryStorage;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
-import org.kevoree.modeling.memory.map.impl.ArrayUniverseOrderMap;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.chunk.impl.OffHeapMemoryChunk;
 import org.kevoree.modeling.memory.tree.KLongLongTree;
@@ -67,7 +67,7 @@ public class OffHeapMemoryStrategy implements KMemoryStrategy {
 
     @Override
     public KMemoryStorage newStorage() {
-        return new OffHeapMemoryMemoryStorage();
+        return new OffHeapMemoryMemoryStorage(this);
     }
 
     @Override

@@ -20,7 +20,7 @@ public interface KMemoryStrategy {
 
     KMemoryElement newFromKey(long universe, long time, long uuid);
 
-    KMemoryStorage newStorage(KMemoryStrategy strategy);
+    KMemoryStorage newStorage();
 
     KCache newCache(KMemoryStorage storage);
 

@@ -5,6 +5,8 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
+import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
+import org.kevoree.modeling.memory.strategy.impl.HeapMemoryStrategy;
 import org.kevoree.modeling.meta.KMetaModel;
 
 public class ArrayMemoryMemoryStorage implements KMemoryStorage {
@@ -40,7 +42,7 @@ public class ArrayMemoryMemoryStorage implements KMemoryStorage {
         }
     }
 
-    public ArrayMemoryMemoryStorage() {
+    public ArrayMemoryMemoryStorage(KMemoryStrategy p_heapMemoryStrategy) {
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this._elementCount = 0;

@@ -1,6 +1,6 @@
 package org.kevoree.modeling.memory.map.impl;
 
-import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
