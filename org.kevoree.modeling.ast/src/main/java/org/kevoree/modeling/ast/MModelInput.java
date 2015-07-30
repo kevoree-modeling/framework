@@ -4,19 +4,16 @@ public class MModelInput {
 
     private String name;
     private String extractor;
-    private Integer index = -1;
+    protected int index = -1;
 
     public Integer getIndex() {
         return index;
     }
 
-    public void setIndex(Integer index) {
-        this.index = index;
-    }
-
-    public MModelInput(String name, String extractor) {
+    public MModelInput(String name, String extractor, int index) {
         this.name = name;
         this.extractor = extractor;
+        this.index = index;
     }
 
     public String getName() {
@@ -28,7 +25,7 @@ public class MModelInput {
     }
 
     public MModelInput clone() {
-        return new MModelInput(this.name, this.extractor);
+        return new MModelInput(this.name, this.extractor, this.index);
     }
 
 }

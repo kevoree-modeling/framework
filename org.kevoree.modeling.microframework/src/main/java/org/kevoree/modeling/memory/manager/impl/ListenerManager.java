@@ -1,7 +1,7 @@
 package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
+import org.kevoree.modeling.memory.map.impl.ArrayLongMap;
 
 public class ListenerManager {
 

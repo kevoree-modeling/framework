@@ -7,6 +7,7 @@ import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
 /**
  * Created by duke on 10/16/14.
@@ -15,7 +16,7 @@ public class JSONSaveTest {
 
     @Test
     public void escapeJsonTest() {
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
         CloudView time0 = dimension0.time(0l);
@@ -64,7 +65,7 @@ public class JSONSaveTest {
 
     @Test
     public void jsonSaveTest() {
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
 

@@ -9,15 +9,13 @@ import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Element;
 import org.kevoree.modeling.cloudmodel.Node;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
-/**
- * Created by gregory.nain on 03/12/14.
- */
 public class DeleteTest {
 
     @Test
     public void basicDeleteTest() {
-        final CloudModel model = new CloudModel();
+        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -110,7 +108,7 @@ public class DeleteTest {
     @Test
     public void simpleDeleteTest() {
 
-        final CloudModel model = new CloudModel();
+        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

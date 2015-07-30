@@ -1,13 +1,11 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.defer.KDefer;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.operation.KOperation;
-import org.kevoree.modeling.scheduler.KScheduler;
 
 public interface KModel<A extends KUniverse> {
 
@@ -17,11 +15,7 @@ public interface KModel<A extends KUniverse> {
 
     A universe(long key);
 
-    KMemoryManager manager();
-
-    KModel<A> setContentDeliveryDriver(KContentDeliveryDriver dataBase);
-
-    KModel<A> setScheduler(KScheduler scheduler);
+    KDataManager manager();
 
     void setOperation(KMetaOperation metaOperation, KOperation operation);
 

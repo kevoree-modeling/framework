@@ -4,8 +4,8 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.traversal.visitor.KModelAttributeVisitor;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayLongMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.map.impl.ArrayLongMap;
+import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
 
 import java.util.ArrayList;
 

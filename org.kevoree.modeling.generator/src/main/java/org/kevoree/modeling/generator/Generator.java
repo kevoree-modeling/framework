@@ -58,7 +58,6 @@ public class Generator {
 
             context.setModel(context.getMetaModel());
 
-            ProcessorHelper.getInstance().consolidate(context.getModel());
             generateUtilities();
             for (MModelClassifier classDecl : context.getModel().getClassifiers()) {
                 if (classDecl instanceof MModelClass) {

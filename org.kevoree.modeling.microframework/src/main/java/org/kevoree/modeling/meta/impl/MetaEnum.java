@@ -1,10 +1,9 @@
 package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.struct.map.KStringMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.map.KStringMap;
+import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.KLiteral;
-import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.MetaType;
 

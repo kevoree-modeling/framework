@@ -1,6 +1,8 @@
 package org.kevoree.modeling.cloudmodel.meta;
 
+import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.*;
+import org.kevoree.modeling.cloudmodel.impl.NodeImpl;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;

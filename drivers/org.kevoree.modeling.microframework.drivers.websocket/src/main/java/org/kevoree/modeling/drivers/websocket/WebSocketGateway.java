@@ -12,8 +12,9 @@ import io.undertow.websockets.core.WebSockets;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
-import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.map.KIntMapCallBack;
+import org.kevoree.modeling.memory.map.impl.ArrayIntMap;
 import org.kevoree.modeling.message.*;
 import org.kevoree.modeling.message.impl.*;
 
@@ -56,7 +57,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
             _server = Undertow.builder().addHttpListener(_port, _address).setHandler(websocket(this)).build();
         }
         _server.start();
-        interceptorId = wrapped.manager().cdn().addUpdateListener(new KContentUpdateListener() {
+        interceptorId = ((KInternalDataManager) wrapped.manager()).cdn().addUpdateListener(new KContentUpdateListener() {
             @Override
             public void on(KContentKey[] updatedKeys) {
                 Events events = new Events(updatedKeys);
@@ -72,7 +73,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
     }
 
     public void stop() {
-        wrapped.manager().cdn().removeUpdateListener(interceptorId);
+        ((KInternalDataManager) wrapped.manager()).cdn().removeUpdateListener(interceptorId);
         _server.stop();
     }
 
@@ -97,7 +98,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
         switch (msg.type()) {
             case KMessageLoader.GET_REQ_TYPE: {
                 final GetRequest getRequest = (GetRequest) msg;
-                wrapped.manager().cdn().get(getRequest.keys, new KCallback<String[]>() {
+                ((KInternalDataManager) wrapped.manager()).cdn().get(getRequest.keys, new KCallback<String[]>() {
                     public void on(String[] strings) {
                         GetResult getResultMessage = new GetResult();
                         getResultMessage.id = getRequest.id;
@@ -109,7 +110,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
             break;
             case KMessageLoader.PUT_REQ_TYPE: {
                 final PutRequest putRequest = (PutRequest) msg;
-                wrapped.manager().cdn().put(putRequest.keys, putRequest.values, new KCallback<Throwable>() {
+                ((KInternalDataManager) wrapped.manager()).cdn().put(putRequest.keys, putRequest.values, new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
                         if (throwable == null) {
@@ -123,7 +124,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
                             _connectedChannels_hash.each(new KIntMapCallBack<WebSocketChannel>() {
                                 @Override
                                 public void on(int key, WebSocketChannel pp_channel) {
-                                    if(p_channel != pp_channel){
+                                    if (p_channel != pp_channel) {
                                         WebSockets.sendText(payload, pp_channel, null);
                                     }
                                 }
@@ -136,7 +137,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
             break;
             case KMessageLoader.ATOMIC_GET_INC_REQUEST_TYPE: {
                 final AtomicGetIncrementRequest atomicGetRequest = (AtomicGetIncrementRequest) msg;
-                wrapped.manager().cdn().atomicGetIncrement(atomicGetRequest.key, new KCallback<Short>() {
+                ((KInternalDataManager) wrapped.manager()).cdn().atomicGetIncrement(atomicGetRequest.key, new KCallback<Short>() {
                     @Override
                     public void on(Short s) {
                         if (s != null) {
@@ -152,7 +153,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
             break;
             case KMessageLoader.OPERATION_CALL_TYPE:
             case KMessageLoader.OPERATION_RESULT_TYPE: {
-                wrapped.manager().operationManager().operationEventReceived(msg);
+                ((KInternalDataManager) wrapped.manager()).operationManager().operationEventReceived(msg);
             }
             break;
             /*

@@ -4,19 +4,16 @@ public class MModelDependency {
 
     private String name;
     private MModelClass type;
-    private Integer index = -1;
+    protected int index = -1;
 
     public Integer getIndex() {
         return index;
     }
 
-    public void setIndex(Integer index) {
-        this.index = index;
-    }
-
-    public MModelDependency(String name, MModelClass type) {
+    public MModelDependency(String name, MModelClass type, int index) {
         this.name = name;
         this.type = type;
+        this.index = index;
     }
 
     public String getName() {
@@ -28,7 +25,7 @@ public class MModelDependency {
     }
 
     public MModelDependency clone() {
-        return new MModelDependency(this.name, this.type);
+        return new MModelDependency(this.name, this.type, this.index);
     }
-    
+
 }

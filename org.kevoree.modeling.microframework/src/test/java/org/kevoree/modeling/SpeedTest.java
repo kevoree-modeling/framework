@@ -2,11 +2,7 @@ package org.kevoree.modeling;
 
 //import net.openhft.chronicle.map.ChronicleMapBuilder;
 
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KActionType;
-import org.kevoree.modeling.KModel;
-import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.KMetaAttribute;
@@ -87,7 +83,7 @@ public class SpeedTest {
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
-        final KModel universe = dynamicMetaModel.model();
+        final KModel universe = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
 
         universe.connect(new KCallback<Throwable>() {
             @Override

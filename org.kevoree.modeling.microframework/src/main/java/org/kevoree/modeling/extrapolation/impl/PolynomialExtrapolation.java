@@ -1,12 +1,12 @@
 package org.kevoree.modeling.extrapolation.impl;
 
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.util.maths.PolynomialFit;
-import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;
+import org.kevoree.modeling.memory.manager.internal.KMemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
@@ -16,13 +16,13 @@ public class PolynomialExtrapolation implements Extrapolation {
     private static int _maxDegree = 20;
 
     @Override
-    public Object extrapolate(KObject current, KMetaAttribute attribute) {
+    public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
         KMemorySegmentResolutionTrace trace = new MemorySegmentResolutionTrace();
-        KMemoryChunk raw = ((AbstractKObject) current)._manager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
+        KMemoryChunk raw = dataManager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
         if (raw != null) {
             Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), trace.getTime());
             int attTypeId = attribute.attributeType().id();
-            switch (attTypeId){
+            switch (attTypeId) {
                 case KPrimitiveTypes.CONTINUOUS_ID:
                     return extrapolatedValue;
                 case KPrimitiveTypes.DOUBLE_ID:
@@ -89,7 +89,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         int deg = (int) raw.getDoubleArrayElem(index, DEGREE, metaClass);
         int num = (int) raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass);
         double maxError = maxErr(precision, deg);
-        //If the current model fits well the new value, return
+        //If the current createModel fits well the new value, return
         if (Math.abs(extrapolateValue(raw, metaClass, index, time, timeOrigin) - value) <= maxError) {
             double nexNumSamples = raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass) + 1;
             raw.setDoubleArrayElem(index, NUMSAMPLES, nexNumSamples, metaClass);
@@ -140,7 +140,6 @@ public class PolynomialExtrapolation implements Extrapolation {
     }
 
 
-
     private double internal_extrapolate(double t, KMemoryChunk raw, int index, KMetaClass metaClass) {
         double result = 0;
         double power = 1;
@@ -167,16 +166,16 @@ public class PolynomialExtrapolation implements Extrapolation {
 
 
     @Override
-    public void mutate(KObject current, KMetaAttribute attribute, Object payload) {
+    public void mutate(KObject current, KMetaAttribute attribute, Object payload, KInternalDataManager dataManager) {
         KMemorySegmentResolutionTrace trace = new MemorySegmentResolutionTrace();
-        KMemoryChunk raw = current.manager().segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
+        KMemoryChunk raw = dataManager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
         if (raw.getDoubleArraySize(attribute.index(), current.metaClass()) == 0) {
-            raw = current.manager().segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
+            raw = dataManager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
         }
         if (!insert(current.now(), castNumber(payload), trace.getTime(), raw, attribute.index(), attribute.precision(), current.metaClass())) {
             long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + trace.getTime();
             double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, trace.getTime());
-            KMemoryChunk newSegment = current.manager().segment(current.universe(), prevTime, current.uuid(), false, current.metaClass(), null);
+            KMemoryChunk newSegment = dataManager.segment(current.universe(), prevTime, current.uuid(), false, current.metaClass(), null);
             insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
             insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
         }

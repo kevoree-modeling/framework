@@ -1,6 +1,6 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaOperation;
@@ -56,7 +56,7 @@ public interface KObject {
 
     void call(KMetaOperation operation, Object[] params, KCallback<Object> cb);
 
-    KMemoryManager manager();
+    KDataManager manager();
 
     void save(KCallback cb);
 

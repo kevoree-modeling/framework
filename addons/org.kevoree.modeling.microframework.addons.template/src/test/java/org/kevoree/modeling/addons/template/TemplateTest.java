@@ -2,6 +2,7 @@ package org.kevoree.modeling.addons.template;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
@@ -16,7 +17,7 @@ public class TemplateTest {
         KMetaReference sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
 
 
-        KModel model = metaModel.model();
+        KModel model = metaModel.createModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -56,7 +57,7 @@ public class TemplateTest {
                             sensor.setByName("value", System.currentTimeMillis());
                             sensor2.setByName("value", System.currentTimeMillis());
                             sensor3.setByName("value", System.currentTimeMillis());
-                            model.save(null);
+                            createModel.save(null);
                             try {
                                 Thread.sleep(100);
                             } catch (InterruptedException e) {

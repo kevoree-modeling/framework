@@ -3,7 +3,8 @@ package org.kevoree.modeling.format.json;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.format.KModelFormat;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.manager.KDataManager;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.util.Checker;
 
 public class JsonFormat implements KModelFormat {
@@ -14,13 +15,13 @@ public class JsonFormat implements KModelFormat {
 
     public static final String KEY_ROOT = "@root";
 
-    private KMemoryManager _manager;
+    private KInternalDataManager _manager;
 
     private long _universe;
 
     private long _time;
 
-    public JsonFormat(long p_universe, long p_time, KMemoryManager p_manager) {
+    public JsonFormat(long p_universe, long p_time, KInternalDataManager p_manager) {
         this._manager = p_manager;
         this._universe = p_universe;
         this._time = p_time;

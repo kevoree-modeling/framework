@@ -7,7 +7,9 @@ import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.infer.impl.GaussianClassifierAlg;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -203,7 +205,7 @@ public class GaussianClassificationTest {
 
 
         KMetaModel mm = createMetaModel();
-        KModel model = mm.model();
+        KModel model = mm.createModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -221,7 +223,7 @@ public class GaussianClassificationTest {
 
                     Object[] output = new Object[1];
                     output[0] = irisInstance.getByName("type");
-                    gaussianProfile.train(new KObject[]{irisInstance}, output, null);
+                    gaussianProfile.genericTrain(new KObject[]{irisInstance}, output, null);
                 }
 
                 KObject[][] irisInstanceTest = new KObject[3][1];
@@ -251,16 +253,14 @@ public class GaussianClassificationTest {
 
 
                 //for debug
-                KMemoryChunk ks = gaussianProfile.manager().segment(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
+                KMemoryChunk ks = ((KInternalDataManager)model.manager()).segment(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
 
-
-                
-                gaussianProfile.inferAll(irisInstanceTest, new KCallback<Object[][]>() {
+                gaussianProfile.genericInferAll(irisInstanceTest, new KCallback<Object[][]>() {
                     @Override
                     public void on(Object[][] objects) {
                         //to replace by iris type later
-                        Assert.assertTrue(objects[0][0]==(mm.metaTypeByName("IrisType")).literalByName("IRISSETOSA"));
-                        Assert.assertTrue(objects[1][0] == ( mm.metaTypeByName("IrisType")).literalByName("IRISVERSICOLOUR"));
+                        Assert.assertTrue(objects[0][0] == (mm.metaTypeByName("IrisType")).literalByName("IRISSETOSA"));
+                        Assert.assertTrue(objects[1][0] == (mm.metaTypeByName("IrisType")).literalByName("IRISVERSICOLOUR"));
                         Assert.assertTrue(objects[2][0] == (mm.metaTypeByName("IrisType")).literalByName("IRISVIRGINICA"));
                     }
                 });

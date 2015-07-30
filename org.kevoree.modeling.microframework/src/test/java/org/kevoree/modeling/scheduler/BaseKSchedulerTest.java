@@ -6,6 +6,7 @@ import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
 public abstract class BaseKSchedulerTest {
 
@@ -13,16 +14,14 @@ public abstract class BaseKSchedulerTest {
 
     @Test
     public void test() {
-        final CloudModel model = new CloudModel();
-        model.setScheduler(createScheduler());
-
+        final CloudModel model = new CloudModel(DataManagerBuilder.create().withScheduler(createScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
                 CloudUniverse dimension0 = model.newUniverse();
                 CloudView time0 = dimension0.time(0l);
                 final Node root = time0.createNode();
-                time0.setRoot(root,null);
+                time0.setRoot(root, null);
                 root.setName("root");
                 Node n1 = time0.createNode();
                 n1.setName("n1");

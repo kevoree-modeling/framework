@@ -7,6 +7,7 @@ import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.infer.impl.StatInferAlg;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -36,7 +37,7 @@ public class BaseKObjectInferTest {
     @Test
     public void test() {
         KMetaModel mm = createMetaModel();
-        KModel model = mm.model();
+        KModel model = mm.createModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -49,10 +50,10 @@ public class BaseKObjectInferTest {
                 sensor2.setByName("value", 0.22);
 
                 KObjectInfer sensorProfile = (KObjectInfer) model.createByName("SensorProfile", 0, 0);
-                sensorProfile.train(new KObject[]{sensor1}, null, null);
-                sensorProfile.train(new KObject[]{sensor2}, null, null);
+                sensorProfile.genericTrain(new KObject[]{sensor1}, null, null);
+                sensorProfile.genericTrain(new KObject[]{sensor2}, null, null);
 
-                sensorProfile.infer(new KObject[]{sensor2}, new KCallback<Object[]>() {
+                sensorProfile.genericInfer(new KObject[]{sensor2}, new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] objects) {
                         Assert.assertEquals(objects[0], 0.32);

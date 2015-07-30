@@ -4,11 +4,11 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.abs.AbstractKModel;
-import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.KContentKey;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.struct.tree.KLongTree;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.tree.KLongTree;
 
 public class LookupAllObjectsRunnable implements Runnable {
 
@@ -17,9 +17,9 @@ public class LookupAllObjectsRunnable implements Runnable {
 
     private long[] _keys;
     private KCallback<KObject[]> _callback;
-    private MemoryManager _store;
+    private DataManager _store;
 
-    public LookupAllObjectsRunnable(long p_universe, long p_time, long[] p_keys, KCallback<KObject[]> p_callback, MemoryManager p_store) {
+    public LookupAllObjectsRunnable(long p_universe, long p_time, long[] p_keys, KCallback<KObject[]> p_callback, DataManager p_store) {
         this._universe = p_universe;
         this._time = p_time;
 

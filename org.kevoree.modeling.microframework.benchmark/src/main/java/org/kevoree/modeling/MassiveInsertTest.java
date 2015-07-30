@@ -1,5 +1,7 @@
 package org.kevoree.modeling;
 
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -15,7 +17,7 @@ public class MassiveInsertTest {
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass metaClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute attribute = metaClass.addAttribute("value", KPrimitiveTypes.LONG);
-        KModel model = metaModel.model();
+        KModel model = metaModel.createModel(DataManagerBuilder.buildDefault());
 
 
         model.connect(new KCallback() {

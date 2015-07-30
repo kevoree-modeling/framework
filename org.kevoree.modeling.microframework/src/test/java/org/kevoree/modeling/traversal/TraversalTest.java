@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
@@ -19,7 +20,7 @@ public class TraversalTest {
 
     @Test
     public void simpleTraversalTest() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         final CloudUniverse dimension0 = universe.newUniverse();
         final CloudView t0 = dimension0.time(0l);
@@ -110,7 +111,7 @@ public class TraversalTest {
 
     @Test
     public void chainedTraversalTest() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         final CloudUniverse dimension0 = universe.newUniverse();
         final CloudView t0 = dimension0.time(0l);
@@ -152,7 +153,7 @@ public class TraversalTest {
 
     @Test
     public void filterTest() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         final CloudUniverse dimension0 = universe.newUniverse();
         final CloudView t0 = dimension0.time(0l);
@@ -201,7 +202,7 @@ public class TraversalTest {
 
     @Test
     public void parentTest() {
-        final CloudModel model = new CloudModel();
+        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -233,7 +234,7 @@ public class TraversalTest {
 
     @Test
     public void traverseQueryTest() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -328,7 +329,7 @@ public class TraversalTest {
 
     @Test
     public void attributeQueryTest() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         final CloudUniverse dimension0 = universe.newUniverse();
         final CloudView t0 = dimension0.time(0l);
@@ -426,7 +427,7 @@ public class TraversalTest {
 
     @Test
     public void deepCollectorTest() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         final CloudUniverse dimension0 = universe.newUniverse();
         final CloudView t0 = dimension0.time(0l);

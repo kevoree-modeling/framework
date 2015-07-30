@@ -4,6 +4,8 @@ import java.util.*;
 
 public class MModelClass extends MModelClassifier {
 
+    public int globalIndex = 0;
+
     private Map<String, MModelAttribute> attributes = new HashMap<String, MModelAttribute>();
     private Map<String, MModelReference> references = new HashMap<String, MModelReference>();
     private Map<String, MModelClass> parents = new HashMap<String, MModelClass>();
@@ -17,7 +19,7 @@ public class MModelClass extends MModelClassifier {
         this.name = name;
     }
 
-    public boolean isInferred(){
+    public boolean isInferred() {
         return this.inference != null;
     }
 
@@ -90,8 +92,15 @@ public class MModelClass extends MModelClassifier {
         dependencies.put(el.getName(), el);
     }
 
-    public Collection<MModelDependency> getDependencies() {
-        return dependencies.values();
+    public MModelDependency[] getDependencies() {
+        MModelDependency[] flat = dependencies.values().toArray(new MModelDependency[dependencies.size()]);
+        Arrays.sort(flat, new Comparator<MModelDependency>() {
+            @Override
+            public int compare(MModelDependency o1, MModelDependency o2) {
+                return o1.getIndex() - o2.getIndex();
+            }
+        });
+        return flat;
     }
 
     public void addInput(MModelInput el) {
@@ -106,8 +115,19 @@ public class MModelClass extends MModelClassifier {
         outputs.put(el.getName(), el);
     }
 
-    public Collection<MModelOutput> getOutputs() {
-        return outputs.values();
+    public MModelOutput[] getOutputs() {
+        MModelOutput[] flat = outputs.values().toArray(new MModelOutput[outputs.size()]);
+        Arrays.sort(flat, new Comparator<MModelOutput>() {
+            @Override
+            public int compare(MModelOutput o1, MModelOutput o2) {
+                return o1.getIndex() - o2.getIndex();
+            }
+        });
+        return flat;
+    }
+
+    public boolean multipleOutput() {
+        return this.getOutputs().length > 1;
     }
 
     public Collection<MModelReference> getReferences() {

@@ -8,6 +8,7 @@ import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
 /**
  * Created by duke on 28/11/14.
@@ -17,9 +18,9 @@ public class ParentStorageTest {
     @Test
     public void discardTest() {
 
-        CloudModel cloudModel = new CloudModel();
+        CloudModel cloudModel = new CloudModel(DataManagerBuilder.buildDefault());
         cloudModel.connect(null);
-        //model.connect(null);
+        //createModel.connect(null);
 
         CloudUniverse dimension0 = cloudModel.newUniverse();
         final CloudView time0 = dimension0.time(0l);
@@ -75,7 +76,7 @@ public class ParentStorageTest {
      //   MultiLayeredMemoryCache.DEBUG = true;
         //MemoryKContentDeliveryDriver.DEBUG = true;
 
-        final CloudModel cloudModel = new CloudModel();
+        final CloudModel cloudModel = new CloudModel(DataManagerBuilder.buildDefault());
         cloudModel.connect(null);
 
         CloudUniverse dimension0 = cloudModel.newUniverse();

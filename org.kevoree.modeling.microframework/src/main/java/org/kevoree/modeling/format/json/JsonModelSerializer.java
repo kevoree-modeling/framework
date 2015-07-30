@@ -5,7 +5,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 
 public class JsonModelSerializer {
 

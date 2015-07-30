@@ -7,8 +7,8 @@ import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.map.KStringMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.map.KStringMap;
+import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.*;
 
 public class MetaClass implements KMetaClass {

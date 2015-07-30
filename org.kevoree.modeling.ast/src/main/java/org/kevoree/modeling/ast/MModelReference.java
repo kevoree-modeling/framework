@@ -5,7 +5,7 @@ public class MModelReference {
     private String name;
     private MModelClass type;
     private String opposite = null;
-    private Integer index = -1;
+    protected int index = -1;
     private boolean single = true;
     private boolean visible = true;
 
@@ -17,9 +17,10 @@ public class MModelReference {
         this.index = index;
     }
 
-    public MModelReference(String name, MModelClass type) {
+    public MModelReference(String name, MModelClass type, int index) {
         this.name = name;
         this.type = type;
+        this.index = index;
     }
 
     public String getName() {
@@ -47,7 +48,7 @@ public class MModelReference {
     }
 
     public MModelReference clone() {
-        MModelReference cloned = new MModelReference(this.name, this.type);
+        MModelReference cloned = new MModelReference(this.name, this.type, this.index);
         cloned.opposite = opposite;
         cloned.single = single;
         cloned.visible = visible;

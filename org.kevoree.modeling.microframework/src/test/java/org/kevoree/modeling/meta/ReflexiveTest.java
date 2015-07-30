@@ -5,10 +5,7 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
-import org.kevoree.modeling.meta.KMetaClass;
-import org.kevoree.modeling.meta.KMetaReference;
-import org.kevoree.modeling.meta.KPrimitiveTypes;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
 /**
@@ -29,7 +26,7 @@ public class ReflexiveTest {
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
 
-        final KModel universe = metaModel.model();
+        final KModel universe = metaModel.createModel(DataManagerBuilder.buildDefault());
         universe.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

@@ -2,7 +2,8 @@ package org.kevoree.modeling.infer.impl;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.util.maths.Distribution;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
@@ -55,9 +56,9 @@ public class GaussianProfiler implements KInferAlg {
 
     //in the trainingset, first value is time needs to be preprocessed into int 0-23, other values are electrical features, expectedResult is null
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResult, KObject origin){
+    public void train(double[][] trainingSet, double[][] expectedResult, KObject origin, KInternalDataManager manager){
 
-        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
         int size=(maxTimeSlots+1)*((origin.metaClass().inputs().length-1)*NUMOFFIELDS+1);
@@ -122,8 +123,8 @@ public class GaussianProfiler implements KInferAlg {
     //result is the probability of every point of the profiler needs to be averaged afterward - threshold here is not defined.
 
     @Override
-    public  double[][] infer(double[][] features, KObject origin) {
-        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+    public  double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
+        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //check if segment is empty
         int size=(maxTimeSlots+1)*((origin.metaClass().inputs().length-1)*NUMOFFIELDS+1);

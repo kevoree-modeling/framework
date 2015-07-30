@@ -2,24 +2,19 @@ package org.kevoree.modeling;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.Element;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
-
-/**
- * Created by thomas on 10/21/14.
- */
 public class TimeTest {
 
     @Test
     public void timeCreationTest() {
 
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
 
@@ -53,7 +48,7 @@ public class TimeTest {
 
     @Test
     public void jumpTest() {
-        CloudModel cloud = new CloudModel();
+        CloudModel cloud = new CloudModel(DataManagerBuilder.buildDefault());
         cloud.connect(null);
         CloudUniverse universe = cloud.newUniverse();
 
@@ -76,7 +71,7 @@ public class TimeTest {
 
     @Test
     public void simpleTimeNavigationTest() {
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
 
@@ -115,7 +110,7 @@ public class TimeTest {
 
     @Test
     public void distortedTimeNavigationTest() {
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
 
@@ -183,7 +178,7 @@ public class TimeTest {
 
     @Test
     public void objectModificationTest() {
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -237,7 +232,7 @@ public class TimeTest {
     @Test
     public void timeUpdateWithLookupTest() {
 
-        CloudModel model = new CloudModel();
+        CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
         model.connect(null);
         CloudUniverse universe = model.newUniverse();
         CloudView t0 = universe.time(0L);
@@ -287,7 +282,7 @@ public class TimeTest {
     @Test
     public void timeUpdateWithSelectTest() {
 
-        final CloudModel model = new CloudModel();
+        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
         model.connect(null);
         CloudUniverse universe = model.newUniverse();
         CloudView t0 = universe.time(0L);

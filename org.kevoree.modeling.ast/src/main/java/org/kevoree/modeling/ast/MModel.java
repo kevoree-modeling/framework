@@ -183,7 +183,8 @@ public class MModel {
                     } else {
                         value = attType.getText();
                     }
-                    final MModelAttribute attribute = new MModelAttribute(name, value);
+                    final MModelAttribute attribute = new MModelAttribute(name, value, newClass.globalIndex);
+                    newClass.globalIndex++;
                     for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : attDecl.annotationDeclr()) {
                         if (annotDecl.IDENT().getText().toLowerCase().equals("precision") && annotDecl.NUMBER() != null) {
                             attribute.setPrecision(Double.parseDouble(annotDecl.NUMBER().getText()));
@@ -193,7 +194,8 @@ public class MModel {
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.ReferenceDeclarationContext refDecl : classDeclrContext.referenceDeclaration()) {
                     final MModelClass refType = model.getOrAddClass(refDecl.TYPE_NAME().getText());
-                    MModelReference reference = new MModelReference(refDecl.IDENT().getText(), refType);
+                    MModelReference reference = new MModelReference(refDecl.IDENT().getText(), refType, newClass.globalIndex);
+                    newClass.globalIndex++;
                     if (refDecl.getText().trim().startsWith("ref*")) {
                         reference.setSingle(false);
                     }
@@ -209,11 +211,13 @@ public class MModel {
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.DependencyDeclarationContext dependencyDeclarationContext : classDeclrContext.dependencyDeclaration()) {
                     final MModelClass depType = model.getOrAddClass(dependencyDeclarationContext.TYPE_NAME().getText());
-                    MModelDependency dependency = new MModelDependency(dependencyDeclarationContext.IDENT().getText(), depType);
+                    MModelDependency dependency = new MModelDependency(dependencyDeclarationContext.IDENT().getText(), depType, newClass.globalIndex);
+                    newClass.globalIndex++;
                     newClass.addDependency(dependency);
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.InputDeclarationContext inputDeclarationContext : classDeclrContext.inputDeclaration()) {
-                    MModelInput input = new MModelInput(inputDeclarationContext.IDENT().getText(), cleanString(inputDeclarationContext.STRING().getText()));
+                    MModelInput input = new MModelInput(inputDeclarationContext.IDENT().getText(), cleanString(inputDeclarationContext.STRING().getText()), newClass.globalIndex);
+                    newClass.globalIndex++;
                     newClass.addInput(input);
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.OutputDeclarationContext outputDeclarationContext : classDeclrContext.outputDeclaration()) {
@@ -224,7 +228,8 @@ public class MModel {
                     } else {
                         typeName = attType.getText();
                     }
-                    MModelOutput output = new MModelOutput(outputDeclarationContext.IDENT().getText(), typeName);
+                    MModelOutput output = new MModelOutput(outputDeclarationContext.IDENT().getText(), typeName, newClass.globalIndex);
+                    newClass.globalIndex++;
                     newClass.addOutput(output);
                 }
                 if (classDeclrContext.classParentDeclr() != null) {
@@ -262,7 +267,8 @@ public class MModel {
                 return registeredRef;
             }
         }
-        MModelReference reference = new MModelReference(refName, refType);
+        MModelReference reference = new MModelReference(refName, refType, owner.globalIndex);
+        owner.globalIndex++;
         owner.addReference(reference);
         return reference;
     }
@@ -308,7 +314,8 @@ public class MModel {
             for (MModelReference ref : classDecl.getReferences().toArray(new MModelReference[classDecl.getReferences().size()])) {
                 if (ref.getOpposite() == null) {
                     //Create opposite relation
-                    MModelReference op_ref = new MModelReference("op_" + classDecl.getName() + "_" + ref.getName(), classDecl);
+                    MModelReference op_ref = new MModelReference("op_" + classDecl.getName() + "_" + ref.getName(), classDecl, classDecl.globalIndex);
+                    classDecl.globalIndex++;
                     op_ref.setVisible(false);
                     op_ref.setSingle(false);
                     op_ref.setOpposite(ref.getName());
@@ -316,7 +323,6 @@ public class MModel {
                     //add the relation on  the other side
                     ref.getType().addReference(op_ref);
                     ref.setOpposite(op_ref.getName());
-
                 }
             }
         }

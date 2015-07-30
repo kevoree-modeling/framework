@@ -4,8 +4,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.struct.chunk.impl.HeapMemoryChunk;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.impl.HeapMemoryChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -17,17 +18,15 @@ public class Array3DTest {
     public void test() {
         KMetaModel mm = new MetaModel("test");
         KMetaClass mc = mm.addInferMetaClass("infer_class", new KInferAlg() {
-
             @Override
-            public void train(double[][] trainingSet, double[][] expectedResultSet, KObject currentInferObject) {
+            public void train(double[][] trainingSet, double[][] expectedResultSet, KObject currentInferObject, KInternalDataManager manager) {
 
             }
 
             @Override
-            public double[][] infer(double[][] features, KObject currentInferObject) {
+            public double[][] infer(double[][] features, KObject currentInferObject, KInternalDataManager manager) {
                 return new double[0][];
             }
-
         });
         KMemoryChunk segment = new HeapMemoryChunk();
         segment.initMetaClass(mc);

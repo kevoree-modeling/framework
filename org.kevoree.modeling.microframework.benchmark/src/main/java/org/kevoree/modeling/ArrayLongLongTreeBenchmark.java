@@ -1,6 +1,6 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.memory.struct.tree.impl.ArrayLongLongTree;
+import org.kevoree.modeling.memory.tree.impl.ArrayLongLongTree;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -14,7 +14,7 @@ public class ArrayLongLongTreeBenchmark {
         ArrayLongLongTree tree = new ArrayLongLongTree();
         HashMap<Long, Long> referee = new HashMap<Long, Long>();
         Random random = new Random();
-        int nb = 1000000;
+        int nb = 10000000;
         ExecutorService service = Executors.newFixedThreadPool(1000);
         for (long i = 0; i < nb; i++) {
             final long key = random.nextLong();

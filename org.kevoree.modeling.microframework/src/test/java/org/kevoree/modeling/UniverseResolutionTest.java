@@ -3,8 +3,8 @@ package org.kevoree.modeling;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.memory.manager.impl.ResolutionHelper;
-import org.kevoree.modeling.memory.struct.map.KLongLongMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.map.KLongLongMap;
+import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
 
 /**
  * Created by duke on 03/03/15.

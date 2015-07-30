@@ -1,9 +1,9 @@
 package org.kevoree.modeling.memory.manager.impl;
 
-import org.kevoree.modeling.memory.manager.KMemorySegmentResolutionTrace;
-import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.struct.tree.KLongTree;
+import org.kevoree.modeling.memory.manager.internal.KMemorySegmentResolutionTrace;
+import org.kevoree.modeling.memory.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.tree.KLongTree;
 
 public class MemorySegmentResolutionTrace implements KMemorySegmentResolutionTrace {
 

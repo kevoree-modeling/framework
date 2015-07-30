@@ -3,6 +3,7 @@ package org.kevoree.modeling.meta.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KUniverse;
 import org.kevoree.modeling.abs.AbstractKModel;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 
@@ -10,8 +11,8 @@ class GenericModel extends AbstractKModel {
 
     private KMetaModel _p_metaModel;
 
-    protected GenericModel(KMetaModel mm) {
-        super();
+    protected GenericModel(KMetaModel mm, KInternalDataManager p_manager) {
+        super(p_manager);
         this._p_metaModel = mm;
     }
 

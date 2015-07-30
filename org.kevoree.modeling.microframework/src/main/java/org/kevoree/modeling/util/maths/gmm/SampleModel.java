@@ -656,12 +656,12 @@ public class SampleModel{
     }
 
     /**
-     * This method derives the conditional distribution of the actual sample model kde with distribution p(x).
+     * This method derives the conditional distribution of the actual sample createModel kde with distribution p(x).
      * It takes a condition parameter that is a vector c of dimension m. Using this vector
      * it finds the conditional distribution p(x*|c) where c=(x_0,...,x_m), x*=(x_m+1,...,x_n).
      * For detailed description see:
      * @param condition A vector that defines c in p(x*|c)
-     * @return The conditional distribution of this sample model under the given condition
+     * @return The conditional distribution of this sample createModel under the given condition
      */
     public ConditionalDistribution getConditionalDistribution(SimpleMatrix condition){
         int lenCond = condition.numRows();

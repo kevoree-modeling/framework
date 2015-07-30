@@ -1,16 +1,16 @@
 package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.struct.cache.KCache;
-import org.kevoree.modeling.memory.struct.map.KLongLongMap;
-import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.struct.tree.KLongTree;
+import org.kevoree.modeling.memory.storage.KMemoryStorage;
+import org.kevoree.modeling.memory.map.KLongLongMap;
+import org.kevoree.modeling.memory.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.tree.KLongTree;
 
 public class ResolutionHelper {
 
-    public static MemorySegmentResolutionTrace resolve_trees(long universe, long time, long uuid, KCache cache) {
+    public static MemorySegmentResolutionTrace resolve_trees(long universe, long time, long uuid, KMemoryStorage cache) {
         MemorySegmentResolutionTrace result = new MemorySegmentResolutionTrace();
         KUniverseOrderMap objectUniverseTree = (KUniverseOrderMap) cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
         KUniverseOrderMap globalUniverseOrder = (KUniverseOrderMap) cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);

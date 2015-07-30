@@ -6,6 +6,7 @@ import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
 /**
  * Created by duke on 04/02/15.
@@ -14,7 +15,7 @@ public class ParentAndReverseTest {
 
     @Test
     public void reverseQueryTest() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

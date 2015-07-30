@@ -2,11 +2,12 @@ package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.defer.KDefer;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.operation.KOperation;
 import org.kevoree.modeling.scheduler.KScheduler;
-import org.kevoree.modeling.memory.manager.impl.MemoryManager;
+import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
@@ -15,12 +16,13 @@ import org.kevoree.modeling.util.Checker;
 
 public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
-    final protected KMemoryManager _manager;
+    final protected KInternalDataManager _manager;
 
     final private long _key;
 
-    protected AbstractKModel() {
-        _manager = new MemoryManager(this);
+    protected AbstractKModel(KInternalDataManager p_manager) {
+        _manager = p_manager;
+        _manager.setModel(this);
         _key = _manager.nextModelKey();
     }
 
@@ -37,7 +39,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public KMemoryManager manager() {
+    public KDataManager manager() {
         return _manager;
     }
 
@@ -45,7 +47,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     public A newUniverse() {
         long nextKey = _manager.nextUniverseKey();
         final A newDimension = internalCreateUniverse(nextKey);
-        manager().initUniverse(newDimension, null);
+        _manager.initUniverse(newDimension, null);
         return newDimension;
     }
 
@@ -60,7 +62,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     @Override
     public A universe(long key) {
         A newDimension = internalCreateUniverse(key);
-        manager().initUniverse(newDimension, null);
+        _manager.initUniverse(newDimension, null);
         return newDimension;
     }
 
@@ -75,25 +77,13 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public KModel<A> setContentDeliveryDriver(KContentDeliveryDriver p_driver) {
-        manager().setContentDeliveryDriver(p_driver);
-        return this;
-    }
-
-    @Override
-    public KModel<A> setScheduler(KScheduler p_scheduler) {
-        manager().setScheduler(p_scheduler);
-        return this;
-    }
-
-    @Override
     public void setOperation(KMetaOperation metaOperation, KOperation operation) {
-        manager().operationManager().registerOperation(metaOperation, operation, null);
+        _manager.operationManager().registerOperation(metaOperation, operation, null);
     }
 
     @Override
     public void setInstanceOperation(KMetaOperation metaOperation, KObject target, KOperation operation) {
-        manager().operationManager().registerOperation(metaOperation, operation, target);
+        _manager.operationManager().registerOperation(metaOperation, operation, target);
     }
 
     @Override
@@ -129,7 +119,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public KListener createListener(long universe){
+    public KListener createListener(long universe) {
         return _manager.createListener(universe);
     }
 

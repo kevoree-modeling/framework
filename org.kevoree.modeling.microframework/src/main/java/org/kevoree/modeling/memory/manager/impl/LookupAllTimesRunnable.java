@@ -6,12 +6,12 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.memory.KMemoryElement;
-import org.kevoree.modeling.memory.struct.map.KLongLongMap;
-import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
-import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.struct.tree.KLongTree;
+import org.kevoree.modeling.memory.map.KLongLongMap;
+import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
+import org.kevoree.modeling.memory.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.tree.KLongTree;
 
 public class LookupAllTimesRunnable implements Runnable {
 
@@ -19,9 +19,9 @@ public class LookupAllTimesRunnable implements Runnable {
     private long[] _times;
     private long _uuid;
     private KCallback<KObject[]> _callback;
-    private MemoryManager _store;
+    private DataManager _store;
 
-    public LookupAllTimesRunnable(long p_universe, long[] p_times, long p_key, KCallback<KObject[]> p_callback, MemoryManager p_store) {
+    public LookupAllTimesRunnable(long p_universe, long[] p_times, long p_key, KCallback<KObject[]> p_callback, DataManager p_store) {
         this._universe = p_universe;
         this._times = p_times;
 

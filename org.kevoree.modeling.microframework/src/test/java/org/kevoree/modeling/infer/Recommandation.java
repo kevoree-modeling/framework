@@ -6,9 +6,8 @@ import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.infer.impl.RecommendationAlg;
-import org.kevoree.modeling.infer.impl.StatInferAlg;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
-import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -50,7 +49,7 @@ public class Recommandation {
     @Test
     public void recTest(){
         KMetaModel mm = createMetaModel();
-        KModel model = mm.model();
+        KModel model = mm.createModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -67,11 +66,11 @@ public class Recommandation {
                 KObject product1 = model.createByName("Product",0,0);
                 long pid= product1.uuid(); //get product Id to map it with the db ID
 
-                //set ratings between user and products and train the rec
-                // train all ratings
-                // train the recommender here, send user object, producut object rating
+                //set ratings between user and products and genericTrain the rec
+                // genericTrain all ratings
+                // genericTrain the recommender here, send user object, producut object rating
                 //
-                // recommendation.train(user1,product1, rating);
+                // recommendation.genericTrain(user1,product1, rating);
 
 
             }

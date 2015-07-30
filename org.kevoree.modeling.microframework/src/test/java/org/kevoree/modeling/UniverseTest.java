@@ -7,6 +7,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.Node;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class UniverseTest {
 
     @Test
     public void testCreation() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -43,7 +44,7 @@ public class UniverseTest {
 
     @Test
     public void testTimeWalker() {
-        final CloudModel universe = new CloudModel();
+        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

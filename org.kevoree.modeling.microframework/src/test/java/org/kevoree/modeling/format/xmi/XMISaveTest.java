@@ -8,15 +8,13 @@ import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.Element;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
-/**
- * Created by gregory.nain on 16/10/2014.
- */
 public class XMISaveTest {
 
     @Test
     public void xmiSaveTest() throws InterruptedException {
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
         final CloudView t0 = dimension0.time(0l);

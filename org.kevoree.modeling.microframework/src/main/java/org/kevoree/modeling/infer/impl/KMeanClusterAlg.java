@@ -2,38 +2,40 @@ package org.kevoree.modeling.infer.impl;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
+
 import java.util.Random;
 
 public class KMeanClusterAlg implements KInferAlg {
 
     //TODO to replace by meta-learning parameters
-    private int k=3; //number of clusters
-    private int iterations=100;
+    private int k = 3; //number of clusters
+    private int iterations = 100;
 
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin) {
-        if(trainingSet.length<k){
+    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
+        if (trainingSet.length < k) {
             throw new RuntimeException("training setPrimitiveType not enough");
         }
-        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
-        int size=k*origin.metaClass().inputs().length;
+        int size = k * origin.metaClass().inputs().length;
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             ks.extendDoubleArray(origin.metaClass().dependencies().index(), size, origin.metaClass());
 
             //Start by selecting first K points as centroids
-            for(int i=0;i<k;i++){
-                for(int j=0;j<origin.metaClass().inputs().length;j++) {
+            for (int i = 0; i < k; i++) {
+                for (int j = 0; j < origin.metaClass().inputs().length; j++) {
                     ks.setDoubleArrayElem(dependenciesIndex, j + i * origin.metaClass().inputs().length, trainingSet[i][j], origin.metaClass());
                 }
             }
         }
-        Array1D state = new Array1D(size,0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
+        Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
-        for(int iter=0;iter<iterations;iter++) {
+        for (int iter = 0; iter < iterations; iter++) {
             int temporalClassification;
             double[][] centroids = new double[k][origin.metaClass().inputs().length];
             int[] counters = new int[k];
@@ -62,7 +64,7 @@ public class KMeanClusterAlg implements KInferAlg {
                     }
                 } else {
                     Random rand = new Random();
-                    int pos=rand.nextInt(trainingSet.length);
+                    int pos = rand.nextInt(trainingSet.length);
                     for (int j = 0; j < origin.metaClass().inputs().length; j++) {
                         state.set(j + i * origin.metaClass().inputs().length, trainingSet[pos][j]);
                     }
@@ -73,20 +75,19 @@ public class KMeanClusterAlg implements KInferAlg {
 
     private int classify(double[] features, Array1D state) {
         double maxdistance = -1;
-        int classNum=-1;
-        for(int i=0;i<k;i++){
-            double currentdist=0;
-            for(int j=0;j<features.length;j++){
-                currentdist+=(features[j]-state.get(i*features.length+j))*(features[j]-state.get(i*features.length+j));
+        int classNum = -1;
+        for (int i = 0; i < k; i++) {
+            double currentdist = 0;
+            for (int j = 0; j < features.length; j++) {
+                currentdist += (features[j] - state.get(i * features.length + j)) * (features[j] - state.get(i * features.length + j));
             }
-            if(maxdistance<0){
-                maxdistance=currentdist;
-                classNum=i;
-            }
-            else{
-                if(currentdist<maxdistance){
-                    maxdistance=currentdist;
-                    classNum=i;
+            if (maxdistance < 0) {
+                maxdistance = currentdist;
+                classNum = i;
+            } else {
+                if (currentdist < maxdistance) {
+                    maxdistance = currentdist;
+                    classNum = i;
                 }
             }
         }
@@ -94,20 +95,20 @@ public class KMeanClusterAlg implements KInferAlg {
     }
 
     @Override
-    public double[][] infer(double[][] features, KObject origin) {
-        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+    public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
+        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
-        int size=k*origin.metaClass().inputs().length;
+        int size = k * origin.metaClass().inputs().length;
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;
         }
-        Array1D state = new Array1D(size,0,origin.metaClass().dependencies().index(),ks,origin.metaClass());
+        Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
         double[][] result = new double[features.length][1];
 
-        for(int inst=0;inst<features.length;inst++){
-            result[inst]=new double[1];
-            result[inst][0]=classify(features[inst], state);
+        for (int inst = 0; inst < features.length; inst++) {
+            result[inst] = new double[1];
+            result[inst][0] = classify(features[inst], state);
         }
         return result;
     }

@@ -4,19 +4,16 @@ public class MModelOutput {
 
     private String name;
     private String type;
-    private Integer index = -1;
+    protected int index = -1;
 
     public Integer getIndex() {
         return index;
     }
 
-    public void setIndex(Integer index) {
-        this.index = index;
-    }
-
-    public MModelOutput(String name, String type) {
+    public MModelOutput(String name, String type, int index) {
         this.name = name;
         this.type = type;
+        this.index = index;
     }
 
     public String getName() {
@@ -28,7 +25,7 @@ public class MModelOutput {
     }
 
     public MModelOutput clone() {
-        return new MModelOutput(this.name, this.type);
+        return new MModelOutput(this.name, this.type, this.index);
     }
 
 }

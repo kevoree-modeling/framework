@@ -3,6 +3,7 @@ package org.kevoree.modeling.meta;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KType;
 import org.kevoree.modeling.infer.KInferAlg;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 
 public interface KMetaModel extends KMeta {
 
@@ -22,6 +23,6 @@ public interface KMetaModel extends KMeta {
 
     KMetaEnum addMetaEnum(String enumName);
 
-    KModel model();
+    KModel createModel(KInternalDataManager manager);
 
 }

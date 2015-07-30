@@ -27,8 +27,18 @@ public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#f
 #end
 
 #if($classDeclaration.isInferred())
+
     #set($i = 0)
-    public void train(#foreach($dependency in $classDeclaration.dependencies) #if($i!=0),#end ${dependency.type.pack}.$dependency.type.name $dependency.name #set($i=$i+1) #end);
+    public void train(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.$dependency.type.name $dependency.name#set($i=$i+1)#end#foreach($output in $classDeclaration.outputs)#if($i!=0), #end${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})} $output.name#set($i=$i+1)#end#if($i!=0),#end org.kevoree.modeling.KCallback callback);
+
+    #set($i = 0)
+    public void trainAll(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.${dependency.type.name}[] ${dependency.name}#set($i=$i+1)#end#foreach($output in $classDeclaration.outputs)#if($i!=0), #end${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})} $output.name#set($i=$i+1)#end#if($i!=0),#end org.kevoree.modeling.KCallback callback);
+
+    #set($i = 0)
+    public void infer(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.$dependency.type.name ${dependency.name}#set($i=$i+1)#end#if($i!=0),#end #if($classDeclaration.multipleOutput())org.kevoree.modeling.KCallback<Object[]> callback #else org.kevoree.modeling.KCallback<#foreach($output in $classDeclaration.outputs) ${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})}#end> callback#end);
+
+    #set($i = 0)
+    public void inferAll(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.${dependency.type.name}[] ${dependency.name}#set($i=$i+1)#end#if($i!=0),#end #if($classDeclaration.multipleOutput())org.kevoree.modeling.KCallback<Object[][]> callback #else org.kevoree.modeling.KCallback<#foreach($output in $classDeclaration.outputs) ${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})}#end[]> callback#end);
 #end
 
 }

@@ -45,7 +45,7 @@ public class Compressor {
                     // calculate mahalanobis distance (x-m)L(x-m)' to each mean until one is small enough
                     double md = means[point].minus(means[i]).transpose().mult( smoothedCovariances[i].invert() ).mult( means[point].minus(means[i]) ).trace();
                     if(md < MIN_EM_DISTANCE) {
-                        // just add the new point to sub model
+                        // just add the new point to sub createModel
 
                         // which subcomponent is closest?
                         OneComponentDistribution[] subSubComponents = subComponent.getSubComponents();

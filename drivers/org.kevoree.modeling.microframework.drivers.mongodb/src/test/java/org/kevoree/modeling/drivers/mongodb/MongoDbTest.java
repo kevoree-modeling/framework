@@ -10,11 +10,11 @@ import junit.framework.Assert;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
-import org.kevoree.modeling.meta.impl.MetaClass;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
 import java.io.IOException;
@@ -38,8 +38,7 @@ public class MongoDbTest {
             KMetaModel metaModel = new MetaModel("IoT");
             KMetaClass metaClass = metaModel.addMetaClass("Sensor");
             metaClass.addAttribute("name", KPrimitiveTypes.STRING);
-            KModel model = metaModel.model();
-            model.setContentDeliveryDriver(driver);
+            KModel model = metaModel.createModel(DataManagerBuilder.create().withContentDeliveryDriver(driver).build());
             model.connect(new KCallback() {
                 @Override
                 public void on(Object o) {
@@ -48,7 +47,7 @@ public class MongoDbTest {
                     model.save(new KCallback() {
                         @Override
                         public void on(Object o) {
-                            model.manager().cache().clear(metaModel);
+                            ((KInternalDataManager)model.manager()).cache().clear(metaModel);
                             model.manager().lookup(0, 0, sensor.uuid(), new KCallback<KObject>() {
                                 @Override
                                 public void on(KObject kObject) {

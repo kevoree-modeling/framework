@@ -3,17 +3,17 @@ package org.kevoree.modeling.format.xmi;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.format.KModelFormat;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.manager.KDataManager;
 
 public class XmiFormat implements KModelFormat {
 
-    private KMemoryManager _manager;
+    private KDataManager _manager;
 
     private long _universe;
 
     private long _time;
 
-    public XmiFormat(long p_universe, long p_time, KMemoryManager p_manager) {
+    public XmiFormat(long p_universe, long p_time, KDataManager p_manager) {
         this._universe = p_universe;
         this._time = p_time;
         this._manager = p_manager;

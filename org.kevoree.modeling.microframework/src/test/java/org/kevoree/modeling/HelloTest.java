@@ -3,6 +3,7 @@ package org.kevoree.modeling;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.cloudmodel.*;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 
@@ -14,7 +15,7 @@ public class HelloTest {
 
     @Test
     public void badLookupTest() {
-        final CloudModel model = new CloudModel();
+        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -24,6 +25,7 @@ public class HelloTest {
                     CloudUniverse universe = model.newUniverse();
                     CloudView time0 = universe.time(0l);
                     Node root = time0.createNode();
+
                     time0.setRoot(root, null);
                     root.setName("root");
                     Assert.assertEquals("root", root.getName());
@@ -48,7 +50,7 @@ public class HelloTest {
 
     @Test
     public void simpleTest() {
-        final CloudModel model = new CloudModel();
+        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -81,7 +83,7 @@ public class HelloTest {
 
     @Test
     public void helloTest() {
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
 
         CloudUniverse dimension0 = universe.newUniverse();

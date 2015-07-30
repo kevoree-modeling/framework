@@ -1,11 +1,7 @@
 package org.kevoree.modeling;
 
 import org.junit.Test;
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KModel;
-import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.KUniverse;
-import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -31,7 +27,7 @@ public class MultiUniverseTest {
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
-        model = dynamicMetaModel.model();
+        model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
         model.connect(null);
 
         object = model.universe(0).time(timeOrigine).create(sensorMetaClass);

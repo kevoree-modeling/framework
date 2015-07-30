@@ -88,8 +88,9 @@ public class ProcessorHelper {
         }
     }
 
-    public void consolidate(MModel model) {
-        for (MModelClass decl : model.getClasses()) {
+    /*
+    public void consolidate(MModel createModel) {
+        for (MModelClass decl : createModel.getClasses()) {
             internal_consolidate(decl);
         }
     }
@@ -108,7 +109,7 @@ public class ProcessorHelper {
             op.setIndex(globalIndex);
             globalIndex++;
         }
-    }
+    }*/
 
     public String toCamelCase(String ref) {
         return ref.substring(0, 1).toUpperCase() + ref.substring(1);

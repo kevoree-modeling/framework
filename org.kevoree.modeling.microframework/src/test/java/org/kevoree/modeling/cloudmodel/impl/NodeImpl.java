@@ -4,7 +4,7 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.cloudmodel.Element;
 import org.kevoree.modeling.cloudmodel.Node;
@@ -15,7 +15,7 @@ import org.kevoree.modeling.cloudmodel.meta.MetaNode;
  */
 public class NodeImpl extends AbstractKObject implements Node {
 
-    public NodeImpl(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KMemoryManager p_manager) {
+    public NodeImpl(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager) {
         super(p_universe, p_time, p_uuid, p_metaClass, p_manager);
     }
 
@@ -55,7 +55,7 @@ public class NodeImpl extends AbstractKObject implements Node {
 
     @Override
     public void getChildren(final KCallback<Node[]> p_callback) {
-        this.ref(MetaNode.REF_CHILDREN,new KCallback<KObject[]>() {
+        this.ref(MetaNode.REF_CHILDREN, new KCallback<KObject[]>() {
             @Override
             public void on(KObject[] kObjects) {
                 if (p_callback != null) {
@@ -77,7 +77,7 @@ public class NodeImpl extends AbstractKObject implements Node {
 
     @Override
     public void getElement(final KCallback<Element> p_callback) {
-        this.ref(MetaNode.REF_ELEMENT,new KCallback<KObject[]>() {
+        this.ref(MetaNode.REF_ELEMENT, new KCallback<KObject[]>() {
             @Override
             public void on(KObject[] kObject) {
                 if (p_callback != null && kObject.length > 0) {

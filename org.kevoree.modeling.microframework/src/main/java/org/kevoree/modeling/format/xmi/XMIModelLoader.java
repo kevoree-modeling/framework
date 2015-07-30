@@ -4,9 +4,8 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.meta.impl.MetaReference;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.manager.KDataManager;
+import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaReference;
@@ -60,7 +59,7 @@ public class XMIModelLoader {
         }
     }
 
-    public static void load(KMemoryManager manager, long universe, long time, String str, KCallback<Throwable> callback) {
+    public static void load(KDataManager manager, long universe, long time, String str, KCallback<Throwable> callback) {
         XmlParser parser = new XmlParser(str);
         if (!parser.hasNext()) {
             callback.on(null);
@@ -73,7 +72,7 @@ public class XMIModelLoader {
     }
 
 
-    private static void deserialize(KMemoryManager manager, long universe, long time, XMILoadingContext context) {
+    private static void deserialize(KDataManager manager, long universe, long time, XMILoadingContext context) {
         try {
             String nsURI;
             XmlParser reader = context.xmiReader;
@@ -110,7 +109,7 @@ public class XMIModelLoader {
         }
     }
 
-    private static KObject callFactory(KMemoryManager manager, long universe, long time, XMILoadingContext ctx, String objectType) {
+    private static KObject callFactory(KDataManager manager, long universe, long time, XMILoadingContext ctx, String objectType) {
         KObject modelElem = null;
         if (objectType != null) {
             modelElem = manager.model().createByName(objectType, universe, time);
@@ -137,7 +136,7 @@ public class XMIModelLoader {
         return modelElem;
     }
 
-    private static KObject loadObject(KMemoryManager manager, long universe, long time, XMILoadingContext ctx, String xmiAddress, String objectType) throws Exception {
+    private static KObject loadObject(KDataManager manager, long universe, long time, XMILoadingContext ctx, String xmiAddress, String objectType) throws Exception {
         String elementTagName = ctx.xmiReader.getLocalName();
         KObject modelElem = callFactory(manager, universe, time, ctx, objectType);
         if (modelElem == null) {

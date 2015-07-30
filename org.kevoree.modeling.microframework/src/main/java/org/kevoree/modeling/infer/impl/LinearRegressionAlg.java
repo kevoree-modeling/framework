@@ -2,7 +2,8 @@ package org.kevoree.modeling.infer.impl;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 
 import java.util.Random;
@@ -17,8 +18,8 @@ public class LinearRegressionAlg implements KInferAlg {
 
     private static Random rand= new Random();
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin) {
-        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
+        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial segment if empty
         int size=origin.metaClass().inputs().length+1;
@@ -53,8 +54,8 @@ public class LinearRegressionAlg implements KInferAlg {
     }
 
     @Override
-    public double[][] infer(double[][] features, KObject origin) {
-        KMemoryChunk ks = origin.manager().segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+    public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
+        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         int size=origin.metaClass().inputs().length+1;
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {

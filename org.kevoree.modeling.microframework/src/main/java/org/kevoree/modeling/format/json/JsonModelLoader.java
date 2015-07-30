@@ -4,13 +4,13 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
-import org.kevoree.modeling.memory.struct.map.KLongLongMap;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.meta.*;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
-import org.kevoree.modeling.memory.struct.map.KStringMapCallBack;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.map.KStringMapCallBack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class JsonModelLoader {
      * } else {
      * var toLoadObj = JSON.parse(payload);
      * var rootElem = [];
-     * var mappedKeys: org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap = new org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap(toLoadObj.length, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
+     * var mappedKeys: org.kevoree.modeling.memory.map.impl.ArrayLongLongMap = new org.kevoree.modeling.memory.map.impl.ArrayLongLongMap(toLoadObj.length, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
      * for(var i = 0; i < toLoadObj.length; i++) {
      * var elem = toLoadObj[i];
      * var kid = elem[org.kevoree.modeling.format.json.JsonFormat.KEY_UUID];
@@ -32,7 +32,7 @@ public class JsonModelLoader {
      * }
      * for(var i = 0; i < toLoadObj.length; i++) {
      * var elemRaw = toLoadObj[i];
-     * var elem2 = new org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap<any>(Object.keys(elemRaw).length, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
+     * var elem2 = new org.kevoree.modeling.memory.map.impl.ArrayStringMap<any>(Object.keys(elemRaw).length, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
      * for(var ik in elemRaw){ elem2[ik] = elemRaw[ik]; }
      * try {
      * org.kevoree.modeling.format.json.JsonModelLoader.loadObj(elem2, manager, universe, time, mappedKeys, rootElem);
@@ -41,7 +41,7 @@ public class JsonModelLoader {
      * if (rootElem[0] != null) { manager.setRoot(rootElem[0], (throwable : java.lang.Throwable) => { if (callback != null) { callback(throwable); }}); } else { if (callback != null) { callback(null); } }
      * }
      */
-    public static void load(KMemoryManager manager, long universe, long time, String payload, final KCallback<Throwable> callback) {
+    public static void load(KInternalDataManager manager, long universe, long time, String payload, final KCallback<Throwable> callback) {
         if (payload == null) {
             callback.on(null);
         } else {
@@ -118,7 +118,7 @@ public class JsonModelLoader {
         }
     }
 
-    private static void loadObj(ArrayStringMap<Object> p_param, KMemoryManager manager, long universe, long time, KLongLongMap p_mappedKeys, KObject[] p_rootElem) {
+    private static void loadObj(ArrayStringMap<Object> p_param, KInternalDataManager manager, long universe, long time, KLongLongMap p_mappedKeys, KObject[] p_rootElem) {
         long kid = Long.parseLong(p_param.get(JsonFormat.KEY_UUID).toString());
         String meta = p_param.get(JsonFormat.KEY_META).toString();
         KMetaClass metaClass = manager.model().metaModel().metaClassByName(meta);

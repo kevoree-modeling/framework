@@ -1,6 +1,6 @@
 package org.kevoree.modeling.util.maths.structure.impl;
 
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 

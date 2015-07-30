@@ -4,25 +4,17 @@ public class MModelAttribute {
 
     private String name;
     private String type;
-    private boolean id = false;
     private double precision = -1;
-    private Integer index = -1;
+    protected int index = -1;
 
     public Integer getIndex() {
         return index;
     }
 
-    public void setIndex(Integer index) {
-        this.index = index;
-    }
-
-    public MModelAttribute(String name, String type) {
+    public MModelAttribute(String name, String type, int index) {
         this.name = name;
         this.type = type;
-    }
-
-    public void setId(boolean id) {
-        this.id = id;
+        this.index = index;
     }
 
     public String getName() {
@@ -33,21 +25,16 @@ public class MModelAttribute {
         return type;
     }
 
-    public boolean isId() {
-        return id;
-    }
-
     public Double getPrecision() {
         return precision;
     }
 
-    public void setPrecision(Double precision) {
+    public void setPrecision(double precision) {
         this.precision = precision;
     }
 
     public MModelAttribute clone() {
-        MModelAttribute cloned = new MModelAttribute(this.name, this.type);
-        cloned.id = id;
+        MModelAttribute cloned = new MModelAttribute(this.name, this.type, this.index);
         cloned.precision = precision;
         return cloned;
     }

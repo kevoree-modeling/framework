@@ -10,6 +10,7 @@ import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.drivers.websocket.WebSocketCDNClient;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
@@ -17,8 +18,6 @@ import org.kevoree.modeling.meta.impl.MetaModel;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
@@ -35,7 +34,7 @@ public class ModelWebSocketTest {
         dynamicSensorClass.addAttribute("name", KPrimitiveTypes.STRING);
         dynamicSensorClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
 
-        KModel model = dynamicMM.model();
+        KModel model = dynamicMM.createModel(DataManagerBuilder.buildDefault());
 
         //expose it to web
         WebSocketGateway wrapper = WebSocketGateway.exposeModel(model, PORT);
@@ -55,10 +54,9 @@ public class ModelWebSocketTest {
                 model.save(new KCallback() {
                     @Override
                     public void on(Object o) {
-                        //ok lets start a second VIRTUAL model connected through WebSocket
+                        //ok lets start a second VIRTUAL createModel connected through WebSocket
                         WebSocketCDNClient client = new WebSocketCDNClient("ws://localhost:" + PORT);
-                        KModel modelClient = dynamicMM.model();
-                        modelClient.setContentDeliveryDriver(client);
+                        KModel modelClient = dynamicMM.createModel(DataManagerBuilder.create().withContentDeliveryDriver(client).build());
                         modelClient.connect(new KCallback() {
                             @Override
                             public void on(Object o) {
@@ -102,7 +100,7 @@ public class ModelWebSocketTest {
         dynamicSensorClass.addAttribute("name", KPrimitiveTypes.STRING);
         dynamicSensorClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
 
-        KModel model = dynamicMM.model();
+        KModel model = dynamicMM.createModel(DataManagerBuilder.buildDefault());
         model.connect(null);
         KObject sensor = model.create(dynamicSensorClass, 0, 0);
         sensor.set(dynamicSensorClass.attribute("name"), "MyName");
@@ -115,7 +113,7 @@ public class ModelWebSocketTest {
         WebSocketGateway wrapper = WebSocketGateway.exposeModelAndResources(model, 8080, this.getClass().getClassLoader());
         wrapper.start();
 
-      //  Thread.sleep(100000);
+       //   Thread.sleep(100000);
 
         int result = launchRunner("MyTestRunner.js");
 

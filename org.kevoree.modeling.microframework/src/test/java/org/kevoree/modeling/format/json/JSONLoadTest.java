@@ -7,13 +7,14 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudView;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
 public class JSONLoadTest {
 
     @Test
     public void jsonLoadTest() {
 
-        CloudModel universe = new CloudModel();
+        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
         final int[] passed = new int[1];

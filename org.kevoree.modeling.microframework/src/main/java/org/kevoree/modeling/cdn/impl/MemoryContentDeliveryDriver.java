@@ -5,10 +5,10 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
-import org.kevoree.modeling.memory.struct.map.KStringMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.map.KIntMapCallBack;
+import org.kevoree.modeling.memory.map.KStringMap;
+import org.kevoree.modeling.memory.map.impl.ArrayIntMap;
+import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
 
 import java.util.Random;
 

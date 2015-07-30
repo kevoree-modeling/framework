@@ -8,7 +8,7 @@ public class KeyCalculator {
      * @native ts
      * private _prefix: string;
      */
-    private long _prefix;
+    private final long _prefix;
     private volatile long _currentIndex;
 
     /**

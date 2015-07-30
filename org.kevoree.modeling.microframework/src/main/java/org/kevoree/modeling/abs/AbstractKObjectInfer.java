@@ -4,14 +4,14 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.defer.KDefer;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.traversal.KTraversalIndexResolver;
 
 public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfer {
 
-    public AbstractKObjectInfer(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KMemoryManager p_manager) {
+    public AbstractKObjectInfer(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager) {
         super(p_universe, p_time, p_uuid, p_metaClass, p_manager);
     }
 
@@ -31,7 +31,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     }
 
     @Override
-    public void train(KObject[] dependencies, Object[] expectedOutputs, KCallback callback) {
+    public void genericTrain(KObject[] dependencies, Object[] expectedOutputs, KCallback callback) {
         //wrap input
         KObject[][] all_dependencies = new KObject[1][dependencies.length];
         all_dependencies[0] = dependencies;
@@ -41,12 +41,12 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             all_expectedOutputs = new Object[1][expectedOutputs.length];
             all_expectedOutputs[0] = expectedOutputs;
         }
-        //call the trainAll method
-        trainAll(all_dependencies, all_expectedOutputs, callback);
+        //call the genericTrainAll method
+        genericTrainAll(all_dependencies, all_expectedOutputs, callback);
     }
 
     @Override
-    public void trainAll(KObject[][] p_dependencies, Object[][] p_outputs, KCallback callback) {
+    public void genericTrainAll(KObject[][] p_dependencies, Object[][] p_outputs, KCallback callback) {
         if (p_dependencies == null) {
             throw new RuntimeException("Dependencies are mandatory for KObjectInfer");
         }
@@ -87,7 +87,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                         extractedOutputs[i][j] = internalConvertOutput(currentOutputObject, metaInferOutput);
                     }
                 }
-                _metaClass.inferAlg().train(extractedInputs, extractedOutputs, selfObject);
+                _metaClass.inferAlg().train(extractedInputs, extractedOutputs, selfObject, _manager);
                 if (callback != null) {
                     callback.on(null);
                 }
@@ -96,12 +96,12 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     }
 
     @Override
-    public void infer(KObject[] dependencies, KCallback<Object[]> callback) {
+    public void genericInfer(KObject[] dependencies, KCallback<Object[]> callback) {
         //wrap input
         KObject[][] all_dependencies = new KObject[1][dependencies.length];
         all_dependencies[0] = dependencies;
-        //call the trainAll method
-        inferAll(all_dependencies, new KCallback<Object[][]>() {
+        //call the genericTrainAll method
+        genericInferAll(all_dependencies, new KCallback<Object[][]>() {
             @Override
             public void on(Object[][] objects) {
                 if (objects != null && objects.length > 0) {
@@ -114,7 +114,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     }
 
     @Override
-    public void inferAll(KObject[][] p_dependencies, KCallback<Object[][]> callback) {
+    public void genericInferAll(KObject[][] p_dependencies, KCallback<Object[][]> callback) {
         if (p_dependencies == null) {
             throw new RuntimeException("Bad number of arguments for allDependencies");
         }
@@ -145,7 +145,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                         k++;
                     }
                 }
-                double[][] extractedOutputs = _metaClass.inferAlg().infer(extractedInputs, selfObject);
+                double[][] extractedOutputs = _metaClass.inferAlg().infer(extractedInputs, selfObject, _manager);
                 if (extractedOutputs[0].length != _metaClass.outputs().length) {
                     callback.on(null);
                 } else {

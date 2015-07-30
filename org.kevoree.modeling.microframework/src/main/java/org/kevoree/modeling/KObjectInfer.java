@@ -2,13 +2,13 @@ package org.kevoree.modeling;
 
 public interface KObjectInfer extends KObject {
 
-    void train(KObject[] dependencies, Object[] expectedOutputs, KCallback callback);
+    void genericTrain(KObject[] dependencies, Object[] expectedOutputs, KCallback callback);
 
-    void trainAll(KObject[][] trainingSet, Object[][] expectedResultSet, KCallback callback);
+    void genericTrainAll(KObject[][] trainingSet, Object[][] expectedResultSet, KCallback callback);
 
-    void infer(KObject[] features, KCallback<Object[]> callback);
+    void genericInfer(KObject[] features, KCallback<Object[]> callback);
 
-    void inferAll(KObject[][] features, KCallback<Object[][]> callback);
+    void genericInferAll(KObject[][] features, KCallback<Object[][]> callback);
 
     void resetLearning();
 

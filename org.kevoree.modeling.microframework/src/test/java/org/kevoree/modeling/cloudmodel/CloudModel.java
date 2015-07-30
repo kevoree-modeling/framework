@@ -2,6 +2,7 @@ package org.kevoree.modeling.cloudmodel;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.impl.GenericObject;
 import org.kevoree.modeling.meta.impl.GenericObjectInfer;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -16,8 +17,8 @@ public class CloudModel extends AbstractKModel<CloudUniverse> {
 
     private MetaModel _metaModel;
 
-    public CloudModel() {
-        super();
+    public CloudModel(KInternalDataManager dataManager) {
+        super(dataManager);
         _metaModel = new MetaModel("Cloud");
         KMetaClass[] tempMetaClasses = new KMetaClass[2];
         tempMetaClasses[0] = MetaNode.getInstance();

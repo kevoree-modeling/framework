@@ -2,7 +2,7 @@ package org.kevoree.modeling.traversal.impl.actions;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaAttribute;

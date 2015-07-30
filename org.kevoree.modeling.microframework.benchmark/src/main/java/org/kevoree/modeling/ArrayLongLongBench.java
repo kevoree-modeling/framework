@@ -1,20 +1,17 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
-
-import java.util.HashMap;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
 
 public class ArrayLongLongBench {
 
     public static void main(String[] args) {
 
+        int nb = 10000000;
+
+        /*
         HashMap<Long, Long> op_map_ref = new HashMap<Long, Long>();
         ArrayLongLongMap op_map = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-        int nb = 1000000;
+        int nb = 10000000;
         Random random = new Random();
         ExecutorService service = Executors.newFixedThreadPool(1000);
         for (long i = 0; i < nb; i++) {
@@ -51,17 +48,16 @@ public class ArrayLongLongBench {
             if (resolved != resolved2) {
                 throw new RuntimeException("WTF " + resolved2 + "-" + resolved);
             }
-        }
+        }*/
 
 
         System.err.println("Equiality Test passed");
 
-
         long time = 0;
         for (int j = 0; j < 30; j++) {
             long before = System.currentTimeMillis();
-            HashMap<Long, Long> op_map2 = new HashMap<Long, Long>();
-            //ArrayLongLongMap op_map2 = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+            // HashMap<Long, Long> op_map2 = new HashMap<Long, Long>();
+            ArrayLongLongMap op_map2 = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
             nb = 10000000;
             for (long i = 0; i < nb; i++) {
                 op_map2.put(i, i);

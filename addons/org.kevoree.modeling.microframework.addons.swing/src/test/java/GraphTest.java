@@ -1,9 +1,8 @@
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.swingViewer.ViewerListener;
 import org.graphstream.ui.swingViewer.ViewerPipe;
-import org.junit.Test;
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
@@ -26,8 +25,7 @@ public class GraphTest {
         nodeClazz.addAttribute("name", KPrimitiveTypes.STRING);
         nodeClazz.addReference("children", nodeClazz, "op_children", true);
         nodeClazz.addReference("neighbor", nodeClazz, "op_neighbor", true);
-        KModel model = metaModel.model();
-        model.setScheduler(new ExecutorServiceScheduler());
+        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new ExecutorServiceScheduler()).build());
 
         model.connect(new KCallback() {
             @Override

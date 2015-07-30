@@ -1,8 +1,8 @@
 package org.kevoree.modeling.util.maths.expression.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.struct.map.KStringMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.map.KStringMap;
+import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
 
 public class MathEntities {
 

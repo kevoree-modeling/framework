@@ -1,7 +1,8 @@
 package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
+import org.kevoree.modeling.memory.manager.KDataManager;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +11,9 @@ public abstract class AbstractKUniverse<A extends KView, B extends KUniverse, C 
 
     final protected long _universe;
 
-    final protected KMemoryManager _manager;
+    final protected KInternalDataManager _manager;
 
-    protected AbstractKUniverse(long p_key, KMemoryManager p_manager) {
+    protected AbstractKUniverse(long p_key, KInternalDataManager p_manager) {
         this._universe = p_key;
         this._manager = p_manager;
     }
@@ -29,7 +30,7 @@ public abstract class AbstractKUniverse<A extends KView, B extends KUniverse, C 
 
     @Override
     public void delete(KCallback cb) {
-        model().manager().delete(this, cb);
+        _manager.delete(this, cb);
     }
 
     @Override

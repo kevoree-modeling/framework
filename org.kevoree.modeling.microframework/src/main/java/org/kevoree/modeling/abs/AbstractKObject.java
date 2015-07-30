@@ -3,8 +3,9 @@ package org.kevoree.modeling.abs;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.struct.map.KLongLongMap;
-import org.kevoree.modeling.memory.struct.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.map.KLongLongMap;
+import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.traversal.query.impl.QueryEngine;
 import org.kevoree.modeling.traversal.visitor.KModelAttributeVisitor;
@@ -12,12 +13,12 @@ import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KTimeWalker;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
-import org.kevoree.modeling.memory.struct.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.struct.chunk.impl.HeapMemoryChunk;
-import org.kevoree.modeling.memory.manager.KMemoryManager;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.struct.map.KLongLongMapCallBack;
-import org.kevoree.modeling.memory.struct.tree.KLongTree;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.impl.HeapMemoryChunk;
+import org.kevoree.modeling.memory.manager.KDataManager;
+import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
+import org.kevoree.modeling.memory.tree.KLongTree;
 import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.util.Checker;
@@ -31,17 +32,19 @@ public abstract class AbstractKObject implements KObject {
     final protected long _time;
     final protected long _universe;
     final protected KMetaClass _metaClass;
-    final public KMemoryManager _manager;
+    final public KInternalDataManager _manager;
     final private static String OUT_OF_CACHE_MSG = "Out of cache Error";
 
-    public AbstractKObject(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KMemoryManager p_manager) {
+    public AbstractKObject(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager) {
         this._universe = p_universe;
         this._time = p_time;
         this._uuid = p_uuid;
         this._metaClass = p_metaClass;
         this._manager = p_manager;
-        this._manager.cache().monitor(this);
+        this._manager.isUsed(this, true);
     }
+
+    //todo finalize
 
     @Override
     public long uuid() {
@@ -135,15 +138,15 @@ public abstract class AbstractKObject implements KObject {
         if (transposed == null) {
             throw new RuntimeException("Bad KMF usage, the attribute named " + p_attribute.metaName() + " is not part of " + metaClass().metaName());
         } else {
-            return transposed.strategy().extrapolate(this, transposed);
+            return transposed.strategy().extrapolate(this, transposed, _manager);
         }
     }
 
     @Override
-    public Object getByName(String atributeName) {
-        KMetaAttribute transposed = _metaClass.attribute(atributeName);
+    public Object getByName(String attributeName) {
+        KMetaAttribute transposed = _metaClass.attribute(attributeName);
         if (transposed != null) {
-            return transposed.strategy().extrapolate(this, transposed);
+            return transposed.strategy().extrapolate(this, transposed, _manager);
         } else {
             return null;
         }
@@ -155,15 +158,15 @@ public abstract class AbstractKObject implements KObject {
         if (transposed == null) {
             throw new RuntimeException("Bad KMF usage, the attribute named " + p_attribute.metaName() + " is not part of " + metaClass().metaName());
         } else {
-            transposed.strategy().mutate(this, transposed, payload);
+            transposed.strategy().mutate(this, transposed, payload, _manager);
         }
     }
 
     @Override
-    public void setByName(String atributeName, Object payload) {
-        KMetaAttribute transposed = _metaClass.attribute(atributeName);
+    public void setByName(String attributeName, Object payload) {
+        KMetaAttribute transposed = _metaClass.attribute(attributeName);
         if (transposed != null) {
-            transposed.strategy().mutate(this, transposed, payload);
+            transposed.strategy().mutate(this, transposed, payload, _manager);
         }
     }
 
@@ -582,7 +585,7 @@ public abstract class AbstractKObject implements KObject {
     }
 
     @Override
-    public KMemoryManager manager() {
+    public KDataManager manager() {
         return _manager;
     }
 

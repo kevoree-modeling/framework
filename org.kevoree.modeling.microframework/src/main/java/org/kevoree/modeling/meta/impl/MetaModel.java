@@ -2,8 +2,9 @@ package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.infer.KInferAlg;
-import org.kevoree.modeling.memory.struct.map.KStringMap;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.map.KStringMap;
+import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.*;
 
 public class MetaModel implements KMetaModel {
@@ -157,8 +158,8 @@ public class MetaModel implements KMetaModel {
     }
 
     @Override
-    public KModel model() {
-        return new GenericModel(this);
+    public KModel createModel(KInternalDataManager p_manager) {
+        return new GenericModel(this, p_manager);
     }
 
 }

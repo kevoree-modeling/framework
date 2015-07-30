@@ -8,6 +8,7 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.drivers.websocket.WebSocketCDNClient;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
@@ -22,7 +23,7 @@ public class RawWebSocketTest {
     public void test() {
         KContentDeliveryDriverMock mock = new KContentDeliveryDriverMock();
         KMetaModel dynamicMM = new MetaModel("mock");
-        KModel model = dynamicMM.model();
+        KModel model = dynamicMM.createModel(DataManagerBuilder.create().withContentDeliveryDriver(mock).build());
 
 
         KContentKey[] getRequest = new KContentKey[3];
@@ -30,7 +31,6 @@ public class RawWebSocketTest {
         getRequest[1] = KContentKey.createLastPrefix();
         getRequest[2] = KContentKey.createRootUniverseTree();
 
-        model.setContentDeliveryDriver(mock);
         WebSocketGateway wrapper = WebSocketGateway.exposeModel(model, PORT);
         wrapper.start();
 

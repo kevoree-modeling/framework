@@ -8,8 +8,8 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
-import org.kevoree.modeling.memory.struct.map.KIntMapCallBack;
-import org.kevoree.modeling.memory.struct.map.impl.ArrayIntMap;
+import org.kevoree.modeling.memory.map.KIntMapCallBack;
+import org.kevoree.modeling.memory.map.impl.ArrayIntMap;
 
 import java.io.File;
 import java.io.IOException;

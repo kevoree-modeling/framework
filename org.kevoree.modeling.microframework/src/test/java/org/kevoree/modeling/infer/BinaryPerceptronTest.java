@@ -7,6 +7,7 @@ import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.infer.impl.BinaryPerceptronAlg;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -85,7 +86,7 @@ public class BinaryPerceptronTest {
     public int test() {
 
         KMetaModel mm = createMetaModel();
-        KModel model = mm.model();
+        KModel model = mm.createModel(DataManagerBuilder.buildDefault());
         final int[] correct = new int[1];
         correct[0] = 0;
 
@@ -102,14 +103,14 @@ public class BinaryPerceptronTest {
 
                     Object[] output = new Object[1];
                     output[0] = person[0].getByName("healthy");
-                    perceptronProfile.train(person, output, null);
+                    perceptronProfile.genericTrain(person, output, null);
                 }
 
 
                 for (int i = 0; i < 50; i++) {
                     KObject[] testPerson = new KObject[1];
                     testPerson[0] = createPerson(model, mm);
-                    perceptronProfile.infer(testPerson, new KCallback<Object[]>() {
+                    perceptronProfile.genericInfer(testPerson, new KCallback<Object[]>() {
                         @Override
                         public void on(Object[] objects) {
                             if (objects[0] == ((MetaLiteral) testPerson[0].getByName("healthy"))) {
