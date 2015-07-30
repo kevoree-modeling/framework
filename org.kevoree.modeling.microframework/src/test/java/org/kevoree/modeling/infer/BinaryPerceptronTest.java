@@ -80,6 +80,7 @@ public class BinaryPerceptronTest {
             result = result + test();
         }
         result = result / 10;
+       // System.out.println(result);
         Assert.assertTrue(result > 50);
     }
 
@@ -107,7 +108,7 @@ public class BinaryPerceptronTest {
                 }
 
 
-                for (int i = 0; i < 50; i++) {
+                for (int i = 0; i < 100; i++) {
                     KObject[] testPerson = new KObject[1];
                     testPerson[0] = createPerson(model, mm);
                     perceptronProfile.genericInfer(testPerson, new KCallback<Object[]>() {
@@ -123,6 +124,6 @@ public class BinaryPerceptronTest {
                 //Assert.assertTrue(correct[0]>50);
             }
         });
-        return correct[0] * 2;
+        return correct[0];
     }
 }
