@@ -33,7 +33,6 @@ public interface KObject {
 
     void ref(KMetaReference metaReference, KCallback<KObject[]> cb);
 
-
     KTraversal traversal();
 
     Object get(KMetaAttribute attribute);
@@ -59,5 +58,7 @@ public interface KObject {
     KDataManager manager();
 
     void save(KCallback cb);
+
+    long timeDephasing();
 
 }

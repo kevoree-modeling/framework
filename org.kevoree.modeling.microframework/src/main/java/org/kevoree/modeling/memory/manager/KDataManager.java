@@ -6,11 +6,11 @@ public interface KDataManager {
 
     void lookup(long universe, long time, long uuid, KCallback<KObject> callback);
 
-    void lookupAllObjects(long universe, long time, long[] uuid, KCallback<KObject[]> callback);
+    void lookupAllObjects(long universe, long time, long[] uuids, KCallback<KObject[]> callback);
 
-    void lookupAllTimes(long universe, long[] time, long uuid, KCallback<KObject[]> callback);
+    void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback);
 
-    void lookupAllObjectsTimes(long universe, long[] time, long[] uuid, KCallback<KObject[]> callback);
+    void lookupAllObjectsTimes(long universe, long[] times, long[] uuids, KCallback<KObject[]> callback);
 
     void saveAll(KCallback<Throwable> callback);
 

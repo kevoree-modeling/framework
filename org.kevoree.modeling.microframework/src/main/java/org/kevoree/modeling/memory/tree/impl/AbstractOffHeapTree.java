@@ -525,7 +525,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return builder.toString();
     }
 
-    public final void init(String payload, KMetaModel metaModel) {
+    public final void init(String payload, KMetaModel metaModel, int metaClassIndex) {
         if (payload == null || payload.length() == 0) {
             internal_allocate(0);
             return;

@@ -17,9 +17,9 @@ public class StatInferAlg implements KInferAlg {
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.chunk(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
-        //Create initial segment if empty
+        //Create initial chunk if empty
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             ks.extendDoubleArray(dependenciesIndex, NUMOFFIELDS * origin.metaClass().inputs().length + 1, origin.metaClass());
             for (int i = 0; i < NUMOFFIELDS * origin.metaClass().inputs().length + 1; i++) {
@@ -56,7 +56,7 @@ public class StatInferAlg implements KInferAlg {
 
     @Override
     public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.chunk(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         double[][] result = new double[1][];
         result[0] = getAvgAll(ks, origin.metaClass().dependencies());
         return result;

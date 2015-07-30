@@ -17,8 +17,8 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
     private final KStringMap<String> backend = new ArrayStringMap<String>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
 
     @Override
-    public void atomicGetIncrement(KContentKey key, KCallback<Short> cb) {
-        String result = backend.get(key.toString());
+    public void atomicGetIncrement(long[] key, KCallback<Short> cb) {
+        String result = backend.get(KContentKey.toString(key, 0));
         short nextV;
         short previousV;
         if (result != null) {
@@ -36,17 +36,16 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
         } else {
             nextV = (short) (previousV + 1);
         }
-        backend.put(key.toString(), "" + nextV);
+        backend.put(KContentKey.toString(key, 0), "" + nextV);
         cb.on(previousV);
     }
 
     @Override
-    public void get(KContentKey[] keys, KCallback<String[]> callback) {
-        String[] values = new String[keys.length];
-        for (int i = 0; i < keys.length; i++) {
-            if (keys[i] != null) {
-                values[i] = backend.get(keys[i].toString());
-            }
+    public void get(long[] keys, KCallback<String[]> callback) {
+        int nbKeys = keys.length / 3;
+        String[] values = new String[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
+            values[i] = backend.get(KContentKey.toString(keys, i));
         }
         if (callback != null) {
             callback.on(values);
@@ -54,12 +53,13 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+    public synchronized void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
         if (p_keys.length != p_values.length) {
             p_callback.on(new Exception("Bad Put Usage !"));
         } else {
-            for (int i = 0; i < p_keys.length; i++) {
-                backend.put(p_keys[i].toString(), p_values[i]);
+            int nbKeys = p_keys.length / 3;
+            for (int i = 0; i < nbKeys; i++) {
+                backend.put(KContentKey.toString(p_keys, i), p_values[i]);
             }
             if (additionalInterceptors != null) {
                 additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {

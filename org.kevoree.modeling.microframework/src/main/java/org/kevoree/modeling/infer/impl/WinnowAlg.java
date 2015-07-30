@@ -19,9 +19,9 @@ public class WinnowAlg implements KInferAlg {
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.chunk(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
-        //Create initial segment if empty
+        //Create initial chunk if empty
         int size = origin.metaClass().inputs().length;
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             ks.extendDoubleArray(origin.metaClass().dependencies().index(), size, origin.metaClass());
@@ -65,7 +65,7 @@ public class WinnowAlg implements KInferAlg {
 
     @Override
     public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.chunk(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
         int size = origin.metaClass().inputs().length;
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {

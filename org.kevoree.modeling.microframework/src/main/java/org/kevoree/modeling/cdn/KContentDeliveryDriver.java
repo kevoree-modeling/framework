@@ -4,11 +4,11 @@ import org.kevoree.modeling.*;
 
 public interface KContentDeliveryDriver {
 
-    void get(KContentKey[] keys, KCallback<String[]> callback);
+    void get(long[] keys, KCallback<String[]> callback);
 
-    void atomicGetIncrement(KContentKey key, KCallback<Short> cb);
+    void atomicGetIncrement(long[] key, KCallback<Short> cb);
 
-    void put(KContentKey[] keys, String[] values, KCallback<Throwable> error, int excludeListener);
+    void put(long[] keys, String[] values, KCallback<Throwable> error, int excludeListener);
 
     void remove(String[] keys, KCallback<Throwable> error);
 

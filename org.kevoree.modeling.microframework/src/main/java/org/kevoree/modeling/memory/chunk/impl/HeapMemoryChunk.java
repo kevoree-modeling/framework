@@ -21,8 +21,6 @@ public class HeapMemoryChunk implements KMemoryChunk {
 
     @Override
     public void initMetaClass(KMetaClass p_metaClass) {
-        this.raw = new Object[p_metaClass.metaElements().length];
-        _metaClassIndex = p_metaClass.index();
     }
 
     @Override
@@ -167,7 +165,9 @@ public class HeapMemoryChunk implements KMemoryChunk {
     }
 
     @Override
-    public void init(String payload, KMetaModel metaModel) {
+    public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
+        this._metaClassIndex = metaClassIndex;
+        this.raw = new Object[metaModel.metaClass(metaClassIndex).metaElements().length];
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);

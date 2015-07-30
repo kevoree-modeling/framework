@@ -28,9 +28,15 @@ public class SingleChainWeakRefCache implements KCache {
     }
 
     @Override
-    public void markAndPut(long universe, long time, long obj, KMemoryElement element) {
+    public KMemoryElement createAndMark(long universe, long time, long obj) {
+        return null;
+    }
+
+    @Override
+    public void unMarkMemoryElement(KMemoryElement element) {
 
     }
+
 
 /*
     private synchronized void common_clean_monitor(KObject origin, KMetaModel p_metaModel) {

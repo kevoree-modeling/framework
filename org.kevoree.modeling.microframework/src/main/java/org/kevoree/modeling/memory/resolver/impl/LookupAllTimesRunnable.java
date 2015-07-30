@@ -1,4 +1,4 @@
-package org.kevoree.modeling.memory.manager.impl;
+package org.kevoree.modeling.memory.resolver.impl;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
@@ -6,6 +6,7 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
@@ -32,6 +33,8 @@ public class LookupAllTimesRunnable implements Runnable {
 
     @Override
     public void run() {
+        /*
+
         _store.bumpKeyToCache(KContentKey.createUniverseTree(_uuid), new KCallback<KMemoryElement>() {
             @Override
             public void on(KMemoryElement universeIndex) {
@@ -100,7 +103,9 @@ public class LookupAllTimesRunnable implements Runnable {
                     }
                 });
             }
+
         });
+        */
     }
 
 }

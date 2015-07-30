@@ -57,7 +57,7 @@ public class GraphBuilder {
     }
 
     private static void createEdges(Graph graph, KObject elem) {
-        KMemoryChunk rawPayload = ((KInternalDataManager)elem.manager()).segment(elem.universe(),elem.now(),elem.uuid(),true, elem.metaClass(),null);
+        KMemoryChunk rawPayload = ((KInternalDataManager)elem.manager()).chunk(elem.universe(), elem.now(), elem.uuid(), true, elem.metaClass(), null);
         for (KMeta meta : elem.metaClass().metaElements()) {
             if (meta instanceof KMetaReference) {
                 KMetaReference metaRef = (KMetaReference) meta;

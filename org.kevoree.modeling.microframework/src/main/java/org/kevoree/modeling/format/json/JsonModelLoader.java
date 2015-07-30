@@ -122,9 +122,9 @@ public class JsonModelLoader {
         long kid = Long.parseLong(p_param.get(JsonFormat.KEY_UUID).toString());
         String meta = p_param.get(JsonFormat.KEY_META).toString();
         KMetaClass metaClass = manager.model().metaModel().metaClassByName(meta);
-        KObject current = ((AbstractKModel) manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass);
+        KObject current = ((AbstractKModel) manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass, universe, time);
         manager.initKObject(current);
-        KMemoryChunk raw = manager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
+        KMemoryChunk raw = manager.chunk(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
         p_param.each(new KStringMapCallBack<Object>() {
             @Override
             public void on(String metaKey, Object payload_content) {
@@ -136,7 +136,7 @@ public class JsonModelLoader {
                         if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
                             KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
                             int metaAttId = metaAttribute.attributeType().id();
-                            switch (metaAttId){
+                            switch (metaAttId) {
                                 case KPrimitiveTypes.CONTINUOUS_ID:
                                     String[] plainRawSet = (String[]) p_param.get(metaAttribute.metaName());
                                     double[] convertedRaw = new double[plainRawSet.length];

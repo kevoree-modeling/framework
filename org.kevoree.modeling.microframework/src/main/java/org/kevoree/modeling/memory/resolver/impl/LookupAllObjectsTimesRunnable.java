@@ -1,4 +1,4 @@
-package org.kevoree.modeling.memory.manager.impl;
+package org.kevoree.modeling.memory.resolver.impl;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
@@ -6,6 +6,7 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.tree.KLongTree;
@@ -28,6 +29,7 @@ public class LookupAllObjectsTimesRunnable implements Runnable {
 
     @Override
     public void run() {
+        /*
         final KContentKey[] tempKeys = new KContentKey[_keys.length];
         for (int i = 0; i < _keys.length; i++) {
             if (_keys[i] != KConfig.NULL_LONG) {
@@ -90,5 +92,6 @@ public class LookupAllObjectsTimesRunnable implements Runnable {
                 });
             }
         });
+        */
     }
 }

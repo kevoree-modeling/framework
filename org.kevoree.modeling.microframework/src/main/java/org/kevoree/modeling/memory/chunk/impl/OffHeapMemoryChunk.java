@@ -36,7 +36,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
 
     private static final int BYTE = 8;
 
-    // native pointer to the start of the memory segment
+    // native pointer to the start of the memory chunk
     private long _start_address;
     private int _allocated_segments = 0;
 
@@ -120,7 +120,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                         long clone_ptr_str_segment = UNSAFE.getLong(clone_ptr);
 
                         if (clone_ptr_str_segment != 0) {
-                            // copy the segment
+                            // copy the chunk
                             int str_size = UNSAFE.getInt(clone_ptr_str_segment);
                             int bytes = 4 + str_size * BYTE;
                             long new_ref_segment = UNSAFE.allocateMemory(bytes);
@@ -138,7 +138,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                         long clone_ptr_str_segment = UNSAFE.getLong(clone_ptr);
 
                         if (clone_ptr_str_segment != 0) {
-                            // copy the segment
+                            // copy the chunk
                             int str_size = UNSAFE.getInt(clone_ptr_str_segment);
                             int bytes = 4 + str_size * BYTE;
                             long new_ref_segment = UNSAFE.allocateMemory(bytes);
@@ -157,7 +157,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                     long clone_ptr_ref_segment = UNSAFE.getLong(clone_ptr);
 
                     if (clone_ptr_ref_segment != 0) {
-                        // copy the segment
+                        // copy the chunk
                         int size = UNSAFE.getInt(clone_ptr_ref_segment);
                         int bytes = 4 + size * BYTE;
                         long new_ref_segment = UNSAFE.allocateMemory(bytes);
@@ -651,7 +651,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     }
 
     @Override
-    public final void init(String payload, KMetaModel metaModel) {
+    public final void init(String payload, KMetaModel metaModel, int metaClassIndex) {
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);

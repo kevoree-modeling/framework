@@ -6,7 +6,7 @@ import org.kevoree.modeling.KTimeWalker;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.memory.manager.impl.DataManager;
-import org.kevoree.modeling.memory.manager.impl.ResolutionHelper;
+import org.kevoree.modeling.memory.resolver.impl.ResolutionHelper;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.tree.KLongTree;
@@ -22,6 +22,8 @@ public class AbstractTimeWalker implements KTimeWalker {
 
     //TODO check the correct usage of start and end regarding multi universe
     private void internal_times(final long start, final long end, KCallback<long[]> cb) {
+        //TODO FIXME
+        /*
         KContentKey[] keys = new KContentKey[2];
         keys[0] = KContentKey.createGlobalUniverseTree();
         keys[1] = KContentKey.createUniverseTree(_origin.uuid());
@@ -73,6 +75,8 @@ public class AbstractTimeWalker implements KTimeWalker {
                 }
             }
         });
+        */
+
     }
 
     @Override

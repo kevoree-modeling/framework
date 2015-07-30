@@ -253,7 +253,7 @@ public class GaussianClassificationTest {
 
 
                 //for debug
-                KMemoryChunk ks = ((KInternalDataManager)model.manager()).segment(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
+                KMemoryChunk ks = ((KInternalDataManager)model.manager()).chunk(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
 
                 gaussianProfile.genericInferAll(irisInstanceTest, new KCallback<Object[][]>() {
                     @Override

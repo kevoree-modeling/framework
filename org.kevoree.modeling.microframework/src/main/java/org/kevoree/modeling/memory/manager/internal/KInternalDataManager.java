@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.manager.internal;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
+import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
@@ -20,9 +21,9 @@ public interface KInternalDataManager extends KDataManager {
 
     KContentDeliveryDriver cdn();
 
-    KMemoryStorage cache();
+    KMemoryChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
 
-    KMemoryChunk segment(long universe, long time, long uuid, boolean resolvePreviousSegment, KMetaClass metaClass, KMemorySegmentResolutionTrace resolutionTrace);
+    KMemoryChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
 
     void initKObject(KObject obj);
 
@@ -40,12 +41,10 @@ public interface KInternalDataManager extends KDataManager {
 
     long[] descendantsUniverseKeys(long currentUniverseKey);
 
-    void reload(KContentKey[] keys, KCallback<Throwable> callback);
-
-    void cleanCache();
-
     void isUsed(KObject origin, boolean state);
 
     void setModel(KModel model);
-    
+
+    void load(long[] keys, KCallback<KMemoryElement[]> callback);
+
 }

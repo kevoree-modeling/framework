@@ -385,7 +385,7 @@ public abstract class AbstractArrayTree {
         return Base64.encodeInt(treeSize) + "," + Base64.encodeInt(savedRoot) + builder.toString();
     }
 
-    public final void init(String payload, KMetaModel metaModel) {
+    public final void init(String payload, KMetaModel metaModel, int metaClassIndex) {
         if (payload == null || payload.length() == 0) {
             return;
         }

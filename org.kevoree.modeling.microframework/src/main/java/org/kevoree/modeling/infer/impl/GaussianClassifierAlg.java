@@ -56,9 +56,9 @@ public class GaussianClassifierAlg implements KInferAlg {
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
         int maxOutput = ((MetaEnum) origin.metaClass().outputs()[0].type()).literals().length;
-        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.chunk(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
-        //Create initial segment if empty
+        //Create initial chunk if empty
         int size = (maxOutput + 1) * (origin.metaClass().inputs().length * NUMOFFIELDS + 1);
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             ks.extendDoubleArray(origin.metaClass().dependencies().index(), size, origin.metaClass());
@@ -119,9 +119,9 @@ public class GaussianClassifierAlg implements KInferAlg {
     @Override
     public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
         int maxOutput = ((MetaEnum) origin.metaClass().outputs()[0].type()).literals().length;
-        KMemoryChunk ks = manager.segment(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.chunk(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
         int dependenciesIndex = origin.metaClass().dependencies().index();
-        //check if segment is empty
+        //check if chunk is empty
         int size = (maxOutput + 1) * (origin.metaClass().inputs().length * NUMOFFIELDS + 1);
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;

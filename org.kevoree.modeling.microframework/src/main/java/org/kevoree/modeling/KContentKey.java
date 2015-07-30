@@ -4,6 +4,24 @@ import org.kevoree.modeling.util.maths.Base64;
 
 public class KContentKey {
 
+    public static String toString(long[] keys, int keyIndex) {
+        StringBuilder buffer = new StringBuilder();
+        int offset = keyIndex * 3;
+        if (keys[offset] != KConfig.NULL_LONG) {
+            Base64.encodeLongToBuffer(keys[offset], buffer);
+        }
+        buffer.append(KConfig.KEY_SEP);
+        if (keys[offset + 1] != KConfig.NULL_LONG) {
+            Base64.encodeLongToBuffer(keys[offset + 1], buffer);
+        }
+        buffer.append(KConfig.KEY_SEP);
+        if (keys[offset + 2] != KConfig.NULL_LONG) {
+            Base64.encodeLongToBuffer(keys[offset + 2], buffer);
+        }
+        return buffer.toString();
+    }
+
+
     public long universe;
 
     public long time;
@@ -112,23 +130,6 @@ public class KContentKey {
             }
             return key;
         }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder buffer = new StringBuilder();
-        if (universe != KConfig.NULL_LONG) {
-            Base64.encodeLongToBuffer(universe, buffer);
-        }
-        buffer.append(KConfig.KEY_SEP);
-        if (time != KConfig.NULL_LONG) {
-            Base64.encodeLongToBuffer(time, buffer);
-        }
-        buffer.append(KConfig.KEY_SEP);
-        if (obj != KConfig.NULL_LONG) {
-            Base64.encodeLongToBuffer(obj, buffer);
-        }
-        return buffer.toString();
     }
 
     @Override

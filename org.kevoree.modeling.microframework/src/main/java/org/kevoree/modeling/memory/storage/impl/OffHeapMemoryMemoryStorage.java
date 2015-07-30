@@ -310,6 +310,7 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
     }
 
     private synchronized void common_clean_monitor(KObject origin, KMetaModel p_metaModel) {
+        /*
         if (origin != null) {
             if (rootReference != null) {
                 rootReference.next = new KObjectWeakReference(origin);
@@ -350,9 +351,7 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
                 previous = current;
                 current = current.next;
             }
-            //now we try to compact if deleted elements
-            compact();
-        }
+        }*/
     }
 
     private void remove(long universe, long time, long obj, KMetaModel p_metaModel) {

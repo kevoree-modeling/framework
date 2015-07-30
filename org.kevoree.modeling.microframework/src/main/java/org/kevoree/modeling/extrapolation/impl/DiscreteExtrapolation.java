@@ -23,7 +23,7 @@ public class DiscreteExtrapolation implements Extrapolation {
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
-        KMemoryChunk payload = dataManager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), null);
+        KMemoryChunk payload = dataManager.chunk(current.universe(), current.now(), current.uuid(), true, current.metaClass(), null);
         if (payload != null) {
             if (attribute.attributeType().isEnum()) {
                 return ((KMetaEnum) attribute.attributeType()).literal((int) payload.getPrimitiveType(attribute.index(), current.metaClass()));
@@ -38,7 +38,7 @@ public class DiscreteExtrapolation implements Extrapolation {
     @Override
     public void mutate(KObject current, KMetaAttribute attribute, Object payload, KInternalDataManager dataManager) {
         //By requiring a raw on the current object, we automatically create and copy the previous object
-        KMemoryChunk internalPayload = dataManager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
+        KMemoryChunk internalPayload = dataManager.chunk(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
         //The object is also automatically cset to Dirty
         if (internalPayload != null) {
             if (attribute.attributeType().isEnum()) {

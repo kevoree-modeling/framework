@@ -53,10 +53,11 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     protected abstract A internalCreateUniverse(long universe);
 
-    protected abstract KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz);
+    protected abstract KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime);
 
-    public KObject createProxy(long universe, long time, long uuid, KMetaClass clazz) {
-        return internalCreateObject(universe, time, uuid, clazz);
+    //TODO drop the metaClass param, replace by index
+    public KObject createProxy(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime) {
+        return internalCreateObject(universe, time, uuid, clazz, previousUniverse, previousTime);
     }
 
     @Override
@@ -101,7 +102,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         if (!Checker.isDefined(clazz)) {
             return null;
         }
-        KObject newObj = internalCreateObject(universe, time, _manager.nextObjectKey(), clazz);
+        KObject newObj = internalCreateObject(universe, time, _manager.nextObjectKey(), clazz, universe, time);
         if (newObj != null) {
             _manager.initKObject(newObj);
         }

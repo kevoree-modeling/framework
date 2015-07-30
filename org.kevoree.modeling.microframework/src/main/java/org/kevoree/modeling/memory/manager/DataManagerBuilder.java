@@ -2,6 +2,8 @@ package org.kevoree.modeling.memory.manager;
 
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
+import org.kevoree.modeling.memory.resolver.KResolver;
+import org.kevoree.modeling.memory.resolver.impl.DistortedTimeResolver;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;

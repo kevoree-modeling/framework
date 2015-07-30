@@ -11,8 +11,8 @@ import org.kevoree.modeling.traversal.KTraversalIndexResolver;
 
 public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfer {
 
-    public AbstractKObjectInfer(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager) {
-        super(p_universe, p_time, p_uuid, p_metaClass, p_manager);
+    public AbstractKObjectInfer(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long currentUniverse, long currentTime) {
+        super(p_universe, p_time, p_uuid, p_metaClass, p_manager, currentUniverse, currentTime);
     }
 
     private KTraversalIndexResolver dependenciesResolver(KObject[] dependencies) {

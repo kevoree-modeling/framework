@@ -105,7 +105,7 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
 
     /* warning: this method is not thread safe */
     @Override
-    public void init(String payload, KMetaModel metaModel) {
+    public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
         if (payload == null || payload.length() == 0) {
             return;
         }

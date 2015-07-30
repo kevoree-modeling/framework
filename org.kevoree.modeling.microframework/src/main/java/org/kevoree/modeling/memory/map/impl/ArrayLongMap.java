@@ -186,7 +186,7 @@ public class ArrayLongMap<V> implements KLongMap<V> {
         int hash = (int) key;
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
         entry = elementData[index];
-        while (entry != null && !(/*((int)segment.key) == hash &&*/ key == entry.key)) {
+        while (entry != null && !(/*((int)chunk.key) == hash &&*/ key == entry.key)) {
             last = entry;
             entry = entry.next;
         }

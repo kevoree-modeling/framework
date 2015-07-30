@@ -1,11 +1,10 @@
 package org.kevoree.modeling.extrapolation.impl;
 
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.util.maths.PolynomialFit;
-import org.kevoree.modeling.memory.manager.internal.KMemorySegmentResolutionTrace;
-import org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -17,10 +16,9 @@ public class PolynomialExtrapolation implements Extrapolation {
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
-        KMemorySegmentResolutionTrace trace = new MemorySegmentResolutionTrace();
-        KMemoryChunk raw = dataManager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
+        KMemoryChunk raw = dataManager.chunk(current.universe(), current.now(), current.uuid(), true, current.metaClass(), ((AbstractKObject) current).previousResolved());
         if (raw != null) {
-            Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), trace.getTime());
+            Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), ((AbstractKObject) current).previousResolved()[AbstractKObject.TIME_PREVIOUS_INDEX]);
             int attTypeId = attribute.attributeType().id();
             switch (attTypeId) {
                 case KPrimitiveTypes.CONTINUOUS_ID:
@@ -167,15 +165,16 @@ public class PolynomialExtrapolation implements Extrapolation {
 
     @Override
     public void mutate(KObject current, KMetaAttribute attribute, Object payload, KInternalDataManager dataManager) {
-        KMemorySegmentResolutionTrace trace = new MemorySegmentResolutionTrace();
-        KMemoryChunk raw = dataManager.segment(current.universe(), current.now(), current.uuid(), true, current.metaClass(), trace);
+        long[] previousResolved = ((AbstractKObject) current).previousResolved();
+        KMemoryChunk raw = dataManager.chunk(current.universe(), current.now(), current.uuid(), true, current.metaClass(), previousResolved);
         if (raw.getDoubleArraySize(attribute.index(), current.metaClass()) == 0) {
-            raw = dataManager.segment(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
+            raw = dataManager.chunk(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
         }
-        if (!insert(current.now(), castNumber(payload), trace.getTime(), raw, attribute.index(), attribute.precision(), current.metaClass())) {
-            long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + trace.getTime();
-            double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, trace.getTime());
-            KMemoryChunk newSegment = dataManager.segment(current.universe(), prevTime, current.uuid(), false, current.metaClass(), null);
+        long chunkResolvedTime = previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX];
+        if (!insert(current.now(), castNumber(payload), chunkResolvedTime, raw, attribute.index(), attribute.precision(), current.metaClass())) {
+            long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + chunkResolvedTime;
+            double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, chunkResolvedTime);
+            KMemoryChunk newSegment = dataManager.chunk(current.universe(), prevTime, current.uuid(), false, current.metaClass(), null);
             insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
             insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
         }

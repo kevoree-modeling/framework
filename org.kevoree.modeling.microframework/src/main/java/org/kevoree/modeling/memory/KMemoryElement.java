@@ -20,7 +20,7 @@ public interface KMemoryElement {
      */
     String serialize(KMetaModel metaModel);
 
-    void init(String payload, KMetaModel metaModel);
+    void init(String payload, KMetaModel metaModel, int metaClassIndex);
 
     int counter();
 
