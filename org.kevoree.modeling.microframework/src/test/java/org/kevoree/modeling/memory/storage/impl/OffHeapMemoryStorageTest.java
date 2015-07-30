@@ -60,6 +60,9 @@ public class OffHeapMemoryStorageTest {
 
         // KMemoryChunk
         KMemoryChunk chunk = new OffHeapMemoryChunk();
+        storage.putAndReplace(0, 0, 0, chunk);
+        KMemoryChunk retrievedChunk = (KMemoryChunk) storage.get(0, 0, 0);
+        Assert.assertNotNull(retrievedChunk);
 
     }
 }
