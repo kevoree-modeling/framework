@@ -6,13 +6,14 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.meta.KMetaModel;
 
-public abstract class BaseKCacheTest {
+public abstract class BaseKMemoryStorageTest {
 
     public abstract KMemoryStorage createKCache();
 
     @Test
     public void test() {
         KMemoryStorage cache = createKCache();
+
         KMemoryElement temp = new KMemoryElement() {
             @Override
             public boolean isDirty() {
