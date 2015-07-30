@@ -6,7 +6,7 @@ import org.kevoree.modeling.memory.storage.KMemoryStorage;
 public class ArrayMemoryStorageTest extends BaseKMemoryStorageTest {
 
     @Override
-    public KMemoryStorage createKCache() {
+    public KMemoryStorage createKMemoryStorage() {
         return new ArrayMemoryMemoryStorage(null);
     }
 }

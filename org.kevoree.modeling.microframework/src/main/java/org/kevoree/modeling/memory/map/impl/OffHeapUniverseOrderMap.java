@@ -1,5 +1,6 @@
 package org.kevoree.modeling.memory.map.impl;
 
+import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
@@ -8,7 +9,7 @@ import org.kevoree.modeling.util.maths.Base64;
  * @ignore ts
  */
 // TODO _counter and _className should be moved to offheap
-public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniverseOrderMap {
+public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniverseOrderMap, KOffHeapMemoryElement {
 
     private volatile int _counter = 0;
 
@@ -153,4 +154,13 @@ public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniv
         clear();
     }
 
+    @Override
+    public long getMemoryAddress() {
+        return this._start_address;
+    }
+
+    @Override
+    public void setMemoryAddress(long address) {
+        this._start_address = address;
+    }
 }

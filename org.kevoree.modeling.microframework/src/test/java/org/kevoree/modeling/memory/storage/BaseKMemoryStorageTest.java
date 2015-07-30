@@ -8,11 +8,11 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 public abstract class BaseKMemoryStorageTest {
 
-    public abstract KMemoryStorage createKCache();
+    public abstract KMemoryStorage createKMemoryStorage();
 
     @Test
     public void test() {
-        KMemoryStorage cache = createKCache();
+        KMemoryStorage cache = createKMemoryStorage();
 
         KMemoryElement temp = new KMemoryElement() {
             @Override
