@@ -11,7 +11,4 @@ public class OffHeapMemoryStorageTest extends BaseKMemoryStorageTest {
         return new OffHeapMemoryStorage();
     }
 
-        return new OffHeapMemoryMemoryStorage(new OffHeapMemoryStrategy());
-    }
-
 }
