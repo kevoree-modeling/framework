@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script type="text/javascript" src="java.js"></script>
+    <script type="text/javascript" src="org.kevoree.modeling.microframework.typescript.js"></script>
+    <script type="text/javascript" src="org.kevoree.modeling.drivers.websocket.js"></script>
+
+    <script type="text/javascript" src="paperclip.js"></script>
+
+    <link rel="import" href="test-module/test-module.html"/>
+</head>
+<body>
+
+
+
+
+
+<script>
+    var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
+    var sensorClass = metaModel.addMetaClass("Sensor");
+    sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
+    sensorClass.addReference("sensors", sensorClass, null, true);
+
+    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://"+window.location.hostname+":8081/cdn");
+    var KmfModel = metaModel.model();
+    KmfModel.setContentDeliveryDriver(wsClient);
+    KmfModel.connect(function () {
+
+        var newElement = document.createElement("test-module");
+        newElement.setAttribute("name", "John !");
+
+        var span = document.createElement("span");
+        span.style["color"] ="blue";
+        span.textContent = "This is some instance content";
+        newElement.appendChild(span);
+
+        document.body.appendChild(newElement);
+
+    });
+</script>
+
+
+</body>
+</html>
