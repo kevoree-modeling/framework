@@ -9,10 +9,12 @@ import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.tree.KLongLongTree;
 import org.kevoree.modeling.memory.tree.KLongTree;
+import org.kevoree.modeling.memory.tree.KTreeWalker;
 import org.kevoree.modeling.meta.KMetaClass;
 
 public class DistortedTimeResolver implements KResolver {
@@ -191,6 +193,7 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     //TODO optimize the worst case by reusing, by using previous universe, maybe optimize
+    //FIXME
     private KMemoryChunk internal_chunk(long universe, long requestedTime, long uuid, boolean useClosest, KMetaClass metaClass, long[] previousResolution) {
         long time = requestedTime;
         if (metaClass.temporalResolution() != 1) {
@@ -509,6 +512,72 @@ public class DistortedTimeResolver implements KResolver {
     }
     */
     /* End of root section */
+
+
+    @Override
+    public void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback) {
+        long[] keys = new long[]{
+                KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG,
+                KConfig.NULL_LONG, KConfig.NULL_LONG, currentUuid
+        };
+        getOrLoadAndMarkAll(keys, new KCallback<KMemoryElement[]>() {
+            @Override
+            public void on(KMemoryElement[] kMemoryElements) {
+                if (kMemoryElements == null || kMemoryElements.length == 0) {
+                    callback.on(new long[0]);
+                    return;
+                }
+                final long[] collectedUniverse = ResolutionHelper.universeSelectByRange((KUniverseOrderMap) kMemoryElements[0], (KUniverseOrderMap) kMemoryElements[1], startTime, endTime, currentUniverse);
+                int nbKeys = collectedUniverse.length * 3;
+                final long[] timeTreeKeys = new long[nbKeys];
+                for (int i = 0; i < collectedUniverse.length; i++) {
+                    timeTreeKeys[i * 3] = collectedUniverse[i];
+                    timeTreeKeys[i * 3 + 1] = KConfig.NULL_LONG;
+                    timeTreeKeys[i * 3 + 2] = currentUuid;
+                }
+                final KUniverseOrderMap objUniverse = (KUniverseOrderMap) kMemoryElements[1];
+                getOrLoadAndMarkAll(timeTreeKeys, new KCallback<KMemoryElement[]>() {
+                    @Override
+                    public void on(KMemoryElement[] timeTrees) {
+                        if (timeTrees == null || timeTrees.length == 0) {
+                            _cache.unmarkAllMemoryElements(kMemoryElements);
+                            callback.on(new long[0]);
+                            return;
+                        }
+                        ArrayLongLongMap collector = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+                        long previousDivergenceTime = endTime;
+                        for (int i = 0; i < collectedUniverse.length; i++) {
+                            KLongTree timeTree = (KLongTree) timeTrees[i];
+                            if (timeTree != null) {
+                                long currentDivergenceTime = objUniverse.get(collectedUniverse[i]);
+                                final long finalPreviousDivergenceTime = previousDivergenceTime;
+                                timeTree.range(currentDivergenceTime, previousDivergenceTime, new KTreeWalker() {
+                                    @Override
+                                    public void elem(long t) {
+                                        if (collector.size() == 0) {
+                                            collector.put(collector.size(), t);
+                                        } else {
+                                            if (t != finalPreviousDivergenceTime) {
+                                                collector.put(collector.size(), t);
+                                            }
+                                        }
+                                    }
+                                });
+                                previousDivergenceTime = currentDivergenceTime;
+                            }
+                        }
+                        long[] orderedTime = new long[collector.size()];
+                        for (int i = 0; i < collector.size(); i++) {
+                            orderedTime[i] = collector.get(i);
+                        }
+                        _cache.unmarkAllMemoryElements(timeTrees);
+                        _cache.unmarkAllMemoryElements(kMemoryElements);
+                        callback.on(orderedTime);
+                    }
+                });
+            }
+        });
+    }
 
 
 }

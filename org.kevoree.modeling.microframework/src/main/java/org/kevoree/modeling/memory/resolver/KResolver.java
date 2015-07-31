@@ -23,4 +23,6 @@ public interface KResolver {
 
     short typeFromKey(long universe, long time, long uuid);
 
+    void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback);
+
 }

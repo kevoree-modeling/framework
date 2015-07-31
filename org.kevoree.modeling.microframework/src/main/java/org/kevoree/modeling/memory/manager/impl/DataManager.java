@@ -582,4 +582,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
         return this._listenerManager.createListener(p_universe);
     }
 
+
+    @Override
+    public void resolveTimes(long currentUniverse, long currentUuid, long startTime, long endTime, KCallback<long[]> callback) {
+        _resolver.resolveTimes(currentUniverse, currentUuid, startTime, endTime, callback);
+    }
 }
