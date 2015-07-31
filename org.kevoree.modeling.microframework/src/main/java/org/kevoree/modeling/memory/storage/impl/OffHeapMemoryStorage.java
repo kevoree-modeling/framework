@@ -198,6 +198,7 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
         return null;
     }
 
+
     @Override
     public KMemoryElement create(long universe, long time, long obj, short type) {
         KMemoryElement newElement = internal_createElement(type);

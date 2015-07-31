@@ -195,7 +195,7 @@ public abstract class BaseKMemoryChunkTest {
                 cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
 
                 // clone
-                KMemoryChunk clonedEntry = cacheEntry.clone(homeMetaClass);
+                KMemoryChunk clonedEntry = cacheEntry.clone(dynamicMetaModel);
 
                 Assert.assertEquals(cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass),
                         clonedEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass));
@@ -258,7 +258,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 ArrayList<KMemoryChunk> segments = new ArrayList<KMemoryChunk>();
                 for (int i = 0; i < 50; i++) {
-                    segments.add(cacheEntry.clone(homeMetaClass));
+                    segments.add(cacheEntry.clone(dynamicMetaModel));
                 }
 
                 // free everything
@@ -382,7 +382,7 @@ public abstract class BaseKMemoryChunkTest {
 
 
                 // clone cache entry
-                KMemoryChunk clone = cacheEntry.clone(sensorMetaClass);
+                KMemoryChunk clone = cacheEntry.clone(dynamicMetaModel);
                 double[] inferPayload5 = clone.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 double[] inferPayload6 = clone.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertTrue(inferPayload5[9] == 52);

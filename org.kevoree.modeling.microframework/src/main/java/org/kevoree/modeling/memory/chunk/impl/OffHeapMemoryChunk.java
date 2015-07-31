@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
+import org.kevoree.modeling.meta.impl.MetaClass;
 import org.kevoree.modeling.meta.impl.MetaReference;
 import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
@@ -107,21 +108,16 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
         long _clone_start_address = UNSAFE.allocateMemory(cloneBytes);
         clonedEntry._allocated_segments++;
         clonedEntry._start_address = _clone_start_address;
-
         UNSAFE.copyMemory(this._start_address, clonedEntry._start_address, cloneBytes);
-
         // strings and references
         for (int i = 0; i < metaClass.metaElements().length; i++) {
             KMeta meta = metaClass.metaElements()[i];
-
             if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                 KMetaAttribute metaAttribute = (KMetaAttribute) meta;
-
                 if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
                     long clone_ptr = clonedEntry.internal_ptr_raw_for_index(metaAttribute.index(), metaClass);
                     if (UNSAFE.getLong(clone_ptr) != 0) {
                         long clone_ptr_str_segment = UNSAFE.getLong(clone_ptr);
-
                         if (clone_ptr_str_segment != 0) {
                             // copy the chunk
                             int str_size = UNSAFE.getInt(clone_ptr_str_segment);
@@ -134,12 +130,10 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                         }
                     }
                 }
-
                 if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
                     long clone_ptr = clonedEntry.internal_ptr_raw_for_index(metaAttribute.index(), metaClass);
                     if (UNSAFE.getLong(clone_ptr) != 0) {
                         long clone_ptr_str_segment = UNSAFE.getLong(clone_ptr);
-
                         if (clone_ptr_str_segment != 0) {
                             // copy the chunk
                             int str_size = UNSAFE.getInt(clone_ptr_str_segment);
@@ -147,7 +141,6 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                             long new_ref_segment = UNSAFE.allocateMemory(bytes);
                             clonedEntry._allocated_segments++;
                             UNSAFE.copyMemory(clone_ptr_str_segment, new_ref_segment, bytes);
-
                             UNSAFE.putLong(clone_ptr, new_ref_segment); // update ptr
                         }
                     }
@@ -158,7 +151,6 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                 long clone_ptr = clonedEntry.internal_ptr_raw_for_index(metaReference.index(), metaClass);
                 if (UNSAFE.getLong(clone_ptr) != 0) {
                     long clone_ptr_ref_segment = UNSAFE.getLong(clone_ptr);
-
                     if (clone_ptr_ref_segment != 0) {
                         // copy the chunk
                         int size = UNSAFE.getInt(clone_ptr_ref_segment);
@@ -166,7 +158,6 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
                         long new_ref_segment = UNSAFE.allocateMemory(bytes);
                         clonedEntry._allocated_segments++;
                         UNSAFE.copyMemory(clone_ptr_ref_segment, new_ref_segment, bytes);
-
                         UNSAFE.putLong(clone_ptr, new_ref_segment); // update ptr
                     }
                 }

@@ -50,12 +50,16 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     private int currentCdnListener = -1;
 
+    @Override
+    public void setModel(KModel p_model) {
+        this._model = p_model;
+    }
+
     public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KMemoryStrategy p_factory) {
         this._factory = p_factory;
         this._storage = _factory.newStorage();
         this._cache = _factory.newCache(_storage);
-        this._resolver = new DistortedTimeResolver(this._cache, this, this._model);
-
+        this._resolver = new DistortedTimeResolver(this._cache, this);
         this._listenerManager = new ListenerManager();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);
         this._db = p_cdn;
@@ -536,11 +540,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public void isUsed(KObject origin, boolean state) {
 
-    }
-
-    @Override
-    public void setModel(KModel p_model) {
-        this._model = p_model;
     }
 
     @Override

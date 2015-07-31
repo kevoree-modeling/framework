@@ -8,11 +8,11 @@ public abstract class BaseKUniverseOrderMapTest {
 
     private static final int SIZE = 100;
 
-    public abstract KUniverseOrderMap createKUniverseOrderMap(int p_initalCapacity, float p_loadFactor, String p_className);
+    public abstract KUniverseOrderMap createKUniverseOrderMap();
 
     @Test
     public void test() {
-        KLongLongMap map = createKUniverseOrderMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR, "org.kevoree.modeling.Hello");
+        KLongLongMap map = createKUniverseOrderMap();//"org.kevoree.modeling.Hello");
         for (long i = 0; i < SIZE; i++) {
             map.put(i, i);
         }
@@ -35,7 +35,7 @@ public abstract class BaseKUniverseOrderMapTest {
 
     @Test
     public void testLoadSave() throws Exception {
-        KUniverseOrderMap map = createKUniverseOrderMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR, "org.kevoree.modeling.Hello");
+        KUniverseOrderMap map = createKUniverseOrderMap();//, "org.kevoree.modeling.Hello");
         for (long i = 0; i < 10; i++) {
             map.put(i, i);
         }
@@ -44,7 +44,7 @@ public abstract class BaseKUniverseOrderMapTest {
 
         Assert.assertEquals(saved, "org.kevoree.modeling.Hello,U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
 
-        KUniverseOrderMap map2 = createKUniverseOrderMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR, null);
+        KUniverseOrderMap map2 = createKUniverseOrderMap();//, null);
         map2.init(saved, null, -1);
         Assert.assertEquals(map2.size(), 10);
         for (long i = 0; i < 10; i++) {
@@ -59,13 +59,13 @@ public abstract class BaseKUniverseOrderMapTest {
 
         Assert.assertEquals(saved2, "org.kevoree.modeling.Hello,U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
 
-        KUniverseOrderMap nullClassName = createKUniverseOrderMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR, null);
+        KUniverseOrderMap nullClassName = createKUniverseOrderMap();//, null);
         for (long i = 0; i < 10; i++) {
             nullClassName.put(i, i);
         }
         String nullSaved = nullClassName.serialize(null);
         Assert.assertEquals(nullSaved, "U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
-        KUniverseOrderMap mapNull2 = createKUniverseOrderMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR, null);
+        KUniverseOrderMap mapNull2 = createKUniverseOrderMap();//, null);
         mapNull2.init(nullSaved, null, -1);
         String nullSaved2 = mapNull2.serialize(null);
         Assert.assertEquals(nullSaved2, "U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
@@ -74,7 +74,7 @@ public abstract class BaseKUniverseOrderMapTest {
 
     @Test
     public void testInitThenPut() {
-        KUniverseOrderMap map = createKUniverseOrderMap(0, KConfig.CACHE_LOAD_FACTOR, "org.kevoree.modeling.Hello");
+        KUniverseOrderMap map = createKUniverseOrderMap();//, "org.kevoree.modeling.Hello");
         map.init(null, null, -1);
         map.put(0, 0);
         map.put(1, 1);
