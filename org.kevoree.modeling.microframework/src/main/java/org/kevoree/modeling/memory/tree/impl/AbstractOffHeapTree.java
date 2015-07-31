@@ -50,7 +50,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
     private volatile long _start_address;
     protected int _threshold;
     protected float _loadFactor;
-    protected static int NODE_SIZE;
+
+    protected int NODE_SIZE;
 
     protected AbstractOffHeapTree() {
         NODE_SIZE = 0;
@@ -69,7 +70,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         _threshold = (int) (size() * _loadFactor);
     }
 
-    private final void internal_reallocate(int length) {
+    private void internal_reallocate(int length) {
         int size_base_segment = BASE_SEGMENT_LEN;
         int size_raw_segment = length * NODE_SIZE * BYTE;
         long new_address = UNSAFE.allocateMemory(size_base_segment + size_raw_segment);
@@ -87,7 +88,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
 //        _threshold = (int) (length * _loadFactor);
     }
 
-    private static final int internal_size_raw_segment(int size) {
+    private int internal_size_raw_segment(int size) {
         return size * BYTE * NODE_SIZE;
     }
 
@@ -103,12 +104,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return UNSAFE.getLong(addr + POS_KEY * BYTE);
     }
 
-    private final void setKey(long p_nodeIndex, long p_key) {
+    private void setKey(long p_nodeIndex, long p_key) {
         long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_KEY * BYTE, p_key);
     }
 
-    private final long left(long p_nodeIndex) {
+    private long left(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
@@ -116,12 +117,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return UNSAFE.getLong(addr + POS_LEFT * BYTE);
     }
 
-    private final void setLeft(long p_nodeIndex, long p_leftNodeIndex) {
+    private void setLeft(long p_nodeIndex, long p_leftNodeIndex) {
         long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_LEFT * BYTE, p_leftNodeIndex);
     }
 
-    private final long right(long p_nodeIndex) {
+    private long right(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
@@ -129,12 +130,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return UNSAFE.getLong(addr + POS_RIGHT * BYTE);
     }
 
-    private final void setRight(long p_nodeIndex, long p_rightNodeIndex) {
+    private void setRight(long p_nodeIndex, long p_rightNodeIndex) {
         long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_RIGHT * BYTE, p_rightNodeIndex);
     }
 
-    private final long parent(long p_nodeIndex) {
+    private long parent(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
@@ -142,12 +143,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return UNSAFE.getLong(address + POS_PARENT * BYTE);
     }
 
-    private final void setParent(long p_nodeIndex, long p_parentNodeIndex) {
+    private void setParent(long p_nodeIndex, long p_parentNodeIndex) {
         long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_PARENT * BYTE, p_parentNodeIndex);
     }
 
-    private final long color(long p_nodeIndex) {
+    private long color(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
@@ -155,7 +156,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return UNSAFE.getLong(addr + POS_COLOR * BYTE);
     }
 
-    private final void setColor(long p_nodeIndex, long p_color) {
+    private void setColor(long p_nodeIndex, long p_color) {
         long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_COLOR * BYTE, p_color);
     }
@@ -168,12 +169,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return UNSAFE.getLong(addr + POS_VALUE * BYTE);
     }
 
-    private final void setValue(long p_nodeIndex, long p_value) {
+    private void setValue(long p_nodeIndex, long p_value) {
         long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_VALUE * BYTE, p_value);
     }
 
-    private final long grandParent(long currentIndex) {
+    private long grandParent(long currentIndex) {
         if (currentIndex == UNDEFINED) {
             return UNDEFINED;
         }
@@ -184,7 +185,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         }
     }
 
-    private final long sibling(long currentIndex) {
+    private long sibling(long currentIndex) {
         if (parent(currentIndex) == UNDEFINED) {
             return UNDEFINED;
         } else {
@@ -196,7 +197,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         }
     }
 
-    private final long uncle(long currentIndex) {
+    private long uncle(long currentIndex) {
         if (parent(currentIndex) != UNDEFINED) {
             return sibling(parent(currentIndex));
         } else {
@@ -204,7 +205,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         }
     }
 
-    private final long previous(long p_index) {
+    private long previous(long p_index) {
         long p = p_index;
         if (left(p) != UNDEFINED) {
             p = left(p);
@@ -307,7 +308,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         return n;
     }
 
-    private final void rotateLeft(long n) {
+    private void rotateLeft(long n) {
         long r = right(n);
         replaceNode(n, r);
         setRight(n, left(r));
@@ -318,7 +319,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         setParent(n, r);
     }
 
-    private final void rotateRight(long n) {
+    private void rotateRight(long n) {
         long l = left(n);
         replaceNode(n, l);
         setLeft(n, right(l));
@@ -329,7 +330,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         setParent(n, l);
     }
 
-    private final void replaceNode(long oldn, long newn) {
+    private void replaceNode(long oldn, long newn) {
         if (parent(oldn) == UNDEFINED) {
             UNSAFE.putLong(_start_address + OFFSET_ROOT_INDEX, newn);
         } else {
@@ -416,7 +417,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         insertCase1(insertedNodeIndex);
     }
 
-    private final void insertCase1(long n) {
+    private void insertCase1(long n) {
         if (parent(n) == UNDEFINED) {
             setColor(n, 1);
         } else {
@@ -424,7 +425,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         }
     }
 
-    private final void insertCase2(long n) {
+    private void insertCase2(long n) {
         if (nodeColor(parent(n)) == true) {
             return;
         } else {
@@ -432,7 +433,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         }
     }
 
-    private final void insertCase3(long n) {
+    private void insertCase3(long n) {
         if (nodeColor(uncle(n)) == false) {
             setColor(parent(n), 1);
             setColor(uncle(n), 1);
@@ -443,7 +444,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         }
     }
 
-    private final void insertCase4(long n_n) {
+    private void insertCase4(long n_n) {
         long n = n_n;
         if (n == right(parent(n)) && parent(n) == left(grandParent(n))) {
             rotateLeft(parent(n));
@@ -457,7 +458,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         insertCase5(n);
     }
 
-    private final void insertCase5(long n) {
+    private void insertCase5(long n) {
         setColor(parent(n), 1);
         setColor(grandParent(n), 0);
         if (n == left(parent(n)) && parent(n) == left(grandParent(n))) {
@@ -471,7 +472,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         //TODO
     }
 
-    private final boolean nodeColor(long n) {
+    private boolean nodeColor(long n) {
         if (n == UNDEFINED) {
             return true;
         } else {

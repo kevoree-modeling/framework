@@ -1,12 +1,16 @@
 package org.kevoree.modeling.memory.storage.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.impl.OffHeapMemoryChunk;
+import org.kevoree.modeling.memory.map.impl.OffHeapUniverseOrderMap;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
-import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
+import org.kevoree.modeling.memory.tree.impl.OffHeapLongLongTree;
+import org.kevoree.modeling.memory.tree.impl.OffHeapLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 import sun.misc.Unsafe;
 
@@ -16,17 +20,15 @@ import java.lang.reflect.Field;
  * @ignore ts
  * OffHeap implementation of KCache
  * - memory structure:  | elementCount (4) | droppedCount (4) | elementDataSize (4) | back (elem data size * 40) |
- * - back:              | universe_key (8)  | time_key (8) | obj_key (8) | next (4) | hash (4) | value_ptr (8)  |
+ * - back:              | universe_key (8)  | time_key (8) | obj_key (8) | next (4) | hash (4) | value_ptr (8) | type (2) |
  */
-public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
+public class OffHeapMemoryStorage implements KMemoryStorage {
     private static final Unsafe UNSAFE = getUnsafe();
 
     protected volatile long _start_address;
 
     private int _threshold;
     private final float _loadFactor;
-
-    private final KMemoryStrategy strategy;
 
     private static final int ATT_ELEMENT_COUNT_LEN = 4;
     private static final int ATT_DROPPED_COUNT_LEN = 4;
@@ -38,6 +40,7 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
     private static final int ATT_NEXT_LEN = 4;
     private static final int ATT_HASH_LEN = 4;
     private static final int ATT_VALUE_PTR_LEN = 8;
+    private static final int ATT_TYPE_LEN = 2;
 
     private static final int OFFSET_STARTADDRESS_ELEMENT_COUNT = 0;
     private static final int OFFSET_STARTADDRESS_DROPPED_COUNT = OFFSET_STARTADDRESS_ELEMENT_COUNT + ATT_ELEMENT_COUNT_LEN;
@@ -50,9 +53,10 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
     private static final int OFFSET_BACK_NEXT = OFFSET_BACK_OBJ_KEY + ATT_OBJ_KEY_LEN;
     private static final int OFFSET_BACK_HASH = OFFSET_BACK_NEXT + ATT_NEXT_LEN;
     private static final int OFFSET_BACK_VALUE_PTR = OFFSET_BACK_HASH + ATT_HASH_LEN;
+    private static final int OFFSET_BACK_TYPE = OFFSET_BACK_VALUE_PTR + ATT_VALUE_PTR_LEN;
 
     protected static final int BASE_SEGMENT_LEN = ATT_ELEMENT_COUNT_LEN + ATT_DROPPED_COUNT_LEN + ATT_ELEMENT_DATA_SIZE_LEN;
-    protected static final int BACK_ELEM_ENTRY_LEN = ATT_UNIVERSE_KEY_LEN + ATT_TIME_KEY_LEN + ATT_OBJ_KEY_LEN + ATT_NEXT_LEN + ATT_HASH_LEN + ATT_VALUE_PTR_LEN;
+    protected static final int BACK_ELEM_ENTRY_LEN = ATT_UNIVERSE_KEY_LEN + ATT_TIME_KEY_LEN + ATT_OBJ_KEY_LEN + ATT_NEXT_LEN + ATT_HASH_LEN + ATT_VALUE_PTR_LEN + ATT_TYPE_LEN;
 
 
     // TODO this methods are maybe a bottleneck if they are not inlined
@@ -104,12 +108,16 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
         UNSAFE.putLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE_PTR), valuePointer);
     }
 
+    private void internal_setType(long startAddress, int index, short type) {
+        UNSAFE.putShort(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_TYPE), type);
+    }
+
+    private short internal_getType(long startAddress, int index) {
+        return UNSAFE.getShort(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_TYPE));
+    }
+
     private KOffHeapMemoryElement internal_getMemoryElement(long startAddress, int index) {
-        KMemoryElement elem = strategy.newFromKey(
-                internal_getUniverseKey(startAddress, index),
-                internal_getTimeKey(startAddress, index),
-                internal_getObjKey(startAddress, index)
-        );
+        KMemoryElement elem = internal_createElement(internal_getType(startAddress, index));
 
         if (!(elem instanceof KOffHeapMemoryElement)) {
             throw new RuntimeException("OffHeapMemoryCache only supports OffHeapMemoryElements");
@@ -120,9 +128,7 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
         return offheapElem;
     }
 
-    public OffHeapMemoryMemoryStorage(KMemoryStrategy strategy) {
-        this.strategy = strategy;
-
+    public OffHeapMemoryStorage() {
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
 
@@ -193,16 +199,33 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
     }
 
     @Override
-    public final void putAndReplace(long universe, long time, long obj, KMemoryElement payload) {
-        internal_put(universe, time, obj, payload, true);
+    public KMemoryElement create(long universe, long time, long obj, short type) {
+        KMemoryElement newElement = internal_createElement(type);
+
+        return internal_put(universe, time, obj, newElement, type);
     }
+
+    private KMemoryElement internal_createElement(short type) {
+        switch (type) {
+            case KMemoryElementTypes.CHUNK:
+                return new OffHeapMemoryChunk();
+            case KMemoryElementTypes.LONG_TREE:
+                return new OffHeapLongTree();
+            case KMemoryElementTypes.LONG_LONG_TREE:
+                return new OffHeapLongLongTree();
+            case KMemoryElementTypes.LONG_LONG_MAP:
+                return new OffHeapUniverseOrderMap(0, KConfig.CACHE_LOAD_FACTOR, null);
+        }
+        return null;
+    }
+
 
     @Override
-    public final KMemoryElement getOrPut(long universe, long time, long obj, KMemoryElement payload) {
-        return internal_put(universe, time, obj, payload, false);
+    public KMemoryChunk clone(KMemoryChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
+        return null;
     }
 
-    private synchronized KMemoryElement internal_put(long universe, long time, long p_obj, KMemoryElement payload, boolean force) {
+    private synchronized KMemoryElement internal_put(long universe, long time, long p_obj, KMemoryElement payload, short type) {
         if (!(payload instanceof KOffHeapMemoryElement)) {
             throw new RuntimeException("OffHeapMemoryCache only supports OffHeapMemoryElements");
         }
@@ -234,6 +257,7 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
             internal_setTimeKey(_start_address, newIndex, time);
             internal_setObjKey(_start_address, newIndex, p_obj);
             internal_setValuePointer(_start_address, newIndex, memoryElement.getMemoryAddress());
+            internal_setType(_start_address, newIndex, type);
 
             internal_setNext(_start_address, newIndex, internal_getNext(_start_address, index));
             //now the object is reachable to other thread everything should be ready
@@ -241,12 +265,7 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
             return payload;
 
         } else {
-            if (force) {
-                internal_setValuePointer(_start_address, entry, memoryElement.getMemoryAddress());/*setValue*/
-                return payload;
-            } else {
-                return internal_getMemoryElement(_start_address, entry);
-            }
+            return internal_getMemoryElement(_start_address, entry);
         }
     }
 
@@ -263,32 +282,32 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
         return -1;
     }
 
-    @Override
-    public KContentKey[] dirtyKeys() {
-        int nbDirties = 0;
-
-        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
-        for (int i = 0; i < elementDataSize; i++) {
-            if (internal_getValuePointer(_start_address, i) != 0) {
-                if (internal_getMemoryElement(_start_address, i).isDirty()) {
-                    nbDirties++;
-                }
-            }
-        }
-        KContentKey[] collectedDirties = new KContentKey[nbDirties];
-        nbDirties = 0;
-        for (int i = 0; i < elementDataSize; i++) {
-            if (internal_getValuePointer(_start_address, i) != 0) {
-                if (internal_getMemoryElement(_start_address, i).isDirty()) {
-                    collectedDirties[nbDirties] = new KContentKey(internal_getUniverseKey(_start_address, i),
-                            internal_getTimeKey(_start_address, i),
-                            internal_getTimeKey(_start_address, i));
-                    nbDirties++;
-                }
-            }
-        }
-        return collectedDirties;
-    }
+//    @Override
+//    public KContentKey[] dirtyKeys() {
+//        int nbDirties = 0;
+//
+//        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+//        for (int i = 0; i < elementDataSize; i++) {
+//            if (internal_getValuePointer(_start_address, i) != 0) {
+//                if (internal_getMemoryElement(_start_address, i).isDirty()) {
+//                    nbDirties++;
+//                }
+//            }
+//        }
+//        KContentKey[] collectedDirties = new KContentKey[nbDirties];
+//        nbDirties = 0;
+//        for (int i = 0; i < elementDataSize; i++) {
+//            if (internal_getValuePointer(_start_address, i) != 0) {
+//                if (internal_getMemoryElement(_start_address, i).isDirty()) {
+//                    collectedDirties[nbDirties] = new KContentKey(internal_getUniverseKey(_start_address, i),
+//                            internal_getTimeKey(_start_address, i),
+//                            internal_getTimeKey(_start_address, i));
+//                    nbDirties++;
+//                }
+//            }
+//        }
+//        return collectedDirties;
+//    }
 
     @Override
     public void clean(KMetaModel metaModel) {
@@ -409,11 +428,13 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
                     long l_uni = internal_getUniverseKey(_start_address, i);
                     long l_time = internal_getTimeKey(_start_address, i);
                     long l_obj = internal_getObjKey(_start_address, i);
+                    short l_type = internal_getType(_start_address, i);
 
                     internal_setValuePointer(newAddress, currentIndex, loopElement.getMemoryAddress());
                     internal_setUniverseKey(newAddress, currentIndex, l_uni);
                     internal_setTimeKey(newAddress, currentIndex, l_time);
                     internal_setObjKey(newAddress, currentIndex, l_obj);
+                    internal_setType(newAddress, currentIndex, l_type);
 
                     int hash = (int) (l_uni ^ l_time ^ l_obj);
                     int index = (hash & 0x7FFFFFFF) % length;

@@ -96,6 +96,8 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     public final KMemoryChunk clone(KMetaModel metaModel) {
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
 
+        KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
+
         OffHeapMemoryChunk clonedEntry = new OffHeapMemoryChunk();
         int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = metaClass.metaElements().length;

@@ -1,5 +1,6 @@
 package org.kevoree.modeling.memory.map.impl;
 
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
@@ -39,9 +40,8 @@ public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniv
         }
     }
 
-    public OffHeapUniverseOrderMap(int p_initalCapacity, float p_loadFactor, String p_className) {
-        super(p_initalCapacity, p_loadFactor);
-        this._className = p_className;
+    public OffHeapUniverseOrderMap() {
+        super(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
     @Override

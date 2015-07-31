@@ -1,6 +1,5 @@
 package org.kevoree.modeling.memory.storage.impl;
 
-import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.chunk.impl.HeapMemoryChunk;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
@@ -16,7 +15,7 @@ public class ArrayMemoryStorageTest extends BaseKMemoryStorageTest {
 
     @Override
     public KMemoryStorage createKMemoryStorage() {
-        return new HeapMemoryStorage(null);
+        return new HeapMemoryStorage();
     }
 
     @Override
@@ -31,7 +30,7 @@ public class ArrayMemoryStorageTest extends BaseKMemoryStorageTest {
 
     @Override
     public KUniverseOrderMap createKUniverseOrderMap() {
-        return new ArrayUniverseOrderMap(10, KConfig.CACHE_LOAD_FACTOR, null);
+        return new ArrayUniverseOrderMap();
     }
 
     @Override
