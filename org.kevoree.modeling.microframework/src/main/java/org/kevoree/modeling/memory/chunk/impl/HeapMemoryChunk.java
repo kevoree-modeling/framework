@@ -16,8 +16,6 @@ public class HeapMemoryChunk implements KMemoryChunk {
 
     private int _metaClassIndex = -1;
 
-    private boolean[] _modifiedIndexes = null;
-
     private boolean _dirty = false;
 
     @Override
@@ -128,32 +126,9 @@ public class HeapMemoryChunk implements KMemoryChunk {
         builder.append("]");
     }
 
-    public int[] modifiedIndexes(KMetaClass p_metaClass) {
-        if (_modifiedIndexes == null) {
-            return new int[0];
-        } else {
-            int nbModified = 0;
-            for (int i = 0; i < _modifiedIndexes.length; i++) {
-                if (_modifiedIndexes[i]) {
-                    nbModified = nbModified + 1;
-                }
-            }
-            int[] result = new int[nbModified];
-            int inserted = 0;
-            for (int i = 0; i < _modifiedIndexes.length; i++) {
-                if (_modifiedIndexes[i]) {
-                    result[inserted] = i;
-                    inserted = inserted + 1;
-                }
-            }
-            return result;
-        }
-    }
-
     @Override
     public void setClean(KMetaModel metaModel) {
         _dirty = false;
-        _modifiedIndexes = null;
     }
 
     @Override
@@ -349,10 +324,6 @@ public class HeapMemoryChunk implements KMemoryChunk {
                 previous = incArray;
             }
             raw[index] = previous;
-            if (_modifiedIndexes == null) {
-                _modifiedIndexes = new boolean[raw.length];
-            }
-            _modifiedIndexes[index] = true;
             _dirty = true;
             return true;
         }
@@ -380,10 +351,6 @@ public class HeapMemoryChunk implements KMemoryChunk {
                         System.arraycopy(previous, indexToRemove + 1, newArray, indexToRemove, previous.length - indexToRemove - 1);
                         raw[index] = newArray;
                     }
-                    if (_modifiedIndexes == null) {
-                        _modifiedIndexes = new boolean[raw.length];
-                    }
-                    _modifiedIndexes[index] = true;
                     _dirty = true;
                     return true;
                 }
@@ -468,10 +435,6 @@ public class HeapMemoryChunk implements KMemoryChunk {
                 previous = incArray;
             }
             raw[index] = previous;
-            if (_modifiedIndexes == null) {
-                _modifiedIndexes = new boolean[raw.length];
-            }
-            _modifiedIndexes[index] = true;
             _dirty = true;
         }
     }
@@ -480,10 +443,6 @@ public class HeapMemoryChunk implements KMemoryChunk {
     public synchronized void setPrimitiveType(int index, Object content, KMetaClass p_metaClass) {
         raw[index] = content;
         _dirty = true;
-        if (_modifiedIndexes == null) {
-            _modifiedIndexes = new boolean[raw.length];
-        }
-        _modifiedIndexes[index] = true;
     }
 
     @Override
