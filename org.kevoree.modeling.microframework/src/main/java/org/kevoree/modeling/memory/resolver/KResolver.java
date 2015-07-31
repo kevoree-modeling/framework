@@ -25,4 +25,8 @@ public interface KResolver {
 
     void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback);
 
+    void getRoot(long universe, long time, KCallback<KObject> callback);
+
+    void setRoot(KObject newRoot, KCallback<Throwable> callback);
+
 }

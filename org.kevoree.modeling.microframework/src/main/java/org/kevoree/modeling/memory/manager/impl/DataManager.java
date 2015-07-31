@@ -420,12 +420,12 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public void getRoot(long universe, long time, KCallback<KObject> callback) {
-
+        _resolver.getRoot(universe, time, callback);
     }
 
     @Override
     public void setRoot(KObject newRoot, KCallback<Throwable> callback) {
-
+        _resolver.setRoot(newRoot, callback);
     }
 
     @Override
@@ -573,6 +573,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                     }
                     results[i].init(payloads[i], _model.metaModel(), classIndex);
                 }
+                callback.on(results);
             }
         });
     }

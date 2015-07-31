@@ -392,6 +392,7 @@ public class DistortedTimeResolver implements KResolver {
         }
     }
 
+    //TODO, ROOT TREE is NEVER UNLOAD
     public void getRoot(long universe, long time, final KCallback<KObject> callback) {
         final long rootFixedKey = KConfig.END_OF_TIME;
         getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KMemoryElement>() {
@@ -442,76 +443,44 @@ public class DistortedTimeResolver implements KResolver {
                 getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, rootFixedKey, new KCallback<KMemoryElement>() {
                     @Override
                     public void on(KMemoryElement rootGlobalUniverseOrderElement) {
+                        KUniverseOrderMap rootGlobalUniverseOrder = (KUniverseOrderMap) rootGlobalUniverseOrderElement;
                         if (rootGlobalUniverseOrderElement == null) {
-                            _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                            callback.on(null);
-                            return;
+                            rootGlobalUniverseOrder = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME, KMemoryElementTypes.LONG_LONG_MAP);
                         }
-                        long closestUniverse = ResolutionHelper.resolve_universe((KUniverseOrderMap) theGlobalUniverseOrderElement, (KUniverseOrderMap) rootGlobalUniverseOrderElement, time, universe);
-                        getOrLoadAndMark(closestUniverse, KConfig.NULL_LONG, rootFixedKey, new KCallback<KMemoryElement>() {
-                            @Override
-                            public void on(KMemoryElement theRootTimeTree) {
-                                long resolvedCurrentRootUUID = ((KLongLongTree) theRootTimeTree).previousOrEqualValue(time);
-                                _cache.unmarkMemoryElement(theRootTimeTree);
-                                _cache.unmarkMemoryElement(rootGlobalUniverseOrderElement);
-                                _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                if (resolvedCurrentRootUUID == KConfig.NULL_LONG) {
-                                    callback.on(null);
-                                }
+                        long closestUniverse = ResolutionHelper.resolve_universe((KUniverseOrderMap) theGlobalUniverseOrderElement, (KUniverseOrderMap) rootGlobalUniverseOrderElement, newRoot.now(), newRoot.universe());
+                        rootGlobalUniverseOrder.put(newRoot.universe(), newRoot.now());
+                        if (closestUniverse != newRoot.universe()) {
+                            KLongLongTree newTimeTree = (KLongLongTree) _cache.createAndMark(newRoot.universe(), KConfig.NULL_LONG, KConfig.END_OF_TIME, KMemoryElementTypes.LONG_LONG_TREE);
+                            newTimeTree.insert(newRoot.now(), newRoot.uuid());
+                            _cache.unmarkMemoryElement(newTimeTree);
+                            _cache.unmarkMemoryElement(rootGlobalUniverseOrderElement);
+                            _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                            if (callback != null) {
+                                callback.on(null);
                             }
-                        });
+                        } else {
+                            getOrLoadAndMark(closestUniverse, KConfig.NULL_LONG, KConfig.END_OF_TIME, new KCallback<KMemoryElement>() {
+                                @Override
+                                public void on(KMemoryElement resolvedRootTimeTree) {
+                                    KLongLongTree initializedTree = (KLongLongTree) resolvedRootTimeTree;
+                                    if (initializedTree == null) {
+                                        initializedTree = (KLongLongTree) _cache.createAndMark(closestUniverse, KConfig.NULL_LONG, KConfig.END_OF_TIME, KMemoryElementTypes.LONG_LONG_TREE);
+                                    }
+                                    initializedTree.insert(newRoot.now(), newRoot.uuid());
+                                    _cache.unmarkMemoryElement(resolvedRootTimeTree);
+                                    _cache.unmarkMemoryElement(rootGlobalUniverseOrderElement);
+                                    _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                    if (callback != null) {
+                                        callback.on(null);
+                                    }
+                                }
+                            });
+                        }
                     }
                 });
             }
         });
     }
-
-/*
-    @Override
-    public void setRoot(final KObject newRoot, final KCallback<Throwable> callback) {
-
-
-        bumpKeyToCache(KContentKey.createRootUniverseTree(), new KCallback<KMemoryElement>() {
-            @Override
-            public void on(KMemoryElement globalRootTree) {
-                KUniverseOrderMap cleanedTree = (KUniverseOrderMap) globalRootTree;
-                if (cleanedTree == null) {
-                    cleanedTree = _factory.newUniverseMap(KConfig.CACHE_INIT_SIZE, null);
-                    cleanedTree = (KUniverseOrderMap) _cache.getOrPut(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME, cleanedTree);
-                }
-                KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
-                long closestUniverse = ResolutionHelper.resolve_universe(globalUniverseTree, cleanedTree, newRoot.now(), newRoot.universe());
-                cleanedTree.put(newRoot.universe(), newRoot.now());
-                if (closestUniverse != newRoot.universe()) {
-                    KLongLongTree newTimeTree = _factory.newLongLongTree();
-                    newTimeTree.insert(newRoot.now(), newRoot.uuid());
-                    KContentKey universeTreeRootKey = KContentKey.createRootTimeTree(newRoot.universe());
-                    _cache.getOrPut(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, (KMemoryElement) newTimeTree);
-                    if (callback != null) {
-                        callback.on(null);
-                    }
-                } else {
-                    final KContentKey universeTreeRootKey = KContentKey.createRootTimeTree(closestUniverse);
-                    bumpKeyToCache(universeTreeRootKey, new KCallback<KMemoryElement>() {
-                        @Override
-                        public void on(KMemoryElement resolvedRootTimeTree) {
-                            KLongLongTree initializedTree = (KLongLongTree) resolvedRootTimeTree;
-                            if (initializedTree == null) {
-                                initializedTree = _factory.newLongLongTree();
-                                initializedTree = (KLongLongTree) _cache.getOrPut(universeTreeRootKey.universe, universeTreeRootKey.time, universeTreeRootKey.obj, (KMemoryElement) initializedTree);
-                            }
-                            initializedTree.insert(newRoot.now(), newRoot.uuid());
-                            if (callback != null) {
-                                callback.on(null);
-                            }
-                        }
-                    });
-                }
-            }
-        });
-    }
-    */
-    /* End of root section */
 
 
     @Override
