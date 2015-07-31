@@ -214,7 +214,7 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
             case KMemoryElementTypes.LONG_LONG_TREE:
                 return new OffHeapLongLongTree();
             case KMemoryElementTypes.LONG_LONG_MAP:
-                return new OffHeapUniverseOrderMap(0, KConfig.CACHE_LOAD_FACTOR, null);
+                return new OffHeapUniverseOrderMap();
         }
         return null;
     }
@@ -222,7 +222,7 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
 
     @Override
     public KMemoryChunk clone(KMemoryChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
-        return null;
+        return (KMemoryChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(metaModel), KMemoryElementTypes.CHUNK);
     }
 
     private synchronized KMemoryElement internal_put(long universe, long time, long p_obj, KMemoryElement payload, short type) {
