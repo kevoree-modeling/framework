@@ -20,5 +20,5 @@ public interface KMemoryStorage {
 
     int size();
 
-
+    void compact();
 }

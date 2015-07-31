@@ -1,10 +1,13 @@
 package org.kevoree.modeling.memory.map.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @native ts
@@ -57,6 +60,7 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
     private volatile int _counter = 0;
 
     private String _className;
+    private KMemoryElement _next;
 
     @Override
     public final int counter() {
@@ -88,21 +92,6 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
     @Override
     public String metaClassName() {
         return _className;
-    }
-
-    @Override
-    public boolean isDirty() {
-        return _isDirty;
-    }
-
-    @Override
-    public void setClean(KMetaModel metaModel) {
-        _isDirty = false;
-    }
-
-    @Override
-    public void setDirty() {
-        this._isDirty = true;
     }
 
     /* warning: this method is not thread safe */
@@ -195,4 +184,16 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
         return KMemoryElementTypes.LONG_LONG_MAP;
     }
 
+    @Override
+    public KMemoryElement next() {
+        return _next;
+    }
+
+    @Override
+    public void insertInto(AtomicReference<KMemoryElement> list){
+        // assert next == null;
+        do {
+            _next = list.get();
+        } while (list.compareAndSet(_next, this));
+    }
 }

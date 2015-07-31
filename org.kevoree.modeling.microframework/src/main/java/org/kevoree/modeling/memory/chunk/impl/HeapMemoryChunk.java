@@ -3,10 +3,15 @@ package org.kevoree.modeling.memory.chunk.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
+import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.util.maths.Base64;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HeapMemoryChunk implements KMemoryChunk {
 
@@ -16,7 +21,14 @@ public class HeapMemoryChunk implements KMemoryChunk {
 
     private int _metaClassIndex = -1;
 
-    private boolean _dirty = false;
+    private boolean[] _modifiedIndexes = null;
+
+    private AtomicLong _flags;
+
+    private KMemoryElement _next;
+
+    public void initMetaClass(KMetaClass p_metaClass) {
+    }
 
     @Override
     public int metaClassIndex() {
@@ -25,7 +37,45 @@ public class HeapMemoryChunk implements KMemoryChunk {
 
     @Override
     public boolean isDirty() {
-        return _dirty;
+        return (getFlags() & KMemoryElementTypes.DIRTY_BIT) == KMemoryElementTypes.DIRTY_BIT;
+    }
+
+    @Override
+    public void setDirty() {
+        setFlags(KMemoryElementTypes.DIRTY_BIT, 0);
+    }
+
+    @Override
+    public KMemoryElement next() {
+        return _next;
+    }
+
+    @Override
+    public void setClean(KMetaModel metaModel) {
+        setFlags(0, KMemoryElementTypes.DIRTY_BIT);
+        _modifiedIndexes = null;
+    }
+
+    @Override
+    public long getFlags() {
+        return _flags.get();
+    }
+
+    @Override
+    public void setFlags(long bitsToEnable, long bitsToDisable) {
+        long val, nval;
+        do {
+            val = _flags.get();
+            nval = val & ~bitsToDisable | bitsToEnable;
+        } while (_flags.compareAndSet(val, nval));
+    }
+
+    @Override
+    public void insertInto(AtomicReference<KMemoryElement> list){
+        // assert next == null;
+        do {
+            _next = list.get();
+        } while (list.compareAndSet(_next, this));
     }
 
     @Override
@@ -126,14 +176,26 @@ public class HeapMemoryChunk implements KMemoryChunk {
         builder.append("]");
     }
 
-    @Override
-    public void setClean(KMetaModel metaModel) {
-        _dirty = false;
-    }
-
-    @Override
-    public void setDirty() {
-        _dirty = true;
+    public int[] modifiedIndexes(KMetaClass p_metaClass) {
+        if (_modifiedIndexes == null) {
+            return new int[0];
+        } else {
+            int nbModified = 0;
+            for (int i = 0; i < _modifiedIndexes.length; i++) {
+                if (_modifiedIndexes[i]) {
+                    nbModified = nbModified + 1;
+                }
+            }
+            int[] result = new int[nbModified];
+            int inserted = 0;
+            for (int i = 0; i < _modifiedIndexes.length; i++) {
+                if (_modifiedIndexes[i]) {
+                    result[inserted] = i;
+                    inserted = inserted + 1;
+                }
+            }
+            return result;
+        }
     }
 
     @Override
@@ -324,7 +386,11 @@ public class HeapMemoryChunk implements KMemoryChunk {
                 previous = incArray;
             }
             raw[index] = previous;
-            _dirty = true;
+            if (_modifiedIndexes == null) {
+                _modifiedIndexes = new boolean[raw.length];
+            }
+            _modifiedIndexes[index] = true;
+            setDirty();
             return true;
         }
         return false;
@@ -351,7 +417,11 @@ public class HeapMemoryChunk implements KMemoryChunk {
                         System.arraycopy(previous, indexToRemove + 1, newArray, indexToRemove, previous.length - indexToRemove - 1);
                         raw[index] = newArray;
                     }
-                    _dirty = true;
+                    if (_modifiedIndexes == null) {
+                        _modifiedIndexes = new boolean[raw.length];
+                    }
+                    _modifiedIndexes[index] = true;
+                    setDirty();
                     return true;
                 }
             }
@@ -419,7 +489,7 @@ public class HeapMemoryChunk implements KMemoryChunk {
         double[] res = getDoubleArray(index, metaClass);
         if (res != null && arrayIndex >= 0 && arrayIndex < res.length) {
             res[arrayIndex] = valueToInsert;
-            _dirty = true;
+            setDirty();
         }
     }
 
@@ -435,14 +505,22 @@ public class HeapMemoryChunk implements KMemoryChunk {
                 previous = incArray;
             }
             raw[index] = previous;
-            _dirty = true;
+            if (_modifiedIndexes == null) {
+                _modifiedIndexes = new boolean[raw.length];
+            }
+            _modifiedIndexes[index] = true;
+            setDirty();
         }
     }
 
     @Override
     public synchronized void setPrimitiveType(int index, Object content, KMetaClass p_metaClass) {
         raw[index] = content;
-        _dirty = true;
+        setDirty();
+        if (_modifiedIndexes == null) {
+            _modifiedIndexes = new boolean[raw.length];
+        }
+        _modifiedIndexes[index] = true;
     }
 
     @Override
@@ -453,7 +531,7 @@ public class HeapMemoryChunk implements KMemoryChunk {
             Object[] cloned = new Object[raw.length];
             System.arraycopy(raw, 0, cloned, 0, raw.length);
             HeapMemoryChunk clonedEntry = new HeapMemoryChunk();
-            clonedEntry._dirty = true;
+            clonedEntry.setDirty();
             clonedEntry.raw = cloned;
             clonedEntry._metaClassIndex = _metaClassIndex;
             return clonedEntry;

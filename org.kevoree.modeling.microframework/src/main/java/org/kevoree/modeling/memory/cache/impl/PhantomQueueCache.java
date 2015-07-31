@@ -1,7 +1,6 @@
 package org.kevoree.modeling.memory.cache.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.KMemoryElement;
@@ -62,7 +61,7 @@ public class PhantomQueueCache extends AbstractCountingCache {
         KMemoryElement elt = _storage.get(universe, time, uuid);
         if (elt != null) {
             elt.dec();
-            if (elt.counter() == 0) {
+            if (elt.counter() == 0 && !elt.isDirty()) {
                 _storage.remove(universe, time, uuid, mmodel);
             }
         }

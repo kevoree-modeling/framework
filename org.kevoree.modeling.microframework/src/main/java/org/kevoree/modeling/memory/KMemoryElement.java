@@ -2,6 +2,8 @@ package org.kevoree.modeling.memory;
 
 import org.kevoree.modeling.meta.KMetaModel;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public interface KMemoryElement {
 
     boolean isDirty();
@@ -9,6 +11,14 @@ public interface KMemoryElement {
     void setClean(KMetaModel metaModel);
 
     void setDirty();
+
+    long getFlags();
+
+    void setFlags(long flagsToEnable, long flagsToDisable);
+
+    KMemoryElement next();
+
+    void insertInto(AtomicReference<KMemoryElement> list);
 
     /**
      * format: definition repeat all entry ...
@@ -31,5 +41,4 @@ public interface KMemoryElement {
     void free(KMetaModel metaModel);
 
     short type();
-
 }

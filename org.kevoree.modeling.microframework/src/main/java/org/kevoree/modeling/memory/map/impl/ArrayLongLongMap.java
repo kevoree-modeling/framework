@@ -4,6 +4,10 @@ package org.kevoree.modeling.memory.map.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
+import org.kevoree.modeling.meta.KMetaModel;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @native ts
@@ -33,11 +37,10 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected int threshold;
 
-    protected boolean _isDirty = false;
-
     private final int initialCapacity;
 
     private final float loadFactor;
+    private AtomicLong _flags = new AtomicLong();
 
 
     /**
@@ -165,7 +168,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public final synchronized void put(long key, long value) {
-        this._isDirty = true;
+        setDirty();
         int entry = -1;
         int index = -1;
         int hash = (int) (key);
@@ -243,6 +246,29 @@ public class ArrayLongLongMap implements KLongLongMap {
         return this.elementCount;
     }
 
+    public boolean isDirty() {
+        return (getFlags() & KMemoryElementTypes.DIRTY_BIT) == KMemoryElementTypes.DIRTY_BIT;
+    }
+
+    public void setDirty() {
+        setFlags(KMemoryElementTypes.DIRTY_BIT, 0);
+    }
+
+    public void setClean(KMetaModel metaModel) {
+        setFlags(0, KMemoryElementTypes.DIRTY_BIT);
+    }
+
+    public long getFlags() {
+        return _flags.get();
+    }
+
+    public void setFlags(long bitsToEnable, long bitsToDisable) {
+        long val, nval;
+        do {
+            val = _flags.get();
+            nval = val & ~bitsToDisable | bitsToEnable;
+        } while (_flags.compareAndSet(val, nval));
+    }
 }
 
 

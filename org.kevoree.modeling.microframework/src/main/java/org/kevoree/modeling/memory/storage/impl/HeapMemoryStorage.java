@@ -208,14 +208,10 @@ public class HeapMemoryStorage implements KMemoryStorage {
         _state.values[m] = null;
         this._elementCount--;
         this._droppedCount++;
-
-        if (this._droppedCount > this._threshold * this._loadFactor) {
-            compact();
-        }
-
     }
 
-    private void compact() {
+    @Override
+    public void compact() {
         InternalState internalState = _state;
         if (this._droppedCount > 0) {
             int length = (this._elementCount == 0 ? 1 : this._elementCount << 1); //take the next size of element count
