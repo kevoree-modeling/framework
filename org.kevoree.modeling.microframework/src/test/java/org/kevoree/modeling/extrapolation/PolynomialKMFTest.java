@@ -11,9 +11,6 @@ import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.Element;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
-/**
- * Created by duke on 10/29/14.
- */
 public class PolynomialKMFTest {
 
     @Test
@@ -21,66 +18,69 @@ public class PolynomialKMFTest {
         final int[] nbAssert = new int[1];
         nbAssert[0] = 0;
         CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
-        universe.connect(null);
-        CloudUniverse dimension0 = universe.newUniverse();
-        final double[] val = new double[1000];
-
-
-        double[] coef = {2, 2, 3};
-        CloudView t0 = dimension0.time(0l);
-        Node node = t0.createNode();
-        node.setName("n0");
-        t0.setRoot(node, null);
-        final Element element = t0.createElement();
-        element.setName("e0");
-        node.setElement(element);
-
-
-        //element.setValue(0.0);
-        //insert 20 variations in time
-        for (int i = 200; i < 1000; i++) {
-            long temp = 1;
-            val[i] = 0;
-            for (int j = 0; j < coef.length; j++) {
-                val[i] = val[i] + coef[j] * temp;
-                temp = temp * i;
-            }
-            final double vv = val[i];
-            final long finalI = i;
-            dimension0.time(finalI).lookup(element.uuid(), new KCallback<KObject>() {
-                @Override
-                public void on(KObject kObject) {
-                    Element casted = (Element) kObject;
-                    casted.setValue(vv);
-                }
-            });
-        }
-        element.timeWalker().allTimes(new KCallback<long[]>() {
+        universe.connect(new KCallback() {
             @Override
-            public void on(long[] collected) {
-                Assert.assertEquals(2, collected.length);//
+            public void on(Object o) {
+                CloudUniverse dimension0 = universe.newUniverse();
+                final double[] val = new double[1000];
+                double[] coef = {2, 2, 3};
+                CloudView t0 = dimension0.time(0l);
+                Node node = t0.createNode();
+                node.setName("n0");
+                t0.setRoot(node, null);
+                final Element element = t0.createElement();
+                element.setName("e0");
+                node.setElement(element);
+
+
+                //element.setValue(0.0);
+                //insert 20 variations in time
+                for (int i = 200; i < 1000; i++) {
+                    long temp = 1;
+                    val[i] = 0;
+                    for (int j = 0; j < coef.length; j++) {
+                        val[i] = val[i] + coef[j] * temp;
+                        temp = temp * i;
+                    }
+                    final double vv = val[i];
+                    final long finalI = i;
+                    dimension0.time(finalI).lookup(element.uuid(), new KCallback<KObject>() {
+                        @Override
+                        public void on(KObject kObject) {
+                            Element casted = (Element) kObject;
+                            casted.setValue(vv);
+                        }
+                    });
+                }
+                element.timeWalker().allTimes(new KCallback<long[]>() {
+                    @Override
+                    public void on(long[] collected) {
+                        Assert.assertEquals(2, collected.length);//
+                    }
+                });
+
+                nbAssert[0]++;
+                for (int i = 200; i < 1000; i++) {
+                    final int finalI = i;
+                    element.jump((long) finalI, new KCallback<KObject>() {
+                        @Override
+                        public void on(KObject element) {
+                            nbAssert[0]++;
+                            Assert.assertTrue(Math.abs((((Element) element).getValue() - val[finalI])) < 5);
+                        }
+                    });
+                }
+                Assert.assertEquals(nbAssert[0], 801);
+
+                element.timeWalker().allTimes(new KCallback<long[]>() {
+                    @Override
+                    public void on(long[] collected2) {
+                        Assert.assertEquals(2, collected2.length);
+                    }
+                });
             }
         });
 
-        nbAssert[0]++;
-        for (int i = 200; i < 1000; i++) {
-            final int finalI = i;
-            element.jump((long) finalI, new KCallback<KObject>() {
-                @Override
-                public void on(KObject element) {
-                    nbAssert[0]++;
-                    Assert.assertTrue(Math.abs((((Element) element).getValue() - val[finalI])) < 5);
-                }
-            });
-        }
-        Assert.assertEquals(nbAssert[0], 801);
-
-        element.timeWalker().allTimes(new KCallback<long[]>() {
-            @Override
-            public void on(long[] collected2) {
-                Assert.assertEquals(2, collected2.length);
-            }
-        });
     }
 
 

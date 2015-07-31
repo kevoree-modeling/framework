@@ -204,10 +204,12 @@ public class DistortedTimeResolver implements KResolver {
             }
         } else {
             currentEntry = (KMemoryChunk) _cache.getAndMark(universe, time, uuid);
-            _cache.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
-            previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = universe;
-            previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = time;
-            return currentEntry;
+            if (currentEntry != null) {
+                _cache.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+                previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = universe;
+                previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = time;
+                return currentEntry;
+            }
         }
         KUniverseOrderMap objectUniverseTree = (KUniverseOrderMap) _cache.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
         if (objectUniverseTree == null) {
