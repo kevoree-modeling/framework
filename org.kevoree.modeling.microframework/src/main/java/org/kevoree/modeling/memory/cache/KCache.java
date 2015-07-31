@@ -6,10 +6,9 @@ public interface KCache {
 
     KMemoryElement getAndMark(long universe, long time, long obj);
 
-    //previous should be updated
-    KMemoryElement getMarkAndUpdate(long universe, long time, long obj, long[] previous);
+    void unmark(long universe, long time, long obj);
 
-    void unMark(long universe, long time, long obj);
+    KMemoryElement unsafeGet(long universe, long time, long obj);
 
     KMemoryElement createAndMark(long universe, long time, long obj);
 

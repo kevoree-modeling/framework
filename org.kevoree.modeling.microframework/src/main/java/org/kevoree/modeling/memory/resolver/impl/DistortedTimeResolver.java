@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.resolver.impl;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.abs.AbstractKModel;
+import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.cache.KCache;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
@@ -15,8 +16,6 @@ import org.kevoree.modeling.meta.KMetaClass;
 public class DistortedTimeResolver implements KResolver {
 
     private static final int KEYS_SIZE = 3;
-
-    private static final String OUT_OF_CACHE_MESSAGE = "KMF Error: your object is out of cache, you probably kept an old reference. Please reload it with a lookup";
 
     private final KCache _cache;
 
@@ -192,8 +191,17 @@ public class DistortedTimeResolver implements KResolver {
         if (metaClass.temporalResolution() != 1) {
             time = time - (time % metaClass.temporalResolution());
         }
-        KMemoryChunk currentEntry = (KMemoryChunk) _cache.getMarkAndUpdate(universe, time, uuid, previousResolution);
-        if (currentEntry != null) {
+        KMemoryChunk currentEntry;
+        if (previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] == universe && previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] == time) {
+            currentEntry = (KMemoryChunk) _cache.unsafeGet(universe, time, uuid);
+            if (currentEntry != null) {
+                return currentEntry;
+            }
+        } else {
+            currentEntry = (KMemoryChunk) _cache.getAndMark(universe, time, uuid);
+            _cache.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+            previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = universe;
+            previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = time;
             return currentEntry;
         }
         KUniverseOrderMap objectUniverseTree = (KUniverseOrderMap) _cache.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
@@ -216,43 +224,51 @@ public class DistortedTimeResolver implements KResolver {
         if (resolvedTime != KConfig.NULL_LONG) {
             boolean needTimeCopy = !useClosest && (resolvedTime != time);
             boolean needUniverseCopy = !useClosest && (resolvedUniverse != universe);
-            KMemoryChunk entry = (KMemoryChunk) _cache.getMarkAndUpdate(resolvedUniverse, resolvedTime, uuid, previousResolution);
-            if (entry == null) {
+            boolean wasPreviouslyTheSameUniverseTime = previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] == resolvedUniverse && previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] == resolvedTime;
+            if (wasPreviouslyTheSameUniverseTime) {
+                currentEntry = (KMemoryChunk) _cache.unsafeGet(resolvedUniverse, resolvedTime, uuid);
+            } else {
+                currentEntry = (KMemoryChunk) _cache.getAndMark(resolvedUniverse, resolvedTime, uuid);
+            }
+            if (currentEntry == null) {
+                if (!wasPreviouslyTheSameUniverseTime) {
+                    _cache.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+                    previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = resolvedUniverse;
+                    previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = resolvedTime;
+                }
                 _cache.unMarkMemoryElement(timeTree);
                 _cache.unMarkMemoryElement(globalUniverseTree);
                 _cache.unMarkMemoryElement(objectUniverseTree);
                 return null;
             }
             if (!needTimeCopy && !needUniverseCopy) {
-                if (!useClosest) {
-                    entry.setDirty();
+                if (!wasPreviouslyTheSameUniverseTime) {
+                    _cache.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+                    previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = resolvedUniverse;
+                    previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = resolvedTime;
+                } else {
+                    _cache.unMarkMemoryElement(currentEntry);
                 }
-                //TODO fill previous
-                return entry;
+                _cache.unMarkMemoryElement(timeTree);
+                _cache.unMarkMemoryElement(globalUniverseTree);
+                _cache.unMarkMemoryElement(objectUniverseTree);
+                return currentEntry;
             } else {
-
-                //TODO todo
-
-
-
-                KMemoryChunk clonedEntry = entry.clone(metaClass);
-                /*
-                clonedEntry = (KMemoryChunk) _cache.getOrPut(universe, time, uuid, clonedEntry);
+                KMemoryChunk clonedChunk = (KMemoryChunk) _cache.cloneMarkAndUnmark(currentEntry, resolvedUniverse, resolvedTime, uuid, universe, time);
                 if (!needUniverseCopy) {
                     timeTree.insert(time);
                 } else {
-                    KLongTree newTemporalTree = _factory.newLongTree();
-                    newTemporalTree.insert(time);
-                    newTemporalTree.inc();
-                    timeTree.dec();
-                    _cache.getOrPut(universe, KConfig.NULL_LONG, uuid, newTemporalTree);
-                    objectUniverseTree.put(universe, time);//insert this time as a divergence point for this object
+                    KLongTree newTemporalTree = (KLongTree) _cache.createAndMark(resolvedUniverse, KConfig.NULL_LONG, uuid);
+                    newTemporalTree.insert(resolvedTime);
+                    _cache.unMarkMemoryElement(timeTree);
+                    objectUniverseTree.put(resolvedUniverse, resolvedTime);
                 }
-                entry.dec();
-                clonedEntry.inc();
-                //TODO fill previous
-                */
-                return clonedEntry;
+                previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = resolvedUniverse;
+                previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = resolvedTime;
+                _cache.unMarkMemoryElement(timeTree);
+                _cache.unMarkMemoryElement(globalUniverseTree);
+                _cache.unMarkMemoryElement(objectUniverseTree);
+                return clonedChunk;
             }
         } else {
             _cache.unMarkMemoryElement(timeTree);
