@@ -171,6 +171,9 @@ public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniv
     @Override
     public void setMemoryAddress(long address) {
         this._start_address = address;
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
     }
 
     @Override

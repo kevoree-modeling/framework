@@ -196,12 +196,7 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
         return -1;
     }
 
-
-    public final void notifyRealloc(KOffHeapMemoryElement elem) {
-        long newAddress = elem.getMemoryAddress();
-    }
-
-    @Override
+   @Override
     public final KMemoryElement get(long universe, long time, long obj) {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 

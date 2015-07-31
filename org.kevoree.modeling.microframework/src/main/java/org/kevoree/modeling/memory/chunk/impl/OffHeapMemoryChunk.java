@@ -445,6 +445,10 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
         _allocated_segments++;
         UNSAFE.setMemory(_start_address, bytes, (byte) 0);
         UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, metaClass.index());
+
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
     }
 
 
@@ -648,11 +652,15 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
 
     @Override
     public final void init(String payload, KMetaModel metaModel, int metaClassIndex) {
+        KMetaClass metaClass = metaModel.metaClass(metaClassIndex);
+        initMetaClass(metaClass);
+        UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, metaClassIndex);
+
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);
-            KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
-            initMetaClass(metaClass);
+            //KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
+
             String[] metaKeys = objectReader.keys();
             for (int i = 0; i < metaKeys.length; i++) {
                 KMeta metaElement = metaClass.metaByName(metaKeys[i]);
@@ -734,8 +742,10 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
 
             }
         }
-        // should not be dirty after unserialization
+
+        // should not be dirty  after unserialization
         UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
+
 
     }
 
@@ -860,6 +870,9 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     @Override
     public final void setMemoryAddress(long address) {
         _start_address = address;
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
     }
 
     @Override
