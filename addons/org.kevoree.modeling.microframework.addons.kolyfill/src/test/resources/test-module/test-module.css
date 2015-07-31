@@ -1,0 +1,11 @@
+
+:host {
+    display: block;
+    width: 500px;
+    height: 250px;
+    border: 1px solid red;
+}
+
+:host span.bold {
+    font-weight: bold;
+}
