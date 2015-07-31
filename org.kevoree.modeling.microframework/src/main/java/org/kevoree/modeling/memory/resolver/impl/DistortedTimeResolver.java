@@ -9,7 +9,7 @@ import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.resolver.KResolver;
-import org.kevoree.modeling.memory.storage.MemoryElementTypes;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.tree.KLongLongTree;
 import org.kevoree.modeling.memory.tree.KLongTree;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -259,7 +259,7 @@ public class DistortedTimeResolver implements KResolver {
                 if (!needUniverseCopy) {
                     timeTree.insert(time);
                 } else {
-                    KLongTree newTemporalTree = (KLongTree) _cache.createAndMark(resolvedUniverse, KConfig.NULL_LONG, uuid, MemoryElementTypes.LONG_TREE);
+                    KLongTree newTemporalTree = (KLongTree) _cache.createAndMark(resolvedUniverse, KConfig.NULL_LONG, uuid, KMemoryElementTypes.LONG_TREE);
                     newTemporalTree.insert(resolvedTime);
                     _cache.unMarkMemoryElement(timeTree);
                     objectUniverseTree.put(resolvedUniverse, resolvedTime);
@@ -282,18 +282,42 @@ public class DistortedTimeResolver implements KResolver {
     @Override
     public void indexObject(KObject obj) {
         int metaClassIndex = obj.metaClass().index();
-        KMemoryChunk cacheEntry = (KMemoryChunk) _cache.createAndMark(obj.universe(), obj.now(), obj.uuid(), MemoryElementTypes.CHUNK);
+        KMemoryChunk cacheEntry = (KMemoryChunk) _cache.createAndMark(obj.universe(), obj.now(), obj.uuid(), KMemoryElementTypes.CHUNK);
         cacheEntry.initMetaClass(obj.metaClass());
         cacheEntry.init(null, _model.metaModel(), metaClassIndex);
         cacheEntry.setDirty();
         //initiate time management
-        KLongTree timeTree = (KLongTree) _cache.createAndMark(obj.universe(), KConfig.NULL_LONG, obj.uuid(), MemoryElementTypes.LONG_TREE);
+        KLongTree timeTree = (KLongTree) _cache.createAndMark(obj.universe(), KConfig.NULL_LONG, obj.uuid(), KMemoryElementTypes.LONG_TREE);
         timeTree.init(null, _model.metaModel(), metaClassIndex);
         timeTree.insert(obj.now());
         //initiate universe management
-        KUniverseOrderMap universeTree = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, obj.uuid(), MemoryElementTypes.LONG_LONG_MAP);
+        KUniverseOrderMap universeTree = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, obj.uuid(), KMemoryElementTypes.LONG_LONG_MAP);
         universeTree.init(null, _model.metaModel(), metaClassIndex);
         universeTree.put(obj.universe(), obj.now());
+    }
+
+    @Override
+    public short typeFromKey(long universe, long time, long uuid) {
+        boolean isUniverseNotNull = universe != KConfig.NULL_LONG;
+        short result = -1;
+        if (KConfig.END_OF_TIME == uuid) {
+            if (isUniverseNotNull) {
+                result = KMemoryElementTypes.LONG_LONG_TREE;
+            } else {
+                result = KMemoryElementTypes.LONG_LONG_MAP;
+            }
+        } else {
+            boolean isTimeNotNull = time != KConfig.NULL_LONG;
+            boolean isObjNotNull = uuid != KConfig.NULL_LONG;
+            if (isUniverseNotNull && isTimeNotNull && isObjNotNull) {
+                result = KMemoryElementTypes.CHUNK;
+            } else if (isUniverseNotNull && !isTimeNotNull && isObjNotNull) {
+                result = KMemoryElementTypes.LONG_TREE;
+            } else {
+                result = KMemoryElementTypes.LONG_LONG_MAP;
+            }
+        }
+        return result;
     }
 
     public final void getOrLoadAndMark(long universe, long time, long uuid, final KCallback<KMemoryElement> callback) {

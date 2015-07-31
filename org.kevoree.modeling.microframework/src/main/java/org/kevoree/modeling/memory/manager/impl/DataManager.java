@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.cache.KCache;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.resolver.impl.*;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
@@ -306,7 +307,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                             objIndexPayload = "0";
                                                         }
                                                         String globalUniverseTreePayload = strings[GLO_TREE_INDEX];
-                                                        KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                                                        KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KMemoryElementTypes.LONG_LONG_MAP);
                                                         if (globalUniverseTreePayload != null) {
                                                             try {
                                                                 globalUniverseTree.init(globalUniverseTreePayload, model().metaModel(), -1);
@@ -553,7 +554,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                     long loopUniverse = keys[i * 3];
                     long loopTime = keys[i * 3 + 1];
                     long loopUuid = keys[i * 3 + 2];
-                    results[i] = _cache.createAndMark(loopUniverse, loopTime, loopUuid);
+                    results[i] = _cache.createAndMark(loopUniverse, loopTime, loopUuid, _resolver.typeFromKey(loopUniverse, loopTime, loopUuid));
                     int classIndex = -1;
                     if (loopUniverse != KConfig.NULL_LONG && loopTime != KConfig.NULL_LONG && loopUuid != KConfig.NULL_LONG) {
                         KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, loopUuid);

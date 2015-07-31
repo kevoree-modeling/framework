@@ -21,5 +21,6 @@ public interface KResolver {
 
     void indexObject(KObject obj);
 
+    short typeFromKey(long universe, long time, long uuid);
 
 }

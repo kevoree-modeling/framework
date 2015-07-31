@@ -1,6 +1,6 @@
 package org.kevoree.modeling.memory.storage;
 
-public class MemoryElementTypes {
+public class KMemoryElementTypes {
 
     public static short CHUNK = 0;
 

@@ -5,7 +5,7 @@ import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.storage.MemoryElementTypes;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaReference;
@@ -820,7 +820,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
 
     @Override
     public short type() {
-        return MemoryElementTypes.CHUNK;
+        return KMemoryElementTypes.CHUNK;
     }
 
 

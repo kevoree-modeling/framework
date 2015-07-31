@@ -1,7 +1,7 @@
 package org.kevoree.modeling.memory.tree.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.storage.MemoryElementTypes;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.tree.KLongLongTree;
 
 /**
@@ -36,6 +36,6 @@ public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLon
 
     @Override
     public short type() {
-        return MemoryElementTypes.LONG_LONG_TREE;
+        return KMemoryElementTypes.LONG_LONG_TREE;
     }
 }
