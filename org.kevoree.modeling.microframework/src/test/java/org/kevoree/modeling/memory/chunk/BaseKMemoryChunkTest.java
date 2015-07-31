@@ -53,7 +53,7 @@ public abstract class BaseKMemoryChunkTest {
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
                 KMemoryChunk cacheEntry = createKMemoryChunk();
-                cacheEntry.initMetaClass(homeMetaClass);
+                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
                 long attr = (long) cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
@@ -119,7 +119,7 @@ public abstract class BaseKMemoryChunkTest {
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
                 KMemoryChunk cacheEntry = createKMemoryChunk();
-                cacheEntry.initMetaClass(homeMetaClass);
+                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
@@ -186,7 +186,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 // cache entry
                 KMemoryChunk cacheEntry = createKMemoryChunk();
-                cacheEntry.initMetaClass(homeMetaClass);
+                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
@@ -248,7 +248,7 @@ public abstract class BaseKMemoryChunkTest {
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
                 KMemoryChunk cacheEntry = createKMemoryChunk();
-                cacheEntry.initMetaClass(homeMetaClass);
+                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
@@ -306,7 +306,7 @@ public abstract class BaseKMemoryChunkTest {
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
                 KMemoryChunk cacheEntry = createKMemoryChunk();
-                cacheEntry.initMetaClass(homeMetaClass);
+                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 Assert.assertFalse(cacheEntry.isDirty());
 
@@ -346,7 +346,7 @@ public abstract class BaseKMemoryChunkTest {
                 sensor.set(sensorMetaClass.attribute("name"), "Sensor#1");
 
                 KMemoryChunk cacheEntry = createKMemoryChunk();
-                cacheEntry.initMetaClass(sensorMetaClass);
+                cacheEntry.init(null, dynamicMetaModel, sensorMetaClass.index());
 
                 Assert.assertFalse(cacheEntry.isDirty());
 
@@ -430,7 +430,7 @@ public abstract class BaseKMemoryChunkTest {
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
                 KMemoryChunk cacheEntry = createKMemoryChunk();
-                cacheEntry.initMetaClass(homeMetaClass);
+                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 Assert.assertFalse(cacheEntry.isDirty());
 
@@ -453,11 +453,9 @@ public abstract class BaseKMemoryChunkTest {
                 Assert.assertEquals("{\"attr_long\":\"U\",\"sensors\":[\"E\",\"G\"],\"value\":[\"P7JmZmZmZma\",\"P/BmZmZmZma\",\"QAAzMzMzMzN\"]}", cacheEntry.serialize(dynamicMetaModel));
 
                 KMemoryChunk newCacheEntry = createKMemoryChunk();
-                newCacheEntry.initMetaClass(homeMetaClass);
-
                 try {
                     String serialized = cacheEntry.serialize(dynamicMetaModel);
-                    newCacheEntry.init(serialized, dynamicMetaModel, cacheEntry.metaClassIndex());
+                    newCacheEntry.init(serialized, dynamicMetaModel, homeMetaClass.index());
 
                     String newSeriliazed = newCacheEntry.serialize(dynamicMetaModel);
                     Assert.assertEquals(serialized, newSeriliazed);

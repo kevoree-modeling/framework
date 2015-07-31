@@ -21,10 +21,6 @@ public class HeapMemoryChunk implements KMemoryChunk {
     private boolean _dirty = false;
 
     @Override
-    public void initMetaClass(KMetaClass p_metaClass) {
-    }
-
-    @Override
     public int metaClassIndex() {
         return _metaClassIndex;
     }

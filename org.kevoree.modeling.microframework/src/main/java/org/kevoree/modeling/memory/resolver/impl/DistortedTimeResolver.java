@@ -287,7 +287,6 @@ public class DistortedTimeResolver implements KResolver {
     public void indexObject(KObject obj) {
         int metaClassIndex = obj.metaClass().index();
         KMemoryChunk cacheEntry = (KMemoryChunk) _cache.createAndMark(obj.universe(), obj.now(), obj.uuid(), KMemoryElementTypes.CHUNK);
-        cacheEntry.initMetaClass(obj.metaClass());
         cacheEntry.init(null, _manager.model().metaModel(), metaClassIndex);
         cacheEntry.setDirty();
         //initiate time management

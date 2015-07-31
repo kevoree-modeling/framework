@@ -431,8 +431,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
         return result;
     }
 
-    @Override
-    public final void initMetaClass(KMetaClass metaClass) {
+    private final void initMetaClass(KMetaClass metaClass) {
         int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = metaClass.metaElements().length;
         int rawSegment = internal_size_of_raw_segment(metaClass);

@@ -8,9 +8,7 @@ public interface KMemoryChunk extends KMemoryElement {
 
     /* Stateful Management */
     KMemoryChunk clone(KMetaModel metaModel);
-
-    void initMetaClass(KMetaClass metaClass);
-
+    
     int metaClassIndex();
 
     String toJSON(KMetaModel metaModel);

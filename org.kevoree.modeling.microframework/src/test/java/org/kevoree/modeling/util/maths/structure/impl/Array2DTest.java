@@ -29,8 +29,7 @@ public class Array2DTest {
             }
         });
         KMemoryChunk segment = new HeapMemoryChunk();
-        segment.initMetaClass(mc);
-        segment.init(null, mm, -1);
+        segment.init(null, mm, mc.index());
         int nbLines = 5;
         int nbColumn = 3;
         //allocate for 5 elem
