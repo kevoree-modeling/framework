@@ -310,63 +310,14 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
 //        return collectedDirties;
 //    }
 
-    @Override
-    public void clean(KMetaModel metaModel) {
-        common_clean_monitor(null, metaModel);
-    }
-
 
     @Override
     public final int size() {
         return UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT);
     }
 
-    private synchronized void common_clean_monitor(KObject origin, KMetaModel p_metaModel) {
-        /*
-        if (origin != null) {
-            if (rootReference != null) {
-                rootReference.next = new KObjectWeakReference(origin);
-            } else {
-                rootReference = new KObjectWeakReference(origin);
-            }
-        } else {
-            KObjectWeakReference current = rootReference;
-            KObjectWeakReference previous = null;
-            while (current != null) {
-                //processValues current
-                if (current.get() == null) {
-                    //check is dirty
-                    KMemoryElement currentEntry = this.get(current.universe, current.time, current.uuid);
-                    if (currentEntry == null || !currentEntry.isDirty()) {
-                        //call the clean sub processValues for universe/time/uuid
-                        MemorySegmentResolutionTrace resolved = ResolutionHelper.resolve_trees(current.universe, current.time, current.uuid, this);
-                        resolved.getUniverseTree().dec();
-                        if (resolved.getUniverseTree().counter() <= 0) {
-                            remove(KConfig.NULL_LONG, KConfig.NULL_LONG, current.uuid, p_metaModel);
-                        }
-                        resolved.getTimeTree().dec();
-                        if (resolved.getTimeTree().counter() <= 0) {
-                            remove(resolved.getUniverse(), KConfig.NULL_LONG, current.uuid, p_metaModel);
-                        }
-                        resolved.getSegment().dec();
-                        if (resolved.getSegment().counter() <= 0) {
-                            remove(resolved.getUniverse(), resolved.getTime(), current.uuid, p_metaModel);
-                        }
-                        //change chaining
-                        if (previous == null) { //first case
-                            rootReference = current.next;
-                        } else { //in the middle case
-                            previous.next = current.next;
-                        }
-                    }
-                }
-                previous = current;
-                current = current.next;
-            }
-        }*/
-    }
-
-    private void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
+    @Override
+    public void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
         int hash = (int) (universe ^ time ^ obj);
