@@ -93,7 +93,7 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     }
 
     @Override
-    public final KMemoryChunk clone(KMetaClass metaClass) {
+    public final KMemoryChunk clone(KMetaModel metaModel) {
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
 
         OffHeapMemoryChunk clonedEntry = new OffHeapMemoryChunk();

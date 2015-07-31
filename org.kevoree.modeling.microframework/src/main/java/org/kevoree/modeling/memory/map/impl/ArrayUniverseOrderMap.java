@@ -1,5 +1,6 @@
 package org.kevoree.modeling.memory.map.impl;
 
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -80,9 +81,8 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
         }
     }
 
-    public ArrayUniverseOrderMap(int p_initalCapacity, float p_loadFactor, String p_className) {
-        super(p_initalCapacity, p_loadFactor);
-        this._className = p_className;
+    public ArrayUniverseOrderMap() {
+        super(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
     @Override
@@ -108,6 +108,7 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
     /* warning: this method is not thread safe */
     @Override
     public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
+
         if (payload == null || payload.length() == 0) {
             return;
         }

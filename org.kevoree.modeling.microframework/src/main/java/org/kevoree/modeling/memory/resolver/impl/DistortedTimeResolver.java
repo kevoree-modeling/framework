@@ -255,7 +255,7 @@ public class DistortedTimeResolver implements KResolver {
                 _cache.unMarkMemoryElement(objectUniverseTree);
                 return currentEntry;
             } else {
-                KMemoryChunk clonedChunk = (KMemoryChunk) _cache.cloneMarkAndUnmark(currentEntry, universe, time, uuid);
+                KMemoryChunk clonedChunk = _cache.cloneMarkAndUnmark(currentEntry, universe, time, uuid, _model.metaModel());
                 if (!needUniverseCopy) {
                     timeTree.insert(time);
                 } else {

@@ -2,12 +2,10 @@ package org.kevoree.modeling.memory.manager;
 
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
-import org.kevoree.modeling.memory.resolver.KResolver;
-import org.kevoree.modeling.memory.resolver.impl.DistortedTimeResolver;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.strategy.impl.HeapMemoryStrategy;
+import org.kevoree.modeling.memory.strategy.impl.HeapPhantomQueueMemoryStrategy;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
@@ -35,7 +33,7 @@ public class DataManagerBuilder {
 
     public KMemoryStrategy strategy() {
         if (this._strategy == null) {
-            this._strategy = new HeapMemoryStrategy();
+            this._strategy = new HeapPhantomQueueMemoryStrategy();
         }
         return _strategy;
     }

@@ -1,6 +1,8 @@
 package org.kevoree.modeling.memory.cache;
 
 import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.meta.KMetaModel;
 
 public interface KCache {
 
@@ -14,6 +16,6 @@ public interface KCache {
 
     void unMarkMemoryElement(KMemoryElement element);
 
-    KMemoryElement cloneMarkAndUnmark(KMemoryElement previous, long newUniverse, long newTime, long obj);
+    KMemoryChunk cloneMarkAndUnmark(KMemoryChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel);
 
 }

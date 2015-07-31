@@ -1,6 +1,7 @@
 package org.kevoree.modeling.memory.storage;
 
 import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaModel;
 
 public interface KMemoryStorage {
@@ -9,7 +10,7 @@ public interface KMemoryStorage {
 
     KMemoryElement create(long universe, long time, long obj, short type);
 
-    KMemoryElement clone(KMemoryElement previousElement, long newUniverse, long newTime, long newObj);
+    KMemoryChunk clone(KMemoryChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel);
 
     void clear(KMetaModel metaModel);
 

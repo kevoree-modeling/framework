@@ -7,7 +7,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 public interface KMemoryChunk extends KMemoryElement {
 
     /* Stateful Management */
-    KMemoryChunk clone(KMetaClass metaClass);
+    KMemoryChunk clone(KMetaModel metaModel);
 
     void initMetaClass(KMetaClass metaClass);
 

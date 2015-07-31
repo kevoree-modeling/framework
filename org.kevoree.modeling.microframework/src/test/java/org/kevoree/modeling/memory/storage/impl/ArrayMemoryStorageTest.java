@@ -16,7 +16,7 @@ public class ArrayMemoryStorageTest extends BaseKMemoryStorageTest {
 
     @Override
     public KMemoryStorage createKMemoryStorage() {
-        return new ArrayMemoryMemoryStorage(null);
+        return new HeapMemoryStorage(null);
     }
 
     @Override

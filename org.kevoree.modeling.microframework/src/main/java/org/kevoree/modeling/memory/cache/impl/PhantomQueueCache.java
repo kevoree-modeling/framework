@@ -2,13 +2,15 @@ package org.kevoree.modeling.memory.cache.impl;
 
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.cache.KCache;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
+import org.kevoree.modeling.meta.KMetaModel;
 
-public class SingleChainWeakRefCache implements KCache {
+public class PhantomQueueCache implements KCache {
 
     private KMemoryStorage _storage;
 
-    public SingleChainWeakRefCache(KMemoryStorage p_storage) {
+    public PhantomQueueCache(KMemoryStorage p_storage) {
         this._storage = p_storage;
     }
 
@@ -49,8 +51,8 @@ public class SingleChainWeakRefCache implements KCache {
     }
 
     @Override
-    public KMemoryElement cloneMarkAndUnmark(KMemoryElement previous, long newUniverse, long newTime, long obj) {
-        KMemoryElement newCreatedElement = _storage.clone(previous, newUniverse, newTime, obj);
+    public KMemoryChunk cloneMarkAndUnmark(KMemoryChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel) {
+        KMemoryChunk newCreatedElement = _storage.clone(previous, newUniverse, newTime, obj, metaModel);
         newCreatedElement.inc();
         previous.dec();
         return newCreatedElement;

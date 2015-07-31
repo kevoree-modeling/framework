@@ -4,12 +4,16 @@ package org.kevoree.modeling.memory.storage.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.impl.HeapMemoryChunk;
+import org.kevoree.modeling.memory.map.impl.ArrayUniverseOrderMap;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
-import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
-import org.kevoree.modeling.memory.strategy.impl.HeapMemoryStrategy;
+import org.kevoree.modeling.memory.tree.impl.ArrayLongLongTree;
+import org.kevoree.modeling.memory.tree.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
-public class ArrayMemoryMemoryStorage implements KMemoryStorage {
+public class HeapMemoryStorage implements KMemoryStorage {
 
     private volatile int _elementCount;
 
@@ -42,7 +46,7 @@ public class ArrayMemoryMemoryStorage implements KMemoryStorage {
         }
     }
 
-    public ArrayMemoryMemoryStorage(KMemoryStrategy p_heapMemoryStrategy) {
+    public HeapMemoryStorage() {
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this._elementCount = 0;
@@ -101,16 +105,32 @@ public class ArrayMemoryMemoryStorage implements KMemoryStorage {
     }
 
     @Override
-    public final void putAndReplace(long universe, long time, long obj, KMemoryElement payload) {
-        internal_put(universe, time, obj, payload, true);
+    public KMemoryElement create(long universe, long time, long obj, short type) {
+        KMemoryElement newElement = internal_createElement(type);
+        return internal_put(universe, time, obj, newElement);
     }
 
     @Override
-    public final KMemoryElement getOrPut(long universe, long time, long obj, KMemoryElement payload) {
-        return internal_put(universe, time, obj, payload, false);
+    public KMemoryChunk clone(KMemoryChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
+        return (KMemoryChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(metaModel));
     }
 
-    private synchronized KMemoryElement internal_put(long universe, long time, long p_obj, KMemoryElement payload, boolean force) {
+    private KMemoryElement internal_createElement(short type) {
+        switch (type) {
+            case KMemoryElementTypes.CHUNK:
+                return new HeapMemoryChunk();
+            case KMemoryElementTypes.LONG_LONG_MAP:
+                return new ArrayUniverseOrderMap();
+            case KMemoryElementTypes.LONG_TREE:
+                return new ArrayLongTree();
+            case KMemoryElementTypes.LONG_LONG_TREE:
+                return new ArrayLongLongTree();
+            default:
+                return null;
+        }
+    }
+
+    private synchronized KMemoryElement internal_put(long universe, long time, long p_obj, KMemoryElement payload) {
         int entry = -1;
         int index = -1;
         int hash = (int) (universe ^ time ^ p_obj);
@@ -133,12 +153,7 @@ public class ArrayMemoryMemoryStorage implements KMemoryStorage {
             _state.elementHash[index] = newIndex;
             return payload;
         } else {
-            if (force) {
-                _state.values[entry] = payload;/*setValue*/
-                return payload;
-            } else {
-                return _state.values[entry];
-            }
+            return _state.values[entry];
         }
     }
 
@@ -153,7 +168,7 @@ public class ArrayMemoryMemoryStorage implements KMemoryStorage {
         return -1;
     }
 
-    @Override
+    // @Override
     public KContentKey[] dirtyKeys() {
         int nbDirties = 0;
         InternalState internalState = _state;

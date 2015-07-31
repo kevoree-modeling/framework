@@ -5,7 +5,7 @@ import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.map.impl.OffHeapUniverseOrderMap;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.cache.KCache;
-import org.kevoree.modeling.memory.cache.impl.SingleChainWeakRefCache;
+import org.kevoree.modeling.memory.cache.impl.PhantomQueueCache;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.storage.impl.OffHeapMemoryMemoryStorage;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
@@ -72,7 +72,7 @@ public class OffHeapMemoryStrategy implements KMemoryStrategy {
 
     @Override
     public KCache newCache(KMemoryStorage p_storage) {
-        return new SingleChainWeakRefCache(p_storage);
+        return new PhantomQueueCache(p_storage);
     }
 
 }

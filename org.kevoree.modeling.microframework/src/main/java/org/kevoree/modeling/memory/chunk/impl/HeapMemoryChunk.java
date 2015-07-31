@@ -491,7 +491,7 @@ public class HeapMemoryChunk implements KMemoryChunk {
     }
 
     @Override
-    public KMemoryChunk clone(KMetaClass p_metaClass) {
+    public KMemoryChunk clone(KMetaModel p_metaClass) {
         if (raw == null) {
             return new HeapMemoryChunk();
         } else {
