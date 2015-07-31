@@ -10,6 +10,7 @@ import org.kevoree.modeling.memory.map.impl.OffHeapUniverseOrderMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.tree.KLongLongTree;
+import org.kevoree.modeling.memory.tree.KLongTree;
 import org.kevoree.modeling.memory.tree.impl.OffHeapLongLongTree;
 import org.kevoree.modeling.memory.tree.impl.OffHeapLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -213,7 +214,9 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
                 return new OffHeapMemoryChunk();
 
             case KMemoryElementTypes.LONG_TREE:
-                return new OffHeapLongTree();
+                KLongTree longTree = new OffHeapLongTree();
+                longTree.init(null, null, -1);
+                return longTree;
 
             case KMemoryElementTypes.LONG_LONG_TREE:
                 KLongLongTree longLongTree = new OffHeapLongLongTree();
