@@ -30,7 +30,7 @@ public class Array1DTest {
         });
         KMemoryChunk segment = new HeapMemoryChunk();
         segment.initMetaClass(mc);
-        segment.init(null, mm);
+        segment.init(null, mm, mc.index());
         int arraySize = 5;
         //allocate for 5 elem
         segment.extendDoubleArray(mc.dependencies().index(), arraySize, mc);

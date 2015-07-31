@@ -230,7 +230,13 @@ public class DistortedTimeResolver implements KResolver {
                 //TODO fill previous
                 return entry;
             } else {
+
+                //TODO todo
+
+
+
                 KMemoryChunk clonedEntry = entry.clone(metaClass);
+                /*
                 clonedEntry = (KMemoryChunk) _cache.getOrPut(universe, time, uuid, clonedEntry);
                 if (!needUniverseCopy) {
                     timeTree.insert(time);
@@ -245,6 +251,7 @@ public class DistortedTimeResolver implements KResolver {
                 entry.dec();
                 clonedEntry.inc();
                 //TODO fill previous
+                */
                 return clonedEntry;
             }
         } else {

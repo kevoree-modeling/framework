@@ -30,7 +30,7 @@ public class Array3DTest {
         });
         KMemoryChunk segment = new HeapMemoryChunk();
         segment.initMetaClass(mc);
-        segment.init(null, mm);
+        segment.init(null, mm, -1);
         int nbLines = 5;
         int nbColumn = 3;
         int nbDeep = 2;

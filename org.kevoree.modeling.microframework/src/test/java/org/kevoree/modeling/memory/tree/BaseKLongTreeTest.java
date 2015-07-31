@@ -12,7 +12,7 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void saveLoad0() throws Exception {
         KLongTree tree = createKLongTree();
-        tree.init(null, null);
+        tree.init(null, null, -1);
 
         //long start = System.currentTimeMillis();
         for (long i = 0; i <= 100000; i++) {
@@ -22,7 +22,7 @@ public abstract class BaseKLongTreeTest {
         //System.out.println(end - start + " ms");
 
         KLongTree treeBis = createKLongTree();
-        treeBis.init(tree.serialize(null), null);
+        treeBis.init(tree.serialize(null), null, -1);
 
         Assert.assertEquals(tree.size(), treeBis.size());
     }
@@ -30,7 +30,7 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void saveLoad() throws Exception {
         KLongTree tree = createKLongTree();
-        tree.init(null, null);
+        tree.init(null, null, -1);
         for (long i = 0; i <= 2; i++) {
             tree.insert(i);
         }
@@ -39,7 +39,7 @@ public abstract class BaseKLongTreeTest {
         Assert.assertEquals("G,C{A,C]C,}E,C", saved0);
 
         KLongTree treeBis = createKLongTree();
-        treeBis.init(saved0, null);
+        treeBis.init(saved0, null, -1);
         Assert.assertEquals(saved0, treeBis.serialize(null));
         Assert.assertEquals(tree.size(), treeBis.size());
         for (int i = 0; i < tree.size(); i++) {
@@ -55,7 +55,7 @@ public abstract class BaseKLongTreeTest {
         long MAX = 99L;
         for (long j = MIN; j <= MAX; j++) {
             KLongTree tree = createKLongTree();
-            tree.init(null, null);
+            tree.init(null, null, -1);
             for (long i = MIN; i <= j; i++) {
                 if ((i % 3) == 0L) {
                     tree.insert(i);
@@ -171,7 +171,7 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void previousOrEqualTest() {
         KLongTree tree = createKLongTree();
-        tree.init(null, null);
+        tree.init(null, null, -1);
 
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
@@ -218,7 +218,7 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void cacheEffectTest() {
         KLongTree tree = createKLongTree();
-        tree.init(null, null);
+        tree.init(null, null, -1);
 
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
@@ -242,7 +242,7 @@ public abstract class BaseKLongTreeTest {
     @Test
     public void rangeTest() {
         KLongTree tree = createKLongTree();
-        tree.init(null, null);
+        tree.init(null, null, -1);
 
         for (int i = 0; i < RANGE_TEST_SIZE; i++) {
             tree.insert(i);

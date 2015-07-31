@@ -32,20 +32,20 @@ public class CloudModel extends AbstractKModel<CloudUniverse> {
     }
 
     @Override
-    protected KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz) {
+    protected KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime) {
         if (clazz == null) {
             return null;
         }
         switch (clazz.index()) {
             case 0:
-                return new NodeImpl(universe, time, uuid, clazz, _manager);
+                return new NodeImpl(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
             case 1:
-                return new ElementImpl(universe, time, uuid, clazz, _manager);
+                return new ElementImpl(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
             default:
                 if (clazz.inferAlg() != null) {
-                    return new GenericObjectInfer(universe, time, uuid, clazz, _manager);
+                    return new GenericObjectInfer(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
                 } else {
-                    return new GenericObject(universe, time, uuid, clazz, _manager);
+                    return new GenericObject(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
                 }
         }
     }

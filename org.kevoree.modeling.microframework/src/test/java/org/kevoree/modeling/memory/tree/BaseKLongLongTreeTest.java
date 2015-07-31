@@ -11,26 +11,26 @@ public abstract class BaseKLongLongTreeTest {
     @Test
     public void saveLoad0() throws Exception {
         KLongLongTree tree = createKLongLongTree();
-        tree.init(null, null);
+        tree.init(null, null, -1);
 
         for (long i = 0; i <= 6; i++) {
             tree.insert(i, i);
         }
         KLongLongTree treeBis = createKLongLongTree();
-        treeBis.init(tree.serialize(null), null);
+        treeBis.init(tree.serialize(null), null, -1);
         Assert.assertEquals(tree.size(), treeBis.size());
     }
 
     @Test
     public void saveLoad() throws Exception {
         KLongLongTree tree = createKLongLongTree();
-        tree.init(null, null);
+        tree.init(null, null, -1);
 
         for (long i = 0; i <= 6; i++) {
             tree.insert(i, i);
         }
         KLongLongTree treeBis = createKLongLongTree();
-        treeBis.init(tree.serialize(null), null);
+        treeBis.init(tree.serialize(null), null, -1);
         Assert.assertEquals(tree.size(), treeBis.size());
         for (int i = 0; i < tree.size(); i++) {
             Long resolved = tree.lookupValue(i);
@@ -42,7 +42,7 @@ public abstract class BaseKLongLongTreeTest {
     @Test
     public void cacheEffectTest() {
         KLongLongTree tree = createKLongLongTree();
-        tree.init(null, null);
+        tree.init(null, null, -1);
 
         for (long i = 0; i <= 6; i++) {
             tree.insert(i, i);

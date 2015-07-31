@@ -38,7 +38,7 @@ public abstract class BaseKMemoryStorageTest {
 
         // KLongLongTree
         KLongLongTree longLongTree = createKLongLongTree();
-        longLongTree.init(null, null);
+        longLongTree.init(null, null,-1);
         longLongTree.insert(0, 0);
         longLongTree.insert(1, 1);
         storage.putAndReplace(0, KConfig.NULL_LONG, KConfig.END_OF_TIME, longLongTree);
@@ -51,7 +51,7 @@ public abstract class BaseKMemoryStorageTest {
 
         // KLongTree
         KLongTree longTree = createKLongTree();
-        longTree.init(null, null);
+        longTree.init(null, null, -1);
         longTree.insert(0);
         longTree.insert(1);
         storage.putAndReplace(0, KConfig.NULL_LONG, 0, longTree);

@@ -457,7 +457,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 try {
                     String serialized = cacheEntry.serialize(dynamicMetaModel);
-                    newCacheEntry.init(serialized, dynamicMetaModel);
+                    newCacheEntry.init(serialized, dynamicMetaModel, cacheEntry.metaClassIndex());
 
                     String newSeriliazed = newCacheEntry.serialize(dynamicMetaModel);
                     Assert.assertEquals(serialized, newSeriliazed);

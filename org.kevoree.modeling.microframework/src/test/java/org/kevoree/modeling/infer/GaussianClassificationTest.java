@@ -6,6 +6,7 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
+import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.infer.impl.GaussianClassifierAlg;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
@@ -219,7 +220,7 @@ public class GaussianClassificationTest {
                     irisInstance.setByName("sepalWidth", irisdataset[i + 1]);
                     irisInstance.setByName("petalLength", irisdataset[i + 2]);
                     irisInstance.setByName("petalWidth", irisdataset[i + 3]);
-                    irisInstance.setByName("type", (mm.metaTypeByName("IrisType")).literal((int)irisdataset[i + 4]));
+                    irisInstance.setByName("type", (mm.metaTypeByName("IrisType")).literal((int) irisdataset[i + 4]));
 
                     Object[] output = new Object[1];
                     output[0] = irisInstance.getByName("type");
@@ -227,16 +228,16 @@ public class GaussianClassificationTest {
                 }
 
                 KObject[][] irisInstanceTest = new KObject[3][1];
-              // Test class 0
-                irisInstanceTest[0]=new KObject[1];
+                // Test class 0
+                irisInstanceTest[0] = new KObject[1];
                 irisInstanceTest[0][0] = model.createByName("Iris", 0, 0);
-                irisInstanceTest[0][0].setByName("sepalLength", 5.006 );
+                irisInstanceTest[0][0].setByName("sepalLength", 5.006);
                 irisInstanceTest[0][0].setByName("sepalWidth", 3.418);
                 irisInstanceTest[0][0].setByName("petalLength", 1.464);
                 irisInstanceTest[0][0].setByName("petalWidth", 0.244);
 
                 // Test class 1
-                irisInstanceTest[1]=new KObject[1];
+                irisInstanceTest[1] = new KObject[1];
                 irisInstanceTest[1][0] = model.createByName("Iris", 0, 0);
                 irisInstanceTest[1][0].setByName("sepalLength", 5.936);
                 irisInstanceTest[1][0].setByName("sepalWidth", 2.77);
@@ -244,7 +245,7 @@ public class GaussianClassificationTest {
                 irisInstanceTest[1][0].setByName("petalWidth", 1.326);
 
                 // Test class 2
-                irisInstanceTest[2]=new KObject[1];
+                irisInstanceTest[2] = new KObject[1];
                 irisInstanceTest[2][0] = model.createByName("Iris", 0, 0);
                 irisInstanceTest[2][0].setByName("sepalLength", 6.588);
                 irisInstanceTest[2][0].setByName("sepalWidth", 2.974);
@@ -253,7 +254,7 @@ public class GaussianClassificationTest {
 
 
                 //for debug
-                KMemoryChunk ks = ((KInternalDataManager)model.manager()).chunk(0, 0, gaussianProfile.uuid(), false, gaussianProfile.metaClass(), null);
+                KMemoryChunk ks = ((KInternalDataManager) model.manager()).preciseChunk(0, 0, gaussianProfile.uuid(), gaussianProfile.metaClass(), ((AbstractKObject) gaussianProfile).previousResolved());
 
                 gaussianProfile.genericInferAll(irisInstanceTest, new KCallback<Object[][]>() {
                     @Override
