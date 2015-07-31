@@ -1,5 +1,6 @@
 package org.kevoree.modeling.memory.cache;
 
+import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -21,5 +22,9 @@ public interface KCache {
     KMemoryChunk cloneMarkAndUnmark(KMemoryChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel);
 
     void clear();
+
+    void register(KObject object);
+
+    void registerAll(KObject[] objects);
 
 }
