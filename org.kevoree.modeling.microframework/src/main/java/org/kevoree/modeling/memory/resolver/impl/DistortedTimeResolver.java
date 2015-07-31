@@ -138,9 +138,16 @@ public class DistortedTimeResolver implements KResolver {
                                             final long[] tempObjectChunkKeys = new long[uuids.length * 3];
                                             for (int i = 0; i < uuids.length; i++) {
                                                 long closestTime = ((KLongTree) objectTimeTreeElements[i]).previousOrEqual(time);
-                                                tempObjectChunkKeys[i * 3] = tempObjectTimeTreeKeys[i * 3];
-                                                tempObjectChunkKeys[i * 3 + 1] = closestTime;
-                                                tempObjectChunkKeys[i * 3 + 2] = uuids[i];
+                                                if (closestTime != KConfig.NULL_LONG) {
+                                                    tempObjectChunkKeys[i * 3] = tempObjectTimeTreeKeys[i * 3];
+                                                    tempObjectChunkKeys[i * 3 + 1] = closestTime;
+                                                    tempObjectChunkKeys[i * 3 + 2] = uuids[i];
+                                                } else {
+                                                    //Key that create a KeyMiss
+                                                    tempObjectChunkKeys[i * 3] = KConfig.END_OF_TIME;
+                                                    tempObjectChunkKeys[i * 3 + 1] = KConfig.END_OF_TIME;
+                                                    tempObjectChunkKeys[i * 3 + 2] = KConfig.END_OF_TIME;
+                                                }
                                             }
                                             getOrLoadAndMarkAll(tempObjectChunkKeys, new KCallback<KMemoryElement[]>() {
                                                 @Override
@@ -160,7 +167,6 @@ public class DistortedTimeResolver implements KResolver {
                                                     }
                                                 }
                                             });
-
                                         }
                                     });
                                 }
@@ -425,9 +431,6 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     public void setRoot(final KObject newRoot, final KCallback<Throwable> callback) {
-        //TODO FIXME
-
-        /*
         final long rootFixedKey = KConfig.END_OF_TIME;
         getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KMemoryElement>() {
             @Override
@@ -440,7 +443,7 @@ public class DistortedTimeResolver implements KResolver {
                     @Override
                     public void on(KMemoryElement rootGlobalUniverseOrderElement) {
                         if (rootGlobalUniverseOrderElement == null) {
-                            _cache.unMarkMemoryElement(theGlobalUniverseOrderElement);
+                            _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
                             callback.on(null);
                             return;
                         }
@@ -449,13 +452,11 @@ public class DistortedTimeResolver implements KResolver {
                             @Override
                             public void on(KMemoryElement theRootTimeTree) {
                                 long resolvedCurrentRootUUID = ((KLongLongTree) theRootTimeTree).previousOrEqualValue(time);
-                                _cache.unMarkMemoryElement(theRootTimeTree);
-                                _cache.unMarkMemoryElement(rootGlobalUniverseOrderElement);
-                                _cache.unMarkMemoryElement(theGlobalUniverseOrderElement);
+                                _cache.unmarkMemoryElement(theRootTimeTree);
+                                _cache.unmarkMemoryElement(rootGlobalUniverseOrderElement);
+                                _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
                                 if (resolvedCurrentRootUUID == KConfig.NULL_LONG) {
                                     callback.on(null);
-                                } else {
-                                    lookup(universe, time, resolvedCurrentRootUUID, callback);
                                 }
                             }
                         });
@@ -463,7 +464,6 @@ public class DistortedTimeResolver implements KResolver {
                 });
             }
         });
-        */
     }
 
 /*
