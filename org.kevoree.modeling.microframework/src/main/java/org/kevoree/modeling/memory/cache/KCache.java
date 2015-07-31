@@ -14,8 +14,12 @@ public interface KCache {
 
     KMemoryElement createAndMark(long universe, long time, long obj, short type);
 
-    void unMarkMemoryElement(KMemoryElement element);
+    void unmarkMemoryElement(KMemoryElement element);
+
+    void unmarkAllMemoryElements(KMemoryElement[] elements);
 
     KMemoryChunk cloneMarkAndUnmark(KMemoryChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel);
+
+    void clear();
 
 }

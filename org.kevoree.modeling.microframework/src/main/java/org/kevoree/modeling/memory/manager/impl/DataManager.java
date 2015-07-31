@@ -409,6 +409,16 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
+    public void discard(KCallback<Throwable> callback) {
+
+    }
+
+    @Override
+    public void clear() {
+
+    }
+
+    @Override
     public void getRoot(long universe, long time, KCallback<KObject> callback) {
 
     }

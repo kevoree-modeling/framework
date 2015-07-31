@@ -14,6 +14,10 @@ public interface KDataManager {
 
     void saveAll(KCallback<Throwable> callback);
 
+    void discard(KCallback<Throwable> callback);
+
+    void clear();
+
     void getRoot(long universe, long time, KCallback<KObject> callback);
 
     void setRoot(KObject newRoot, KCallback<Throwable> callback);
