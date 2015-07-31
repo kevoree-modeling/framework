@@ -63,7 +63,9 @@ public class DistortedTimeResolver implements KResolver {
                                                                 _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
                                                                 callback.on(null);
                                                             } else {
-                                                                callback.on(((AbstractKModel) _manager.model()).createProxy(universe, time, uuid, _manager.model().metaModel().metaClass(((KMemoryChunk) theObjectChunk).metaClassIndex()), closestUniverse, closestTime));
+                                                                KObject newProxy = ((AbstractKModel) _manager.model()).createProxy(universe, time, uuid, _manager.model().metaModel().metaClass(((KMemoryChunk) theObjectChunk).metaClassIndex()), closestUniverse, closestTime);
+                                                                _cache.register(newProxy);
+                                                                callback.on(newProxy);
                                                             }
                                                         }
                                                     });
@@ -151,6 +153,7 @@ public class DistortedTimeResolver implements KResolver {
                                                         for (int h = 0; h < theObjectChunks.length; h++) {
                                                             finalResult[h] = ((AbstractKModel) _manager.model()).createProxy(universe, time, uuids[h], _manager.model().metaModel().metaClass(((KMemoryChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1]);
                                                         }
+                                                        _cache.registerAll(finalResult);
                                                         callback.on(finalResult);
                                                     }
                                                 }
@@ -295,6 +298,7 @@ public class DistortedTimeResolver implements KResolver {
         KUniverseOrderMap universeTree = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, obj.uuid(), KMemoryElementTypes.LONG_LONG_MAP);
         universeTree.init(null, _manager.model().metaModel(), metaClassIndex);
         universeTree.put(obj.universe(), obj.now());
+        _cache.register(obj);
     }
 
     @Override
