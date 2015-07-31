@@ -30,4 +30,6 @@ public interface KMemoryElement {
 
     void free(KMetaModel metaModel);
 
+    short type();
+
 }

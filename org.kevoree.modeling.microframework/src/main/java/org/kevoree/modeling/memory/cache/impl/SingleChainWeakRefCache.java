@@ -14,27 +14,46 @@ public class SingleChainWeakRefCache implements KCache {
 
     @Override
     public KMemoryElement getAndMark(long universe, long time, long obj) {
-        return null;
+        KMemoryElement resolvedElement = _storage.get(universe, time, obj);
+        if (resolvedElement != null) {
+            resolvedElement.inc();
+        }
+        return resolvedElement;
     }
 
     @Override
     public void unmark(long universe, long time, long obj) {
-
+        KMemoryElement resolvedElement = _storage.get(universe, time, obj);
+        if (resolvedElement != null) {
+            resolvedElement.dec();
+        }
     }
 
     @Override
-    public KMemoryElement createAndMark(long universe, long time, long obj) {
-        return null;
+    public KMemoryElement unsafeGet(long universe, long time, long obj) {
+        return _storage.get(universe, time, obj);
+    }
+
+    @Override
+    public KMemoryElement createAndMark(long universe, long time, long obj, short type) {
+        KMemoryElement newCreatedElement = _storage.create(universe, time, obj, type);
+        if (newCreatedElement != null) {
+            newCreatedElement.inc();
+        }
+        return newCreatedElement;
     }
 
     @Override
     public void unMarkMemoryElement(KMemoryElement element) {
-
+        element.dec();
     }
 
     @Override
-    public KMemoryElement cloneMarkAndUnmark(KMemoryElement previous, long universe, long time, long obj, long newUniverse, long newTime) {
-        return null;
+    public KMemoryElement cloneMarkAndUnmark(KMemoryElement previous, long newUniverse, long newTime, long obj) {
+        KMemoryElement newCreatedElement = _storage.clone(previous, newUniverse, newTime, obj);
+        newCreatedElement.inc();
+        previous.dec();
+        return newCreatedElement;
     }
 
 

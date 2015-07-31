@@ -18,4 +18,8 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
         internal_insert(p_key,p_key);
     }
 
+    @Override
+    public short type() {
+        return 0;
+    }
 }

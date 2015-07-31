@@ -10,11 +10,10 @@ public interface KCache {
 
     KMemoryElement unsafeGet(long universe, long time, long obj);
 
-    KMemoryElement createAndMark(long universe, long time, long obj);
+    KMemoryElement createAndMark(long universe, long time, long obj, short type);
 
     void unMarkMemoryElement(KMemoryElement element);
 
-    KMemoryElement cloneMarkAndUnmark(KMemoryElement previous, long universe, long time, long obj, long newUniverse, long newTime);
-
+    KMemoryElement cloneMarkAndUnmark(KMemoryElement previous, long newUniverse, long newTime, long obj);
 
 }
