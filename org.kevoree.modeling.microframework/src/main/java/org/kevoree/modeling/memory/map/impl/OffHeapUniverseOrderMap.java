@@ -4,6 +4,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
+import org.kevoree.modeling.memory.storage.impl.OffHeapMemoryStorage;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -14,8 +15,10 @@ import org.kevoree.modeling.util.maths.Base64;
 public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniverseOrderMap, KOffHeapMemoryElement {
 
     private volatile int _counter = 0;
-
     private String _className;
+
+    private OffHeapMemoryStorage storage;
+    private long universe, time, obj;
 
     @Override
     public final int counter() {
@@ -168,5 +171,14 @@ public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniv
     @Override
     public void setMemoryAddress(long address) {
         this._start_address = address;
+    }
+
+    @Override
+    public void setStorage(OffHeapMemoryStorage storage, long universe, long time, long obj) {
+        this.storage = storage;
+        this.universe = universe;
+        this.time = time;
+        this.obj = obj;
+
     }
 }

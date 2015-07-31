@@ -6,9 +6,9 @@ import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
+import org.kevoree.modeling.memory.storage.impl.OffHeapMemoryStorage;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
-import org.kevoree.modeling.meta.impl.MetaClass;
 import org.kevoree.modeling.meta.impl.MetaReference;
 import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
@@ -24,6 +24,9 @@ import java.lang.reflect.Field;
  */
 public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     private static final Unsafe UNSAFE = getUnsafe();
+
+    private OffHeapMemoryStorage storage;
+    private long universe, time, obj;
 
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
     private static final int ATT_COUNTER_LEN = 4;
@@ -857,6 +860,14 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     @Override
     public final void setMemoryAddress(long address) {
         _start_address = address;
+    }
+
+    @Override
+    public void setStorage(OffHeapMemoryStorage storage, long universe, long time, long obj) {
+        this.storage = storage;
+        this.universe = universe;
+        this.time = time;
+        this.obj = obj;
     }
 
 }

@@ -1,7 +1,6 @@
 package org.kevoree.modeling.memory.storage.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
@@ -9,8 +8,6 @@ import org.kevoree.modeling.memory.chunk.impl.OffHeapMemoryChunk;
 import org.kevoree.modeling.memory.map.impl.OffHeapUniverseOrderMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
-import org.kevoree.modeling.memory.tree.KLongLongTree;
-import org.kevoree.modeling.memory.tree.KLongTree;
 import org.kevoree.modeling.memory.tree.impl.OffHeapLongLongTree;
 import org.kevoree.modeling.memory.tree.impl.OffHeapLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -181,6 +178,29 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
         this._threshold = (int) (length * this._loadFactor);
     }
 
+    public final int getIndex(long universe, long time, long obj) {
+        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+
+        if (elementDataSize == 0) {
+            return -1;
+        }
+        int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % elementDataSize;
+        int m = internal_getHash(_start_address, index);
+        while (m != -1) {
+            if (universe == internal_getUniverseKey(_start_address, m) && time == internal_getTimeKey(_start_address, m) && obj == internal_getObjKey(_start_address, m)) {
+                return m;
+            } else {
+                m = internal_getNext(_start_address, m);
+            }
+        }
+        return -1;
+    }
+
+
+    public final void notifyRealloc(KOffHeapMemoryElement elem) {
+        long newAddress = elem.getMemoryAddress();
+    }
+
     @Override
     public final KMemoryElement get(long universe, long time, long obj) {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
@@ -202,26 +222,32 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
 
 
     @Override
-    public KMemoryElement create(long universe, long time, long obj, short type) {
-        KMemoryElement newElement = internal_createElement(type);
+    public final KMemoryElement create(long universe, long time, long obj, short type) {
+        KOffHeapMemoryElement newElement = internal_createElement(type);
+        newElement.setStorage(this, universe, time, obj);
 
         return internal_put(universe, time, obj, newElement, type);
     }
 
-    private KMemoryElement internal_createElement(short type) {
+    public final void notifyRealloc(long newAddress, long universe, long time, long obj) {
+        int index = getIndex(universe, time, obj);
+
+        long currentAddress = internal_getValuePointer(_start_address, index);
+        if (currentAddress != newAddress) {
+            internal_setValuePointer(_start_address, index, newAddress);
+        }
+    }
+
+    private KOffHeapMemoryElement internal_createElement(short type) {
         switch (type) {
             case KMemoryElementTypes.CHUNK:
                 return new OffHeapMemoryChunk();
 
             case KMemoryElementTypes.LONG_TREE:
-                KLongTree longTree = new OffHeapLongTree();
-                longTree.init(null, null, -1);
-                return longTree;
+                return new OffHeapLongTree();
 
             case KMemoryElementTypes.LONG_LONG_TREE:
-                KLongLongTree longLongTree = new OffHeapLongLongTree();
-                longLongTree.init(null, null, -1);
-                return longLongTree;
+                return new OffHeapLongLongTree();
 
             case KMemoryElementTypes.LONG_LONG_MAP:
                 return new OffHeapUniverseOrderMap();
@@ -231,7 +257,7 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
 
 
     @Override
-    public KMemoryChunk clone(KMemoryChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
+    public final KMemoryChunk clone(KMemoryChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
         return (KMemoryChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(metaModel), KMemoryElementTypes.CHUNK);
     }
 

@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.tree.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
+import org.kevoree.modeling.memory.storage.impl.OffHeapMemoryStorage;
 import org.kevoree.modeling.memory.tree.KTreeWalker;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
@@ -14,10 +15,13 @@ import java.lang.reflect.Field;
  * <p/>
  * OffHeap implementation of AbstractOffHeapTree
  * - memory structure:  | root index (8) | size (4) | dirty (1) | counter (4) | back (size * node size * 8) |
- * - back:              | key (8)        | left (8) | right (8) | parent (8)  | color (8)   | value (8)     |
+ * - back:              | key (8) | left (8) | right (8) | parent (8) | color (8) | value (8) |
  */
 public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
     protected static final Unsafe UNSAFE = getUnsafe();
+
+    protected OffHeapMemoryStorage storage;
+    protected long universe, time, obj;
 
     private static final char BLACK_LEFT = '{';
     private static final char BLACK_RIGHT = '}';
@@ -68,6 +72,10 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
 
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
         _threshold = (int) (size() * _loadFactor);
+
+        if (storage != null) {
+            storage.notifyRealloc(this._start_address, this.universe, this.time, this.obj);
+        }
     }
 
     private void internal_reallocate(int length) {
@@ -81,11 +89,17 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
 
         _threshold = (int) (length * _loadFactor);
 
-//        int size_base_segment = BASE_SEGMENT_LEN;
-//        int size_raw_segment = length * NODE_SIZE * BYTE;
-//        _start_address = UNSAFE.reallocateMemory(_start_address, size_base_segment + size_raw_segment);
-//
-//        _threshold = (int) (length * _loadFactor);
+        if (storage != null) {
+            storage.notifyRealloc(this._start_address, this.universe, this.time, this.obj);
+        }
+    }
+
+    @Override
+    public void setStorage(OffHeapMemoryStorage storage, long universe, long time, long obj) {
+        this.storage = storage;
+        this.universe = universe;
+        this.time = time;
+        this.obj = obj;
     }
 
     private int internal_size_raw_segment(int size) {
