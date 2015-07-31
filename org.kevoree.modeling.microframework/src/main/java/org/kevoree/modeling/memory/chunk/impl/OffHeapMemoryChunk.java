@@ -5,6 +5,7 @@ import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.storage.MemoryElementTypes;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaReference;
@@ -815,6 +816,11 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
 //        if (_allocated_segments != 0) {
 //            throw new RuntimeException("OffHeap Memory Management Exception: more segments allocated than freed");
 //        }
+    }
+
+    @Override
+    public short type() {
+        return MemoryElementTypes.CHUNK;
     }
 
 

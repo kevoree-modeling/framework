@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.map.impl;
 
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.storage.MemoryElementTypes;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -152,6 +153,11 @@ public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniv
     @Override
     public void free(KMetaModel metaModel) {
         clear();
+    }
+
+    @Override
+    public short type() {
+        return MemoryElementTypes.LONG_LONG_MAP;
     }
 
     @Override

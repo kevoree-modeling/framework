@@ -4,6 +4,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.storage.MemoryElementTypes;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -278,6 +279,11 @@ public class HeapMemoryChunk implements KMemoryChunk {
     @Override
     public void free(KMetaModel metaModel) {
         raw = null;
+    }
+
+    @Override
+    public short type() {
+        return MemoryElementTypes.CHUNK;
     }
 
     @Override

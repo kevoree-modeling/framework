@@ -1,6 +1,7 @@
 package org.kevoree.modeling.memory.tree.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.storage.MemoryElementTypes;
 import org.kevoree.modeling.memory.tree.KLongLongTree;
 
 public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTree {
@@ -30,4 +31,8 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
         internal_insert(p_key, p_value);
     }
 
+    @Override
+    public short type() {
+        return MemoryElementTypes.LONG_LONG_TREE;
+    }
 }

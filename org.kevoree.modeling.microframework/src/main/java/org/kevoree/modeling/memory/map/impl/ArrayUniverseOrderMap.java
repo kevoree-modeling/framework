@@ -1,6 +1,7 @@
 package org.kevoree.modeling.memory.map.impl;
 
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.storage.MemoryElementTypes;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -48,6 +49,7 @@ import org.kevoree.modeling.util.maths.Base64;
  * this[loopKey] = loopVal;
  * }
  * }
+ * public type(): number { return org.kevoree.modeling.memory.storage.MemoryElementTypes.LONG_LONG_MAP; }
  */
 public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverseOrderMap {
 
@@ -185,6 +187,11 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
     @Override
     public void free(KMetaModel metaModel) {
         clear();
+    }
+
+    @Override
+    public short type() {
+        return MemoryElementTypes.LONG_LONG_MAP;
     }
 
 }
