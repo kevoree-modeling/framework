@@ -182,6 +182,29 @@ public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniv
         this.universe = universe;
         this.time = time;
         this.obj = obj;
+    }
 
+    @Override
+    protected final void internal_allocate(int p_initalCapacity, float p_loadFactor) {
+        super.internal_allocate(p_initalCapacity, p_loadFactor);
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
+    }
+
+    @Override
+    public final void clear() {
+        super.clear();
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
+    }
+
+    @Override
+    protected final void rehashCapacity(int capacity) {
+        super.rehashCapacity(capacity);
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
     }
 }

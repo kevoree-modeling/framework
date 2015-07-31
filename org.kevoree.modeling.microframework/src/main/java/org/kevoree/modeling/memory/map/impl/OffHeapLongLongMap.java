@@ -20,9 +20,9 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
     protected int threshold;
 
-    private final int initialCapacity;
+    private int initialCapacity;
 
-    private final float loadFactor;
+    private float loadFactor;
 
     protected volatile long _start_address;
 
@@ -85,6 +85,10 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
 
     public OffHeapLongLongMap(int p_initalCapacity, float p_loadFactor) {
+        internal_allocate(p_initalCapacity, p_loadFactor);
+    }
+
+    protected void internal_allocate(int p_initalCapacity, float p_loadFactor) {
         this.initialCapacity = p_initalCapacity;
         this.loadFactor = p_loadFactor;
 
@@ -107,7 +111,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         this.threshold = (int) (elementDataSize * loadFactor);
     }
 
-    public final void clear() {
+    public void clear() {
         int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
 
         if (elementCount > 0) {
@@ -135,7 +139,7 @@ public class OffHeapLongLongMap implements KLongLongMap {
         }
     }
 
-    protected final void rehashCapacity(int capacity) {
+    protected void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);
 
         long bytes = BASE_SEGMENT_LEN + length * BACK_ELEM_ENTRY_LEN;
