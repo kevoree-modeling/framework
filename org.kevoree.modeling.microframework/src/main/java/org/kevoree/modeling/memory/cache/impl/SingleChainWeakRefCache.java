@@ -18,7 +18,7 @@ public class SingleChainWeakRefCache implements KCache {
     }
 
     @Override
-    public KMemoryElement getMarkAndUpdate(long universe, long time, long obj) {
+    public KMemoryElement getMarkAndUpdate(long universe, long time, long obj, long[] previous) {
         return null;
     }
 
@@ -35,6 +35,11 @@ public class SingleChainWeakRefCache implements KCache {
     @Override
     public void unMarkMemoryElement(KMemoryElement element) {
 
+    }
+
+    @Override
+    public KMemoryElement cloneMarkAndUnmark(KMemoryElement previous, long universe, long time, long obj, long newUniverse, long newTime) {
+        return null;
     }
 
 

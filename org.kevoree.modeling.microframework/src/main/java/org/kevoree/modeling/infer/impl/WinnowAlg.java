@@ -1,6 +1,7 @@
 package org.kevoree.modeling.infer.impl;
 
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
@@ -19,7 +20,7 @@ public class WinnowAlg implements KInferAlg {
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.chunk(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), (((AbstractKObject) origin).previousResolved()));
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial chunk if empty
         int size = origin.metaClass().inputs().length;
@@ -33,9 +34,9 @@ public class WinnowAlg implements KInferAlg {
 
         for (int iter = 0; iter < iterations; iter++) {
             for (int inst = 0; inst < trainingSet.length; inst++) {
-                if (calculate(trainingSet[inst], state) == expectedResultSet[inst][0])
+                if (calculate(trainingSet[inst], state) == expectedResultSet[inst][0]) {
                     continue;
-
+                }
                 //Else update the weights
                 if (expectedResultSet[inst][0] == 0) {
                     for (int i = 0; i < size; i++) {
@@ -65,16 +66,14 @@ public class WinnowAlg implements KInferAlg {
 
     @Override
     public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.chunk(origin.universe(), origin.now(), origin.uuid(), false, origin.metaClass(), null);
+        KMemoryChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), (((AbstractKObject) origin).previousResolved()));
         int dependenciesIndex = origin.metaClass().dependencies().index();
         int size = origin.metaClass().inputs().length;
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-
         double[][] result = new double[features.length][1];
-
         for (int inst = 0; inst < features.length; inst++) {
             result[inst] = new double[1];
             result[inst][0] = calculate(features[inst], state);

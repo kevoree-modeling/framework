@@ -41,7 +41,7 @@ public class FilterAttributeAction implements KTraversalAction {
             for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
                     final AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];
-                    KMemoryChunk raw = (loopObj)._manager.chunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
+                    KMemoryChunk raw = (loopObj)._manager.closestChunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), loopObj.metaClass(), loopObj.previousResolved());
                     if (raw != null) {
                         if (_attribute == null) {
                             if (_expectedValue == null) {

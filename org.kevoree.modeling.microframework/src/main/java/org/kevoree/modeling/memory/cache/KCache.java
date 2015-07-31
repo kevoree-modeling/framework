@@ -15,4 +15,7 @@ public interface KCache {
 
     void unMarkMemoryElement(KMemoryElement element);
 
+    KMemoryElement cloneMarkAndUnmark(KMemoryElement previous, long universe, long time, long obj, long newUniverse, long newTime);
+
+
 }

@@ -5,9 +5,6 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
-import org.kevoree.modeling.memory.cache.impl.KObjectWeakReference;
-import org.kevoree.modeling.memory.manager.impl.MemorySegmentResolutionTrace;
-import org.kevoree.modeling.memory.manager.impl.ResolutionHelper;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -122,11 +119,6 @@ public class OffHeapMemoryMemoryStorage implements KMemoryStorage {
 
         return offheapElem;
     }
-
-    /**
-     * @ignore ts
-     */
-    private KObjectWeakReference rootReference = null;
 
     public OffHeapMemoryMemoryStorage(KMemoryStrategy strategy) {
         this.strategy = strategy;

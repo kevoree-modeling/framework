@@ -45,7 +45,7 @@ public class TraverseQueryAction implements KTraversalAction {
             for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];
-                    KMemoryChunk raw = loopObj._manager.chunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
+                    KMemoryChunk raw = loopObj._manager.closestChunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), loopObj.metaClass(), loopObj.previousResolved());
                     KMeta[] metaElements = loopObj.metaClass().metaElements();
                     if (raw != null) {
                         if (_referenceQuery == null) {

@@ -1,6 +1,7 @@
 package org.kevoree.modeling.extrapolation.impl;
 
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
@@ -23,7 +24,7 @@ public class DiscreteExtrapolation implements Extrapolation {
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
-        KMemoryChunk payload = dataManager.chunk(current.universe(), current.now(), current.uuid(), true, current.metaClass(), null);
+        KMemoryChunk payload = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         if (payload != null) {
             if (attribute.attributeType().isEnum()) {
                 return ((KMetaEnum) attribute.attributeType()).literal((int) payload.getPrimitiveType(attribute.index(), current.metaClass()));
@@ -38,7 +39,7 @@ public class DiscreteExtrapolation implements Extrapolation {
     @Override
     public void mutate(KObject current, KMetaAttribute attribute, Object payload, KInternalDataManager dataManager) {
         //By requiring a raw on the current object, we automatically create and copy the previous object
-        KMemoryChunk internalPayload = dataManager.chunk(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
+        KMemoryChunk internalPayload = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         //The object is also automatically cset to Dirty
         if (internalPayload != null) {
             if (attribute.attributeType().isEnum()) {

@@ -30,7 +30,7 @@ public class FilterNotAttributeAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         if (context.inputObjects() == null || context.inputObjects().length == 0) {
-            if(_next != null){
+            if (_next != null) {
                 _next.execute(context);
             } else {
                 context.finalCallback().on(context.inputObjects());
@@ -41,7 +41,7 @@ public class FilterNotAttributeAction implements KTraversalAction {
             for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];
-                    KMemoryChunk raw = loopObj._manager.chunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), true, loopObj.metaClass(), null);
+                    KMemoryChunk raw = loopObj._manager.closestChunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), loopObj.metaClass(), loopObj.previousResolved());
                     if (raw != null) {
                         if (_attribute == null) {
                             if (_expectedValue == null) {

@@ -4,6 +4,7 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
+import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.meta.*;
@@ -124,7 +125,7 @@ public class JsonModelLoader {
         KMetaClass metaClass = manager.model().metaModel().metaClassByName(meta);
         KObject current = ((AbstractKModel) manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass, universe, time);
         manager.initKObject(current);
-        KMemoryChunk raw = manager.chunk(current.universe(), current.now(), current.uuid(), false, current.metaClass(), null);
+        KMemoryChunk raw = manager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         p_param.each(new KStringMapCallBack<Object>() {
             @Override
             public void on(String metaKey, Object payload_content) {

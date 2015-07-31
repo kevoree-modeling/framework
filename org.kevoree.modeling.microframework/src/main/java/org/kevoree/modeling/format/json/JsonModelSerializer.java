@@ -49,7 +49,7 @@ public class JsonModelSerializer {
 
     public static void printJSON(KObject elem, StringBuilder builder, boolean isRoot) {
         if (elem != null) {
-            KMemoryChunk raw = ((AbstractKObject) elem)._manager.chunk(elem.universe(), elem.now(), elem.uuid(), true, elem.metaClass(), null);
+            KMemoryChunk raw = ((AbstractKObject) elem)._manager.closestChunk(elem.universe(), elem.now(), elem.uuid(), elem.metaClass(), ((AbstractKObject)elem).previousResolved() );
             if (raw != null) {
                 builder.append(JsonRaw.encode(raw, elem.uuid(), elem.metaClass(), isRoot));
             }

@@ -48,7 +48,7 @@ public abstract class AbstractKObject implements KObject {
         this._previousResolveds[TIME_PREVIOUS_INDEX] = p_actualTime;
     }
 
-    public long[] previousResolved(){
+    public long[] previousResolved() {
         return this._previousResolveds;
     }
 
@@ -87,7 +87,7 @@ public abstract class AbstractKObject implements KObject {
     @Override
     public void delete(KCallback cb) {
         final KObject selfPointer = this;
-        KMemoryChunk rawPayload = _manager.chunk(_universe, _time, _uuid, false, _metaClass, null);
+        KMemoryChunk rawPayload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
         if (rawPayload == null) {
             if (cb != null) {
                 cb.on(new Exception(OUT_OF_CACHE_MSG));
@@ -201,7 +201,7 @@ public abstract class AbstractKObject implements KObject {
             if (metaReference.single()) {
                 internal_mutate(KActionType.SET, metaReference, param, setOpposite);
             } else {
-                KMemoryChunk raw = _manager.chunk(_universe, _time, _uuid, false, _metaClass, null);
+                KMemoryChunk raw = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
                 if (raw != null) {
                     if (raw.addLongToArray(metaReference.index(), param.uuid(), _metaClass)) {
                         if (setOpposite) {
@@ -217,7 +217,7 @@ public abstract class AbstractKObject implements KObject {
                 if (param == null) {
                     internal_mutate(KActionType.REMOVE, metaReference, null, setOpposite);
                 } else {
-                    KMemoryChunk payload = _manager.chunk(_universe, _time, _uuid, false, _metaClass, null);
+                    KMemoryChunk payload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
                     long[] previous = payload.getLongArray(metaReference.index(), _metaClass);
                     //override
                     long[] singleValue = new long[1];
@@ -243,7 +243,7 @@ public abstract class AbstractKObject implements KObject {
             }
         } else if (actionType.equals(KActionType.REMOVE)) {
             if (metaReference.single()) {
-                KMemoryChunk raw = _manager.chunk(_universe, _time, _uuid, false, _metaClass, null);
+                KMemoryChunk raw = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
                 long[] previousKid = raw.getLongArray(metaReference.index(), _metaClass);
                 raw.setPrimitiveType(metaReference.index(), null, _metaClass);
                 if (setOpposite) {
@@ -264,7 +264,7 @@ public abstract class AbstractKObject implements KObject {
                     }
                 }
             } else {
-                KMemoryChunk payload = _manager.chunk(_universe, _time, _uuid, false, _metaClass, null);
+                KMemoryChunk payload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
                 if (payload != null) {
                     if (payload.removeLongToArray(metaReference.index(), param.uuid(), _metaClass)) {
                         if (setOpposite) {
@@ -281,7 +281,7 @@ public abstract class AbstractKObject implements KObject {
         if (transposed == null) {
             throw new RuntimeException("Bad KMF usage, the attribute named " + p_metaReference.metaName() + " is not part of " + metaClass().metaName());
         } else {
-            KMemoryChunk raw = _manager.chunk(_universe, _time, _uuid, true, _metaClass, null);
+            KMemoryChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
             if (raw != null) {
                 Object ref = raw.getPrimitiveType(transposed.index(), _metaClass);
                 if (ref == null) {
@@ -307,7 +307,7 @@ public abstract class AbstractKObject implements KObject {
         if (transposed == null) {
             throw new RuntimeException("Bad KMF usage, the reference named " + p_metaReference.metaName() + " is not part of " + metaClass().metaName());
         } else {
-            KMemoryChunk raw = _manager.chunk(_universe, _time, _uuid, true, _metaClass, null);
+            KMemoryChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
             if (raw == null) {
                 cb.on(new KObject[0]);
             } else {
@@ -327,7 +327,7 @@ public abstract class AbstractKObject implements KObject {
         if (transposed == null) {
             throw new RuntimeException("Bad KMF usage, the reference named " + p_refName + " is not part of " + metaClass().metaName());
         } else {
-            KMemoryChunk raw = _manager.chunk(_universe, _time, _uuid, true, _metaClass, null);
+            KMemoryChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
             if (raw == null) {
                 return new long[0];
             } else {
@@ -372,7 +372,7 @@ public abstract class AbstractKObject implements KObject {
         for (int i = 0; i < metaElements.length; i++) {
             if (metaElements[i] != null && metaElements[i].metaType() == MetaType.REFERENCE) {
                 final KMetaReference reference = (KMetaReference) metaElements[i];
-                KMemoryChunk raw = _manager.chunk(_universe, _time, _uuid, true, _metaClass, null);
+                KMemoryChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
                 if (raw != null) {
                     long[] idArr = raw.getLongArray(reference.index(), _metaClass);
                     if (idArr != null) {
@@ -469,7 +469,7 @@ public abstract class AbstractKObject implements KObject {
         builder.append(_time);
         builder.append(",\"uuid\":");
         builder.append(_uuid);
-        KMemoryChunk raw = _manager.chunk(_universe, _time, _uuid, true, _metaClass, null);
+        KMemoryChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
         if (raw != null) {
             builder.append(",\"data\":");
             builder.append(raw.toJSON(_manager.model().metaModel()));
@@ -568,7 +568,7 @@ public abstract class AbstractKObject implements KObject {
     @Override
     public KMetaReference[] referencesWith(KObject o) {
         if (Checker.isDefined(o)) {
-            KMemoryChunk raw = _manager.chunk(_universe, _time, _uuid, true, _metaClass, null);
+            KMemoryChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
             if (raw != null) {
                 KMeta[] metaElements = metaClass().metaElements();
                 List<KMetaReference> selected = new ArrayList<KMetaReference>();
