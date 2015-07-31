@@ -168,41 +168,14 @@ public class HeapMemoryStorage implements KMemoryStorage {
         return -1;
     }
 
-    // @Override
-    public KContentKey[] dirtyKeys() {
-        int nbDirties = 0;
-        InternalState internalState = _state;
-        for (int i = 0; i < internalState.elementDataSize; i++) {
-            if (internalState.values[i] != null) {
-                if (internalState.values[i].isDirty()) {
-                    nbDirties++;
-                }
-            }
-        }
-        KContentKey[] collectedDirties = new KContentKey[nbDirties];
-        nbDirties = 0;
-        for (int i = 0; i < internalState.elementDataSize; i++) {
-            if (internalState.values[i] != null) {
-                if (internalState.values[i].isDirty()) {
-                    collectedDirties[nbDirties] = new KContentKey(internalState.elementK3[i * 3], internalState.elementK3[(i * 3) + 1], internalState.elementK3[(i * 3) + 2]);
-                    nbDirties++;
-                }
-            }
-        }
-        return collectedDirties;
-    }
-
-    @Override
-    public void clean(KMetaModel metaModel) {
-        //common_clean_monitor(null, metaModel);
-    }
-
     @Override
     public final int size() {
         return this._elementCount;
     }
 
-    private void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
+    @Override
+    public void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
+        //TODO warning this is not thread safe!, all must be enqueue while this remove
         InternalState internalState = _state;
         int hash = (int) (universe ^ time ^ obj);
         int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
@@ -235,6 +208,11 @@ public class HeapMemoryStorage implements KMemoryStorage {
         _state.values[m] = null;
         this._elementCount--;
         this._droppedCount++;
+
+        if (this._droppedCount > this._threshold * this._loadFactor) {
+            compact();
+        }
+
     }
 
     private void compact() {

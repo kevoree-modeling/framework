@@ -14,10 +14,11 @@ public interface KMemoryStorage {
 
     void clear(KMetaModel metaModel);
 
-    void clean(KMetaModel metaModel);
+    void delete(KMetaModel metaModel);
+
+    void remove(long universe, long time, long obj, KMetaModel metaModel);
 
     int size();
 
-    void delete(KMetaModel metaModel);
 
 }
