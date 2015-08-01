@@ -194,6 +194,6 @@ public class ArrayUniverseOrderMap extends ArrayLongLongMap implements KUniverse
         // assert next == null;
         do {
             _next = list.get();
-        } while (list.compareAndSet(_next, this));
+        } while (!list.compareAndSet(_next, this));
     }
 }

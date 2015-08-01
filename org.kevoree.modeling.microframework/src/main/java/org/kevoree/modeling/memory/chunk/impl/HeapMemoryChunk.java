@@ -23,7 +23,7 @@ public class HeapMemoryChunk implements KMemoryChunk {
 
     private boolean[] _modifiedIndexes = null;
 
-    private AtomicLong _flags;
+    private AtomicLong _flags = new AtomicLong();
 
     private KMemoryElement _next;
 
@@ -67,7 +67,7 @@ public class HeapMemoryChunk implements KMemoryChunk {
         do {
             val = _flags.get();
             nval = val & ~bitsToDisable | bitsToEnable;
-        } while (_flags.compareAndSet(val, nval));
+        } while (!_flags.compareAndSet(val, nval));
     }
 
     @Override
@@ -75,7 +75,7 @@ public class HeapMemoryChunk implements KMemoryChunk {
         // assert next == null;
         do {
             _next = list.get();
-        } while (list.compareAndSet(_next, this));
+        } while (!list.compareAndSet(_next, this));
     }
 
     @Override

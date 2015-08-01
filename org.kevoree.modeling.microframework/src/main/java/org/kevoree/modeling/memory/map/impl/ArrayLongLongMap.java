@@ -267,7 +267,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         do {
             val = _flags.get();
             nval = val & ~bitsToDisable | bitsToEnable;
-        } while (_flags.compareAndSet(val, nval));
+        } while (!_flags.compareAndSet(val, nval));
     }
 }
 

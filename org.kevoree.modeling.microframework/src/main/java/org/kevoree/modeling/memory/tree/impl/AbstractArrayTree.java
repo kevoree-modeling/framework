@@ -29,7 +29,7 @@ public abstract class AbstractArrayTree {
     private volatile int _root_index = -1;
     private volatile int _size = 0;
     private volatile InternalState state;
-    private AtomicLong _flags;
+    private AtomicLong _flags = new AtomicLong();
 
     public AbstractArrayTree() {
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
@@ -489,7 +489,7 @@ public abstract class AbstractArrayTree {
         do {
             val = _flags.get();
             nval = val & ~bitsToDisable | bitsToEnable;
-        } while (_flags.compareAndSet(val, nval));
+        } while (!_flags.compareAndSet(val, nval));
     }
 
     public final int counter() {
