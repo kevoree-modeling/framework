@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.map.KUniverseOrderMap;
+import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.tree.KLongLongTree;
 import org.kevoree.modeling.memory.tree.KLongTree;
 
@@ -17,10 +17,10 @@ public abstract class BaseKMemoryStorageTest {
         KMemoryStorage storage = createKMemoryStorage();
 
         // KUniverseOrderMap
-        KUniverseOrderMap map = (KUniverseOrderMap) storage.create(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KMemoryElementTypes.LONG_LONG_MAP);
+        KLongLongMap map = (KLongLongMap) storage.create(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KMemoryElementTypes.LONG_LONG_MAP);
         map.put(0, 0);
         map.put(1, 1);
-        KUniverseOrderMap retrievedMap = (KUniverseOrderMap) storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        KLongLongMap retrievedMap = (KLongLongMap) storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         Assert.assertEquals(0, retrievedMap.get(0));
         Assert.assertEquals(1, retrievedMap.get(1));
         Assert.assertEquals(map.size(), retrievedMap.size());

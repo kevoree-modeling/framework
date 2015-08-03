@@ -5,6 +5,7 @@ import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.chunk.impl.OffHeapMemoryChunk;
+import org.kevoree.modeling.memory.map.impl.OffHeapLongLongMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.tree.impl.OffHeapLongLongTree;
@@ -195,7 +196,7 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
         return -1;
     }
 
-   @Override
+    @Override
     public final KMemoryElement get(long universe, long time, long obj) {
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
@@ -244,7 +245,7 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
                 return new OffHeapLongLongTree();
 
             case KMemoryElementTypes.LONG_LONG_MAP:
-                return new OffHeapUniverseOrderMap();
+                return new OffHeapLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         }
         return null;
     }
