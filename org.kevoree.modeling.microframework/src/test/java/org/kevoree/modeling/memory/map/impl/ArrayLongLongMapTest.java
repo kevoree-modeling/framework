@@ -7,7 +7,7 @@ import org.kevoree.modeling.memory.map.KLongLongMap;
 public class ArrayLongLongMapTest extends BaseKLongLongMapTest {
 
     @Override
-    public KLongLongMap createKUniverseOrderMap() {
+    public KLongLongMap createKLongLongMap() {
         return new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 

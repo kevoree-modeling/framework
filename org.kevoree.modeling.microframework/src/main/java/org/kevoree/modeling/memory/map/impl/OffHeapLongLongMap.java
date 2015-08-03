@@ -165,6 +165,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapMemoryElement {
 
         long bytes = BASE_SEGMENT_LEN + length * BACK_ELEM_ENTRY_LEN;
         long newAddress = UNSAFE.allocateMemory(bytes);
+        UNSAFE.setMemory(newAddress, bytes, (byte) 0);
 
         long elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
         UNSAFE.copyMemory(_start_address, newAddress, BASE_SEGMENT_LEN + elementDataSize * BACK_ELEM_ENTRY_LEN);
@@ -397,11 +398,11 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapMemoryElement {
         UNSAFE.putByte(_start_address + OFFSET_STARTADDRESS_DIRTY, (byte) 1);
     }
 
+
     /* warning: this method is not thread safe */
     @Override
     public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
         _metaClassIndex = metaClassIndex;
-
         if (payload == null || payload.length() == 0) {
             return;
         }
@@ -422,7 +423,17 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapMemoryElement {
             cursor++;
         }
         int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
-        rehashCapacity(nbElement);
+        //reset the map
+        int length = (nbElement == 0 ? 1 : nbElement << 1);
+
+        long newAddress = UNSAFE.allocateMemory(BASE_SEGMENT_LEN + length * BACK_ELEM_ENTRY_LEN);
+        UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, length);
+        for (int i = 0; i < length; i++) {
+            internal_setNext(newAddress, i, -1);
+            internal_setHash(newAddress, i, -1);
+        }
+
+        //setPrimitiveType value for all
         while (cursor < payload.length()) {
             cursor++;
             int beginChunk = cursor;
@@ -435,30 +446,120 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapMemoryElement {
             }
             long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
             long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
-            int index = (((int) (loopKey)) & 0x7FFFFFFF) % UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+            int index = (((int) (loopKey)) & 0x7FFFFFFF) % UNSAFE.getInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
             //insert K/V
             int newIndex = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
-            internal_setKey(_start_address, newIndex, loopKey);
-            internal_setValue(_start_address, newIndex, loopVal);
-            int currentHashedIndex = internal_getHash(_start_address, index);
-            if (currentHashedIndex != -1) {
-                internal_setNext(_start_address, newIndex, currentHashedIndex);
-            } else {
-                internal_setNext(_start_address, newIndex, -2);//special char to tag used values
-            }
-            internal_setHash(_start_address, index, newIndex);
+            internal_setKey(newAddress, newIndex, loopKey);
+            internal_setValue(newAddress, newIndex, loopVal);
 
-            // increase element count
+            int currentHashedIndex = internal_getHash(newAddress, index);
+            if (currentHashedIndex != -1) {
+                internal_setNext(newAddress, newIndex, currentHashedIndex);
+            } else {
+                internal_setNext(newAddress, newIndex, -2);
+            }
+            internal_setHash(newAddress, index, newIndex);
+
             int oldElementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
             int elementCount = oldElementCount + 1;
             UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
         }
+
+        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, nbElement);
+        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
+
+        int newElemDataSize = UNSAFE.getInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, newElemDataSize);
+        _start_address = UNSAFE.reallocateMemory(_start_address, BASE_SEGMENT_LEN + newElemDataSize * BACK_ELEM_ENTRY_LEN);
+        UNSAFE.copyMemory(newAddress + OFFSET_STARTADDRESS_BACK, _start_address + OFFSET_STARTADDRESS_BACK, newElemDataSize * BACK_ELEM_ENTRY_LEN);
+        this.threshold = (int) (length * loadFactor);
+
+        UNSAFE.freeMemory(newAddress);
+
     }
+
+
+//    /* warning: this method is not thread safe */
+//    @Override
+//    public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
+//        _metaClassIndex = metaClassIndex;
+//
+//        if (payload == null || payload.length() == 0) {
+//            return;
+//        }
+//        int initPos = 0;
+//        int cursor = 0;
+//        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '/') {
+//            cursor++;
+//        }
+//        if (cursor >= payload.length()) {
+//            return;
+//        }
+//        if (payload.charAt(cursor) == ',') {//className to parse
+//            _metaClassIndex = metaModel.metaClassByName(payload.substring(initPos, cursor)).index();
+//            cursor++;
+//            initPos = cursor;
+//        }
+//        while (cursor < payload.length() && payload.charAt(cursor) != '/') {
+//            cursor++;
+//        }
+//        int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
+//
+//        int length = (nbElement == 0 ? 1 : nbElement << 1);
+//
+//        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+//        long bytes = BASE_SEGMENT_LEN + elementDataSize * BACK_ELEM_ENTRY_LEN;
+//        long newAddress = UNSAFE.allocateMemory(bytes);
+//        UNSAFE.setMemory(newAddress, bytes, (byte) 0);
+//        UNSAFE.copyMemory(_start_address, newAddress, BASE_SEGMENT_LEN + nbElement * BACK_ELEM_ENTRY_LEN);
+//
+//        UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, length);
+//
+//        //setPrimitiveType value for all
+//        while (cursor < payload.length()) {
+//            cursor++;
+//            int beginChunk = cursor;
+//            while (cursor < payload.length() && payload.charAt(cursor) != ':') {
+//                cursor++;
+//            }
+//            int middleChunk = cursor;
+//            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+//                cursor++;
+//            }
+//            long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
+//            long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
+//            int index = (((int) (loopKey)) & 0x7FFFFFFF) % UNSAFE.getInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+//            //insert K/V
+//            int newIndex = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+//
+//            internal_setKey(newAddress, newIndex, loopKey);
+//            internal_setValue(newAddress, newIndex, loopVal);
+//            int currentHashedIndex = internal_getHash(newAddress, index);
+//            if (currentHashedIndex != -1) {
+//                internal_setNext(newAddress, newIndex, currentHashedIndex);
+//            } else {
+//                internal_setNext(newAddress, newIndex, -2);//special char to tag used values
+//            }
+//            internal_setHash(newAddress, index, newIndex);
+//
+//            // increase element count
+//            int oldElementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+//            int elementCount = oldElementCount + 1;
+//            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
+//        }
+//
+//        UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_COUNT, nbElement);
+//        UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
+//        long oldAddress = _start_address;
+//        _start_address = newAddress;
+//        this.threshold = (int) (length * loadFactor);
+//
+//        UNSAFE.freeMemory(oldAddress);
+//    }
 
     @Override
     public String serialize(KMetaModel metaModel) {
         int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
-
         final StringBuilder buffer = new StringBuilder(elementCount * 8);//roughly approximate init size
         if (_metaClassIndex != -1) {
             buffer.append(metaModel.metaClass(_metaClassIndex).metaName());
@@ -467,9 +568,9 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapMemoryElement {
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.append('/');
         boolean isFirst = true;
-
         int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
         for (int i = 0; i < elementDataSize; i++) {
+
             if (internal_getNext(_start_address, i) != -1) { //there is a real value
                 long loopKey = internal_getKey(_start_address, i);
                 long loopValue = internal_getValue(_start_address, i);
