@@ -399,11 +399,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public void lookupAllObjectsTimes(long universe, long[] times, long[] uuids, KCallback<KObject[]> callback) {
-        this._scheduler.dispatch(this._resolver.lookupAllObjectsTimes(universe, times, uuids, callback));
-    }
-
-    @Override
     public void saveAll(KCallback<Throwable> callback) {
         save(null, callback);
     }

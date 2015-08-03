@@ -31,7 +31,7 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
-    public Runnable lookup(long universe, long time, long uuid, KCallback<KObject> callback) {
+    public final Runnable lookup(long universe, long time, long uuid, KCallback<KObject> callback) {
         return new Runnable() {
             @Override
             public void run() {
@@ -91,20 +91,8 @@ public class DistortedTimeResolver implements KResolver {
         };
     }
 
-        /*
     @Override
-    public void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
-        this._scheduler.dispatch(new LookupAllTimesRunnable(universe, times, uuid, callback, this));
-    }
-
-    @Override
-    public void lookupAllObjectsTimes(long universe, long[] times, long[] uuid, KCallback<KObject[]> callback) {
-        this._scheduler.dispatch(new LookupAllObjectsTimesRunnable(universe, times, uuid, callback, this));
-    }
-*/
-
-    @Override
-    public Runnable lookupAllObjects(long universe, long time, long[] uuids, KCallback<KObject[]> callback) {
+    public final Runnable lookupAllObjects(long universe, long time, long[] uuids, KCallback<KObject[]> callback) {
         return new Runnable() {
             @Override
             public void run() {
@@ -187,7 +175,7 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
-    public Runnable lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
+    public final Runnable lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         return new Runnable() {
             @Override
             public void run() {
@@ -289,11 +277,6 @@ public class DistortedTimeResolver implements KResolver {
                 });
             }
         };
-    }
-
-    @Override
-    public Runnable lookupAllObjectsTimes(long universe, long[] time, long[] uuid, KCallback<KObject[]> callback) {
-        return null;
     }
 
     @Override

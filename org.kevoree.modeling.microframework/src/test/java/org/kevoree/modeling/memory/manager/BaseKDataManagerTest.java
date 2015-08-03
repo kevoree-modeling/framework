@@ -47,6 +47,7 @@ public class BaseKDataManagerTest {
                                 }
                             }
                         });
+                        /*
                         origin.manager().lookupAllObjectsTimes(origin.universe(), times, new long[]{origin.uuid()}, new KCallback<KObject[]>() {
                             @Override
                             public void on(KObject[] kObjects) {
@@ -55,7 +56,7 @@ public class BaseKDataManagerTest {
                                     Assert.assertEquals("{\"universe\":0,\"time\":" + times[i] + ",\"uuid\":1,\"data\":{\"name\":\"Sensor#1\",\"value\":" + (double) lastVal + "}}", kObjects[i].toJSON());
                                 }
                             }
-                        });
+                        });*/
                     }
                 });
             }
