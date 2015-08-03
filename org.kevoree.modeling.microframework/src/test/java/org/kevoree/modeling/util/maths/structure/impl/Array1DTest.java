@@ -28,7 +28,7 @@ public class Array1DTest {
                 return new double[0][];
             }
         });
-        KObjectChunk segment = new HeapObjectChunk();
+        KObjectChunk segment = new HeapObjectChunk(null);
         segment.init(null, mm, mc.index());
         int arraySize = 5;
         //allocate for 5 elem

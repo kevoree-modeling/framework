@@ -11,6 +11,6 @@ public class ArrayLongLongTreeTest extends BaseKLongLongTreeTest {
 
     @Override
     public KLongLongTree createKLongLongTree() {
-        return new ArrayLongLongTree();
+        return new ArrayLongLongTree(null);
     }
 }

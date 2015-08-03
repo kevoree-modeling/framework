@@ -15,7 +15,7 @@ public class UniverseResolutionTest {
     public void test() {
 
         //create a universeTree
-        KLongLongMap globalUniverse = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        KLongLongMap globalUniverse = new ArrayLongLongMap(null);
         //root
         globalUniverse.put(0, 0);
         //branch 0 -> 1 -> 3
@@ -25,7 +25,7 @@ public class UniverseResolutionTest {
         globalUniverse.put(2, 0);
         globalUniverse.put(4, 2);
 
-        KLongLongMap objectUniverse = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        KLongLongMap objectUniverse = new ArrayLongLongMap(null);
         objectUniverse.put(0, 0);
         objectUniverse.put(3, 10);
         objectUniverse.put(2, 8);
@@ -51,7 +51,7 @@ public class UniverseResolutionTest {
     public void testRange() {
 
         //create a universeTree
-        KLongLongMap globalUniverse = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        KLongLongMap globalUniverse = new ArrayLongLongMap(null);
         //root
         globalUniverse.put(0, 0);
         //branch 0 -> 1 -> 3
@@ -61,7 +61,7 @@ public class UniverseResolutionTest {
         globalUniverse.put(2, 0);
         globalUniverse.put(4, 2);
 
-        KLongLongMap objectUniverse = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        KLongLongMap objectUniverse = new ArrayLongLongMap(null);
         objectUniverse.put(0, 0);
         objectUniverse.put(3, 10);
         objectUniverse.put(2, 8);
