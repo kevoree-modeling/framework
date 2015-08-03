@@ -4,6 +4,7 @@ import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.impl.*;
+import org.kevoree.modeling.util.maths.Base64;
 
 public class KMessageLoader {
 
@@ -47,10 +48,10 @@ public class KMessageLoader {
                 Events eventsMessage = null;
                 if (objectReader.get(KEYS_NAME) != null) {
                     String[] objIdsRaw = objectReader.getAsStringArray(KEYS_NAME);
-                    KContentKey[] keys = new KContentKey[objIdsRaw.length];
+                    long[] keys = new long[objIdsRaw.length];
                     for (int i = 0; i < objIdsRaw.length; i++) {
                         try {
-                            keys[i] = KContentKey.create(objIdsRaw[i]);
+                            keys[i] = Base64.decodeToLong(objIdsRaw[i]);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -65,9 +66,9 @@ public class KMessageLoader {
                 }
                 if (objectReader.get(KEYS_NAME) != null) {
                     String[] metaInt = objectReader.getAsStringArray(KEYS_NAME);
-                    KContentKey[] keys = new KContentKey[metaInt.length];
+                    long[] keys = new long[metaInt.length];
                     for (int i = 0; i < metaInt.length; i++) {
-                        keys[i] = KContentKey.create(metaInt[i]);
+                        keys[i] = Base64.decodeToLong(metaInt[i]);
                     }
                     getKeysRequest.keys = keys;
                 }
@@ -99,11 +100,13 @@ public class KMessageLoader {
                 if (objectReader.get(VALUES_NAME) != null) {
                     toFlatValues = objectReader.getAsStringArray(VALUES_NAME);
                 }
-                if (toFlatKeys != null && toFlatValues != null && toFlatKeys.length == toFlatValues.length) {
-                    putRequest.keys = new KContentKey[toFlatKeys.length];
-                    putRequest.values = new String[toFlatKeys.length];
+                if (toFlatKeys != null && toFlatValues != null) {
+                    putRequest.keys = new long[toFlatKeys.length];
+                    putRequest.values = new String[toFlatValues.length];
                     for (int i = 0; i < toFlatKeys.length; i++) {
-                        putRequest.keys[i] = KContentKey.create(toFlatKeys[i]);
+                        putRequest.keys[i] = Base64.decodeToLong(toFlatKeys[i]);
+                    }
+                    for (int i = 0; i < toFlatValues.length; i++) {
                         putRequest.values[i] = JsonString.unescape(toFlatValues[i]);
                     }
                 }
@@ -115,12 +118,13 @@ public class KMessageLoader {
                 }
                 return putResult;
             } else if (parsedType == OPERATION_CALL_TYPE) {
+                /*
                 OperationCallMessage callMessage = new OperationCallMessage();
                 if (objectReader.get(ID_NAME) != null) {
                     callMessage.id = Long.parseLong(objectReader.get(ID_NAME).toString());
                 }
                 if (objectReader.get(KEY_NAME) != null) {
-                    callMessage.key = KContentKey.create(objectReader.get(KEY_NAME).toString());
+                    callMessage.key =  KContentKey.create(objectReader.get(KEY_NAME).toString());
                 }
                 if (objectReader.get(CLASS_IDX_NAME) != null) {
                     callMessage.classIndex = Integer.parseInt(objectReader.get(CLASS_IDX_NAME).toString());
@@ -136,7 +140,8 @@ public class KMessageLoader {
                     }
                     callMessage.params = toFlat;
                 }
-                return callMessage;
+                return callMessage;*/
+                return null;
             } else if (parsedType == OPERATION_RESULT_TYPE) {
                 OperationResultMessage resultMessage = new OperationResultMessage();
                 if (objectReader.get(ID_NAME) != null) {

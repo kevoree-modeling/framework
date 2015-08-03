@@ -1,13 +1,13 @@
 package org.kevoree.modeling.message.impl;
 
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.KMessageLoader;
+import org.kevoree.modeling.util.maths.Base64;
 
 public class PutRequest implements KMessage {
 
-    public KContentKey[] keys;
+    public long[] keys;
 
     public String[] values;
 
@@ -27,13 +27,13 @@ public class PutRequest implements KMessage {
                     buffer.append(",");
                 }
                 buffer.append("\"");
-                buffer.append(keys[i]);
+                Base64.encodeLongToBuffer(keys[i], buffer);
                 buffer.append("\"");
             }
             buffer.append("]\n");
             buffer.append(",\"");
             buffer.append(KMessageLoader.VALUES_NAME).append("\":[");
-            for (int i = 0; i < keys.length; i++) {
+            for (int i = 0; i < values.length; i++) {
                 if (i != 0) {
                     buffer.append(",");
                 }

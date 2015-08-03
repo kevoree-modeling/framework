@@ -82,10 +82,9 @@ public class HashOperationManager implements KOperationManager {
         for (int i = 0; i < param.length; i++) {
             stringParams[i] = param[i].toString();
         }
-        KContentKey contentKey = new KContentKey(source.universe(), source.now(), source.uuid());
         OperationCallMessage operationCall = new OperationCallMessage();
         operationCall.id = nextKey();
-        operationCall.key = contentKey;
+        operationCall.key = new long[]{source.universe(), source.now(), source.uuid()};
         operationCall.classIndex = source.metaClass().index();
         operationCall.opIndex = operation.index();
         operationCall.params = stringParams;
@@ -111,19 +110,21 @@ public class HashOperationManager implements KOperationManager {
             }
         } else if (operationEvent.type() == KMessageLoader.OPERATION_CALL_TYPE) {
             final OperationCallMessage operationCall = (OperationCallMessage) operationEvent;
-            KContentKey sourceKey = operationCall.key;
-            final KOperation operationCore = searchOperation(sourceKey.obj, operationCall.classIndex, operationCall.opIndex);
+            long[] sourceKey = operationCall.key;
+            final KOperation operationCore = searchOperation(sourceKey[2], operationCall.classIndex, operationCall.opIndex);
             if (operationCore != null) {
-                KView view = _manager.model().universe(sourceKey.universe).time(sourceKey.time);
-                view.lookup(sourceKey.obj, new KCallback<KObject>() {
+                KView view = _manager.model().universe(sourceKey[0]).time(sourceKey[1]);
+                view.lookup(sourceKey[2], new KCallback<KObject>() {
                     public void on(KObject kObject) {
                         if (kObject != null) {
                             operationCore.on(kObject, operationCall.params, new KCallback<Object>() {
                                 public void on(Object o) {
+                                    /*
                                     OperationResultMessage operationResultMessage = new OperationResultMessage();
                                     operationResultMessage.key = operationCall.key;
                                     operationResultMessage.id = operationCall.id;
                                     operationResultMessage.value = o.toString();
+                                    */
                                     //_manager.cdn().send(operationResultMessage);
                                 }
                             });

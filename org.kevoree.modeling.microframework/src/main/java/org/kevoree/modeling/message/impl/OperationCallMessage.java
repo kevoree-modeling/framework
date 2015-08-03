@@ -1,6 +1,5 @@
 package org.kevoree.modeling.message.impl;
 
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.KMessageLoader;
@@ -11,7 +10,7 @@ public class OperationCallMessage implements KMessage {
     public int classIndex;
     public int opIndex;
     public String[] params;
-    public KContentKey key;
+    public long[] key;
 
     @Override
     public String json() {

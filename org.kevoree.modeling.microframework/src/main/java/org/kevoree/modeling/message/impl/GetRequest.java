@@ -1,14 +1,14 @@
 package org.kevoree.modeling.message.impl;
 
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.KMessageLoader;
+import org.kevoree.modeling.util.maths.Base64;
 
 public class GetRequest implements KMessage {
 
     public long id;
 
-    public KContentKey[] keys;
+    public long[] keys;
 
     @Override
     public String json() {
@@ -25,7 +25,7 @@ public class GetRequest implements KMessage {
                     buffer.append(",");
                 }
                 buffer.append("\"");
-                buffer.append(keys[i].toString());
+                Base64.encodeLongToBuffer(keys[i], buffer);
                 buffer.append("\"");
             }
             buffer.append("]\n");

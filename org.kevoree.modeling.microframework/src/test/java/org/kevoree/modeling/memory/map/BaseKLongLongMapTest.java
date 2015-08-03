@@ -45,7 +45,7 @@ public abstract class BaseKLongLongMapTest {
             map.put(i, i);
         }
         Assert.assertEquals(map.size(), 10);
-        String saved = map.serialize(null);
+        String saved = map.serialize(metaModel);
         Assert.assertEquals(saved, "org.kevoree.modeling.Hello,U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
         map.init(saved, metaModel, metaClass.index()); //init again and simulate a reload
         saved = map.serialize(metaModel);
