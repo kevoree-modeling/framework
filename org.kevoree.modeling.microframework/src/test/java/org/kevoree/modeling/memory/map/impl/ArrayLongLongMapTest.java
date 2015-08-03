@@ -1,11 +1,11 @@
 package org.kevoree.modeling.memory.map.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.map.BaseKUniverseOrderMapTest;
+import org.kevoree.modeling.memory.map.BaseKLongLongMapTest;
 import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 
-public class ArrayUniverseOrderMapTest extends BaseKUniverseOrderMapTest {
+public class ArrayLongLongMapTest extends BaseKLongLongMapTest {
 
     @Override
     public KLongLongMap createKUniverseOrderMap() {

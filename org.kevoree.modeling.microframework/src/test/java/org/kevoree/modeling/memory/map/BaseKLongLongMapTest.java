@@ -6,7 +6,7 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
-public abstract class BaseKUniverseOrderMapTest {
+public abstract class BaseKLongLongMapTest {
 
     private static final int SIZE = 100;
 
