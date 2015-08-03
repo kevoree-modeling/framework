@@ -7,12 +7,12 @@ import org.kevoree.modeling.KConfig;
 public abstract class BaseKLongLongHashMapTest {
     private static final int SIZE = 20;
 
-    public abstract KLongLongMap createKLongLongHashMap(int p_initalCapacity, float p_loadFactor);
+    public abstract KLongLongMap createKLongLongMap(int p_initalCapacity, float p_loadFactor);
 
     @Test
     public void test() {
 
-        KLongLongMap map = createKLongLongHashMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        KLongLongMap map = createKLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         for (long i = 0; i < SIZE; i++) {
             map.put(i, i);
         }
