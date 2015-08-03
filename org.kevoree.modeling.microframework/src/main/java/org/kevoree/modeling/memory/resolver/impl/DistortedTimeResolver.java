@@ -56,6 +56,13 @@ public class DistortedTimeResolver implements KResolver {
                                                     callback.on(null);
                                                 } else {
                                                     long closestTime = ((KLongTree) theObjectTimeTreeElement).previousOrEqual(time);
+                                                    if(closestTime == KConfig.NULL_LONG){
+                                                        _cache.unmarkMemoryElement(theObjectTimeTreeElement);
+                                                        _cache.unmarkMemoryElement(theObjectUniverseOrderElement);
+                                                        _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                                        callback.on(null);
+                                                        return;
+                                                    }
                                                     getOrLoadAndMark(closestUniverse, closestTime, uuid, new KCallback<KMemoryElement>() {
                                                         @Override
                                                         public void on(KMemoryElement theObjectChunk) {
@@ -143,10 +150,7 @@ public class DistortedTimeResolver implements KResolver {
                                                     tempObjectChunkKeys[i * 3 + 1] = closestTime;
                                                     tempObjectChunkKeys[i * 3 + 2] = uuids[i];
                                                 } else {
-                                                    //Key that create a KeyMiss
-                                                    tempObjectChunkKeys[i * 3] = KConfig.END_OF_TIME;
-                                                    tempObjectChunkKeys[i * 3 + 1] = KConfig.END_OF_TIME;
-                                                    tempObjectChunkKeys[i * 3 + 2] = KConfig.END_OF_TIME;
+                                                    System.arraycopy(KContentKey.NULL_KEY, 0, tempObjectChunkKeys, (i * 3), 3);
                                                 }
                                             }
                                             getOrLoadAndMarkAll(tempObjectChunkKeys, new KCallback<KMemoryElement[]>() {
@@ -336,6 +340,10 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     public final void getOrLoadAndMark(long universe, long time, long uuid, final KCallback<KMemoryElement> callback) {
+        if (universe == KContentKey.NULL_KEY[0] && time == KContentKey.NULL_KEY[1] && uuid == KContentKey.NULL_KEY[2]) {
+            callback.on(null);
+            return;
+        }
         KMemoryElement cached = _cache.getAndMark(universe, time, uuid);
         if (cached != null) {
             callback.on(cached);
@@ -355,10 +363,17 @@ public class DistortedTimeResolver implements KResolver {
         int nbElem = 0;
         final KMemoryElement[] result = new KMemoryElement[nbKeys];
         for (int i = 0; i < nbKeys; i++) {
-            result[i] = _cache.getAndMark(keys[i * KEYS_SIZE], keys[i * KEYS_SIZE + 1], keys[i * KEYS_SIZE + 2]);
-            if (result[i] == null) {
-                toLoadIndexes[i] = true;
-                nbElem++;
+            if (keys[i * KEYS_SIZE] == KContentKey.NULL_KEY[0] && keys[i * KEYS_SIZE + 1] == KContentKey.NULL_KEY[1] && keys[i * KEYS_SIZE + 2] == KContentKey.NULL_KEY[2]) {
+                toLoadIndexes[i] = false;
+                result[i] = null;
+            } else {
+                result[i] = _cache.getAndMark(keys[i * KEYS_SIZE], keys[i * KEYS_SIZE + 1], keys[i * KEYS_SIZE + 2]);
+                if (result[i] == null) {
+                    toLoadIndexes[i] = true;
+                    nbElem++;
+                } else {
+                    toLoadIndexes[i] = false;
+                }
             }
         }
         if (nbElem == 0) {
@@ -421,7 +436,7 @@ public class DistortedTimeResolver implements KResolver {
                                 if (resolvedCurrentRootUUID == KConfig.NULL_LONG) {
                                     callback.on(null);
                                 } else {
-                                    lookup(universe, time, resolvedCurrentRootUUID, callback);
+                                    _manager.lookup(universe, time, resolvedCurrentRootUUID, callback);
                                 }
                             }
                         });

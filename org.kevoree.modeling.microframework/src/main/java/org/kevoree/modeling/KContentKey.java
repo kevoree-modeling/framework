@@ -4,6 +4,8 @@ import org.kevoree.modeling.util.maths.Base64;
 
 public class KContentKey {
 
+    public static final long[] NULL_KEY = new long[]{KConfig.END_OF_TIME, KConfig.END_OF_TIME, KConfig.END_OF_TIME};
+
     public static String toString(long[] keys, int keyIndex) {
         StringBuilder buffer = new StringBuilder();
         int offset = keyIndex * 3;
@@ -34,14 +36,6 @@ public class KContentKey {
         obj = p_objID;
     }
 
-    public static KContentKey createUniverseTree(long p_objectID) {
-        return new KContentKey(KConfig.NULL_LONG, KConfig.NULL_LONG, p_objectID);
-    }
-
-    public static KContentKey createTimeTree(long p_universeID, long p_objectID) {
-        return new KContentKey(p_universeID, KConfig.NULL_LONG, p_objectID);
-    }
-
     public static KContentKey createObject(long p_universeID, long p_quantaID, long p_objectID) {
         return new KContentKey(p_universeID, p_quantaID, p_objectID);
     }
@@ -54,21 +48,10 @@ public class KContentKey {
         return new KContentKey(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME);
     }
 
-    public static KContentKey createRootTimeTree(long universeID) {
-        return new KContentKey(universeID, KConfig.NULL_LONG, KConfig.END_OF_TIME);
-    }
-
     public static KContentKey createLastPrefix() {
         return new KContentKey(KConfig.END_OF_TIME, KConfig.NULL_LONG, KConfig.NULL_LONG);
     }
 
-    public static KContentKey createLastObjectIndexFromPrefix(Short prefix) {
-        return new KContentKey(KConfig.END_OF_TIME, KConfig.NULL_LONG, prefix);
-    }
-
-    public static KContentKey createLastUniverseIndexFromPrefix(Short prefix) {
-        return new KContentKey(KConfig.BEGINNING_OF_TIME, KConfig.NULL_LONG, prefix);
-    }
 
     public static KContentKey create(String payload) {
         if (payload == null || payload.length() == 0) {
