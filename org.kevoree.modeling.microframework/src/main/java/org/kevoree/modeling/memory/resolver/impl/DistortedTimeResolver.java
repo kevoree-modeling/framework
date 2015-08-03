@@ -278,13 +278,13 @@ public class DistortedTimeResolver implements KResolver {
                 if (!needUniverseCopy) {
                     timeTree.insert(time);
                 } else {
-                    KLongTree newTemporalTree = (KLongTree) _cache.createAndMark(resolvedUniverse, KConfig.NULL_LONG, uuid, KMemoryElementTypes.LONG_TREE);
-                    newTemporalTree.insert(resolvedTime);
+                    KLongTree newTemporalTree = (KLongTree) _cache.createAndMark(universe, KConfig.NULL_LONG, uuid, KMemoryElementTypes.LONG_TREE);
+                    newTemporalTree.insert(time);
                     _cache.unmarkMemoryElement(timeTree);
-                    objectUniverseTree.put(resolvedUniverse, resolvedTime);
+                    objectUniverseTree.put(universe, time);
                 }
-                previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = resolvedUniverse;
-                previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = resolvedTime;
+                previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = universe;
+                previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = time;
                 _cache.unmarkMemoryElement(timeTree);
                 _cache.unmarkMemoryElement(globalUniverseTree);
                 _cache.unmarkMemoryElement(objectUniverseTree);
