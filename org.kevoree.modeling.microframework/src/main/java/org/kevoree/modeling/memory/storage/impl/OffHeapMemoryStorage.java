@@ -5,7 +5,6 @@ import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.chunk.impl.OffHeapMemoryChunk;
-import org.kevoree.modeling.memory.map.impl.OffHeapUniverseOrderMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.tree.impl.OffHeapLongLongTree;
