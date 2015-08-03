@@ -6,6 +6,7 @@ import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.cache.KCache;
+import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.resolver.impl.*;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
@@ -13,7 +14,6 @@ import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.manager.KDataManager;
-import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
@@ -107,7 +107,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public final void initUniverse(KUniverse p_universe, KUniverse p_parent) {
-        KUniverseOrderMap cached = (KUniverseOrderMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        KLongLongMap cached = (KLongLongMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null && !cached.contains(p_universe.key())) {
             if (p_parent == null) {
                 cached.put(p_universe.key(), p_universe.key());
@@ -119,7 +119,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public long parentUniverseKey(long currentUniverseKey) {
-        KUniverseOrderMap cached = (KUniverseOrderMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        KLongLongMap cached = (KLongLongMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null) {
             return cached.get(currentUniverseKey);
         } else {
@@ -129,7 +129,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public long[] descendantsUniverseKeys(final long currentUniverseKey) {
-        KUniverseOrderMap cached = (KUniverseOrderMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        KLongLongMap cached = (KLongLongMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null) {
             final ArrayLongLongMap temp = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
             cached.each(new KLongLongMapCallBack() {
@@ -311,7 +311,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                             objIndexPayload = "0";
                                                         }
                                                         String globalUniverseTreePayload = strings[GLO_TREE_INDEX];
-                                                        KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KMemoryElementTypes.LONG_LONG_MAP);
+                                                        KLongLongMap globalUniverseTree = (KLongLongMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KMemoryElementTypes.LONG_LONG_MAP);
                                                         if (globalUniverseTreePayload != null) {
                                                             try {
                                                                 globalUniverseTree.init(globalUniverseTreePayload, model().metaModel(), -1);
@@ -566,9 +566,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
                     results[i] = _cache.createAndMark(loopUniverse, loopTime, loopUuid, _resolver.typeFromKey(loopUniverse, loopTime, loopUuid));
                     int classIndex = -1;
                     if (loopUniverse != KConfig.NULL_LONG && loopTime != KConfig.NULL_LONG && loopUuid != KConfig.NULL_LONG) {
-                        KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, loopUuid);
+                        KLongLongMap alreadyLoadedOrder = (KLongLongMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, loopUuid);
                         if (alreadyLoadedOrder != null) {
-                            classIndex = _model.metaModel().metaClassByName(alreadyLoadedOrder.metaClassName()).index();
+                            classIndex = alreadyLoadedOrder.metaClassIndex();
                         }
                     }
                     results[i].init(payloads[i], _model.metaModel(), classIndex);

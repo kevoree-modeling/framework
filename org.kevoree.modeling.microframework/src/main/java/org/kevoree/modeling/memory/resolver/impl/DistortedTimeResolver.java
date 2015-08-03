@@ -8,7 +8,6 @@ import org.kevoree.modeling.memory.cache.KCache;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.map.KLongLongMap;
-import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
@@ -46,7 +45,7 @@ public class DistortedTimeResolver implements KResolver {
                                         _cache.unmarkMemoryElement(theGlobalUniverseOrderElement);
                                         callback.on(null);
                                     } else {
-                                        long closestUniverse = ResolutionHelper.resolve_universe((KUniverseOrderMap) theGlobalUniverseOrderElement, (KUniverseOrderMap) theObjectUniverseOrderElement, time, universe);
+                                        long closestUniverse = ResolutionHelper.resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, universe);
                                         getOrLoadAndMark(closestUniverse, KConfig.NULL_LONG, uuid, new KCallback<KMemoryElement>() {
                                             @Override
                                             public void on(KMemoryElement theObjectTimeTreeElement) {
@@ -128,7 +127,7 @@ public class DistortedTimeResolver implements KResolver {
                                     }
                                     final long[] tempObjectTimeTreeKeys = new long[uuids.length * 3];
                                     for (int i = 0; i < uuids.length; i++) {
-                                        long closestUniverse = ResolutionHelper.resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KUniverseOrderMap) objectUniverseOrderElements[i], time, universe);
+                                        long closestUniverse = ResolutionHelper.resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) objectUniverseOrderElements[i], time, universe);
                                         tempObjectTimeTreeKeys[i * 3] = closestUniverse;
                                         tempObjectTimeTreeKeys[i * 3 + 1] = KConfig.NULL_LONG;
                                         tempObjectTimeTreeKeys[i * 3 + 2] = uuids[i];
@@ -224,11 +223,11 @@ public class DistortedTimeResolver implements KResolver {
                 return currentEntry;
             }
         }
-        KUniverseOrderMap objectUniverseTree = (KUniverseOrderMap) _cache.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
+        KLongLongMap objectUniverseTree = (KLongLongMap) _cache.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
         if (objectUniverseTree == null) {
             return null;
         }
-        KUniverseOrderMap globalUniverseTree = (KUniverseOrderMap) _cache.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        KLongLongMap globalUniverseTree = (KLongLongMap) _cache.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (globalUniverseTree == null) {
             _cache.unmarkMemoryElement(objectUniverseTree);
             return null;
@@ -309,7 +308,7 @@ public class DistortedTimeResolver implements KResolver {
         timeTree.init(null, _manager.model().metaModel(), metaClassIndex);
         timeTree.insert(obj.now());
         //initiate universe management
-        KUniverseOrderMap universeTree = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, obj.uuid(), KMemoryElementTypes.LONG_LONG_MAP);
+        KLongLongMap universeTree = (KLongLongMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, obj.uuid(), KMemoryElementTypes.LONG_LONG_MAP);
         universeTree.init(null, _manager.model().metaModel(), metaClassIndex);
         universeTree.put(obj.universe(), obj.now());
         _cache.register(obj);
@@ -425,7 +424,7 @@ public class DistortedTimeResolver implements KResolver {
                             callback.on(null);
                             return;
                         }
-                        long closestUniverse = ResolutionHelper.resolve_universe((KUniverseOrderMap) theGlobalUniverseOrderElement, (KUniverseOrderMap) rootGlobalUniverseOrderElement, time, universe);
+                        long closestUniverse = ResolutionHelper.resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) rootGlobalUniverseOrderElement, time, universe);
                         getOrLoadAndMark(closestUniverse, KConfig.NULL_LONG, rootFixedKey, new KCallback<KMemoryElement>() {
                             @Override
                             public void on(KMemoryElement theRootTimeTree) {
@@ -458,11 +457,11 @@ public class DistortedTimeResolver implements KResolver {
                 getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, rootFixedKey, new KCallback<KMemoryElement>() {
                     @Override
                     public void on(KMemoryElement rootGlobalUniverseOrderElement) {
-                        KUniverseOrderMap rootGlobalUniverseOrder = (KUniverseOrderMap) rootGlobalUniverseOrderElement;
+                        KLongLongMap rootGlobalUniverseOrder = (KLongLongMap) rootGlobalUniverseOrderElement;
                         if (rootGlobalUniverseOrderElement == null) {
-                            rootGlobalUniverseOrder = (KUniverseOrderMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME, KMemoryElementTypes.LONG_LONG_MAP);
+                            rootGlobalUniverseOrder = (KLongLongMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME, KMemoryElementTypes.LONG_LONG_MAP);
                         }
-                        long closestUniverse = ResolutionHelper.resolve_universe((KUniverseOrderMap) theGlobalUniverseOrderElement, (KUniverseOrderMap) rootGlobalUniverseOrderElement, newRoot.now(), newRoot.universe());
+                        long closestUniverse = ResolutionHelper.resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) rootGlobalUniverseOrderElement, newRoot.now(), newRoot.universe());
                         rootGlobalUniverseOrder.put(newRoot.universe(), newRoot.now());
                         if (closestUniverse != newRoot.universe()) {
                             KLongLongTree newTimeTree = (KLongLongTree) _cache.createAndMark(newRoot.universe(), KConfig.NULL_LONG, KConfig.END_OF_TIME, KMemoryElementTypes.LONG_LONG_TREE);
@@ -511,7 +510,7 @@ public class DistortedTimeResolver implements KResolver {
                     callback.on(new long[0]);
                     return;
                 }
-                final long[] collectedUniverse = ResolutionHelper.universeSelectByRange((KUniverseOrderMap) kMemoryElements[0], (KUniverseOrderMap) kMemoryElements[1], startTime, endTime, currentUniverse);
+                final long[] collectedUniverse = ResolutionHelper.universeSelectByRange((KLongLongMap) kMemoryElements[0], (KLongLongMap) kMemoryElements[1], startTime, endTime, currentUniverse);
                 int nbKeys = collectedUniverse.length * 3;
                 final long[] timeTreeKeys = new long[nbKeys];
                 for (int i = 0; i < collectedUniverse.length; i++) {
@@ -519,7 +518,7 @@ public class DistortedTimeResolver implements KResolver {
                     timeTreeKeys[i * 3 + 1] = KConfig.NULL_LONG;
                     timeTreeKeys[i * 3 + 2] = currentUuid;
                 }
-                final KUniverseOrderMap objUniverse = (KUniverseOrderMap) kMemoryElements[1];
+                final KLongLongMap objUniverse = (KLongLongMap) kMemoryElements[1];
                 getOrLoadAndMarkAll(timeTreeKeys, new KCallback<KMemoryElement[]>() {
                     @Override
                     public void on(KMemoryElement[] timeTrees) {

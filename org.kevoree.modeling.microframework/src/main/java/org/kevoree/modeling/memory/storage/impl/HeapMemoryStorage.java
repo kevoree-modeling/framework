@@ -2,11 +2,10 @@
 package org.kevoree.modeling.memory.storage.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.chunk.impl.HeapMemoryChunk;
-import org.kevoree.modeling.memory.map.impl.ArrayUniverseOrderMap;
+import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.tree.impl.ArrayLongLongTree;
@@ -120,7 +119,7 @@ public class HeapMemoryStorage implements KMemoryStorage {
             case KMemoryElementTypes.CHUNK:
                 return new HeapMemoryChunk();
             case KMemoryElementTypes.LONG_LONG_MAP:
-                return new ArrayUniverseOrderMap();
+                return new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
             case KMemoryElementTypes.LONG_TREE:
                 return new ArrayLongTree();
             case KMemoryElementTypes.LONG_LONG_TREE:

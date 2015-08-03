@@ -1,6 +1,10 @@
 package org.kevoree.modeling.memory.map;
 
-public interface KLongLongMap {
+import org.kevoree.modeling.memory.KMemoryElement;
+
+public interface KLongLongMap extends KMemoryElement {
+
+    int metaClassIndex();
 
     boolean contains(long key);
 
@@ -15,4 +19,5 @@ public interface KLongLongMap {
     int size();
 
     void clear();
+
 }

@@ -3,6 +3,9 @@ package org.kevoree.modeling.memory.map.impl;
 
 import org.kevoree.modeling.memory.map.KLongMap;
 import org.kevoree.modeling.memory.map.KLongMapCallBack;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
+import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.util.maths.Base64;
 
 /**
  * @native ts

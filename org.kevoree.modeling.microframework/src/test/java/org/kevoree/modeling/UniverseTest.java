@@ -20,15 +20,12 @@ public class UniverseTest {
             @Override
             public void on(Throwable throwable) {
                 CloudUniverse dimension0 = universe.newUniverse();
-
                 Node n0 = dimension0.time(0).createNode();
                 n0.setName("n0");
-
                 CloudUniverse div0 = dimension0.diverge();
                 Assert.assertNotEquals(dimension0.key(), div0.key());
                 CloudUniverse div0parent = div0.origin();
                 Assert.assertEquals(dimension0.key(), div0parent.key());
-
                 List<CloudUniverse> children = dimension0.descendants();
                 for (int i = 0; i < children.size(); i++) {
                     Assert.assertNotEquals(dimension0.key(), children.get(i).key());
@@ -48,7 +45,6 @@ public class UniverseTest {
                 CloudUniverse dimension0 = universe.newUniverse();
                 Node n0 = dimension0.time(0).createNode();
                 n0.setName("n0");
-
                 n0.timeWalker().allTimes(new KCallback<long[]>() {
                     @Override
                     public void on(long[] longs) {
@@ -56,7 +52,6 @@ public class UniverseTest {
                         Assert.assertEquals(0, longs[0]);
                     }
                 });
-
                 CloudUniverse forkedUniverse = dimension0.diverge();
                 forkedUniverse.time(1).lookup(n0.uuid(), new KCallback<KObject>() {
                     @Override
@@ -80,7 +75,6 @@ public class UniverseTest {
                         });
                     }
                 });
-
             }
         });
     }

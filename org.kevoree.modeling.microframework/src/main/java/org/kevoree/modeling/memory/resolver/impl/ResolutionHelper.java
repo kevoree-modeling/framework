@@ -3,7 +3,6 @@ package org.kevoree.modeling.memory.resolver.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.map.KLongLongMap;
-import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.tree.KLongTree;
