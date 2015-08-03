@@ -13,9 +13,6 @@ import org.kevoree.modeling.cloudmodel.Element;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.meta.MetaNode;
 
-/**
- * Created by thomas on 19/12/14.
- */
 public class TraversalTest {
 
     @Test

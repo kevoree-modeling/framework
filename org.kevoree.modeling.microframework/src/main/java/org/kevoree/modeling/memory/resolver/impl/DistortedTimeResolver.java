@@ -163,7 +163,11 @@ public class DistortedTimeResolver implements KResolver {
                                                     } else {
                                                         KObject[] finalResult = new KObject[uuids.length];
                                                         for (int h = 0; h < theObjectChunks.length; h++) {
-                                                            finalResult[h] = ((AbstractKModel) _manager.model()).createProxy(universe, time, uuids[h], _manager.model().metaModel().metaClass(((KMemoryChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1]);
+                                                            if(theObjectChunks[h] != null){
+                                                                finalResult[h] = ((AbstractKModel) _manager.model()).createProxy(universe, time, uuids[h], _manager.model().metaModel().metaClass(((KMemoryChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1]);
+                                                            } else {
+                                                                finalResult[h] = null;
+                                                            }
                                                         }
                                                         _cache.registerAll(finalResult);
                                                         callback.on(finalResult);
