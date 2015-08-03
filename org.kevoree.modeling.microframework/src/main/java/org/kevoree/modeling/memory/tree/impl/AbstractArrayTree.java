@@ -196,6 +196,32 @@ public abstract class AbstractArrayTree {
         }
     }
 
+    private int next(int p_index) {
+        int p = p_index;
+        if (right(p) != -1) {
+            p = right(p);
+            while (left(p) != -1) {
+                p = left(p);
+            }
+            return p;
+        } else {
+            if (parent(p) != -1) {
+                if (p == left(parent(p))) {
+                    return parent(p);
+                } else {
+                    while (parent(p) != -1 && p == right(parent(p))) {
+                        p = parent(p);
+                    }
+                    return parent(p);
+                }
+
+            } else {
+                return -1;
+            }
+        }
+    }
+
+
     /* Time never use direct lookup, sadly for performance, anyway this method is private to ensure the correctness of caching mechanism */
     public final long lookup(long p_key) {
         int n = _root_index;

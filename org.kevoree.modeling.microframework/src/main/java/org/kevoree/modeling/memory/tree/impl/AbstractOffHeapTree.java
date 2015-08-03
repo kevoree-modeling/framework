@@ -243,6 +243,30 @@ public abstract class AbstractOffHeapTree implements KOffHeapMemoryElement {
         }
     }
 
+    private long next(long p_index) {
+        long p = p_index;
+        if (right(p) != UNDEFINED) {
+            p = right(p);
+            while (left(p) != UNDEFINED) {
+                p = left(p);
+            }
+            return p;
+        } else {
+            if (parent(p) != UNDEFINED) {
+                if (p == left(parent(p))) {
+                    return parent(p);
+                } else {
+                    while (parent(p) != UNDEFINED && p == right(parent(p))) {
+                        p = parent(p);
+                    }
+                    return parent(p);
+                }
+            } else {
+                return UNDEFINED;
+            }
+        }
+    }
+
     /* Time never use direct lookup, sadly for performance, anyway this method is private to ensure the correctness of caching mechanism */
     public final long lookup(long p_key) {
         long n = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
