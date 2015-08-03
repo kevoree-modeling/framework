@@ -175,11 +175,11 @@ public class ArrayLongLongMap implements KLongLongMap {
         int m = internalState.elementHash[index];
         while (m >= 0) {
             if (key == internalState.elementKV[m * 2] /* getKey */) {
-                return m != -1;
+                return true;
             }
             m = internalState.elementNext[m];
         }
-        return m != -1;
+        return false;
     }
 
     @Override

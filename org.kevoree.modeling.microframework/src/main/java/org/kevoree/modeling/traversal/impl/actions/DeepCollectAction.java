@@ -42,7 +42,7 @@ public class DeepCollectAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         if (context.inputObjects() == null || context.inputObjects().length == 0) {
-            if(_next != null){
+            if (_next != null) {
                 _next.execute(context);
             } else {
                 context.finalCallback().on(context.inputObjects());

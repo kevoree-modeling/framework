@@ -38,7 +38,6 @@ public class BaseKDataManagerTest {
                     @Override
                     public void on(long[] times) {
                         Assert.assertEquals(times.length, 10);
-
                         origin.manager().lookupAllTimes(origin.universe(), times, origin.uuid(), new KCallback<KObject[]>() {
                             @Override
                             public void on(KObject[] kObjects) {
@@ -48,8 +47,6 @@ public class BaseKDataManagerTest {
                                 }
                             }
                         });
-
-
                         origin.manager().lookupAllObjectsTimes(origin.universe(), times, new long[]{origin.uuid()}, new KCallback<KObject[]>() {
                             @Override
                             public void on(KObject[] kObjects) {
@@ -59,7 +56,6 @@ public class BaseKDataManagerTest {
                                 }
                             }
                         });
-
                     }
                 });
             }

@@ -410,12 +410,12 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public void discard(KCallback<Throwable> callback) {
-
+        //TODO
     }
 
     @Override
     public void clear() {
-
+        //TODO
     }
 
     @Override
