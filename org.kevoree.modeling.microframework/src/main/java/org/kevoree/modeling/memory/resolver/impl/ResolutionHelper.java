@@ -1,11 +1,8 @@
 package org.kevoree.modeling.memory.resolver.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.storage.KMemoryStorage;
 import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.tree.KLongTree;
 
 public class ResolutionHelper {
 
@@ -27,51 +24,6 @@ public class ResolutionHelper {
         return result;
     }*/
 
-    public static long resolve_universe(KLongLongMap globalTree, KLongLongMap objUniverseTree, long timeToResolve, long originUniverseId) {
-        if (globalTree == null || objUniverseTree == null) {
-            return originUniverseId;
-        }
-        long currentUniverse = originUniverseId;
-        long previousUniverse = KConfig.NULL_LONG;
-        long divergenceTime = objUniverseTree.get(currentUniverse);
-        while (currentUniverse != previousUniverse) {
-            //check range
-            if (divergenceTime != KConfig.NULL_LONG && divergenceTime <= timeToResolve) {
-                return currentUniverse;
-            }
-            //next round
-            previousUniverse = currentUniverse;
-            currentUniverse = globalTree.get(currentUniverse);
-            divergenceTime = objUniverseTree.get(currentUniverse);
-        }
-        return originUniverseId;
-    }
 
-    public static long[] universeSelectByRange(KLongLongMap globalTree, KLongLongMap objUniverseTree, long rangeMin, long rangeMax, long originUniverseId) {
-        KLongLongMap collected = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-        long currentUniverse = originUniverseId;
-        long previousUniverse = KConfig.NULL_LONG;
-        long divergenceTime = objUniverseTree.get(currentUniverse);
-        while (currentUniverse != previousUniverse) {
-            //check range
-            if (divergenceTime != KConfig.NULL_LONG) {
-                if (divergenceTime <= rangeMin) {
-                    collected.put(collected.size(), currentUniverse);
-                    break;
-                } else if (divergenceTime <= rangeMax) {
-                    collected.put(collected.size(), currentUniverse);
-                }
-            }
-            //next round
-            previousUniverse = currentUniverse;
-            currentUniverse = globalTree.get(currentUniverse);
-            divergenceTime = objUniverseTree.get(currentUniverse);
-        }
-        long[] trimmed = new long[collected.size()];
-        for (long i = 0; i < collected.size(); i++) {
-            trimmed[(int) i] = collected.get(i);
-        }
-        return trimmed;
-    }
 
 }
