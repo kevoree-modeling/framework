@@ -14,7 +14,9 @@ public abstract class BaseKLongLongMapTest {
 
     @Test
     public void test() {
-        KLongLongMap map = createKUniverseOrderMap();//"org.kevoree.modeling.Hello");
+        KLongLongMap map = createKUniverseOrderMap();
+        KMetaModel metaModel = new MetaModel("UniverseOrderMapTest");
+        map.init(null, metaModel, -1);
         for (long i = 0; i < SIZE; i++) {
             map.put(i, i);
         }

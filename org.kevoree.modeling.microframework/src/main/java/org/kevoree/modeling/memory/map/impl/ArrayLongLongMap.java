@@ -383,6 +383,7 @@ public class ArrayLongLongMap implements KLongLongMap {
             this.elementCount++;
         }
         this.elementCount = nbElement;
+        this.droppedCount = 0;
         this.state = temp_state;//TODO check with CnS
         this.threshold = (int) (length * loadFactor);
 

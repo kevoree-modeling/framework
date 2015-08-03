@@ -8,7 +8,7 @@ public class ArrayLongLongMapTest extends BaseKLongLongMapTest {
 
     @Override
     public KLongLongMap createKUniverseOrderMap() {
-        return new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.NULL_LONG);
+        return new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
 }
