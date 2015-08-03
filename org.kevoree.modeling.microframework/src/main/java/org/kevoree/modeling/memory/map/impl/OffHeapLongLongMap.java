@@ -2,8 +2,13 @@
 package org.kevoree.modeling.memory.map.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.map.KLongLongMap;
 import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
+import org.kevoree.modeling.memory.storage.impl.OffHeapMemoryStorage;
+import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -15,8 +20,15 @@ import java.lang.reflect.Field;
  * - memory structure:  | elem count (4) | dropped count (4) | dirty (1) | elem data size (4) | back (elem data size * 28) |
  * - back:              | key (8)   | value (8) | next (4) | hash (4) |
  */
-public class OffHeapLongLongMap implements KLongLongMap {
+public class OffHeapLongLongMap implements KLongLongMap, KOffHeapMemoryElement {
     protected static final Unsafe UNSAFE = getUnsafe();
+
+
+    private volatile int _counter = 0;
+    private int _metaClassIndex = -1;
+
+    private OffHeapMemoryStorage storage;
+    private long universe, time, obj;
 
     protected int threshold;
 
@@ -109,6 +121,11 @@ public class OffHeapLongLongMap implements KLongLongMap {
         }
 
         this.threshold = (int) (elementDataSize * loadFactor);
+
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
+
     }
 
     public void clear() {
@@ -136,6 +153,10 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
             long elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
             this.threshold = (int) (elementDataSize * loadFactor);
+
+            if (this.storage != null) {
+                storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+            }
         }
     }
 
@@ -172,6 +193,11 @@ public class OffHeapLongLongMap implements KLongLongMap {
         UNSAFE.freeMemory(oldAddress);
 
         this.threshold = (int) (length * loadFactor);
+
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
+
     }
 
     @Override
@@ -183,6 +209,11 @@ public class OffHeapLongLongMap implements KLongLongMap {
                 callback.on(internal_getKey(_start_address, i), internal_getValue(_start_address, i));
             }
         }
+    }
+
+    @Override
+    public int metaClassIndex() {
+        return 0;
     }
 
     @Override
@@ -326,6 +357,163 @@ public class OffHeapLongLongMap implements KLongLongMap {
 
     public final int size() {
         return UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+    }
+
+    @Override
+    public final int counter() {
+        return this._counter;
+    }
+
+    @Override
+    public final void inc() {
+        internal_counter(true);
+    }
+
+    @Override
+    public final void dec() {
+        internal_counter(false);
+    }
+
+    private synchronized void internal_counter(boolean inc) {
+        if (inc) {
+            this._counter++;
+        } else {
+            this._counter--;
+        }
+    }
+
+    @Override
+    public boolean isDirty() {
+        return UNSAFE.getByte(_start_address + OFFSET_STARTADDRESS_DIRTY) != 0;
+    }
+
+    @Override
+    public void setClean(KMetaModel metaModel) {
+        UNSAFE.putByte(_start_address + OFFSET_STARTADDRESS_DIRTY, (byte) 0);
+    }
+
+    @Override
+    public void setDirty() {
+        UNSAFE.putByte(_start_address + OFFSET_STARTADDRESS_DIRTY, (byte) 1);
+    }
+
+    /* warning: this method is not thread safe */
+    @Override
+    public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
+        _metaClassIndex = metaClassIndex;
+
+        if (payload == null || payload.length() == 0) {
+            return;
+        }
+        int initPos = 0;
+        int cursor = 0;
+        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '/') {
+            cursor++;
+        }
+        if (cursor >= payload.length()) {
+            return;
+        }
+        if (payload.charAt(cursor) == ',') {//className to parse
+            _metaClassIndex = metaModel.metaClassByName(payload.substring(initPos, cursor)).index();
+            cursor++;
+            initPos = cursor;
+        }
+        while (cursor < payload.length() && payload.charAt(cursor) != '/') {
+            cursor++;
+        }
+        int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
+        rehashCapacity(nbElement);
+        while (cursor < payload.length()) {
+            cursor++;
+            int beginChunk = cursor;
+            while (cursor < payload.length() && payload.charAt(cursor) != ':') {
+                cursor++;
+            }
+            int middleChunk = cursor;
+            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+                cursor++;
+            }
+            long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
+            long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
+            int index = (((int) (loopKey)) & 0x7FFFFFFF) % UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+            //insert K/V
+            int newIndex = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+            internal_setKey(_start_address, newIndex, loopKey);
+            internal_setValue(_start_address, newIndex, loopVal);
+            int currentHashedIndex = internal_getHash(_start_address, index);
+            if (currentHashedIndex != -1) {
+                internal_setNext(_start_address, newIndex, currentHashedIndex);
+            } else {
+                internal_setNext(_start_address, newIndex, -2);//special char to tag used values
+            }
+            internal_setHash(_start_address, index, newIndex);
+
+            // increase element count
+            int oldElementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+            int elementCount = oldElementCount + 1;
+            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
+        }
+    }
+
+    @Override
+    public String serialize(KMetaModel metaModel) {
+        int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+
+        final StringBuilder buffer = new StringBuilder(elementCount * 8);//roughly approximate init size
+        if (_metaClassIndex != -1) {
+            buffer.append(metaModel.metaClass(_metaClassIndex).metaName());
+            buffer.append(',');
+        }
+        Base64.encodeIntToBuffer(elementCount, buffer);
+        buffer.append('/');
+        boolean isFirst = true;
+
+        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        for (int i = 0; i < elementDataSize; i++) {
+            if (internal_getNext(_start_address, i) != -1) { //there is a real value
+                long loopKey = internal_getKey(_start_address, i);
+                long loopValue = internal_getValue(_start_address, i);
+                if (!isFirst) {
+                    buffer.append(",");
+                }
+                isFirst = false;
+                Base64.encodeLongToBuffer(loopKey, buffer);
+                buffer.append(":");
+                Base64.encodeLongToBuffer(loopValue, buffer);
+            }
+        }
+        return buffer.toString();
+    }
+
+    @Override
+    public void free(KMetaModel metaModel) {
+        clear();
+    }
+
+    @Override
+    public short type() {
+        return KMemoryElementTypes.LONG_LONG_MAP;
+    }
+
+    @Override
+    public long getMemoryAddress() {
+        return this._start_address;
+    }
+
+    @Override
+    public void setMemoryAddress(long address) {
+        this._start_address = address;
+        if (this.storage != null) {
+            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        }
+    }
+
+    @Override
+    public void setStorage(OffHeapMemoryStorage storage, long universe, long time, long obj) {
+        this.storage = storage;
+        this.universe = universe;
+        this.time = time;
+        this.obj = obj;
     }
 
     @SuppressWarnings("restriction")
