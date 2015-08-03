@@ -8,9 +8,9 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.infer.impl.GaussianClassifierAlg;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -254,7 +254,7 @@ public class GaussianClassificationTest {
 
 
                 //for debug
-                KMemoryChunk ks = ((KInternalDataManager) model.manager()).preciseChunk(0, 0, gaussianProfile.uuid(), gaussianProfile.metaClass(), ((AbstractKObject) gaussianProfile).previousResolved());
+                KObjectChunk ks = ((KInternalDataManager) model.manager()).preciseChunk(0, 0, gaussianProfile.uuid(), gaussianProfile.metaClass(), ((AbstractKObject) gaussianProfile).previousResolved());
 
                 gaussianProfile.genericInferAll(irisInstanceTest, new KCallback<Object[][]>() {
                     @Override

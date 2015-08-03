@@ -2,8 +2,8 @@ package org.kevoree.modeling.traversal.impl.actions;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.memory.map.impl.ArrayLongMap;
-import org.kevoree.modeling.memory.map.KLongMapCallBack;
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongMap;
+import org.kevoree.modeling.memory.chunk.KLongMapCallBack;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
 

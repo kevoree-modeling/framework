@@ -2,8 +2,6 @@ package org.kevoree.modeling;
 
 public class KConfig {
 
-    public static final int TREE_CACHE_SIZE = 3;
-
     public static final int CALLBACK_HISTORY = 1000;
 
     // Limit long lengths to 53 bits because of JS limitation

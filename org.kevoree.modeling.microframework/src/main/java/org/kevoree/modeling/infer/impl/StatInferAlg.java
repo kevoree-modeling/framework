@@ -3,8 +3,8 @@ package org.kevoree.modeling.infer.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.infer.KInferAlg;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 
@@ -18,7 +18,7 @@ public class StatInferAlg implements KInferAlg {
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
+        KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial chunk if empty
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
@@ -57,13 +57,13 @@ public class StatInferAlg implements KInferAlg {
 
     @Override
     public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
+        KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         double[][] result = new double[1][];
         result[0] = getAvgAll(ks, origin.metaClass().dependencies());
         return result;
     }
 
-    public double[] getAvgAll(KMemoryChunk ks, KMetaDependencies meta) {
+    public double[] getAvgAll(KObjectChunk ks, KMetaDependencies meta) {
         double[] result = new double[meta.origin().inputs().length];
         for (int i = 0; i < meta.origin().inputs().length; i++) {
             result[i] = getAvg(i, ks, meta);
@@ -71,7 +71,7 @@ public class StatInferAlg implements KInferAlg {
         return result;
     }
 
-    public double[] getMinAll(KMemoryChunk ks, KMetaDependencies meta) {
+    public double[] getMinAll(KObjectChunk ks, KMetaDependencies meta) {
         double[] result = new double[meta.origin().inputs().length];
         for (int i = 0; i < meta.origin().inputs().length; i++) {
             result[i] = getMin(i, ks, meta);
@@ -79,7 +79,7 @@ public class StatInferAlg implements KInferAlg {
         return result;
     }
 
-    public double[] getMaxAll(KMemoryChunk ks, KMetaDependencies meta) {
+    public double[] getMaxAll(KObjectChunk ks, KMetaDependencies meta) {
         double[] result = new double[meta.origin().inputs().length];
         for (int i = 0; i < meta.origin().inputs().length; i++) {
             result[i] = getMax(i, ks, meta);
@@ -87,7 +87,7 @@ public class StatInferAlg implements KInferAlg {
         return result;
     }
 
-    public double[] getVarianceAll(KMemoryChunk ks, KMetaDependencies meta, double[] avgs) {
+    public double[] getVarianceAll(KObjectChunk ks, KMetaDependencies meta, double[] avgs) {
         double[] result = new double[meta.origin().inputs().length];
         for (int i = 0; i < meta.origin().inputs().length; i++) {
             result[i] = getVariance(i, ks, meta, avgs[i]);
@@ -95,7 +95,7 @@ public class StatInferAlg implements KInferAlg {
         return result;
     }
 
-    public double getAvg(int featureNum, KMemoryChunk ks, KMetaDependencies meta) {
+    public double getAvg(int featureNum, KObjectChunk ks, KMetaDependencies meta) {
 
         if (ks.getDoubleArraySize(meta.index(), meta.origin()) == 0) {
             return 0;
@@ -108,7 +108,7 @@ public class StatInferAlg implements KInferAlg {
         return ks.getDoubleArrayElem(meta.index(), featureNum * NUMOFFIELDS + SUM, meta.origin()) / count;
     }
 
-    public double getMin(int featureNum, KMemoryChunk ks, KMetaDependencies meta) {
+    public double getMin(int featureNum, KObjectChunk ks, KMetaDependencies meta) {
         if (ks.getDoubleArraySize(meta.index(), meta.origin()) == 0) {
             return 0;
         }
@@ -120,7 +120,7 @@ public class StatInferAlg implements KInferAlg {
         return ks.getDoubleArrayElem(meta.index(), featureNum * NUMOFFIELDS + MIN, meta.origin());
     }
 
-    public double getMax(int featureNum, KMemoryChunk ks, KMetaDependencies meta) {
+    public double getMax(int featureNum, KObjectChunk ks, KMetaDependencies meta) {
 
         if (ks.getDoubleArraySize(meta.index(), meta.origin()) == 0) {
             return 0;
@@ -133,7 +133,7 @@ public class StatInferAlg implements KInferAlg {
         return ks.getDoubleArrayElem(meta.index(), featureNum * NUMOFFIELDS + MAX, meta.origin());
     }
 
-    public double getVariance(int featureNum, KMemoryChunk ks, KMetaDependencies meta, double avg) {
+    public double getVariance(int featureNum, KObjectChunk ks, KMetaDependencies meta, double avg) {
         if (ks.getDoubleArraySize(meta.index(), meta.origin()) == 0) {
             return 0;
         }

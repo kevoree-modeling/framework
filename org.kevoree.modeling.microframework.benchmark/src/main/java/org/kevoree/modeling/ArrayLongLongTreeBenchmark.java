@@ -1,6 +1,6 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.memory.tree.impl.ArrayLongLongTree;
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongTree;
 
 import java.util.HashMap;
 import java.util.Random;

@@ -3,6 +3,7 @@ package org.kevoree.modeling.memory.tree;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.chunk.KLongLongTree;
 
 public abstract class BaseKLongLongTreeTest {
 

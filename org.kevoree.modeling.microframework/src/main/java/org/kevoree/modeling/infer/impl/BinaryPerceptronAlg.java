@@ -4,7 +4,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 
 import java.util.Random;
@@ -20,7 +20,7 @@ public class BinaryPerceptronAlg implements KInferAlg {
 
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
+        KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial chunk if empty
         int size = origin.metaClass().inputs().length + 1;
@@ -60,7 +60,7 @@ public class BinaryPerceptronAlg implements KInferAlg {
 
     @Override
     public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
-        KMemoryChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
+        KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         int size = origin.metaClass().inputs().length + 1;
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {

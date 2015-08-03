@@ -1,8 +1,8 @@
 package org.kevoree.modeling.memory.tree.impl;
 
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongTree;
 import org.kevoree.modeling.memory.tree.BaseKLongLongTreeTest;
-import org.kevoree.modeling.memory.tree.KLongLongTree;
-import org.kevoree.modeling.memory.tree.KLongTree;
+import org.kevoree.modeling.memory.chunk.KLongLongTree;
 
 /**
  * Created by duke on 01/12/14.

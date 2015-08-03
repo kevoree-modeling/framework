@@ -1,0 +1,37 @@
+package org.kevoree.modeling.memory.chunk.impl;
+
+import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KOffHeapChunk;
+import org.kevoree.modeling.memory.space.KChunkTypes;
+import org.kevoree.modeling.memory.chunk.KLongTree;
+
+/**
+ * @ignore ts
+ */
+public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, KOffHeapChunk {
+
+    public OffHeapLongTree() {
+        super();
+        NODE_SIZE = 5;
+    }
+
+    @Override
+    public void insert(long key) {
+        internal_insert(key, key);
+    }
+
+    @Override
+    public long previousOrEqual(long key) {
+        long result = internal_previousOrEqual_index(key);
+        if (result != -1) {
+            return key(result);
+        } else {
+            return KConfig.NULL_LONG;
+        }
+    }
+
+    @Override
+    public short type() {
+        return KChunkTypes.LONG_TREE;
+    }
+}

@@ -1,6 +1,6 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
 
 public class ArrayLongLongBench {
 

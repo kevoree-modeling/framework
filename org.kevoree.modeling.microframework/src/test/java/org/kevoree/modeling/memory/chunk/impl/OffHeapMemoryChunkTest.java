@@ -1,7 +1,7 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.memory.chunk.BaseKMemoryChunkTest;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 
 /**
  * @ignore ts
@@ -9,7 +9,7 @@ import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 public class OffHeapMemoryChunkTest extends BaseKMemoryChunkTest {
 
     @Override
-    public KMemoryChunk createKMemoryChunk() {
-        return new OffHeapMemoryChunk();
+    public KObjectChunk createKMemoryChunk() {
+        return new OffHeapObjectChunk();
     }
 }

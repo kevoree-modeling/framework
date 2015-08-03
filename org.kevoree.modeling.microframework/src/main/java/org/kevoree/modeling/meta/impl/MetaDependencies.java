@@ -2,8 +2,8 @@ package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.abs.KLazyResolver;
-import org.kevoree.modeling.memory.map.KStringMap;
-import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.chunk.KStringMap;
+import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.*;
 
 public class MetaDependencies implements KMetaDependencies {

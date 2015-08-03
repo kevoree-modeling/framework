@@ -6,12 +6,12 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.map.KLongLongMap;
+import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.meta.*;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
-import org.kevoree.modeling.memory.map.KStringMapCallBack;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.chunk.KStringMapCallBack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +83,7 @@ public class JsonModelLoader {
                     currentToken = lexer.nextToken();
                 }
                 final KObject[] rootElem = {null};
-                ArrayLongLongMap mappedKeys = new ArrayLongLongMap(alls.size(), KConfig.CACHE_LOAD_FACTOR);
+                ArrayLongLongMap mappedKeys = new ArrayLongLongMap(null);
                 for (int i = 0; i < alls.size(); i++) {
                     try {
                         ArrayStringMap<Object> elem = alls.get(i);
@@ -125,7 +125,7 @@ public class JsonModelLoader {
         KMetaClass metaClass = manager.model().metaModel().metaClassByName(meta);
         KObject current = ((AbstractKModel) manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass, universe, time);
         manager.initKObject(current);
-        KMemoryChunk raw = manager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
+        KObjectChunk raw = manager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         p_param.each(new KStringMapCallBack<Object>() {
             @Override
             public void on(String metaKey, Object payload_content) {

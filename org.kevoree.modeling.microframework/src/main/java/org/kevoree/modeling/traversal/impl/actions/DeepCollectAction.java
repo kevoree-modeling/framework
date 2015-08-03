@@ -4,12 +4,12 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.map.KLongLongMap;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.map.impl.ArrayLongMap;
-import org.kevoree.modeling.memory.map.KLongMapCallBack;
-import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
+import org.kevoree.modeling.memory.chunk.KLongLongMap;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongMap;
+import org.kevoree.modeling.memory.chunk.KLongMapCallBack;
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.MetaType;
@@ -98,13 +98,13 @@ public class DeepCollectAction implements KTraversalAction {
 
     private void executeStep(KObject[] p_inputStep, KCallback<KObject[]> private_callback) {
         AbstractKObject currentObject = null;
-        KLongLongMap nextIds = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        KLongLongMap nextIds = new ArrayLongLongMap(null);
         for (int i = 0; i < p_inputStep.length; i++) {
             if (p_inputStep[i] != null) {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) p_inputStep[i];
                     currentObject = loopObj;
-                    KMemoryChunk raw = loopObj._manager.closestChunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), loopObj.metaClass(), loopObj.previousResolved());
+                    KObjectChunk raw = loopObj._manager.closestChunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), loopObj.metaClass(), loopObj.previousResolved());
                     if (raw != null) {
                         if (_reference == null) {
                             KMeta[] metaElements = loopObj.metaClass().metaElements();

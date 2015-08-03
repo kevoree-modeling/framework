@@ -4,7 +4,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.meta.impl.MetaEnum;
 import org.kevoree.modeling.util.maths.Distribution;
@@ -57,7 +57,7 @@ public class GaussianClassifierAlg implements KInferAlg {
     @Override
     public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
         int maxOutput = ((MetaEnum) origin.metaClass().outputs()[0].type()).literals().length;
-        KMemoryChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
+        KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial chunk if empty
         int size = (maxOutput + 1) * (origin.metaClass().inputs().length * NUMOFFIELDS + 1);
@@ -120,7 +120,7 @@ public class GaussianClassifierAlg implements KInferAlg {
     @Override
     public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
         int maxOutput = ((MetaEnum) origin.metaClass().outputs()[0].type()).literals().length;
-        KMemoryChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
+        KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //check if chunk is empty
         int size = (maxOutput + 1) * (origin.metaClass().inputs().length * NUMOFFIELDS + 1);

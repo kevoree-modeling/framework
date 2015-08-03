@@ -1,6 +1,6 @@
 package org.kevoree.modeling.util.maths.structure.impl;
 
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.util.maths.structure.KArray1D;
 
@@ -12,11 +12,11 @@ public class Array1D implements KArray1D {
 
     private int _segmentIndex;
 
-    private KMemoryChunk _segment;
+    private KObjectChunk _segment;
 
     private KMetaClass _metaClass;
 
-    public Array1D(int p_size, int p_offset, int p_segmentIndex, KMemoryChunk p_segment, KMetaClass p_metaClass) {
+    public Array1D(int p_size, int p_offset, int p_segmentIndex, KObjectChunk p_segment, KMetaClass p_metaClass) {
         this._size = p_size;
         this._offset = p_offset;
         this._segmentIndex = p_segmentIndex;

@@ -4,10 +4,10 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.map.KLongLongMap;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.map.KLongLongMapCallBack;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.memory.chunk.KLongLongMap;
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.MetaType;
@@ -39,11 +39,11 @@ public class TraverseAction implements KTraversalAction {
             }
         } else {
             final AbstractKObject currentObject = (AbstractKObject) context.inputObjects()[0];
-            KLongLongMap nextIds = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+            KLongLongMap nextIds = new ArrayLongLongMap(null);
             for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];
-                    KMemoryChunk raw = currentObject._manager.closestChunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), loopObj.metaClass(), loopObj.previousResolved());
+                    KObjectChunk raw = currentObject._manager.closestChunk(loopObj.universe(), loopObj.now(), loopObj.uuid(), loopObj.metaClass(), loopObj.previousResolved());
                     if (raw != null) {
                         if (_reference == null) {
                             KMeta[] metaElements = loopObj.metaClass().metaElements();

@@ -1,11 +1,11 @@
 package org.kevoree.modeling.format.json;
 
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 
 public class JsonModelSerializer {
 
@@ -49,7 +49,7 @@ public class JsonModelSerializer {
 
     public static void printJSON(KObject elem, StringBuilder builder, boolean isRoot) {
         if (elem != null) {
-            KMemoryChunk raw = ((AbstractKObject) elem)._manager.closestChunk(elem.universe(), elem.now(), elem.uuid(), elem.metaClass(), ((AbstractKObject)elem).previousResolved() );
+            KObjectChunk raw = ((AbstractKObject) elem)._manager.closestChunk(elem.universe(), elem.now(), elem.uuid(), elem.metaClass(), ((AbstractKObject)elem).previousResolved() );
             if (raw != null) {
                 builder.append(JsonRaw.encode(raw, elem.uuid(), elem.metaClass(), isRoot));
             }

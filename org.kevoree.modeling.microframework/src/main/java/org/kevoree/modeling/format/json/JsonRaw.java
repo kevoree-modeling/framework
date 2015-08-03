@@ -1,6 +1,6 @@
 package org.kevoree.modeling.format.json;
 
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -32,7 +32,7 @@ public class JsonRaw {
      * }
      * return JSON.stringify(builder);
      */
-    public static String encode(KMemoryChunk raw, long uuid, KMetaClass p_metaClass, boolean isRoot) {
+    public static String encode(KObjectChunk raw, long uuid, KMetaClass p_metaClass, boolean isRoot) {
         StringBuilder builder = new StringBuilder();
         builder.append("{\"@class\":\"");
         builder.append(p_metaClass.metaName());

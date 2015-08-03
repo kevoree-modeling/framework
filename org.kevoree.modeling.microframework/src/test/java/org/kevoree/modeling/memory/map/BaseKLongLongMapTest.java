@@ -2,6 +2,8 @@ package org.kevoree.modeling.memory.map;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.memory.chunk.KLongLongMap;
+import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;

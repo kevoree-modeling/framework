@@ -2,7 +2,7 @@ package org.kevoree.modeling.memory.resolver;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 
 public interface KResolver {
@@ -13,9 +13,9 @@ public interface KResolver {
 
     Runnable lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback);
 
-    KMemoryChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
+    KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
 
-    KMemoryChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
+    KObjectChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
 
     void indexObject(KObject obj);
 

@@ -1,9 +1,9 @@
 package org.kevoree.modeling.memory.strategy.impl;
 
-import org.kevoree.modeling.memory.cache.KCache;
-import org.kevoree.modeling.memory.cache.impl.PhantomQueueCache;
-import org.kevoree.modeling.memory.storage.KMemoryStorage;
-import org.kevoree.modeling.memory.storage.impl.OffHeapMemoryStorage;
+import org.kevoree.modeling.memory.cache.KChunkSpaceManager;
+import org.kevoree.modeling.memory.cache.impl.PhantomQueueChunkSpaceManager;
+import org.kevoree.modeling.memory.space.KChunkSpace;
+import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 
 /**
@@ -12,13 +12,13 @@ import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 public class OffHeapMemoryStrategy implements KMemoryStrategy {
 
     @Override
-    public KMemoryStorage newStorage() {
-        return new OffHeapMemoryStorage();
+    public KChunkSpace newStorage() {
+        return new OffHeapChunkSpace();
     }
 
     @Override
-    public KCache newCache(KMemoryStorage p_storage) {
-        return new PhantomQueueCache(p_storage);
+    public KChunkSpaceManager newCache(KChunkSpace p_storage) {
+        return new PhantomQueueChunkSpaceManager(p_storage);
     }
 
 }

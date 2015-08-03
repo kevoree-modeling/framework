@@ -1,12 +1,12 @@
 package org.kevoree.modeling.memory.strategy;
 
-import org.kevoree.modeling.memory.cache.KCache;
-import org.kevoree.modeling.memory.storage.KMemoryStorage;
+import org.kevoree.modeling.memory.cache.KChunkSpaceManager;
+import org.kevoree.modeling.memory.space.KChunkSpace;
 
 public interface KMemoryStrategy {
 
-    KMemoryStorage newStorage();
+    KChunkSpace newStorage();
 
-    KCache newCache(KMemoryStorage storage);
+    KChunkSpaceManager newCache(KChunkSpace storage);
 
 }

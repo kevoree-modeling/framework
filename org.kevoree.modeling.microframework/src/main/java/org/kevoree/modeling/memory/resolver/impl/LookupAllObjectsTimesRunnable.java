@@ -1,11 +1,7 @@
 package org.kevoree.modeling.memory.resolver.impl;
 
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.abs.AbstractKModel;
-import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.manager.impl.DataManager;
 
 public class LookupAllObjectsTimesRunnable implements Runnable {
@@ -33,9 +29,9 @@ public class LookupAllObjectsTimesRunnable implements Runnable {
                 tempKeys[i] = KContentKey.createUniverseTree(_keys[i]);
             }
         }
-        _store.bumpKeysToCache(tempKeys, new KCallback<KMemoryElement[]>() {
+        _store.bumpKeysToCache(tempKeys, new KCallback<KObjectChunk[]>() {
             @Override
-            public void on(KMemoryElement[] universeIndexes) {
+            public void on(KObjectChunk[] universeIndexes) {
                 final KContentKey[] tempKeys2 = new KContentKey[_keys.length * _times.length];
                 for (int i = 0; i < _keys.length; i++) {
                     for (int j = 0; j < _times.length; j++) {
@@ -47,9 +43,9 @@ public class LookupAllObjectsTimesRunnable implements Runnable {
                     }
                 }
                 //todo check duplicate
-                _store.bumpKeysToCache(tempKeys2, new KCallback<KMemoryElement[]>() {
+                _store.bumpKeysToCache(tempKeys2, new KCallback<KObjectChunk[]>() {
                     @Override
-                    public void on(KMemoryElement[] timeIndexes) {
+                    public void on(KObjectChunk[] timeIndexes) {
                         for (int i = 0; i < _keys.length; i++) {
                             for (int j = 0; j < _times.length; j++) {
                                 KContentKey resolvedContentKey = null;
@@ -63,14 +59,14 @@ public class LookupAllObjectsTimesRunnable implements Runnable {
                                 tempKeys2[(i * _times.length) + j] = resolvedContentKey;
                             }
                         }
-                        _store.bumpKeysToCache(tempKeys2, new KCallback<KMemoryElement[]>() {
+                        _store.bumpKeysToCache(tempKeys2, new KCallback<KObjectChunk[]>() {
                             @Override
-                            public void on(KMemoryElement[] cachedObjects) {
+                            public void on(KObjectChunk[] cachedObjects) {
                                 KObject[] proxies = new KObject[_keys.length * _times.length];
                                 for (int i = 0; i < _keys.length; i++) {
                                     for (int j = 0; j < _times.length; j++) {
                                         if (cachedObjects[(i * _times.length) + j] != null) {
-                                            proxies[(i * _times.length) + j] = ((AbstractKModel) _store.model()).createProxy(_universe, _times[j], _keys[i], _store.model().metaModel().metaClasses()[((KMemoryChunk) cachedObjects[i]).metaClassIndex()]);
+                                            proxies[(i * _times.length) + j] = ((AbstractKModel) _store.model()).createProxy(_universe, _times[j], _keys[i], _store.model().metaModel().metaClasses()[((KObjectChunk) cachedObjects[i]).metaClassIndex()]);
                                             if (proxies[(i * _times.length) + j] != null) {
                                                 KLongTree cachedIndexTree = (KLongTree) timeIndexes[(i * _times.length) + j];
                                                 cachedIndexTree.inc();

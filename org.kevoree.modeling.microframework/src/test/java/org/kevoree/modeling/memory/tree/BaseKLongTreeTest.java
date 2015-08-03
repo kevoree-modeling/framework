@@ -3,6 +3,8 @@ package org.kevoree.modeling.memory.tree;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.chunk.KLongTree;
+import org.kevoree.modeling.memory.chunk.KTreeWalker;
 
 public abstract class BaseKLongTreeTest {
     private static final int RANGE_TEST_SIZE = 100;

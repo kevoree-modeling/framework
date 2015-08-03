@@ -13,8 +13,8 @@ import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.map.KIntMapCallBack;
-import org.kevoree.modeling.memory.map.impl.ArrayIntMap;
+import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
+import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.message.*;
 import org.kevoree.modeling.message.impl.*;
 

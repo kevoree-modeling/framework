@@ -3,6 +3,8 @@ package org.kevoree.modeling.memory.map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.chunk.KLongMap;
+import org.kevoree.modeling.memory.chunk.KLongMapCallBack;
 
 public abstract class BaseKLongHashMapTest {
     private static final int SIZE = 100;

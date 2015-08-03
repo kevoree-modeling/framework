@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public abstract class BaseKMemoryChunkTest {
 
-    public abstract KMemoryChunk createKMemoryChunk();
+    public abstract KObjectChunk createKMemoryChunk();
 
     @Test
     public void attributeTest() {
@@ -52,7 +52,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -118,7 +118,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -185,7 +185,7 @@ public abstract class BaseKMemoryChunkTest {
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
                 // cache entry
-                KMemoryChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -195,7 +195,7 @@ public abstract class BaseKMemoryChunkTest {
                 cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
 
                 // clone
-                KMemoryChunk clonedEntry = cacheEntry.clone(dynamicMetaModel);
+                KObjectChunk clonedEntry = cacheEntry.clone(dynamicMetaModel);
 
                 Assert.assertEquals(cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass),
                         clonedEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass));
@@ -247,7 +247,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -256,13 +256,13 @@ public abstract class BaseKMemoryChunkTest {
                 cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
                 cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
 
-                ArrayList<KMemoryChunk> segments = new ArrayList<KMemoryChunk>();
+                ArrayList<KObjectChunk> segments = new ArrayList<KObjectChunk>();
                 for (int i = 0; i < 50; i++) {
                     segments.add(cacheEntry.clone(dynamicMetaModel));
                 }
 
                 // free everything
-                KMemoryChunk[] loopSegment = segments.toArray(new KMemoryChunk[segments.size()]);
+                KObjectChunk[] loopSegment = segments.toArray(new KObjectChunk[segments.size()]);
                 for (int i = 0; i < loopSegment.length; i++) {
                     loopSegment[i].free(dynamicMetaModel);
                 }
@@ -305,7 +305,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 Assert.assertFalse(cacheEntry.isDirty());
@@ -345,7 +345,7 @@ public abstract class BaseKMemoryChunkTest {
                 KObject sensor = model.universe(0).time(0).create(sensorMetaClass);
                 sensor.set(sensorMetaClass.attribute("name"), "Sensor#1");
 
-                KMemoryChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, sensorMetaClass.index());
 
                 Assert.assertFalse(cacheEntry.isDirty());
@@ -382,7 +382,7 @@ public abstract class BaseKMemoryChunkTest {
 
 
                 // clone cache entry
-                KMemoryChunk clone = cacheEntry.clone(dynamicMetaModel);
+                KObjectChunk clone = cacheEntry.clone(dynamicMetaModel);
                 double[] inferPayload5 = clone.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 double[] inferPayload6 = clone.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertTrue(inferPayload5[9] == 52);
@@ -429,7 +429,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KMemoryChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 Assert.assertFalse(cacheEntry.isDirty());
@@ -452,7 +452,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 Assert.assertEquals("{\"attr_long\":\"U\",\"sensors\":[\"E\",\"G\"],\"value\":[\"P7JmZmZmZma\",\"P/BmZmZmZma\",\"QAAzMzMzMzN\"]}", cacheEntry.serialize(dynamicMetaModel));
 
-                KMemoryChunk newCacheEntry = createKMemoryChunk();
+                KObjectChunk newCacheEntry = createKMemoryChunk();
                 try {
                     String serialized = cacheEntry.serialize(dynamicMetaModel);
                     newCacheEntry.init(serialized, dynamicMetaModel, homeMetaClass.index());

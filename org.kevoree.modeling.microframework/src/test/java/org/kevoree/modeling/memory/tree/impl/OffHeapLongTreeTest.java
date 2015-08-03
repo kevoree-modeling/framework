@@ -1,7 +1,8 @@
 package org.kevoree.modeling.memory.tree.impl;
 
+import org.kevoree.modeling.memory.chunk.impl.OffHeapLongTree;
 import org.kevoree.modeling.memory.tree.BaseKLongTreeTest;
-import org.kevoree.modeling.memory.tree.KLongTree;
+import org.kevoree.modeling.memory.chunk.KLongTree;
 
 /** @ignore ts*/
 

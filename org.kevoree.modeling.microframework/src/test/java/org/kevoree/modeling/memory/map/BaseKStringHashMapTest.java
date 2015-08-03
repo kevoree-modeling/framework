@@ -3,6 +3,8 @@ package org.kevoree.modeling.memory.map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.chunk.KStringMap;
+import org.kevoree.modeling.memory.chunk.KStringMapCallBack;
 
 import java.util.HashMap;
 

@@ -3,9 +3,8 @@ package org.kevoree.modeling;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.memory.resolver.impl.DistortedTimeResolver;
-import org.kevoree.modeling.memory.resolver.impl.ResolutionHelper;
-import org.kevoree.modeling.memory.map.KLongLongMap;
-import org.kevoree.modeling.memory.map.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.chunk.KLongLongMap;
+import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
 
 /**
  * Created by duke on 03/03/15.

@@ -1,8 +1,8 @@
 package org.kevoree.modeling.format.json;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.map.impl.ArrayStringMap;
-import org.kevoree.modeling.memory.map.KStringMapCallBack;
+import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
+import org.kevoree.modeling.memory.chunk.KStringMapCallBack;
 
 import java.util.ArrayList;
 

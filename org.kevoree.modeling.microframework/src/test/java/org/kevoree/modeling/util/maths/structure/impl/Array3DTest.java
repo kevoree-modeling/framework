@@ -4,9 +4,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.infer.KInferAlg;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
-import org.kevoree.modeling.memory.chunk.impl.HeapMemoryChunk;
+import org.kevoree.modeling.memory.chunk.impl.HeapObjectChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -28,7 +28,7 @@ public class Array3DTest {
                 return new double[0][];
             }
         });
-        KMemoryChunk segment = new HeapMemoryChunk();
+        KObjectChunk segment = new HeapObjectChunk();
         segment.init(null, mm, mc.index());
         int nbLines = 5;
         int nbColumn = 3;

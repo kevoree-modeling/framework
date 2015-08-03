@@ -3,9 +3,9 @@ package org.kevoree.modeling.extrapolation.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.util.maths.PolynomialFit;
-import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
@@ -16,7 +16,7 @@ public class PolynomialExtrapolation implements Extrapolation {
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
-        KMemoryChunk raw = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
+        KObjectChunk raw = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         if (raw != null) {
             Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), ((AbstractKObject) current).previousResolved()[AbstractKObject.TIME_PREVIOUS_INDEX]);
             int attTypeId = attribute.attributeType().id();
@@ -44,7 +44,7 @@ public class PolynomialExtrapolation implements Extrapolation {
     private final static int LASTTIME = 3;
     private final static int WEIGHTS = 4;
 
-    private Double extrapolateValue(KMemoryChunk segment, KMetaClass meta, int index, long time, long timeOrigin) {
+    private Double extrapolateValue(KObjectChunk segment, KMetaClass meta, int index, long time, long timeOrigin) {
         if (segment.getDoubleArraySize(index, meta) == 0) {
             return 0.0;
         }
@@ -75,7 +75,7 @@ public class PolynomialExtrapolation implements Extrapolation {
     }
 
 
-    public boolean insert(long time, double value, long timeOrigin, KMemoryChunk raw, int index, double precision, KMetaClass metaClass) {
+    public boolean insert(long time, double value, long timeOrigin, KObjectChunk raw, int index, double precision, KMetaClass metaClass) {
         if (raw.getDoubleArraySize(index, metaClass) == 0) {
             initial_feed(time, value, raw, index, metaClass);
             return true;
@@ -138,7 +138,7 @@ public class PolynomialExtrapolation implements Extrapolation {
     }
 
 
-    private double internal_extrapolate(double t, KMemoryChunk raw, int index, KMetaClass metaClass) {
+    private double internal_extrapolate(double t, KObjectChunk raw, int index, KMetaClass metaClass) {
         double result = 0;
         double power = 1;
         if (raw.getDoubleArrayElem(index, STEP, metaClass) == 0) {
@@ -151,7 +151,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         return result;
     }
 
-    private void initial_feed(long time, double value, KMemoryChunk raw, int index, KMetaClass metaClass) {
+    private void initial_feed(long time, double value, KObjectChunk raw, int index, KMetaClass metaClass) {
         //Create initial array of the constant elements + 1 for weights.
 
         raw.extendDoubleArray(index, WEIGHTS + 1, metaClass); //Create N constants and 1 for the weights
@@ -166,7 +166,7 @@ public class PolynomialExtrapolation implements Extrapolation {
     @Override
     public void mutate(KObject current, KMetaAttribute attribute, Object payload, KInternalDataManager dataManager) {
         long[] previousResolved = ((AbstractKObject) current).previousResolved();
-        KMemoryChunk raw = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), previousResolved);
+        KObjectChunk raw = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), previousResolved);
         if (raw.getDoubleArraySize(attribute.index(), current.metaClass()) == 0) {
             raw = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), previousResolved);
         }
@@ -174,7 +174,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         if (!insert(current.now(), castNumber(payload), chunkResolvedTime, raw, attribute.index(), attribute.precision(), current.metaClass())) {
             long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + chunkResolvedTime;
             double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, chunkResolvedTime);
-            KMemoryChunk newSegment = dataManager.preciseChunk(current.universe(), prevTime, current.uuid(), current.metaClass(), previousResolved);
+            KObjectChunk newSegment = dataManager.preciseChunk(current.universe(), prevTime, current.uuid(), current.metaClass(), previousResolved);
             insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
             insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
         }
