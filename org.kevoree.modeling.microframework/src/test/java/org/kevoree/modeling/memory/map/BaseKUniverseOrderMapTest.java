@@ -79,7 +79,6 @@ public abstract class BaseKUniverseOrderMapTest {
         mapNull2.init(nullSaved, null, -1);
         String nullSaved2 = mapNull2.serialize(null);
         Assert.assertEquals(nullSaved2, "U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
-
     }
 
     @Test

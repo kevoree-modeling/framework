@@ -11,9 +11,6 @@ import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
 import java.util.List;
 
-/**
- * Created by duke on 18/02/15.
- */
 public class UniverseTest {
 
     @Test
@@ -61,7 +58,7 @@ public class UniverseTest {
                 });
 
                 CloudUniverse forkedUniverse = dimension0.diverge();
-                forkedUniverse.time(1).lookup(n0.uuid(),new KCallback<KObject>() {
+                forkedUniverse.time(1).lookup(n0.uuid(), new KCallback<KObject>() {
                     @Override
                     public void on(KObject forkedN1) {
                         Node forkedNode = (Node) forkedN1;
