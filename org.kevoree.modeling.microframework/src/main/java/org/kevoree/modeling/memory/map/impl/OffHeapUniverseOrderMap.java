@@ -1,12 +1,15 @@
 package org.kevoree.modeling.memory.map.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.map.KUniverseOrderMap;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.storage.impl.OffHeapMemoryStorage;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @ignore ts
@@ -65,6 +68,26 @@ public class OffHeapUniverseOrderMap extends OffHeapLongLongMap implements KUniv
     @Override
     public void setDirty() {
         UNSAFE.putByte(_start_address + OFFSET_STARTADDRESS_DIRTY, (byte) 1);
+    }
+
+    @Override
+    public long getFlags() {
+        return 0; //  FIXME
+    }
+
+    @Override
+    public void setFlags(long flagsToEnable, long flagsToDisable) {
+        //  FIXME
+    }
+
+    @Override
+    public KMemoryElement next() {
+        return null;//  FIXME
+    }
+
+    @Override
+    public void insertInto(AtomicReference<KMemoryElement> list) {
+        //  FIXME
     }
 
     /* warning: this method is not thread safe */

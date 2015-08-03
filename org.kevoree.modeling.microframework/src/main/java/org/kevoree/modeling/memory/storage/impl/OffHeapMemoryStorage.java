@@ -384,13 +384,10 @@ public class OffHeapMemoryStorage implements KMemoryStorage {
         UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT, elementCount - 1);
         int droppedCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
         UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, droppedCount + 1);
-
-        if (droppedCount > this._threshold * this._loadFactor) {
-            compact();
-        }
     }
 
-    private void compact() {
+    @Override
+    public void compact() {
         int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT);
         int droppedCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
 

@@ -8,7 +8,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 public abstract class AbstractCountingCache implements KCache {
 
-    private KMemoryStorage _storage;
+    final protected KMemoryStorage _storage;
 
     public AbstractCountingCache(KMemoryStorage p_storage) {
         this._storage = p_storage;
@@ -67,9 +67,9 @@ public abstract class AbstractCountingCache implements KCache {
 
     @Override
     public void clear() {
-
     }
 
+    abstract void collect(KMemoryStorage storage);
 
 /*
     private synchronized void common_clean_monitor(KObject origin, KMetaModel p_metaModel) {

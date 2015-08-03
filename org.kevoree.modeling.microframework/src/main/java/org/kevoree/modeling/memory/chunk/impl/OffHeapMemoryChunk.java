@@ -3,6 +3,7 @@ package org.kevoree.modeling.memory.chunk.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
+import org.kevoree.modeling.memory.KMemoryElement;
 import org.kevoree.modeling.memory.KOffHeapMemoryElement;
 import org.kevoree.modeling.memory.chunk.KMemoryChunk;
 import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
@@ -15,6 +16,7 @@ import sun.misc.Unsafe;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @ignore ts
@@ -759,6 +761,26 @@ public class OffHeapMemoryChunk implements KMemoryChunk, KOffHeapMemoryElement {
     @Override
     public final void setDirty() {
         UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 1);
+    }
+
+    @Override
+    public long getFlags() {
+        return 0; // FIXME
+    }
+
+    @Override
+    public void setFlags(long flagsToEnable, long flagsToDisable) {
+        // FIXME
+    }
+
+    @Override
+    public KMemoryElement next() {
+        return null; // FIXME
+    }
+
+    @Override
+    public void insertInto(AtomicReference<KMemoryElement> list) {
+        // FIXME
     }
 
 

@@ -1,9 +1,14 @@
 package org.kevoree.modeling.memory.tree.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KMemoryElement;
+import org.kevoree.modeling.memory.storage.KMemoryElementTypes;
 import org.kevoree.modeling.memory.tree.KTreeWalker;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
+
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractArrayTree {
 
@@ -18,13 +23,13 @@ public abstract class AbstractArrayTree {
     protected int kvSize = 1;
 
     private int _threshold = 0;
-    private boolean _dirty = true;
 
     //volatile variables
     private volatile int _counter = 0;
     private volatile int _root_index = -1;
     private volatile int _size = 0;
     private volatile InternalState state;
+    private AtomicLong _flags = new AtomicLong();
 
     public AbstractArrayTree() {
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
@@ -463,16 +468,28 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    public final boolean isDirty() {
-        return _dirty;
+    public boolean isDirty() {
+        return (getFlags() & KMemoryElementTypes.DIRTY_BIT) == KMemoryElementTypes.DIRTY_BIT;
     }
 
-    public final void setClean(KMetaModel p_metaModel) {
-        _dirty = false;
+    public void setDirty() {
+        setFlags(KMemoryElementTypes.DIRTY_BIT, 0);
     }
 
-    public final void setDirty() {
-        _dirty = true;
+    public void setClean(KMetaModel metaModel) {
+        setFlags(0, KMemoryElementTypes.DIRTY_BIT);
+    }
+
+    public long getFlags() {
+        return _flags.get();
+    }
+
+    public void setFlags(long bitsToEnable, long bitsToDisable) {
+        long val, nval;
+        do {
+            val = _flags.get();
+            nval = val & ~bitsToDisable | bitsToEnable;
+        } while (!_flags.compareAndSet(val, nval));
     }
 
     public final int counter() {
@@ -502,7 +519,7 @@ public abstract class AbstractArrayTree {
     }
 
     protected final synchronized void internal_insert(long p_key, long p_value) {
-        this._dirty = true;
+        setDirty();
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             reallocate(length);
