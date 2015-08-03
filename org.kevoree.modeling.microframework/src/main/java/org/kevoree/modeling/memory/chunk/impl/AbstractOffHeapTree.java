@@ -2,8 +2,9 @@ package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KOffHeapChunk;
-import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.memory.chunk.KTreeWalker;
+import org.kevoree.modeling.memory.space.KChunkSpace;
+import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
@@ -20,7 +21,7 @@ import java.lang.reflect.Field;
 public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     protected static final Unsafe UNSAFE = getUnsafe();
 
-    protected OffHeapChunkSpace storage;
+    protected OffHeapChunkSpace space;
     protected long universe, time, obj;
 
     private static final char BLACK_LEFT = '{';
@@ -73,8 +74,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
         _threshold = (int) (size() * _loadFactor);
 
-        if (storage != null) {
-            storage.notifyRealloc(this._start_address, this.universe, this.time, this.obj);
+        if (space != null) {
+            space.notifyRealloc(this._start_address, this.universe, this.time, this.obj);
         }
     }
 
@@ -89,14 +90,14 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
         _threshold = (int) (length * _loadFactor);
 
-        if (storage != null) {
-            storage.notifyRealloc(this._start_address, this.universe, this.time, this.obj);
+        if (space != null) {
+            space.notifyRealloc(this._start_address, this.universe, this.time, this.obj);
         }
     }
 
     @Override
     public void setStorage(OffHeapChunkSpace storage, long universe, long time, long obj) {
-        this.storage = storage;
+        this.space = storage;
         this.universe = universe;
         this.time = time;
         this.obj = obj;
@@ -697,6 +698,11 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
         _threshold = (int) (size() * _loadFactor);
+    }
+
+    @Override
+    public KChunkSpace space() {
+        return space;
     }
 
 }

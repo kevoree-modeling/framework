@@ -1,6 +1,7 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.chunk.KLongLongTree;
 
@@ -38,4 +39,6 @@ public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLon
     public short type() {
         return KChunkTypes.LONG_LONG_TREE;
     }
+
+
 }

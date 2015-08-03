@@ -5,6 +5,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
+import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -27,7 +28,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private volatile int _counter = 0;
     private int _metaClassIndex = -1;
 
-    private OffHeapChunkSpace storage;
+    private OffHeapChunkSpace space;
     private long universe, time, obj;
 
     protected int threshold;
@@ -122,8 +123,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
         this.threshold = (int) (elementDataSize * loadFactor);
 
-        if (this.storage != null) {
-            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        if (this.space != null) {
+            space.notifyRealloc(_start_address, this.universe, this.time, this.obj);
         }
 
     }
@@ -154,8 +155,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             long elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
             this.threshold = (int) (elementDataSize * loadFactor);
 
-            if (this.storage != null) {
-                storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+            if (this.space != null) {
+                space.notifyRealloc(_start_address, this.universe, this.time, this.obj);
             }
         }
     }
@@ -195,8 +196,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
         this.threshold = (int) (length * loadFactor);
 
-        if (this.storage != null) {
-            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        if (this.space != null) {
+            space.notifyRealloc(_start_address, this.universe, this.time, this.obj);
         }
 
     }
@@ -478,85 +479,6 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
     }
 
-
-//    /* warning: this method is not thread safe */
-//    @Override
-//    public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
-//        _metaClassIndex = metaClassIndex;
-//
-//        if (payload == null || payload.length() == 0) {
-//            return;
-//        }
-//        int initPos = 0;
-//        int cursor = 0;
-//        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '/') {
-//            cursor++;
-//        }
-//        if (cursor >= payload.length()) {
-//            return;
-//        }
-//        if (payload.charAt(cursor) == ',') {//className to parse
-//            _metaClassIndex = metaModel.metaClassByName(payload.substring(initPos, cursor)).index();
-//            cursor++;
-//            initPos = cursor;
-//        }
-//        while (cursor < payload.length() && payload.charAt(cursor) != '/') {
-//            cursor++;
-//        }
-//        int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
-//
-//        int length = (nbElement == 0 ? 1 : nbElement << 1);
-//
-//        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
-//        long bytes = BASE_SEGMENT_LEN + elementDataSize * BACK_ELEM_ENTRY_LEN;
-//        long newAddress = UNSAFE.allocateMemory(bytes);
-//        UNSAFE.setMemory(newAddress, bytes, (byte) 0);
-//        UNSAFE.copyMemory(_start_address, newAddress, BASE_SEGMENT_LEN + nbElement * BACK_ELEM_ENTRY_LEN);
-//
-//        UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, length);
-//
-//        //setPrimitiveType value for all
-//        while (cursor < payload.length()) {
-//            cursor++;
-//            int beginChunk = cursor;
-//            while (cursor < payload.length() && payload.charAt(cursor) != ':') {
-//                cursor++;
-//            }
-//            int middleChunk = cursor;
-//            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
-//                cursor++;
-//            }
-//            long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
-//            long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
-//            int index = (((int) (loopKey)) & 0x7FFFFFFF) % UNSAFE.getInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
-//            //insert K/V
-//            int newIndex = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
-//
-//            internal_setKey(newAddress, newIndex, loopKey);
-//            internal_setValue(newAddress, newIndex, loopVal);
-//            int currentHashedIndex = internal_getHash(newAddress, index);
-//            if (currentHashedIndex != -1) {
-//                internal_setNext(newAddress, newIndex, currentHashedIndex);
-//            } else {
-//                internal_setNext(newAddress, newIndex, -2);//special char to tag used values
-//            }
-//            internal_setHash(newAddress, index, newIndex);
-//
-//            // increase element count
-//            int oldElementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
-//            int elementCount = oldElementCount + 1;
-//            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
-//        }
-//
-//        UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_COUNT, nbElement);
-//        UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
-//        long oldAddress = _start_address;
-//        _start_address = newAddress;
-//        this.threshold = (int) (length * loadFactor);
-//
-//        UNSAFE.freeMemory(oldAddress);
-//    }
-
     @Override
     public String serialize(KMetaModel metaModel) {
         int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
@@ -597,6 +519,11 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     }
 
     @Override
+    public KChunkSpace space() {
+        return space;
+    }
+
+    @Override
     public long getMemoryAddress() {
         return this._start_address;
     }
@@ -604,14 +531,14 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     @Override
     public void setMemoryAddress(long address) {
         this._start_address = address;
-        if (this.storage != null) {
-            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        if (this.space != null) {
+            space.notifyRealloc(_start_address, this.universe, this.time, this.obj);
         }
     }
 
     @Override
     public void setStorage(OffHeapChunkSpace storage, long universe, long time, long obj) {
-        this.storage = storage;
+        this.space = storage;
         this.universe = universe;
         this.time = time;
         this.obj = obj;

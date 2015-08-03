@@ -5,6 +5,7 @@ import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.meta.*;
@@ -25,7 +26,7 @@ import java.lang.reflect.Field;
 public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     private static final Unsafe UNSAFE = getUnsafe();
 
-    private OffHeapChunkSpace storage;
+    private OffHeapChunkSpace space;
     private long universe, time, obj;
 
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
@@ -446,8 +447,8 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         UNSAFE.setMemory(_start_address, bytes, (byte) 0);
         UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, metaClass.index());
 
-        if (this.storage != null) {
-            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        if (this.space != null) {
+            space.notifyRealloc(_start_address, this.universe, this.time, this.obj);
         }
     }
 
@@ -828,6 +829,11 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         return KChunkTypes.CHUNK;
     }
 
+    @Override
+    public KChunkSpace space() {
+        return space;
+    }
+
 
     @Override
     public final int getLongArraySize(int index, KMetaClass metaClass) {
@@ -870,14 +876,14 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     @Override
     public final void setMemoryAddress(long address) {
         _start_address = address;
-        if (this.storage != null) {
-            storage.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        if (this.space != null) {
+            space.notifyRealloc(_start_address, this.universe, this.time, this.obj);
         }
     }
 
     @Override
     public void setStorage(OffHeapChunkSpace storage, long universe, long time, long obj) {
-        this.storage = storage;
+        this.space = storage;
         this.universe = universe;
         this.time = time;
         this.obj = obj;
