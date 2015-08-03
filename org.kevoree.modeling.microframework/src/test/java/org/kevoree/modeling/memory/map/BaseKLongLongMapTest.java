@@ -50,8 +50,9 @@ public abstract class BaseKLongLongMapTest {
         map.init(saved, metaModel, metaClass.index()); //init again and simulate a reload
         saved = map.serialize(metaModel);
         Assert.assertEquals(saved, "org.kevoree.modeling.Hello,U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
+
         KLongLongMap map2 = createKUniverseOrderMap();//, null);
-        map2.init(saved, null, -1);
+        map2.init(saved, metaModel, -1);
         Assert.assertEquals(map2.size(), 10);
         for (long i = 0; i < 10; i++) {
             Assert.assertEquals(map.get(i), i);
@@ -59,17 +60,17 @@ public abstract class BaseKLongLongMapTest {
         }
         Assert.assertEquals(map.size(), map2.size());
         Assert.assertEquals(map.metaClassIndex(), map2.metaClassIndex());
-        String saved2 = map2.serialize(null);
+        String saved2 = map2.serialize(metaModel);
         Assert.assertEquals(saved2, "org.kevoree.modeling.Hello,U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
         KLongLongMap nullClassName = createKUniverseOrderMap();//, null);
         for (long i = 0; i < 10; i++) {
             nullClassName.put(i, i);
         }
-        String nullSaved = nullClassName.serialize(null);
+        String nullSaved = nullClassName.serialize(metaModel);
         Assert.assertEquals(nullSaved, "U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
         KLongLongMap mapNull2 = createKUniverseOrderMap();//, null);
-        mapNull2.init(nullSaved, null, -1);
-        String nullSaved2 = mapNull2.serialize(null);
+        mapNull2.init(nullSaved, metaModel, -1);
+        String nullSaved2 = mapNull2.serialize(metaModel);
         Assert.assertEquals(nullSaved2, "U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
     }
 

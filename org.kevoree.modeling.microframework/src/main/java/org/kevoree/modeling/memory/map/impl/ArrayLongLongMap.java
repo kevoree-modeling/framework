@@ -345,7 +345,17 @@ public class ArrayLongLongMap implements KLongLongMap {
             cursor++;
         }
         int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
-        rehashCapacity(nbElement);
+        //reset the map
+        int length = (nbElement == 0 ? 1 : nbElement << 1);
+        long[] newElementKV = new long[length * 2];
+        int[] newElementNext = new int[length];
+        int[] newElementHash = new int[length];
+        for (int i = 0; i < length; i++) {
+            newElementNext[i] = -1;
+            newElementHash[i] = -1;
+        }
+        //setPrimitiveType value for all
+        InternalState temp_state = new InternalState(length, newElementKV, newElementNext, newElementHash);
         while (cursor < payload.length()) {
             cursor++;
             int beginChunk = cursor;
@@ -358,20 +368,24 @@ public class ArrayLongLongMap implements KLongLongMap {
             }
             long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
             long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
-            int index = (((int) (loopKey)) & 0x7FFFFFFF) % state.elementDataSize;
+            int index = (((int) (loopKey)) & 0x7FFFFFFF) % temp_state.elementDataSize;
             //insert K/V
             int newIndex = this.elementCount;
-            state.elementKV[newIndex * 2] = loopKey;
-            state.elementKV[newIndex * 2 + 1] = loopVal;
-            int currentHashedIndex = state.elementHash[index];
+            temp_state.elementKV[newIndex * 2] = loopKey;
+            temp_state.elementKV[newIndex * 2 + 1] = loopVal;
+            int currentHashedIndex = temp_state.elementHash[index];
             if (currentHashedIndex != -1) {
-                state.elementNext[newIndex] = currentHashedIndex;
+                temp_state.elementNext[newIndex] = currentHashedIndex;
             } else {
-                state.elementNext[newIndex] = -2; //special char to tag used values
+                temp_state.elementNext[newIndex] = -2; //special char to tag used values
             }
-            state.elementHash[index] = newIndex;
+            temp_state.elementHash[index] = newIndex;
             this.elementCount++;
         }
+        this.elementCount = nbElement;
+        this.state = temp_state;//TODO check with CnS
+        this.threshold = (int) (length * loadFactor);
+
     }
 
     @Override
