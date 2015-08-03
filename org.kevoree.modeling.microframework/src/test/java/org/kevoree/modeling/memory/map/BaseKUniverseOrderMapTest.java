@@ -2,7 +2,9 @@ package org.kevoree.modeling.memory.map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.meta.KMetaClass;
+import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.meta.impl.MetaModel;
 
 public abstract class BaseKUniverseOrderMapTest {
 
@@ -35,12 +37,20 @@ public abstract class BaseKUniverseOrderMapTest {
 
     @Test
     public void testLoadSave() throws Exception {
+        KMetaModel metaModel = new MetaModel("UniverseOrderMapTest");
+        KMetaClass metaClass = metaModel.addMetaClass("org.kevoree.modeling.Hello");
+
         KUniverseOrderMap map = createKUniverseOrderMap();//, "org.kevoree.modeling.Hello");
         for (long i = 0; i < 10; i++) {
             map.put(i, i);
         }
         Assert.assertEquals(map.size(), 10);
         String saved = map.serialize(null);
+
+        Assert.assertEquals(saved, "U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
+
+        map.init(saved, metaModel, metaClass.index());
+        saved = map.serialize(metaModel);
 
         Assert.assertEquals(saved, "org.kevoree.modeling.Hello,U/A:A,C:C,E:E,G:G,I:I,K:K,M:M,O:O,Q:Q,S:S");
 
