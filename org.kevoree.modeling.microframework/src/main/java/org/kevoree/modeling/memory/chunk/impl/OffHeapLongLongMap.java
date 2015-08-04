@@ -16,50 +16,50 @@ import sun.misc.Unsafe;
  * @ignore ts
  * <p/>
  * OffHeap implementation of KLongLongMap
- * - memory structure:  | elem count (4) | dropped count (4) | flags (8) | elem data size (4) | back (elem data size * 28) |
- * - back:              | key (8)   | value (8) | next (4) | hash (4) |
+ * - memory structure:  | meta class idx (4) | elem count (4) | dropped count (4) | flags (8) | elem data size (4) | counter (4) | back (elem data size * 28) |
+ * - back:              | key (8) | value (8) | next (4) | hash (4) |
  */
 public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     protected static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
-    private volatile int _counter = 0;
-    private int _metaClassIndex = -1;
-
     private OffHeapChunkSpace _space;
     private long _universe, _time, _obj;
 
-    protected int threshold;
-
     private int initialCapacity;
-
+    private int threshold;
     private float loadFactor;
 
-    protected volatile long _start_address;
+    private volatile long _start_address;
 
     // constants for off-heap memory layout
-    protected static final int ATT_ELEM_COUNT_LEN = 4;
-    protected static final int ATT_DROPPED_COUNT_LEN = 4;
-    protected static final int ATT_FLAGS_LEN = 8;
-    protected static final int ATT_ELEM_DATA_SIZE_LEN = 4;
+    private static final int ATT_META_CLASS_INDEX_LEN = 4;
+    private static final int ATT_ELEM_COUNT_LEN = 4;
+    private static final int ATT_DROPPED_COUNT_LEN = 4;
+    private static final int ATT_FLAGS_LEN = 8;
+    private static final int ATT_ELEM_DATA_SIZE_LEN = 4;
+    private static final int ATT_COUNTER_LEN = 4;
 
-    protected static final int ATT_KEY_LEN = 8;
-    protected static final int ATT_VALUE_LEN = 8;
-    protected static final int ATT_NEXT_LEN = 8;
-    protected static final int ATT_HASH_LEN = 4;
+    private static final int ATT_KEY_LEN = 8;
+    private static final int ATT_VALUE_LEN = 8;
+    private static final int ATT_NEXT_LEN = 8;
+    private static final int ATT_HASH_LEN = 4;
 
-    protected static final int BASE_SEGMENT_LEN = ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN + ATT_FLAGS_LEN + ATT_ELEM_DATA_SIZE_LEN;
-    protected static final int BACK_ELEM_ENTRY_LEN = ATT_KEY_LEN + ATT_VALUE_LEN + ATT_NEXT_LEN + ATT_HASH_LEN;
+    private static final int BASE_SEGMENT_LEN =
+            ATT_META_CLASS_INDEX_LEN + ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN + ATT_FLAGS_LEN + ATT_ELEM_DATA_SIZE_LEN + ATT_COUNTER_LEN;
+    private static final int BACK_ELEM_ENTRY_LEN = ATT_KEY_LEN + ATT_VALUE_LEN + ATT_NEXT_LEN + ATT_HASH_LEN;
 
-    protected static final int OFFSET_STARTADDRESS_ELEM_COUNT = 0;
-    protected static final int OFFSET_STARTADDRESS_DROPPED_COUNT = OFFSET_STARTADDRESS_ELEM_COUNT + ATT_ELEM_COUNT_LEN;
-    protected static final int OFFSET_STARTADDRESS_FLAGS = OFFSET_STARTADDRESS_DROPPED_COUNT + ATT_DROPPED_COUNT_LEN;
-    protected static final int OFFSET_STARTADDRESS_ELEM_DATA_SIZE = OFFSET_STARTADDRESS_FLAGS + ATT_FLAGS_LEN;
-    protected static final int OFFSET_STARTADDRESS_BACK = OFFSET_STARTADDRESS_ELEM_DATA_SIZE + ATT_ELEM_DATA_SIZE_LEN;
+    private static final int OFFSET_STARTADDRESS_META_CLASS_INDEX = 0;
+    private static final int OFFSET_STARTADDRESS_ELEM_COUNT = OFFSET_STARTADDRESS_META_CLASS_INDEX + ATT_META_CLASS_INDEX_LEN;
+    private static final int OFFSET_STARTADDRESS_DROPPED_COUNT = OFFSET_STARTADDRESS_ELEM_COUNT + ATT_ELEM_COUNT_LEN;
+    private static final int OFFSET_STARTADDRESS_FLAGS = OFFSET_STARTADDRESS_DROPPED_COUNT + ATT_DROPPED_COUNT_LEN;
+    private static final int OFFSET_STARTADDRESS_ELEM_DATA_SIZE = OFFSET_STARTADDRESS_FLAGS + ATT_FLAGS_LEN;
+    private static final int OFFSET_STARTADDRESS_COUNTER = OFFSET_STARTADDRESS_ELEM_DATA_SIZE + ATT_ELEM_DATA_SIZE_LEN;
+    private static final int OFFSET_STARTADDRESS_BACK = OFFSET_STARTADDRESS_COUNTER + ATT_COUNTER_LEN;
 
-    protected static final int OFFSET_BACK_KEY = 0;
-    protected static final int OFFSET_BACK_VALUE = OFFSET_BACK_KEY + 8;
-    protected static final int OFFSET_BACK_NEXT = OFFSET_BACK_VALUE + 8;
-    protected static final int OFFSET_BACK_HASH = OFFSET_BACK_NEXT + 4;
+    private static final int OFFSET_BACK_KEY = 0;
+    private static final int OFFSET_BACK_VALUE = OFFSET_BACK_KEY + ATT_KEY_LEN;
+    private static final int OFFSET_BACK_NEXT = OFFSET_BACK_VALUE + ATT_VALUE_LEN;
+    private static final int OFFSET_BACK_HASH = OFFSET_BACK_NEXT + ATT_NEXT_LEN;
 
     public OffHeapLongLongMap(OffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
         this._space = p_space;
@@ -110,55 +110,56 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         int elementDataSize = p_initalCapacity;
         long bytes = BASE_SEGMENT_LEN + elementDataSize * BACK_ELEM_ENTRY_LEN;
         _start_address = UNSAFE.allocateMemory(bytes);
-        UNSAFE.setMemory(_start_address, bytes, (byte) 0);
+        UNSAFE.setMemory(this._start_address, bytes, (byte) 0);
 
-        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, 0);
-        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
-        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, elementDataSize);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX, -1);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT, 0);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, elementDataSize);
 
         for (int i = 0; i < initialCapacity; i++) {
             // next
-            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_BACK + (i * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT), -1);
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_BACK + (i * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT), -1);
             // hash
-            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_BACK + (i * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), -1);
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_BACK + (i * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), -1);
         }
 
         this.threshold = (int) (elementDataSize * loadFactor);
 
         if (this._space != null) {
-            _space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
+            this._space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
         }
 
     }
 
     public void clear() {
-        int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+        int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
 
         if (elementCount > 0) {
 
             long bytes = BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN;
             long newAddress = UNSAFE.allocateMemory(bytes);
 
-            UNSAFE.copyMemory(_start_address, newAddress, BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN);
+            UNSAFE.copyMemory(this._start_address, newAddress, BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN);
 
             UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_COUNT, 0);
             UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
             UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, initialCapacity);
 
-            for (int i = 0; i < initialCapacity; i++) {
+            for (int i = 0; i < this.initialCapacity; i++) {
                 setNext(newAddress, i, -1);
                 setHash(newAddress, i, -1);
             }
 
-            long oldAddress = _start_address;
-            _start_address = newAddress;
+            long oldAddress = this._start_address;
+            this._start_address = newAddress;
             UNSAFE.freeMemory(oldAddress);
 
-            long elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
-            this.threshold = (int) (elementDataSize * loadFactor);
+            long elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+            this.threshold = (int) (elementDataSize * this.loadFactor);
 
             if (this._space != null) {
-                _space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
+                this._space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
             }
         }
     }
@@ -170,8 +171,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         long newAddress = UNSAFE.allocateMemory(bytes);
         UNSAFE.setMemory(newAddress, bytes, (byte) 0);
 
-        long elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
-        UNSAFE.copyMemory(_start_address, newAddress, BASE_SEGMENT_LEN + elementDataSize * BACK_ELEM_ENTRY_LEN);
+        long elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        UNSAFE.copyMemory(this._start_address, newAddress, BASE_SEGMENT_LEN + elementDataSize * BACK_ELEM_ENTRY_LEN);
 
         for (int i = 0; i < length; i++) {
             setNext(newAddress, i, -1);
@@ -179,8 +180,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         }
         //rehashEveryThing
         for (int i = 0; i < elementDataSize; i++) {
-            if (next(_start_address, i) != -1) { //there is a real value
-                int index = ((int) key(_start_address, i) & 0x7FFFFFFF) % length;
+            if (next(this._start_address, i) != -1) { //there is a real value
+                int index = ((int) key(this._start_address, i) & 0x7FFFFFFF) % length;
                 int currentHashedIndex = hash(newAddress, index);
                 if (currentHashedIndex != -1) {
                     setNext(newAddress, i, currentHashedIndex);
@@ -192,37 +193,37 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         }
 
         UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, length);
-        long oldAddress = _start_address;
-        _start_address = newAddress;
+        long oldAddress = this._start_address;
+        this._start_address = newAddress;
         UNSAFE.freeMemory(oldAddress);
 
-        this.threshold = (int) (length * loadFactor);
+        this.threshold = (int) (length * this.loadFactor);
 
         if (this._space != null) {
-            _space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
+            _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
         }
 
     }
 
     @Override
     public final void each(KLongLongMapCallBack callback) {
-        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
         for (int i = 0; i < elementDataSize; i++) {
-            if (next(_start_address, i) != -1) { //there is a real value
-                callback.on(key(_start_address, i), value(_start_address, i));
+            if (next(this._start_address, i) != -1) { //there is a real value
+                callback.on(key(this._start_address, i), value(this._start_address, i));
             }
         }
     }
 
     @Override
     public int metaClassIndex() {
-        return 0;
+        return UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX);
     }
 
     @Override
     public final boolean contains(long key) {
-        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
         if (elementDataSize == 0) {
             return false;
@@ -230,34 +231,34 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         int hash = (int) (key);
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
 
-        int m = hash(_start_address, index);
+        int m = hash(this._start_address, index);
         while (m >= 0) {
-            long k = key(_start_address, m);
+            long k = key(this._start_address, m);
             if (key == k) {
                 return m != -1;
             }
-            m = next(_start_address, m);
+            m = next(this._start_address, m);
         }
         return m != -1;
     }
 
     @Override
     public final long get(long key) {
-        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
         if (elementDataSize == 0) {
             return KConfig.NULL_LONG;
         }
         int index = ((int) (key) & 0x7FFFFFFF) % elementDataSize;
 
-        int m = hash(_start_address, index);
+        int m = hash(this._start_address, index);
         while (m >= 0) {
-            long k = key(_start_address, m);
+            long k = key(this._start_address, m);
             if (key == k) {
-                long v = value(_start_address, m);
+                long v = value(this._start_address, m);
                 return v;
             } else {
-                m = next(_start_address, m);
+                m = next(this._start_address, m);
             }
         }
         return KConfig.NULL_LONG;
@@ -265,7 +266,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
     @Override
     public final synchronized void put(long key, long value) {
-        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
 //        UNSAFE.putByte(_start_address + OFFSET_STARTADDRESS_DIRTY, (byte) 1);
         int entry = -1;
@@ -278,41 +279,41 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
         if (entry == -1) {
             // increase elem count
-            int oldElementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+            int oldElementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
             int elementCount = oldElementCount + 1;
-            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
 
-            int droppedCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
+            int droppedCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
 
-            if (elementCount > threshold) {
+            if (elementCount > this.threshold) {
                 rehashCapacity(elementDataSize);
 
-                int newElementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+                int newElementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
                 index = (hash & 0x7FFFFFFF) % newElementDataSize;
             }
             int newIndex = (elementCount + droppedCount - 1);
-            setKey(_start_address, newIndex, key);
-            setValue(_start_address, newIndex, value);
-            int currentHashedIndex = hash(_start_address, index);
+            setKey(this._start_address, newIndex, key);
+            setValue(this._start_address, newIndex, value);
+            int currentHashedIndex = hash(this._start_address, index);
             if (currentHashedIndex != -1) {
-                setNext(_start_address, newIndex, currentHashedIndex);
+                setNext(this._start_address, newIndex, currentHashedIndex);
             } else {
-                setNext(_start_address, newIndex, -2);//special char to tag used values
+                setNext(this._start_address, newIndex, -2);//special char to tag used values
             }
             //now the object is reachable to other thread everything should be ready
-            setHash(_start_address, index, newIndex);
+            setHash(this._start_address, index, newIndex);
         } else {
-            setValue(_start_address, entry, value);
+            setValue(this._start_address, entry, value);
         }
     }
 
     final int findNonNullKeyEntry(long key, int index) {
-        int m = hash(_start_address, index);
+        int m = hash(this._start_address, index);
         while (m >= 0) {
-            if (key == key(_start_address, m)) {
+            if (key == key(this._start_address, m)) {
                 return m;
             }
-            m = next(_start_address, m);
+            m = next(this._start_address, m);
         }
         return -1;
     }
@@ -320,52 +321,52 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     //TODO check intersection of remove and put
     @Override
     public synchronized final void remove(long key) {
-        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
         if (elementDataSize == 0) {
             return;
         }
         int index = ((int) (key) & 0x7FFFFFFF) % elementDataSize;
-        int m = hash(_start_address, index);
+        int m = hash(this._start_address, index);
         int last = -1;
         while (m >= 0) {
-            if (key == key(_start_address, m)) {
+            if (key == key(this._start_address, m)) {
                 break;
             }
             last = m;
-            m = next(_start_address, m);
+            m = next(this._start_address, m);
         }
         if (m == -1) {
             return;
         }
         if (last == -1) {
-            if (next(_start_address, m) > 0) {
-                setHash(_start_address, index, m);
+            if (next(this._start_address, m) > 0) {
+                setHash(this._start_address, index, m);
             } else {
-                setHash(_start_address, index, -1);
+                setHash(this._start_address, index, -1);
             }
         } else {
-            setNext(_start_address, last, next(_start_address, m));
+            setNext(this._start_address, last, next(this._start_address, m));
         }
-        setNext(_start_address, m, -1); //flag to dropped value
+        setNext(this._start_address, m, -1); //flag to dropped value
         // decrease elem count
-        int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+        int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
         elementCount--;
-        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
 
         // increase dropped count
-        int droppedCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
+        int droppedCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
         droppedCount++;
-        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, droppedCount);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, droppedCount);
     }
 
     public final int size() {
-        return UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+        return UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
     }
 
     @Override
     public final int counter() {
-        return this._counter;
+        return UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
     }
 
     @Override
@@ -379,17 +380,21 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     }
 
     private synchronized void internal_counter(boolean inc) {
+        int c = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
         if (inc) {
-            this._counter++;
+            c++;
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_COUNTER, c);
         } else {
-            this._counter--;
+            c--;
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_COUNTER, c);
         }
     }
 
     /* warning: this method is not thread safe */
     @Override
     public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
-        _metaClassIndex = metaClassIndex;
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX, metaClassIndex);
+
         if (payload == null || payload.length() == 0) {
             return;
         }
@@ -402,7 +407,9 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             return;
         }
         if (payload.charAt(cursor) == ',') {//className to parse
-            _metaClassIndex = metaModel.metaClassByName(payload.substring(initPos, cursor)).index();
+            int idx = metaModel.metaClassByName(payload.substring(initPos, cursor)).index();
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX, idx);
+
             cursor++;
             initPos = cursor;
         }
@@ -435,7 +442,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
             int index = (((int) (loopKey)) & 0x7FFFFFFF) % UNSAFE.getInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
             //insert K/V
-            int newIndex = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+            int newIndex = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
             setKey(newAddress, newIndex, loopKey);
             setValue(newAddress, newIndex, loopVal);
 
@@ -447,19 +454,19 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             }
             setHash(newAddress, index, newIndex);
 
-            int oldElementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+            int oldElementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
             int elementCount = oldElementCount + 1;
-            UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT, elementCount);
         }
 
-        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT, nbElement);
-        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT, nbElement);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
 
         int newElemDataSize = UNSAFE.getInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
-        UNSAFE.putInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, newElemDataSize);
-        _start_address = UNSAFE.reallocateMemory(_start_address, BASE_SEGMENT_LEN + newElemDataSize * BACK_ELEM_ENTRY_LEN);
-        UNSAFE.copyMemory(newAddress + OFFSET_STARTADDRESS_BACK, _start_address + OFFSET_STARTADDRESS_BACK, newElemDataSize * BACK_ELEM_ENTRY_LEN);
-        this.threshold = (int) (length * loadFactor);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, newElemDataSize);
+        this._start_address = UNSAFE.reallocateMemory(this._start_address, BASE_SEGMENT_LEN + newElemDataSize * BACK_ELEM_ENTRY_LEN);
+        UNSAFE.copyMemory(newAddress + OFFSET_STARTADDRESS_BACK, this._start_address + OFFSET_STARTADDRESS_BACK, newElemDataSize * BACK_ELEM_ENTRY_LEN);
+        this.threshold = (int) (length * this.loadFactor);
 
         UNSAFE.freeMemory(newAddress);
 
@@ -467,21 +474,23 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
     @Override
     public String serialize(KMetaModel metaModel) {
-        int elementCount = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+        int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
         final StringBuilder buffer = new StringBuilder(elementCount * 8);//roughly approximate init size
-        if (_metaClassIndex != -1) {
-            buffer.append(metaModel.metaClass(_metaClassIndex).metaName());
+
+        int metaClassIndex = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX);
+        if (metaClassIndex != -1) {
+            buffer.append(metaModel.metaClass(metaClassIndex).metaName());
             buffer.append(',');
         }
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.append('/');
         boolean isFirst = true;
-        int elementDataSize = UNSAFE.getInt(_start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
         for (int i = 0; i < elementDataSize; i++) {
 
-            if (next(_start_address, i) != -1) { //there is a real value
-                long loopKey = key(_start_address, i);
-                long loopValue = value(_start_address, i);
+            if (next(this._start_address, i) != -1) { //there is a real value
+                long loopKey = key(this._start_address, i);
+                long loopValue = value(this._start_address, i);
                 if (!isFirst) {
                     buffer.append(",");
                 }
