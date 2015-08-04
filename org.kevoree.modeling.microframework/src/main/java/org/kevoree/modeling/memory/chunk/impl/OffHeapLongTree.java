@@ -22,13 +22,13 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
     }
 
     @Override
-    public void insert(long key) {
-        internal_insert(key, key);
+    public void insert(long p_key) {
+        internal_insert(p_key, p_key);
     }
 
     @Override
-    public long previousOrEqual(long key) {
-        long result = previousOrEqualIndex(key);
+    public long previousOrEqual(long p_key) {
+        long result = previousOrEqualIndex(p_key);
         if (result != -1) {
             return key(result);
         } else {

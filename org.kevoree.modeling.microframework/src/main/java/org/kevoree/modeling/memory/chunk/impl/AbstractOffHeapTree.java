@@ -62,14 +62,14 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         NODE_SIZE = 0;
     }
 
-    private final void allocate(int length) {
-        long bytes = BASE_SEGMENT_LEN + sizeOfRawSegment(length);
+    private final void allocate(int p_length) {
+        long bytes = BASE_SEGMENT_LEN + sizeOfRawSegment(p_length);
 
         this._start_address = UNSAFE.allocateMemory(bytes);
         UNSAFE.setMemory(this._start_address, bytes, (byte) 0);
 
         UNSAFE.putLong(this._start_address + OFFSET_ROOT_INDEX, UNDEFINED);
-        UNSAFE.putInt(this._start_address + OFFSET_SIZE, length);
+        UNSAFE.putInt(this._start_address + OFFSET_SIZE, p_length);
 
         this.loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this.threshold = (int) (size() * this.loadFactor);
@@ -79,24 +79,24 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         }
     }
 
-    private void reallocate(int length) {
+    private void reallocate(int p_length) {
         int size_base_segment = BASE_SEGMENT_LEN;
-        int size_raw_segment = length * NODE_SIZE * BYTE;
+        int size_raw_segment = p_length * NODE_SIZE * BYTE;
         long newAddress = UNSAFE.allocateMemory(size_base_segment + size_raw_segment);
         UNSAFE.copyMemory(this._start_address, newAddress, BASE_SEGMENT_LEN + size() * NODE_SIZE * BYTE);
         long oldAddress = this._start_address;
         this._start_address = newAddress;
         UNSAFE.freeMemory(oldAddress);
 
-        this.threshold = (int) (length * this.loadFactor);
+        this.threshold = (int) (p_length * this.loadFactor);
 
         if (_space != null) {
             _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
         }
     }
 
-    private int sizeOfRawSegment(int length) {
-        return length * BYTE * NODE_SIZE;
+    private int sizeOfRawSegment(int p_length) {
+        return p_length * BYTE * NODE_SIZE;
     }
 
     public final int size() {
@@ -181,32 +181,32 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         UNSAFE.putLong(addr + POS_VALUE * BYTE, p_value);
     }
 
-    private long grandParent(long currentIndex) {
-        if (currentIndex == UNDEFINED) {
+    private long grandParent(long p_currentIndex) {
+        if (p_currentIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        if (parent(currentIndex) != UNDEFINED) {
-            return parent(parent(currentIndex));
+        if (parent(p_currentIndex) != UNDEFINED) {
+            return parent(parent(p_currentIndex));
         } else {
             return UNDEFINED;
         }
     }
 
-    private long sibling(long currentIndex) {
-        if (parent(currentIndex) == UNDEFINED) {
+    private long sibling(long p_currentIndex) {
+        if (parent(p_currentIndex) == UNDEFINED) {
             return UNDEFINED;
         } else {
-            if (currentIndex == left(parent(currentIndex))) {
-                return right(parent(currentIndex));
+            if (p_currentIndex == left(parent(p_currentIndex))) {
+                return right(parent(p_currentIndex));
             } else {
-                return left(parent(currentIndex));
+                return left(parent(p_currentIndex));
             }
         }
     }
 
-    private long uncle(long currentIndex) {
-        if (parent(currentIndex) != UNDEFINED) {
-            return sibling(parent(currentIndex));
+    private long uncle(long p_currentIndex) {
+        if (parent(p_currentIndex) != UNDEFINED) {
+            return sibling(parent(p_currentIndex));
         } else {
             return UNDEFINED;
         }
@@ -280,10 +280,10 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         return n;
     }
 
-    public final void range(long startKey, long endKey, KTreeWalker walker) {
-        long indexEnd = previousOrEqualIndex(endKey);
-        while (indexEnd != UNDEFINED && key(indexEnd) >= startKey) {
-            walker.elem(key(indexEnd));
+    public final void range(long p_startKey, long p_endKey, KTreeWalker p_walker) {
+        long indexEnd = previousOrEqualIndex(p_endKey);
+        while (indexEnd != UNDEFINED && key(indexEnd) >= p_startKey) {
+            p_walker.elem(key(indexEnd));
             indexEnd = previous(indexEnd);
         }
     }
@@ -511,7 +511,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         }
     }
 
-    public final String serialize(KMetaModel metaModel) {
+    public final String serialize(KMetaModel p_metaModel) {
         StringBuilder builder = new StringBuilder();
         long rootIndex = UNSAFE.getLong(this._start_address + OFFSET_ROOT_INDEX);
         if (rootIndex == UNDEFINED) {
@@ -557,39 +557,39 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         return builder.toString();
     }
 
-    public final void init(String payload, KMetaModel metaModel, int metaClassIndex) {
-        if (payload == null || payload.length() == 0) {
+    public final void init(String p_payload, KMetaModel p_metaModel, int p_metaClassIndex) {
+        if (p_payload == null || p_payload.length() == 0) {
             allocate(0);
             return;
         }
         int initPos = 0;
         int cursor = 0;
-        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+        while (cursor < p_payload.length() && p_payload.charAt(cursor) != ',' && p_payload.charAt(cursor) != BLACK_LEFT && p_payload.charAt(cursor) != BLACK_RIGHT && p_payload.charAt(cursor) != RED_LEFT && p_payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
 
-        int s = Base64.decodeToIntWithBounds(payload, initPos, cursor);
+        int s = Base64.decodeToIntWithBounds(p_payload, initPos, cursor);
         allocate(s);
 
-        if (payload.charAt(cursor) == ',') {//className to parse
+        if (p_payload.charAt(cursor) == ',') {//className to parse
             UNSAFE.putInt(this._start_address + OFFSET_SIZE, s);
             cursor++;
             initPos = cursor;
         }
-        while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+        while (cursor < p_payload.length() && p_payload.charAt(cursor) != BLACK_LEFT && p_payload.charAt(cursor) != BLACK_RIGHT && p_payload.charAt(cursor) != RED_LEFT && p_payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
 
-        UNSAFE.putLong(this._start_address + OFFSET_ROOT_INDEX, Base64.decodeToIntWithBounds(payload, initPos, cursor));
+        UNSAFE.putLong(this._start_address + OFFSET_ROOT_INDEX, Base64.decodeToIntWithBounds(p_payload, initPos, cursor));
         UNSAFE.setMemory(this._start_address + OFFSET_BACK, sizeOfRawSegment(s), (byte) UNDEFINED);
 
         int _back_index = 0;
-        while (cursor < payload.length()) {
-            while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+        while (cursor < p_payload.length()) {
+            while (cursor < p_payload.length() && p_payload.charAt(cursor) != BLACK_LEFT && p_payload.charAt(cursor) != BLACK_RIGHT && p_payload.charAt(cursor) != RED_LEFT && p_payload.charAt(cursor) != RED_RIGHT) {
                 cursor++;
             }
-            if (cursor < payload.length()) {
-                char elem = payload.charAt(cursor);
+            if (cursor < p_payload.length()) {
+                char elem = p_payload.charAt(cursor);
 
                 boolean isOnLeft = false;
                 if (elem == BLACK_LEFT || elem == RED_LEFT) {
@@ -602,19 +602,19 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
                 }
                 cursor++;
                 int beginChunk = cursor;
-                while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+                while (cursor < p_payload.length() && p_payload.charAt(cursor) != ',') {
                     cursor++;
                 }
 
-                long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
+                long loopKey = Base64.decodeToLongWithBounds(p_payload, beginChunk, cursor);
                 setKey(_back_index, loopKey);
                 cursor++;
                 beginChunk = cursor;
-                while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+                while (cursor < p_payload.length() && p_payload.charAt(cursor) != ',' && p_payload.charAt(cursor) != BLACK_LEFT && p_payload.charAt(cursor) != BLACK_RIGHT && p_payload.charAt(cursor) != RED_LEFT && p_payload.charAt(cursor) != RED_RIGHT) {
                     cursor++;
                 }
                 if (cursor > beginChunk) {
-                    long parentValue = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
+                    long parentValue = Base64.decodeToLongWithBounds(p_payload, beginChunk, cursor);
                     setParent(_back_index, parentValue);
                     if (isOnLeft) {
                         setLeft(parentValue, _back_index);
@@ -622,14 +622,14 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
                         setRight(parentValue, _back_index);
                     }
                 }
-                if (cursor < payload.length() && payload.charAt(cursor) == ',') {
+                if (cursor < p_payload.length() && p_payload.charAt(cursor) == ',') {
                     cursor++;
                     beginChunk = cursor;
-                    while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+                    while (cursor < p_payload.length() && p_payload.charAt(cursor) != BLACK_LEFT && p_payload.charAt(cursor) != BLACK_RIGHT && p_payload.charAt(cursor) != RED_LEFT && p_payload.charAt(cursor) != RED_RIGHT) {
                         cursor++;
                     }
                     if (cursor > beginChunk) {
-                        long currentValue = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
+                        long currentValue = Base64.decodeToLongWithBounds(p_payload, beginChunk, cursor);
                         setValue(_back_index, currentValue);
                     }
                 }
@@ -680,12 +680,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     @Override
-    public void setFlags(long bitsToEnable, long bitsToDisable) {
+    public void setFlags(long p_bitsToEnable, long p_bitsToDisable) {
         long expected;
         long updated;
         do {
             expected = UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
-            updated = expected & ~bitsToDisable | bitsToEnable;
+            updated = expected & ~p_bitsToDisable | p_bitsToEnable;
         } while (!UNSAFE.compareAndSwapLong(this, this._start_address + OFFSET_FLAGS, expected, updated));
     }
 

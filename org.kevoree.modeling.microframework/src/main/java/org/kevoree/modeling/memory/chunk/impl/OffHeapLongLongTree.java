@@ -36,8 +36,8 @@ public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLon
     }
 
     @Override
-    public void insert(long key, long value) {
-        internal_insert(key, value);
+    public void insert(long p_key, long p_value) {
+        internal_insert(p_key, p_value);
     }
 
     @Override
