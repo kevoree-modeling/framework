@@ -14,7 +14,7 @@ public class OffHeapObjectChunkTest extends BaseKObjectChunkTest {
 
     @Override
     public KObjectChunk createKObjectChunk() {
-        return new OffHeapObjectChunk(new OffHeapChunkSpace(), 0, 0, 0);
+        return new OffHeapObjectChunk(null, -1, -1, -1);
     }
 
     @Override

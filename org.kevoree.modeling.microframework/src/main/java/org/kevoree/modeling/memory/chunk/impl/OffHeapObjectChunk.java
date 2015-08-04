@@ -774,15 +774,27 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     }
 
     @Override
-    public final void inc() {
-        int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
-        UNSAFE.putInt(_start_address + OFFSET_COUNTER, c + 1);
+    public final int inc() {
+        int expected;
+        int updated;
+        do {
+            expected = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
+            updated = expected + 1;
+        } while (!UNSAFE.compareAndSwapInt(this, this._start_address + OFFSET_COUNTER, expected, updated));
+
+        return updated;
     }
 
     @Override
-    public final void dec() {
-        int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
-        UNSAFE.putInt(_start_address + OFFSET_COUNTER, c - 1);
+    public final int dec() {
+        int expected;
+        int updated;
+        do {
+            expected = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
+            updated = expected - 1;
+        } while (!UNSAFE.compareAndSwapInt(this, this._start_address + OFFSET_COUNTER, expected, updated));
+
+        return updated;
     }
 
     @Override

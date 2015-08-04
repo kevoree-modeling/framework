@@ -11,8 +11,6 @@ import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.KMetaModel;
 import sun.misc.Unsafe;
 
-import java.lang.reflect.Field;
-
 /**
  * @ignore ts
  * OffHeap implementation of KChunkSpaceManager
@@ -71,7 +69,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
             setHash(address, i, -1);
         }
 
-        _start_address = address;
+        this._start_address = address;
         this.threshold = (int) (initialCapacity * this.loadFactor);
     }
 
@@ -223,10 +221,11 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     public final void notifyRealloc(long newAddress, long universe, long time, long obj) {
         int index = getIndex(universe, time, obj);
-
-        long currentAddress = valuePointer(this._start_address, index);
-        if (currentAddress != newAddress) {
-            setValuePointer(this._start_address, index, newAddress);
+        if (index != -1) {
+            long currentAddress = valuePointer(this._start_address, index);
+            if (currentAddress != newAddress) {
+                setValuePointer(this._start_address, index, newAddress);
+            }
         }
     }
 
@@ -482,5 +481,6 @@ public class OffHeapChunkSpace implements KChunkSpace {
         UNSAFE.putInt(oldAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
         this.threshold = 0;
     }
+
 }
 
