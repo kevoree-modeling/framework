@@ -22,4 +22,6 @@ public interface KChunkSpace {
 
     KChunkIterator detachDirties();
 
+    void declareDirty(KChunk dirtyChunk);
+
 }

@@ -27,7 +27,7 @@ public class HeapChunkSpace implements KChunkSpace {
 
     private final float _loadFactor;
 
-    private final AtomicReference<KChunk> _dirtiesHead;
+    private volatile long[] _dirtyList;
 
     private class InternalState {
 
@@ -48,10 +48,6 @@ public class HeapChunkSpace implements KChunkSpace {
             this.elementHash = p_elementHash;
             this.values = p_values;
         }
-    }
-
-    public AtomicReference<KChunk> dirtiesHead() {
-        return this._dirtiesHead;
     }
 
     public HeapChunkSpace() {

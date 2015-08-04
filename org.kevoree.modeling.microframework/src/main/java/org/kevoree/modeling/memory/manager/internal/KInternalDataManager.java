@@ -10,12 +10,6 @@ import org.kevoree.modeling.operation.KOperationManager;
 
 public interface KInternalDataManager extends KDataManager {
 
-    void save(KObject src, KCallback<Throwable> callback);
-
-    void discard(KUniverse universe, KCallback<Throwable> callback);
-
-    void delete(KUniverse universe, KCallback<Throwable> callback);
-
     KListener createListener(long universe);
 
     KContentDeliveryDriver cdn();
@@ -34,6 +28,11 @@ public interface KInternalDataManager extends KDataManager {
 
     long nextModelKey();
 
+    void discard(KUniverse universe, KCallback<Throwable> callback);
+
+    void delete(KUniverse universe, KCallback<Throwable> callback);
+
+    //TODO clean these method
     KOperationManager operationManager();
 
     long parentUniverseKey(long currentUniverseKey);
@@ -43,7 +42,7 @@ public interface KInternalDataManager extends KDataManager {
     void isUsed(KObject origin, boolean state);
 
     void setModel(KModel model);
-    
+
     void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback);
 
 }

@@ -4,6 +4,10 @@ import org.kevoree.modeling.memory.KChunk;
 
 public interface KChunkIterator {
 
+    boolean hasNext();
+
     KChunk next();
+
+    int size();
 
 }

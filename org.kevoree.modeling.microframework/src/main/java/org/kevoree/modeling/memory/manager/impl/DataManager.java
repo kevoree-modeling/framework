@@ -4,6 +4,8 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
+import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
@@ -20,6 +22,8 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
+
+import java.util.ArrayList;
 
 public class DataManager implements KDataManager, KInternalDataManager {
 
@@ -155,7 +159,19 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public synchronized void save(KObject src, final KCallback<Throwable> callback) {
+    public void save(final KCallback<Throwable> callback) {
+        KChunkIterator dirtyIterator = _storage.detachDirties();
+        KChunk loopChunk = dirtyIterator.next();
+        //TODO enhance with static allocation of plain array
+        ArrayList<Long> keys = new ArrayList<Long>();
+        ArrayList<String> values = new ArrayList<String>();
+        while(loopChunk != null){
+
+            loopChunk = dirtyIterator.next();
+        }
+        _db.put();
+
+
         //TODO //FIXME
 
         /*
@@ -395,11 +411,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         this._scheduler.dispatch(this._resolver.lookupAllTimes(universe, times, uuid, callback));
-    }
-
-    @Override
-    public void saveAll(KCallback<Throwable> callback) {
-        save(null, callback);
     }
 
     @Override

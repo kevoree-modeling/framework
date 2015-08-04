@@ -33,6 +33,10 @@ public interface KChunk {
 
     void setFlags(long bitsToEnable, long bitsToDisable);
 
-    KChunk next();
+    long universe();
+
+    long time();
+
+    long obj();
 
 }
