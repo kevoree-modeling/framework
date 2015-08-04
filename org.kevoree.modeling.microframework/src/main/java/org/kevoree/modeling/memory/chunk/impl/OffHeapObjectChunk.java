@@ -15,7 +15,6 @@ import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 
 /**
  * @ignore ts
@@ -24,7 +23,7 @@ import java.lang.reflect.Field;
  * -                   |(4 byte)          |(4 byte)   |(8 byte) |(x byte)|
  */
 public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
-    private static final Unsafe UNSAFE = getUnsafe();
+    private static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
     private OffHeapChunkSpace _space;
     private long _universe, _time, _obj;
@@ -874,19 +873,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             elem = refs[refIndex];
         }
         return elem;
-    }
-
-
-    @SuppressWarnings("restriction")
-    private static Unsafe getUnsafe() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            return (Unsafe) theUnsafe.get(null);
-
-        } catch (Exception e) {
-            throw new RuntimeException("ERROR: unsafe operations are not available", e);
-        }
     }
 
     @Override

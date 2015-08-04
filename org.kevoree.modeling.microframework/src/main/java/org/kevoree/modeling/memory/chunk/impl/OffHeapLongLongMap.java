@@ -12,8 +12,6 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
 
-import java.lang.reflect.Field;
-
 /**
  * @ignore ts
  * <p/>
@@ -22,7 +20,7 @@ import java.lang.reflect.Field;
  * - back:              | key (8)   | value (8) | next (4) | hash (4) |
  */
 public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
-    protected static final Unsafe UNSAFE = getUnsafe();
+    protected static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
     private volatile int _counter = 0;
     private int _metaClassIndex = -1;
@@ -551,17 +549,6 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         this._start_address = address;
         if (this._space != null) {
             _space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
-        }
-    }
-
-    @SuppressWarnings("restriction")
-    protected final static Unsafe getUnsafe() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            return (Unsafe) theUnsafe.get(null);
-        } catch (Exception e) {
-            throw new RuntimeException("ERROR: unsafe operations are not available");
         }
     }
 }

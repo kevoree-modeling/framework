@@ -4,10 +4,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapLongLongMap;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapLongLongTree;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapLongTree;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapObjectChunk;
+import org.kevoree.modeling.memory.chunk.impl.*;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
@@ -23,7 +20,7 @@ import java.lang.reflect.Field;
  * - back:              | universe_key (8)  | time_key (8) | obj_key (8) | next (4) | hash (4) | value_ptr (8) | type (2) |
  */
 public class OffHeapChunkSpace implements KChunkSpace {
-    private static final Unsafe UNSAFE = getUnsafe();
+    private static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
     protected volatile long _start_address;
 
@@ -485,20 +482,5 @@ public class OffHeapChunkSpace implements KChunkSpace {
         UNSAFE.putInt(oldAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
         this.threshold = 0;
     }
-
-
-    @SuppressWarnings("restriction")
-    private static Unsafe getUnsafe() {
-        try {
-
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            return (Unsafe) theUnsafe.get(null);
-
-        } catch (Exception e) {
-            throw new RuntimeException("ERROR: unsafe operations are not available");
-        }
-    }
-
 }
 

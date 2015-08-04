@@ -19,7 +19,7 @@ import java.lang.reflect.Field;
  * - back:              | key (8) | left (8) | right (8) | parent (8) | color (8) | value (8) |
  */
 public abstract class AbstractOffHeapTree implements KOffHeapChunk {
-    protected static final Unsafe UNSAFE = getUnsafe();
+    protected static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
     protected OffHeapChunkSpace _space;
     protected long _universe, _time, _obj;
@@ -656,17 +656,6 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
     public final void free(KMetaModel p_metaModel) {
         UNSAFE.freeMemory(this.startAddress);
-    }
-
-    @SuppressWarnings("restriction")
-    protected final static Unsafe getUnsafe() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            return (Unsafe) theUnsafe.get(null);
-        } catch (Exception e) {
-            throw new RuntimeException("ERROR: unsafe operations are not available");
-        }
     }
 
     @Override
