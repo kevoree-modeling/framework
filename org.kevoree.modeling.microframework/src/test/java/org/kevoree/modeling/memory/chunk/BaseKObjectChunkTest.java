@@ -8,6 +8,7 @@ import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaReference;
@@ -16,9 +17,10 @@ import org.kevoree.modeling.meta.impl.MetaModel;
 
 import java.util.ArrayList;
 
-public abstract class BaseKMemoryChunkTest {
+public abstract class BaseKObjectChunkTest {
 
-    public abstract KObjectChunk createKMemoryChunk();
+    public abstract KObjectChunk createKObjectChunk();
+    public abstract KInternalDataManager createKInternalDataManger();
 
     @Test
     public void attributeTest() {
@@ -34,7 +36,7 @@ public abstract class BaseKMemoryChunkTest {
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
 
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel model = dynamicMetaModel.createModel(createKInternalDataManger());
 
         model.connect(new KCallback<Throwable>() {
             @Override
@@ -52,7 +54,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKObjectChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -118,7 +120,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKObjectChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -185,7 +187,7 @@ public abstract class BaseKMemoryChunkTest {
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
                 // cache entry
-                KObjectChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKObjectChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -247,7 +249,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKObjectChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
@@ -305,7 +307,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKObjectChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
@@ -345,7 +347,7 @@ public abstract class BaseKMemoryChunkTest {
                 KObject sensor = model.universe(0).time(0).create(sensorMetaClass);
                 sensor.set(sensorMetaClass.attribute("name"), "Sensor#1");
 
-                KObjectChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKObjectChunk();
                 cacheEntry.init(null, dynamicMetaModel, sensorMetaClass.index());
 
                 Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
@@ -429,7 +431,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKMemoryChunk();
+                KObjectChunk cacheEntry = createKObjectChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
                 Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
@@ -452,7 +454,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 Assert.assertEquals("{\"attr_long\":\"U\",\"sensors\":[\"E\",\"G\"],\"value\":[\"P7JmZmZmZma\",\"P/BmZmZmZma\",\"QAAzMzMzMzN\"]}", cacheEntry.serialize(dynamicMetaModel));
 
-                KObjectChunk newCacheEntry = createKMemoryChunk();
+                KObjectChunk newCacheEntry = createKObjectChunk();
                 try {
                     String serialized = cacheEntry.serialize(dynamicMetaModel);
                     newCacheEntry.init(serialized, dynamicMetaModel, homeMetaClass.index());

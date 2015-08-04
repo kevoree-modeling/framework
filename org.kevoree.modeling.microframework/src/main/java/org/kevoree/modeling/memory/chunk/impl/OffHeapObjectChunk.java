@@ -3,6 +3,7 @@ package org.kevoree.modeling.memory.chunk.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
@@ -176,10 +177,23 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
 
         // dirty
-//        clonedEntry.setDirty();
+        clonedEntry.setDirty();
 
         return clonedEntry;
     }
+
+    private void setDirty() {
+        if (_space != null) {
+            if ((UNSAFE.getLong(this._start_address + OFFSET_FLAGS) & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
+                _space.declareDirty(this);
+                //the synchronization risk is minimal here, at worse the object will be saved twice for the next iteration
+                setFlags(KChunkFlags.DIRTY_BIT, 0);
+            }
+        } else {
+            setFlags(KChunkFlags.DIRTY_BIT, 0);
+        }
+    }
+
 
     @Override
     public final void setPrimitiveType(int p_index, Object p_content, KMetaClass p_metaClass) {
@@ -216,8 +230,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     UNSAFE.putFloat(ptr, (Float) p_content);
                 }
 
-//                setDirty();
-                //UNSAFE.putByte(_start_address + OFFSET_MODIFIED_INDEXES + index, (byte) 1);
+                setDirty();
             }
 
         } catch (
@@ -274,6 +287,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                 UNSAFE.putLong(new_ref_ptr + 4, p_newRef); // content
             }
             UNSAFE.putLong(ptr, new_ref_ptr); // update ptr
+            setDirty();
             result = true;
         }
         return result;
@@ -311,6 +325,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     _allocated_segments--;
                     UNSAFE.putLong(ptr, 0);
                 }
+                setDirty();
                 result = true;
             }
         }
@@ -378,8 +393,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
 
         UNSAFE.putDouble(ptr_segment + 4 + p_arrayIndex * BYTE, valueToInsert);
-
-//        setDirty();
+        setDirty();
     }
 
     @Override
@@ -396,7 +410,8 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
         UNSAFE.putInt(new_ptr_segment, p_newSize); // update size
         UNSAFE.putLong(ptr, new_ptr_segment); // update pointer
-//        setDirty();
+
+        setDirty();
 
     }
 
@@ -826,7 +841,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public long getFlags() {
-        return 0;
+        return UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
     }
 
     @Override
