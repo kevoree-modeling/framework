@@ -7,7 +7,7 @@ public class ArrayMemoryStorageTest extends BaseKMemoryStorageTest {
 
     @Override
     public KChunkSpace createKMemoryStorage() {
-        return new HeapChunkSpace();
+        return new HeapChunkSpace2();
     }
 
 }

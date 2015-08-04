@@ -5,7 +5,7 @@ import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KTreeWalker;
 import org.kevoree.modeling.memory.space.KChunkSpace;
-import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
+import org.kevoree.modeling.memory.space.impl.HeapChunkSpace2;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -32,7 +32,7 @@ public abstract class AbstractArrayTree {
     private volatile int _size = 0;
     private volatile InternalState state;
 
-    private final HeapChunkSpace _space;
+    private final HeapChunkSpace2 _space;
 
     private final AtomicLong _flags;
 
@@ -74,7 +74,7 @@ public abstract class AbstractArrayTree {
         return _space;
     }
 
-    public AbstractArrayTree(HeapChunkSpace p_space) {
+    public AbstractArrayTree(HeapChunkSpace2 p_space) {
         this._flags = new AtomicLong();
         this._space = p_space;
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;

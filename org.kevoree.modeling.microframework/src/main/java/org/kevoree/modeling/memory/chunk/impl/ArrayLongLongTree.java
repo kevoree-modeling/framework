@@ -1,14 +1,13 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.chunk.KLongLongTree;
-import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
+import org.kevoree.modeling.memory.space.impl.HeapChunkSpace2;
 
 public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTree {
 
-    public ArrayLongLongTree(HeapChunkSpace p_space) {
+    public ArrayLongLongTree(HeapChunkSpace2 p_space) {
         super(p_space);
         this.kvSize = 2;
     }

@@ -3,12 +3,10 @@ package org.kevoree.modeling.memory.chunk.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
-import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
-import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -22,13 +20,20 @@ public class HeapObjectChunk implements KObjectChunk {
 
     private int _metaClassIndex = -1;
 
-    private HeapChunkSpace _space;
+    private KChunkSpace _space;
 
     private final AtomicLong _flags;
 
-    private KChunk _next;
+    private final long _universe;
 
-    public HeapObjectChunk(HeapChunkSpace p_space) {
+    private final long _time;
+
+    private final long _obj;
+
+    public HeapObjectChunk(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
+        this._universe = p_universe;
+        this._time = p_time;
+        this._obj = p_obj;
         this._flags = new AtomicLong();
         this._space = p_space;
     }
@@ -451,13 +456,13 @@ public class HeapObjectChunk implements KObjectChunk {
     }
 
     @Override
-    public KObjectChunk clone(KMetaModel p_metaClass) {
+    public KObjectChunk clone(long p_universe, long p_time, long p_obj, KMetaModel p_metaClass) {
         if (raw == null) {
-            return new HeapObjectChunk(_space);
+            return new HeapObjectChunk(p_universe, p_time, p_obj, _space);
         } else {
             Object[] cloned = new Object[raw.length];
             System.arraycopy(raw, 0, cloned, 0, raw.length);
-            HeapObjectChunk clonedEntry = new HeapObjectChunk(_space);
+            HeapObjectChunk clonedEntry = new HeapObjectChunk(p_universe, p_time, p_obj, _space);
             clonedEntry.raw = cloned;
             clonedEntry._metaClassIndex = _metaClassIndex;
             clonedEntry.internal_set_dirty();
@@ -531,9 +536,7 @@ public class HeapObjectChunk implements KObjectChunk {
     private void internal_set_dirty() {
         if (_space != null) {
             if ((_flags.get() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
-                do {
-                    _next = _space.dirtiesHead().get();
-                } while (!_space.dirtiesHead().compareAndSet(_next, this));
+                _space.declareDirty(this);
                 //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
                 setFlags(KChunkFlags.DIRTY_BIT, 0);
             }
@@ -558,8 +561,18 @@ public class HeapObjectChunk implements KObjectChunk {
     }
 
     @Override
-    public KChunk next() {
-        return _next;
+    public long universe() {
+        return this._universe;
+    }
+
+    @Override
+    public long time() {
+        return this._time;
+    }
+
+    @Override
+    public long obj() {
+        return this._obj;
     }
 
 }

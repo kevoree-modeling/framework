@@ -13,9 +13,7 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongTree;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-public class HeapChunkSpace implements KChunkSpace {
+public class HeapChunkSpace2 implements KChunkSpace {
 
     private volatile int _elementCount;
 
@@ -25,9 +23,13 @@ public class HeapChunkSpace implements KChunkSpace {
 
     private int _threshold;
 
-    private final float _loadFactor;
+    private float _loadFactor;
+
+    private volatile int capacity;
 
     private volatile long[] _dirtyList;
+
+    private volatile int nextIndex = 0;
 
     private class InternalState {
 
@@ -50,8 +52,8 @@ public class HeapChunkSpace implements KChunkSpace {
         }
     }
 
-    public HeapChunkSpace() {
-        _dirtiesHead = new AtomicReference<KChunk>();
+    public HeapChunkSpace2() {
+        _dirtyList = new long[];
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this._elementCount = 0;
@@ -180,6 +182,8 @@ public class HeapChunkSpace implements KChunkSpace {
 
     @Override
     public KChunkIterator detachDirties() {
+
+
         final KChunk[] _current = new KChunk[1];
         _current[0] = _dirtiesHead.getAndSet(null);
         return new KChunkIterator() {
@@ -192,6 +196,11 @@ public class HeapChunkSpace implements KChunkSpace {
                 return nextLoop;
             }
         };
+    }
+
+    @Override
+    public void declareDirty(KChunk dirtyChunk) {
+
     }
 
     @Override

@@ -7,8 +7,8 @@ import org.kevoree.modeling.meta.KMetaModel;
 public interface KObjectChunk extends KChunk {
 
     /* Stateful Management */
-    KObjectChunk clone(KMetaModel metaModel);
-    
+    KObjectChunk clone(long p_universe, long p_time, long p_obj, KMetaModel p_metaClass);
+
     int metaClassIndex();
 
     String toJSON(KMetaModel metaModel);
