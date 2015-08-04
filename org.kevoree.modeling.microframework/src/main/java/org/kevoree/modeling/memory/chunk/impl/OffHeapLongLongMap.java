@@ -25,11 +25,11 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private OffHeapChunkSpace _space;
     private long _universe, _time, _obj;
 
+    private volatile long _start_address;
+
     private int initialCapacity;
     private int threshold;
     private float loadFactor;
-
-    private volatile long _start_address;
 
     // constants for off-heap memory layout
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
@@ -71,36 +71,36 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     }
 
     // TODO this methods are maybe a bottleneck if they are not inlined
-    protected int hash(long startAddress, int index) {
-        return UNSAFE.getInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH));
+    protected int hash(long baseAddress, int index) {
+        return UNSAFE.getInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH));
     }
 
-    protected void setHash(long startAddress, int index, int hash) {
-        UNSAFE.putInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), hash);
+    protected void setHash(long baseAddress, int index, int hash) {
+        UNSAFE.putInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), hash);
     }
 
-    protected long key(long startAddress, int index) {
-        return UNSAFE.getLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY));
+    protected long key(long baseAddress, int index) {
+        return UNSAFE.getLong(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY));
     }
 
-    protected void setKey(long startAddress, int index, long key) {
-        UNSAFE.putLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY), key);
+    protected void setKey(long baseAddress, int index, long key) {
+        UNSAFE.putLong(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY), key);
     }
 
-    protected long value(long startAddress, int index) {
-        return UNSAFE.getLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE));
+    protected long value(long baseAddress, int index) {
+        return UNSAFE.getLong(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE));
     }
 
-    protected void setValue(long startAddress, int index, long value) {
-        UNSAFE.putLong(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE), value);
+    protected void setValue(long baseAddress, int index, long value) {
+        UNSAFE.putLong(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE), value);
     }
 
-    protected int next(long startAddress, int index) {
-        return UNSAFE.getInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT));
+    protected int next(long baseAddress, int index) {
+        return UNSAFE.getInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT));
     }
 
-    protected void setNext(long startAddress, int index, int next) {
-        UNSAFE.putInt(startAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT), next);
+    protected void setNext(long baseAddress, int index, int next) {
+        UNSAFE.putInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT), next);
     }
 
     protected void allocate(int p_initalCapacity, float p_loadFactor) {

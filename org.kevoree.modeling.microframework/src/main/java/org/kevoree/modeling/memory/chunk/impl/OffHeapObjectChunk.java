@@ -28,6 +28,10 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     private OffHeapChunkSpace _space;
     private long _universe, _time, _obj;
 
+    // native pointer to the start of the memory chunk
+    private volatile long _start_address;
+    private int _allocated_segments = 0;
+
     // constants for off-heap memory layout
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
     private static final int ATT_COUNTER_LEN = 4;
@@ -41,10 +45,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     private static final int BASE_SEGMENT_SIZE = ATT_META_CLASS_INDEX_LEN + ATT_COUNTER_LEN + ATT_FLAGS_LEN;
 
     private static final int BYTE = 8;
-
-    // native pointer to the start of the memory chunk
-    private long _start_address;
-    private int _allocated_segments = 0;
 
     public OffHeapObjectChunk(OffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
         super();
