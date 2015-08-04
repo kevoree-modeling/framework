@@ -339,44 +339,44 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         return n;
     }
 
-    private void rotateLeft(long n) {
-        long r = right(n);
-        replaceNode(n, r);
-        setRight(n, left(r));
+    private void rotateLeft(long p_n) {
+        long r = right(p_n);
+        replaceNode(p_n, r);
+        setRight(p_n, left(r));
         if (left(r) != UNDEFINED) {
-            setParent(left(r), n);
+            setParent(left(r), p_n);
         }
-        setLeft(r, n);
-        setParent(n, r);
+        setLeft(r, p_n);
+        setParent(p_n, r);
     }
 
-    private void rotateRight(long n) {
-        long l = left(n);
-        replaceNode(n, l);
-        setLeft(n, right(l));
+    private void rotateRight(long p_n) {
+        long l = left(p_n);
+        replaceNode(p_n, l);
+        setLeft(p_n, right(l));
         if (right(l) != UNDEFINED) {
-            setParent(right(l), n);
+            setParent(right(l), p_n);
         }
-        setRight(l, n);
-        setParent(n, l);
+        setRight(l, p_n);
+        setParent(p_n, l);
     }
 
-    private void replaceNode(long oldn, long newn) {
-        if (parent(oldn) == UNDEFINED) {
-            UNSAFE.putLong(this._start_address + OFFSET_ROOT_INDEX, newn);
+    private void replaceNode(long p_oldn, long p_newn) {
+        if (parent(p_oldn) == UNDEFINED) {
+            UNSAFE.putLong(this._start_address + OFFSET_ROOT_INDEX, p_newn);
         } else {
-            if (oldn == left(parent(oldn))) {
-                setLeft(parent(oldn), newn);
+            if (p_oldn == left(parent(p_oldn))) {
+                setLeft(parent(p_oldn), p_newn);
             } else {
-                setRight(parent(oldn), newn);
+                setRight(parent(p_oldn), p_newn);
             }
         }
-        if (newn != UNDEFINED) {
-            setParent(newn, parent(oldn));
+        if (p_newn != UNDEFINED) {
+            setParent(p_newn, parent(p_oldn));
         }
     }
 
-    protected synchronized void internal_insert(long key, long value) {
+    protected synchronized void internal_insert(long p_key, long p_value) {
         if ((size() + 1) > this.threshold) {
             int length = (size() == 0 ? 1 : size() << 1);
 
@@ -387,9 +387,9 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         if (insertedNodeIndex == 0) {
             UNSAFE.putInt(this._start_address + OFFSET_SIZE, 1);
 
-            setKey(insertedNodeIndex, key);
+            setKey(insertedNodeIndex, p_key);
             if (NODE_SIZE == 6) {
-                setValue(insertedNodeIndex, value);
+                setValue(insertedNodeIndex, p_value);
             }
             setColor(insertedNodeIndex, 0);
             setLeft(insertedNodeIndex, -1);
@@ -400,15 +400,15 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         } else {
             long rootIndex = UNSAFE.getLong(this._start_address + OFFSET_ROOT_INDEX);
             while (true) {
-                if (key == key(rootIndex)) {
+                if (p_key == key(rootIndex)) {
                     //nop _size
                     return;
-                } else if (key < key(rootIndex)) {
+                } else if (p_key < key(rootIndex)) {
                     if (left(rootIndex) == -1) {
 
-                        setKey(insertedNodeIndex, key);
+                        setKey(insertedNodeIndex, p_key);
                         if (NODE_SIZE == 6) {
-                            setValue(insertedNodeIndex, value);
+                            setValue(insertedNodeIndex, p_value);
                         }
                         setColor(insertedNodeIndex, 0);
                         setLeft(insertedNodeIndex, -1);
@@ -425,9 +425,9 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
                 } else {
                     if (right(rootIndex) == -1) {
 
-                        setKey(insertedNodeIndex, key);
+                        setKey(insertedNodeIndex, p_key);
                         if (NODE_SIZE == 6) {
-                            setValue(insertedNodeIndex, value);
+                            setValue(insertedNodeIndex, p_value);
                         }
                         setColor(insertedNodeIndex, 0);
                         setLeft(insertedNodeIndex, -1);
@@ -448,35 +448,35 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         insertCase1(insertedNodeIndex);
     }
 
-    private void insertCase1(long n) {
-        if (parent(n) == UNDEFINED) {
-            setColor(n, 1);
+    private void insertCase1(long p_n) {
+        if (parent(p_n) == UNDEFINED) {
+            setColor(p_n, 1);
         } else {
-            insertCase2(n);
+            insertCase2(p_n);
         }
     }
 
-    private void insertCase2(long n) {
-        if (nodeColor(parent(n)) == true) {
+    private void insertCase2(long p_n) {
+        if (nodeColor(parent(p_n)) == true) {
             return;
         } else {
-            insertCase3(n);
+            insertCase3(p_n);
         }
     }
 
-    private void insertCase3(long n) {
-        if (nodeColor(uncle(n)) == false) {
-            setColor(parent(n), 1);
-            setColor(uncle(n), 1);
-            setColor(grandParent(n), 0);
-            insertCase1(grandParent(n));
+    private void insertCase3(long p_n) {
+        if (nodeColor(uncle(p_n)) == false) {
+            setColor(parent(p_n), 1);
+            setColor(uncle(p_n), 1);
+            setColor(grandParent(p_n), 0);
+            insertCase1(grandParent(p_n));
         } else {
-            insertCase4(n);
+            insertCase4(p_n);
         }
     }
 
-    private void insertCase4(long n_n) {
-        long n = n_n;
+    private void insertCase4(long p_n) {
+        long n = p_n;
         if (n == right(parent(n)) && parent(n) == left(grandParent(n))) {
             rotateLeft(parent(n));
             n = left(n);
@@ -489,13 +489,13 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         insertCase5(n);
     }
 
-    private void insertCase5(long n) {
-        setColor(parent(n), 1);
-        setColor(grandParent(n), 0);
-        if (n == left(parent(n)) && parent(n) == left(grandParent(n))) {
-            rotateRight(grandParent(n));
+    private void insertCase5(long p_n) {
+        setColor(parent(p_n), 1);
+        setColor(grandParent(p_n), 0);
+        if (p_n == left(parent(p_n)) && parent(p_n) == left(grandParent(p_n))) {
+            rotateRight(grandParent(p_n));
         } else {
-            rotateLeft(grandParent(n));
+            rotateLeft(grandParent(p_n));
         }
     }
 
@@ -503,11 +503,11 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         //TODO
     }
 
-    private boolean nodeColor(long n) {
-        if (n == UNDEFINED) {
+    private boolean nodeColor(long p_n) {
+        if (p_n == UNDEFINED) {
             return true;
         } else {
-            return color(n) == 1;
+            return color(p_n) == 1;
         }
     }
 

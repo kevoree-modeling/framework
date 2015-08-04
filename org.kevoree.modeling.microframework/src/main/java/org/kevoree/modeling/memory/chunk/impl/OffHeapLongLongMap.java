@@ -71,36 +71,36 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     }
 
     // TODO this methods are maybe a bottleneck if they are not inlined
-    protected int hash(long baseAddress, int index) {
-        return UNSAFE.getInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH));
+    protected int hash(long p_baseAddress, int p_index) {
+        return UNSAFE.getInt(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH));
     }
 
-    protected void setHash(long baseAddress, int index, int hash) {
-        UNSAFE.putInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), hash);
+    protected void setHash(long p_baseAddress, int p_index, int p_hash) {
+        UNSAFE.putInt(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), p_hash);
     }
 
-    protected long key(long baseAddress, int index) {
-        return UNSAFE.getLong(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY));
+    protected long key(long p_baseAddress, int p_index) {
+        return UNSAFE.getLong(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY));
     }
 
-    protected void setKey(long baseAddress, int index, long key) {
-        UNSAFE.putLong(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY), key);
+    protected void setKey(long p_baseAddress, int p_index, long p_key) {
+        UNSAFE.putLong(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_KEY), p_key);
     }
 
-    protected long value(long baseAddress, int index) {
-        return UNSAFE.getLong(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE));
+    protected long value(long p_baseAddress, int p_index) {
+        return UNSAFE.getLong(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE));
     }
 
-    protected void setValue(long baseAddress, int index, long value) {
-        UNSAFE.putLong(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE), value);
+    protected void setValue(long p_baseAddress, int p_index, long p_value) {
+        UNSAFE.putLong(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_VALUE), p_value);
     }
 
-    protected int next(long baseAddress, int index) {
-        return UNSAFE.getInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT));
+    protected int next(long p_baseAddress, int p_index) {
+        return UNSAFE.getInt(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT));
     }
 
-    protected void setNext(long baseAddress, int index, int next) {
-        UNSAFE.putInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT), next);
+    protected void setNext(long p_baseAddress, int p_index, int p_next) {
+        UNSAFE.putInt(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_NEXT), p_next);
     }
 
     protected void allocate(int p_initalCapacity, float p_loadFactor) {
@@ -379,9 +379,9 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         internal_counter(false);
     }
 
-    private synchronized void internal_counter(boolean inc) {
+    private synchronized void internal_counter(boolean p_inc) {
         int c = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
-        if (inc) {
+        if (p_inc) {
             c++;
             UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_COUNTER, c);
         } else {
