@@ -156,6 +156,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     private static final int PREFIX_TO_SAVE_SIZE = 2;
+    private static final int KEY_SIZE = 3;
 
     @Override
     public void save(final KCallback<Throwable> callback) {
@@ -163,26 +164,26 @@ public class DataManager implements KDataManager, KInternalDataManager {
         if (dirtyIterator.size() == 0) {
             return;
         }
-        long[] toSaveKeys = new long[(dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * 3];
+        long[] toSaveKeys = new long[(dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * KEY_SIZE];
         String[] toSaveValues = new String[dirtyIterator.size() + PREFIX_TO_SAVE_SIZE];
         int i = 0;
         KMetaModel _mm = _model.metaModel();
         while (dirtyIterator.hasNext()) {
             KChunk loopChunk = dirtyIterator.next();
-            toSaveKeys[i * 3] = loopChunk.universe();
-            toSaveKeys[i * 3 + 1] = loopChunk.time();
-            toSaveKeys[i * 3 + 2] = loopChunk.obj();
+            toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
+            toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
+            toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
             toSaveValues[i] = loopChunk.serialize(_mm);
             i++;
         }
-        toSaveKeys[i * 3] = KConfig.BEGINNING_OF_TIME;
-        toSaveKeys[i * 3 + 1] = KConfig.NULL_LONG;
-        toSaveKeys[i * 3 + 2] = _objectKeyCalculator.prefix();
+        toSaveKeys[i * KEY_SIZE] = KConfig.BEGINNING_OF_TIME;
+        toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
+        toSaveKeys[i * KEY_SIZE + 2] = _objectKeyCalculator.prefix();
         toSaveValues[i] = "" + _objectKeyCalculator.lastComputedIndex();
         i++;
-        toSaveKeys[i * 3] = KConfig.END_OF_TIME;
-        toSaveKeys[i * 3 + 1] = KConfig.NULL_LONG;
-        toSaveKeys[i * 3 + 2] = _universeKeyCalculator.prefix();
+        toSaveKeys[i * KEY_SIZE] = KConfig.END_OF_TIME;
+        toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
+        toSaveKeys[i * KEY_SIZE + 2] = _universeKeyCalculator.prefix();
         toSaveValues[i] = "" + _universeKeyCalculator.lastComputedIndex();
         _db.put(toSaveKeys, toSaveValues, callback, this.currentCdnListener);
     }
@@ -479,11 +480,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     public KOperationManager operationManager() {
         return _operationManager;
-    }
-
-    @Override
-    public void isUsed(KObject origin, boolean state) {
-
     }
 
     @Override

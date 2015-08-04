@@ -54,26 +54,22 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public synchronized void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
-        if (p_keys.length != p_values.length) {
-            p_callback.on(new Exception("Bad Put Usage !"));
-        } else {
-            int nbKeys = p_keys.length / 3;
-            for (int i = 0; i < nbKeys; i++) {
-                backend.put(KContentKey.toString(p_keys, i), p_values[i]);
-            }
-            if (additionalInterceptors != null) {
-                additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
-                    @Override
-                    public void on(int key, KContentUpdateListener value) {
-                        if (value != null && key != excludeListener) {
-                            value.on(p_keys);
-                        }
+        int nbKeys = p_keys.length / 3;
+        for (int i = 0; i < nbKeys; i++) {
+            backend.put(KContentKey.toString(p_keys, i), p_values[i]);
+        }
+        if (additionalInterceptors != null) {
+            additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                @Override
+                public void on(int key, KContentUpdateListener value) {
+                    if (value != null && key != excludeListener) {
+                        value.on(p_keys);
                     }
-                });
-            }
-            if (p_callback != null) {
-                p_callback.on(null);
-            }
+                }
+            });
+        }
+        if (p_callback != null) {
+            p_callback.on(null);
         }
     }
 

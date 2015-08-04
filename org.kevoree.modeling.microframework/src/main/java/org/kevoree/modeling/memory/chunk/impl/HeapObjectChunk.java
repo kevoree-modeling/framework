@@ -535,7 +535,7 @@ public class HeapObjectChunk implements KObjectChunk {
 
     private void internal_set_dirty() {
         if (_space != null) {
-            if ((_flags.get() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
+            if ((_flags.get() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
                 _space.declareDirty(this);
                 //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
                 setFlags(KChunkFlags.DIRTY_BIT, 0);

@@ -14,7 +14,6 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.IntUnaryOperator;
 
 public class HeapChunkSpace implements KChunkSpace {
 

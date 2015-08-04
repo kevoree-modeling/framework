@@ -42,8 +42,6 @@ public abstract class AbstractKObject implements KObject {
         this._uuid = p_uuid;
         this._metaClass = p_metaClass;
         this._manager = p_manager;
-        this._manager.isUsed(this, true);
-
         this._previousResolveds[UNIVERSE_PREVIOUS_INDEX] = p_actualUniverse;
         this._previousResolveds[TIME_PREVIOUS_INDEX] = p_actualTime;
     }

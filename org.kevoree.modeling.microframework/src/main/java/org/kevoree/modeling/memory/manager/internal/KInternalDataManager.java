@@ -38,9 +38,7 @@ public interface KInternalDataManager extends KDataManager {
     long parentUniverseKey(long currentUniverseKey);
 
     long[] descendantsUniverseKeys(long currentUniverseKey);
-
-    void isUsed(KObject origin, boolean state);
-
+    
     void setModel(KModel model);
 
     void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback);

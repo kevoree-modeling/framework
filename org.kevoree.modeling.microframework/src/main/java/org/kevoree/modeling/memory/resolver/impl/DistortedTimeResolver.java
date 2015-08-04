@@ -192,7 +192,7 @@ public class DistortedTimeResolver implements KResolver {
                                         callback.on(null);
                                     } else {
                                         final long[] closestUniverses = new long[times.length];
-                                        ArrayLongLongMap closestUnikUniverse = new ArrayLongLongMap(-1,-1,-1,null);
+                                        ArrayLongLongMap closestUnikUniverse = new ArrayLongLongMap(-1, -1, -1, null);
                                         int nbUniverseToload = 0;
                                         for (int i = 0; i < times.length; i++) {
                                             closestUniverses[i] = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, times[i], universe);
@@ -220,8 +220,8 @@ public class DistortedTimeResolver implements KResolver {
                                                     callback.on(null);
                                                 } else {
                                                     final long[] closestTimes = new long[times.length];
-                                                    final ArrayLongLongMap closestUnikTimes = new ArrayLongLongMap(-1,-1,-1,null);
-                                                    ArrayLongLongMap reverseTimeUniverse = new ArrayLongLongMap(-1,-1,-1,null);
+                                                    final ArrayLongLongMap closestUnikTimes = new ArrayLongLongMap(-1, -1, -1, null);
+                                                    ArrayLongLongMap reverseTimeUniverse = new ArrayLongLongMap(-1, -1, -1, null);
                                                     int nbTimesToload = 0;
                                                     for (int i = 0; i < times.length; i++) {
                                                         int alignedIndexOfUniverse = (int) closestUnikUniverse.get(closestUniverses[i]);
@@ -392,6 +392,8 @@ public class DistortedTimeResolver implements KResolver {
         KObjectChunk cacheEntry = (KObjectChunk) _cache.createAndMark(obj.universe(), obj.now(), obj.uuid(), KChunkTypes.CHUNK);
         cacheEntry.init(null, _manager.model().metaModel(), metaClassIndex);
         cacheEntry.setFlags(KChunkFlags.DIRTY_BIT, 0);
+        cacheEntry.space().declareDirty(cacheEntry);
+
         //initiate time management
         KLongTree timeTree = (KLongTree) _cache.createAndMark(obj.universe(), KConfig.NULL_LONG, obj.uuid(), KChunkTypes.LONG_TREE);
         timeTree.init(null, _manager.model().metaModel(), metaClassIndex);
@@ -616,7 +618,7 @@ public class DistortedTimeResolver implements KResolver {
                             callback.on(new long[0]);
                             return;
                         }
-                        ArrayLongLongMap collector = new ArrayLongLongMap(-1,-1,-1,null);
+                        ArrayLongLongMap collector = new ArrayLongLongMap(-1, -1, -1, null);
                         long previousDivergenceTime = endTime;
                         for (int i = 0; i < collectedUniverse.length; i++) {
                             KLongTree timeTree = (KLongTree) timeTrees[i];
@@ -672,7 +674,7 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     public final static long[] universeSelectByRange(KLongLongMap globalTree, KLongLongMap objUniverseTree, long rangeMin, long rangeMax, long originUniverseId) {
-        KLongLongMap collected = new ArrayLongLongMap(-1,-1,-1,null);
+        KLongLongMap collected = new ArrayLongLongMap(-1, -1, -1, null);
         long currentUniverse = originUniverseId;
         long previousUniverse = KConfig.NULL_LONG;
         long divergenceTime = objUniverseTree.get(currentUniverse);
