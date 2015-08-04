@@ -47,6 +47,14 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     private long _start_address;
     private int _allocated_segments = 0;
 
+    public OffHeapObjectChunk(OffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
+        super();
+        this._space = p_space;
+        this._universe = p_universe;
+        this._time = p_time;
+        this._obj = p_obj;
+    }
+
     private int sizeOfRawSegment(KMetaClass metaClass) {
         int rawSegment = 0;
 
@@ -99,12 +107,11 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     }
 
     @Override
-    public final KObjectChunk clone(KMetaModel metaModel) {
+    public final KObjectChunk clone(long p_universe, long p_time, long p_obj, KMetaModel p_metaModel) {
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
+        KMetaClass metaClass = p_metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
 
-        KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
-
-        OffHeapObjectChunk clonedEntry = new OffHeapObjectChunk();
+        OffHeapObjectChunk clonedEntry = new OffHeapObjectChunk(this._space, p_universe, p_time, p_obj);
         int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = metaClass.metaElements().length;
         int rawSegment = sizeOfRawSegment(metaClass);
@@ -893,14 +900,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         if (this._space != null) {
             this._space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
         }
-    }
-
-    @Override
-    public void setSpace(OffHeapChunkSpace storage, long universe, long time, long obj) {
-        this._space = storage;
-        this._universe = universe;
-        this._time = time;
-        this._obj = obj;
     }
 
 }

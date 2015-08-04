@@ -97,14 +97,6 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         }
     }
 
-    @Override
-    public void setSpace(OffHeapChunkSpace storage, long universe, long time, long obj) {
-        this._space = storage;
-        this._universe = universe;
-        this._time = time;
-        this._obj = obj;
-    }
-
     private int sizeOfRawSegment(int length) {
         return length * BYTE * NODE_SIZE;
     }

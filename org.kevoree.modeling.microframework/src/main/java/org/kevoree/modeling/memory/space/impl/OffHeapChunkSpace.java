@@ -4,13 +4,13 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.OffHeapLongLongMap;
+import org.kevoree.modeling.memory.chunk.impl.OffHeapLongLongTree;
+import org.kevoree.modeling.memory.chunk.impl.OffHeapLongTree;
+import org.kevoree.modeling.memory.chunk.impl.OffHeapObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapLongLongTree;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 import sun.misc.Unsafe;
 
@@ -117,8 +117,8 @@ public class OffHeapChunkSpace implements KChunkSpace {
         return UNSAFE.getShort(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_TYPE));
     }
 
-    private KOffHeapChunk internal_getMemoryElement(long baseAddress, int index) {
-        KChunk elem = internal_createElement(type(baseAddress, index));
+    private KOffHeapChunk internal_getMemoryElement(long universe, long time, long obj, long baseAddress, int index) {
+        KChunk elem = internal_createElement(universe, time, obj, type(baseAddress, index));
 
         if (!(elem instanceof KOffHeapChunk)) {
             throw new RuntimeException("OffHeapMemoryCache only supports OffHeapMemoryElements");
@@ -209,7 +209,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
         int m = hash(this._start_address, index);
         while (m != -1) {
             if (universe == universe(this._start_address, m) && time == time(this._start_address, m) && obj == obj(this._start_address, m)) {
-                return internal_getMemoryElement(this._start_address, m); /* getValue */
+                return internal_getMemoryElement(universe, time, obj, this._start_address, m); /* getValue */
             } else {
                 m = next(this._start_address, m);
             }
@@ -220,9 +220,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     @Override
     public final KChunk create(long universe, long time, long obj, short type) {
-        KOffHeapChunk newElement = internal_createElement(type);
-        newElement.setSpace(this, universe, time, obj);
-
+        KOffHeapChunk newElement = internal_createElement(universe, time, obj, type);
         return internal_put(universe, time, obj, newElement, type);
     }
 
@@ -235,16 +233,16 @@ public class OffHeapChunkSpace implements KChunkSpace {
         }
     }
 
-    private KOffHeapChunk internal_createElement(short type) {
+    private KOffHeapChunk internal_createElement(long universe, long time, long obj, short type) {
         switch (type) {
             case KChunkTypes.CHUNK:
-                return new OffHeapObjectChunk();
+                return new OffHeapObjectChunk(this, universe, time, obj);
 
             case KChunkTypes.LONG_TREE:
-                return new OffHeapLongTree();
+                return new OffHeapLongTree(this, universe, time, obj);
 
             case KChunkTypes.LONG_LONG_TREE:
-                return new OffHeapLongLongTree();
+                return new OffHeapLongLongTree(this, universe, time, obj);
 
             case KChunkTypes.LONG_LONG_MAP:
                 return new OffHeapLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
@@ -255,7 +253,8 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     @Override
     public final KObjectChunk clone(KObjectChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
-        return (KObjectChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(metaModel), KChunkTypes.CHUNK);
+        return (KObjectChunk) internal_put(newUniverse, newTime, newObj,
+                previousElement.clone(newUniverse, newTime, newObj, metaModel), KChunkTypes.CHUNK);
     }
 
     private synchronized KChunk internal_put(long universe, long time, long p_obj, KChunk payload, short type) {
@@ -298,7 +297,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
             return payload;
 
         } else {
-            return internal_getMemoryElement(this._start_address, entry);
+            return internal_getMemoryElement(universe, time, p_obj, this._start_address, entry);
         }
     }
 
@@ -362,7 +361,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
             setNext(this._start_address, last, next(this._start_address, m));
         }
         setNext(this._start_address, m, -1);//flag to dropped value
-        internal_getMemoryElement(this._start_address, m).free(p_metaModel);
+        internal_getMemoryElement(universe, time, obj, this._start_address, m).free(p_metaModel);
         setValuePointer(this._start_address, m, 0);
 
         int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT);

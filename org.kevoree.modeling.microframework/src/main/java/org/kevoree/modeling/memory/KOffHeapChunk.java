@@ -8,5 +8,4 @@ public interface KOffHeapChunk extends KChunk {
 
     void setMemoryAddress(long address);
 
-    void setSpace(OffHeapChunkSpace space, long universe, long time, long obj);
 }
