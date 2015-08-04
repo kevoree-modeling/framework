@@ -14,6 +14,7 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntUnaryOperator;
 
 public class HeapChunkSpace implements KChunkSpace {
 
@@ -26,10 +27,6 @@ public class HeapChunkSpace implements KChunkSpace {
     private int _threshold;
 
     private float _loadFactor;
-
-    private volatile long[] _dirtyList;
-
-    private AtomicInteger _dirtyListIndex = new AtomicInteger();
 
     private class InternalState {
 
@@ -53,9 +50,8 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     public HeapChunkSpace() {
-        _dirtyList = new long[KConfig.CACHE_INIT_SIZE];
+        _dirtyList = new int[KConfig.CACHE_INIT_SIZE];
         _dirtyListIndex = new AtomicInteger(0);
-
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this._elementCount = 0;
@@ -182,27 +178,42 @@ public class HeapChunkSpace implements KChunkSpace {
         return this._elementCount;
     }
 
+    private volatile int[] _dirtyList;
+    private AtomicInteger _dirtyListIndex = new AtomicInteger();
+
     @Override
     public KChunkIterator detachDirties() {
-
-
-        final KChunk[] _current = new KChunk[1];
-        _current[0] = _dirtiesHead.getAndSet(null);
-        return new KChunkIterator() {
-            @Override
-            public KChunk next() {
-                KChunk nextLoop = _current[0];
-                if (_current[0] != null) {
-                    _current[0] = _current[0].next();
-                }
-                return nextLoop;
-            }
-        };
+        int[] indexDirties = _dirtyList;
+        int currentIndex = _dirtyListIndex.getAndSet(0);
+        //TODO this is not thread safe!
+        _dirtyListIndex.set(0);
+        _dirtyList = new int[KConfig.CACHE_INIT_SIZE];
+        return new HeapChunkIterator(indexDirties, currentIndex, this._state.values);
     }
 
     @Override
     public void declareDirty(KChunk dirtyChunk) {
-
+        //TODO this is not thread safe!
+        InternalState currentState = _state;
+        int entry = -1;
+        long universe = dirtyChunk.universe();
+        long time = dirtyChunk.time();
+        long obj = dirtyChunk.obj();
+        int hash = (int) (universe ^ time ^ obj);
+        if (currentState.elementDataSize != 0) {
+            int index = (hash & 0x7FFFFFFF) % currentState.elementDataSize;
+            entry = findNonNullKeyEntry(universe, time, obj, index, _state);
+        }
+        if (entry != -1) {
+            int currentIndex = _dirtyListIndex.getAndIncrement();
+            if (currentIndex >= this._dirtyList.length) {
+                int newlength = currentIndex << 1;
+                int[] previousList = this._dirtyList;
+                this._dirtyList = new int[newlength];
+                System.arraycopy(previousList, 0, this._dirtyList, 0, newlength);
+            }
+            this._dirtyList[currentIndex] = entry;
+        }
     }
 
     @Override
