@@ -13,7 +13,7 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongTree;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
-public class HeapChunkSpace2 implements KChunkSpace {
+public class HeapChunkSpace implements KChunkSpace {
 
     private volatile int _elementCount;
 
@@ -52,7 +52,7 @@ public class HeapChunkSpace2 implements KChunkSpace {
         }
     }
 
-    public HeapChunkSpace2() {
+    public HeapChunkSpace() {
         _dirtyList = new long[];
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;

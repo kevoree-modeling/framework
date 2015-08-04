@@ -8,7 +8,7 @@ import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
-import org.kevoree.modeling.memory.space.impl.HeapChunkSpace2;
+import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -80,7 +80,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     private final AtomicLong _flags;
 
-    private HeapChunkSpace2 _space;
+    private HeapChunkSpace _space;
 
     private KChunk _next;
 
@@ -110,7 +110,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         return _next;
     }
 
-    public ArrayLongLongMap(HeapChunkSpace2 p_space) {
+    public ArrayLongLongMap(HeapChunkSpace p_space) {
         this._flags = new AtomicLong();
         this._space = p_space;
         this.elementCount = 0;
