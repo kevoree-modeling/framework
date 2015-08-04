@@ -2,13 +2,11 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
-import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -70,8 +68,6 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     protected int threshold;
 
-    protected boolean _isDirty = false;
-
     private final int initialCapacity = 16;
 
     private static final float loadFactor = ((float) 75 / (float) 100);
@@ -80,9 +76,13 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     private final AtomicLong _flags;
 
-    private HeapChunkSpace _space;
+    private KChunkSpace _space;
 
-    private KChunk _next;
+    private final long _universe;
+
+    private final long _time;
+
+    private final long _obj;
 
     /**
      * @native ts
@@ -105,12 +105,10 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
     }
 
-    @Override
-    public KChunk next() {
-        return _next;
-    }
-
-    public ArrayLongLongMap(HeapChunkSpace p_space) {
+    public ArrayLongLongMap(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
+        this._universe = p_universe;
+        this._time = p_time;
+        this._obj = p_obj;
         this._flags = new AtomicLong();
         this._space = p_space;
         this.elementCount = 0;
@@ -219,7 +217,6 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public final synchronized void put(long key, long value) {
-        this._isDirty = true;
         int entry = -1;
         int index = -1;
         int hash = (int) (key);
@@ -246,6 +243,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         } else {
             state.elementKV[entry + 1] = value;/*setValue*/
         }
+        internal_set_dirty();
     }
 
     final int findNonNullKeyEntry(long key, int index) {
@@ -436,9 +434,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     private void internal_set_dirty() {
         if (_space != null) {
             if ((_flags.get() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
-                do {
-                    _next = _space.dirtiesHead().get();
-                } while (!_space.dirtiesHead().compareAndSet(_next, this));
+                _space.declareDirty(this);
                 //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
                 setFlags(KChunkFlags.DIRTY_BIT, 0);
             }
@@ -460,6 +456,21 @@ public class ArrayLongLongMap implements KLongLongMap {
             val = _flags.get();
             nval = val & ~bitsToDisable | bitsToEnable;
         } while (!_flags.compareAndSet(val, nval));
+    }
+
+    @Override
+    public long universe() {
+        return this._universe;
+    }
+
+    @Override
+    public long time() {
+        return this._time;
+    }
+
+    @Override
+    public long obj() {
+        return this._obj;
     }
 
 }

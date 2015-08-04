@@ -13,6 +13,8 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongTree;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class HeapChunkSpace implements KChunkSpace {
 
     private volatile int _elementCount;
@@ -25,11 +27,9 @@ public class HeapChunkSpace implements KChunkSpace {
 
     private float _loadFactor;
 
-    private volatile int capacity;
-
     private volatile long[] _dirtyList;
 
-    private volatile int nextIndex = 0;
+    private AtomicInteger _dirtyListIndex = new AtomicInteger();
 
     private class InternalState {
 
@@ -53,7 +53,9 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     public HeapChunkSpace() {
-        _dirtyList = new long[];
+        _dirtyList = new long[KConfig.CACHE_INIT_SIZE];
+        _dirtyListIndex = new AtomicInteger(0);
+
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this._elementCount = 0;
@@ -113,25 +115,25 @@ public class HeapChunkSpace implements KChunkSpace {
 
     @Override
     public KChunk create(long universe, long time, long obj, short type) {
-        KChunk newElement = internal_createElement(type);
+        KChunk newElement = internal_createElement(universe, time, obj, type);
         return internal_put(universe, time, obj, newElement);
     }
 
     @Override
     public KObjectChunk clone(KObjectChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
-        return (KObjectChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(metaModel));
+        return (KObjectChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(newUniverse, newTime, newObj, metaModel));
     }
 
-    private KChunk internal_createElement(short type) {
+    private KChunk internal_createElement(long p_universe, long p_time, long p_obj, short type) {
         switch (type) {
             case KChunkTypes.CHUNK:
-                return new HeapObjectChunk(this);
+                return new HeapObjectChunk(p_universe, p_time, p_obj, this);
             case KChunkTypes.LONG_LONG_MAP:
-                return new ArrayLongLongMap(this);
+                return new ArrayLongLongMap(p_universe, p_time, p_obj, this);
             case KChunkTypes.LONG_TREE:
-                return new ArrayLongTree(this);
+                return new ArrayLongTree(p_universe, p_time, p_obj, this);
             case KChunkTypes.LONG_LONG_TREE:
-                return new ArrayLongLongTree(this);
+                return new ArrayLongLongTree(p_universe, p_time, p_obj, this);
             default:
                 return null;
         }

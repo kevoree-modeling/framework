@@ -19,31 +19,23 @@ public abstract class AbstractArrayTree {
     private static final char RED_LEFT = '[';
     private static final char RED_RIGHT = ']';
     private static final int META_SIZE = 3;
-
     private final float _loadFactor;
     protected int kvSize = 1;
-
     private int _threshold = 0;
-    private boolean _dirty = true;
-
     //volatile variables
     private volatile int _counter = 0;
     private volatile int _root_index = -1;
     private volatile int _size = 0;
     private volatile InternalState state;
 
-    private final HeapChunkSpace _space;
+    private final KChunkSpace _space;
 
     private final AtomicLong _flags;
-
-    private KChunk _next;
 
     private void internal_set_dirty() {
         if (_space != null) {
             if ((_flags.get() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
-                do {
-                    _next = _space.dirtiesHead().get();
-                } while (!_space.dirtiesHead().compareAndSet(_next, (KChunk) this));
+                _space.declareDirty((KChunk) this);
                 //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
                 setFlags(KChunkFlags.DIRTY_BIT, 0);
             }
@@ -52,8 +44,22 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    public KChunk next() {
-        return _next;
+    private final long _universe;
+
+    private final long _time;
+
+    private final long _obj;
+
+    public long universe() {
+        return this._universe;
+    }
+
+    public long time() {
+        return this._time;
+    }
+
+    public long obj() {
+        return this._obj;
     }
 
     public long getFlags() {
@@ -74,7 +80,10 @@ public abstract class AbstractArrayTree {
         return _space;
     }
 
-    public AbstractArrayTree(HeapChunkSpace p_space) {
+    public AbstractArrayTree(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
+        this._universe = p_universe;
+        this._time = p_time;
+        this._obj = p_obj;
         this._flags = new AtomicLong();
         this._space = p_space;
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
@@ -539,18 +548,7 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    public final boolean isDirty() {
-        return _dirty;
-    }
-
-    public final void setClean(KMetaModel p_metaModel) {
-        _dirty = false;
-    }
-
-    public final void setDirty() {
-        _dirty = true;
-    }
-
+    
     public final int counter() {
         return this._counter;
     }
@@ -578,7 +576,6 @@ public abstract class AbstractArrayTree {
     }
 
     protected final synchronized void internal_insert(long p_key, long p_value) {
-        this._dirty = true;
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             reallocate(length);
@@ -638,6 +635,7 @@ public abstract class AbstractArrayTree {
             setParent(newIndex, n);
         }
         insertCase1(newIndex);
+        internal_set_dirty();
     }
 
     protected final long internal_lookup_value(long p_key) {
