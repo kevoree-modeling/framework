@@ -52,6 +52,10 @@ public abstract class AbstractArrayTree {
         }
     }
 
+    public KChunk next() {
+        return _next;
+    }
+
     public long getFlags() {
         return _flags.get();
     }

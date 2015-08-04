@@ -105,6 +105,11 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
     }
 
+    @Override
+    public KChunk next() {
+        return _next;
+    }
+
     public ArrayLongLongMap(HeapChunkSpace p_space) {
         this._flags = new AtomicLong();
         this._space = p_space;

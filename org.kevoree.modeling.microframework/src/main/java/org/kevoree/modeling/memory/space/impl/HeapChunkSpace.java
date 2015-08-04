@@ -6,6 +6,7 @@ import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.HeapObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongTree;
@@ -179,6 +180,22 @@ public class HeapChunkSpace implements KChunkSpace {
     @Override
     public final int size() {
         return this._elementCount;
+    }
+
+    @Override
+    public KChunkIterator detachDirties() {
+        final KChunk[] _current = new KChunk[1];
+        _current[0] = _dirtiesHead.getAndSet(null);
+        return new KChunkIterator() {
+            @Override
+            public KChunk next() {
+                KChunk nextLoop = _current[0];
+                if (_current[0] != null) {
+                    _current[0] = _current[0].next();
+                }
+                return nextLoop;
+            }
+        };
     }
 
     @Override

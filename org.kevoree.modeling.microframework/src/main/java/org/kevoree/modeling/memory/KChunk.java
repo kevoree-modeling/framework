@@ -4,7 +4,7 @@ import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 
 public interface KChunk {
-    
+
     /**
      * format: definition repeat all entry ...
      * KTree: ]=>red right [=>red left }=>black right {=>black left
@@ -32,5 +32,7 @@ public interface KChunk {
     long getFlags();
 
     void setFlags(long bitsToEnable, long bitsToDisable);
+
+    KChunk next();
 
 }

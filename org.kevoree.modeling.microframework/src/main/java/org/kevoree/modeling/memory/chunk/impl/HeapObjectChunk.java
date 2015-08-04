@@ -557,4 +557,9 @@ public class HeapObjectChunk implements KObjectChunk {
         } while (!_flags.compareAndSet(val, nval));
     }
 
+    @Override
+    public KChunk next() {
+        return _next;
+    }
+
 }
