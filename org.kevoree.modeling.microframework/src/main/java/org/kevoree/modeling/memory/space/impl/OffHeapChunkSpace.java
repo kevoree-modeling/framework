@@ -60,6 +60,24 @@ public class OffHeapChunkSpace implements KChunkSpace {
     protected static final int BACK_ELEM_ENTRY_LEN = ATT_UNIVERSE_KEY_LEN + ATT_TIME_KEY_LEN + ATT_OBJ_KEY_LEN + ATT_NEXT_LEN + ATT_HASH_LEN + ATT_VALUE_PTR_LEN + ATT_TYPE_LEN;
 
 
+    public OffHeapChunkSpace() {
+        int initialCapacity = KConfig.CACHE_INIT_SIZE;
+        this.loadFactor = KConfig.CACHE_LOAD_FACTOR;
+
+        long address = UNSAFE.allocateMemory(BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN);
+        UNSAFE.putInt(address + OFFSET_STARTADDRESS_ELEMENT_COUNT, 0);
+        UNSAFE.putInt(address + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
+
+        UNSAFE.putInt(address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE, initialCapacity);
+        for (int i = 0; i < initialCapacity; i++) {
+            setNext(address, i, -1);
+            setHash(address, i, -1);
+        }
+
+        _start_address = address;
+        this.threshold = (int) (initialCapacity * this.loadFactor);
+    }
+
     // TODO this methods are maybe a bottleneck if they are not inlined
     private int hash(long baseAddress, int index) {
         return UNSAFE.getInt(baseAddress + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH));
@@ -127,24 +145,6 @@ public class OffHeapChunkSpace implements KChunkSpace {
         offheapElem.setMemoryAddress(valuePointer(baseAddress, index));
 
         return offheapElem;
-    }
-
-    public OffHeapChunkSpace() {
-        int initialCapacity = KConfig.CACHE_INIT_SIZE;
-        this.loadFactor = KConfig.CACHE_LOAD_FACTOR;
-
-        long address = UNSAFE.allocateMemory(BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN);
-        UNSAFE.putInt(address + OFFSET_STARTADDRESS_ELEMENT_COUNT, 0);
-        UNSAFE.putInt(address + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
-
-        UNSAFE.putInt(address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE, initialCapacity);
-        for (int i = 0; i < initialCapacity; i++) {
-            setNext(address, i, -1);
-            setHash(address, i, -1);
-        }
-
-        _start_address = address;
-        this.threshold = (int) (initialCapacity * this.loadFactor);
     }
 
     private void rehashCapacity(int capacity) {
@@ -245,7 +245,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
                 return new OffHeapLongLongTree(this, universe, time, obj);
 
             case KChunkTypes.LONG_LONG_MAP:
-                return new OffHeapLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+                return new OffHeapLongLongMap(this, universe, time, obj);
         }
         return null;
     }
@@ -393,12 +393,13 @@ public class OffHeapChunkSpace implements KChunkSpace {
             }
 
             for (int i = 0; i < elementDataSize; i++) {
-                KOffHeapChunk loopElement = internal_getMemoryElement(this._start_address, i);
-                if (loopElement != null) {
+                if (valuePointer(this._start_address, i) != 0) {
                     long l_uni = universe(this._start_address, i);
                     long l_time = time(this._start_address, i);
                     long l_obj = obj(this._start_address, i);
                     short l_type = type(this._start_address, i);
+
+                    KOffHeapChunk loopElement = internal_getMemoryElement(l_uni, l_time, l_obj, this._start_address, i);
 
                     setValuePointer(newAddress, currentIndex, loopElement.memoryAddress());
                     setUniverse(newAddress, currentIndex, l_uni);
@@ -411,6 +412,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
                     setNext(newAddress, currentIndex, hash(newAddress, index));
                     setHash(newAddress, index, currentIndex);
                     currentIndex++;
+
                 }
             }
 
@@ -435,7 +437,10 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
             for (int i = 0; i < elementDataSize; i++) {
                 if (valuePointer(this._start_address, i) != 0) {
-                    internal_getMemoryElement(this._start_address, i).free(metaModel);
+                    long universe = universe(this._start_address, i);
+                    long time = time(this._start_address, i);
+                    long obj = obj(this._start_address, i);
+                    internal_getMemoryElement(universe, time, obj, this._start_address, i).free(metaModel);
                 }
             }
             int initialCapacity = KConfig.CACHE_INIT_SIZE;
@@ -456,6 +461,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
             UNSAFE.freeMemory(oldAddress);
 
             this.threshold = (int) (elementDataSize * loadFactor);
+
         }
     }
 
@@ -468,7 +474,10 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
         for (int i = 0; i < elementDataSize; i++) {
             if (valuePointer(oldAddress, i) != 0) {
-                internal_getMemoryElement(oldAddress, i).free(metaModel);
+                long universe = universe(oldAddress, i);
+                long time = time(oldAddress, i);
+                long obj = obj(oldAddress, i);
+                internal_getMemoryElement(universe, time, obj, oldAddress, i).free(metaModel);
             }
         }
 

@@ -63,8 +63,13 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     protected static final int OFFSET_BACK_NEXT = OFFSET_BACK_VALUE + 8;
     protected static final int OFFSET_BACK_HASH = OFFSET_BACK_NEXT + 4;
 
-    public OffHeapLongLongMap(int p_initalCapacity, float p_loadFactor) {
-        allocate(p_initalCapacity, p_loadFactor);
+    public OffHeapLongLongMap(OffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
+        this._space = p_space;
+        this._universe = p_universe;
+        this._time = p_time;
+        this._obj = p_obj;
+
+        allocate(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
     // TODO this methods are maybe a bottleneck if they are not inlined
@@ -547,14 +552,6 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         if (this._space != null) {
             _space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
         }
-    }
-
-    @Override
-    public void setSpace(OffHeapChunkSpace storage, long universe, long time, long obj) {
-        this._space = storage;
-        this._universe = universe;
-        this._time = time;
-        this._obj = obj;
     }
 
     @SuppressWarnings("restriction")
