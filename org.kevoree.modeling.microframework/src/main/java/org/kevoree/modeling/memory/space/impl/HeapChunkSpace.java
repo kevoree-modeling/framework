@@ -210,7 +210,7 @@ public class HeapChunkSpace implements KChunkSpace {
                 int newlength = currentIndex << 1;
                 int[] previousList = this._dirtyList;
                 this._dirtyList = new int[newlength];
-                System.arraycopy(previousList, 0, this._dirtyList, 0, newlength);
+                System.arraycopy(previousList, 0, this._dirtyList, 0, currentIndex);
             }
             this._dirtyList[currentIndex] = entry;
         }

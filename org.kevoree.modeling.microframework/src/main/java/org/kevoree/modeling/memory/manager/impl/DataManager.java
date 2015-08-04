@@ -163,7 +163,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
         if (dirtyIterator.size() == 0) {
             return;
         }
-        long[] toSaveKeys = new long[(dirtyIterator.size() * 3) + PREFIX_TO_SAVE_SIZE];
+        long[] toSaveKeys = new long[(dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * 3];
         String[] toSaveValues = new String[dirtyIterator.size() + PREFIX_TO_SAVE_SIZE];
         int i = 0;
         KMetaModel _mm = _model.metaModel();
