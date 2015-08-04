@@ -4,9 +4,6 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.operation.KOperation;
-import org.kevoree.modeling.scheduler.KScheduler;
-import org.kevoree.modeling.memory.manager.impl.DataManager;
-import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -69,7 +66,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     @Override
     public void save(KCallback cb) {
-        _manager.save(null, cb);
+        _manager.save(cb);
     }
 
     @Override

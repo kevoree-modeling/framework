@@ -83,7 +83,7 @@ public class JsonModelLoader {
                     currentToken = lexer.nextToken();
                 }
                 final KObject[] rootElem = {null};
-                ArrayLongLongMap mappedKeys = new ArrayLongLongMap(null);
+                ArrayLongLongMap mappedKeys = new ArrayLongLongMap(-1,-1,-1,null);
                 for (int i = 0; i < alls.size(); i++) {
                     try {
                         ArrayStringMap<Object> elem = alls.get(i);

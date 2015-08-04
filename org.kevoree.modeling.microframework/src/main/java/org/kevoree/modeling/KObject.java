@@ -57,8 +57,6 @@ public interface KObject {
 
     KDataManager manager();
 
-    void save(KCallback cb);
-
     long timeDephasing();
 
 }

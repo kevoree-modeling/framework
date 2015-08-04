@@ -93,7 +93,7 @@ public abstract class AbstractKObject implements KObject {
                 cb.on(new Exception(OUT_OF_CACHE_MSG));
             }
         } else {
-            ArrayLongLongMap collector = new ArrayLongLongMap(null);
+            ArrayLongLongMap collector = new ArrayLongLongMap(-1,-1,-1,null);
             KMeta[] metaElements = _metaClass.metaElements();
             for (int i = 0; i < metaElements.length; i++) {
                 if (metaElements[i] != null && metaElements[i].metaType() == MetaType.REFERENCE) {
@@ -357,7 +357,7 @@ public abstract class AbstractKObject implements KObject {
 
     @Override
     public void visit(KModelVisitor p_visitor, KCallback cb) {
-        internal_visit(p_visitor, cb, new ArrayLongLongMap(null), new ArrayLongLongMap(null));
+        internal_visit(p_visitor, cb, new ArrayLongLongMap(-1,-1,-1,null), new ArrayLongLongMap(-1,-1,-1,null));
     }
 
     private void internal_visit(final KModelVisitor visitor, final KCallback end, final KLongLongMap visited, final KLongLongMap traversed) {
@@ -367,7 +367,7 @@ public abstract class AbstractKObject implements KObject {
         if (traversed != null) {
             traversed.put(_uuid, _uuid);
         }
-        final ArrayLongLongMap toResolveIds = new ArrayLongLongMap(null);
+        final ArrayLongLongMap toResolveIds = new ArrayLongLongMap(-1,-1,-1,null);
         KMeta[] metaElements = metaClass().metaElements();
         for (int i = 0; i < metaElements.length; i++) {
             if (metaElements[i] != null && metaElements[i].metaType() == MetaType.REFERENCE) {
@@ -605,8 +605,4 @@ public abstract class AbstractKObject implements KObject {
         return _manager;
     }
 
-    @Override
-    public void save(KCallback cb) {
-        _manager.save(this, cb);
-    }
 }

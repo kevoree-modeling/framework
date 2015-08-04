@@ -39,7 +39,7 @@ public class TraverseAction implements KTraversalAction {
             }
         } else {
             final AbstractKObject currentObject = (AbstractKObject) context.inputObjects()[0];
-            KLongLongMap nextIds = new ArrayLongLongMap(null);
+            KLongLongMap nextIds = new ArrayLongLongMap(-1,-1,-1,null);
             for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];

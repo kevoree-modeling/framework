@@ -98,7 +98,7 @@ public class DeepCollectAction implements KTraversalAction {
 
     private void executeStep(KObject[] p_inputStep, KCallback<KObject[]> private_callback) {
         AbstractKObject currentObject = null;
-        KLongLongMap nextIds = new ArrayLongLongMap(null);
+        KLongLongMap nextIds = new ArrayLongLongMap(-1,-1,-1,null);
         for (int i = 0; i < p_inputStep.length; i++) {
             if (p_inputStep[i] != null) {
                 try {
