@@ -20,25 +20,26 @@ import java.lang.reflect.Field;
 /**
  * @ignore ts
  * OffHeap implementation of KObjectChunk
- * - Memory structure: |meta class index  |counter    |dirty    |raw     |
- * -                   |(4 byte)          |(4 byte)   |(1 byte) |(x byte)|
+ * - Memory structure: |meta class index  |counter    |flags    |raw     |
+ * -                   |(4 byte)          |(4 byte)   |(8 byte) |(x byte)|
  */
 public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     private static final Unsafe UNSAFE = getUnsafe();
 
-    private OffHeapChunkSpace space;
-    private long universe, time, obj;
+    private OffHeapChunkSpace _space;
+    private long _universe, _time, _obj;
 
+    // constants for off-heap memory layout
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
     private static final int ATT_COUNTER_LEN = 4;
-    private static final int ATT_DIRTY_LEN = 1;
+    private static final int ATT_FLAGS_LEN = 8;
 
     private static final int OFFSET_META_CLASS_INDEX = 0;
     private static final int OFFSET_COUNTER = OFFSET_META_CLASS_INDEX + ATT_META_CLASS_INDEX_LEN;
-    private static final int OFFSET_DIRTY = OFFSET_COUNTER + ATT_COUNTER_LEN;
-    private static final int OFFSET_RAW = OFFSET_DIRTY + 1;
+    private static final int OFFSET_FLAGS = OFFSET_COUNTER + ATT_COUNTER_LEN;
+    private static final int OFFSET_RAW = OFFSET_FLAGS + ATT_FLAGS_LEN;
 
-    private static final int BASE_SEGMENT_SIZE = ATT_META_CLASS_INDEX_LEN + ATT_COUNTER_LEN + ATT_DIRTY_LEN;
+    private static final int BASE_SEGMENT_SIZE = ATT_META_CLASS_INDEX_LEN + ATT_COUNTER_LEN + ATT_FLAGS_LEN;
 
     private static final int BYTE = 8;
 
@@ -46,17 +47,17 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     private long _start_address;
     private int _allocated_segments = 0;
 
-    private int internal_size_of_raw_segment(KMetaClass metaClass) {
+    private int sizeOfRawSegment(KMetaClass metaClass) {
         int rawSegment = 0;
 
         for (int i = 0; i < metaClass.metaElements().length; i++) {
             KMeta meta = metaClass.metaElements()[i];
-            rawSegment += internal_size_of(meta.index(), metaClass);
+            rawSegment += sizeOf(meta.index(), metaClass);
         }
         return rawSegment;
     }
 
-    private int internal_size_of(int index, KMetaClass metaClass) {
+    private int sizeOf(int index, KMetaClass metaClass) {
         KMeta meta = metaClass.meta(index);
 
         int size = 0;
@@ -83,14 +84,14 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         return size;
     }
 
-    private long internal_ptr_raw_for_index(int index, KMetaClass metaClass) {
+    private long rawPointerForIndex(int index, KMetaClass metaClass) {
         int offset = 0;
         for (int i = 0; i < metaClass.metaElements().length; i++) {
             KMeta meta = metaClass.metaElements()[i];
 
             if (meta.index() < index) {
                 if (meta.metaType().equals(MetaType.ATTRIBUTE) || meta.metaType().equals(MetaType.REFERENCE)) {
-                    offset += internal_size_of(index, metaClass);
+                    offset += sizeOf(index, metaClass);
                 }
             }
         }
@@ -106,7 +107,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         OffHeapObjectChunk clonedEntry = new OffHeapObjectChunk();
         int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = metaClass.metaElements().length;
-        int rawSegment = internal_size_of_raw_segment(metaClass);
+        int rawSegment = sizeOfRawSegment(metaClass);
         int cloneBytes = baseSegment + modifiedIndexSegment + rawSegment;
 
         long _clone_start_address = UNSAFE.allocateMemory(cloneBytes);
@@ -119,7 +120,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                 KMetaAttribute metaAttribute = (KMetaAttribute) meta;
                 if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                    long clone_ptr = clonedEntry.internal_ptr_raw_for_index(metaAttribute.index(), metaClass);
+                    long clone_ptr = clonedEntry.rawPointerForIndex(metaAttribute.index(), metaClass);
                     if (UNSAFE.getLong(clone_ptr) != 0) {
                         long clone_ptr_str_segment = UNSAFE.getLong(clone_ptr);
                         if (clone_ptr_str_segment != 0) {
@@ -135,7 +136,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     }
                 }
                 if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                    long clone_ptr = clonedEntry.internal_ptr_raw_for_index(metaAttribute.index(), metaClass);
+                    long clone_ptr = clonedEntry.rawPointerForIndex(metaAttribute.index(), metaClass);
                     if (UNSAFE.getLong(clone_ptr) != 0) {
                         long clone_ptr_str_segment = UNSAFE.getLong(clone_ptr);
                         if (clone_ptr_str_segment != 0) {
@@ -152,7 +153,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
             } else if (meta.metaType().equals(MetaType.REFERENCE)) {
                 KMetaReference metaReference = (KMetaReference) meta;
-                long clone_ptr = clonedEntry.internal_ptr_raw_for_index(metaReference.index(), metaClass);
+                long clone_ptr = clonedEntry.rawPointerForIndex(metaReference.index(), metaClass);
                 if (UNSAFE.getLong(clone_ptr) != 0) {
                     long clone_ptr_ref_segment = UNSAFE.getLong(clone_ptr);
                     if (clone_ptr_ref_segment != 0) {
@@ -169,7 +170,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
 
         // dirty
-        clonedEntry.setDirty();
+//        clonedEntry.setDirty();
 
         return clonedEntry;
     }
@@ -178,7 +179,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     public final void setPrimitiveType(int index, Object content, KMetaClass metaClass) {
         try {
             MetaType type = metaClass.meta(index).metaType();
-            long ptr = internal_ptr_raw_for_index(index, metaClass);
+            long ptr = rawPointerForIndex(index, metaClass);
 
             // primitive types
             if (type.equals(MetaType.ATTRIBUTE)) {
@@ -209,7 +210,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     UNSAFE.putFloat(ptr, (Float) content);
                 }
 
-                setDirty();
+//                setDirty();
                 //UNSAFE.putByte(_start_address + OFFSET_MODIFIED_INDEXES + index, (byte) 1);
             }
 
@@ -228,7 +229,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         long[] result = null;
 
         KMeta meta = metaClass.meta(index);
-        long ptr = internal_ptr_raw_for_index(index, metaClass);
+        long ptr = rawPointerForIndex(index, metaClass);
 
         if (meta.metaType().equals(MetaType.REFERENCE)) {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
@@ -249,7 +250,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         boolean result = false;
 
         KMeta meta = metaClass.meta(index);
-        long ptr = internal_ptr_raw_for_index(index, metaClass);
+        long ptr = rawPointerForIndex(index, metaClass);
 
         if (meta.metaType().equals(MetaType.REFERENCE)) {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
@@ -277,7 +278,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         boolean result = false;
 
         KMeta meta = metaClass.meta(index);
-        long ptr = internal_ptr_raw_for_index(index, metaClass);
+        long ptr = rawPointerForIndex(index, metaClass);
 
         if (meta.metaType().equals(MetaType.REFERENCE)) {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
@@ -314,7 +315,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     @Override
     public final void clearLongArray(int index, KMetaClass metaClass) {
         KMeta meta = metaClass.meta(index);
-        long ptr = internal_ptr_raw_for_index(index, metaClass);
+        long ptr = rawPointerForIndex(index, metaClass);
 
         if (meta.metaType().equals(MetaType.REFERENCE)) {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
@@ -330,7 +331,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     @Override
     public final double[] getDoubleArray(int index, KMetaClass metaClass) {
         double[] infer = null;
-        long ptr = internal_ptr_raw_for_index(index, metaClass);
+        long ptr = rawPointerForIndex(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
         if (ptr_segment != 0) {
             int size = UNSAFE.getInt(ptr_segment);
@@ -359,7 +360,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final void setDoubleArrayElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
-        long ptr = internal_ptr_raw_for_index(index, metaClass);
+        long ptr = rawPointerForIndex(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
 
         if (ptr_segment == 0) {
@@ -372,12 +373,12 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
         UNSAFE.putDouble(ptr_segment + 4 + arrayIndex * BYTE, valueToInsert);
 
-        setDirty();
+//        setDirty();
     }
 
     @Override
     public final void extendDoubleArray(int index, int newSize, KMetaClass metaClass) {
-        long ptr = internal_ptr_raw_for_index(index, metaClass);
+        long ptr = rawPointerForIndex(index, metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
 
         long new_ptr_segment;
@@ -389,7 +390,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
         UNSAFE.putInt(new_ptr_segment, newSize); // update size
         UNSAFE.putLong(ptr, new_ptr_segment); // update pointer
-        setDirty();
+//        setDirty();
 
     }
 
@@ -399,7 +400,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
         try {
             KMeta meta = metaClass.meta(index);
-            long ptr = internal_ptr_raw_for_index(index, metaClass);
+            long ptr = rawPointerForIndex(index, metaClass);
 
             if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                 KMetaAttribute metaAttribute = (KMetaAttribute) meta;
@@ -438,7 +439,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     private final void initMetaClass(KMetaClass metaClass) {
         int baseSegment = BASE_SEGMENT_SIZE;
         int modifiedIndexSegment = metaClass.metaElements().length;
-        int rawSegment = internal_size_of_raw_segment(metaClass);
+        int rawSegment = sizeOfRawSegment(metaClass);
 
         int bytes = baseSegment + modifiedIndexSegment + rawSegment;
 
@@ -447,8 +448,8 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         UNSAFE.setMemory(_start_address, bytes, (byte) 0);
         UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, metaClass.index());
 
-        if (this.space != null) {
-            space.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        if (this._space != null) {
+            this._space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
         }
     }
 
@@ -458,10 +459,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         return UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX);
     }
 
-    @Override
-    public final boolean isDirty() {
-        return UNSAFE.getByte(_start_address + OFFSET_DIRTY) != 0;
-    }
 
     @Override
     public final String toJSON(KMetaModel metaModel) {
@@ -745,23 +742,10 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
 
         // should not be dirty  after unserialization
-        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
+//        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
 
 
     }
-
-    @Override
-    public final void setClean(KMetaModel model) {
-        KMetaClass metaClass = model.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
-        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
-        //UNSAFE.setMemory(_start_address + OFFSET_MODIFIED_INDEXES, metaClass.metaElements().length, (byte) 0);
-    }
-
-    @Override
-    public final void setDirty() {
-        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 1);
-    }
-
 
     @Override
     public final int counter() {
@@ -790,7 +774,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                 KMetaAttribute metaAttribute = (KMetaAttribute) meta;
                 if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                    long ptr = internal_ptr_raw_for_index(metaAttribute.index(), metaClass);
+                    long ptr = rawPointerForIndex(metaAttribute.index(), metaClass);
                     long ptr_str_segment = UNSAFE.getLong(ptr);
                     if (ptr_str_segment != 0) {
                         UNSAFE.freeMemory(ptr_str_segment);
@@ -798,7 +782,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     }
                 }
                 if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                    long ptr = internal_ptr_raw_for_index(metaAttribute.index(), metaClass);
+                    long ptr = rawPointerForIndex(metaAttribute.index(), metaClass);
                     long ptr_segment = UNSAFE.getLong(ptr);
                     if (ptr_segment != 0) {
                         UNSAFE.freeMemory(ptr_segment);
@@ -807,7 +791,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                 }
             } else if (meta.metaType().equals(MetaType.REFERENCE)) {
                 KMetaReference metaReference = (KMetaReference) meta;
-                long ptr = internal_ptr_raw_for_index(metaReference.index(), metaClass);
+                long ptr = rawPointerForIndex(metaReference.index(), metaClass);
                 long ptr_str_segment = UNSAFE.getLong(ptr);
                 if (ptr_str_segment != 0) {
                     UNSAFE.freeMemory(ptr_str_segment);
@@ -831,7 +815,37 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public KChunkSpace space() {
-        return space;
+        return this._space;
+    }
+
+    @Override
+    public long getFlags() {
+        return 0;
+    }
+
+    @Override
+    public void setFlags(long bitsToEnable, long bitsToDisable) {
+        long expected;
+        long updated;
+        do {
+            expected = UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
+            updated = expected & ~bitsToDisable | bitsToEnable;
+        } while (!UNSAFE.compareAndSwapLong(this, this._start_address + OFFSET_FLAGS, expected, updated));
+    }
+
+    @Override
+    public long universe() {
+        return this._universe;
+    }
+
+    @Override
+    public long time() {
+        return this._time;
+    }
+
+    @Override
+    public long obj() {
+        return this._obj;
     }
 
 
@@ -869,24 +883,24 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     }
 
     @Override
-    public final long getMemoryAddress() {
+    public final long memoryAddress() {
         return _start_address;
     }
 
     @Override
     public final void setMemoryAddress(long address) {
         _start_address = address;
-        if (this.space != null) {
-            space.notifyRealloc(_start_address, this.universe, this.time, this.obj);
+        if (this._space != null) {
+            this._space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
         }
     }
 
     @Override
-    public void setStorage(OffHeapChunkSpace storage, long universe, long time, long obj) {
-        this.space = storage;
-        this.universe = universe;
-        this.time = time;
-        this.obj = obj;
+    public void setSpace(OffHeapChunkSpace storage, long universe, long time, long obj) {
+        this._space = storage;
+        this._universe = universe;
+        this._time = time;
+        this._obj = obj;
     }
 
 }

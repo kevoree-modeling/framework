@@ -4,9 +4,9 @@ import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 
 public interface KOffHeapChunk extends KChunk {
 
-    long getMemoryAddress();
+    long memoryAddress();
 
     void setMemoryAddress(long address);
 
-    void setStorage(OffHeapChunkSpace storage, long universe, long time, long obj);
+    void setSpace(OffHeapChunkSpace space, long universe, long time, long obj);
 }

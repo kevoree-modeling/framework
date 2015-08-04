@@ -22,7 +22,7 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
 
     @Override
     public long previousOrEqual(long key) {
-        long result = internal_previousOrEqual_index(key);
+        long result = previousOrEqualIndex(key);
         if (result != -1) {
             return key(result);
         } else {
@@ -34,4 +34,5 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
     public short type() {
         return KChunkTypes.LONG_TREE;
     }
+
 }

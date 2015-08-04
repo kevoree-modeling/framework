@@ -15,19 +15,30 @@ import java.lang.reflect.Field;
  * @ignore ts
  * <p/>
  * OffHeap implementation of AbstractOffHeapTree
- * - memory structure:  | root index (8) | size (4) | dirty (1) | counter (4) | back (size * node size * 8) |
+ * - memory structure:  | root index (8) | size (4) | flags (8) | counter (4) | back (size * node size * 8) |
  * - back:              | key (8) | left (8) | right (8) | parent (8) | color (8) | value (8) |
  */
 public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     protected static final Unsafe UNSAFE = getUnsafe();
 
-    protected OffHeapChunkSpace space;
-    protected long universe, time, obj;
+    protected OffHeapChunkSpace _space;
+    protected long _universe, _time, _obj;
 
+    private volatile long startAddress;
+    protected int threshold;
+    protected float loadFactor;
+
+    protected int NODE_SIZE;
+
+    // constants for tree semantic
     private static final char BLACK_LEFT = '{';
     private static final char BLACK_RIGHT = '}';
     private static final char RED_LEFT = '[';
     private static final char RED_RIGHT = ']';
+
+    // constants for off-heap memory layout
+    private static final long UNDEFINED = -1;
+    private static final int BYTE = 8;
 
     private static final int POS_KEY = 0;
     private static final int POS_LEFT = 1;
@@ -36,91 +47,82 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     private static final int POS_COLOR = 4;
     private static final int POS_VALUE = 5;
 
-    private static final long UNDEFINED = -1;
-    private static final int BYTE = 8;
-
     private static final int ATT_ROOT_INDEX_LEN = 8;
     private static final int ATT_SIZE_LEN = 4;
-    private static final int ATT_DIRTY_LEN = 1;
+    private static final int ATT_FLAGS_LEN = 8;
     private static final int ATT_COUNTER_LEN = 4;
 
     private static final int OFFSET_ROOT_INDEX = 0;
     private static final int OFFSET_SIZE = OFFSET_ROOT_INDEX + ATT_ROOT_INDEX_LEN;
-    private static final int OFFSET_DIRTY = OFFSET_SIZE + ATT_SIZE_LEN;
-    private static final int OFFSET_COUNTER = OFFSET_DIRTY + ATT_DIRTY_LEN;
+    private static final int OFFSET_FLAGS = OFFSET_SIZE + ATT_SIZE_LEN;
+    private static final int OFFSET_COUNTER = OFFSET_FLAGS + ATT_FLAGS_LEN;
     private static final int OFFSET_BACK = OFFSET_COUNTER + ATT_COUNTER_LEN;
 
-    private static final int BASE_SEGMENT_LEN = ATT_ROOT_INDEX_LEN + ATT_SIZE_LEN + ATT_DIRTY_LEN + ATT_COUNTER_LEN;
-
-    private volatile long _start_address;
-    protected int _threshold;
-    protected float _loadFactor;
-
-    protected int NODE_SIZE;
+    private static final int BASE_SEGMENT_LEN = ATT_ROOT_INDEX_LEN + ATT_SIZE_LEN + ATT_FLAGS_LEN + ATT_COUNTER_LEN;
 
     protected AbstractOffHeapTree() {
         NODE_SIZE = 0;
     }
 
-    private final void internal_allocate(int size) {
-        long bytes = BASE_SEGMENT_LEN + internal_size_raw_segment(size);
+    private final void allocate(int length) {
+        long bytes = BASE_SEGMENT_LEN + sizeOfRawSegment(length);
 
-        _start_address = UNSAFE.allocateMemory(bytes);
-        UNSAFE.setMemory(_start_address, bytes, (byte) 0);
+        this.startAddress = UNSAFE.allocateMemory(bytes);
+        UNSAFE.setMemory(this.startAddress, bytes, (byte) 0);
 
-        UNSAFE.putLong(_start_address + OFFSET_ROOT_INDEX, UNDEFINED);
-        UNSAFE.putInt(_start_address + OFFSET_SIZE, size);
+        UNSAFE.putLong(this.startAddress + OFFSET_ROOT_INDEX, UNDEFINED);
+        UNSAFE.putInt(this.startAddress + OFFSET_SIZE, length);
 
-        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        _threshold = (int) (size() * _loadFactor);
+        this.loadFactor = KConfig.CACHE_LOAD_FACTOR;
+        this.threshold = (int) (size() * this.loadFactor);
 
-        if (space != null) {
-            space.notifyRealloc(this._start_address, this.universe, this.time, this.obj);
+        if (_space != null) {
+            _space.notifyRealloc(this.startAddress, this._universe, this._time, this._obj);
         }
     }
 
-    private void internal_reallocate(int length) {
+    private void reallocate(int length) {
         int size_base_segment = BASE_SEGMENT_LEN;
         int size_raw_segment = length * NODE_SIZE * BYTE;
-        long new_address = UNSAFE.allocateMemory(size_base_segment + size_raw_segment);
-        UNSAFE.copyMemory(_start_address, new_address, BASE_SEGMENT_LEN + size() * NODE_SIZE * BYTE);
-        long old_address = _start_address;
-        _start_address = new_address;
-        UNSAFE.freeMemory(old_address);
+        long newAddress = UNSAFE.allocateMemory(size_base_segment + size_raw_segment);
+        UNSAFE.copyMemory(this.startAddress, newAddress, BASE_SEGMENT_LEN + size() * NODE_SIZE * BYTE);
+        long oldAddress = this.startAddress;
+        this.startAddress = newAddress;
+        UNSAFE.freeMemory(oldAddress);
 
-        _threshold = (int) (length * _loadFactor);
+        this.threshold = (int) (length * this.loadFactor);
 
-        if (space != null) {
-            space.notifyRealloc(this._start_address, this.universe, this.time, this.obj);
+        if (_space != null) {
+            _space.notifyRealloc(this.startAddress, this._universe, this._time, this._obj);
         }
     }
 
     @Override
-    public void setStorage(OffHeapChunkSpace storage, long universe, long time, long obj) {
-        this.space = storage;
-        this.universe = universe;
-        this.time = time;
-        this.obj = obj;
+    public void setSpace(OffHeapChunkSpace storage, long universe, long time, long obj) {
+        this._space = storage;
+        this._universe = universe;
+        this._time = time;
+        this._obj = obj;
     }
 
-    private int internal_size_raw_segment(int size) {
-        return size * BYTE * NODE_SIZE;
+    private int sizeOfRawSegment(int length) {
+        return length * BYTE * NODE_SIZE;
     }
 
     public final int size() {
-        return UNSAFE.getInt(_start_address + OFFSET_SIZE);
+        return UNSAFE.getInt(this.startAddress + OFFSET_SIZE);
     }
 
     protected final long key(long p_nodeIndex) {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         return UNSAFE.getLong(addr + POS_KEY * BYTE);
     }
 
     private void setKey(long p_nodeIndex, long p_key) {
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_KEY * BYTE, p_key);
     }
 
@@ -128,12 +130,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         return UNSAFE.getLong(addr + POS_LEFT * BYTE);
     }
 
     private void setLeft(long p_nodeIndex, long p_leftNodeIndex) {
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_LEFT * BYTE, p_leftNodeIndex);
     }
 
@@ -141,12 +143,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         return UNSAFE.getLong(addr + POS_RIGHT * BYTE);
     }
 
     private void setRight(long p_nodeIndex, long p_rightNodeIndex) {
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_RIGHT * BYTE, p_rightNodeIndex);
     }
 
@@ -154,12 +156,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        long address = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long address = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         return UNSAFE.getLong(address + POS_PARENT * BYTE);
     }
 
     private void setParent(long p_nodeIndex, long p_parentNodeIndex) {
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_PARENT * BYTE, p_parentNodeIndex);
     }
 
@@ -167,12 +169,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         return UNSAFE.getLong(addr + POS_COLOR * BYTE);
     }
 
     private void setColor(long p_nodeIndex, long p_color) {
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_COLOR * BYTE, p_color);
     }
 
@@ -180,12 +182,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         if (p_nodeIndex == UNDEFINED) {
             return UNDEFINED;
         }
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         return UNSAFE.getLong(addr + POS_VALUE * BYTE);
     }
 
     private void setValue(long p_nodeIndex, long p_value) {
-        long addr = _start_address + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
+        long addr = this.startAddress + OFFSET_BACK + p_nodeIndex * BYTE * NODE_SIZE;
         UNSAFE.putLong(addr + POS_VALUE * BYTE, p_value);
     }
 
@@ -270,7 +272,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
     /* Time never use direct lookup, sadly for performance, anyway this method is private to ensure the correctness of caching mechanism */
     public final long lookup(long p_key) {
-        long n = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
+        long n = UNSAFE.getLong(this.startAddress + OFFSET_ROOT_INDEX);
         if (n == UNDEFINED) {
             return KConfig.NULL_LONG;
         }
@@ -289,15 +291,15 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     public final void range(long startKey, long endKey, KTreeWalker walker) {
-        long indexEnd = internal_previousOrEqual_index(endKey);
+        long indexEnd = previousOrEqualIndex(endKey);
         while (indexEnd != UNDEFINED && key(indexEnd) >= startKey) {
             walker.elem(key(indexEnd));
             indexEnd = previous(indexEnd);
         }
     }
 
-    protected final long internal_previousOrEqual_index(long p_key) {
-        long p = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
+    protected final long previousOrEqualIndex(long p_key) {
+        long p = UNSAFE.getLong(this.startAddress + OFFSET_ROOT_INDEX);
         if (p == UNDEFINED) {
             return p;
         }
@@ -328,8 +330,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         return UNDEFINED;
     }
 
-    protected final long internal_lookup_value(long p_key) {
-        long n = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
+    protected final long internal_lookupValue(long p_key) {
+        long n = UNSAFE.getLong(this.startAddress + OFFSET_ROOT_INDEX);
         if (n == UNDEFINED) {
             return KConfig.NULL_LONG;
         }
@@ -371,7 +373,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
     private void replaceNode(long oldn, long newn) {
         if (parent(oldn) == UNDEFINED) {
-            UNSAFE.putLong(_start_address + OFFSET_ROOT_INDEX, newn);
+            UNSAFE.putLong(this.startAddress + OFFSET_ROOT_INDEX, newn);
         } else {
             if (oldn == left(parent(oldn))) {
                 setLeft(parent(oldn), newn);
@@ -385,15 +387,15 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     protected synchronized void internal_insert(long key, long value) {
-        if ((size() + 1) > _threshold) {
+        if ((size() + 1) > this.threshold) {
             int length = (size() == 0 ? 1 : size() << 1);
 
-            internal_reallocate(length);
+            reallocate(length);
         }
 
         long insertedNodeIndex = size();
         if (insertedNodeIndex == 0) {
-            UNSAFE.putInt(_start_address + OFFSET_SIZE, 1);
+            UNSAFE.putInt(this.startAddress + OFFSET_SIZE, 1);
 
             setKey(insertedNodeIndex, key);
             if (NODE_SIZE == 6) {
@@ -404,9 +406,9 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
             setRight(insertedNodeIndex, -1);
             setParent(insertedNodeIndex, -1);
 
-            UNSAFE.putLong(_start_address + OFFSET_ROOT_INDEX, insertedNodeIndex);
+            UNSAFE.putLong(this.startAddress + OFFSET_ROOT_INDEX, insertedNodeIndex);
         } else {
-            long rootIndex = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
+            long rootIndex = UNSAFE.getLong(this.startAddress + OFFSET_ROOT_INDEX);
             while (true) {
                 if (key == key(rootIndex)) {
                     //nop _size
@@ -425,7 +427,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
                         setLeft(rootIndex, insertedNodeIndex);
 
-                        UNSAFE.putInt(_start_address + OFFSET_SIZE, size() + 1);
+                        UNSAFE.putInt(this.startAddress + OFFSET_SIZE, size() + 1);
                         break;
                     } else {
                         rootIndex = left(rootIndex);
@@ -444,7 +446,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
                         setRight(rootIndex, insertedNodeIndex);
 
-                        UNSAFE.putInt(_start_address + OFFSET_SIZE, size() + 1);
+                        UNSAFE.putInt(this.startAddress + OFFSET_SIZE, size() + 1);
                         break;
                     } else {
                         rootIndex = right(rootIndex);
@@ -521,7 +523,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
     public final String serialize(KMetaModel metaModel) {
         StringBuilder builder = new StringBuilder();
-        long rootIndex = UNSAFE.getLong(_start_address + OFFSET_ROOT_INDEX);
+        long rootIndex = UNSAFE.getLong(this.startAddress + OFFSET_ROOT_INDEX);
         if (rootIndex == UNDEFINED) {
             builder.append("0");
         } else {
@@ -567,7 +569,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
     public final void init(String payload, KMetaModel metaModel, int metaClassIndex) {
         if (payload == null || payload.length() == 0) {
-            internal_allocate(0);
+            allocate(0);
             return;
         }
         int initPos = 0;
@@ -577,10 +579,10 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         }
 
         int s = Base64.decodeToIntWithBounds(payload, initPos, cursor);
-        internal_allocate(s);
+        allocate(s);
 
         if (payload.charAt(cursor) == ',') {//className to parse
-            UNSAFE.putInt(_start_address + OFFSET_SIZE, s);
+            UNSAFE.putInt(this.startAddress + OFFSET_SIZE, s);
             cursor++;
             initPos = cursor;
         }
@@ -588,8 +590,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
             cursor++;
         }
 
-        UNSAFE.putLong(_start_address + OFFSET_ROOT_INDEX, Base64.decodeToIntWithBounds(payload, initPos, cursor));
-        UNSAFE.setMemory(_start_address + OFFSET_BACK, internal_size_raw_segment(s), (byte) UNDEFINED);
+        UNSAFE.putLong(this.startAddress + OFFSET_ROOT_INDEX, Base64.decodeToIntWithBounds(payload, initPos, cursor));
+        UNSAFE.setMemory(this.startAddress + OFFSET_BACK, sizeOfRawSegment(s), (byte) UNDEFINED);
 
         int _back_index = 0;
         while (cursor < payload.length()) {
@@ -646,34 +648,22 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         }
     }
 
-    public final boolean isDirty() {
-        return UNSAFE.getByte(_start_address + OFFSET_DIRTY) != 0;
-    }
-
-    public final void setClean(KMetaModel p_metaModel) {
-        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);
-    }
-
-    public final void setDirty() {
-        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 1);
-    }
-
     public final int counter() {
-        return UNSAFE.getInt(_start_address + OFFSET_COUNTER);
+        return UNSAFE.getInt(this.startAddress + OFFSET_COUNTER);
     }
 
     public final void inc() {
-        int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
-        UNSAFE.putInt(_start_address + OFFSET_COUNTER, c + 1);
+        int c = UNSAFE.getInt(this.startAddress + OFFSET_COUNTER);
+        UNSAFE.putInt(this.startAddress + OFFSET_COUNTER, c + 1);
     }
 
     public final void dec() {
-        int c = UNSAFE.getInt(_start_address + OFFSET_COUNTER);
-        UNSAFE.putInt(_start_address + OFFSET_COUNTER, c - 1);
+        int c = UNSAFE.getInt(this.startAddress + OFFSET_COUNTER);
+        UNSAFE.putInt(this.startAddress + OFFSET_COUNTER, c - 1);
     }
 
     public final void free(KMetaModel p_metaModel) {
-        UNSAFE.freeMemory(_start_address);
+        UNSAFE.freeMemory(this.startAddress);
     }
 
     @SuppressWarnings("restriction")
@@ -688,21 +678,50 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     @Override
-    public final long getMemoryAddress() {
-        return _start_address;
+    public final long memoryAddress() {
+        return this.startAddress;
     }
 
     @Override
     public final void setMemoryAddress(long address) {
-        _start_address = address;
+        this.startAddress = address;
 
-        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        _threshold = (int) (size() * _loadFactor);
+        loadFactor = KConfig.CACHE_LOAD_FACTOR;
+        this.threshold = (int) (size() * this.loadFactor);
     }
 
     @Override
     public KChunkSpace space() {
-        return space;
+        return this._space;
     }
 
+    @Override
+    public long getFlags() {
+        return UNSAFE.getLong(this.startAddress + OFFSET_FLAGS);
+    }
+
+    @Override
+    public void setFlags(long bitsToEnable, long bitsToDisable) {
+        long expected;
+        long updated;
+        do {
+            expected = UNSAFE.getLong(this.startAddress + OFFSET_FLAGS);
+            updated = expected & ~bitsToDisable | bitsToEnable;
+        } while (!UNSAFE.compareAndSwapLong(this, this.startAddress + OFFSET_FLAGS, expected, updated));
+    }
+
+    @Override
+    public long universe() {
+        return this._universe;
+    }
+
+    @Override
+    public long time() {
+        return this._time;
+    }
+
+    @Override
+    public long obj() {
+        return this._obj;
+    }
 }
