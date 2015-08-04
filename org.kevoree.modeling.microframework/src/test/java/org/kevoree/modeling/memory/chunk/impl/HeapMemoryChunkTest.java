@@ -8,6 +8,6 @@ public class HeapMemoryChunkTest extends BaseKMemoryChunkTest {
 
     @Override
     public KObjectChunk createKMemoryChunk() {
-        return new HeapObjectChunk(new OffHeapChunkSpace());
+        return new HeapObjectChunk(-1,-1,-1,null);
     }
 }

@@ -28,7 +28,7 @@ public class Array1DTest {
                 return new double[0][];
             }
         });
-        KObjectChunk segment = new HeapObjectChunk(null);
+        KObjectChunk segment = new HeapObjectChunk(-1, -1, -1, null);
         segment.init(null, mm, mc.index());
         int arraySize = 5;
         //allocate for 5 elem
@@ -36,17 +36,17 @@ public class Array1DTest {
         //attach a wrapper
         KArray1D array = new Array1D(arraySize, 0, mc.dependencies().index(), segment, mc);
         //fill it
-        int count=0;
+        int count = 0;
         for (int i = 0; i < arraySize; i++) {
             array.set(i, count);
             count++;
         }
         //test content
 
-        count=0;
+        count = 0;
         for (int i = 0; i < arraySize; i++) {
             Assert.assertTrue(array.get(i) == count);
-            Assert.assertTrue(segment.getDoubleArrayElem(mc.dependencies().index(), count, mc)==count);
+            Assert.assertTrue(segment.getDoubleArrayElem(mc.dependencies().index(), count, mc) == count);
             count++;
         }
         //test raw array

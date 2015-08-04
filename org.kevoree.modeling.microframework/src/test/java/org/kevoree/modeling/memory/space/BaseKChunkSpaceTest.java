@@ -3,6 +3,7 @@ package org.kevoree.modeling.memory.space;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongTree;
@@ -24,7 +25,7 @@ public abstract class BaseKChunkSpaceTest {
         Assert.assertEquals(0, retrievedMap.get(0));
         Assert.assertEquals(1, retrievedMap.get(1));
         Assert.assertEquals(map.size(), retrievedMap.size());
-        Assert.assertEquals(map.isDirty(), retrievedMap.isDirty());
+        Assert.assertEquals((map.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT, (retrievedMap.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
         Assert.assertEquals(map.counter(), retrievedMap.counter());
 
         // KLongLongTree
@@ -36,7 +37,9 @@ public abstract class BaseKChunkSpaceTest {
         Assert.assertEquals(0, retrievedLongLongTree.lookupValue(0));
         Assert.assertEquals(1, retrievedLongLongTree.lookupValue(1));
         Assert.assertEquals(longLongTree.size(), retrievedLongLongTree.size());
-        Assert.assertEquals(longLongTree.isDirty(), retrievedLongLongTree.isDirty());
+
+        Assert.assertEquals((longLongTree.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT, (retrievedLongLongTree.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+
         Assert.assertEquals(longLongTree.counter(), retrievedLongLongTree.counter());
 
         // KLongTree
@@ -48,7 +51,9 @@ public abstract class BaseKChunkSpaceTest {
         Assert.assertEquals(0, retrievedLongTree.lookup(0));
         Assert.assertEquals(1, retrievedLongTree.lookup(1));
         Assert.assertEquals(longTree.size(), retrievedLongTree.size());
-        Assert.assertEquals(longTree.isDirty(), retrievedLongTree.isDirty());
+
+        Assert.assertEquals((longTree.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT, (retrievedLongTree.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+
         Assert.assertEquals(longTree.counter(), retrievedLongTree.counter());
 
         // KObjectChunk

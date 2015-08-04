@@ -28,7 +28,7 @@ public class Array2DTest {
                 return new double[0][];
             }
         });
-        KObjectChunk segment = new HeapObjectChunk(null);
+        KObjectChunk segment = new HeapObjectChunk(-1,-1,-1,null);
         segment.init(null, mm, mc.index());
         int nbLines = 5;
         int nbColumn = 3;

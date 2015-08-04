@@ -6,6 +6,7 @@ import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -14,7 +15,6 @@ import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
 import java.util.ArrayList;
-
 
 public abstract class BaseKMemoryChunkTest {
 
@@ -195,7 +195,7 @@ public abstract class BaseKMemoryChunkTest {
                 cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
 
                 // clone
-                KObjectChunk clonedEntry = cacheEntry.clone(dynamicMetaModel);
+                KObjectChunk clonedEntry = cacheEntry.clone(-1,-1,-1, dynamicMetaModel);
 
                 Assert.assertEquals(cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass),
                         clonedEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass));
@@ -204,7 +204,7 @@ public abstract class BaseKMemoryChunkTest {
                 Assert.assertArrayEquals(cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass),
                         clonedEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass));
 
-                Assert.assertTrue(clonedEntry.isDirty());
+                Assert.assertTrue((clonedEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 // free cache entry
                 //cacheEntry.free(dynamicMetaModel);
@@ -258,7 +258,7 @@ public abstract class BaseKMemoryChunkTest {
 
                 ArrayList<KObjectChunk> segments = new ArrayList<KObjectChunk>();
                 for (int i = 0; i < 50; i++) {
-                    segments.add(cacheEntry.clone(dynamicMetaModel));
+                    segments.add(cacheEntry.clone(-1,-1,-1, dynamicMetaModel));
                 }
 
                 // free everything
@@ -308,13 +308,13 @@ public abstract class BaseKMemoryChunkTest {
                 KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
-                Assert.assertFalse(cacheEntry.isDirty());
+                Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
                 long attr = (long) cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
                 Assert.assertEquals(10l, attr);
 
-                Assert.assertTrue(cacheEntry.isDirty());
+                Assert.assertTrue((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
                 String name = (String) cacheEntry.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass);
@@ -348,13 +348,13 @@ public abstract class BaseKMemoryChunkTest {
                 KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, sensorMetaClass.index());
 
-                Assert.assertFalse(cacheEntry.isDirty());
+                Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 double[] inferPayload0 = cacheEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertNull(inferPayload0);
 
                 cacheEntry.extendDoubleArray(sensorMetaClass.attribute("value").index(), 1, sensorMetaClass);
-                Assert.assertTrue(cacheEntry.isDirty());
+                Assert.assertTrue((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 double[] inferPayload1 = cacheEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertNotNull(inferPayload1);
@@ -382,7 +382,7 @@ public abstract class BaseKMemoryChunkTest {
 
 
                 // clone cache entry
-                KObjectChunk clone = cacheEntry.clone(dynamicMetaModel);
+                KObjectChunk clone = cacheEntry.clone(-1,-1,-1, dynamicMetaModel);
                 double[] inferPayload5 = clone.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 double[] inferPayload6 = clone.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertTrue(inferPayload5[9] == 52);
@@ -432,7 +432,7 @@ public abstract class BaseKMemoryChunkTest {
                 KObjectChunk cacheEntry = createKMemoryChunk();
                 cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
-                Assert.assertFalse(cacheEntry.isDirty());
+                Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
                 cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
@@ -444,7 +444,7 @@ public abstract class BaseKMemoryChunkTest {
                 Assert.assertEquals(cacheEntry.getDoubleArraySize(homeMetaClass.attribute("value").index(), homeMetaClass), 0);
                 cacheEntry.extendDoubleArray(homeMetaClass.attribute("value").index(), 3, homeMetaClass);
                 //Assert.assertEquals(cacheEntry.getDoubleArraySize(homeMetaClass.attribute("value").index(), homeMetaClass), 3);
-                Assert.assertTrue(cacheEntry.isDirty());
+                Assert.assertTrue((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 cacheEntry.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 0, 0.1, homeMetaClass);
                 cacheEntry.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 1, 1.1, homeMetaClass);
@@ -472,7 +472,7 @@ public abstract class BaseKMemoryChunkTest {
                     double[] newInfer = newCacheEntry.getDoubleArray(homeMetaClass.attribute("value").index(), homeMetaClass);
 
                     Assert.assertEquals(originInfer.length, newInfer.length);
-                    Assert.assertFalse(newCacheEntry.isDirty());
+                    Assert.assertFalse((newCacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 } catch (Exception e) {
                     e.printStackTrace();

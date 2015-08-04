@@ -9,7 +9,7 @@ public class ArrayLongTreeTest extends BaseKLongTreeTest {
 
     @Override
     public KLongTree createKLongTree() {
-        return new ArrayLongTree(null);
+        return new ArrayLongTree(-1,-1,-1,null);
     }
 }
 

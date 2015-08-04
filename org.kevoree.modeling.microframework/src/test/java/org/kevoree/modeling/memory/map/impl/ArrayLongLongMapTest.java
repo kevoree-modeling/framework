@@ -8,7 +8,7 @@ public class ArrayLongLongMapTest extends BaseKLongLongMapTest {
 
     @Override
     public KLongLongMap createKLongLongMap() {
-        return new ArrayLongLongMap(null);
+        return new ArrayLongLongMap(-1,-1,-1,null);
     }
 
 }
