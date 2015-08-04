@@ -162,6 +162,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     public void save(final KCallback<Throwable> callback) {
         KChunkIterator dirtyIterator = _storage.detachDirties();
         if (dirtyIterator.size() == 0) {
+            callback.on(null);
             return;
         }
         long[] toSaveKeys = new long[(dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * KEY_SIZE];
@@ -297,33 +298,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public synchronized void discard(KUniverse p_universe, final KCallback<Throwable> callback) {
-        //TODO
-        //FIXME
-        /*
-
-        KContentKey[] toReloadKeys = new KContentKey[1];
-        toReloadKeys[0] = KContentKey.createGlobalUniverseTree();
-        _db.get(toReloadKeys, new KCallback<String[]>() {
-            @Override
-            public void on(String[] strings) {
-                if (strings != null && strings.length > 0 && strings[0] != null) {
-                    KObjectChunk newObject = internal_unserialize(toReloadKeys[0], strings[0]);
-                    KChunkSpace newCache = _factory.newStorage();
-                    newCache.getOrPut(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, newObject);
-                    //swapCache
-                    KChunkSpace oldCache = _cache;
-                    _cache = newCache;
-                    oldCache.delete(_model.metaModel());
-                    callback.on(null);
-                }
-            }
-        });
-        */
-
-    }
-
-    @Override
     public void delete(KUniverse p_universe, KCallback<Throwable> callback) {
         throw new RuntimeException("Not implemented yet !");
     }
@@ -341,11 +315,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         this._scheduler.dispatch(this._resolver.lookupAllTimes(universe, times, uuid, callback));
-    }
-
-    @Override
-    public void discard(KCallback<Throwable> callback) {
-        //TODO
     }
 
     @Override
@@ -373,6 +342,14 @@ public class DataManager implements KDataManager, KInternalDataManager {
         currentCdnListener = this._db.addUpdateListener(new KContentUpdateListener() {
             @Override
             public void on(long[] updatedKeys) {
+                int nbElements = updatedKeys.length / KEY_SIZE;
+                for (int i = 0; i < nbElements; i++) {
+
+                }
+
+
+
+
                 /*
 
 

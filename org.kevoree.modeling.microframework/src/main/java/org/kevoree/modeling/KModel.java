@@ -27,8 +27,6 @@ public interface KModel<A extends KUniverse> {
 
     void save(KCallback cb);
 
-    void discard(KCallback cb);
-
     void connect(KCallback cb);
 
     void close(KCallback cb);

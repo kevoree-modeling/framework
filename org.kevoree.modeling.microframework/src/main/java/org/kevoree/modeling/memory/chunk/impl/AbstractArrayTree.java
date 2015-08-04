@@ -5,10 +5,10 @@ import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KTreeWalker;
 import org.kevoree.modeling.memory.space.KChunkSpace;
-import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class AbstractArrayTree {
@@ -19,29 +19,50 @@ public abstract class AbstractArrayTree {
     private static final char RED_LEFT = '[';
     private static final char RED_RIGHT = ']';
     private static final int META_SIZE = 3;
-    private final float _loadFactor;
+    private static final float LOAD_FACTOR = ((float) 75 / (float) 100);
     protected int kvSize = 1;
     private int _threshold = 0;
     //volatile variables
-    private volatile int _counter = 0;
     private volatile int _root_index = -1;
     private volatile int _size = 0;
     private volatile InternalState state;
-
+    //final local variables
     private final KChunkSpace _space;
-
     private final AtomicLong _flags;
+    private final AtomicInteger _counter;
 
-    private void internal_set_dirty() {
-        if (_space != null) {
-            if ((_flags.get() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-                _space.declareDirty((KChunk) this);
-                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
-                setFlags(KChunkFlags.DIRTY_BIT, 0);
-            }
-        } else {
-            setFlags(KChunkFlags.DIRTY_BIT, 0);
+    public AbstractArrayTree(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
+        this._universe = p_universe;
+        this._time = p_time;
+        this._obj = p_obj;
+        this._flags = new AtomicLong();
+        this._counter = new AtomicInteger(0);
+        this._space = p_space;
+    }
+
+    class InternalState {
+
+        public InternalState(int[] _back_meta, long[] _back_kv, boolean[] _back_colors) {
+            this._back_meta = _back_meta;
+            this._back_kv = _back_kv;
+            this._back_colors = _back_colors;
         }
+
+        final int[] _back_meta;
+        final long[] _back_kv;
+        final boolean[] _back_colors;
+    }
+
+    public final int counter() {
+        return this._counter.get();
+    }
+
+    public final int inc() {
+        return this._counter.incrementAndGet();
+    }
+
+    public final int dec() {
+        return this._counter.decrementAndGet();
     }
 
     private final long _universe;
@@ -80,35 +101,13 @@ public abstract class AbstractArrayTree {
         return _space;
     }
 
-    public AbstractArrayTree(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
-        this._universe = p_universe;
-        this._time = p_time;
-        this._obj = p_obj;
-        this._flags = new AtomicLong();
-        this._space = p_space;
-        _loadFactor = KConfig.CACHE_LOAD_FACTOR;
-    }
-
-    class InternalState {
-
-        public InternalState(int[] _back_meta, long[] _back_kv, boolean[] _back_colors) {
-            this._back_meta = _back_meta;
-            this._back_kv = _back_kv;
-            this._back_colors = _back_colors;
-        }
-
-        final int[] _back_meta;
-        final long[] _back_kv;
-        final boolean[] _back_colors;
-    }
-
     private void allocate(int capacity) {
         state = new InternalState(new int[capacity * META_SIZE], new long[capacity * kvSize], new boolean[capacity]);
-        _threshold = (int) (capacity * _loadFactor);
+        _threshold = (int) (capacity * LOAD_FACTOR);
     }
 
     private void reallocate(int newCapacity) {
-        _threshold = (int) (newCapacity * _loadFactor);
+        _threshold = (int) (newCapacity * LOAD_FACTOR);
         long[] new_back_kv = new long[newCapacity * kvSize];
         if (state != null && state._back_kv != null) {
             System.arraycopy(state._back_kv, 0, new_back_kv, 0, _size * kvSize);
@@ -548,27 +547,6 @@ public abstract class AbstractArrayTree {
         }
     }
 
-    
-    public final int counter() {
-        return this._counter;
-    }
-
-    public final void inc() {
-        internal_counter(true);
-    }
-
-    public final void dec() {
-        internal_counter(false);
-    }
-
-    private synchronized void internal_counter(boolean inc) {
-        if (inc) {
-            this._counter++;
-        } else {
-            this._counter--;
-        }
-    }
-
     public final void free(KMetaModel p_metaModel) {
         this.state = null;
         this._size = 0;
@@ -656,6 +634,19 @@ public abstract class AbstractArrayTree {
         }
         return n;
     }
+
+    private void internal_set_dirty() {
+        if (_space != null) {
+            if ((_flags.get() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                _space.declareDirty((KChunk) this);
+                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
+                setFlags(KChunkFlags.DIRTY_BIT, 0);
+            }
+        } else {
+            setFlags(KChunkFlags.DIRTY_BIT, 0);
+        }
+    }
+
 
      /*
     public void delete(long key) {

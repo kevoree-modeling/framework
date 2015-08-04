@@ -70,11 +70,6 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public void discard(KCallback cb) {
-        _manager.discard(null, cb);
-    }
-
-    @Override
     public void setOperation(KMetaOperation metaOperation, KOperation operation) {
         _manager.operationManager().registerOperation(metaOperation, operation, null);
     }

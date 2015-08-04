@@ -19,9 +19,9 @@ public interface KChunk {
 
     int counter();
 
-    void inc();
+    int inc();
 
-    void dec();
+    int dec();
 
     void free(KMetaModel metaModel);
 

@@ -293,12 +293,7 @@ public class TimeTest {
         model.save(new KCallback<Throwable>() {
             @Override
             public void on(Throwable aBoolean) {
-                model.discard(new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable aBoolean) {
 
-                    }
-                });
             }
         });
 
@@ -320,12 +315,7 @@ public class TimeTest {
         model.save(new KCallback<Throwable>() {
             @Override
             public void on(Throwable aBoolean) {
-                model.discard(new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable aBoolean) {
 
-                    }
-                });
             }
         });
 

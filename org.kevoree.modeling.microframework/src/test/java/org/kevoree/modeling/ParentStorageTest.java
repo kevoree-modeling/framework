@@ -47,7 +47,8 @@ public class ParentStorageTest {
         }
         //We clear the cache
 
-        cloudModel.discard(new KCallback<Throwable>() {
+        /*
+        cloudModel(new KCallback<Throwable>() {
             @Override
             public void on(Throwable aBoolean) {
                 time0.lookup(n1.uuid(),new KCallback<KObject>() {
@@ -57,7 +58,7 @@ public class ParentStorageTest {
                     }
                 });
             }
-        });
+        });*/
 
         /*
         try {
@@ -105,12 +106,7 @@ public class ParentStorageTest {
         cloudModel.save(new KCallback<Throwable>() {
             @Override
             public void on(Throwable aBoolean) {
-                cloudModel.discard(new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable aBoolean) {
 
-                    }
-                });
             }
         });
 

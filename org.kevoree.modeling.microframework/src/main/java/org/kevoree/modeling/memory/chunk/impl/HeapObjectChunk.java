@@ -10,19 +10,16 @@ import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.util.maths.Base64;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class HeapObjectChunk implements KObjectChunk {
 
-    private Object[] raw;
-
-    private volatile int _counter = 0;
-
-    private int _metaClassIndex = -1;
-
-    private KChunkSpace _space;
+    private final KChunkSpace _space;
 
     private final AtomicLong _flags;
+
+    private final AtomicInteger _counter;
 
     private final long _universe;
 
@@ -30,11 +27,16 @@ public class HeapObjectChunk implements KObjectChunk {
 
     private final long _obj;
 
+    private Object[] raw;
+
+    private int _metaClassIndex = -1;
+
     public HeapObjectChunk(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
         this._flags = new AtomicLong();
+        this._counter = new AtomicInteger(0);
         this._space = p_space;
     }
 
@@ -236,25 +238,17 @@ public class HeapObjectChunk implements KObjectChunk {
 
     @Override
     public final int counter() {
-        return this._counter;
+        return this._counter.get();
     }
 
     @Override
-    public final void inc() {
-        internal_counter(true);
+    public final int inc() {
+        return this._counter.incrementAndGet();
     }
 
     @Override
-    public final void dec() {
-        internal_counter(false);
-    }
-
-    private synchronized void internal_counter(boolean inc) {
-        if (inc) {
-            this._counter++;
-        } else {
-            this._counter--;
-        }
+    public final int dec() {
+        return this._counter.decrementAndGet();
     }
 
     @Override

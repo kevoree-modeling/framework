@@ -31,12 +31,7 @@ public class LookupRootTest {
                 cloudModel.save(new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable aBoolean) {
-                        cloudModel.discard(new KCallback<Throwable>() {
-                            @Override
-                            public void on(Throwable aBoolean) {
 
-                            }
-                        });
                     }
                 });
 
@@ -81,12 +76,6 @@ public class LookupRootTest {
                 cloudModel.save(new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable aBoolean) {
-                        cloudModel.discard(new KCallback<Throwable>() {
-                            @Override
-                            public void on(Throwable aBoolean) {
-
-                            }
-                        });
                     }
                 });
             }

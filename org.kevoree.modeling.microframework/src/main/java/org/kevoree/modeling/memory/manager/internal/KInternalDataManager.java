@@ -28,8 +28,6 @@ public interface KInternalDataManager extends KDataManager {
 
     long nextModelKey();
 
-    void discard(KUniverse universe, KCallback<Throwable> callback);
-
     void delete(KUniverse universe, KCallback<Throwable> callback);
 
     //TODO clean these method
@@ -38,7 +36,7 @@ public interface KInternalDataManager extends KDataManager {
     long parentUniverseKey(long currentUniverseKey);
 
     long[] descendantsUniverseKeys(long currentUniverseKey);
-    
+
     void setModel(KModel model);
 
     void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback);

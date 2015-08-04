@@ -10,6 +10,7 @@ import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -72,11 +73,11 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     private static final float loadFactor = ((float) 75 / (float) 100);
 
-    private int _metaClassIndex = -1;
-
     private final AtomicLong _flags;
 
-    private KChunkSpace _space;
+    private final AtomicInteger _counter;
+
+    private final KChunkSpace _space;
 
     private final long _universe;
 
@@ -84,10 +85,30 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     private final long _obj;
 
+    private int _metaClassIndex = -1;
+
+    public ArrayLongLongMap(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
+        this._universe = p_universe;
+        this._time = p_time;
+        this._obj = p_obj;
+        this._flags = new AtomicLong();
+        this._counter = new AtomicInteger(0);
+        this._space = p_space;
+        this.elementCount = 0;
+        this.droppedCount = 0;
+        InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
+        for (int i = 0; i < initialCapacity; i++) {
+            newstate.elementNext[i] = -1;
+            newstate.elementHash[i] = -1;
+        }
+        this.state = newstate;
+        this.threshold = (int) (newstate.elementDataSize * loadFactor);
+    }
+
     /**
      * @native ts
      */
-    class InternalState {
+    final class InternalState {
 
         public final int elementDataSize;
 
@@ -105,21 +126,19 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
     }
 
-    public ArrayLongLongMap(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
-        this._universe = p_universe;
-        this._time = p_time;
-        this._obj = p_obj;
-        this._flags = new AtomicLong();
-        this._space = p_space;
-        this.elementCount = 0;
-        this.droppedCount = 0;
-        InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
-        for (int i = 0; i < initialCapacity; i++) {
-            newstate.elementNext[i] = -1;
-            newstate.elementHash[i] = -1;
-        }
-        this.state = newstate;
-        this.threshold = (int) (newstate.elementDataSize * loadFactor);
+    @Override
+    public final int counter() {
+        return this._counter.get();
+    }
+
+    @Override
+    public final int inc() {
+        return this._counter.incrementAndGet();
+    }
+
+    @Override
+    public final int dec() {
+        return this._counter.decrementAndGet();
     }
 
     public final void clear() {
@@ -293,32 +312,6 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     public final int size() {
         return this.elementCount;
-    }
-
-
-    private volatile int _counter = 0;
-
-    @Override
-    public final int counter() {
-        return this._counter;
-    }
-
-    @Override
-    public final void inc() {
-        internal_counter(true);
-    }
-
-    @Override
-    public final void dec() {
-        internal_counter(false);
-    }
-
-    private synchronized void internal_counter(boolean inc) {
-        if (inc) {
-            this._counter++;
-        } else {
-            this._counter--;
-        }
     }
 
     /* warning: this method is not thread safe */
