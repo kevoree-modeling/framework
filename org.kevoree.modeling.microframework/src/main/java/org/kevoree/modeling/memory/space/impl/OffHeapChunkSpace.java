@@ -231,7 +231,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     private KOffHeapChunk internal_createElement(long p_universe, long p_time, long p_obj, short p_type) {
         switch (p_type) {
-            case KChunkTypes.CHUNK:
+            case KChunkTypes.OBJECT_CHUNK:
                 return new OffHeapObjectChunk(this, p_universe, p_time, p_obj);
 
             case KChunkTypes.LONG_TREE:
@@ -250,7 +250,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
     @Override
     public final KObjectChunk clone(KObjectChunk p_previousElement, long p_newUniverse, long p_newTime, long p_newObj, KMetaModel p_metaModel) {
         return (KObjectChunk) internal_put(p_newUniverse, p_newTime, p_newObj,
-                p_previousElement.clone(p_newUniverse, p_newTime, p_newObj, p_metaModel), KChunkTypes.CHUNK);
+                p_previousElement.clone(p_newUniverse, p_newTime, p_newObj, p_metaModel), KChunkTypes.OBJECT_CHUNK);
     }
 
     private synchronized KChunk internal_put(long p_universe, long p_time, long p_obj, KChunk p_payload, short p_type) {

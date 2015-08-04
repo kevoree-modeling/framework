@@ -89,23 +89,25 @@ public class ListenerManager {
         }
     }
 
-    public boolean isListened(KContentKey key) {
-        long[] notifier = _obj2Listener.get(key.obj);
+    public boolean isListened(long obj) {
+        long[] notifier = _obj2Listener.get(obj);
         if (notifier != null && notifier.length > 0) {
             return true;
         }
         return false;
     }
 
-    public void dispatch(KContentKey[] keys, KObject[] objects, int lastIndex) {
-        for (int i = 0; i < lastIndex; i++) {
-            long[] notifier = _obj2Listener.get(keys[i].obj);
-            if (notifier != null && notifier.length > 0) {
-                for (int j = 0; j < notifier.length; j++) {
-                    HeapListener ll = _listeners.get(notifier[j]);
-                    KCallback<KObject> cb = ll.cb;
-                    if(cb != null){
-                        cb.on(objects[i]);
+    public void dispatch(KObject[] objects) {
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] != null) {
+                long[] notifier = _obj2Listener.get(objects[i].uuid());
+                if (notifier != null && notifier.length > 0) {
+                    for (int j = 0; j < notifier.length; j++) {
+                        HeapListener ll = _listeners.get(notifier[j]);
+                        KCallback<KObject> cb = ll.cb;
+                        if (cb != null) {
+                            cb.on(objects[i]);
+                        }
                     }
                 }
             }

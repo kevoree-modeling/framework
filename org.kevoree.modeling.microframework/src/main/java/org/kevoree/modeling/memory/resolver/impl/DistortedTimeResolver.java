@@ -389,7 +389,7 @@ public class DistortedTimeResolver implements KResolver {
     @Override
     public void indexObject(KObject obj) {
         int metaClassIndex = obj.metaClass().index();
-        KObjectChunk cacheEntry = (KObjectChunk) _cache.createAndMark(obj.universe(), obj.now(), obj.uuid(), KChunkTypes.CHUNK);
+        KObjectChunk cacheEntry = (KObjectChunk) _cache.createAndMark(obj.universe(), obj.now(), obj.uuid(), KChunkTypes.OBJECT_CHUNK);
         cacheEntry.init(null, _manager.model().metaModel(), metaClassIndex);
         cacheEntry.setFlags(KChunkFlags.DIRTY_BIT, 0);
         cacheEntry.space().declareDirty(cacheEntry);
@@ -419,7 +419,7 @@ public class DistortedTimeResolver implements KResolver {
             boolean isTimeNotNull = time != KConfig.NULL_LONG;
             boolean isObjNotNull = uuid != KConfig.NULL_LONG;
             if (isUniverseNotNull && isTimeNotNull && isObjNotNull) {
-                result = KChunkTypes.CHUNK;
+                result = KChunkTypes.OBJECT_CHUNK;
             } else if (isUniverseNotNull && !isTimeNotNull && isObjNotNull) {
                 result = KChunkTypes.LONG_TREE;
             } else {

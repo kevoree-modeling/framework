@@ -57,7 +57,7 @@ public abstract class BaseKChunkSpaceTest {
         Assert.assertEquals(longTree.counter(), retrievedLongTree.counter());
 
         // KObjectChunk
-        KObjectChunk chunk = (KObjectChunk) storage.create(0, 0, 0, KChunkTypes.CHUNK);
+        KObjectChunk chunk = (KObjectChunk) storage.create(0, 0, 0, KChunkTypes.OBJECT_CHUNK);
         KObjectChunk retrievedChunk = (KObjectChunk) storage.get(0, 0, 0);
         Assert.assertNotNull(retrievedChunk);
     }

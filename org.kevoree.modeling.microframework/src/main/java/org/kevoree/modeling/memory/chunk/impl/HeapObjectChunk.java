@@ -258,7 +258,7 @@ public class HeapObjectChunk implements KObjectChunk {
 
     @Override
     public short type() {
-        return KChunkTypes.CHUNK;
+        return KChunkTypes.OBJECT_CHUNK;
     }
 
     @Override

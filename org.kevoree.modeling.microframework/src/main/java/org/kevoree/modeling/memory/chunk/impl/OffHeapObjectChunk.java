@@ -843,7 +843,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public short type() {
-        return KChunkTypes.CHUNK;
+        return KChunkTypes.OBJECT_CHUNK;
     }
 
     @Override

@@ -121,7 +121,7 @@ public class HeapChunkSpace implements KChunkSpace {
 
     private KChunk internal_createElement(long p_universe, long p_time, long p_obj, short type) {
         switch (type) {
-            case KChunkTypes.CHUNK:
+            case KChunkTypes.OBJECT_CHUNK:
                 return new HeapObjectChunk(p_universe, p_time, p_obj, this);
             case KChunkTypes.LONG_LONG_MAP:
                 return new ArrayLongLongMap(p_universe, p_time, p_obj, this);

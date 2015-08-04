@@ -1,10 +1,12 @@
 package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
 import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
@@ -342,115 +344,70 @@ public class DataManager implements KDataManager, KInternalDataManager {
         currentCdnListener = this._db.addUpdateListener(new KContentUpdateListener() {
             @Override
             public void on(long[] updatedKeys) {
+                long[] toLoadKeys = new long[updatedKeys.length];
                 int nbElements = updatedKeys.length / KEY_SIZE;
+                int toInsertKey = 0;
                 for (int i = 0; i < nbElements; i++) {
-
-                }
-
-
-
-
-                /*
-
-
-                KContentKey[] toReloadKey = new KContentKey[updatedKeys.length * 2];
-                int indexInsert = 0;
-                ArrayLongLongMap tempMap = null;
-                int nbDispatch = 0;
-                for (int i = 0; i < updatedKeys.length; i++) {
-                    //for chunk only we check in all case if there are listened
-                    if (updatedKeys[i].universe != KConfig.NULL_LONG && updatedKeys[i].time != KConfig.NULL_LONG && updatedKeys[i].obj != KConfig.NULL_LONG) {
-                        if (_listenerManager.isListened(updatedKeys[i])) {
-                            //if yes, tag it as event for KListener
-                            nbDispatch++;
-                            if (tempMap == null) {
-                                tempMap = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-                            }
-                            //check that the KUniverseTree will be ready
-                            if (!tempMap.contains(updatedKeys[i].obj)) {
-                                KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, updatedKeys[i].obj);
-                                if (alreadyLoadedOrder == null) {
-                                    toReloadKey[indexInsert] = KContentKey.createUniverseTree(updatedKeys[i].obj);
-                                    indexInsert++;
-                                    tempMap.put(updatedKeys[i].obj, updatedKeys[i].obj);
-                                }
-                            }
+                    KChunk currentChunk = _cache.getAndMark(updatedKeys[i * 3], updatedKeys[i * 3 + 1], updatedKeys[i * 3 + 2]);
+                    if (currentChunk != null) {
+                        if ((currentChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                            toLoadKeys[toInsertKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
+                            toLoadKeys[toInsertKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
+                            toLoadKeys[toInsertKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
+                            toInsertKey++;
                         }
-                    }
-                    KObjectChunk cached = _cache.get(updatedKeys[i].universe, updatedKeys[i].time, updatedKeys[i].obj);
-                    //first we check if the object is already in cache
-                    if (cached == null) {
-                        //if its a chunk then investigate
-                        if (updatedKeys[i].universe != KConfig.NULL_LONG && updatedKeys[i].time != KConfig.NULL_LONG && updatedKeys[i].obj != KConfig.NULL_LONG) {
-                            //the chunk has to be loaded anyway, because a listener is waiting for it
-                            if (_listenerManager.isListened(updatedKeys[i])) {
-                                toReloadKey[indexInsert] = updatedKeys[i];
-                                indexInsert++;
-                            }
-                        }
-                    } else {
-                        //check if the element is dirty, otherwise wait
-                        if (!cached.isDirty()) {
-                            //this is a UniverseTree, tag as reloaded to avoid duplicate
-                            if (updatedKeys[i].universe == KConfig.NULL_LONG && updatedKeys[i].time == KConfig.NULL_LONG) {
-                                if (tempMap == null) {
-                                    tempMap = new ArrayLongLongMap(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-                                }
-                                //reload if not already tagged as reload
-                                if (!tempMap.contains(updatedKeys[i].obj)) {
-                                    tempMap.put(updatedKeys[i].obj, updatedKeys[i].obj);
-                                    toReloadKey[indexInsert] = updatedKeys[i];
-                                    indexInsert++;
-                                }
-                                //otherwise just ask for reload
-                            } else {
-                                toReloadKey[indexInsert] = updatedKeys[i];
-                                indexInsert++;
-                            }
-                        }
+                        _cache.unmarkMemoryElement(currentChunk);
+                    } else if (_listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2]) && updatedKeys[i * KEY_SIZE + 2] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 1] != KConfig.NULL_LONG) {
+                        //check if the object is listened anyway
+                        toLoadKeys[toInsertKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
+                        toLoadKeys[toInsertKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
+                        toLoadKeys[toInsertKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
+                        toInsertKey++;
                     }
                 }
-                if (indexInsert == 0) {
+                if (toInsertKey == 0) {
                     return;
                 }
-                final KContentKey[] pruned2ReloadKey = new KContentKey[indexInsert];
-                System.arraycopy(toReloadKey, 0, pruned2ReloadKey, 0, indexInsert);
-                final int finalNbDispatch = nbDispatch;
-                _db.get(pruned2ReloadKey, new KCallback<String[]>() {
+                final long[] trimmedToLoad = new long[toInsertKey];
+                System.arraycopy(toLoadKeys, 0, trimmedToLoad, 0, toInsertKey);
+                KMetaModel mm = _model.metaModel();
+                AbstractKModel am = (AbstractKModel) _model;
+                _db.get(trimmedToLoad, new KCallback<String[]>() {
                     @Override
-                    public void on(String[] strings) {
-                        KObject[] updatedElems = new KObject[finalNbDispatch];
-                        KContentKey[] correspondingKeys = new KContentKey[finalNbDispatch];
-                        int insertUpdatedKeys = 0;
-                        for (int i = 0; i < strings.length; i++) {
-                            if (strings[i] != null) {
-                                KContentKey correspondingKey = pruned2ReloadKey[i];
-                                KObjectChunk cachedObj = _cache.get(correspondingKey.universe, correspondingKey.time, correspondingKey.obj);
-                                if (cachedObj != null && !cachedObj.isDirty()) {
-                                    cachedObj = internal_unserialize(correspondingKey, strings[i]);
-                                    if (cachedObj != null) {
-                                        //replace the cache value
-                                        _cache.putAndReplace(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, cachedObj);
-                                    }
-                                }
-                                if (correspondingKey.universe != KConfig.NULL_LONG && correspondingKey.time != KConfig.NULL_LONG && correspondingKey.obj != KConfig.NULL_LONG) {
-                                    if (_listenerManager.isListened(updatedKeys[i])) {
-                                        KUniverseOrderMap alreadyLoadedOrder = (KUniverseOrderMap) _cache.get(KConfig.NULL_LONG, KConfig.NULL_LONG, updatedKeys[i].obj);
-                                        if (alreadyLoadedOrder != null) {
-                                            correspondingKeys[insertUpdatedKeys] = correspondingKey;
-                                            updatedElems[insertUpdatedKeys] = ((AbstractKModel) _model).createProxy(correspondingKey.universe, correspondingKey.time, correspondingKey.obj, _model.metaModel().metaClassByName(alreadyLoadedOrder.metaClassName()));
-                                            insertUpdatedKeys++;
+                    public void on(String[] payloads) {
+                        KObject[] updatedElements = new KObject[payloads.length];
+                        int indexToInsert = 0;
+                        for (int i = 0; i < payloads.length; i++) {
+                            if (payloads[i] != null) {
+                                KChunk currentChunk = _cache.getAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2]);
+                                if (currentChunk != null) {
+                                    currentChunk.init(payloads[i], mm, -1);
+                                    if (currentChunk.type() == KChunkTypes.OBJECT_CHUNK) {
+                                        if (_listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2])) {
+                                            KObjectChunk objectChunk = (KObjectChunk) currentChunk;
+                                            updatedElements[indexToInsert] = am.createProxy(currentChunk.universe(), currentChunk.time(), currentChunk.obj(), mm.metaClass(objectChunk.metaClassIndex()), currentChunk.universe(), currentChunk.time());
+                                            indexToInsert++;
+                                        } else {
+                                            _cache.unmarkMemoryElement(currentChunk);
                                         }
+                                    } else {
+                                        _cache.unmarkMemoryElement(currentChunk);
                                     }
+                                } else {
+                                    KObjectChunk objectChunk = (KObjectChunk) _cache.createAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2], KChunkTypes.OBJECT_CHUNK);
+                                    objectChunk.init(payloads[i], mm, -1);
+                                    updatedElements[indexToInsert] = am.createProxy(objectChunk.universe(), objectChunk.time(), objectChunk.obj(), mm.metaClass(objectChunk.metaClassIndex()), objectChunk.universe(), objectChunk.time());
                                 }
-
                             }
                         }
-                        //now dispatch to listeners
-                        _listenerManager.dispatch(correspondingKeys, updatedElems, insertUpdatedKeys);
+                        if (indexToInsert == 0) {
+                            return;
+                        }
+                        KObject[] trimmedElements = new KObject[indexToInsert];
+                        System.arraycopy(updatedElements, 0, trimmedElements, 0, indexToInsert);
+                        _listenerManager.dispatch(trimmedElements);
                     }
                 });
-                */
             }
         });
     }

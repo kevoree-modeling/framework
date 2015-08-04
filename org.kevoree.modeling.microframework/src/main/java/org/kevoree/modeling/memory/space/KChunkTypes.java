@@ -2,7 +2,7 @@ package org.kevoree.modeling.memory.space;
 
 public class KChunkTypes {
 
-    public static final short CHUNK = 0;
+    public static final short OBJECT_CHUNK = 0;
 
     public static final short LONG_TREE = 1;
 
