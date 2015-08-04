@@ -1,7 +1,7 @@
 package org.kevoree.modeling.memory.strategy.impl;
 
-import org.kevoree.modeling.memory.cache.KChunkSpaceManager;
-import org.kevoree.modeling.memory.cache.impl.PhantomQueueChunkSpaceManager;
+import org.kevoree.modeling.memory.space.KChunkSpaceManager;
+import org.kevoree.modeling.memory.space.impl.PhantomQueueChunkSpaceManager;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;

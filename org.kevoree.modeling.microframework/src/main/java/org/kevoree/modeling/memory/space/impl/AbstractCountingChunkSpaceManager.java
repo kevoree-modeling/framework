@@ -1,7 +1,7 @@
-package org.kevoree.modeling.memory.cache.impl;
+package org.kevoree.modeling.memory.space.impl;
 
 import org.kevoree.modeling.memory.KChunk;
-import org.kevoree.modeling.memory.cache.KChunkSpaceManager;
+import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;

@@ -4,7 +4,8 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.KChunk;
-import org.kevoree.modeling.memory.cache.KChunkSpaceManager;
+import org.kevoree.modeling.memory.KChunkFlags;
+import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
@@ -390,7 +391,7 @@ public class DistortedTimeResolver implements KResolver {
         int metaClassIndex = obj.metaClass().index();
         KObjectChunk cacheEntry = (KObjectChunk) _cache.createAndMark(obj.universe(), obj.now(), obj.uuid(), KChunkTypes.CHUNK);
         cacheEntry.init(null, _manager.model().metaModel(), metaClassIndex);
-        cacheEntry.setDirty();
+        cacheEntry.setFlags(KChunkFlags.DIRTY_BIT, 0);
         //initiate time management
         KLongTree timeTree = (KLongTree) _cache.createAndMark(obj.universe(), KConfig.NULL_LONG, obj.uuid(), KChunkTypes.LONG_TREE);
         timeTree.init(null, _manager.model().metaModel(), metaClassIndex);
@@ -405,7 +406,7 @@ public class DistortedTimeResolver implements KResolver {
     @Override
     public short typeFromKey(long universe, long time, long uuid) {
         boolean isUniverseNotNull = universe != KConfig.NULL_LONG;
-        short result = -1;
+        short result;
         if (KConfig.END_OF_TIME == uuid) {
             if (isUniverseNotNull) {
                 result = KChunkTypes.LONG_LONG_TREE;

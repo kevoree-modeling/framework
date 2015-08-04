@@ -38,7 +38,7 @@ public class Array2DTest {
         KArray2D array = new Array2D(nbLines, nbColumn, 0, mc.dependencies().index(), segment, mc);
 
         //fill it
-        int count=0;
+        int count = 0;
 
         //fill it
         for (int i = 0; i < nbLines; i++) {
@@ -48,11 +48,11 @@ public class Array2DTest {
             }
         }
         //test content
-        count=0;
+        count = 0;
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumn; j++) {
-                Assert.assertTrue(array.get(i,j) == count);
-                Assert.assertTrue(segment.getDoubleArrayElem(mc.dependencies().index(), count, mc)==count);
+                Assert.assertTrue(array.get(i, j) == count);
+                Assert.assertTrue(segment.getDoubleArrayElem(mc.dependencies().index(), count, mc) == count);
                 count++;
             }
         }

@@ -20,5 +20,6 @@ public interface KChunkSpace {
 
     int size();
 
+    KChunkIterator detachDirties();
 
 }

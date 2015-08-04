@@ -3,11 +3,16 @@ package org.kevoree.modeling.memory.chunk.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
+import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
+import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.util.maths.Base64;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 public class HeapObjectChunk implements KObjectChunk {
 
@@ -17,11 +22,14 @@ public class HeapObjectChunk implements KObjectChunk {
 
     private int _metaClassIndex = -1;
 
-    private boolean _dirty = false;
+    private HeapChunkSpace _space;
 
-    private KChunkSpace _space;
+    private final AtomicLong _flags;
 
-    public HeapObjectChunk(KChunkSpace p_space) {
+    private KChunk _next;
+
+    public HeapObjectChunk(HeapChunkSpace p_space) {
+        this._flags = new AtomicLong();
         this._space = p_space;
     }
 
@@ -33,11 +41,6 @@ public class HeapObjectChunk implements KObjectChunk {
     @Override
     public int metaClassIndex() {
         return _metaClassIndex;
-    }
-
-    @Override
-    public boolean isDirty() {
-        return _dirty;
     }
 
     @Override
@@ -136,16 +139,6 @@ public class HeapObjectChunk implements KObjectChunk {
             builder.append("\"");
         }
         builder.append("]");
-    }
-
-    @Override
-    public void setClean(KMetaModel metaModel) {
-        _dirty = false;
-    }
-
-    @Override
-    public void setDirty() {
-        _dirty = true;
     }
 
     @Override
@@ -336,7 +329,7 @@ public class HeapObjectChunk implements KObjectChunk {
                 previous = incArray;
             }
             raw[index] = previous;
-            _dirty = true;
+            internal_set_dirty();
             return true;
         }
         return false;
@@ -363,7 +356,7 @@ public class HeapObjectChunk implements KObjectChunk {
                         System.arraycopy(previous, indexToRemove + 1, newArray, indexToRemove, previous.length - indexToRemove - 1);
                         raw[index] = newArray;
                     }
-                    _dirty = true;
+                    internal_set_dirty();
                     return true;
                 }
             }
@@ -431,7 +424,7 @@ public class HeapObjectChunk implements KObjectChunk {
         double[] res = getDoubleArray(index, metaClass);
         if (res != null && arrayIndex >= 0 && arrayIndex < res.length) {
             res[arrayIndex] = valueToInsert;
-            _dirty = true;
+            internal_set_dirty();
         }
     }
 
@@ -447,14 +440,14 @@ public class HeapObjectChunk implements KObjectChunk {
                 previous = incArray;
             }
             raw[index] = previous;
-            _dirty = true;
+            internal_set_dirty();
         }
     }
 
     @Override
     public synchronized void setPrimitiveType(int index, Object content, KMetaClass p_metaClass) {
         raw[index] = content;
-        _dirty = true;
+        internal_set_dirty();
     }
 
     @Override
@@ -465,9 +458,9 @@ public class HeapObjectChunk implements KObjectChunk {
             Object[] cloned = new Object[raw.length];
             System.arraycopy(raw, 0, cloned, 0, raw.length);
             HeapObjectChunk clonedEntry = new HeapObjectChunk(_space);
-            clonedEntry._dirty = true;
             clonedEntry.raw = cloned;
             clonedEntry._metaClassIndex = _metaClassIndex;
+            clonedEntry.internal_set_dirty();
             return clonedEntry;
         }
     }
@@ -533,6 +526,35 @@ public class HeapObjectChunk implements KObjectChunk {
         }
         builder.append("}");
         return builder.toString();
+    }
+
+    private void internal_set_dirty() {
+        if (_space != null) {
+            if ((_flags.get() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
+                do {
+                    _next = _space.dirtiesHead().get();
+                } while (!_space.dirtiesHead().compareAndSet(_next, this));
+                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
+                setFlags(KChunkFlags.DIRTY_BIT, 0);
+            }
+        } else {
+            setFlags(KChunkFlags.DIRTY_BIT, 0);
+        }
+    }
+
+    @Override
+    public long getFlags() {
+        return _flags.get();
+    }
+
+    @Override
+    public void setFlags(long bitsToEnable, long bitsToDisable) {
+        long val;
+        long nval;
+        do {
+            val = _flags.get();
+            nval = val & ~bitsToDisable | bitsToEnable;
+        } while (!_flags.compareAndSet(val, nval));
     }
 
 }

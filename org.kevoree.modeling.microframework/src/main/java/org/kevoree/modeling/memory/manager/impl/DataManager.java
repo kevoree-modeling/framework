@@ -4,7 +4,7 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
-import org.kevoree.modeling.memory.cache.KChunkSpaceManager;
+import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.resolver.KResolver;

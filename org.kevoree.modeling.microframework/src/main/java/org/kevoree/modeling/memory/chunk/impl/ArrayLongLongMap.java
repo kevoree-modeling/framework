@@ -2,12 +2,17 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
+import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @native ts
@@ -73,7 +78,11 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     private int _metaClassIndex = -1;
 
-    private final KChunkSpace _space;
+    private final AtomicLong _flags;
+
+    private HeapChunkSpace _space;
+
+    private KChunk _next;
 
     /**
      * @native ts
@@ -96,7 +105,8 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
     }
 
-    public ArrayLongLongMap(KChunkSpace p_space) {
+    public ArrayLongLongMap(HeapChunkSpace p_space) {
+        this._flags = new AtomicLong();
         this._space = p_space;
         this.elementCount = 0;
         this.droppedCount = 0;
@@ -308,21 +318,6 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
     }
 
-    @Override
-    public boolean isDirty() {
-        return _isDirty;
-    }
-
-    @Override
-    public void setClean(KMetaModel metaModel) {
-        _isDirty = false;
-    }
-
-    @Override
-    public void setDirty() {
-        this._isDirty = true;
-    }
-
     /* warning: this method is not thread safe */
     @Override
     public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
@@ -431,6 +426,35 @@ public class ArrayLongLongMap implements KLongLongMap {
     @Override
     public KChunkSpace space() {
         return _space;
+    }
+
+    private void internal_set_dirty() {
+        if (_space != null) {
+            if ((_flags.get() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
+                do {
+                    _next = _space.dirtiesHead().get();
+                } while (!_space.dirtiesHead().compareAndSet(_next, this));
+                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
+                setFlags(KChunkFlags.DIRTY_BIT, 0);
+            }
+        } else {
+            setFlags(KChunkFlags.DIRTY_BIT, 0);
+        }
+    }
+
+    @Override
+    public long getFlags() {
+        return _flags.get();
+    }
+
+    @Override
+    public void setFlags(long bitsToEnable, long bitsToDisable) {
+        long val;
+        long nval;
+        do {
+            val = _flags.get();
+            nval = val & ~bitsToDisable | bitsToEnable;
+        } while (!_flags.compareAndSet(val, nval));
     }
 
 }

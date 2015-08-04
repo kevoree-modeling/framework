@@ -4,13 +4,7 @@ import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 
 public interface KChunk {
-
-    boolean isDirty();
-
-    void setClean(KMetaModel metaModel);
-
-    void setDirty();
-
+    
     /**
      * format: definition repeat all entry ...
      * KTree: ]=>red right [=>red left }=>black right {=>black left
@@ -34,5 +28,9 @@ public interface KChunk {
     short type();
 
     KChunkSpace space();
+
+    long getFlags();
+
+    void setFlags(long bitsToEnable, long bitsToDisable);
 
 }

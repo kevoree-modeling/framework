@@ -1,4 +1,4 @@
-package org.kevoree.modeling.memory.cache;
+package org.kevoree.modeling.memory.space;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KChunk;

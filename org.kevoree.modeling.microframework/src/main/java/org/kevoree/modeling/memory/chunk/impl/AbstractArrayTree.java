@@ -1,10 +1,15 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KTreeWalker;
 import org.kevoree.modeling.memory.space.KChunkSpace;
+import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.maths.Base64;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class AbstractArrayTree {
 
@@ -27,13 +32,46 @@ public abstract class AbstractArrayTree {
     private volatile int _size = 0;
     private volatile InternalState state;
 
-    private final KChunkSpace _space;
+    private final HeapChunkSpace _space;
+
+    private final AtomicLong _flags;
+
+    private KChunk _next;
+
+    private void internal_set_dirty() {
+        if (_space != null) {
+            if ((_flags.get() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
+                do {
+                    _next = _space.dirtiesHead().get();
+                } while (!_space.dirtiesHead().compareAndSet(_next, (KChunk) this));
+                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
+                setFlags(KChunkFlags.DIRTY_BIT, 0);
+            }
+        } else {
+            setFlags(KChunkFlags.DIRTY_BIT, 0);
+        }
+    }
+
+    public long getFlags() {
+        return _flags.get();
+    }
+
+    public void setFlags(long bitsToEnable, long bitsToDisable) {
+        long val;
+        long nval;
+        do {
+            val = _flags.get();
+            nval = val & ~bitsToDisable | bitsToEnable;
+        } while (!_flags.compareAndSet(val, nval));
+    }
+
 
     public KChunkSpace space() {
         return _space;
     }
 
-    public AbstractArrayTree(KChunkSpace p_space) {
+    public AbstractArrayTree(HeapChunkSpace p_space) {
+        this._flags = new AtomicLong();
         this._space = p_space;
         _loadFactor = KConfig.CACHE_LOAD_FACTOR;
     }
