@@ -1,15 +1,18 @@
 package org.kevoree.modeling.memory.tree.impl;
 
-import org.kevoree.modeling.memory.chunk.impl.OffHeapLongTree;
-import org.kevoree.modeling.memory.tree.BaseKLongTreeTest;
 import org.kevoree.modeling.memory.chunk.KLongTree;
+import org.kevoree.modeling.memory.chunk.impl.OffHeapLongTree;
+import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
+import org.kevoree.modeling.memory.tree.BaseKLongTreeTest;
 
-/** @ignore ts*/
+/**
+ * @ignore ts
+ */
 
 public class OffHeapLongTreeTest extends BaseKLongTreeTest {
 
     @Override
     public KLongTree createKLongTree() {
-        return new OffHeapLongTree();
+        return new OffHeapLongTree(new OffHeapChunkSpace(), 0, 0, 0);
     }
 }

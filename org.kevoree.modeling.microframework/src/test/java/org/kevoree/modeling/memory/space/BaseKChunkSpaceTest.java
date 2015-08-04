@@ -8,13 +8,13 @@ import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongTree;
 import org.kevoree.modeling.memory.chunk.KLongTree;
 
-public abstract class BaseKMemoryStorageTest {
+public abstract class BaseKChunkSpaceTest {
 
-    public abstract KChunkSpace createKMemoryStorage();
+    public abstract KChunkSpace createKChunkSpace();
 
     @Test
     public void test() {
-        KChunkSpace storage = createKMemoryStorage();
+        KChunkSpace storage = createKChunkSpace();
 
         // KUniverseOrderMap
         KLongLongMap map = (KLongLongMap) storage.create(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
