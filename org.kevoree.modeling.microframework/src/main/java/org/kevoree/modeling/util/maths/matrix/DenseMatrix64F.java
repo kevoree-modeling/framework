@@ -48,6 +48,7 @@ public class DenseMatrix64F {
         return ret;
     }
 
+    /*
     public void constructorRow(int numRows, int numCols, boolean rowMajor, double[] data) {
         final int length = numRows * numCols;
         this.data = new double[ length ];
@@ -70,7 +71,7 @@ public class DenseMatrix64F {
             pos += numCols;
         }
     }
-
+*/
 
 
     public void constructor1dArray( int length ) {

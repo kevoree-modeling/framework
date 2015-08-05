@@ -384,11 +384,12 @@ public class SimpleMatrix{
         return ret;
     }*/
 
+    /*
     public static SimpleMatrix diag( double ...vals ) {
         DenseMatrix64F m = CommonOps.diag(vals);
         SimpleMatrix ret = wrap(m);
         return ret;
-    }
+    }*/
 
     public double determinant() {
         double ret = CommonOps.det(mat);

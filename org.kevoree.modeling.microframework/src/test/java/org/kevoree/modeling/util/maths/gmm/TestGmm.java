@@ -9,6 +9,7 @@ import java.util.Random;
 /**
  * Created by assaad on 29/07/15.
  */
+/** @ignore ts */
 public class TestGmm {
 
     // disable the forgetting factor

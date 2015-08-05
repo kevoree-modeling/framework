@@ -625,6 +625,7 @@ public class CommonOps {
     }
 
 
+    /*
     public static DenseMatrix64F diagR( int numRows , int numCols , double ...diagEl )
     {
         DenseMatrix64F ret = new DenseMatrix64F(numRows,numCols);
@@ -637,7 +638,7 @@ public class CommonOps {
 
         return ret;
     }
-
+*/
 
     public static void kron( DenseMatrix64F A , DenseMatrix64F B , DenseMatrix64F C )
     {
