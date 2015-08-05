@@ -12,6 +12,6 @@ public class OffHeapLongLongTreeTest extends BaseKLongLongTreeTest {
 
     @Override
     public KLongLongTree createKLongLongTree() {
-        return new OffHeapLongLongTree(new OffHeapChunkSpace(), 0, 0, 0);
+        return new OffHeapLongLongTree(null, -1, -1, -1);
     }
 }

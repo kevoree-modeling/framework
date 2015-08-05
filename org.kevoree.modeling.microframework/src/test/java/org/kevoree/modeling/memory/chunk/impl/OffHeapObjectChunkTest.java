@@ -4,7 +4,6 @@ import org.kevoree.modeling.memory.chunk.BaseKObjectChunkTest;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.memory.strategy.impl.OffHeapMemoryStrategy;
 
 /**

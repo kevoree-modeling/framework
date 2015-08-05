@@ -62,7 +62,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         NODE_SIZE = 0;
     }
 
-    private final void allocate(int p_length) {
+    protected final void allocate(int p_length) {
         long bytes = BASE_SEGMENT_LEN + sizeOfRawSegment(p_length);
 
         this._start_address = UNSAFE.allocateMemory(bytes);
@@ -74,9 +74,9 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         this.loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this.threshold = (int) (size() * this.loadFactor);
 
-        if (_space != null) {
-            _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
-        }
+//        if (_space != null) {
+//            _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
+//        }
     }
 
     private void reallocate(int p_length) {
@@ -643,25 +643,19 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     public final int inc() {
-        int expected;
-        int updated;
-        do {
-            expected = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
-            updated = expected + 1;
-        } while (!UNSAFE.compareAndSwapInt(this, this._start_address + OFFSET_COUNTER, expected, updated));
-
-        return updated;
+        // TODO check for a lock strategy
+        int o = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
+        int n = o++;
+        UNSAFE.putInt(this._start_address + OFFSET_COUNTER, n);
+        return n;
     }
 
     public final int dec() {
-        int expected;
-        int updated;
-        do {
-            expected = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
-            updated = expected - 1;
-        } while (!UNSAFE.compareAndSwapInt(this, this._start_address + OFFSET_COUNTER, expected, updated));
-
-        return updated;
+        // TODO check for a lock strategy
+        int o = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
+        int n = o--;
+        UNSAFE.putInt(this._start_address + OFFSET_COUNTER, n);
+        return n;
     }
 
     public final void free(KMetaModel p_metaModel) {
@@ -693,12 +687,10 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
     @Override
     public void setFlags(long p_bitsToEnable, long p_bitsToDisable) {
-        long expected;
-        long updated;
-        do {
-            expected = UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
-            updated = expected & ~p_bitsToDisable | p_bitsToEnable;
-        } while (!UNSAFE.compareAndSwapLong(this, this._start_address + OFFSET_FLAGS, expected, updated));
+        // TODO check for a lock strategy
+        long expected = UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
+        long updated = expected & ~p_bitsToDisable | p_bitsToEnable;
+        UNSAFE.putLong(this._start_address + OFFSET_FLAGS, updated);
     }
 
     @Override

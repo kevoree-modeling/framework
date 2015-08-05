@@ -287,7 +287,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
             setValuePointer(this._start_address, newIndex, memoryElement.memoryAddress());
             setType(this._start_address, newIndex, p_type);
 
-            setNext(this._start_address, newIndex, next(this._start_address, index));
+            setNext(this._start_address, newIndex, hash(this._start_address, index));
             //now the object is reachable to other thread everything should be ready
             setHash(this._start_address, index, newIndex);
             return p_payload;

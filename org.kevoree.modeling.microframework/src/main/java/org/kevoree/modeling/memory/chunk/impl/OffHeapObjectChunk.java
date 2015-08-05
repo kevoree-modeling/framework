@@ -53,6 +53,8 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
+
+        this._start_address = UNSAFE.allocateMemory(BASE_SEGMENT_SIZE);
     }
 
     private int sizeOfRawSegment(KMetaClass p_metaClass) {
@@ -113,9 +115,10 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
         OffHeapObjectChunk clonedEntry = new OffHeapObjectChunk(this._space, p_universe, p_time, p_obj);
         int baseSegment = BASE_SEGMENT_SIZE;
-        int modifiedIndexSegment = metaClass.metaElements().length;
+        //int modifiedIndexSegment = metaClass.metaElements().length;
         int rawSegment = sizeOfRawSegment(metaClass);
-        int cloneBytes = baseSegment + modifiedIndexSegment + rawSegment;
+//        int cloneBytes = baseSegment + modifiedIndexSegment + rawSegment;
+        int cloneBytes = baseSegment + rawSegment;
 
         long _clone_start_address = UNSAFE.allocateMemory(cloneBytes);
         clonedEntry._allocated_segments++;
@@ -775,26 +778,20 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final int inc() {
-        int expected;
-        int updated;
-        do {
-            expected = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
-            updated = expected + 1;
-        } while (!UNSAFE.compareAndSwapInt(this, this._start_address + OFFSET_COUNTER, expected, updated));
-
-        return updated;
+        // TODO check for a lock strategy
+        int o = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
+        int n = o++;
+        UNSAFE.putInt(this._start_address + OFFSET_COUNTER, n);
+        return n;
     }
 
     @Override
     public final int dec() {
-        int expected;
-        int updated;
-        do {
-            expected = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
-            updated = expected - 1;
-        } while (!UNSAFE.compareAndSwapInt(this, this._start_address + OFFSET_COUNTER, expected, updated));
-
-        return updated;
+        // TODO check for a lock strategy
+        int o = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
+        int n = o--;
+        UNSAFE.putInt(this._start_address + OFFSET_COUNTER, n);
+        return n;
     }
 
     @Override
@@ -858,12 +855,10 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public void setFlags(long p_bitsToEnable, long p_bitsToDisable) {
-        long expected;
-        long updated;
-        do {
-            expected = UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
-            updated = expected & ~p_bitsToDisable | p_bitsToEnable;
-        } while (!UNSAFE.compareAndSwapLong(this, this._start_address + OFFSET_FLAGS, expected, updated));
+        // TODO check for a lock strategy
+        long expected = UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
+        long updated = expected & ~p_bitsToDisable | p_bitsToEnable;
+        UNSAFE.putLong(this._start_address + OFFSET_FLAGS, updated);
     }
 
     @Override

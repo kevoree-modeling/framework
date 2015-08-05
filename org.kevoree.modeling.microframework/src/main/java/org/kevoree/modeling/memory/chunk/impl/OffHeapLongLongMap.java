@@ -126,9 +126,10 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
         this.threshold = (int) (elementDataSize * loadFactor);
 
-        if (this._space != null) {
-            this._space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
-        }
+        // don't notify for creation! otherwise the value pointer will be set to the newly created objects for get methods instead to the old one
+//        if (this._space != null) {
+//            this._space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
+//        }
 
     }
 
@@ -371,28 +372,21 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
     @Override
     public final int inc() {
-        int expected;
-        int updated;
-        do {
-            expected = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
-            updated = expected + 1;
-        } while (!UNSAFE.compareAndSwapInt(this, this._start_address + OFFSET_STARTADDRESS_COUNTER, expected, updated));
-
-        return updated;
+        // TODO check for a lock strategy
+        int o = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
+        int n = o++;
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_COUNTER, n);
+        return n;
     }
 
     @Override
     public final int dec() {
-        int expected;
-        int updated;
-        do {
-            expected = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
-            updated = expected -1;
-        } while (!UNSAFE.compareAndSwapInt(this, this._start_address + OFFSET_STARTADDRESS_COUNTER, expected, updated));
-
-        return updated;
+        // TODO check for a lock strategy
+        int o = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
+        int n = o--;
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_COUNTER, n);
+        return n;
     }
-
 
 
     /* warning: this method is not thread safe */
@@ -530,12 +524,10 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
     @Override
     public void setFlags(long p_bitsToEnable, long p_bitsToDisable) {
-        long expected;
-        long updated;
-        do {
-            expected = UNSAFE.getLong(this._start_address + OFFSET_STARTADDRESS_FLAGS);
-            updated = expected & ~p_bitsToDisable | p_bitsToEnable;
-        } while (!UNSAFE.compareAndSwapLong(this, this._start_address + OFFSET_STARTADDRESS_FLAGS, expected, updated));
+        // TODO check for a lock strategy
+        long expected = UNSAFE.getLong(this._start_address + OFFSET_STARTADDRESS_FLAGS);
+        long updated = expected & ~p_bitsToDisable | p_bitsToEnable;
+        UNSAFE.putLong(this._start_address + OFFSET_STARTADDRESS_FLAGS, updated);
     }
 
     @Override

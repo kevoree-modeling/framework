@@ -19,6 +19,8 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
+
+        allocate(0);
     }
 
     @Override

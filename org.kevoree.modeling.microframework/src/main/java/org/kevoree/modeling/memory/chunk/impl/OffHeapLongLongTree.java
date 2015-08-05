@@ -18,6 +18,8 @@ public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLon
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
+
+        allocate(0);
     }
 
     @Override
