@@ -37,8 +37,8 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private final ListenerManager _listenerManager;
     private final KeyCalculator _modelKeyCalculator;
     private final KResolver _resolver;
-    private final KChunkSpace _storage;
-    private final KChunkSpaceManager _cache;
+    private final KChunkSpace _space;
+    private final KChunkSpaceManager _spaceManager;
 
     private KeyCalculator _objectKeyCalculator = null;
     private KeyCalculator _universeKeyCalculator = null;
@@ -59,9 +59,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KMemoryStrategy p_factory) {
-        this._storage = p_factory.newStorage();
-        this._cache = p_factory.newCache(_storage);
-        this._resolver = new DistortedTimeResolver(this._cache, this);
+        this._space = p_factory.newStorage();
+        this._spaceManager = p_factory.newCache(_space);
+        this._resolver = new DistortedTimeResolver(this._spaceManager, this);
         this._listenerManager = new ListenerManager();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);
         this._db = p_cdn;
@@ -109,7 +109,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public final void initUniverse(KUniverse p_universe, KUniverse p_parent) {
-        KLongLongMap cached = (KLongLongMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        KLongLongMap cached = (KLongLongMap) _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null && !cached.contains(p_universe.key())) {
             if (p_parent == null) {
                 cached.put(p_universe.key(), p_universe.key());
@@ -121,7 +121,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public long parentUniverseKey(long currentUniverseKey) {
-        KLongLongMap cached = (KLongLongMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        KLongLongMap cached = (KLongLongMap) _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null) {
             return cached.get(currentUniverseKey);
         } else {
@@ -131,7 +131,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public long[] descendantsUniverseKeys(final long currentUniverseKey) {
-        KLongLongMap cached = (KLongLongMap) _storage.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        KLongLongMap cached = (KLongLongMap) _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (cached != null) {
             final ArrayLongLongMap temp = new ArrayLongLongMap(-1, -1, -1, null);
             cached.each(new KLongLongMapCallBack() {
@@ -162,7 +162,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public void save(final KCallback<Throwable> callback) {
-        KChunkIterator dirtyIterator = _storage.detachDirties();
+        KChunkIterator dirtyIterator = _space.detachDirties();
         if (dirtyIterator.size() == 0) {
             callback.on(null);
             return;
@@ -259,7 +259,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                             objIndexPayload = "0";
                                                         }
                                                         String globalUniverseTreePayload = strings[GLO_TREE_INDEX];
-                                                        KLongLongMap globalUniverseTree = (KLongLongMap) _cache.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
+                                                        KLongLongMap globalUniverseTree = (KLongLongMap) _spaceManager.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
                                                         if (globalUniverseTreePayload != null) {
                                                             try {
                                                                 globalUniverseTree.init(globalUniverseTreePayload, model().metaModel(), -1);
@@ -348,7 +348,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 int nbElements = updatedKeys.length / KEY_SIZE;
                 int toInsertKey = 0;
                 for (int i = 0; i < nbElements; i++) {
-                    KChunk currentChunk = _cache.getAndMark(updatedKeys[i * 3], updatedKeys[i * 3 + 1], updatedKeys[i * 3 + 2]);
+                    KChunk currentChunk = _spaceManager.getAndMark(updatedKeys[i * 3], updatedKeys[i * 3 + 1], updatedKeys[i * 3 + 2]);
                     if (currentChunk != null) {
                         if ((currentChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
                             toLoadKeys[toInsertKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
@@ -356,7 +356,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                             toLoadKeys[toInsertKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
                             toInsertKey++;
                         }
-                        _cache.unmarkMemoryElement(currentChunk);
+                        _spaceManager.unmarkMemoryElement(currentChunk);
                     } else if (_listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2]) && updatedKeys[i * KEY_SIZE + 2] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 1] != KConfig.NULL_LONG) {
                         //check if the object is listened anyway
                         toLoadKeys[toInsertKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
@@ -379,7 +379,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                         int indexToInsert = 0;
                         for (int i = 0; i < payloads.length; i++) {
                             if (payloads[i] != null) {
-                                KChunk currentChunk = _cache.getAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2]);
+                                KChunk currentChunk = _spaceManager.getAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2]);
                                 if (currentChunk != null) {
                                     currentChunk.init(payloads[i], mm, -1);
                                     if (currentChunk.type() == KChunkTypes.OBJECT_CHUNK) {
@@ -388,13 +388,13 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                             updatedElements[indexToInsert] = am.createProxy(currentChunk.universe(), currentChunk.time(), currentChunk.obj(), mm.metaClass(objectChunk.metaClassIndex()), currentChunk.universe(), currentChunk.time());
                                             indexToInsert++;
                                         } else {
-                                            _cache.unmarkMemoryElement(currentChunk);
+                                            _spaceManager.unmarkMemoryElement(currentChunk);
                                         }
                                     } else {
-                                        _cache.unmarkMemoryElement(currentChunk);
+                                        _spaceManager.unmarkMemoryElement(currentChunk);
                                     }
                                 } else {
-                                    KObjectChunk objectChunk = (KObjectChunk) _cache.createAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2], KChunkTypes.OBJECT_CHUNK);
+                                    KObjectChunk objectChunk = (KObjectChunk) _spaceManager.createAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2], KChunkTypes.OBJECT_CHUNK);
                                     objectChunk.init(payloads[i], mm, -1);
                                     updatedElements[indexToInsert] = am.createProxy(objectChunk.universe(), objectChunk.time(), objectChunk.obj(), mm.metaClass(objectChunk.metaClassIndex()), objectChunk.universe(), objectChunk.time());
                                 }
