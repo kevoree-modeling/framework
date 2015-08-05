@@ -1,10 +1,12 @@
 package org.kevoree.modeling.util.maths.matrix.solvers.decomposition;
 
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
+import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 public class QRDecompositionHouseholderColumn_D64 {
 
-    protected double dataQR[][]; // [ column][ row ]
+    protected KArray2D dataQR; // [ column][ row ]
     // used internally to store temporary data
     protected double v[];
     // universe of the decomposed matrices
@@ -24,11 +26,9 @@ public class QRDecompositionHouseholderColumn_D64 {
         this.numRows = numRows;
         minLength = Math.min(numCols, numRows);
         int maxLength = Math.max(numCols, numRows);
-        if (dataQR == null || dataQR.length < numCols || dataQR[0].length < numRows) {
-            dataQR = new double[numCols][numRows];
-            for (int i = 0; i < numCols; i++) {
-                dataQR[i] = new double[numRows];
-            }
+        if (dataQR == null ) {
+            dataQR = new NativeArray2D(numRows,numCols);
+
             v = new double[maxLength];
             gammas = new double[minLength];
         }
@@ -38,6 +38,23 @@ public class QRDecompositionHouseholderColumn_D64 {
         if (gammas.length < minLength) {
             gammas = new double[minLength];
         }
+    }
+
+
+    public double[] transformCol(KArray2D matrix, int col){
+        double[] res= new double[matrix.nbRows()];
+        for(int i=0;i<matrix.nbRows();i++){
+            res[i]=matrix.get(i,col);
+        }
+        return res;
+    }
+
+    public double[] transformRow(KArray2D matrix, int row){
+        double[] res= new double[matrix.nbColumns()];
+        for(int i=0;i<matrix.nbColumns();i++){
+            res[i]=matrix.get(row,i);
+        }
+        return res;
     }
 
     public DenseMatrix64F getQ(DenseMatrix64F Q, boolean compact) {
@@ -55,13 +72,27 @@ public class QRDecompositionHouseholderColumn_D64 {
             }
         }
         for (int j = minLength - 1; j >= 0; j--) {
-            double u[] = dataQR[j];
+
+            double u[] = transformCol(dataQR,j);
             double vv = u[j];
             u[j] = 1;
             rank1UpdateMultR(Q, u, gammas[j], j, j, numRows, v);
             u[j] = vv;
+            setTransformCol(u,dataQR,j);
         }
         return Q;
+    }
+
+    private void setTransformCol(double[] u, KArray2D matrix, int col) {
+        for(int i=0;i<matrix.nbRows();i++){
+            matrix.set(i, col, u[i]);
+        }
+    }
+
+    private void setTransformRow(double[] u, KArray2D matrix, int row) {
+        for(int i=0;i<matrix.nbColumns();i++){
+            matrix.set(row,i,u[i]);
+        }
     }
 
     public DenseMatrix64F getR(DenseMatrix64F R, boolean compact) {
@@ -79,7 +110,7 @@ public class QRDecompositionHouseholderColumn_D64 {
             }
         }
         for (int j = 0; j < numCols; j++) {
-            double colR[] = dataQR[j];
+            double colR[] = transformCol(dataQR,j);
             int l = Math.min(j, numRows - 1);
             for (int i = 0; i <= l; i++) {
                 double val = colR[i];
@@ -102,15 +133,14 @@ public class QRDecompositionHouseholderColumn_D64 {
 
     protected void convertToColumnMajor(DenseMatrix64F A) {
         for (int x = 0; x < numCols; x++) {
-            double colQ[] = dataQR[x];
             for (int y = 0; y < numRows; y++) {
-                colQ[y] = A.data[y * numCols + x];
+                dataQR.set(y,x, A.data[y * numCols + x]);
             }
         }
     }
 
     protected void householder(int j) {
-        final double u[] = dataQR[j];
+        final double u[] = transformCol(dataQR,j);
         // find the largest value in this column
         // this is used to normalize the column and mitigate overflow/underflow
         final double max = findMax(u, j, numRows - j);
@@ -128,12 +158,13 @@ public class QRDecompositionHouseholderColumn_D64 {
             u[j] = -tau;
         }
         gammas[j] = gamma;
+        setTransformCol(u,dataQR,j);
     }
 
     protected void updateA(int w) {
-        final double u[] = dataQR[w];
+        final double u[]= transformCol(dataQR,w);
         for (int j = w + 1; j < numCols; j++) {
-            final double colQ[] = dataQR[j];
+            final double colQ[] = transformCol(dataQR,j);
             double val = colQ[w];
             for (int k = w + 1; k < numRows; k++) {
                 val += u[k] * colQ[k];
@@ -143,6 +174,7 @@ public class QRDecompositionHouseholderColumn_D64 {
             for (int i = w + 1; i < numRows; i++) {
                 colQ[i] -= u[i] * val;
             }
+            setTransformCol(colQ,dataQR,w);
         }
     }
 
