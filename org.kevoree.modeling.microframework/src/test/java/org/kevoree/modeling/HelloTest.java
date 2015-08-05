@@ -7,11 +7,7 @@ import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 
-/**
- * Created by duke on 10/13/14.
- */
 public class HelloTest {
-
 
     @Test
     public void badLookupTest() {
