@@ -200,6 +200,10 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final void setPrimitiveType(int p_index, Object p_content, KMetaClass p_metaClass) {
+        internal_setPrimitiveType(p_index, p_content, p_metaClass, true);
+    }
+
+    private void internal_setPrimitiveType(int p_index, Object p_content, KMetaClass p_metaClass, boolean p_setDirty) {
         try {
             MetaType type = p_metaClass.meta(p_index).metaType();
             long ptr = rawPointerForIndex(p_index, p_metaClass);
@@ -233,7 +237,9 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     UNSAFE.putFloat(ptr, (Float) p_content);
                 }
 
-                setDirty();
+                if (p_setDirty) {
+                    setDirty();
+                }
             }
 
         } catch (
@@ -269,6 +275,10 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final boolean addLongToArray(int p_index, long p_newRef, KMetaClass p_metaClass) {
+        return internal_addLongToArray(p_index, p_newRef, p_metaClass, true);
+    }
+
+    boolean internal_addLongToArray(int p_index, long p_newRef, KMetaClass p_metaClass, boolean p_setDirty) {
         boolean result = false;
 
         KMeta meta = p_metaClass.meta(p_index);
@@ -290,7 +300,11 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                 UNSAFE.putLong(new_ref_ptr + 4, p_newRef); // content
             }
             UNSAFE.putLong(ptr, new_ref_ptr); // update ptr
-            setDirty();
+
+            if (p_setDirty) {
+                setDirty();
+            }
+
             result = true;
         }
         return result;
@@ -383,7 +397,11 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     }
 
     @Override
-    public final void setDoubleArrayElem(int p_index, int p_arrayIndex, double valueToInsert, KMetaClass p_metaClass) {
+    public final void setDoubleArrayElem(int p_index, int p_arrayIndex, double p_valueToInsert, KMetaClass p_metaClass) {
+        internal_setDoubleArrayElem(p_index, p_arrayIndex, p_valueToInsert, p_metaClass, true);
+    }
+
+    private void internal_setDoubleArrayElem(int p_index, int p_arrayIndex, double valueToInsert, KMetaClass p_metaClass, boolean p_setDirty) {
         long ptr = rawPointerForIndex(p_index, p_metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
 
@@ -396,11 +414,17 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
 
         UNSAFE.putDouble(ptr_segment + 4 + p_arrayIndex * BYTE, valueToInsert);
-        setDirty();
+        if (p_setDirty) {
+            setDirty();
+        }
     }
 
     @Override
     public final void extendDoubleArray(int p_index, int p_newSize, KMetaClass p_metaClass) {
+        internal_extendDoubleArray(p_index, p_newSize, p_metaClass, true);
+    }
+
+    private void internal_extendDoubleArray(int p_index, int p_newSize, KMetaClass p_metaClass, boolean p_setDirty) {
         long ptr = rawPointerForIndex(p_index, p_metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);
 
@@ -414,8 +438,9 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         UNSAFE.putInt(new_ptr_segment, p_newSize); // update size
         UNSAFE.putLong(ptr, new_ptr_segment); // update pointer
 
-        setDirty();
-
+        if (p_setDirty) {
+            setDirty();
+        }
     }
 
     @Override
@@ -717,12 +742,12 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
                         if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
                             double[] infer = (double[]) converted;
-                            extendDoubleArray(metaAttribute.index(), infer.length, metaClass);
+                            internal_extendDoubleArray(metaAttribute.index(), infer.length, metaClass, false);
                             for (int k = 0; k < infer.length; k++) {
-                                setDoubleArrayElem(metaAttribute.index(), k, infer[k], metaClass);
+                                internal_setDoubleArrayElem(metaAttribute.index(), k, infer[k], metaClass, false);
                             }
                         } else {
-                            setPrimitiveType(metaAttribute.index(), converted, metaClass);
+                            internal_setPrimitiveType(metaAttribute.index(), converted, metaClass, false);
                         }
 
                     } else if (metaElement != null && metaElement instanceof KMetaReference) {
@@ -737,7 +762,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                                 }
                             }
                             for (int k = 0; k < convertedRaw.length; k++) {
-                                addLongToArray(metaElement.index(), convertedRaw[k], metaClass);
+                                internal_addLongToArray(metaElement.index(), convertedRaw[k], metaClass, false);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -754,7 +779,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                                 }
                             }
                             for (int k = 0; k < convertedRaw.length; k++) {
-                                setDoubleArrayElem(metaElement.index(), k, convertedRaw[k], metaClass);
+                                internal_setDoubleArrayElem(metaElement.index(), k, convertedRaw[k], metaClass, false);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
