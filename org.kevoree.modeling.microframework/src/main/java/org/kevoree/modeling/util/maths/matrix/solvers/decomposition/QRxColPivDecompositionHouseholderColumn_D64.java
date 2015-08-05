@@ -70,12 +70,12 @@ public class QRxColPivDecompositionHouseholderColumn_D64
         }
 
         for( int j = rank-1; j >= 0; j-- ) {
-            double u[] = dataQR[j];
+           // double u[] = dataQR[j];
 
-            double vv = u[j];
-            u[j] = 1;
-            QrHelperFunctions_D64.rank1UpdateMultR(Q, u, gammas[j], j, j, numRows, v);
-            u[j] = vv;
+            double vv = dataQR.get(j,j);
+            dataQR.set(j,j,1);
+            QrHelperFunctions_D64.rank1UpdateMultRArray(Q, dataQR, j, gammas[j], j, j, numRows, v);
+            dataQR.set(j,j, vv);
         }
 
         return Q;
@@ -111,10 +111,10 @@ public class QRxColPivDecompositionHouseholderColumn_D64
     private void setupPivotInfo() {
         for( int col = 0; col < numCols; col++ ) {
             pivots[col] = col;
-            double c[] = dataQR[col];
+          //  double c[] = dataQR[col];
             double norm = 0;
             for( int row = 0; row < numRows; row++ ) {
-                double element = c[row];
+                double element = dataQR.get(row,col);//[row];
                 norm += element*element;
             }
             normsCol[col] = norm;
@@ -125,7 +125,7 @@ public class QRxColPivDecompositionHouseholderColumn_D64
     private void updateNorms( int j ) {
         boolean foundNegative = false;
         for( int col = j; col < numCols; col++ ) {
-            double e = dataQR[col][j-1];
+            double e = dataQR.get(j-1,col);//[col][j-1];
             normsCol[col] -= e*e;
 
             if( normsCol[col] < 0 ) {
@@ -137,10 +137,10 @@ public class QRxColPivDecompositionHouseholderColumn_D64
 
         if( foundNegative ) {
             for( int col = j; col < numCols; col++ ) {
-                double u[] = dataQR[col];
+               // double u[] = dataQR[col];
                 double actual = 0;
                 for( int i=j; i < numRows; i++ ) {
-                    double v = u[i];
+                    double v = dataQR.get(i,col);
                     actual += v*v;
                 }
                 normsCol[col] = actual;
@@ -161,10 +161,19 @@ public class QRxColPivDecompositionHouseholderColumn_D64
                 largestIndex = col;
             }
         }
+
+        double val=0;
+
+        for(int k=0;k<dataQR.nbRows();k++){
+            val= dataQR.get(k,j);
+            dataQR.set(k,j,dataQR.get(k,largestIndex));
+            dataQR.set(k,largestIndex,val);
+        }
+
         // swap the columns
-        double []tempC = dataQR[j];
-        dataQR[j] = dataQR[largestIndex];
-        dataQR[largestIndex] = tempC;
+    //    double []tempC = dataQR[j];
+      //  dataQR[j] = dataQR[largestIndex];
+        //dataQR[largestIndex] = tempC;
         double tempN = normsCol[j];
         normsCol[j] = normsCol[largestIndex];
         normsCol[largestIndex] = tempN;
@@ -176,26 +185,26 @@ public class QRxColPivDecompositionHouseholderColumn_D64
 
     protected boolean householderPivot(int j)
     {
-        final double u[] = dataQR[j];
+      //  final double u[] = dataQR[j];
 
         // find the largest value in this column
         // this is used to normalize the column and mitigate overflow/underflow
-        final double max = QrHelperFunctions_D64.findMax(u, j, numRows - j);
+        final double max = QrHelperFunctions_D64.findMaxArray(dataQR, j, j, numRows - j);
 
         if( max <= 0 ) {
             return false;
         } else {
             // computes tau and normalizes u by max
-            tau = QrHelperFunctions_D64.computeTauAndDivide4arg(j, numRows, u, max);
+            tau = QrHelperFunctions_D64.computeTauAndDivide4argArray(j, numRows, dataQR, j, max);
 
             // divide u by u_0
-            double u_0 = u[j] + tau;
-            QrHelperFunctions_D64.divideElements4arg(j + 1, numRows, u, u_0);
+            double u_0 = dataQR.get(j,j) + tau;
+            QrHelperFunctions_D64.divideElements4argArray(j + 1, numRows, dataQR,j, u_0);
 
             gamma = u_0/tau;
             tau *= max;
 
-            u[j] = -tau;
+            dataQR.set(j,j, -tau);
 
             if( Math.abs(tau) <= singularThreshold ) {
                 return false;

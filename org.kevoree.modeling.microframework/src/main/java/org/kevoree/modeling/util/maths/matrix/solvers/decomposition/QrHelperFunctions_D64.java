@@ -1,29 +1,10 @@
 package org.kevoree.modeling.util.maths.matrix.solvers.decomposition;
 
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 
 
-/**
- * <p>
- * Contains different functions that are useful for computing the QR decomposition of a matrix.
- * </p>
- *
- * <p>
- * Two different families of functions are provided for help in computing reflectors.  Internally
- * both of these functions switch between normalization by division or multiplication.  Multiplication
- * is most often significantly faster than division (2 or 3 times) but produces less accurate results
- * on very small numbers.  It checks to see if round off error is significant and decides which
- * one it should do.
- * </p>
- *
- * <p>
- * Tests were done using the stability benchmark in jmatbench and there doesn't seem to be
- * any advantage to always dividing by the max instead of checking and deciding.  The most
- * noticeable difference between the two methods is with very small numbers.
- * </p>
- *
- * @author Peter Abeles
- */
+
 public class QrHelperFunctions_D64 {
 
     public static double findMax( double[] u, int startU , int length ) {
@@ -41,6 +22,21 @@ public class QrHelperFunctions_D64 {
         return max;
     }
 
+    public static double findMaxArray(KArray2D u, int col, int startU , int length ) {
+        double max = -1;
+
+        int index = startU;
+        int stopIndex = startU + length;
+        for( ; index < stopIndex; index++ ) {
+            double val = u.get(index,col);
+            val = (val < 0.0D) ? -val : val;
+            if( val > max )
+                max = val;
+        }
+
+        return max;
+    }
+
     public static void divideElements4arg(final int j, final int numRows ,
                                       final double[] u, final double u_0 ) {
 //        double div_u = 1.0/u_0;
@@ -48,6 +44,21 @@ public class QrHelperFunctions_D64 {
 //        if( Double.isInfinite(div_u)) {
         for( int i = j; i < numRows; i++ ) {
             u[i] /= u_0;
+        }
+//        } else {
+//            for( int i = j; i < getNumRows; i++ ) {
+//                u[i] *= div_u;
+//            }
+//        }
+    }
+
+    public static void divideElements4argArray(final int j, final int numRows ,
+                                          KArray2D u, int col, final double u_0 ) {
+//        double div_u = 1.0/u_0;
+//
+//        if( Double.isInfinite(div_u)) {
+        for( int i = j; i < numRows; i++ ) {
+            u.set(i,col,u.get(i,col)/ u_0);
         }
 //        } else {
 //            for( int i = j; i < getNumRows; i++ ) {
@@ -131,29 +142,8 @@ public class QrHelperFunctions_D64 {
         return tau;
     }
 
-    /**
-     * Normalizes elements in 'u' by dividing by max and computes the norm2 of the normalized
-     * array u.  Adjust the sign of the returned value depending on the size of the first
-     * element in 'u'. Normalization is done to avoid overflow.
-     *
-     * <pre>
-     * for i=j:getNumRows
-     *   u[i] = u[i] / max
-     *   tau = tau + u[i]*u[i]
-     * end
-     * tau = sqrt(tau)
-     * if( u[j] < 0 )
-     *    tau = -tau;
-     * </pre>
-     *
-     * @param j Element in 'u' that it starts at.
-     * @param numRows Element in 'u' that it stops at.
-     * @param u Array
-     * @param max Max value in 'u' that is used to normalize it.
-     * @return norm2 of 'u'
-     */
     public static double computeTauAndDivide4arg(final int j, final int numRows ,
-                                             final double[] u , final double max) {
+                                                 final double[] u , final double max) {
         double tau = 0;
 //        double div_max = 1.0/max;
 //        if( Double.isInfinite(div_max)) {
@@ -175,22 +165,31 @@ public class QrHelperFunctions_D64 {
         return tau;
     }
 
-    /**
-     * <p>
-     * Performs a rank-1 update operation on the submatrix specified by w with the multiply on the right.<br>
-     * <br>
-     * A = (I - &gamma;*u*u<sup>T</sup>)*A<br>
-     * </p>
-     * <p>
-     * The order that matrix multiplies are performed has been carefully selected
-     * to minimize the number of operations.
-     * </p>
-     *
-     * <p>
-     * Before this can become a truly generic operation the submatrix specification needs
-     * to be made more generic.
-     * </p>
-     */
+
+    public static double computeTauAndDivide4argArray(final int j, final int numRows ,
+                                            KArray2D u , int col, final double max) {
+        double tau = 0;
+//        double div_max = 1.0/max;
+//        if( Double.isInfinite(div_max)) {
+        for( int i = j; i < numRows; i++ ) {
+            u.set(i,col,u.get(i,col)/max);
+            double d = u.get(i,col);
+            tau += d*d;
+        }
+//        } else {
+//            for( int i = j; i < getNumRows; i++ ) {
+//                double d = u[i] *= div_max;
+//                tau += d*d;
+//            }
+//        }
+        tau = Math.sqrt(tau);
+
+        if( u.get(j,col) < 0 )
+            tau = -tau;
+
+        return tau;
+    }
+
     public static void rank1UpdateMultR( DenseMatrix64F A , double u[] , double gamma ,
                                          int colA0,
                                          int w0, int w1 ,
@@ -225,6 +224,48 @@ public class QrHelperFunctions_D64 {
 
         for( int i = w0; i < w1; i++ ) {
             double valU = u[i];
+
+            int indexA = i*A.numCols + colA0;
+            for( int j = colA0; j < A.numCols; j++ ) {
+                A.data[indexA++] -= valU*_temp[j];
+            }
+        }
+    }
+
+    public static void rank1UpdateMultRArray( DenseMatrix64F A , KArray2D u , int col, double gamma ,
+                                         int colA0,
+                                         int w0, int w1 ,
+                                         double _temp[] )
+    {
+//        for( int i = colA0; i < A.getNumCols; i++ ) {
+//            double val = 0;
+//
+//            for( int k = w0; k < w1; k++ ) {
+//                val += u[k]*A.data[k*A.getNumCols +i];
+//            }
+//            _temp[i] = gamma*val;
+//        }
+
+        // reordered to reduce cpu cache issues
+        for( int i = colA0; i < A.numCols; i++ ) {
+            _temp[i] = u.get(w0,col)*A.data[w0 *A.numCols +i];
+        }
+
+        for( int k = w0+1; k < w1; k++ ) {
+            int indexA = k*A.numCols + colA0;
+            double valU = u.get(k,col);
+            for( int i = colA0; i < A.numCols; i++ ) {
+                _temp[i] += valU*A.data[indexA++];
+            }
+        }
+        for( int i = colA0; i < A.numCols; i++ ) {
+            _temp[i] *= gamma;
+        }
+
+        // end of reorder
+
+        for( int i = w0; i < w1; i++ ) {
+            double valU = u.get(i,col);
 
             int indexA = i*A.numCols + colA0;
             for( int j = colA0; j < A.numCols; j++ ) {
