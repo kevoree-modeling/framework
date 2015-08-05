@@ -643,19 +643,25 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     public final int inc() {
-        // TODO check for a lock strategy
-        int o = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
-        int n = o++;
-        UNSAFE.putInt(this._start_address + OFFSET_COUNTER, n);
-        return n;
+        int val;
+        int nval;
+        do {
+            val = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
+            nval = val + 1;
+        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_COUNTER, val, nval));
+
+        return nval;
     }
 
     public final int dec() {
-        // TODO check for a lock strategy
-        int o = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
-        int n = o--;
-        UNSAFE.putInt(this._start_address + OFFSET_COUNTER, n);
-        return n;
+        int val;
+        int nval;
+        do {
+            val = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
+            nval = val - 1;
+        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_COUNTER, val, nval));
+
+        return nval;
     }
 
     public final void free(KMetaModel p_metaModel) {
@@ -687,10 +693,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
     @Override
     public void setFlags(long p_bitsToEnable, long p_bitsToDisable) {
-        // TODO check for a lock strategy
-        long expected = UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
-        long updated = expected & ~p_bitsToDisable | p_bitsToEnable;
-        UNSAFE.putLong(this._start_address + OFFSET_FLAGS, updated);
+        long val;
+        long nval;
+        do {
+            val = UNSAFE.getLong(this._start_address + OFFSET_FLAGS);
+            nval = val & ~p_bitsToDisable | p_bitsToEnable;
+        } while (!UNSAFE.compareAndSwapLong(null, _start_address + OFFSET_FLAGS, val, nval));
     }
 
     @Override
