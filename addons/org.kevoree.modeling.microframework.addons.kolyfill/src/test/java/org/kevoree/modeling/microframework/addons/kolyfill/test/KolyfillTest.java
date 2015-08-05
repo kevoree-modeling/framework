@@ -2,6 +2,8 @@ package org.kevoree.modeling.microframework.addons.kolyfill.test;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
+import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
@@ -16,7 +18,7 @@ public class KolyfillTest {
         KMetaReference sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
 
 
-        KModel model = metaModel.model();
+        KModel model = metaModel.createModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
