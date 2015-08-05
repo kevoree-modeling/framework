@@ -211,7 +211,8 @@ public class GaussianClassificationTest {
             @Override
             public void on(Object o) {
 
-                KObjectInfer gaussianProfile = (KObjectInfer) model.createByName("GaussianProfile", 0, 0);
+                KObject newObj = model.createByName("GaussianProfile", 0, 0);
+                KObjectInfer gaussianProfile = (KObjectInfer) newObj;
 
                 for (int i = 0; i < irisdataset.length; i += 5) {
 
@@ -254,7 +255,7 @@ public class GaussianClassificationTest {
 
 
                 //for debug
-                KObjectChunk ks = ((KInternalDataManager) model.manager()).preciseChunk(0, 0, gaussianProfile.uuid(), gaussianProfile.metaClass(), ((AbstractKObject) gaussianProfile).previousResolved());
+                KObjectChunk ks = ((KInternalDataManager) model.manager()).preciseChunk(0, 0, gaussianProfile.uuid(), gaussianProfile.metaClass(), ((AbstractKObject) newObj).previousResolved());
 
                 gaussianProfile.genericInferAll(irisInstanceTest, new KCallback<Object[][]>() {
                     @Override
