@@ -31,7 +31,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     // native pointer to the start of the memory chunk
     private volatile long _start_address;
-    private int _allocated_segments = 0;
+    //private int _allocated_segments = 0;
 
     // constants for off-heap memory layout
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
@@ -121,7 +121,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         int cloneBytes = baseSegment + rawSegment;
 
         long _clone_start_address = UNSAFE.allocateMemory(cloneBytes);
-        clonedEntry._allocated_segments++;
+//        clonedEntry._allocated_segments++;
         clonedEntry._start_address = _clone_start_address;
         UNSAFE.copyMemory(this._start_address, clonedEntry._start_address, cloneBytes);
         // strings and references
@@ -138,7 +138,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                             int str_size = UNSAFE.getInt(clone_ptr_str_segment);
                             int bytes = 4 + str_size * BYTE;
                             long new_ref_segment = UNSAFE.allocateMemory(bytes);
-                            clonedEntry._allocated_segments++;
+//                            clonedEntry._allocated_segments++;
                             UNSAFE.copyMemory(clone_ptr_str_segment, new_ref_segment, bytes);
 
                             UNSAFE.putLong(clone_ptr, new_ref_segment); // update ptr
@@ -154,7 +154,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                             int str_size = UNSAFE.getInt(clone_ptr_str_segment);
                             int bytes = 4 + str_size * BYTE;
                             long new_ref_segment = UNSAFE.allocateMemory(bytes);
-                            clonedEntry._allocated_segments++;
+//                            clonedEntry._allocated_segments++;
                             UNSAFE.copyMemory(clone_ptr_str_segment, new_ref_segment, bytes);
                             UNSAFE.putLong(clone_ptr, new_ref_segment); // update ptr
                         }
@@ -171,7 +171,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                         int size = UNSAFE.getInt(clone_ptr_ref_segment);
                         int bytes = 4 + size * BYTE;
                         long new_ref_segment = UNSAFE.allocateMemory(bytes);
-                        clonedEntry._allocated_segments++;
+//                        clonedEntry._allocated_segments++;
                         UNSAFE.copyMemory(clone_ptr_ref_segment, new_ref_segment, bytes);
                         UNSAFE.putLong(clone_ptr, new_ref_segment); // update ptr
                     }
@@ -215,7 +215,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     String s = (String) p_content;
                     int size = s.length();
                     long newSegment = UNSAFE.allocateMemory(4 + size * BYTE); // size + the actual string
-                    _allocated_segments++;
+//                    _allocated_segments++;
                     byte[] bytes = s.getBytes("UTF-8");
                     UNSAFE.putInt(newSegment, size);
                     for (int i = 0; i < bytes.length; i++) {
@@ -295,7 +295,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
             } else {
                 new_ref_ptr = UNSAFE.allocateMemory(4 + 8);
-                _allocated_segments++;
+//                _allocated_segments++;
                 UNSAFE.putInt(new_ref_ptr, 1); // size
                 UNSAFE.putLong(new_ref_ptr + 4, p_newRef); // content
             }
@@ -323,7 +323,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                 int size = UNSAFE.getInt(ptr_ref_segment);
                 if (size > 1) {
                     long new_ref_ptr = UNSAFE.allocateMemory((size - 1) * BYTE);
-                    _allocated_segments++;
+//                    _allocated_segments++;
                     int j = 0;
                     for (int i = 0; i < size; i++) {
                         long value = UNSAFE.getLong(ptr_ref_segment + 4 + i * BYTE);
@@ -334,12 +334,12 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     }
                     UNSAFE.putInt(new_ref_ptr, j); // setPrimitiveType the new size
                     UNSAFE.freeMemory(ptr_ref_segment); // release the old memory zone
-                    _allocated_segments--;
+//                    _allocated_segments--;
                     UNSAFE.putLong(ptr, new_ref_ptr); // update pointer
 
                 } else {
                     UNSAFE.freeMemory(ptr_ref_segment); // release the old memory zone
-                    _allocated_segments--;
+//                    _allocated_segments--;
                     UNSAFE.putLong(ptr, 0);
                 }
                 setDirty();
@@ -359,7 +359,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
             if (ptr_ref_segment != 0) {
                 UNSAFE.freeMemory(ptr_ref_segment);
-                _allocated_segments--;
+//                _allocated_segments--;
 
                 UNSAFE.putLong(ptr, 0);
             }
@@ -433,7 +433,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             new_ptr_segment = UNSAFE.reallocateMemory(ptr_segment, 4 + p_newSize * BYTE);
         } else {
             new_ptr_segment = UNSAFE.allocateMemory(4 + p_newSize * BYTE);
-            _allocated_segments++;
+//            _allocated_segments++;
         }
         UNSAFE.putInt(new_ptr_segment, p_newSize); // update size
         UNSAFE.putLong(ptr, new_ptr_segment); // update pointer
@@ -493,7 +493,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         int bytes = baseSegment + modifiedIndexSegment + rawSegment;
 
         _start_address = UNSAFE.allocateMemory(bytes);
-        _allocated_segments++;
+//        _allocated_segments++;
         UNSAFE.setMemory(_start_address, bytes, (byte) 0);
         UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, p_metaClass.index());
 
@@ -838,7 +838,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     long ptr_str_segment = UNSAFE.getLong(ptr);
                     if (ptr_str_segment != 0) {
                         UNSAFE.freeMemory(ptr_str_segment);
-                        _allocated_segments--;
+//                        _allocated_segments--;
                     }
                 }
                 if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
@@ -846,7 +846,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     long ptr_segment = UNSAFE.getLong(ptr);
                     if (ptr_segment != 0) {
                         UNSAFE.freeMemory(ptr_segment);
-                        _allocated_segments--;
+//                        _allocated_segments--;
                     }
                 }
             } else if (meta.metaType().equals(MetaType.REFERENCE)) {
@@ -855,13 +855,13 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                 long ptr_str_segment = UNSAFE.getLong(ptr);
                 if (ptr_str_segment != 0) {
                     UNSAFE.freeMemory(ptr_str_segment);
-                    _allocated_segments--;
+//                    _allocated_segments--;
                 }
             }
         }
 
         UNSAFE.freeMemory(_start_address);
-        _allocated_segments--;
+//        _allocated_segments--;
 
 //        if (_allocated_segments != 0) {
 //            throw new RuntimeException("OffHeap Memory Management Exception: more segments allocated than freed");

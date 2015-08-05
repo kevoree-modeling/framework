@@ -16,7 +16,7 @@ import sun.misc.Unsafe;
  * @ignore ts
  * <p/>
  * OffHeap implementation of KLongLongMap
- * - memory structure:  | meta class idx (4) | elem count (4) | dropped count (4) | flags (8) | elem data size (4) | counter (4) | back (elem data size * 28) |
+ * - memory structure:  | threshold (4) | meta class idx (4) | elem count (4) | dropped count (4) | flags (8) | elem data size (4) | counter (4) | back (elem data size * 28) |
  * - back:              | key (8) | value (8) | next (4) | hash (4) |
  */
 public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
@@ -28,10 +28,10 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private volatile long _start_address;
 
     private int initialCapacity;
-    private int threshold;
     private float loadFactor;
 
     // constants for off-heap memory layout
+    private static final int ATT_THRESHOLD_LEN = 4;
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
     private static final int ATT_ELEM_COUNT_LEN = 4;
     private static final int ATT_DROPPED_COUNT_LEN = 4;
@@ -45,10 +45,12 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private static final int ATT_HASH_LEN = 4;
 
     private static final int BASE_SEGMENT_LEN =
-            ATT_META_CLASS_INDEX_LEN + ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN + ATT_FLAGS_LEN + ATT_ELEM_DATA_SIZE_LEN + ATT_COUNTER_LEN;
+            ATT_THRESHOLD_LEN + ATT_META_CLASS_INDEX_LEN + ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN + ATT_FLAGS_LEN +
+                    ATT_ELEM_DATA_SIZE_LEN + ATT_COUNTER_LEN;
     private static final int BACK_ELEM_ENTRY_LEN = ATT_KEY_LEN + ATT_VALUE_LEN + ATT_NEXT_LEN + ATT_HASH_LEN;
 
-    private static final int OFFSET_STARTADDRESS_META_CLASS_INDEX = 0;
+    private static final int OFFSET_STARTADDRESS_THRESHOLD = 0;
+    private static final int OFFSET_STARTADDRESS_META_CLASS_INDEX = OFFSET_STARTADDRESS_THRESHOLD + ATT_THRESHOLD_LEN;
     private static final int OFFSET_STARTADDRESS_ELEM_COUNT = OFFSET_STARTADDRESS_META_CLASS_INDEX + ATT_META_CLASS_INDEX_LEN;
     private static final int OFFSET_STARTADDRESS_DROPPED_COUNT = OFFSET_STARTADDRESS_ELEM_COUNT + ATT_ELEM_COUNT_LEN;
     private static final int OFFSET_STARTADDRESS_FLAGS = OFFSET_STARTADDRESS_DROPPED_COUNT + ATT_DROPPED_COUNT_LEN;
@@ -124,7 +126,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_BACK + (i * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH), -1);
         }
 
-        this.threshold = (int) (elementDataSize * loadFactor);
+        int threshold = (int) (elementDataSize * loadFactor);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
 
         // don't notify for creation! otherwise the value pointer will be set to the newly created objects for get methods instead to the old one
 //        if (this._space != null) {
@@ -157,7 +160,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             UNSAFE.freeMemory(oldAddress);
 
             long elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
-            this.threshold = (int) (elementDataSize * this.loadFactor);
+            int threshold = (int) (elementDataSize * this.loadFactor);
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
 
             if (this._space != null) {
                 this._space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
@@ -198,7 +202,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         this._start_address = newAddress;
         UNSAFE.freeMemory(oldAddress);
 
-        this.threshold = (int) (length * this.loadFactor);
+        int threshold = (int) (length * this.loadFactor);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
 
         if (this._space != null) {
             _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
@@ -286,7 +291,8 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
             int droppedCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
 
-            if (elementCount > this.threshold) {
+            int threshold = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD);
+            if (elementCount > threshold) {
                 rehashCapacity(elementDataSize);
 
                 int newElementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
@@ -471,7 +477,9 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, newElemDataSize);
         this._start_address = UNSAFE.reallocateMemory(this._start_address, BASE_SEGMENT_LEN + newElemDataSize * BACK_ELEM_ENTRY_LEN);
         UNSAFE.copyMemory(newAddress + OFFSET_STARTADDRESS_BACK, this._start_address + OFFSET_STARTADDRESS_BACK, newElemDataSize * BACK_ELEM_ENTRY_LEN);
-        this.threshold = (int) (length * this.loadFactor);
+
+        int threshold = (int) (length * this.loadFactor);
+        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
 
         UNSAFE.freeMemory(newAddress);
 

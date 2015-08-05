@@ -13,7 +13,7 @@ import sun.misc.Unsafe;
  * @ignore ts
  * <p/>
  * OffHeap implementation of AbstractOffHeapTree
- * - memory structure:  | root index (8) | size (4) | flags (8) | counter (4) | back (size * node size * 8) |
+ * - memory structure:  | threshold (4) | root index (8) | size (4) | flags (8) | counter (4) | back (size * node size * 8) |
  * - back:              | key (8) | left (8) | right (8) | parent (8) | color (8) | value (8) |
  */
 public abstract class AbstractOffHeapTree implements KOffHeapChunk {
@@ -23,7 +23,6 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     protected long _universe, _time, _obj;
 
     private volatile long _start_address;
-    protected int threshold;
     protected float loadFactor;
 
     protected int NODE_SIZE;
@@ -45,18 +44,21 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     private static final int POS_COLOR = 4;
     private static final int POS_VALUE = 5;
 
+    private static final int ATT_THRESHOLD_LEN = 4;
     private static final int ATT_ROOT_INDEX_LEN = 8;
     private static final int ATT_SIZE_LEN = 4;
     private static final int ATT_FLAGS_LEN = 8;
     private static final int ATT_COUNTER_LEN = 4;
 
-    private static final int OFFSET_ROOT_INDEX = 0;
+    private static final int OFFSET_THRESHOLD = 0;
+    private static final int OFFSET_ROOT_INDEX = OFFSET_THRESHOLD + ATT_THRESHOLD_LEN;
     private static final int OFFSET_SIZE = OFFSET_ROOT_INDEX + ATT_ROOT_INDEX_LEN;
     private static final int OFFSET_FLAGS = OFFSET_SIZE + ATT_SIZE_LEN;
     private static final int OFFSET_COUNTER = OFFSET_FLAGS + ATT_FLAGS_LEN;
     private static final int OFFSET_BACK = OFFSET_COUNTER + ATT_COUNTER_LEN;
 
-    private static final int BASE_SEGMENT_LEN = ATT_ROOT_INDEX_LEN + ATT_SIZE_LEN + ATT_FLAGS_LEN + ATT_COUNTER_LEN;
+    private static final int BASE_SEGMENT_LEN =
+            ATT_THRESHOLD_LEN + ATT_ROOT_INDEX_LEN + ATT_SIZE_LEN + ATT_FLAGS_LEN + ATT_COUNTER_LEN;
 
     protected AbstractOffHeapTree() {
         NODE_SIZE = 0;
@@ -72,7 +74,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         UNSAFE.putInt(this._start_address + OFFSET_SIZE, p_length);
 
         this.loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        this.threshold = (int) (size() * this.loadFactor);
+        int threshold = (int) (size() * this.loadFactor);
+        UNSAFE.putInt(this._start_address + OFFSET_THRESHOLD, threshold);
 
 //        if (_space != null) {
 //            _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
@@ -88,7 +91,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         this._start_address = newAddress;
         UNSAFE.freeMemory(oldAddress);
 
-        this.threshold = (int) (p_length * this.loadFactor);
+        int threshold = (int) (p_length * this.loadFactor);
+        UNSAFE.putInt(this._start_address + OFFSET_THRESHOLD, threshold);
 
         if (_space != null) {
             _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
@@ -377,7 +381,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     protected synchronized void internal_insert(long p_key, long p_value) {
-        if ((size() + 1) > this.threshold) {
+        int threshold = UNSAFE.getInt(this._start_address + OFFSET_THRESHOLD);
+        if ((size() + 1) > threshold) {
             int length = (size() == 0 ? 1 : size() << 1);
 
             reallocate(length);
@@ -678,7 +683,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         this._start_address = address;
 
         loadFactor = KConfig.CACHE_LOAD_FACTOR;
-        this.threshold = (int) (size() * this.loadFactor);
+        int threshold = (int) (size() * this.loadFactor);
+        UNSAFE.putInt(this._start_address + OFFSET_THRESHOLD, threshold);
     }
 
     @Override
