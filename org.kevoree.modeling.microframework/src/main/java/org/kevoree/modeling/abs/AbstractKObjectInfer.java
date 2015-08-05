@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.traversal.KTraversalIndexResolver;
+import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfer {
 
@@ -65,18 +66,18 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             @Override
             public void on(Object[] results) {
                 //collect output
-                double[][] extractedInputs = new double[p_dependencies.length][_metaClass.inputs().length];
+                NativeArray2D extractedInputs = new NativeArray2D(p_dependencies.length, _metaClass.inputs().length);
                 int k = 0;
                 for (int i = 0; i < p_dependencies.length; i++) {
                     for (int j = 0; j < _metaClass.inputs().length; j++) {
                         Object[] extracted = (Object[]) results[k];
                         if (extracted != null && extracted.length > 0) {
-                            extractedInputs[i][j] = (double) extracted[0];
+                            extractedInputs.set(i,j, (double) extracted[0]);
                         }
                         k++;
                     }
                 }
-                double[][] extractedOutputs = new double[1][_metaClass.outputs().length];
+                NativeArray2D extractedOutputs = new NativeArray2D(1, _metaClass.inputs().length);
                 for (int i = 0; i < p_dependencies.length; i++) {
                     for (int j = 0; j < _metaClass.outputs().length; j++) {
                         KMetaInferOutput metaInferOutput = _metaClass.outputs()[j];
@@ -84,7 +85,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                         if (p_outputs != null) {
                             currentOutputObject = p_outputs[i][j];
                         }
-                        extractedOutputs[i][j] = internalConvertOutput(currentOutputObject, metaInferOutput);
+                        extractedOutputs.set(i,j, internalConvertOutput(currentOutputObject, metaInferOutput));
                     }
                 }
                 _metaClass.inferAlg().train(extractedInputs, extractedOutputs, selfObject, _manager);
@@ -133,14 +134,13 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             @Override
             public void on(Object[] results) {
                 //collect output
-                double[][] extractedInputs = new double[p_dependencies.length][_metaClass.inputs().length];
+                NativeArray2D extractedInputs = new NativeArray2D(p_dependencies.length, _metaClass.inputs().length);
                 int k = 0;
                 for (int i = 0; i < p_dependencies.length; i++) {
-                    extractedInputs[i] = new double[_metaClass.inputs().length];
                     for (int j = 0; j < _metaClass.inputs().length; j++) {
                         Object[] extracted = (Object[]) results[k];
                         if (extracted != null && extracted.length > 0) {
-                            extractedInputs[i][j] = (double) extracted[0];
+                            extractedInputs.set(i,j, (double) extracted[0]);
                         }
                         k++;
                     }
