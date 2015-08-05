@@ -159,8 +159,13 @@ public class KMessageLoader {
                 if (objectReader.get(ID_NAME) != null) {
                     atomicGetMessage.id = Long.parseLong(objectReader.get(ID_NAME).toString());
                 }
-                if (objectReader.get(KEY_NAME) != null) {
-                    atomicGetMessage.key = KContentKey.create(objectReader.get(KEY_NAME).toString());
+                if (objectReader.get(KEYS_NAME) != null) {
+                    String[] metaInt = objectReader.getAsStringArray(KEYS_NAME);
+                    long[] keys = new long[metaInt.length];
+                    for (int i = 0; i < metaInt.length; i++) {
+                        keys[i] = Base64.decodeToLong(metaInt[i]);
+                    }
+                    atomicGetMessage.keys = keys;
                 }
                 return atomicGetMessage;
             } else if (parsedType == ATOMIC_GET_INC_RESULT_TYPE) {

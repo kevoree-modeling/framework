@@ -131,16 +131,16 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
     }
 
     @Override
-    public void atomicGetIncrement(KContentKey key, KCallback<Short> callback) {
+    public void atomicGetIncrement(long[] key, KCallback<Short> callback) {
         AtomicGetIncrementRequest atomicGetRequest = new AtomicGetIncrementRequest();
         atomicGetRequest.id = nextKey();
-        atomicGetRequest.key = key;
+        atomicGetRequest.keys = key;
         _callbacks.put(atomicGetRequest.id, callback);
         WebSockets.sendText(atomicGetRequest.json(), _client.getChannel(), null);
     }
 
     @Override
-    public void get(KContentKey[] keys, KCallback<String[]> callback) {
+    public void get(long[] keys, KCallback<String[]> callback) {
         GetRequest getRequest = new GetRequest();
         getRequest.keys = keys;
         getRequest.id = nextKey();
@@ -149,7 +149,7 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
     }
 
     @Override
-    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+    public synchronized void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
         PutRequest putRequest = new PutRequest();
         putRequest.keys = p_keys;
         putRequest.values = p_values;
@@ -169,7 +169,7 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
     }
 
     @Override
-    public void remove(String[] keys, KCallback<Throwable> error) {
+    public void remove(long[] keys, KCallback<Throwable> error) {
         //TODO
     }
 
