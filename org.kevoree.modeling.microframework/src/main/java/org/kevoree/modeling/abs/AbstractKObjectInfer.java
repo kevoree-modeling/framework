@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.traversal.KTraversalIndexResolver;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfer {
@@ -72,7 +73,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                     for (int j = 0; j < _metaClass.inputs().length; j++) {
                         Object[] extracted = (Object[]) results[k];
                         if (extracted != null && extracted.length > 0) {
-                            extractedInputs.set(i,j, (double) extracted[0]);
+                            extractedInputs.set(i, j, (double) extracted[0]);
                         }
                         k++;
                     }
@@ -85,7 +86,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                         if (p_outputs != null) {
                             currentOutputObject = p_outputs[i][j];
                         }
-                        extractedOutputs.set(i,j, internalConvertOutput(currentOutputObject, metaInferOutput));
+                        extractedOutputs.set(i, j, internalConvertOutput(currentOutputObject, metaInferOutput));
                     }
                 }
                 _metaClass.inferAlg().train(extractedInputs, extractedOutputs, selfObject, _manager);
@@ -140,24 +141,20 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                     for (int j = 0; j < _metaClass.inputs().length; j++) {
                         Object[] extracted = (Object[]) results[k];
                         if (extracted != null && extracted.length > 0) {
-                            extractedInputs.set(i,j, (double) extracted[0]);
+                            extractedInputs.set(i, j, (double) extracted[0]);
                         }
                         k++;
                     }
                 }
-                double[][] extractedOutputs = _metaClass.inferAlg().infer(extractedInputs, selfObject, _manager);
-                if (extractedOutputs[0].length != _metaClass.outputs().length) {
-                    callback.on(null);
-                } else {
-                    Object[][] result = new Object[extractedOutputs.length][_metaClass.outputs().length];
-                    for (int i = 0; i < extractedOutputs.length; i++) {
-                        result[i] = new Object[_metaClass.outputs().length];
-                        for (int j = 0; j < _metaClass.outputs().length; j++) {
-                            result[i][j] = internalReverseOutput(extractedOutputs[i][j], _metaClass.outputs()[j]);
-                        }
+                KArray2D extractedOutputs = _metaClass.inferAlg().infer(extractedInputs, selfObject, _manager);
+                Object[][] result = new Object[extractedOutputs.nbRows()][extractedOutputs.nbColumns()];
+                for (int i = 0; i < extractedOutputs.nbRows(); i++) {
+                    result[i] = new Object[extractedOutputs.nbColumns()];
+                    for (int j = 0; j < extractedOutputs.nbColumns(); j++) {
+                        result[i][j] = internalReverseOutput(extractedOutputs.get(i, j), _metaClass.outputs()[j]);
                     }
-                    callback.on(result);
                 }
+                callback.on(result);
             }
         });
     }
