@@ -14,20 +14,20 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
 
-    private Options options = new Options().createIfMissing(true);
+    private final Options options = new Options().createIfMissing(true);
+
+    private final String _storagePath;
 
     private DB db;
 
-    private final Lock lock = new ReentrantLock();
-
-    private String _storagePath = null;
-
     private boolean _isConnected = false;
+
+    public LevelDbContentDeliveryDriver(String p_storagePath) throws IOException {
+        this._storagePath = p_storagePath;
+    }
 
     @Override
     public void connect(KCallback<Throwable> callback) {
@@ -47,10 +47,6 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
         if (callback != null) {
             callback.on(exception);
         }
-    }
-
-    public LevelDbContentDeliveryDriver(String p_storagePath) throws IOException {
-        this._storagePath = p_storagePath;
     }
 
     private String _connectedError = "PLEASE CONNECT YOUR DATABASE FIRST";

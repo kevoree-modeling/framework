@@ -27,8 +27,8 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void atomicGetIncrement(KContentKey key, KCallback<Short> cb) {
-        String result = (String) m.get(key.toString());
+    public void atomicGetIncrement(long[] key, KCallback<Short> cb) {
+        String result = (String) m.get(KContentKey.toString(key, 0));
         short nextV;
         short previousV;
         if (result != null) {
@@ -46,26 +46,28 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
         } else {
             nextV = (short) (previousV + 1);
         }
-        m.put(key.toString(), nextV + "");
+        m.put(KContentKey.toString(key, 0), nextV + "");
         cb.on(previousV);
     }
 
     @Override
-    public void get(KContentKey[] keys, KCallback<String[]> callback) {
-        String[] results = new String[keys.length];
-        for (int i = 0; i < keys.length; i++) {
-            results[i] = (String) m.get(keys[i].toString());
+    public void get(long[] keys, KCallback<String[]> callback) {
+        int nbKeys = keys.length / 3;
+        String[] results = new String[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
+            results[i] = (String) m.get(KContentKey.toString(keys,i));
         }
         callback.on(results);
     }
 
     @Override
-    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+    public synchronized void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
         if (p_keys.length != p_values.length) {
             p_callback.on(new Exception("Bad Put Usage !"));
         } else {
-            for (int i = 0; i < p_keys.length; i++) {
-                m.put(p_keys[i].toString(), p_values[i]);
+            int nbKeys = p_keys.length / 3;
+            for (int i = 0; i < nbKeys; i++) {
+                m.put(KContentKey.toString(p_keys,i), p_values[i]);
             }
             if (additionalInterceptors != null) {
                 additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
@@ -84,7 +86,7 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void remove(String[] keys, KCallback<Throwable> error) {
+    public void remove(long[] keys, KCallback<Throwable> error) {
 
     }
 
