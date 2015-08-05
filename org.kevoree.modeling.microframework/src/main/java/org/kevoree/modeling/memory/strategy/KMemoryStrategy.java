@@ -5,8 +5,8 @@ import org.kevoree.modeling.memory.space.KChunkSpace;
 
 public interface KMemoryStrategy {
 
-    KChunkSpace newStorage();
+    KChunkSpace newSpace();
 
-    KChunkSpaceManager newCache(KChunkSpace storage);
+    KChunkSpaceManager newSpaceManager(KChunkSpace space);
 
 }

@@ -59,8 +59,8 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KMemoryStrategy p_factory) {
-        this._space = p_factory.newStorage();
-        this._spaceManager = p_factory.newCache(_space);
+        this._space = p_factory.newSpace();
+        this._spaceManager = p_factory.newSpaceManager(_space);
         this._resolver = new DistortedTimeResolver(this._spaceManager, this);
         this._listenerManager = new ListenerManager();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);

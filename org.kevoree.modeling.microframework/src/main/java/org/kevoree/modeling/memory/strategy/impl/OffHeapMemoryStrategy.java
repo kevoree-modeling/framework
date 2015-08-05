@@ -12,12 +12,12 @@ import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 public class OffHeapMemoryStrategy implements KMemoryStrategy {
 
     @Override
-    public KChunkSpace newStorage() {
+    public KChunkSpace newSpace() {
         return new OffHeapChunkSpace();
     }
 
     @Override
-    public KChunkSpaceManager newCache(KChunkSpace p_storage) {
+    public KChunkSpaceManager newSpaceManager(KChunkSpace p_storage) {
         return new PhantomQueueChunkSpaceManager(p_storage);
     }
 

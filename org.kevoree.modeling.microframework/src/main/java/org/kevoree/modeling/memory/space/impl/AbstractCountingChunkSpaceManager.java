@@ -9,15 +9,15 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceManager {
 
-    private KChunkSpace _storage;
+    private KChunkSpace _space;
 
     public AbstractCountingChunkSpaceManager(KChunkSpace p_storage) {
-        this._storage = p_storage;
+        this._space = p_storage;
     }
 
     @Override
     public KChunk getAndMark(long universe, long time, long obj) {
-        KChunk resolvedElement = _storage.get(universe, time, obj);
+        KChunk resolvedElement = _space.get(universe, time, obj);
         if (resolvedElement != null) {
             resolvedElement.inc();
         }
@@ -26,7 +26,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
 
     @Override
     public void unmark(long universe, long time, long obj) {
-        KChunk resolvedElement = _storage.get(universe, time, obj);
+        KChunk resolvedElement = _space.get(universe, time, obj);
         if (resolvedElement != null) {
             resolvedElement.dec();
         }
@@ -34,12 +34,12 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
 
     @Override
     public KChunk unsafeGet(long universe, long time, long obj) {
-        return _storage.get(universe, time, obj);
+        return _space.get(universe, time, obj);
     }
 
     @Override
     public KChunk createAndMark(long universe, long time, long obj, short type) {
-        KChunk newCreatedElement = _storage.create(universe, time, obj, type);
+        KChunk newCreatedElement = _space.create(universe, time, obj, type);
         if (newCreatedElement != null) {
             newCreatedElement.inc();
         }
@@ -60,7 +60,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
 
     @Override
     public KObjectChunk cloneMarkAndUnmark(KObjectChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel) {
-        KObjectChunk newCreatedElement = _storage.clone(previous, newUniverse, newTime, obj, metaModel);
+        KObjectChunk newCreatedElement = _space.clone(previous, newUniverse, newTime, obj, metaModel);
         newCreatedElement.inc();
         previous.dec();
         return newCreatedElement;

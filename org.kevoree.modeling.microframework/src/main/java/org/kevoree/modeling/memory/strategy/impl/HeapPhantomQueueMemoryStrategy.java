@@ -9,13 +9,13 @@ import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 public class HeapPhantomQueueMemoryStrategy implements KMemoryStrategy {
 
     @Override
-    public KChunkSpace newStorage() {
+    public KChunkSpace newSpace() {
         return new HeapChunkSpace();
     }
 
     @Override
-    public KChunkSpaceManager newCache(KChunkSpace p_storage) {
-        return new PhantomQueueChunkSpaceManager(p_storage);
+    public KChunkSpaceManager newSpaceManager(KChunkSpace p_space) {
+        return new PhantomQueueChunkSpaceManager(p_space);
     }
 
 }
