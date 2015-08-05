@@ -184,10 +184,11 @@ public class JsonModelLoader {
         if (plainRawSet == null) {
             return null;
         }
-        long[] convertedRaw = new long[plainRawSet.size()];
-        for (int l = 0; l < plainRawSet.size(); l++) {
+        int sizeOfL = sizeOfList(plainRawSet);
+        long[] convertedRaw = new long[sizeOfL];
+        for (int l = 0; l < sizeOfL; l++) {
             try {
-                long converted = Long.parseLong(plainRawSet.get(l));
+                long converted = Long.parseLong(getString(plainRawSet, l));
                 if (p_mappedKeys.contains(converted)) {
                     converted = p_mappedKeys.get(converted);
                 }
@@ -197,6 +198,31 @@ public class JsonModelLoader {
             }
         }
         return convertedRaw;
+    }
+
+    /** @native ts
+     *  if(plainRawSet != null && plainRawSet != undefined){
+     *      if(plainRawSet.size != undefined){
+     *          return plainRawSet.size();
+     *      } else {
+     *          return plainRawSet.length;
+     *      }
+     *  }
+     *
+     * */
+    private static int sizeOfList(ArrayList<String> plainRawSet){
+        return plainRawSet.size();
+    }
+
+    /** @native ts
+     * if(plainRawSet.get != undefined){
+     *     return plainRawSet.get(l);
+     * } else {
+     *     return plainRawSet[l];
+     * }
+     * */
+    private static String getString(ArrayList<String> plainRawSet, int l){
+        return plainRawSet.get(l);
     }
 
 }

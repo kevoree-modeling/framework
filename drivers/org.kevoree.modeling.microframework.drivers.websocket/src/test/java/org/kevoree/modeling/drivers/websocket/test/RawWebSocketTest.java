@@ -4,6 +4,7 @@ package org.kevoree.modeling.drivers.websocket.test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.drivers.websocket.WebSocketCDNClient;
@@ -25,11 +26,11 @@ public class RawWebSocketTest {
         KMetaModel dynamicMM = new MetaModel("mock");
         KModel model = dynamicMM.createModel(DataManagerBuilder.create().withContentDeliveryDriver(mock).build());
 
-
-        KContentKey[] getRequest = new KContentKey[3];
-        getRequest[0] = KContentKey.createGlobalUniverseTree();
-        getRequest[1] = KContentKey.createLastPrefix();
-        getRequest[2] = KContentKey.createRootUniverseTree();
+        long[] getRequest = new long[]{
+                KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG,
+                KConfig.END_OF_TIME, KConfig.NULL_LONG, KConfig.NULL_LONG,
+                KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.END_OF_TIME
+        };
 
         WebSocketGateway wrapper = WebSocketGateway.exposeModel(model, PORT);
         wrapper.start();
@@ -48,21 +49,22 @@ public class RawWebSocketTest {
                             @Override
                             public void on(String[] resultPayloads) {
                                 latch.countDown();
-                                Assert.assertEquals(resultPayloads.length, getRequest.length);
-                                for (int i = 0; i < resultPayloads.length; i++) {
-                                    Assert.assertEquals(resultPayloads[i], getRequest[i].toString());
+                                int nbKeys = getRequest.length / 3;
+                                Assert.assertEquals(resultPayloads.length, nbKeys);
+                                for (int i = 0; i < nbKeys; i++) {
+                                    Assert.assertEquals(resultPayloads[i], KContentKey.toString(getRequest, i));
                                 }
                             }
                         });
 
-                        client.put(new KContentKey[]{KContentKey.createGlobalUniverseTree()}, new String[]{"GlobalUniverseTree"}, new KCallback<Throwable>() {
+                        client.put(KContentKey.GLOBAL_UNIVERSE_KEY, new String[]{"GlobalUniverseTree"}, new KCallback<Throwable>() {
                             @Override
                             public void on(Throwable throwable) {
                                 latch.countDown();
                                 Assert.assertEquals(mock.alreadyPut.size(), 1);
                             }
                         }, -1);
-                        client.atomicGetIncrement(KContentKey.createGlobalUniverseTree(), new KCallback<Short>() {
+                        client.atomicGetIncrement(KContentKey.GLOBAL_UNIVERSE_KEY, new KCallback<Short>() {
                             @Override
                             public void on(Short s) {
                                 latch.countDown();

@@ -140,7 +140,7 @@ module org {
                             return this._callbackId;
                         }
 
-                        public put(keys:org.kevoree.modeling.KContentKey[], values:string[], error:(p:java.lang.Throwable) => void, ignoreInterceptor):void {
+                        public put(keys:Float64Array, values:string[], error:(p:java.lang.Throwable) => void, ignoreInterceptor):void {
                             var putRequest = new org.kevoree.modeling.message.impl.PutRequest();
                             putRequest.id = this.nextKey();
                             putRequest.keys = keys;
@@ -149,7 +149,7 @@ module org {
                             this._clientConnection.send(putRequest.json());
                         }
 
-                        public get(keys:org.kevoree.modeling.KContentKey[], callback:(p:string[], p1:java.lang.Throwable) => void):void {
+                        public get(keys:Float64Array, callback:(p:string[], p1:java.lang.Throwable) => void):void {
                             var getRequest = new org.kevoree.modeling.message.impl.GetRequest();
                             getRequest.id = this.nextKey();
                             getRequest.keys = keys;
@@ -157,15 +157,15 @@ module org {
                             this._clientConnection.send(getRequest.json());
                         }
 
-                        public atomicGetIncrement(key:org.kevoree.modeling.KContentKey, callback:(p:number, p1:java.lang.Throwable) => void):void {
+                        public atomicGetIncrement(keys:Float64Array, callback:(p:number, p1:java.lang.Throwable) => void):void {
                             var atomicGetRequest = new org.kevoree.modeling.message.impl.AtomicGetIncrementRequest();
                             atomicGetRequest.id = this.nextKey();
-                            atomicGetRequest.key = key;
+                            atomicGetRequest.keys = keys;
                             this._atomicGetCallbacks[atomicGetRequest.id] = callback;
                             this._clientConnection.send(atomicGetRequest.json());
                         }
 
-                        public remove(keys:string[], error:(p:java.lang.Throwable) => void):void {
+                        public remove(keys:Float64Array, error:(p:java.lang.Throwable) => void):void {
                             console.error("Not implemented yet");
                         }
 

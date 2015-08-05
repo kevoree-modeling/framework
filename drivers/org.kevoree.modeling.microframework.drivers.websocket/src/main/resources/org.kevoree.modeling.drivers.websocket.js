@@ -141,10 +141,10 @@ var org;
                             this._getCallbacks[getRequest.id] = callback;
                             this._clientConnection.send(getRequest.json());
                         };
-                        WebSocketCDNClient.prototype.atomicGetIncrement = function (key, callback) {
+                        WebSocketCDNClient.prototype.atomicGetIncrement = function (keys, callback) {
                             var atomicGetRequest = new org.kevoree.modeling.message.impl.AtomicGetIncrementRequest();
                             atomicGetRequest.id = this.nextKey();
-                            atomicGetRequest.key = key;
+                            atomicGetRequest.keys = keys;
                             this._atomicGetCallbacks[atomicGetRequest.id] = callback;
                             this._clientConnection.send(atomicGetRequest.json());
                         };

@@ -59,7 +59,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
         _server.start();
         interceptorId = ((KInternalDataManager) wrapped.manager()).cdn().addUpdateListener(new KContentUpdateListener() {
             @Override
-            public void on(KContentKey[] updatedKeys) {
+            public void on(long[] updatedKeys) {
                 Events events = new Events(updatedKeys);
                 String payload = events.json();
                 _connectedChannels_hash.each(new KIntMapCallBack<WebSocketChannel>() {
@@ -137,7 +137,7 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
             break;
             case KMessageLoader.ATOMIC_GET_INC_REQUEST_TYPE: {
                 final AtomicGetIncrementRequest atomicGetRequest = (AtomicGetIncrementRequest) msg;
-                ((KInternalDataManager) wrapped.manager()).cdn().atomicGetIncrement(atomicGetRequest.key, new KCallback<Short>() {
+                ((KInternalDataManager) wrapped.manager()).cdn().atomicGetIncrement(atomicGetRequest.keys, new KCallback<Short>() {
                     @Override
                     public void on(Short s) {
                         if (s != null) {

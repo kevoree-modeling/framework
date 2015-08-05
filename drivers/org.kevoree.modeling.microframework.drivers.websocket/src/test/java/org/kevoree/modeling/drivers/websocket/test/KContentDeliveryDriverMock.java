@@ -15,30 +15,32 @@ public class KContentDeliveryDriverMock implements KContentDeliveryDriver {
     public HashMap<String, String> alreadyPut = new HashMap<String, String>();
 
     @Override
-    public void atomicGetIncrement(KContentKey key, KCallback<Short> callback) {
+    public void atomicGetIncrement(long[] key, KCallback<Short> callback) {
         callback.on(Short.parseShort("0"));
     }
 
     @Override
-    public void put(KContentKey[] keys, String[] values, KCallback<Throwable> error, int excludeListener) {
-        for (int i = 0; i < keys.length; i++) {
-            alreadyPut.put(keys[i].toString(), values[i]);
+    public void put(long[] keys, String[] values, KCallback<Throwable> error, int excludeListener) {
+        int nbKeys = keys.length /3;
+        for (int i = 0; i < nbKeys; i++) {
+            alreadyPut.put(KContentKey.toString(keys, i), values[i]);
         }
         msgCounter.countDown();
         error.on(null);
     }
 
     @Override
-    public void get(KContentKey[] keys, KCallback<String[]> callback) {
-        String[] values = new String[keys.length];
-        for (int i = 0; i < keys.length; i++) {
-            values[i] = keys[i].toString();
+    public void get(long[] keys, KCallback<String[]> callback) {
+        int nbKeys = keys.length /3;
+        String[] values = new String[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
+            values[i] = KContentKey.toString(keys,i);
         }
         callback.on(values);
     }
 
     @Override
-    public void remove(String[] keys, KCallback<Throwable> error) {
+    public void remove(long[] keys, KCallback<Throwable> error) {
 
     }
 
