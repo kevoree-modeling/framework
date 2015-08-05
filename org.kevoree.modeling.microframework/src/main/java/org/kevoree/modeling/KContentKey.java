@@ -52,7 +52,6 @@ public class KContentKey {
         return new KContentKey(KConfig.END_OF_TIME, KConfig.NULL_LONG, KConfig.NULL_LONG);
     }
 
-
     public static KContentKey create(String payload) {
         if (payload == null || payload.length() == 0) {
             return null;

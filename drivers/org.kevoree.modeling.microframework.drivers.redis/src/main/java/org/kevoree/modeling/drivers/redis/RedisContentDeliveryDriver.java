@@ -54,8 +54,8 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void atomicGetIncrement(KContentKey key, KCallback<Short> cb) {
-        String result = jedis.get(key.toString());
+    public void atomicGetIncrement(long[] key, KCallback<Short> cb) {
+        String result = jedis.get(KContentKey.toString(key, 0));
         short nextV;
         short previousV;
         if (result != null) {
@@ -80,10 +80,11 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
 
 
     @Override
-    public void get(KContentKey[] keys, KCallback<String[]> callback) {
-        String[] flatKeys = new String[keys.length];
-        for (int i = 0; i < keys.length; i++) {
-            flatKeys[i] = keys[i].toString();
+    public void get(long[] keys, KCallback<String[]> callback) {
+        int nbKeys = keys.length / 3;
+        String[] flatKeys = new String[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
+            flatKeys[i] = KContentKey.toString(keys, i);
         }
         List<String> values = jedis.mget(flatKeys);
         if (callback != null) {
@@ -92,10 +93,11 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
-        String[] elems = new String[p_keys.length * 2];
-        for (int i = 0; i < p_keys.length; i++) {
-            elems[(i * 2)] = p_keys[i].toString();
+    public synchronized void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+        int nbKeys = p_keys.length / 3;
+        String[] elems = new String[nbKeys * 2];
+        for (int i = 0; i < nbKeys; i++) {
+            elems[(i * 2)] = KContentKey.toString(p_keys, i);
             elems[(i * 2) + 1] = p_values[i];
         }
         if (jedis != null) {
@@ -109,8 +111,13 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void remove(String[] keys, KCallback<Throwable> error) {
-        jedis.del(keys);
+    public void remove(long[] keys, KCallback<Throwable> error) {
+        int nbKeys = keys.length / 3;
+        String[] elems = new String[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
+            elems[i] = KContentKey.toString(keys, i);
+        }
+        jedis.del(elems);
     }
 
     @Override
