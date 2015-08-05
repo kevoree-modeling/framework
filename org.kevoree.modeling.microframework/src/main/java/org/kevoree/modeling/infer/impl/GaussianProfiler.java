@@ -7,7 +7,9 @@ import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.util.maths.Distribution;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
+import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 public class GaussianProfiler implements KInferAlg {
 
@@ -53,7 +55,7 @@ public class GaussianProfiler implements KInferAlg {
 
     //in the trainingset, first value is time needs to be preprocessed into int 0-23, other values are electrical features, expectedResult is null
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResult, KObject origin, KInternalDataManager manager) {
+    public void train(KArray2D trainingSet, KArray2D expectedResult, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial chunk if empty
@@ -66,41 +68,41 @@ public class GaussianProfiler implements KInferAlg {
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
         //update the state
-        for (int i = 0; i < trainingSet.length; i++) {
-            int output = (int) trainingSet[i][0];
+        for (int i = 0; i < trainingSet.nbRows(); i++) {
+            int output = (int) trainingSet.get(i,0);
             for (int j = 1; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
                 if (state.get(getCounter(output, origin.metaClass().dependencies())) == 0) {
-                    state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                    state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
 
                 } else {
-                    if (trainingSet[i][j] < state.get(getIndex(j, output, MIN, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet.get(i,j) < state.get(getIndex(j, output, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    if (trainingSet[i][j] > state.get(getIndex(j, output, MAX, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet.get(i,j) > state.get(getIndex(j, output, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    state.add(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.add(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                    state.add(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.add(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 }
                 //update global stat
                 if (state.get(getCounter(maxTimeSlots, origin.metaClass().dependencies())) == 0) {
-                    state.set(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                    state.set(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 } else {
-                    if (trainingSet[i][j] < state.get(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet.get(i,j) < state.get(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    if (trainingSet[i][j] > state.get(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet.get(i,j) > state.get(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    state.add(getIndex(j, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.add(getIndex(j, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                    state.add(getIndex(j, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.add(getIndex(j, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 }
             }
             //Update Global counters
@@ -114,7 +116,7 @@ public class GaussianProfiler implements KInferAlg {
     //result is the probability of every point of the profiler needs to be averaged afterward - threshold here is not defined.
 
     @Override
-    public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
+    public KArray2D infer(KArray2D features, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //check if chunk is empty
@@ -123,17 +125,16 @@ public class GaussianProfiler implements KInferAlg {
             return null;
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-        double[][] result = new double[features.length][1];
+        KArray2D result = new NativeArray2D(features.nbRows(),1);
 
-        for (int j = 0; j < features.length; j++) {
-            result[j] = new double[1];
-            int output = (int) features[j][0];
+        for (int j = 0; j < features.nbRows(); j++) {
+            int output = (int) features.get(j,0);
 
-            double[] values = new double[features[j].length - 1];
-            for (int i = 0; i < features[j].length - 1; i++) {
-                values[i] = features[j][i + 1];
+            double[] values = new double[features.nbColumns() - 1];
+            for (int i = 0; i < features.nbColumns() - 1; i++) {
+                values[i] = features.get(j,i + 1);
             }
-            result[j][0] = getProba(values, output, state, origin.metaClass().dependencies());
+            result.set(j,0,getProba(values, output, state, origin.metaClass().dependencies()));
         }
         return result;
     }

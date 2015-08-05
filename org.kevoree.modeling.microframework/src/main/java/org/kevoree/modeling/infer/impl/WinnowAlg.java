@@ -5,7 +5,9 @@ import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
+import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 import java.util.Random;
 
@@ -19,7 +21,7 @@ public class WinnowAlg implements KInferAlg {
 
 
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
+    public void train(KArray2D trainingSet, KArray2D expectedResultSet, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), (((AbstractKObject) origin).previousResolved()));
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial chunk if empty
@@ -33,12 +35,12 @@ public class WinnowAlg implements KInferAlg {
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
         for (int iter = 0; iter < iterations; iter++) {
-            for (int inst = 0; inst < trainingSet.length; inst++) {
-                if (calculate(trainingSet[inst], state) == expectedResultSet[inst][0]) {
+            for (int inst = 0; inst < trainingSet.nbRows(); inst++) {
+                if (calculate(trainingSet,inst, state) == expectedResultSet.get(inst,0)) {
                     continue;
                 }
                 //Else update the weights
-                if (expectedResultSet[inst][0] == 0) {
+                if (expectedResultSet.get(inst,0) == 0) {
                     for (int i = 0; i < size; i++) {
                         state.set(i, state.get(i) / beta);
                     }
@@ -52,12 +54,12 @@ public class WinnowAlg implements KInferAlg {
         }
     }
 
-    private double calculate(double[] features, Array1D state) {
+    private double calculate(KArray2D features, int row, Array1D state) {
         double result = 0;
-        for (int i = 0; i < features.length; i++) {
-            result += state.get(i) * features[i];
+        for (int i = 0; i < features.nbColumns(); i++) {
+            result += state.get(i) * features.get(row,i);
         }
-        if (result >= features.length) {
+        if (result >= features.nbColumns()) {
             return 1.0;
         } else {
             return 0.0;
@@ -65,7 +67,7 @@ public class WinnowAlg implements KInferAlg {
     }
 
     @Override
-    public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
+    public KArray2D infer(KArray2D features, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), (((AbstractKObject) origin).previousResolved()));
         int dependenciesIndex = origin.metaClass().dependencies().index();
         int size = origin.metaClass().inputs().length;
@@ -73,10 +75,9 @@ public class WinnowAlg implements KInferAlg {
             return null;
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-        double[][] result = new double[features.length][1];
-        for (int inst = 0; inst < features.length; inst++) {
-            result[inst] = new double[1];
-            result[inst][0] = calculate(features[inst], state);
+        KArray2D result = new NativeArray2D(features.nbRows(),1);
+        for (int inst = 0; inst < features.nbRows(); inst++) {
+            result.set(inst,0, calculate(features,inst, state));
         }
         return result;
     }

@@ -1,5 +1,7 @@
 package org.kevoree.modeling.util.maths;
 
+import org.kevoree.modeling.util.maths.structure.KArray2D;
+
 public class Distribution {
 
     public static double inverseNormalCDF(double q) {
@@ -40,6 +42,16 @@ public class Distribution {
 
         for (int i = 0; i < dim; i++) {
             p = p * (1 / Math.sqrt(2 * Math.PI * variances[i])) * Math.exp(-((features[i] - means[i]) * (features[i] - means[i])) / (2 * variances[i]));
+        }
+        return p;
+    }
+
+    public static double gaussianArray(KArray2D features, int row, double[] means, double[] variances) {
+        int dim = features.nbColumns();
+        double p = 1;
+
+        for (int i = 0; i < dim; i++) {
+            p = p * (1 / Math.sqrt(2 * Math.PI * variances[i])) * Math.exp(-((features.get(row,i) - means[i]) * (features.get(row,i) - means[i])) / (2 * variances[i]));
         }
         return p;
     }

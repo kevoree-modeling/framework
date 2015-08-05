@@ -6,7 +6,9 @@ import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaDependencies;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
+import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 public class StatInferAlg implements KInferAlg {
     private static int MIN = 0;
@@ -17,7 +19,7 @@ public class StatInferAlg implements KInferAlg {
 
 
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
+    public void train(KArray2D trainingSet, KArray2D expectedResultSet, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial chunk if empty
@@ -27,26 +29,26 @@ public class StatInferAlg implements KInferAlg {
                 ks.setDoubleArrayElem(dependenciesIndex, i, 0, origin.metaClass());
             }
         }
-        Array1D state = new Array1D(NUMOFFIELDS * trainingSet[0].length + 1, 0, dependenciesIndex, ks, origin.metaClass());
+        Array1D state = new Array1D(NUMOFFIELDS * trainingSet.nbColumns() + 1, 0, dependenciesIndex, ks, origin.metaClass());
 
         //update the state
-        for (int i = 0; i < trainingSet.length; i++) {
+        for (int i = 0; i < trainingSet.nbRows(); i++) {
             for (int j = 0; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
-                if (state.get(NUMOFFIELDS * trainingSet[0].length) == 0) {
-                    state.set(MIN + j * NUMOFFIELDS, trainingSet[i][j]);
-                    state.set(MAX + j * NUMOFFIELDS, trainingSet[i][j]);
-                    state.set(SUM + j * NUMOFFIELDS, trainingSet[i][j]);
-                    state.set(SUMSQuare + j * NUMOFFIELDS, trainingSet[i][j] * trainingSet[i][j]);
+                if (state.get(NUMOFFIELDS * trainingSet.nbColumns()) == 0) {
+                    state.set(MIN + j * NUMOFFIELDS, trainingSet.get(i,j));
+                    state.set(MAX + j * NUMOFFIELDS, trainingSet.get(i,j));
+                    state.set(SUM + j * NUMOFFIELDS, trainingSet.get(i,j));
+                    state.set(SUMSQuare + j * NUMOFFIELDS, trainingSet.get(i,j) * trainingSet.get(i,j));
                 } else {
-                    if (trainingSet[i][j] < state.get(MIN + j * NUMOFFIELDS)) {
-                        state.set(MIN + j * NUMOFFIELDS, trainingSet[i][j]);
+                    if (trainingSet.get(i,j) < state.get(MIN + j * NUMOFFIELDS)) {
+                        state.set(MIN + j * NUMOFFIELDS, trainingSet.get(i,j));
                     }
-                    if (trainingSet[i][j] > state.get(MAX + j * NUMOFFIELDS)) {
-                        state.set(MAX + j * NUMOFFIELDS, trainingSet[i][j]);
+                    if (trainingSet.get(i,j) > state.get(MAX + j * NUMOFFIELDS)) {
+                        state.set(MAX + j * NUMOFFIELDS, trainingSet.get(i,j));
                     }
-                    state.add(SUM + j * NUMOFFIELDS, trainingSet[i][j]);
-                    state.add(SUMSQuare + j * NUMOFFIELDS, trainingSet[i][j] * trainingSet[i][j]);
+                    state.add(SUM + j * NUMOFFIELDS, trainingSet.get(i,j));
+                    state.add(SUMSQuare + j * NUMOFFIELDS, trainingSet.get(i,j) * trainingSet.get(i,j));
                 }
             }
             //Global counter
@@ -56,10 +58,13 @@ public class StatInferAlg implements KInferAlg {
 
 
     @Override
-    public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
+    public KArray2D infer(KArray2D features, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
-        double[][] result = new double[1][];
-        result[0] = getAvgAll(ks, origin.metaClass().dependencies());
+        double[] tempres = getAvgAll(ks, origin.metaClass().dependencies());
+        KArray2D result = new NativeArray2D(1,tempres.length);
+        for(int i=0;i<tempres.length;i++){
+            result.set(0,i,tempres[i]);
+        }
         return result;
     }
 

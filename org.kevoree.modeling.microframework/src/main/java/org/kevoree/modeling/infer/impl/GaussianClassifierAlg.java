@@ -8,7 +8,10 @@ import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaDependencies;
 import org.kevoree.modeling.meta.impl.MetaEnum;
 import org.kevoree.modeling.util.maths.Distribution;
+import org.kevoree.modeling.util.maths.structure.KArray1D;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
+import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 /**
  * Created by assaad on 08/07/15.
@@ -32,7 +35,7 @@ public class GaussianClassifierAlg implements KInferAlg {
     }
 
 
-    public double[] getAvg(int output, Array1D state, KMetaDependencies meta) {
+    public double[] getAvg(int output, KArray1D state, KMetaDependencies meta) {
         double[] avg = new double[meta.origin().inputs().length];
         double total = state.get(getCounter(output, meta));
         if (total != 0) {
@@ -43,7 +46,7 @@ public class GaussianClassifierAlg implements KInferAlg {
         return avg;
     }
 
-    public double[] getVariance(int output, Array1D state, double[] avg, KMetaDependencies meta) {
+    public double[] getVariance(int output, KArray1D state, double[] avg, KMetaDependencies meta) {
         double[] variances = new double[meta.origin().inputs().length];
         double total = state.get(getCounter(output, meta));
         if (total != 0) {
@@ -55,7 +58,7 @@ public class GaussianClassifierAlg implements KInferAlg {
     }
 
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
+    public void train(KArray2D trainingSet, KArray2D expectedResultSet, KObject origin, KInternalDataManager manager) {
         int maxOutput = ((MetaEnum) origin.metaClass().outputs()[0].type()).literals().length;
         KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
@@ -71,42 +74,42 @@ public class GaussianClassifierAlg implements KInferAlg {
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
         //update the state
-        for (int i = 0; i < trainingSet.length; i++) {
-            int output = (int) expectedResultSet[i][0];
+        for (int i = 0; i < trainingSet.nbRows(); i++) {
+            int output = (int) expectedResultSet.get(i,0);
             for (int j = 0; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
                 if (state.get(getCounter(output, origin.metaClass().dependencies())) == 0) {
-                    state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                    state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet.get(i, j));
+                    state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet.get(i, j));
+                    state.set(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet.get(i, j));
+                    state.set(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
 
                 } else {
-                    if (trainingSet[i][j] < state.get(getIndex(j, output, MIN, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet.get(i,j) < state.get(getIndex(j, output, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    if (trainingSet[i][j] > state.get(getIndex(j, output, MAX, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet.get(i,j) > state.get(getIndex(j, output, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    state.add(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.add(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                    state.add(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.add(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 }
 
                 //update global stat
                 if (state.get(getCounter(maxOutput, origin.metaClass().dependencies())) == 0) {
-                    state.set(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxOutput, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.set(getIndex(j, maxOutput, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                    state.set(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, maxOutput, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j, maxOutput, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 } else {
-                    if (trainingSet[i][j] < state.get(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet.get(i,j) < state.get(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j, maxOutput, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    if (trainingSet[i][j] > state.get(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()), trainingSet[i][j]);
+                    if (trainingSet.get(i,j) > state.get(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j, maxOutput, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    state.add(getIndex(j, maxOutput, SUM, origin.metaClass().dependencies()), trainingSet[i][j]);
-                    state.add(getIndex(j, maxOutput, SUMSQUARE, origin.metaClass().dependencies()), trainingSet[i][j] * trainingSet[i][j]);
+                    state.add(getIndex(j, maxOutput, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.add(getIndex(j, maxOutput, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 }
             }
 
@@ -118,7 +121,7 @@ public class GaussianClassifierAlg implements KInferAlg {
 
 
     @Override
-    public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
+    public KArray2D infer(KArray2D features, KObject origin, KInternalDataManager manager) {
         int maxOutput = ((MetaEnum) origin.metaClass().outputs()[0].type()).literals().length;
         KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
@@ -127,36 +130,37 @@ public class GaussianClassifierAlg implements KInferAlg {
         if (ks.getDoubleArraySize(dependenciesIndex, origin.metaClass()) == 0) {
             return null;
         }
-        Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-        double[][] result = new double[features.length][1];
+        KArray1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
+        KArray2D result = new NativeArray2D(features.nbRows(),1);
 
-        for (int j = 0; j < features.length; j++) {
-            result[j] = new double[1];
+        for (int j = 0; j < features.nbRows(); j++) {
             double maxprob = 0;
             double prob = 0;
             for (int output = 0; output < maxOutput; output++) {
-                prob = getProba(features[j], output, state, origin.metaClass().dependencies());
+                prob = getProba(features,j, output, state, origin.metaClass().dependencies());
                 if (prob > maxprob) {
                     maxprob = prob;
-                    result[j][0] = output;
+                    result.set(j,0,output);
                 }
             }
         }
         return result;
     }
 
-    public double getProba(double[] features, int output, Array1D state, KMetaDependencies meta) {
+    public double getProba(KArray2D features, int row, int output, KArray1D state, KMetaDependencies meta) {
         double prob = 0;
         double[] avg = getAvg(output, state, meta);
         double[] variance = getVariance(output, state, avg, meta);
-        prob = Distribution.gaussian(features, avg, variance);
+        prob = Distribution.gaussianArray(features, row, avg, variance);
         return prob;
     }
 
     public double[] getAllProba(double[] features, Array1D state, KMetaDependencies meta, int maxOutput) {
         double[] results = new double[maxOutput];
         for (int i = 0; i < maxOutput; i++) {
-            results[i] = getProba(features, i, state, meta);
+            double[] avg = getAvg(i, state, meta);
+            double[] variance = getVariance(i, state, avg, meta);
+            results[i] = Distribution.gaussian(features,avg,variance);
         }
         return results;
     }

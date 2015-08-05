@@ -584,7 +584,13 @@ public class SampleModel{
         SimpleMatrix[] means = new SimpleMatrix[mSubDistributions.length] ;
         for (int i=0;i<mSubDistributions.length;i++) {
             BaseSampleDistribution d = mSubDistributions[i];
-            means[i]=(d.getGlobalMean());
+            try {
+                means[i] = (d.getGlobalMean());
+            }
+            catch (Exception ex){
+                int x=9;
+
+            }
         }
         return means;
     }
@@ -916,7 +922,7 @@ public class SampleModel{
             else if(i>index){
                 array2[i]=mSubDistributions[i-1];
             }
-            mSubDistributions=array2;
         }
+        mSubDistributions=array2;
     }
 }

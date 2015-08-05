@@ -5,7 +5,9 @@ import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
+import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 import java.util.Random;
 
@@ -19,7 +21,7 @@ public class BinaryPerceptronAlg implements KInferAlg {
     private Random rand = new Random();
 
     @Override
-    public void train(double[][] trainingSet, double[][] expectedResultSet, KObject origin, KInternalDataManager manager) {
+    public void train(KArray2D trainingSet, KArray2D expectedResultSet, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         //Create initial chunk if empty
@@ -32,12 +34,12 @@ public class BinaryPerceptronAlg implements KInferAlg {
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
         for (int iter = 0; iter < iterations; iter++) {
-            for (int row = 0; row < trainingSet.length; row++) {
-                double h = sigmoid(trainingSet[row], state);
+            for (int row = 0; row < trainingSet.nbRows(); row++) {
+                double h = sigmoid(trainingSet,row, state);
                 // double error = alpha *h*(1-h)* (expectedResultSet[row][0] - h);
-                double error = alpha * (expectedResultSet[row][0] - h);
+                double error = alpha * (expectedResultSet.get(row,0) - h);
                 for (int j = 0; j < origin.metaClass().inputs().length; j++) {
-                    state.add(j, error * trainingSet[row][j]); //update for the wi
+                    state.add(j, error * trainingSet.get(row,j)); //update for the wi
                 }
                 state.add(origin.metaClass().inputs().length, error);//for the bias
 
@@ -45,21 +47,22 @@ public class BinaryPerceptronAlg implements KInferAlg {
         }
     }
 
-    private double addUp(double[] features, Array1D state) {
+    private double addUp(KArray2D features, int row, Array1D state) {
         double res = 0;
-        for (int i = 0; i < features.length; i++) {
-            res = res + state.get(i) * features[i];
+        for (int i = 0; i < features.nbColumns(); i++) {
+            res = res + state.get(i) * features.get(row,i);
         }
-        res = res + state.get(features.length);
+        res = res + state.get(features.nbColumns());
         return res;
     }
 
-    private double sigmoid(double[] features, Array1D state) {
-        return 1 / (1 + Math.exp(-addUp(features, state)));
+    private double sigmoid(KArray2D features, int row, Array1D state) {
+        return 1 / (1 + Math.exp(-addUp(features, row, state)));
     }
 
     @Override
-    public double[][] infer(double[][] features, KObject origin, KInternalDataManager manager) {
+    public KArray2D infer(KArray2D features, KObject origin, KInternalDataManager manager) {
+
         KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
         int dependenciesIndex = origin.metaClass().dependencies().index();
         int size = origin.metaClass().inputs().length + 1;
@@ -67,13 +70,12 @@ public class BinaryPerceptronAlg implements KInferAlg {
             return null;
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-        double[][] result = new double[features.length][1];
-        for (int inst = 0; inst < features.length; inst++) {
-            result[inst] = new double[1];
-            if (sigmoid(features[inst], state) >= 0.5) {
-                result[inst][0] = 1.0;
+        KArray2D result = new NativeArray2D(features.nbRows(),1);
+        for (int inst = 0; inst < features.nbRows(); inst++) {
+            if (sigmoid(features,inst, state) >= 0.5) {
+                result.set(inst,0,1.0);
             } else {
-                result[inst][0] = 0.0;
+                result.set(inst,0,0);
             }
         }
         return result;

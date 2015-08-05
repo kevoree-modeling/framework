@@ -11,6 +11,7 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.util.maths.structure.KArray1D;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 
 public class Array1DTest {
 
@@ -19,13 +20,13 @@ public class Array1DTest {
         KMetaModel mm = new MetaModel("test");
         KMetaClass mc = mm.addInferMetaClass("infer_class", new KInferAlg() {
             @Override
-            public void train(double[][] trainingSet, double[][] expectedResultSet, KObject currentInferObject, KInternalDataManager manager) {
+            public void train(KArray2D trainingSet, KArray2D expectedResultSet, KObject currentInferObject, KInternalDataManager manager) {
 
             }
 
             @Override
-            public double[][] infer(double[][] features, KObject currentInferObject, KInternalDataManager manager) {
-                return new double[0][];
+            public KArray2D infer(KArray2D features, KObject currentInferObject, KInternalDataManager manager) {
+                return new NativeArray2D(1,1);
             }
         });
         KObjectChunk segment = new HeapObjectChunk(-1, -1, -1, null);
