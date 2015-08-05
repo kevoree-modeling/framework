@@ -34,7 +34,7 @@ public class BaseKDataManagerTest {
                         }
                     });
                 }
-                origin.timeWalker().allTimes(new KCallback<long[]>() {
+                origin.allTimes(new KCallback<long[]>() {
                     @Override
                     public void on(long[] times) {
                         Assert.assertEquals(times.length, 10);

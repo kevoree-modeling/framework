@@ -25,8 +25,6 @@ public interface KObject {
 
     void visit(KModelVisitor visitor, KCallback cb);
 
-    KTimeWalker timeWalker();
-
     KMetaClass metaClass();
 
     void mutate(KActionType actionType, KMetaReference metaReference, KObject param);
@@ -58,5 +56,13 @@ public interface KObject {
     KDataManager manager();
 
     long timeDephasing();
+
+    void allTimes(KCallback<long[]> cb);
+
+    void timesBefore(long endOfSearch,KCallback<long[]> cb);
+
+    void timesAfter(long beginningOfSearch,KCallback<long[]> cb);
+
+    void timesBetween(long beginningOfSearch,long endOfSearch,KCallback<long[]> cb);
 
 }

@@ -52,7 +52,7 @@ public class PolynomialKMFTest {
                         }
                     });
                 }
-                element.timeWalker().allTimes(new KCallback<long[]>() {
+                element.allTimes(new KCallback<long[]>() {
                     @Override
                     public void on(long[] collected) {
                         Assert.assertEquals(2, collected.length);//
@@ -72,7 +72,7 @@ public class PolynomialKMFTest {
                 }
                 Assert.assertEquals(nbAssert[0], 801);
 
-                element.timeWalker().allTimes(new KCallback<long[]>() {
+                element.allTimes(new KCallback<long[]>() {
                     @Override
                     public void on(long[] collected2) {
                         Assert.assertEquals(2, collected2.length);
@@ -114,7 +114,7 @@ public class PolynomialKMFTest {
             });
         }
 
-        element.timeWalker().allTimes(new KCallback<long[]>() {
+        element.allTimes(new KCallback<long[]>() {
             @Override
             public void on(long[] collected2) {
                 Assert.assertEquals(92, collected2.length);

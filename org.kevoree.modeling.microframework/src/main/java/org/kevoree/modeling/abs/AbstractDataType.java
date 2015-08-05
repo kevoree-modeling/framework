@@ -1,8 +1,6 @@
 package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.KType;
-import org.kevoree.modeling.format.json.JsonString;
-import org.kevoree.modeling.meta.KPrimitiveTypes;
 
 public class AbstractDataType implements KType {
 

@@ -11,7 +11,6 @@ import org.kevoree.modeling.traversal.query.impl.QueryEngine;
 import org.kevoree.modeling.traversal.visitor.KModelAttributeVisitor;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.KTimeWalker;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
@@ -78,11 +77,6 @@ public abstract class AbstractKObject implements KObject {
     }
 
     @Override
-    public KTimeWalker timeWalker() {
-        return new AbstractTimeWalker(this);
-    }
-
-    @Override
     public void delete(KCallback cb) {
         final KObject selfPointer = this;
         KObjectChunk rawPayload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
@@ -91,7 +85,7 @@ public abstract class AbstractKObject implements KObject {
                 cb.on(new Exception(OUT_OF_CACHE_MSG));
             }
         } else {
-            ArrayLongLongMap collector = new ArrayLongLongMap(-1,-1,-1,null);
+            ArrayLongLongMap collector = new ArrayLongLongMap(-1, -1, -1, null);
             KMeta[] metaElements = _metaClass.metaElements();
             for (int i = 0; i < metaElements.length; i++) {
                 if (metaElements[i] != null && metaElements[i].metaType() == MetaType.REFERENCE) {
@@ -355,7 +349,7 @@ public abstract class AbstractKObject implements KObject {
 
     @Override
     public void visit(KModelVisitor p_visitor, KCallback cb) {
-        internal_visit(p_visitor, cb, new ArrayLongLongMap(-1,-1,-1,null), new ArrayLongLongMap(-1,-1,-1,null));
+        internal_visit(p_visitor, cb, new ArrayLongLongMap(-1, -1, -1, null), new ArrayLongLongMap(-1, -1, -1, null));
     }
 
     private void internal_visit(final KModelVisitor visitor, final KCallback end, final KLongLongMap visited, final KLongLongMap traversed) {
@@ -365,7 +359,7 @@ public abstract class AbstractKObject implements KObject {
         if (traversed != null) {
             traversed.put(_uuid, _uuid);
         }
-        final ArrayLongLongMap toResolveIds = new ArrayLongLongMap(-1,-1,-1,null);
+        final ArrayLongLongMap toResolveIds = new ArrayLongLongMap(-1, -1, -1, null);
         KMeta[] metaElements = metaClass().metaElements();
         for (int i = 0; i < metaElements.length; i++) {
             if (metaElements[i] != null && metaElements[i].metaType() == MetaType.REFERENCE) {
@@ -601,6 +595,30 @@ public abstract class AbstractKObject implements KObject {
     @Override
     public KDataManager manager() {
         return _manager;
+    }
+
+    private void internal_times(final long start, final long end, KCallback<long[]> cb) {
+        _manager.resolveTimes(_universe, _uuid, start, end, cb);
+    }
+
+    @Override
+    public void allTimes(KCallback<long[]> cb) {
+        internal_times(KConfig.BEGINNING_OF_TIME, KConfig.END_OF_TIME, cb);
+    }
+
+    @Override
+    public void timesBefore(long endOfSearch, KCallback<long[]> cb) {
+        internal_times(KConfig.BEGINNING_OF_TIME, endOfSearch, cb);
+    }
+
+    @Override
+    public void timesAfter(long beginningOfSearch, KCallback<long[]> cb) {
+        internal_times(beginningOfSearch, KConfig.END_OF_TIME, cb);
+    }
+
+    @Override
+    public void timesBetween(long beginningOfSearch, long endOfSearch, KCallback<long[]> cb) {
+        internal_times(beginningOfSearch, endOfSearch, cb);
     }
 
 }

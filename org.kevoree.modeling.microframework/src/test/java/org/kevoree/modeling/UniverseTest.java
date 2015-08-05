@@ -45,7 +45,7 @@ public class UniverseTest {
                 CloudUniverse dimension0 = universe.newUniverse();
                 Node n0 = dimension0.time(0).createNode();
                 n0.setName("n0");
-                n0.timeWalker().allTimes(new KCallback<long[]>() {
+                n0.allTimes(new KCallback<long[]>() {
                     @Override
                     public void on(long[] longs) {
                         Assert.assertEquals(1, longs.length);
@@ -57,7 +57,7 @@ public class UniverseTest {
                     @Override
                     public void on(KObject forkedN1) {
                         Node forkedNode = (Node) forkedN1;
-                        forkedNode.timeWalker().allTimes(new KCallback<long[]>() {
+                        forkedNode.allTimes(new KCallback<long[]>() {
                             @Override
                             public void on(long[] longs) {
                                 Assert.assertEquals(1, longs.length);
@@ -65,7 +65,7 @@ public class UniverseTest {
                             }
                         });
                         forkedNode.setName("n0bias");
-                        forkedNode.timeWalker().allTimes(new KCallback<long[]>() {
+                        forkedNode.allTimes(new KCallback<long[]>() {
                             @Override
                             public void on(long[] longs) {
                                 Assert.assertEquals(2, longs.length);
