@@ -14,6 +14,7 @@ import sun.misc.Unsafe;
  * <p/>
  * OffHeap implementation of AbstractOffHeapTree
  * - memory structure:  | threshold (4) | root index (8) | size (4) | flags (8) | counter (4) | back (size * node size * 8) |
+ * -
  * - back:              | key (8) | left (8) | right (8) | parent (8) | color (8) | value (8) |
  */
 public abstract class AbstractOffHeapTree implements KOffHeapChunk {
@@ -77,6 +78,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         int threshold = (int) (size() * this.loadFactor);
         UNSAFE.putInt(this._start_address + OFFSET_THRESHOLD, threshold);
 
+//      don't notify for allocation, otherwise the pointer of space will point to the newly created objects for the get
 //        if (_space != null) {
 //            _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
 //        }

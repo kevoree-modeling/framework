@@ -276,7 +276,6 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     public final synchronized void put(long p_key, long p_value) {
         int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
 
-//        UNSAFE.putByte(_start_address + OFFSET_STARTADDRESS_DIRTY, (byte) 1);
         int entry = -1;
         int index = -1;
         int hash = (int) (p_key);
@@ -309,7 +308,6 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             } else {
                 setNext(this._start_address, newIndex, -2);//special char to tag used values
             }
-            //now the object is reachable to other thread everything should be ready
             setHash(this._start_address, index, newIndex);
         } else {
             setValue(this._start_address, entry, p_value);
@@ -358,6 +356,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             setNext(this._start_address, last, next(this._start_address, m));
         }
         setNext(this._start_address, m, -1); //flag to dropped value
+
         // decrease elem count
         int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
         elementCount--;
@@ -454,7 +453,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             long loopKey = Base64.decodeToLongWithBounds(p_payload, beginChunk, middleChunk);
             long loopVal = Base64.decodeToLongWithBounds(p_payload, middleChunk + 1, cursor);
             int index = (((int) (loopKey)) & 0x7FFFFFFF) % UNSAFE.getInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
-            //insert K/V
+
             int newIndex = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
             setKey(newAddress, newIndex, loopKey);
             setValue(newAddress, newIndex, loopVal);
