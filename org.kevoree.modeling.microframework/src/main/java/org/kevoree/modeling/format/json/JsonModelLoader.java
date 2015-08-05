@@ -83,7 +83,7 @@ public class JsonModelLoader {
                     currentToken = lexer.nextToken();
                 }
                 final KObject[] rootElem = {null};
-                ArrayLongLongMap mappedKeys = new ArrayLongLongMap(-1,-1,-1,null);
+                ArrayLongLongMap mappedKeys = new ArrayLongLongMap(-1, -1, -1, null);
                 for (int i = 0; i < alls.size(); i++) {
                     try {
                         ArrayStringMap<Object> elem = alls.get(i);
@@ -180,24 +180,6 @@ public class JsonModelLoader {
         });
     }
 
-    /**
-     * @native ts
-     * if (plainRawSet == null) { return null; }
-     * var convertedRaw: Float64Array = new Float64Array(plainRawSet.length);
-     * for (var l in plainRawSet) {
-     * try {
-     * var converted: number = java.lang.Long.parseLong(plainRawSet[l]);
-     * if (p_mappedKeys.contains(converted)) { converted = p_mappedKeys.get(converted); }
-     * convertedRaw[l] = converted;
-     * } catch ($ex$) {
-     * if ($ex$ instanceof java.lang.Exception) {
-     * var e: java.lang.Exception = <java.lang.Exception>$ex$;
-     * e.printStackTrace();
-     * }
-     * }
-     * }
-     * return convertedRaw;
-     */
     private static long[] transposeArr(ArrayList<String> plainRawSet, KLongLongMap p_mappedKeys) {
         if (plainRawSet == null) {
             return null;
