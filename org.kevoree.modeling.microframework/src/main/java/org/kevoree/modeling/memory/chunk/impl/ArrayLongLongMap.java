@@ -14,7 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @native ts
+ * //TODO maybe redo an optimized version for JS
+ * native ts
  * private _counter = 0;
  * private _className : string;
  * constructor(initalCapacity: number, loadFactor : number, p_className : string) { super(initalCapacity,loadFactor);this._className = p_className; }
@@ -91,7 +92,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
-        this._flags = new AtomicLong();
+        this._flags = new AtomicLong(0);
         this._counter = new AtomicInteger(0);
         this._space = p_space;
         this.elementCount = 0;
@@ -106,7 +107,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     /**
-     * @native ts
+     * native ts
      */
     final class InternalState {
 
@@ -384,7 +385,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public String serialize(KMetaModel metaModel) {
-        final StringBuilder buffer = new StringBuilder(elementCount * 8);//roughly approximate init size
+        final StringBuilder buffer = new StringBuilder();//roughly approximate init size
         if (_metaClassIndex != -1) {
             buffer.append(metaModel.metaClass(_metaClassIndex).metaName());
             buffer.append(',');

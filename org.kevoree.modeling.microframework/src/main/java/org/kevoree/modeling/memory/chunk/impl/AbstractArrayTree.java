@@ -11,7 +11,7 @@ import org.kevoree.modeling.util.maths.Base64;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class AbstractArrayTree {
+public abstract class AbstractArrayTree implements KChunk {
 
     //constants definition
     private static final char BLACK_LEFT = '{';
@@ -35,7 +35,7 @@ public abstract class AbstractArrayTree {
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
-        this._flags = new AtomicLong();
+        this._flags = new AtomicLong(0);
         this._counter = new AtomicInteger(0);
         this._space = p_space;
     }
@@ -741,5 +741,7 @@ public abstract class AbstractArrayTree {
             rotateRight(n.getParent());
         }
     }*/
+
+    public abstract short type();
 
 }

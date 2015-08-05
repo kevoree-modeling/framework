@@ -25,7 +25,7 @@ public class JsonModelLoader {
      * } else {
      * var toLoadObj = JSON.parse(payload);
      * var rootElem = [];
-     * var mappedKeys: org.kevoree.modeling.memory.map.impl.ArrayLongLongMap = new org.kevoree.modeling.memory.map.impl.ArrayLongLongMap(toLoadObj.length, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
+     * var mappedKeys: org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap = new org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap(-1,-1,-1,null);
      * for(var i = 0; i < toLoadObj.length; i++) {
      * var elem = toLoadObj[i];
      * var kid = elem[org.kevoree.modeling.format.json.JsonFormat.KEY_UUID];
@@ -33,7 +33,7 @@ public class JsonModelLoader {
      * }
      * for(var i = 0; i < toLoadObj.length; i++) {
      * var elemRaw = toLoadObj[i];
-     * var elem2 = new org.kevoree.modeling.memory.map.impl.ArrayStringMap<any>(Object.keys(elemRaw).length, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
+     * var elem2 = new org.kevoree.modeling.memory.chunk.impl.ArrayStringMap<any>(Object.keys(elemRaw).length, org.kevoree.modeling.KConfig.CACHE_LOAD_FACTOR);
      * for(var ik in elemRaw){ elem2[ik] = elemRaw[ik]; }
      * try {
      * org.kevoree.modeling.format.json.JsonModelLoader.loadObj(elem2, manager, universe, time, mappedKeys, rootElem);

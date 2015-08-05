@@ -1,6 +1,8 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KLongTree;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 

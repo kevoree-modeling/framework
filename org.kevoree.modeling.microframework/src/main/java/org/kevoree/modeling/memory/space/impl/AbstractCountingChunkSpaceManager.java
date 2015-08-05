@@ -1,5 +1,6 @@
 package org.kevoree.modeling.memory.space.impl;
 
+import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
@@ -69,6 +70,11 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     public void clear() {
 
     }
+
+    abstract public void register(KObject object);
+
+    abstract public void registerAll(KObject[] objects);
+
 
 
 /*

@@ -178,7 +178,7 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     private volatile int[] _dirtyList;
-    private AtomicInteger _dirtyListIndex = new AtomicInteger();
+    private AtomicInteger _dirtyListIndex = new AtomicInteger(0);
 
     @Override
     public KChunkIterator detachDirties() {

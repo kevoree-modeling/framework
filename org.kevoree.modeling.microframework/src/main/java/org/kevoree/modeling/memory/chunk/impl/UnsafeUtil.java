@@ -4,9 +4,7 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
-/**
- * Created by thomas on 04/08/15.
- */
+/** @ignore ts */
 public class UnsafeUtil {
 
     @SuppressWarnings("restriction")

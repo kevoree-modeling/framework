@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.*;
+import org.kevoree.modeling.util.Checker;
 import org.kevoree.modeling.util.maths.Base64;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,7 +36,7 @@ public class HeapObjectChunk implements KObjectChunk {
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
-        this._flags = new AtomicLong();
+        this._flags = new AtomicLong(0);
         this._counter = new AtomicInteger(0);
         this._space = p_space;
     }
@@ -397,31 +398,19 @@ public class HeapObjectChunk implements KObjectChunk {
         return 0;
     }
 
-    /**
-     * @native ts
-     * var res = this.raw[index];
-     * if(res != null && res != undefined){ return res[arrayIndex]; }
-     * return 0;
-     */
     @Override
     public double getDoubleArrayElem(int index, int arrayIndex, KMetaClass metaClass) {
         double[] res = getDoubleArray(index, metaClass);
-        if (res != null && arrayIndex >= 0 && arrayIndex < res.length) {
+        if (Checker.isDefined(res)) {
             return res[arrayIndex];
         }
         return 0;
     }
 
-    /**
-     * @native ts
-     * var res = this.raw[index];
-     * if(res != null && res != undefined){ res[arrayIndex] = valueToInsert; }
-     * this._dirty = true;
-     */
     @Override
     public void setDoubleArrayElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
         double[] res = getDoubleArray(index, metaClass);
-        if (res != null && arrayIndex >= 0 && arrayIndex < res.length) {
+        if (Checker.isDefined(res)) {
             res[arrayIndex] = valueToInsert;
             internal_set_dirty();
         }
