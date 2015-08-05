@@ -27,27 +27,33 @@ public class JSONLoadTest {
                 "]\n", new KCallback<Throwable>() {
             @Override
             public void on(Throwable res) {
-                time0.lookup(1l, new KCallback<KObject>() {
+                time0.lookup(1, new KCallback<KObject>() {
                     @Override
                     public void on(KObject r) {
-                        Assert.assertNotNull(r);
-                        //Assert.assertTrue(r.isRoot());
-                        passed[0]++;
-                    }
-                });
-                time0.lookup(2l, new KCallback<KObject>() {
-                    @Override
-                    public void on(KObject r) {
+                        Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"root\",\"children\":[2,3]}}", r.toJSON());
                         Assert.assertNotNull(r);
                         passed[0]++;
                     }
                 });
-
+                time0.lookup(2, new KCallback<KObject>() {
+                    @Override
+                    public void on(KObject r) {
+                        Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":2,\"data\":{\"name\":\"n1\"}}", r.toJSON());
+                        Assert.assertNotNull(r);
+                        passed[0]++;
+                    }
+                });
+                time0.lookup(3, new KCallback<KObject>() {
+                    @Override
+                    public void on(KObject r) {
+                        Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":3,\"data\":{\"name\":\"n2\"}}", r.toJSON());
+                        Assert.assertNotNull(r);
+                        passed[0]++;
+                    }
+                });
             }
         });
-
-        Assert.assertEquals(passed[0], 2);
-
+        Assert.assertEquals(passed[0], 3);
         time0.select("@root", new KCallback<Object[]>() {
             @Override
             public void on(Object[] kObjects) {

@@ -493,37 +493,6 @@ public abstract class AbstractKObject implements KObject {
     @Override
     public void jump(long p_time, KCallback<KObject> p_callback) {
         _manager.lookup(_universe, p_time, _uuid, p_callback);
-
-        /*
-        HeapObjectChunk resolve_entry = (HeapObjectChunk) _manager.cache().get(_universe, p_time, _uuid);
-        if (resolve_entry != null) {
-            KLongTree timeTree = (KLongTree) _manager.cache().get(_universe, KConfig.NULL_LONG, _uuid);
-            timeTree.inc();
-            KUniverseOrderMap universeTree = (KUniverseOrderMap) _manager.cache().get(KConfig.NULL_LONG, KConfig.NULL_LONG, _uuid);
-            universeTree.inc();
-            resolve_entry.inc();
-            p_callback.on(((AbstractKModel) _manager.model()).createProxy(_universe, p_time, _uuid, _metaClass));
-        } else {
-            KLongTree timeTree = (KLongTree) _manager.cache().get(_universe, KConfig.NULL_LONG, _uuid);
-            if (timeTree != null) {
-                final long resolvedTime = timeTree.previousOrEqual(p_time);
-                if (resolvedTime != KConfig.NULL_LONG) {
-                    HeapObjectChunk entry = (HeapObjectChunk) _manager.cache().get(_universe, resolvedTime, _uuid);
-                    if (entry != null) {
-                        KUniverseOrderMap universeTree = (KUniverseOrderMap) _manager.cache().get(KConfig.NULL_LONG, KConfig.NULL_LONG, _uuid);
-                        universeTree.inc();
-                        timeTree.inc();
-                        entry.inc();
-                        p_callback.on(((AbstractKModel) _manager.model()).createProxy(_universe, p_time, _uuid, _metaClass));
-                    } else {
-                        //TODO optimize
-                        _manager.lookup(_universe, p_time, _uuid, p_callback);
-                    }
-                }
-            } else {
-                _manager.lookup(_universe, p_time, _uuid, p_callback);
-            }
-        }*/
     }
 
     public KMetaReference internal_transpose_ref(KMetaReference p) {

@@ -9,29 +9,6 @@ import org.kevoree.modeling.meta.KPrimitiveTypes;
 
 public class JsonRaw {
 
-    /**
-     * @native ts
-     * var builder = {};
-     * builder["@class"] = p_metaClass.metaName();
-     * builder["@uuid"] = +uuid;
-     * if(isRoot){ builder["@root"] = true; }
-     * var metaElements = p_metaClass.metaElements();
-     * for(var i=0;i<metaElements.length;i++){
-     * var subElem;
-     * if (metaElements[i] != null && metaElements[i].metaType() === org.kevoree.modeling.meta.MetaType.ATTRIBUTE) {
-     * var metaAttribute = <org.kevoree.modeling.meta.KMetaAttribute>metaElements[i];
-     * if(metaAttribute.attributeType() == org.kevoree.modeling.meta.KPrimitiveTypes.CONTINUOUS){
-     * subElem = raw.getDoubleArray(metaAttribute.index(),p_metaClass);
-     * } else {
-     * subElem = raw.getPrimitiveType(metaAttribute.index(),p_metaClass);
-     * }
-     * } else {
-     * subElem = raw.getLongArray(metaElements[i].index(),p_metaClass);
-     * }
-     * if(subElem != null && subElem != undefined){ builder[metaElements[i].metaName()] = subElem; }
-     * }
-     * return JSON.stringify(builder);
-     */
     public static String encode(KObjectChunk raw, long uuid, KMetaClass p_metaClass, boolean isRoot) {
         StringBuilder builder = new StringBuilder();
         builder.append("{\"@class\":\"");
