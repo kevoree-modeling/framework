@@ -9,6 +9,6 @@ public interface KInferAlg {
 
     void train(KArray2D trainingSet, KArray2D expectedResultSet, KObject currentInferObject, KInternalDataManager manager);
 
-    double[][] infer(KArray2D features, KObject currentInferObject, KInternalDataManager manager);
+    KArray2D infer(KArray2D features, KObject currentInferObject, KInternalDataManager manager);
 
 }
