@@ -54,33 +54,33 @@ public abstract class BaseKObjectChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKObjectChunk();
-                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
+                KObjectChunk objectChunk = createKObjectChunk();
+                objectChunk.init(null, dynamicMetaModel, homeMetaClass.index());
 
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
-                long attr = (long) cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
+                long attr = (long) objectChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
                 Assert.assertEquals(10l, attr);
 
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
-                String name = (String) cacheEntry.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
+                String name = (String) objectChunk.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass);
                 Assert.assertEquals("test", name);
 
                 // add and remove attributes
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
-                long[] ref = cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+                long[] ref = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
                 Assert.assertArrayEquals(ref, new long[]{sensor.uuid(), sensor2.uuid()});
 
-                cacheEntry.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                long[] ref2 = cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+                objectChunk.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+                long[] ref2 = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
                 Assert.assertArrayEquals(ref2, new long[]{sensor2.uuid()});
 
-                cacheEntry.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
-                long[] ref3 = cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+                objectChunk.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+                long[] ref3 = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
                 Assert.assertArrayEquals(ref3, null);
 
-                // free cache entry
-                cacheEntry.free(dynamicMetaModel);
+                // free object chunk
+                objectChunk.free(dynamicMetaModel);
 
             }
         });
@@ -120,35 +120,35 @@ public abstract class BaseKObjectChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKObjectChunk();
-                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
+                KObjectChunk objectChunk = createKObjectChunk();
+                objectChunk.init(null, dynamicMetaModel, homeMetaClass.index());
 
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
 
                 // add and remove attributes
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
-                long[] ref = cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+                long[] ref = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
                 Assert.assertArrayEquals(ref, new long[]{sensor.uuid(), sensor2.uuid()});
 
-                Assert.assertEquals(2, cacheEntry.getLongArraySize(homeMetaClass.reference("sensors").index(), homeMetaClass));
+                Assert.assertEquals(2, objectChunk.getLongArraySize(homeMetaClass.reference("sensors").index(), homeMetaClass));
 
-                Assert.assertEquals(sensor.uuid(), cacheEntry.getLongArrayElem(homeMetaClass.reference("sensors").index(), 0, homeMetaClass));
-                Assert.assertEquals(sensor2.uuid(), cacheEntry.getLongArrayElem(homeMetaClass.reference("sensors").index(), 1, homeMetaClass));
+                Assert.assertEquals(sensor.uuid(), objectChunk.getLongArrayElem(homeMetaClass.reference("sensors").index(), 0, homeMetaClass));
+                Assert.assertEquals(sensor2.uuid(), objectChunk.getLongArrayElem(homeMetaClass.reference("sensors").index(), 1, homeMetaClass));
 
-                cacheEntry.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                long[] ref2 = cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+                objectChunk.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+                long[] ref2 = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
                 Assert.assertArrayEquals(ref2, new long[]{sensor2.uuid()});
 
-                Assert.assertEquals(1, cacheEntry.getLongArraySize(homeMetaClass.reference("sensors").index(), homeMetaClass));
+                Assert.assertEquals(1, objectChunk.getLongArraySize(homeMetaClass.reference("sensors").index(), homeMetaClass));
 
-                cacheEntry.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
-                long[] ref3 = cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+                objectChunk.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+                long[] ref3 = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
                 Assert.assertArrayEquals(ref3, null);
 
-                // free cache entry
-                cacheEntry.free(dynamicMetaModel);
+                // free object chunk
+                objectChunk.free(dynamicMetaModel);
             }
         });
     }
@@ -186,31 +186,31 @@ public abstract class BaseKObjectChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                // cache entry
-                KObjectChunk cacheEntry = createKObjectChunk();
-                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
+                // object chunk
+                KObjectChunk objectChunk = createKObjectChunk();
+                objectChunk.init(null, dynamicMetaModel, homeMetaClass.index());
 
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
 
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
 
                 // clone
-                KObjectChunk clonedEntry = cacheEntry.clone(-1,-1,-1, dynamicMetaModel);
+                KObjectChunk clonedChunk = objectChunk.clone(-1,-1,-1, dynamicMetaModel);
 
-                Assert.assertEquals(cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass),
-                        clonedEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass));
-                Assert.assertEquals(cacheEntry.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass),
-                        clonedEntry.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass));
-                Assert.assertArrayEquals(cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass),
-                        clonedEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass));
+                Assert.assertEquals(objectChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass),
+                        clonedChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass));
+                Assert.assertEquals(objectChunk.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass),
+                        clonedChunk.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass));
+                Assert.assertArrayEquals(objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass),
+                        clonedChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass));
 
-                Assert.assertTrue((clonedEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+                Assert.assertTrue((clonedChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
-                // free cache entry
-                //cacheEntry.free(dynamicMetaModel);
-                clonedEntry.free(dynamicMetaModel);
+                // free object chunk
+                //objectChunk.free(dynamicMetaModel);
+                clonedChunk.free(dynamicMetaModel);
 
             }
         });
@@ -249,28 +249,28 @@ public abstract class BaseKObjectChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKObjectChunk();
-                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
+                KObjectChunk objectChunkEntry = createKObjectChunk();
+                objectChunkEntry.init(null, dynamicMetaModel, homeMetaClass.index());
 
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
+                objectChunkEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
+                objectChunkEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
 
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+                objectChunkEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+                objectChunkEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
 
-                ArrayList<KObjectChunk> segments = new ArrayList<KObjectChunk>();
+                ArrayList<KObjectChunk> chunks = new ArrayList<KObjectChunk>();
                 for (int i = 0; i < 50; i++) {
-                    segments.add(cacheEntry.clone(-1,-1,-1, dynamicMetaModel));
+                    chunks.add(objectChunkEntry.clone(-1, -1, -1, dynamicMetaModel));
                 }
 
                 // free everything
-                KObjectChunk[] loopSegment = segments.toArray(new KObjectChunk[segments.size()]);
-                for (int i = 0; i < loopSegment.length; i++) {
-                    loopSegment[i].free(dynamicMetaModel);
+                KObjectChunk[] loopChunks = chunks.toArray(new KObjectChunk[chunks.size()]);
+                for (int i = 0; i < loopChunks.length; i++) {
+                    loopChunks[i].free(dynamicMetaModel);
                 }
 
-                // free cache entry
-                cacheEntry.free(dynamicMetaModel);
+                // free object chunk
+                objectChunkEntry.free(dynamicMetaModel);
             }
         });
     }
@@ -307,23 +307,23 @@ public abstract class BaseKObjectChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKObjectChunk();
-                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
+                KObjectChunk objectChunk = createKObjectChunk();
+                objectChunk.init(null, dynamicMetaModel, homeMetaClass.index());
 
-                Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+                Assert.assertFalse((objectChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
-                long attr = (long) cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
+                long attr = (long) objectChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
                 Assert.assertEquals(10l, attr);
 
-                Assert.assertTrue((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+                Assert.assertTrue((objectChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
-                String name = (String) cacheEntry.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
+                String name = (String) objectChunk.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass);
                 Assert.assertEquals("test", name);
 
-                // free cache entry
-                cacheEntry.free(dynamicMetaModel);
+                // free object chunk
+                objectChunk.free(dynamicMetaModel);
 
             }
         });
@@ -347,51 +347,51 @@ public abstract class BaseKObjectChunkTest {
                 KObject sensor = model.universe(0).time(0).create(sensorMetaClass);
                 sensor.set(sensorMetaClass.attribute("name"), "Sensor#1");
 
-                KObjectChunk cacheEntry = createKObjectChunk();
-                cacheEntry.init(null, dynamicMetaModel, sensorMetaClass.index());
+                KObjectChunk objectChunkEntry = createKObjectChunk();
+                objectChunkEntry.init(null, dynamicMetaModel, sensorMetaClass.index());
 
-                Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+                Assert.assertFalse((objectChunkEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
-                double[] inferPayload0 = cacheEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
+                double[] inferPayload0 = objectChunkEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertNull(inferPayload0);
 
-                cacheEntry.extendDoubleArray(sensorMetaClass.attribute("value").index(), 1, sensorMetaClass);
-                Assert.assertTrue((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+                objectChunkEntry.extendDoubleArray(sensorMetaClass.attribute("value").index(), 1, sensorMetaClass);
+                Assert.assertTrue((objectChunkEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
-                double[] inferPayload1 = cacheEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
+                double[] inferPayload1 = objectChunkEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertNotNull(inferPayload1);
                 //Assert.assertEquals(1,cacheEntry.getDoubleArraySize(sensorMetaClass.attribute("value").index(), sensorMetaClass));
 
-                cacheEntry.setDoubleArrayElem(sensorMetaClass.attribute("value").index(), 0, 42, sensorMetaClass);
-                double[] inferPayload2 = cacheEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
+                objectChunkEntry.setDoubleArrayElem(sensorMetaClass.attribute("value").index(), 0, 42, sensorMetaClass);
+                double[] inferPayload2 = objectChunkEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertNotNull(inferPayload2);
-                Assert.assertEquals(1, cacheEntry.getDoubleArraySize(sensorMetaClass.attribute("value").index(), sensorMetaClass));
+                Assert.assertEquals(1, objectChunkEntry.getDoubleArraySize(sensorMetaClass.attribute("value").index(), sensorMetaClass));
 
                 Assert.assertTrue(inferPayload2[0] == 42);
 
 
-                cacheEntry.extendDoubleArray(sensorMetaClass.attribute("value").index(), 10, sensorMetaClass);
-                double[] inferPayload3 = cacheEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
+                objectChunkEntry.extendDoubleArray(sensorMetaClass.attribute("value").index(), 10, sensorMetaClass);
+                double[] inferPayload3 = objectChunkEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertNotNull(inferPayload3);
                 // Assert.assertTrue(inferPayload3.length == 10);
                 Assert.assertTrue(inferPayload3[0] == 42);
 
 
-                cacheEntry.setDoubleArrayElem(sensorMetaClass.attribute("value").index(), 9, 52, sensorMetaClass);
-                double[] inferPayload4 = cacheEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
+                objectChunkEntry.setDoubleArrayElem(sensorMetaClass.attribute("value").index(), 9, 52, sensorMetaClass);
+                double[] inferPayload4 = objectChunkEntry.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertTrue(inferPayload4[9] == 52);
                 Assert.assertTrue(inferPayload3[0] == 42);
 
 
-                // clone cache entry
-                KObjectChunk clone = cacheEntry.clone(-1,-1,-1, dynamicMetaModel);
+                // clone object chunk
+                KObjectChunk clone = objectChunkEntry.clone(-1,-1,-1, dynamicMetaModel);
                 double[] inferPayload5 = clone.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 double[] inferPayload6 = clone.getDoubleArray(sensorMetaClass.attribute("value").index(), sensorMetaClass);
                 Assert.assertTrue(inferPayload5[9] == 52);
                 Assert.assertTrue(inferPayload6[0] == 42);
 
-                // free cache entry
-                cacheEntry.free(dynamicMetaModel);
+                // free object chunk
+                objectChunkEntry.free(dynamicMetaModel);
                 clone.free(dynamicMetaModel);
             }
         });
@@ -431,58 +431,58 @@ public abstract class BaseKObjectChunkTest {
 
                 home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
 
-                KObjectChunk cacheEntry = createKObjectChunk();
-                cacheEntry.init(null, dynamicMetaModel, homeMetaClass.index());
+                KObjectChunk objectChunk = createKObjectChunk();
+                objectChunk.init(null, dynamicMetaModel, homeMetaClass.index());
 
-                Assert.assertFalse((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+                Assert.assertFalse((objectChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                cacheEntry.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
 
-                cacheEntry.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
-                long attr = (long) cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
+                objectChunk.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
+                long attr = (long) objectChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
                 Assert.assertEquals(10l, attr);
 
-                Assert.assertEquals(cacheEntry.getDoubleArraySize(homeMetaClass.attribute("value").index(), homeMetaClass), 0);
-                cacheEntry.extendDoubleArray(homeMetaClass.attribute("value").index(), 3, homeMetaClass);
+                Assert.assertEquals(objectChunk.getDoubleArraySize(homeMetaClass.attribute("value").index(), homeMetaClass), 0);
+                objectChunk.extendDoubleArray(homeMetaClass.attribute("value").index(), 3, homeMetaClass);
                 //Assert.assertEquals(cacheEntry.getDoubleArraySize(homeMetaClass.attribute("value").index(), homeMetaClass), 3);
-                Assert.assertTrue((cacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+                Assert.assertTrue((objectChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
-                cacheEntry.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 0, 0.1, homeMetaClass);
-                cacheEntry.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 1, 1.1, homeMetaClass);
-                cacheEntry.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 2, 2.1, homeMetaClass);
+                objectChunk.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 0, 0.1, homeMetaClass);
+                objectChunk.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 1, 1.1, homeMetaClass);
+                objectChunk.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 2, 2.1, homeMetaClass);
 
-                Assert.assertEquals("{\"attr_long\":\"U\",\"sensors\":[\"E\",\"G\"],\"value\":[\"P7JmZmZmZma\",\"P/BmZmZmZma\",\"QAAzMzMzMzN\"]}", cacheEntry.serialize(dynamicMetaModel));
+                Assert.assertEquals("{\"attr_long\":\"U\",\"sensors\":[\"E\",\"G\"],\"value\":[\"P7JmZmZmZma\",\"P/BmZmZmZma\",\"QAAzMzMzMzN\"]}", objectChunk.serialize(dynamicMetaModel));
 
-                KObjectChunk newCacheEntry = createKObjectChunk();
+                KObjectChunk newObjectChunk = createKObjectChunk();
                 try {
-                    String serialized = cacheEntry.serialize(dynamicMetaModel);
-                    newCacheEntry.init(serialized, dynamicMetaModel, homeMetaClass.index());
+                    String serialized = objectChunk.serialize(dynamicMetaModel);
+                    newObjectChunk.init(serialized, dynamicMetaModel, homeMetaClass.index());
 
-                    String newSeriliazed = newCacheEntry.serialize(dynamicMetaModel);
+                    String newSeriliazed = newObjectChunk.serialize(dynamicMetaModel);
                     Assert.assertEquals(serialized, newSeriliazed);
 
-                    Assert.assertEquals(cacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass),
-                            newCacheEntry.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass));
+                    Assert.assertEquals(objectChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass),
+                            newObjectChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass));
                     //Assert.assertEquals(cacheEntry.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass),
                     //        newCacheEntry.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass));
 
-                    Assert.assertArrayEquals(cacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass),
-                            newCacheEntry.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass));
+                    Assert.assertArrayEquals(objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass),
+                            newObjectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass));
 
-                    double[] originInfer = cacheEntry.getDoubleArray(homeMetaClass.attribute("value").index(), homeMetaClass);
-                    double[] newInfer = newCacheEntry.getDoubleArray(homeMetaClass.attribute("value").index(), homeMetaClass);
+                    double[] originInfer = objectChunk.getDoubleArray(homeMetaClass.attribute("value").index(), homeMetaClass);
+                    double[] newInfer = newObjectChunk.getDoubleArray(homeMetaClass.attribute("value").index(), homeMetaClass);
 
                     Assert.assertEquals(originInfer.length, newInfer.length);
-                    Assert.assertFalse((newCacheEntry.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
+                    Assert.assertFalse((newObjectChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                // free cache entry
-                cacheEntry.free(dynamicMetaModel);
-                newCacheEntry.free(dynamicMetaModel);
+                // free object chunk
+                objectChunk.free(dynamicMetaModel);
+                newObjectChunk.free(dynamicMetaModel);
 
             }
         });
