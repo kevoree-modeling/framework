@@ -47,7 +47,6 @@ public class MongoDbTest {
                     model.save(new KCallback() {
                         @Override
                         public void on(Object o) {
-                            ((KInternalDataManager)model.manager()).cache().clear(metaModel);
                             model.manager().lookup(0, 0, sensor.uuid(), new KCallback<KObject>() {
                                 @Override
                                 public void on(KObject kObject) {

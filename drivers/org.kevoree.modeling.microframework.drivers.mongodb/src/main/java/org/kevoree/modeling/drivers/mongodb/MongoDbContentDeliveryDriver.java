@@ -39,10 +39,9 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
     private static final String KMF_VAL = "@val";
 
     @Override
-    public void atomicGetIncrement(KContentKey key, KCallback<Short> cb) {
-
+    public void atomicGetIncrement(long[] p_key, KCallback<Short> cb) {
         BasicDBObject searchQuery = new BasicDBObject();
-        searchQuery.put(KMF_KEY, key.toString());
+        searchQuery.put(KMF_KEY, KContentKey.toString(p_key, 0));
         DBCursor cursor = table.find(searchQuery);
         String result = "0";
         if (cursor.count() > 1) {
@@ -66,22 +65,21 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
         } else {
             nextV = (short) (previousV + 1);
         }
-
         BasicDBObject newValue = new BasicDBObject();
-        newValue.append(KMF_KEY, key.toString());
+        newValue.append(KMF_KEY, KContentKey.toString(p_key, 0));
         newValue.append(KMF_VAL, nextV);
         table.update(searchQuery, newValue, true, false);
-
         cb.on(previousV);
     }
 
 
     @Override
-    public void get(KContentKey[] keys, KCallback<String[]> callback) {
-        String[] result = new String[keys.length];
-        for (int i = 0; i < result.length; i++) {
+    public void get(long[] p_keys, KCallback<String[]> callback) {
+        int nbKeys = p_keys.length / 3;
+        String[] result = new String[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
             BasicDBObject searchQuery = new BasicDBObject();
-            searchQuery.put(KMF_KEY, keys[i].toString());
+            searchQuery.put(KMF_KEY, KContentKey.toString(p_keys, i));
             DBCursor cursor = table.find(searchQuery);
             if (cursor.count() == 1) {
                 DBObject objectResult = cursor.next();
@@ -94,12 +92,13 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
-        for (int i = 0; i < p_keys.length; i++) {
+    public synchronized void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+        int nbKeys = p_keys.length / 3;
+        for (int i = 0; i < nbKeys; i++) {
             BasicDBObject originalObjectQuery = new BasicDBObject();
-            originalObjectQuery.put(KMF_KEY, p_keys[i].toString());
+            originalObjectQuery.put(KMF_KEY, KContentKey.toString(p_keys, i));
             BasicDBObject newValue = new BasicDBObject();
-            newValue.append(KMF_KEY, p_keys[i].toString());
+            newValue.append(KMF_KEY, KContentKey.toString(p_keys, i));
             newValue.append(KMF_VAL, p_values[i]);
             table.update(originalObjectQuery, newValue, true, false);
         }
@@ -119,7 +118,7 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void remove(String[] keys, KCallback<Throwable> error) {
+    public void remove(long[] keys, KCallback<Throwable> error) {
         if (error != null) {
             error.on(null);
         }
