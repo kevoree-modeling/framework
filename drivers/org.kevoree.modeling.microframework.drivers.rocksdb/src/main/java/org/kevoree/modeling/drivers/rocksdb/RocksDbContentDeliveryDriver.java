@@ -35,10 +35,11 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+    public void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+        int nbKeys = p_keys.length / 3;
         WriteBatch batch = new WriteBatch();
-        for (int i = 0; i < p_keys.length; i++) {
-            batch.put(p_keys[i].toString().getBytes(), p_values[i].getBytes());
+        for (int i = 0; i < nbKeys; i++) {
+            batch.put(KContentKey.toString(p_keys, i).getBytes(), p_values[i].getBytes());
         }
         WriteOptions options = new WriteOptions();
         options.setSync(true);
@@ -64,9 +65,13 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
 
 
     @Override
-    public void atomicGetIncrement(KContentKey key, KCallback<Short> cb) {
+    public void atomicGetIncrement(long[] key, KCallback<Short> cb) {
         try {
-            String result = new String(db.get(key.toString().getBytes()));
+            byte[] bulkResult = db.get(KContentKey.toString(key, 0).getBytes());
+            String result = null;
+            if(bulkResult != null){
+                result = new String(bulkResult);
+            }
             short nextV;
             short previousV;
             if (result != null) {
@@ -85,8 +90,7 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
                 nextV = (short) (previousV + 1);
             }
             WriteBatch batch = new WriteBatch();
-            batch.put(key.toString().getBytes(), (nextV + "").getBytes());
-
+            batch.put(KContentKey.toString(key, 0).getBytes(), (nextV + "").getBytes());
             db.write(new WriteOptions().setSync(true), batch);
             cb.on(previousV);
         } catch (RocksDBException e) {
@@ -96,12 +100,12 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void get(KContentKey[] keys, KCallback<String[]> callback) {
-        String[] result = new String[keys.length];
-        for (int i = 0; i < keys.length; i++) {
+    public void get(long[] keys, KCallback<String[]> callback) {
+        int nbKeys = keys.length / 3;
+        String[] result = new String[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
             try {
-                result[i] = new String(db.get(keys[i].toString().getBytes()));
-
+                result[i] = new String(db.get(KContentKey.toString(keys, i).getBytes()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -112,10 +116,11 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void remove(String[] keys, KCallback<Throwable> error) {
+    public void remove(long[] keys, KCallback<Throwable> error) {
+        int nbKeys = keys.length / 3;
         try {
-            for (int i = 0; i < keys.length; i++) {
-                db.remove(keys[i].getBytes());
+            for (int i = 0; i < nbKeys; i++) {
+                db.remove(KContentKey.toString(keys, i).getBytes());
             }
             if (error != null) {
                 error.on(null);

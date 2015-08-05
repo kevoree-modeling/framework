@@ -10,7 +10,7 @@ public interface KContentDeliveryDriver {
 
     void put(long[] keys, String[] values, KCallback<Throwable> error, int excludeListener);
 
-    void remove(String[] keys, KCallback<Throwable> error);
+    void remove(long[] keys, KCallback<Throwable> error);
 
     void connect(KCallback<Throwable> callback);
 

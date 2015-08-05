@@ -74,9 +74,10 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void remove(String[] keys, KCallback<Throwable> callback) {
-        for (int i = 0; i < keys.length; i++) {
-            backend.remove(keys[i]);
+    public void remove(long[] p_keys, KCallback<Throwable> callback) {
+        int nbKeys = p_keys.length / 3;
+        for (int i = 0; i < nbKeys; i++) {
+            backend.remove(KContentKey.toString(p_keys, i));
         }
         if (callback != null) {
             callback.on(null);

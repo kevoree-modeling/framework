@@ -56,8 +56,8 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
     private String _connectedError = "PLEASE CONNECT YOUR DATABASE FIRST";
 
     @Override
-    public void atomicGetIncrement(KContentKey key, KCallback<Short> cb) {
-        String result = JniDBFactory.asString(db.get(JniDBFactory.bytes(key.toString())));
+    public void atomicGetIncrement(long[] key, KCallback<Short> cb) {
+        String result = JniDBFactory.asString(db.get(JniDBFactory.bytes(KContentKey.toString(key, 0))));
         short nextV;
         short previousV;
         if (result != null) {
@@ -76,19 +76,20 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
             nextV = (short) (previousV + 1);
         }
         WriteBatch batch = db.createWriteBatch();
-        batch.put(JniDBFactory.bytes(key.toString()), JniDBFactory.bytes(nextV + ""));
+        batch.put(JniDBFactory.bytes(KContentKey.toString(key, 0)), JniDBFactory.bytes(nextV + ""));
         db.write(batch);
         cb.on(previousV);
     }
 
     @Override
-    public void get(KContentKey[] keys, KCallback<String[]> callback) {
+    public void get(long[] keys, KCallback<String[]> callback) {
         if (!_isConnected) {
             throw new RuntimeException(_connectedError);
         }
-        String[] result = new String[keys.length];
-        for (int i = 0; i < keys.length; i++) {
-            result[i] = JniDBFactory.asString(db.get(JniDBFactory.bytes(keys[i].toString())));
+        int nbKeys = keys.length / 3;
+        String[] result = new String[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
+            result[i] = JniDBFactory.asString(db.get(JniDBFactory.bytes(KContentKey.toString(keys, i))));
         }
         if (callback != null) {
             callback.on(result);
@@ -96,13 +97,14 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public synchronized void put(KContentKey[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+    public void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
         if (!_isConnected) {
             throw new RuntimeException(_connectedError);
         }
         WriteBatch batch = db.createWriteBatch();
-        for (int i = 0; i < p_keys.length; i++) {
-            batch.put(JniDBFactory.bytes(p_keys[i].toString()), JniDBFactory.bytes(p_values[i]));
+        int nbKeys = p_keys.length / 3;
+        for (int i = 0; i < nbKeys; i++) {
+            batch.put(JniDBFactory.bytes(KContentKey.toString(p_keys, i)), JniDBFactory.bytes(p_values[i]));
         }
         db.write(batch);
         if (additionalInterceptors != null) {
@@ -121,13 +123,14 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void remove(String[] keys, KCallback<Throwable> error) {
+    public void remove(long[] p_keys, KCallback<Throwable> error) {
         if (!_isConnected) {
             throw new RuntimeException(_connectedError);
         }
         try {
-            for (int i = 0; i < keys.length; i++) {
-                db.delete(JniDBFactory.bytes(keys[i]));
+            int nbKeys = p_keys.length / 3;
+            for (int i = 0; i < nbKeys; i++) {
+                db.delete(JniDBFactory.bytes(KContentKey.toString(p_keys, i)));
             }
             if (error != null) {
                 error.on(null);

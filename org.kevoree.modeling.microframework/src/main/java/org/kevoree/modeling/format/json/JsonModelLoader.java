@@ -183,7 +183,7 @@ public class JsonModelLoader {
     /**
      * @native ts
      * if (plainRawSet == null) { return null; }
-     * var convertedRaw: number[] = new Array();
+     * var convertedRaw: Float64Array = new Float64Array(plainRawSet.size());
      * for (var l in plainRawSet) {
      * try {
      * var converted: number = java.lang.Long.parseLong(plainRawSet[l]);
