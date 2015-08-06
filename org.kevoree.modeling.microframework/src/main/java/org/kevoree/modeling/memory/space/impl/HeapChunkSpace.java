@@ -24,7 +24,7 @@ public class HeapChunkSpace implements KChunkSpace {
 
     private final AtomicReference<InternalDirtyState> _dirtyState;
 
-    private final class InternalState {
+    final class InternalState {
 
         public final int elementDataSize;
 
@@ -36,11 +36,11 @@ public class HeapChunkSpace implements KChunkSpace {
 
         public final KChunk[] values;
 
-        private final AtomicInteger _elementCount;
+        final AtomicInteger _elementCount;
 
-        private volatile int _droppedCount;
+        volatile int _droppedCount;
 
-        private int _threshold;
+        int _threshold;
 
         public InternalState(int p_elementDataSize, long[] p_elementKE, int[] p_elementNext, int[] p_elementHash, KChunk[] p_values) {
             this.elementDataSize = p_elementDataSize;
@@ -52,7 +52,7 @@ public class HeapChunkSpace implements KChunkSpace {
         }
     }
 
-    private final class InternalDirtyState {
+    final class InternalDirtyState {
 
         public volatile long[] _dirtyList;
 
