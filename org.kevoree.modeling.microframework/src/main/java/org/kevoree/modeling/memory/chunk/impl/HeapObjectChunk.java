@@ -441,7 +441,7 @@ public class HeapObjectChunk implements KObjectChunk {
     }
 
     @Override
-    public synchronized void setPrimitiveType(int index, Object content, KMetaClass p_metaClass) {
+    public void setPrimitiveType(int index, Object content, KMetaClass p_metaClass) {
         raw[index] = content;
         internal_set_dirty();
     }

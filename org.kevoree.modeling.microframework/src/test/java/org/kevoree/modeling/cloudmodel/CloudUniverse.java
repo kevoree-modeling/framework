@@ -5,10 +5,7 @@ import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.cloudmodel.impl.CloudViewImpl;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 
-/**
- * Created by duke on 10/13/14.
- */
-public class CloudUniverse extends AbstractKUniverse<CloudView, CloudUniverse, CloudModel> {
+public class CloudUniverse extends AbstractKUniverse<CloudView, CloudUniverse> {
 
     protected CloudUniverse(long p_universe, KInternalDataManager p_manager) {
         super(p_universe, p_manager);

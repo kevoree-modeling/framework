@@ -44,7 +44,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     public A newUniverse() {
         long nextKey = _manager.nextUniverseKey();
         final A newDimension = internalCreateUniverse(nextKey);
-        _manager.initUniverse(newDimension, null);
+        _manager.initUniverse(nextKey, nextKey);
         return newDimension;
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     @Override
     public A universe(long key) {
         A newDimension = internalCreateUniverse(key);
-        _manager.initUniverse(newDimension, null);
+        _manager.initUniverse(key, key);
         return newDimension;
     }
 

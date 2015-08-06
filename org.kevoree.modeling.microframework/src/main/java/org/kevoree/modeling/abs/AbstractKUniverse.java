@@ -7,7 +7,7 @@ import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractKUniverse<A extends KView, B extends KUniverse, C extends KModel> implements KUniverse<A, B, C> {
+public abstract class AbstractKUniverse<A extends KView, B extends KUniverse> implements KUniverse<A, B> {
 
     final protected long _universe;
 
@@ -21,16 +21,6 @@ public abstract class AbstractKUniverse<A extends KView, B extends KUniverse, C 
     @Override
     public long key() {
         return _universe;
-    }
-
-    @Override
-    public C model() {
-        return (C) this._manager.model();
-    }
-
-    @Override
-    public void delete(KCallback cb) {
-        _manager.delete(this, cb);
     }
 
     @Override
@@ -55,33 +45,17 @@ public abstract class AbstractKUniverse<A extends KView, B extends KUniverse, C 
     }
 
     @Override
-    public B origin() {
-        return (B) _manager.model().universe(_manager.parentUniverseKey(_universe));
-    }
-
-    @Override
     public B diverge() {
         AbstractKModel casted = (AbstractKModel) _manager.model();
         long nextKey = _manager.nextUniverseKey();
         B newUniverse = (B) casted.internalCreateUniverse(nextKey);
-        _manager.initUniverse(newUniverse, this);
+        _manager.initUniverse(nextKey, _universe);
         return newUniverse;
     }
 
     @Override
-    public List<B> descendants() {
-        long[] descendentsKey = _manager.descendantsUniverseKeys(_universe);
-        List<B> childs = new ArrayList<B>();
-        for (int i = 0; i < descendentsKey.length; i++) {
-            childs.add((B) _manager.model().universe(descendentsKey[i]));
-        }
-        return childs;
-    }
-
-    @Override
     public void lookupAllTimes(long uuid, long[] times, KCallback<KObject[]> cb) {
-        //TODO
-        throw new RuntimeException("Not implemented Yet !");
+        _manager.lookupAllTimes(_universe, times, uuid, cb);
     }
 
     @Override

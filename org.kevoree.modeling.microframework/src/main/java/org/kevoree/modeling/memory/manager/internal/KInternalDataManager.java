@@ -20,7 +20,7 @@ public interface KInternalDataManager extends KDataManager {
 
     void initKObject(KObject obj);
 
-    void initUniverse(KUniverse universe, KUniverse parent);
+    void initUniverse(long universe, long parent);
 
     long nextUniverseKey();
 
@@ -32,10 +32,6 @@ public interface KInternalDataManager extends KDataManager {
 
     //TODO clean these method
     KOperationManager operationManager();
-
-    long parentUniverseKey(long currentUniverseKey);
-
-    long[] descendantsUniverseKeys(long currentUniverseKey);
 
     void setModel(KModel model);
 

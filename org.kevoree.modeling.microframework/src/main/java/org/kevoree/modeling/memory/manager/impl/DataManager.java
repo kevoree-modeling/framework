@@ -18,8 +18,6 @@ import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.manager.KDataManager;
-import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
-import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.scheduler.KScheduler;
@@ -33,7 +31,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private final KOperationManager _operationManager;
     private final KContentDeliveryDriver _db;
     private final KScheduler _scheduler;
-    private KModel _model;
     private final ListenerManager _listenerManager;
     private final KeyCalculator _modelKeyCalculator;
     private final KResolver _resolver;
@@ -45,6 +42,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private boolean isConnected = false;
 
     private Short prefix;
+    private KModel _model;
 
     private static final int UNIVERSE_INDEX = 0;
     private static final int OBJ_INDEX = 1;
@@ -108,52 +106,10 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public final void initUniverse(KUniverse p_universe, KUniverse p_parent) {
+    public final void initUniverse(long p_universe, long p_parent) {
         KLongLongMap cached = (KLongLongMap) _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
-        if (cached != null && !cached.contains(p_universe.key())) {
-            if (p_parent == null) {
-                cached.put(p_universe.key(), p_universe.key());
-            } else {
-                cached.put(p_universe.key(), p_parent.key());
-            }
-        }
-    }
-
-    @Override
-    public long parentUniverseKey(long currentUniverseKey) {
-        KLongLongMap cached = (KLongLongMap) _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
-        if (cached != null) {
-            return cached.get(currentUniverseKey);
-        } else {
-            return KConfig.NULL_LONG;
-        }
-    }
-
-    @Override
-    public long[] descendantsUniverseKeys(final long currentUniverseKey) {
-        KLongLongMap cached = (KLongLongMap) _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
-        if (cached != null) {
-            final ArrayLongLongMap temp = new ArrayLongLongMap(-1, -1, -1, null);
-            cached.each(new KLongLongMapCallBack() {
-                @Override
-                public void on(long key, long value) {
-                    if (value == currentUniverseKey && key != currentUniverseKey) {
-                        temp.put(key, value);
-                    }
-                }
-            });
-            final long[] result = new long[temp.size()];
-            final int[] insertIndex = {0};
-            temp.each(new KLongLongMapCallBack() {
-                @Override
-                public void on(long key, long value) {
-                    result[insertIndex[0]] = key;
-                    insertIndex[0]++;
-                }
-            });
-            return result;
-        } else {
-            return new long[0];
+        if (cached != null && !cached.contains(p_universe)) {
+            cached.put(p_universe, p_parent);
         }
     }
 
@@ -317,11 +273,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         this._scheduler.dispatch(this._resolver.lookupAllTimes(universe, times, uuid, callback));
-    }
-
-    @Override
-    public void clear() {
-        //TODO
     }
 
     @Override

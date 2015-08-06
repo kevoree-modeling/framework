@@ -13,6 +13,7 @@ import java.util.List;
 
 public class UniverseTest {
 
+    /*
     @Test
     public void testCreation() {
         final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
@@ -34,7 +35,7 @@ public class UniverseTest {
                 }
             }
         });
-    }
+    }*/
 
     @Test
     public void testTimeWalker() {
