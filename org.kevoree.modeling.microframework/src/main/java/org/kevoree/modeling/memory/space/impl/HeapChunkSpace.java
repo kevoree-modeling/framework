@@ -15,7 +15,6 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.UnaryOperator;
 
 public class HeapChunkSpace implements KChunkSpace {
 

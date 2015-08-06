@@ -69,7 +69,7 @@
     </developers>
 
     <properties>
-        <java2typescript.plugin.version>36</java2typescript.plugin.version>
+        <java2typescript.plugin.version>37</java2typescript.plugin.version>
     </properties>
 
     <modules>
