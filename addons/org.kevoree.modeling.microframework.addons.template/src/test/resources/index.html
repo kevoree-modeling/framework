@@ -52,10 +52,12 @@
             var listener = model.universe(0).createListener();
             listener.listen(obj);
             listener.then(function (updatedObj) {
+                /*
                 model.lookup(updatedObj.universe(), updatedObj.now(), updatedObj.uuid(), function (e) {
                     viewContext.elem = e;
                     v.accessor.apply();
                 })
+                */
                 //v.runloop.deferOnce(inc);
             });
 
