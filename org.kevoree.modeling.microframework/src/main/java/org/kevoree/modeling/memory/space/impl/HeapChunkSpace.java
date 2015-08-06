@@ -148,46 +148,48 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     private KChunk internal_put(long universe, long time, long p_obj, KChunk payload) {
-        InternalState currentState;
-        InternalState nextState;
-        KChunk result;
-        int nbTry = 0;
-        do {
-            currentState = _state.get();
-            int entry = -1;
-            int index = -1;
-            int hash = (int) (universe ^ time ^ p_obj);
-            if (currentState.elementDataSize != 0) {
-                index = (hash & 0x7FFFFFFF) % currentState.elementDataSize;
-                entry = findNonNullKeyEntry(universe, time, p_obj, index, currentState);
-            }
-            if (entry == -1) {
-                int nextElementCount = currentState._elementCount.incrementAndGet();
-                if (nextElementCount > currentState._threshold) {
-                    nextState = rehashCapacity(currentState);
-                    index = (hash & 0x7FFFFFFF) % nextState.elementDataSize;
+        synchronized (lock) {
+            InternalState currentState;
+            InternalState nextState;
+            KChunk result;
+            int nbTry = 0;
+            do {
+                currentState = _state.get();
+                int entry = -1;
+                int index = -1;
+                int hash = (int) (universe ^ time ^ p_obj);
+                if (currentState.elementDataSize != 0) {
+                    index = (hash & 0x7FFFFFFF) % currentState.elementDataSize;
+                    entry = findNonNullKeyEntry(universe, time, p_obj, index, currentState);
+                }
+                if (entry == -1) {
+                    int nextElementCount = currentState._elementCount.incrementAndGet();
+                    if (nextElementCount > currentState._threshold) {
+                        nextState = rehashCapacity(currentState);
+                        index = (hash & 0x7FFFFFFF) % nextState.elementDataSize;
+                    } else {
+                        nextState = currentState;
+                    }
+                    int newIndex = (nextElementCount - 1 + nextState._droppedCount); //replace by atomicInteger
+                    nextState.elementK3[(newIndex * 3)] = universe;
+                    nextState.elementK3[((newIndex * 3) + 1)] = time;
+                    nextState.elementK3[((newIndex * 3) + 2)] = p_obj;
+                    nextState.values[newIndex] = payload;
+                    nextState.elementNext[newIndex] = nextState.elementHash[index];
+                    //now the object is reachable to other thread everything should be ready
+                    nextState.elementHash[index] = newIndex;
+                    result = payload;
                 } else {
                     nextState = currentState;
+                    result = nextState.values[entry];
                 }
-                int newIndex = (nextElementCount - 1 + nextState._droppedCount); //replace by atomicInteger
-                nextState.elementK3[(newIndex * 3)] = universe;
-                nextState.elementK3[((newIndex * 3) + 1)] = time;
-                nextState.elementK3[((newIndex * 3) + 2)] = p_obj;
-                nextState.values[newIndex] = payload;
-                nextState.elementNext[newIndex] = nextState.elementHash[index];
-                //now the object is reachable to other thread everything should be ready
-                nextState.elementHash[index] = newIndex;
-                result = payload;
-            } else {
-                nextState = currentState;
-                result = nextState.values[entry];
-            }
-            nbTry++;
-            if (nbTry == KConfig.CAS_MAX_TRY) {
-                throw new RuntimeException("CompareAndSwap error, failed to converge");
-            }
-        } while (!_state.compareAndSet(currentState, nextState));
-        return result;
+                nbTry++;
+                if (nbTry == KConfig.CAS_MAX_TRY) {
+                    throw new RuntimeException("CompareAndSwap error, failed to converge");
+                }
+            } while (!_state.compareAndSet(currentState, nextState));
+            return result;
+        }
     }
 
     private InternalState rehashCapacity(InternalState previousState) {
@@ -259,49 +261,53 @@ public class HeapChunkSpace implements KChunkSpace {
 
     }
 
+    private Object lock = new Object();
+
     @Override
     public void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
-        InternalState previousState;
-        int nbTry = 0;
-        do {
-            previousState = _state.get();
-            int hash = (int) (universe ^ time ^ obj);
-            int index = (hash & 0x7FFFFFFF) % previousState.elementDataSize;
-            if (previousState.elementDataSize == 0) {
-                return;
-            }
-            int m = previousState.elementHash[index];
-            int last = -1;
-            while (m >= 0) {
-                if (universe == previousState.elementK3[m * 3] && time == previousState.elementK3[(m * 3) + 1] && obj == previousState.elementK3[(m * 3) + 2]) {
-                    break;
+        synchronized (lock) {
+            InternalState previousState;
+            int nbTry = 0;
+            do {
+                previousState = _state.get();
+                int hash = (int) (universe ^ time ^ obj);
+                int index = (hash & 0x7FFFFFFF) % previousState.elementDataSize;
+                if (previousState.elementDataSize == 0) {
+                    return;
                 }
-                last = m;
-                m = previousState.elementNext[m];
-            }
-            if (m == -1) {
-                return;
-            }
-            if (last == -1) {
-                if (previousState.elementNext[m] != -1) {
-                    previousState.elementHash[index] = m;
+                int m = previousState.elementHash[index];
+                int last = -1;
+                while (m >= 0) {
+                    if (universe == previousState.elementK3[m * 3] && time == previousState.elementK3[(m * 3) + 1] && obj == previousState.elementK3[(m * 3) + 2]) {
+                        break;
+                    }
+                    last = m;
+                    m = previousState.elementNext[m];
+                }
+                if (m == -1) {
+                    return;
+                }
+                if (last == -1) {
+                    if (previousState.elementNext[m] != -1) {
+                        previousState.elementHash[index] = m;
+                    } else {
+                        previousState.elementHash[index] = -1;
+                    }
                 } else {
-                    previousState.elementHash[index] = -1;
+                    previousState.elementNext[last] = previousState.elementNext[m];
                 }
-            } else {
-                previousState.elementNext[last] = previousState.elementNext[m];
-            }
-            previousState.elementNext[m] = -1;//flag to dropped value
-            previousState.values[m].free(p_metaModel);
-            previousState.values[m] = null;
-            previousState._elementCount.decrementAndGet();
-            previousState._droppedCount++;
-            nbTry++;
-            if (nbTry == KConfig.CAS_MAX_TRY) {
-                throw new RuntimeException("CompareAndSwap error, failed to converge");
-            }
-        } while (!_state.compareAndSet(previousState, previousState));
+                previousState.elementNext[m] = -1;//flag to dropped value
+                previousState.values[m].free(p_metaModel);
+                previousState.values[m] = null;
+                previousState._elementCount.decrementAndGet();
+                previousState._droppedCount++;
+                nbTry++;
+                if (nbTry == KConfig.CAS_MAX_TRY) {
+                    throw new RuntimeException("CompareAndSwap error, failed to converge");
+                }
+            } while (!_state.compareAndSet(previousState, previousState));
 
+        }
     }
 
     @Override
