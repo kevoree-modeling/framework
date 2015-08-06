@@ -414,9 +414,15 @@ public class OffHeapChunkSpace implements KChunkSpace {
     @Override
     public void declareDirty(KChunk p_dirtyChunk) {
         long currentDirtiesAddr;
+        int nbTry = 0;
         do {
             currentDirtiesAddr = UNSAFE.getLong(this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR);
             internal_declareDirty(currentDirtiesAddr, p_dirtyChunk.universe(), p_dirtyChunk.time(), p_dirtyChunk.obj());
+
+            nbTry++;
+            if (nbTry == KConfig.CAS_MAX_TRY) {
+                throw new RuntimeException("CompareAndSwap error, failed to converge");
+            }
         } while (!UNSAFE.compareAndSwapLong(null,
                 this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, currentDirtiesAddr, currentDirtiesAddr));
     }
