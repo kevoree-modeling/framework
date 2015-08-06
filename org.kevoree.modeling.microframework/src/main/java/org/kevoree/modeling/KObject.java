@@ -11,27 +11,34 @@ import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 
 public interface KObject {
 
+    /** KObject identification */
     long universe();
 
     long now();
 
     long uuid();
 
-    void delete(KCallback cb);
+    KMetaClass metaClass();
 
-    void select(String query, KCallback<Object[]> cb);
-
+    /** Visitor, KTraversal and Jump strategies */
     void visitAttributes(KModelAttributeVisitor visitor);
 
     void visit(KModelVisitor visitor, KCallback cb);
 
-    KMetaClass metaClass();
+    KTraversal traversal();
 
+    void jump(long time, KCallback<KObject> callback);
+
+    /** Selector are untyped version of traversal */
+    void select(String query, KCallback<Object[]> cb);
+
+    /** Delete KObject */
+    void delete(KCallback cb);
+
+    /** Reflexive API */
     void mutate(KActionType actionType, KMetaReference metaReference, KObject param);
 
     void ref(KMetaReference metaReference, KCallback<KObject[]> cb);
-
-    KTraversal traversal();
 
     Object get(KMetaAttribute attribute);
 
@@ -43,11 +50,21 @@ public interface KObject {
 
     long[] getRefValuesByName(String refName);
 
+    /** Time related naviguation */
+    long timeDephasing();
+
+    void allTimes(KCallback<long[]> cb);
+
+    void timesBefore(long endOfSearch, KCallback<long[]> cb);
+
+    void timesAfter(long beginningOfSearch, KCallback<long[]> cb);
+
+    void timesBetween(long beginningOfSearch, long endOfSearch, KCallback<long[]> cb);
+
+    /** Bulk KObject management */
     String toJSON();
 
     boolean equals(Object other);
-
-    void jump(long time, KCallback<KObject> callback);
 
     KMetaReference[] referencesWith(KObject o);
 
@@ -55,14 +72,7 @@ public interface KObject {
 
     KDataManager manager();
 
-    long timeDephasing();
 
-    void allTimes(KCallback<long[]> cb);
 
-    void timesBefore(long endOfSearch,KCallback<long[]> cb);
-
-    void timesAfter(long beginningOfSearch,KCallback<long[]> cb);
-
-    void timesBetween(long beginningOfSearch,long endOfSearch,KCallback<long[]> cb);
 
 }
