@@ -11,6 +11,8 @@ import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.KMetaModel;
 import sun.misc.Unsafe;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * @ignore ts
  * OffHeap implementation of KChunkSpaceManager
@@ -21,7 +23,9 @@ import sun.misc.Unsafe;
 public class OffHeapChunkSpace implements KChunkSpace {
     private static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
-    protected volatile long _start_address;
+    // chunk spaces always have unique start addresses, that is why they can be used for compare and swap operations
+    // this isn't the case for chunks since several chunks can share the same start address
+    private AtomicLong _start_address = new AtomicLong(-1);
     private float loadFactor;
 
     // constants for off-heap memory layout
@@ -92,15 +96,15 @@ public class OffHeapChunkSpace implements KChunkSpace {
             setHash(address, i, -1);
         }
 
-        this._start_address = address;
+        this._start_address.set(address);
 
         // dirty list
         long dirtyListAddress = allocateDirties(KConfig.CACHE_INIT_SIZE);
         // link
-        UNSAFE.putLong(this._start_address + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, dirtyListAddress);
+        UNSAFE.putLong(this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, dirtyListAddress);
 
         int threshold = (int) (initialCapacity * this.loadFactor);
-        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
+        UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD, threshold);
     }
 
     private long allocateDirties(int length) {
@@ -168,24 +172,12 @@ public class OffHeapChunkSpace implements KChunkSpace {
         return UNSAFE.getShort(p_baseAddress + OFFSET_STARTADDRESS_BACK + (p_index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_TYPE));
     }
 
-    private void setDirtyListUniverse(long p_baseAddress, int p_index, long p_universe) {
-        UNSAFE.putLong(p_baseAddress + OFFSET_DIRTYLIST_ELEMS + (p_index * DIRTY_LIST_ENTRY_LEN + OFFSET_DIRTYLIST_UNIVERSE_KEY), p_universe);
-    }
-
     private long dirtyListUniverse(long p_baseAddress, int p_index) {
         return UNSAFE.getLong(p_baseAddress + OFFSET_DIRTYLIST_ELEMS + (p_index * DIRTY_LIST_ENTRY_LEN + OFFSET_DIRTYLIST_UNIVERSE_KEY));
     }
 
-    private void setDirtyListTime(long p_baseAddress, int p_index, long p_time) {
-        UNSAFE.putLong(p_baseAddress + OFFSET_DIRTYLIST_ELEMS + (p_index * DIRTY_LIST_ENTRY_LEN + OFFSET_DIRTYLIST_TIME_KEY), p_time);
-    }
-
     private long dirtyListTime(long p_baseAddress, int p_index) {
         return UNSAFE.getLong(p_baseAddress + OFFSET_DIRTYLIST_ELEMS + (p_index * DIRTY_LIST_ENTRY_LEN + OFFSET_DIRTYLIST_TIME_KEY));
-    }
-
-    private void setDirtyListObj(long p_baseAddress, int p_index, long p_obj) {
-        UNSAFE.putLong(p_baseAddress + OFFSET_DIRTYLIST_ELEMS + (p_index * DIRTY_LIST_ENTRY_LEN + OFFSET_DIRTYLIST_OBJ_KEY), p_obj);
     }
 
     private long dirtyListObj(long p_baseAddress, int p_index) {
@@ -213,11 +205,11 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     private void rehashCapacity(int p_capacity) {
         int length = (p_capacity == 0 ? 1 : p_capacity << 1);
-        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
         long bytes = BASE_SEGMENT_LEN + length * BACK_ELEM_ENTRY_LEN;
         long newAddress = UNSAFE.allocateMemory(bytes);
-        UNSAFE.copyMemory(this._start_address, newAddress, BASE_SEGMENT_LEN + elementDataSize * BACK_ELEM_ENTRY_LEN);
+        UNSAFE.copyMemory(this._start_address.get(), newAddress, BASE_SEGMENT_LEN + elementDataSize * BACK_ELEM_ENTRY_LEN);
 
         for (int i = 0; i < length; i++) {
             setNext(newAddress, i, -1);
@@ -237,27 +229,27 @@ public class OffHeapChunkSpace implements KChunkSpace {
         //setPrimitiveType value for all
         UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE, length);
 
-        long oldAddress = this._start_address;
-        this._start_address = newAddress;
+        long oldAddress = this._start_address.get();
+        this._start_address.set(newAddress);
         UNSAFE.freeMemory(oldAddress);
 
         int threshold = (int) (length * this.loadFactor);
-        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
+        UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD, threshold);
     }
 
     public final int getIndex(long p_universe, long p_time, long p_obj) {
-        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
         if (elementDataSize == 0) {
             return -1;
         }
         int index = (((int) (p_universe ^ p_time ^ p_obj)) & 0x7FFFFFFF) % elementDataSize;
-        int m = hash(this._start_address, index);
+        int m = hash(this._start_address.get(), index);
         while (m != -1) {
-            if (p_universe == universe(this._start_address, m) && p_time == time(this._start_address, m) && p_obj == obj(this._start_address, m)) {
+            if (p_universe == universe(this._start_address.get(), m) && p_time == time(this._start_address.get(), m) && p_obj == obj(this._start_address.get(), m)) {
                 return m;
             } else {
-                m = next(this._start_address, m);
+                m = next(this._start_address.get(), m);
             }
         }
         return -1;
@@ -265,18 +257,18 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     @Override
     public final KChunk get(long p_universe, long p_time, long p_obj) {
-        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
         if (elementDataSize == 0) {
             return null;
         }
         int index = (((int) (p_universe ^ p_time ^ p_obj)) & 0x7FFFFFFF) % elementDataSize;
-        int m = hash(this._start_address, index);
+        int m = hash(this._start_address.get(), index);
         while (m != -1) {
-            if (p_universe == universe(this._start_address, m) && p_time == time(this._start_address, m) && p_obj == obj(this._start_address, m)) {
-                return internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address, m); /* getValue */
+            if (p_universe == universe(this._start_address.get(), m) && p_time == time(this._start_address.get(), m) && p_obj == obj(this._start_address.get(), m)) {
+                return internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address.get(), m); /* getValue */
             } else {
-                m = next(this._start_address, m);
+                m = next(this._start_address.get(), m);
             }
         }
         return null;
@@ -292,9 +284,9 @@ public class OffHeapChunkSpace implements KChunkSpace {
     public final void notifyRealloc(long newAddress, long universe, long time, long obj) {
         int index = getIndex(universe, time, obj);
         if (index != -1) {
-            long currentAddress = valuePointer(this._start_address, index);
+            long currentAddress = valuePointer(this._start_address.get(), index);
             if (currentAddress != newAddress) {
-                setValuePointer(this._start_address, index, newAddress);
+                setValuePointer(this._start_address.get(), index, newAddress);
             }
         }
     }
@@ -329,67 +321,83 @@ public class OffHeapChunkSpace implements KChunkSpace {
         }
         KOffHeapChunk memoryElement = (KOffHeapChunk) p_payload;
 
-        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+        long currentState;
+        long nextState;
+        KChunk result;
+        int nbTry = 0;
+        do {
+            int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
-        int entry = -1;
-        int index = -1;
-        int hash = (int) (p_universe ^ p_time ^ p_obj);
-        if (elementDataSize != 0) {
-            index = (hash & 0x7FFFFFFF) % elementDataSize;
-            entry = findNonNullKeyEntry(p_universe, p_time, p_obj, index);
-        }
-        if (entry == -1) {
-            int oldElementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT);
-            int elementCount = oldElementCount + 1;
-            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT, elementCount);
-
-            int threshold = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD);
-            if (elementCount > threshold) {
-                rehashCapacity(elementDataSize);
+            currentState = this._start_address.get();
+            int entry = -1;
+            int index = -1;
+            int hash = (int) (p_universe ^ p_time ^ p_obj);
+            if (elementDataSize != 0) {
                 index = (hash & 0x7FFFFFFF) % elementDataSize;
+                entry = findNonNullKeyEntry(p_universe, p_time, p_obj, index);
             }
+            if (entry == -1) {
+                int oldElementCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT);
+                int elementCount = oldElementCount + 1;
+                UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT, elementCount);
 
-            int droppedCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
-            int newIndex = (elementCount - 1 + droppedCount);
+                int threshold = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD);
+                if (elementCount > threshold) {
+                    rehashCapacity(elementDataSize);
+                    nextState = this._start_address.get();
+                    index = (hash & 0x7FFFFFFF) % elementDataSize;
+                } else {
+                    nextState = currentState;
+                }
+                int droppedCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_DROPPED_COUNT);
+                int newIndex = (elementCount - 1 + droppedCount);
 
-            setUniverse(this._start_address, newIndex, p_universe);
-            setTime(this._start_address, newIndex, p_time);
-            setObj(this._start_address, newIndex, p_obj);
-            setValuePointer(this._start_address, newIndex, memoryElement.memoryAddress());
-            setType(this._start_address, newIndex, p_type);
+                setUniverse(this._start_address.get(), newIndex, p_universe);
+                setTime(this._start_address.get(), newIndex, p_time);
+                setObj(this._start_address.get(), newIndex, p_obj);
+                setValuePointer(this._start_address.get(), newIndex, memoryElement.memoryAddress());
+                setType(this._start_address.get(), newIndex, p_type);
 
-            setNext(this._start_address, newIndex, hash(this._start_address, index));
-            //now the object is reachable to other thread everything should be ready
-            setHash(this._start_address, index, newIndex);
-            return p_payload;
+                setNext(this._start_address.get(), newIndex, hash(this._start_address.get(), index));
+                //now the object is reachable to other thread everything should be ready
+                setHash(this._start_address.get(), index, newIndex);
+                result = p_payload;
 
-        } else {
-            return internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address, entry);
-        }
+            } else {
+                nextState = currentState;
+                result = internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address.get(), entry);
+            }
+            nbTry++;
+            if (nbTry == KConfig.CAS_MAX_TRY) {
+                throw new RuntimeException("CompareAndSwap error, failed to converge");
+            }
+        } while (!this._start_address.compareAndSet(currentState, nextState));
+
+        return result;
     }
 
     final int findNonNullKeyEntry(long p_universe, long p_time, long p_obj, int p_index) {
-        int m = hash(this._start_address, p_index);
+        int m = hash(this._start_address.get(), p_index);
         while (m >= 0) {
-            if (p_universe == universe(this._start_address, m)
-                    && p_time == time(this._start_address, m)
-                    && p_obj == obj(this._start_address, m)) {
+            if (p_universe == universe(this._start_address.get(), m)
+                    && p_time == time(this._start_address.get(), m)
+                    && p_obj == obj(this._start_address.get(), m)) {
                 return m;
             }
-            m = next(this._start_address, m);
+            m = next(this._start_address.get(), m);
         }
         return -1;
     }
 
     @Override
     public final int size() {
-        return UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT);
+        return UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT);
     }
 
     @Override
     public KChunkIterator detachDirties() {
         long newDirtiesAddr = allocateDirties(KConfig.CACHE_INIT_SIZE);
-        long detachedDirtiesAddr = UNSAFE.getAndSetLong(null, this._start_address + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, newDirtiesAddr);
+        long detachedDirtiesAddr = UNSAFE.getAndSetLong(null, this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, newDirtiesAddr);
 
         int maxIndex = UNSAFE.getInt(detachedDirtiesAddr + OFFSET_DIRTYLIST_INDEX);
         long[] shrinked = new long[maxIndex * 3];
@@ -408,10 +416,10 @@ public class OffHeapChunkSpace implements KChunkSpace {
     public void declareDirty(KChunk p_dirtyChunk) {
         long currentDirtiesAddr;
         do {
-            currentDirtiesAddr = UNSAFE.getLong(this._start_address + OFFSET_STARTADDRESS_DIRTY_LIST_PTR);
+            currentDirtiesAddr = UNSAFE.getLong(this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR);
             internal_declareDirty(currentDirtiesAddr, p_dirtyChunk.universe(), p_dirtyChunk.time(), p_dirtyChunk.obj());
         } while (!UNSAFE.compareAndSwapLong(null,
-                this._start_address + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, currentDirtiesAddr, currentDirtiesAddr));
+                this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, currentDirtiesAddr, currentDirtiesAddr));
     }
 
     private void internal_declareDirty(long p_dirtiesAddr, long p_universe, long p_time, long p_obj) {
@@ -428,8 +436,8 @@ public class OffHeapChunkSpace implements KChunkSpace {
                 long bytes = DIRTY_LIST_BASE_LEN + length * DIRTY_LIST_ENTRY_LEN;
                 UNSAFE.copyMemory(p_dirtiesAddr, newDirtiesAddr, bytes);
 
-                long oldDirtiesAddr = UNSAFE.getLong(this._start_address + OFFSET_STARTADDRESS_DIRTY_LIST_PTR);
-                UNSAFE.putLong(this._start_address + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, newDirtiesAddr);
+                long oldDirtiesAddr = UNSAFE.getLong(this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR);
+                UNSAFE.putLong(this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, newDirtiesAddr);
                 UNSAFE.freeMemory(oldDirtiesAddr);
 
                 setDirtyListElem(newDirtiesAddr, nextIndex, p_universe, p_time, p_obj);
@@ -439,60 +447,60 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     @Override
     public void remove(long p_universe, long p_time, long p_obj, KMetaModel p_metaModel) {
-        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
         int hash = (int) (p_universe ^ p_time ^ p_obj);
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
         if (elementDataSize == 0) {
             return;
         }
-        int m = hash(this._start_address, index);
+        int m = hash(this._start_address.get(), index);
         int last = -1;
         while (m >= 0) {
-            if (p_universe == universe(this._start_address, m) && p_time == time(this._start_address, m) && p_obj == obj(_start_address, m)) {
+            if (p_universe == universe(this._start_address.get(), m) && p_time == time(this._start_address.get(), m) && p_obj == obj(_start_address.get(), m)) {
                 break;
             }
             last = m;
-            m = next(this._start_address, m);
+            m = next(this._start_address.get(), m);
         }
         if (m == -1) {
             return;
         }
         if (last == -1) {
-            if (next(this._start_address, m) != -1) {
-                setHash(this._start_address, index, m);
+            if (next(this._start_address.get(), m) != -1) {
+                setHash(this._start_address.get(), index, m);
             } else {
-                setHash(this._start_address, index, -1);
+                setHash(this._start_address.get(), index, -1);
             }
         } else {
-            setNext(this._start_address, last, next(this._start_address, m));
+            setNext(this._start_address.get(), last, next(this._start_address.get(), m));
         }
-        setNext(this._start_address, m, -1);//flag to dropped value
-        internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address, m).free(p_metaModel);
-        setValuePointer(this._start_address, m, 0);
+        setNext(this._start_address.get(), m, -1);//flag to dropped value
+        internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address.get(), m).free(p_metaModel);
+        setValuePointer(this._start_address.get(), m, 0);
 
-        int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT);
-        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT, elementCount - 1);
-        int droppedCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
-        UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT, droppedCount + 1);
+        int elementCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT);
+        UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT, elementCount - 1);
+        int droppedCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_DROPPED_COUNT);
+        UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_DROPPED_COUNT, droppedCount + 1);
 
-        int threshold = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD);
+        int threshold = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD);
         if (droppedCount > threshold * this.loadFactor) {
             compact();
         }
     }
 
     private void compact() {
-        int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT);
-        int droppedCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_DROPPED_COUNT);
+        int elementCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT);
+        int droppedCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_DROPPED_COUNT);
 
         if (droppedCount > 0) {
             int length = (elementCount == 0 ? 1 : elementCount << 1); //take the next size of element count
-            int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+            int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
             long bytes = BASE_SEGMENT_LEN + length * BACK_ELEM_ENTRY_LEN;
             long newAddress = UNSAFE.allocateMemory(bytes);
-            UNSAFE.copyMemory(this._start_address, newAddress, BASE_SEGMENT_LEN);
+            UNSAFE.copyMemory(this._start_address.get(), newAddress, BASE_SEGMENT_LEN);
 
             int currentIndex = 0;
             for (int i = 0; i < length; i++) {
@@ -501,13 +509,13 @@ public class OffHeapChunkSpace implements KChunkSpace {
             }
 
             for (int i = 0; i < elementDataSize; i++) {
-                if (valuePointer(this._start_address, i) != 0) {
-                    long l_uni = universe(this._start_address, i);
-                    long l_time = time(this._start_address, i);
-                    long l_obj = obj(this._start_address, i);
-                    short l_type = type(this._start_address, i);
+                if (valuePointer(this._start_address.get(), i) != 0) {
+                    long l_uni = universe(this._start_address.get(), i);
+                    long l_time = time(this._start_address.get(), i);
+                    long l_obj = obj(this._start_address.get(), i);
+                    short l_type = type(this._start_address.get(), i);
 
-                    KOffHeapChunk loopElement = internal_getMemoryElement(l_uni, l_time, l_obj, this._start_address, i);
+                    KOffHeapChunk loopElement = internal_getMemoryElement(l_uni, l_time, l_obj, this._start_address.get(), i);
 
                     setValuePointer(newAddress, currentIndex, loopElement.memoryAddress());
                     setUniverse(newAddress, currentIndex, l_uni);
@@ -528,28 +536,28 @@ public class OffHeapChunkSpace implements KChunkSpace {
             UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEMENT_COUNT, currentIndex);
             UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
 
-            long oldAddress = this._start_address;
-            this._start_address = newAddress;
+            long oldAddress = this._start_address.get();
+            this._start_address.set(newAddress);
             UNSAFE.freeMemory(oldAddress);
 
             int threshold = (int) (length * this.loadFactor);
-            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
+            UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD, threshold);
         }
     }
 
     @Override
     public final void clear(KMetaModel p_metaModel) {
-        int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_COUNT);
+        int elementCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT);
 
         if (elementCount > 0) {
-            int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+            int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
             for (int i = 0; i < elementDataSize; i++) {
-                if (valuePointer(this._start_address, i) != 0) {
-                    long universe = universe(this._start_address, i);
-                    long time = time(this._start_address, i);
-                    long obj = obj(this._start_address, i);
-                    internal_getMemoryElement(universe, time, obj, this._start_address, i).free(p_metaModel);
+                if (valuePointer(this._start_address.get(), i) != 0) {
+                    long universe = universe(this._start_address.get(), i);
+                    long time = time(this._start_address.get(), i);
+                    long obj = obj(this._start_address.get(), i);
+                    internal_getMemoryElement(universe, time, obj, this._start_address.get(), i).free(p_metaModel);
                 }
             }
             int initialCapacity = KConfig.CACHE_INIT_SIZE;
@@ -565,12 +573,12 @@ public class OffHeapChunkSpace implements KChunkSpace {
                 setHash(newAddress, i, -1);
             }
 
-            long oldAddress = this._start_address;
-            this._start_address = newAddress;
+            long oldAddress = this._start_address.get();
+            this._start_address.set(newAddress);
             UNSAFE.freeMemory(oldAddress);
 
             int threshold = (int) (elementDataSize * loadFactor);
-            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
+            UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD, threshold);
 
         }
     }
@@ -578,10 +586,10 @@ public class OffHeapChunkSpace implements KChunkSpace {
     @Override
     public void delete(KMetaModel p_metaModel) {
         // TODO this method is not thread-safe
-        int elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+        int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 
-        long oldAddress = this._start_address;
-        this._start_address = -1; //this object should not be used anymore
+        long oldAddress = this._start_address.get();
+        this._start_address.set(-1); //this object should not be used anymore
 
         for (int i = 0; i < elementDataSize; i++) {
             if (valuePointer(oldAddress, i) != 0) {
