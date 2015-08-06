@@ -2,6 +2,8 @@ package org.kevoree.modeling;
 
 public class KConfig {
 
+    public static final int CAS_MAX_TRY = 1000;
+
     public static final int CALLBACK_HISTORY = 1000;
 
     // Limit long lengths to 53 bits because of JS limitation
