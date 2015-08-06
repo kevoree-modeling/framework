@@ -27,9 +27,9 @@ public class ChunkIterator implements KChunkIterator {
     public KChunk next() {
         KChunk current = null;
         if (currentIndex < maxIndex) {
-            current = _origin.get(_dirties[currentIndex], _dirties[currentIndex + 1], _dirties[currentIndex + 2]);
+            current = _origin.get(_dirties[currentIndex*3], _dirties[currentIndex*3 + 1], _dirties[currentIndex*3 + 2]);
         }
-        this.currentIndex = this.currentIndex + 3;
+        this.currentIndex++;
         return current;
     }
 
