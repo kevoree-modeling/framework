@@ -14,6 +14,8 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
 
 public class HeapChunkSpace implements KChunkSpace {
 
@@ -27,7 +29,9 @@ public class HeapChunkSpace implements KChunkSpace {
 
     private float _loadFactor;
 
-    private class InternalState {
+    private final AtomicReference<InternalDirtyState> dirtyState;
+
+    private final class InternalState {
 
         public final int elementDataSize;
 
@@ -48,9 +52,46 @@ public class HeapChunkSpace implements KChunkSpace {
         }
     }
 
+    private final class InternalDirtyState {
+
+        public volatile long[] _dirtyList;
+
+        public final AtomicInteger _dirtyIndex;
+
+        public InternalDirtyState() {
+            this._dirtyList = new long[KConfig.CACHE_INIT_SIZE * 3];
+            this._dirtyIndex = new AtomicInteger(0);
+        }
+
+        public void declareDirty(long universe, long time, long obj) {
+            int nextIndex = this._dirtyIndex.getAndIncrement() * 3;
+            //simple case
+            if (nextIndex + 2 < this._dirtyList.length) {
+                this._dirtyList[nextIndex] = universe;
+                this._dirtyList[nextIndex + 1] = time;
+                this._dirtyList[nextIndex + 2] = obj;
+            } else {
+                reallocate(nextIndex);
+                this._dirtyList[nextIndex] = universe;
+                this._dirtyList[nextIndex + 1] = time;
+                this._dirtyList[nextIndex + 2] = obj;
+            }
+        }
+
+        private synchronized void reallocate(int wantedIndex) {
+            if (wantedIndex + 2 >= this._dirtyList.length) {
+                int newlength = wantedIndex << 1;
+                long[] previousList = this._dirtyList;
+                this._dirtyList = new long[newlength];
+                System.arraycopy(previousList, 0, this._dirtyList, 0, wantedIndex);
+            }
+        }
+
+    }
+
     public HeapChunkSpace() {
-        _dirtyList = new int[KConfig.CACHE_INIT_SIZE];
-        _dirtyListIndex = new AtomicInteger(0);
+        dirtyState = new AtomicReference<InternalDirtyState>();
+        dirtyState.set(new InternalDirtyState());
         int initialCapacity = KConfig.CACHE_INIT_SIZE;
         this._loadFactor = KConfig.CACHE_LOAD_FACTOR;
         this._elementCount = 0;
@@ -177,54 +218,22 @@ public class HeapChunkSpace implements KChunkSpace {
         return this._elementCount;
     }
 
-    private class InternalDirtyState {
-
-        public final long[] dirtyList;
-
-        public final AtomicInteger dirtyIndex;
-
-        public InternalDirtyState() {
-            dirtyList = new long[KConfig.CACHE_INIT_SIZE * 3];
-            dirtyIndex = new AtomicInteger(0);
-        }
-
-    }
-
-    private InternalDirtyState dirtyState = new InternalDirtyState();
-
     @Override
     public KChunkIterator detachDirties() {
-        int[] indexDirties = _dirtyList;
-        int currentIndex = _dirtyListIndex.getAndSet(0);
-        //TODO this is not thread safe!
-        _dirtyListIndex.set(0);
-        _dirtyList = new int[KConfig.CACHE_INIT_SIZE];
-        return new ChunkIterator(indexDirties, currentIndex, this._state.values);
+        InternalDirtyState detachedState = dirtyState.getAndSet(new InternalDirtyState());
+        int maxIndex = detachedState._dirtyIndex.get();
+        long[] shrinked = new long[maxIndex * 3];
+        System.arraycopy(detachedState._dirtyList, 0, shrinked, 0, maxIndex * 3);
+        return new ChunkIterator(shrinked, this);
     }
 
     @Override
     public void declareDirty(KChunk dirtyChunk) {
-        //TODO this is not thread safe!
-        InternalState currentState = _state;
-        int entry = -1;
-        long universe = dirtyChunk.universe();
-        long time = dirtyChunk.time();
-        long obj = dirtyChunk.obj();
-        int hash = (int) (universe ^ time ^ obj);
-        if (currentState.elementDataSize != 0) {
-            int index = (hash & 0x7FFFFFFF) % currentState.elementDataSize;
-            entry = findNonNullKeyEntry(universe, time, obj, index, _state);
-        }
-        if (entry != -1) {
-            int currentIndex = _dirtyListIndex.getAndIncrement();
-            if (currentIndex >= this._dirtyList.length) {
-                int newlength = currentIndex << 1;
-                int[] previousList = this._dirtyList;
-                this._dirtyList = new int[newlength];
-                System.arraycopy(previousList, 0, this._dirtyList, 0, currentIndex);
-            }
-            this._dirtyList[currentIndex] = entry;
-        }
+        InternalDirtyState current;
+        do {
+            current = dirtyState.get();
+            current.declareDirty(dirtyChunk.universe(), dirtyChunk.time(), dirtyChunk.obj());
+        } while (!dirtyState.compareAndSet(current, current));
     }
 
     @Override
