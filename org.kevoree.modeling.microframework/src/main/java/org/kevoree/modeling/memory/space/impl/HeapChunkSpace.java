@@ -183,10 +183,10 @@ public class HeapChunkSpace implements KChunkSpace {
                 result = nextState.values[entry];
             }
             nbTry++;
-        } while (!_state.compareAndSet(currentState, nextState) && nbTry < KConfig.CAS_MAX_TRY);
-        if (nbTry == KConfig.CAS_MAX_TRY) {
-            throw new RuntimeException("CompareAndSwap error, failed to converge");
-        }
+            if (nbTry == KConfig.CAS_MAX_TRY) {
+                throw new RuntimeException("CompareAndSwap error, failed to converge");
+            }
+        } while (!_state.compareAndSet(currentState, nextState));
         return result;
     }
 
@@ -252,10 +252,11 @@ public class HeapChunkSpace implements KChunkSpace {
             current = _dirtyState.get();
             current.declareDirty(dirtyChunk.universe(), dirtyChunk.time(), dirtyChunk.obj());
             nbTry++;
-        } while (!_dirtyState.compareAndSet(current, current) && nbTry < KConfig.CAS_MAX_TRY);
-        if (nbTry == KConfig.CAS_MAX_TRY) {
-            throw new RuntimeException("CompareAndSwap error, failed to converge");
-        }
+            if (nbTry == KConfig.CAS_MAX_TRY) {
+                throw new RuntimeException("CompareAndSwap error, failed to converge");
+            }
+        } while (!_dirtyState.compareAndSet(current, current));
+
     }
 
     @Override
@@ -296,10 +297,11 @@ public class HeapChunkSpace implements KChunkSpace {
             previousState._elementCount.decrementAndGet();
             previousState._droppedCount++;
             nbTry++;
-        } while (!_state.compareAndSet(previousState, previousState) && nbTry < KConfig.CAS_MAX_TRY);
-        if (nbTry == KConfig.CAS_MAX_TRY) {
-            throw new RuntimeException("CompareAndSwap error, failed to converge");
-        }
+            if (nbTry == KConfig.CAS_MAX_TRY) {
+                throw new RuntimeException("CompareAndSwap error, failed to converge");
+            }
+        } while (!_state.compareAndSet(previousState, previousState));
+
     }
 
     private void compact() {
@@ -342,10 +344,10 @@ public class HeapChunkSpace implements KChunkSpace {
                 compactedState._droppedCount = 0;
                 compactedState._threshold = (int) (length * LOAD_FACTOR);
                 nbTry++;
-            } while (!_state.compareAndSet(previousState, compactedState) && nbTry < KConfig.CAS_MAX_TRY);
-            if (nbTry == KConfig.CAS_MAX_TRY) {
-                throw new RuntimeException("CompareAndSwap error, failed to converge");
-            }
+                if (nbTry == KConfig.CAS_MAX_TRY) {
+                    throw new RuntimeException("CompareAndSwap error, failed to converge");
+                }
+            } while (!_state.compareAndSet(previousState, compactedState));
         }
     }
 
