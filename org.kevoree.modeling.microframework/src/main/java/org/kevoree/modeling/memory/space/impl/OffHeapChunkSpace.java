@@ -499,7 +499,6 @@ public class OffHeapChunkSpace implements KChunkSpace {
         } while (!this._start_address.compareAndSet(previousState, previousState));
     }
 
-    @Override
     public void compact() {
         long previousState;
         long compactedState;
