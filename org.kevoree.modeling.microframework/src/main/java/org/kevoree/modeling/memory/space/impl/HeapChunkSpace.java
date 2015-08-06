@@ -304,7 +304,8 @@ public class HeapChunkSpace implements KChunkSpace {
 
     }
 
-    private void compact() {
+    @Override
+    public void compact() {
         InternalState previousState = _state.get();
         InternalState compactedState;
         if (previousState._droppedCount > 0) {

@@ -37,4 +37,6 @@ public interface KInternalDataManager extends KDataManager {
 
     void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback);
 
+    int spaceSize();
+
 }

@@ -17,9 +17,6 @@ import org.kevoree.modeling.meta.impl.MetaModel;
 
 import java.util.Random;
 
-/**
- * Created by assaad on 15/07/15.
- */
 public class BinaryPerceptronTest {
     private KMetaModel createMetaModel() {
         KMetaModel metaModel = new MetaModel("PerceptronClassificationTestMM");

@@ -24,4 +24,6 @@ public interface KChunkSpace {
 
     void declareDirty(KChunk dirtyChunk);
 
+    void compact();
+
 }

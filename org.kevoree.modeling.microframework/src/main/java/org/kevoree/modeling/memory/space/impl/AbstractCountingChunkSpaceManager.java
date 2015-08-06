@@ -9,7 +9,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceManager {
 
-    private KChunkSpace _space;
+    protected KChunkSpace _space;
 
     public AbstractCountingChunkSpaceManager(KChunkSpace p_storage) {
         this._space = p_storage;
@@ -74,5 +74,5 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     abstract public void register(KObject object);
 
     abstract public void registerAll(KObject[] objects);
-    
+
 }

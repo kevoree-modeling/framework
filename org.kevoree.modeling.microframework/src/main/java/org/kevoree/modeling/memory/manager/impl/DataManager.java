@@ -377,4 +377,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
     public void resolveTimes(long currentUniverse, long currentUuid, long startTime, long endTime, KCallback<long[]> callback) {
         _resolver.resolveTimes(currentUniverse, currentUuid, startTime, endTime, callback);
     }
+
+    @Override
+    public int spaceSize() {
+        return _space.size();
+    }
 }
