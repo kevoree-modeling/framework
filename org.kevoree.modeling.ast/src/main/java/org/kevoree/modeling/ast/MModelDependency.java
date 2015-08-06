@@ -10,9 +10,13 @@ public class MModelDependency {
         return index;
     }
 
-    public MModelDependency(String name, MModelClass type, int index) {
+    public MModelDependency(String name, MModelClass type) {
         this.name = name;
         this.type = type;
+
+    }
+
+    public void setIndex(int index) {
         this.index = index;
     }
 
@@ -25,7 +29,9 @@ public class MModelDependency {
     }
 
     public MModelDependency clone() {
-        return new MModelDependency(this.name, this.type, this.index);
+        MModelDependency clone = new MModelDependency(this.name, this.type);
+        clone.index = index;
+        return clone;
     }
 
 }

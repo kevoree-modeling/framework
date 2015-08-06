@@ -11,10 +11,9 @@ public class MModelAttribute {
         return index;
     }
 
-    public MModelAttribute(String name, String type, int index) {
+    public MModelAttribute(String name, String type) {
         this.name = name;
         this.type = type;
-        this.index = index;
     }
 
     public String getName() {
@@ -33,8 +32,13 @@ public class MModelAttribute {
         this.precision = precision;
     }
 
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     public MModelAttribute clone() {
-        MModelAttribute cloned = new MModelAttribute(this.name, this.type, this.index);
+        MModelAttribute cloned = new MModelAttribute(this.name, this.type);
+        cloned.setIndex(index);
         cloned.precision = precision;
         return cloned;
     }

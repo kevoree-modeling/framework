@@ -88,28 +88,7 @@ public class ProcessorHelper {
         }
     }
 
-    /*
-    public void consolidate(MModel createModel) {
-        for (MModelClass decl : createModel.getClasses()) {
-            internal_consolidate(decl);
-        }
-    }
 
-    private void internal_consolidate(MModelClass classRelDecls) {
-        int globalIndex = 0;
-        for (MModelAttribute att : classRelDecls.getAttributes()) {
-            att.setIndex(globalIndex);
-            globalIndex++;
-        }
-        for (MModelReference ref : classRelDecls.getReferences()) {
-            ref.setIndex(globalIndex);
-            globalIndex++;
-        }
-        for (MModelOperation op : classRelDecls.getOperations()) {
-            op.setIndex(globalIndex);
-            globalIndex++;
-        }
-    }*/
 
     public String toCamelCase(String ref) {
         return ref.substring(0, 1).toUpperCase() + ref.substring(1);

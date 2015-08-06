@@ -183,8 +183,7 @@ public class MModel {
                     } else {
                         value = attType.getText();
                     }
-                    final MModelAttribute attribute = new MModelAttribute(name, value, newClass.globalIndex);
-                    newClass.globalIndex++;
+                    final MModelAttribute attribute = new MModelAttribute(name, value);
                     for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : attDecl.annotationDeclr()) {
                         if (annotDecl.IDENT().getText().toLowerCase().equals("precision") && annotDecl.NUMBER() != null) {
                             attribute.setPrecision(Double.parseDouble(annotDecl.NUMBER().getText()));
@@ -194,8 +193,7 @@ public class MModel {
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.ReferenceDeclarationContext refDecl : classDeclrContext.referenceDeclaration()) {
                     final MModelClass refType = model.getOrAddClass(refDecl.TYPE_NAME().getText());
-                    MModelReference reference = new MModelReference(refDecl.IDENT().getText(), refType, newClass.globalIndex);
-                    newClass.globalIndex++;
+                    MModelReference reference = model.getOrAddReference(newClass, refDecl.IDENT().getText(), refType);
                     if (refDecl.getText().trim().startsWith("ref*")) {
                         reference.setSingle(false);
                     }
@@ -211,13 +209,11 @@ public class MModel {
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.DependencyDeclarationContext dependencyDeclarationContext : classDeclrContext.dependencyDeclaration()) {
                     final MModelClass depType = model.getOrAddClass(dependencyDeclarationContext.TYPE_NAME().getText());
-                    MModelDependency dependency = new MModelDependency(dependencyDeclarationContext.IDENT().getText(), depType, newClass.globalIndex);
-                    newClass.globalIndex++;
+                    MModelDependency dependency = new MModelDependency(dependencyDeclarationContext.IDENT().getText(), depType);
                     newClass.addDependency(dependency);
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.InputDeclarationContext inputDeclarationContext : classDeclrContext.inputDeclaration()) {
-                    MModelInput input = new MModelInput(inputDeclarationContext.IDENT().getText(), cleanString(inputDeclarationContext.STRING().getText()), newClass.globalIndex);
-                    newClass.globalIndex++;
+                    MModelInput input = new MModelInput(inputDeclarationContext.IDENT().getText(), cleanString(inputDeclarationContext.STRING().getText()));
                     newClass.addInput(input);
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.OutputDeclarationContext outputDeclarationContext : classDeclrContext.outputDeclaration()) {
@@ -228,8 +224,7 @@ public class MModel {
                     } else {
                         typeName = attType.getText();
                     }
-                    MModelOutput output = new MModelOutput(outputDeclarationContext.IDENT().getText(), typeName, newClass.globalIndex);
-                    newClass.globalIndex++;
+                    MModelOutput output = new MModelOutput(outputDeclarationContext.IDENT().getText(), typeName);
                     newClass.addOutput(output);
                 }
                 if (classDeclrContext.classParentDeclr() != null) {
@@ -254,6 +249,7 @@ public class MModel {
         }
         //opposite completion
         model.completeOppositeReferences();
+        model.consolidateIndexes();
         return model;
     }
 
@@ -267,8 +263,7 @@ public class MModel {
                 return registeredRef;
             }
         }
-        MModelReference reference = new MModelReference(refName, refType, owner.globalIndex);
-        owner.globalIndex++;
+        MModelReference reference = new MModelReference(refName, refType);
         owner.addReference(reference);
         return reference;
     }
@@ -314,8 +309,8 @@ public class MModel {
             for (MModelReference ref : classDecl.getReferences().toArray(new MModelReference[classDecl.getReferences().size()])) {
                 if (ref.getOpposite() == null) {
                     //Create opposite relation
-                    MModelReference op_ref = new MModelReference("op_" + classDecl.getName() + "_" + ref.getName(), classDecl, classDecl.globalIndex);
-                    classDecl.globalIndex++;
+
+                    MModelReference op_ref = getOrAddReference(ref.getType(), "op_" + classDecl.getName() + "_" + ref.getName(), classDecl);
                     op_ref.setVisible(false);
                     op_ref.setSingle(false);
                     op_ref.setOpposite(ref.getName());
@@ -325,6 +320,40 @@ public class MModel {
                     ref.setOpposite(op_ref.getName());
                 }
             }
+        }
+    }
+
+    public void consolidateIndexes() {
+        for (MModelClass decl : getClasses()) {
+            internal_consolidate(decl);
+        }
+    }
+
+    private void internal_consolidate(MModelClass classRelDecls) {
+        int globalIndex = 0;
+        for (MModelAttribute att : classRelDecls.getAttributes()) {
+            att.setIndex(globalIndex);
+            globalIndex++;
+        }
+        for (MModelReference ref : classRelDecls.getReferences()) {
+            ref.setIndex(globalIndex);
+            globalIndex++;
+        }
+        for (MModelOperation op : classRelDecls.getOperations()) {
+            op.setIndex(globalIndex);
+            globalIndex++;
+        }
+        for (MModelInput inp : classRelDecls.getInputs()) {
+            inp.setIndex(globalIndex);
+            globalIndex++;
+        }
+        for (MModelOutput out : classRelDecls.getOutputs()) {
+            out.setIndex(globalIndex);
+            globalIndex++;
+        }
+        for (MModelDependency dep : classRelDecls.getDependencies()) {
+            dep.setIndex(globalIndex);
+            globalIndex++;
         }
     }
 

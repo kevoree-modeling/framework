@@ -35,6 +35,7 @@ public class MModelOperation {
 
     public MModelOperation clone() {
         MModelOperation cloned = new MModelOperation(this.name);
+        cloned.index = index;
         cloned.inputParams = inputParams;
         cloned.returnParam = returnParam;
         return cloned;

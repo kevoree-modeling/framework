@@ -4,7 +4,7 @@ import java.util.*;
 
 public class MModelClass extends MModelClassifier {
 
-    public int globalIndex = 0;
+    //public int globalIndex = 0;
 
     private Map<String, MModelAttribute> attributes = new HashMap<String, MModelAttribute>();
     private Map<String, MModelReference> references = new HashMap<String, MModelReference>();

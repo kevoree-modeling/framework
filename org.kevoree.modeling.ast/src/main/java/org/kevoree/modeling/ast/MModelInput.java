@@ -10,10 +10,9 @@ public class MModelInput {
         return index;
     }
 
-    public MModelInput(String name, String extractor, int index) {
+    public MModelInput(String name, String extractor) {
         this.name = name;
         this.extractor = extractor;
-        this.index = index;
     }
 
     public String getName() {
@@ -24,8 +23,14 @@ public class MModelInput {
         return extractor;
     }
 
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     public MModelInput clone() {
-        return new MModelInput(this.name, this.extractor, this.index);
+        MModelInput clone = new MModelInput(this.name, this.extractor);
+        clone.index = index;
+        return clone;
     }
 
 }
