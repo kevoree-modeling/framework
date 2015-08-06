@@ -25,7 +25,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     // chunk spaces always have unique start addresses, that is why they can be used for compare and swap operations
     // this isn't the case for chunks since several chunks can share the same start address
-    private AtomicLong _start_address = new AtomicLong(-1);
+    private final AtomicLong _start_address;
     private float loadFactor;
 
     // constants for off-heap memory layout
@@ -76,6 +76,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
 
     public OffHeapChunkSpace() {
+        this._start_address = new AtomicLong(0);
         allocate();
     }
 
@@ -447,47 +448,51 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     @Override
     public void remove(long p_universe, long p_time, long p_obj, KMetaModel p_metaModel) {
-        int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+        long previousState;
+        int nbTry = 0;
 
-        int hash = (int) (p_universe ^ p_time ^ p_obj);
-        int index = (hash & 0x7FFFFFFF) % elementDataSize;
-        if (elementDataSize == 0) {
-            return;
-        }
-        int m = hash(this._start_address.get(), index);
-        int last = -1;
-        while (m >= 0) {
-            if (p_universe == universe(this._start_address.get(), m) && p_time == time(this._start_address.get(), m) && p_obj == obj(_start_address.get(), m)) {
-                break;
+        do {
+            previousState = this._start_address.get();
+
+            int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+            int hash = (int) (p_universe ^ p_time ^ p_obj);
+            int index = (hash & 0x7FFFFFFF) % elementDataSize;
+            if (elementDataSize == 0) {
+                return;
             }
-            last = m;
-            m = next(this._start_address.get(), m);
-        }
-        if (m == -1) {
-            return;
-        }
-        if (last == -1) {
-            if (next(this._start_address.get(), m) != -1) {
-                setHash(this._start_address.get(), index, m);
+            int m = hash(this._start_address.get(), index);
+            int last = -1;
+            while (m >= 0) {
+                if (p_universe == universe(this._start_address.get(), m) && p_time == time(this._start_address.get(), m) && p_obj == obj(_start_address.get(), m)) {
+                    break;
+                }
+                last = m;
+                m = next(this._start_address.get(), m);
+            }
+            if (m == -1) {
+                return;
+            }
+            if (last == -1) {
+                if (next(this._start_address.get(), m) != -1) {
+                    setHash(this._start_address.get(), index, m);
+                } else {
+                    setHash(this._start_address.get(), index, -1);
+                }
             } else {
-                setHash(this._start_address.get(), index, -1);
+                setNext(this._start_address.get(), last, next(this._start_address.get(), m));
             }
-        } else {
-            setNext(this._start_address.get(), last, next(this._start_address.get(), m));
-        }
-        setNext(this._start_address.get(), m, -1);//flag to dropped value
-        internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address.get(), m).free(p_metaModel);
-        setValuePointer(this._start_address.get(), m, 0);
+            setNext(this._start_address.get(), m, -1);//flag to dropped value
+            internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address.get(), m).free(p_metaModel);
+            setValuePointer(this._start_address.get(), m, 0);
 
-        int elementCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT);
-        UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT, elementCount - 1);
-        int droppedCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_DROPPED_COUNT);
-        UNSAFE.putInt(this._start_address.get() + OFFSET_STARTADDRESS_DROPPED_COUNT, droppedCount + 1);
+            UNSAFE.getAndAddInt(null, this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT, -1);
+            UNSAFE.getAndAddInt(null, this._start_address.get() + OFFSET_STARTADDRESS_DROPPED_COUNT, +1);
 
-        int threshold = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD);
-        if (droppedCount > threshold * this.loadFactor) {
-            compact();
-        }
+            nbTry++;
+            if (nbTry == KConfig.CAS_MAX_TRY) {
+                throw new RuntimeException("CompareAndSwap error, failed to converge");
+            }
+        } while (!this._start_address.compareAndSet(previousState, previousState));
     }
 
     private void compact() {
