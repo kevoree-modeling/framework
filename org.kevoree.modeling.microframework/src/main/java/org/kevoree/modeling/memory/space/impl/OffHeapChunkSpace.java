@@ -501,7 +501,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
     @Override
     public void compact() {
-        long previousState = this._start_address.get();
+        long previousState;
         long compactedState;
 
         int droppedCount = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_DROPPED_COUNT);

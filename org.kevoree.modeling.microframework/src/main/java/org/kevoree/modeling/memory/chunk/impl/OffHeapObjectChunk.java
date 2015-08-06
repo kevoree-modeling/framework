@@ -802,26 +802,12 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final int inc() {
-        int val;
-        int nval;
-        do {
-            val = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
-            nval = val + 1;
-        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_COUNTER, val, nval));
-
-        return nval;
+        return UNSAFE.getAndAddInt(null, this._start_address + OFFSET_COUNTER, +1) + 1;
     }
 
     @Override
     public final int dec() {
-        int val;
-        int nval;
-        do {
-            val = UNSAFE.getInt(this._start_address + OFFSET_COUNTER);
-            nval = val - 1;
-        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_COUNTER, val, nval));
-
-        return nval;
+        return UNSAFE.getAndAddInt(null, this._start_address + OFFSET_COUNTER, -1) - 1;
     }
 
     @Override
@@ -936,9 +922,9 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final void setMemoryAddress(long p_address) {
-        _start_address = p_address;
+        this._start_address = p_address;
         if (this._space != null) {
-            this._space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
+            this._space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
         }
     }
 

@@ -379,26 +379,12 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
 
     @Override
     public final int inc() {
-        int val;
-        int nval;
-        do {
-            val = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
-            nval = val + 1;
-        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_STARTADDRESS_COUNTER, val, nval));
-
-        return nval;
+        return UNSAFE.getAndAddInt(null, this._start_address + OFFSET_STARTADDRESS_COUNTER, +1) + 1;
     }
 
     @Override
     public final int dec() {
-        int val;
-        int nval;
-        do {
-            val = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_COUNTER);
-            nval = val - 1;
-        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_STARTADDRESS_COUNTER, val, nval));
-
-        return nval;
+        return UNSAFE.getAndAddInt(null, this._start_address + OFFSET_STARTADDRESS_COUNTER, -1) - 1;
     }
 
 
