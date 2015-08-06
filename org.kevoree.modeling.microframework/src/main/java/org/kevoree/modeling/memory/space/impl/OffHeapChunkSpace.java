@@ -328,7 +328,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
 //        _dirtyListIndex.set(0);
 //        _dirtyList = new int[KConfig.CACHE_INIT_SIZE];
 //
-//        return new HeapChunkIterator(indexDirties, currentIndex, this._state.values);
+//        return new ChunkIterator(indexDirties, currentIndex, this._state.values);
         return null;
     }
 

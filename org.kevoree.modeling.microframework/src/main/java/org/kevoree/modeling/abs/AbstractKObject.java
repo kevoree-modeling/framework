@@ -53,9 +53,7 @@ public abstract class AbstractKObject implements KObject {
     public long timeDephasing() {
         return _time - this._previousResolveds[TIME_PREVIOUS_INDEX];
     }
-
-    //todo finalize
-
+    
     @Override
     public long uuid() {
         return _uuid;

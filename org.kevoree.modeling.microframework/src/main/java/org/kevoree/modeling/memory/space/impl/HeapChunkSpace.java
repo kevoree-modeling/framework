@@ -177,8 +177,20 @@ public class HeapChunkSpace implements KChunkSpace {
         return this._elementCount;
     }
 
-    private volatile int[] _dirtyList;
-    private AtomicInteger _dirtyListIndex = new AtomicInteger(0);
+    private class InternalDirtyState {
+
+        public final long[] dirtyList;
+
+        public final AtomicInteger dirtyIndex;
+
+        public InternalDirtyState() {
+            dirtyList = new long[KConfig.CACHE_INIT_SIZE * 3];
+            dirtyIndex = new AtomicInteger(0);
+        }
+
+    }
+
+    private InternalDirtyState dirtyState = new InternalDirtyState();
 
     @Override
     public KChunkIterator detachDirties() {
@@ -187,7 +199,7 @@ public class HeapChunkSpace implements KChunkSpace {
         //TODO this is not thread safe!
         _dirtyListIndex.set(0);
         _dirtyList = new int[KConfig.CACHE_INIT_SIZE];
-        return new HeapChunkIterator(indexDirties, currentIndex, this._state.values);
+        return new ChunkIterator(indexDirties, currentIndex, this._state.values);
     }
 
     @Override
