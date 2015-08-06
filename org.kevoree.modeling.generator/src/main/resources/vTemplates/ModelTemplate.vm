@@ -5,8 +5,8 @@ public class ${context.metaModelName}Model extends org.kevoree.modeling.abs.Abst
 
     private org.kevoree.modeling.meta.KMetaModel _metaModel;
 
-    public ${context.metaModelName}Model() {
-    super();
+    public ${context.metaModelName}Model(org.kevoree.modeling.memory.manager.internal.KInternalDataManager p_manager) {
+    super(p_manager);
     _metaModel = new org.kevoree.modeling.meta.impl.MetaModel("${context.metaModelName}");
     org.kevoree.modeling.meta.KMetaClass[] tempMetaClasses = new org.kevoree.modeling.meta.KMetaClass[${context.model.getClasses().size()}];
     #foreach($class in $context.model.getClasses())
@@ -26,17 +26,16 @@ public class ${context.metaModelName}Model extends org.kevoree.modeling.abs.Abst
     }
 
     @Override
-    protected org.kevoree.modeling.KObject internalCreateObject(long universe, long time, long uuid,
-    org.kevoree.modeling.meta.KMetaClass p_clazz) {
+    protected org.kevoree.modeling.KObject internalCreateObject(long universe, long time, long uuid,org.kevoree.modeling.meta.KMetaClass p_clazz, long previousUniverse, long previousTime) {
     if (p_clazz == null) {
     return null;
     }
     switch (p_clazz.index()) {
     #foreach($class in $context.model.getClasses())
             #set($lastIdx = $class.fqn.lastIndexOf(".")+1)
-            case ${class.index} : return new ${class.fqn.substring(0,$class.fqn.lastIndexOf("."))}.impl.${class.fqn.substring($lastIdx)}Impl(universe, time, uuid, p_clazz, _manager);
+            case ${class.index} : return new ${class.fqn.substring(0,$class.fqn.lastIndexOf("."))}.impl.${class.fqn.substring($lastIdx)}Impl(universe, time, uuid, p_clazz, _manager,previousUniverse,previousTime);
         #end
-    default : return new org.kevoree.modeling.meta.impl.GenericObject(universe, time, uuid, p_clazz, _manager);
+    default : return new org.kevoree.modeling.meta.impl.GenericObject(universe, time, uuid, p_clazz, _manager,previousUniverse,previousTime);
     }
     }
 

@@ -3,8 +3,8 @@ package ${classDeclaration.pack}.impl;
 
 public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferred()) org.kevoree.modeling.abs.AbstractKObjectInfer #else org.kevoree.modeling.abs.AbstractKObject #end implements ${classDeclaration.pack}.${classDeclaration.name} {
 
-    public ${classDeclaration.name}Impl(long p_universe, long p_time, long p_uuid, org.kevoree.modeling.meta.KMetaClass p_metaClass, org.kevoree.modeling.memory.manager.KMemoryManager p_manager) {
-        super(p_universe, p_time, p_uuid, p_metaClass, p_manager);
+    public ${classDeclaration.name}Impl(long p_universe, long p_time, long p_uuid, org.kevoree.modeling.meta.KMetaClass p_metaClass, org.kevoree.modeling.memory.manager.internal.KInternalDataManager p_manager, long p_previousUniverse, long p_previoustTime) {
+        super(p_universe, p_time, p_uuid, p_metaClass, p_manager,p_previousUniverse,p_previoustTime);
     }
 
 #foreach($attribute in $classDeclaration.attributes)

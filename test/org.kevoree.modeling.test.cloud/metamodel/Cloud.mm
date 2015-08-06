@@ -1,6 +1,5 @@
 class cloud.Node {
-    @id
-    name : String
+    att name : String
     value : String
     children : cloud.Node[0,*]
     element : cloud.Element

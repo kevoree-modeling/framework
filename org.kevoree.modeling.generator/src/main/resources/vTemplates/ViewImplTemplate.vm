@@ -2,7 +2,7 @@ package ${context.metaModelPackage}.impl;
 
 public class ${context.metaModelName}ViewImpl extends org.kevoree.modeling.abs.AbstractKView implements ${context.metaModelPackage}.${context.metaModelName}View {
 
-    public ${context.metaModelName}ViewImpl(long p_universe, long _time, org.kevoree.modeling.memory.manager.KMemoryManager p_manager) {
+    public ${context.metaModelName}ViewImpl(long p_universe, long _time, org.kevoree.modeling.memory.manager.internal.KInternalDataManager p_manager) {
         super(p_universe, _time, p_manager);
     }
 

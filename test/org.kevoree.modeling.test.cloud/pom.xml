@@ -38,7 +38,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <metaModelFile>metamodel/Cloud.mm</metaModelFile>
+                            <metaModelFile>metamodel/Cloud2.mm</metaModelFile>
                             <metaModelQualifiedName>cloud.Cloud</metaModelQualifiedName>
                             <js>true</js>
                         </configuration>
