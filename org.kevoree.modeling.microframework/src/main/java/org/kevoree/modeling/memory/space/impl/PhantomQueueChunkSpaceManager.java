@@ -4,6 +4,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -99,7 +100,9 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     if (spaceChunk != null) {
                         unmarkMemoryElement(spaceChunk);
                         if (spaceChunk.counter() == 0) {
-                            _space.remove(spaceChunk.universe(), spaceChunk.time(), spaceChunk.obj(), _metaModel);
+                            if ((spaceChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                                _space.remove(spaceChunk.universe(), spaceChunk.time(), spaceChunk.obj(), _metaModel);
+                            }
                         }
                     }
                 }
