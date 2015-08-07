@@ -176,28 +176,29 @@
                 ct = ct[key];
             }
             if (ct['_metaClass'] != undefined) {
-                var lastKey = keys[keys.length - 1];
-                if (lastKey == 'uuid') {
-                    return ct.uuid();
-                } else if (lastKey == 'now') {
-                    return ct.now();
+                var getElemName = keys[keys.length - 1];
+                var metaElem = ct.metaClass().metaByName(getElemName);
+                if (metaElem != null) {
+                    var metaType = metaElem.metaType();
+                    if (metaType == org.kevoree.modeling.meta.MetaType.ATTRIBUTE) {
+                        return ct.getByName(getElemName);
+                    }
+                    if (metaType == org.kevoree.modeling.meta.MetaType.REFERENCE) {
+                        var kref = {};
+                        kref._ksrc = ct;
+                        kref._elems = ct.getRefValuesByName(getElemName);
+                        return kref;
+                    }
                 } else {
-                    var getElemName = keys[keys.length - 1];
-                    var metaElem = ct.metaClass().metaByName(getElemName);
-                    if(metaElem != null){
-                        var metaType = metaElem.metaType();
-                        if(metaType==org.kevoree.modeling.meta.MetaType.ATTRIBUTE){
-                            return ct.getByName(getElemName);
-                        }
-                        if(metaType==org.kevoree.modeling.meta.MetaType.REFERENCE){
-                            var kref = {};
-                            kref._ksrc = ct;
-                            kref._elems = ct.getRefValuesByName(getElemName);
-                            return kref;
+                    if (ct[getElemName] != undefined) {
+                        if (typeof ct[getElemName] == "function") {
+                            return ct[getElemName]();
+                        } else {
+                            return ct[getElemName];
                         }
                     }
-                    return null;
                 }
+                return null;
             } else {
                 var pt = typeof path !== "string" ? path.join(".") : path;
                 var getter;
