@@ -7,7 +7,7 @@ TODO introduction about complexity to represent data and so on
 Features and Design principles
 -------------
 
-TODO: async, lazy load etc
+TODO: async, lazy load etc, end goal data overlay
 
 
 Publications:
