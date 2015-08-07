@@ -5,6 +5,7 @@ import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.space.BaseKChunkSpaceCleanerTest;
 import org.kevoree.modeling.memory.strategy.impl.OffHeapMemoryStrategy;
 
+/** @ignore ts */
 public class OffHeapChunkSpaceCleanerTest extends BaseKChunkSpaceCleanerTest {
 
     @Override
