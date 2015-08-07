@@ -345,9 +345,10 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                         _spaceManager.unmarkMemoryElement(currentChunk);
                                     }
                                 } else {
-                                    KObjectChunk objectChunk = (KObjectChunk) _spaceManager.createAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2], KChunkTypes.OBJECT_CHUNK);
-                                    objectChunk.init(payloads[i], mm, -1);
-                                    updatedElements[indexToInsert] = am.createProxy(objectChunk.universe(), objectChunk.time(), objectChunk.obj(), mm.metaClass(objectChunk.metaClassIndex()), objectChunk.universe(), objectChunk.time());
+                                    //KObjectChunk objectChunk = (KObjectChunk) _spaceManager.createAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2], KChunkTypes.OBJECT_CHUNK);
+                                    //objectChunk.init(payloads[i], mm, -1);
+                                    //updatedElements[indexToInsert] = am.createProxy(objectChunk.universe(), objectChunk.time(), objectChunk.obj(), mm.metaClass(objectChunk.metaClassIndex()), objectChunk.universe(), objectChunk.time());
+                                    updatedElements[indexToInsert] = null;
                                 }
                             }
                         }
