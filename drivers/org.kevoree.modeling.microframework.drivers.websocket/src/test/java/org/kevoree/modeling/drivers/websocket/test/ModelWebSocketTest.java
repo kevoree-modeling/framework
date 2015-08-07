@@ -110,7 +110,7 @@ public class ModelWebSocketTest {
         model.save(null);
 
         //expose it to web
-        WebSocketGateway wrapper = WebSocketGateway.exposeModelAndResources(model, 8080, this.getClass().getClassLoader());
+        WebSocketGateway wrapper = WebSocketGateway.exposeModelAndResources(model, PORT, this.getClass().getClassLoader());
         wrapper.start();
 
        //   Thread.sleep(100000);

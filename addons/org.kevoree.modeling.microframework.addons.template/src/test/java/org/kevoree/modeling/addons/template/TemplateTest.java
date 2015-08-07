@@ -6,6 +6,10 @@ import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class TemplateTest {
 
     //@Test
@@ -15,6 +19,8 @@ public class TemplateTest {
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
         KMetaReference sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
+
+        ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 
 
         KModel model = metaModel.createModel(DataManagerBuilder.buildDefault());
@@ -48,30 +54,32 @@ public class TemplateTest {
                         //done
                     }
                 });
-/*
 
-                new Thread(){
+                long[] uuids = new long[]{sensor.uuid(), sensor2.uuid(), sensor3.uuid()};
+
+
+                KCallback<KObject[]> jumped = new KCallback<KObject[]>(){
+                    public void on(KObject[] kObjects) {
+                        for (int i = 0; i < kObjects.length; i++) {
+                            kObjects[i].setByName("value", System.currentTimeMillis());
+                        }
+                        model.save(null);
+                    }
+                };
+
+                serviceExecutor.scheduleAtFixedRate(new Runnable() {
                     @Override
                     public void run() {
-                        while (true) {
-                            sensor.setByName("value", System.currentTimeMillis());
-                            sensor2.setByName("value", System.currentTimeMillis());
-                            sensor3.setByName("value", System.currentTimeMillis());
-                            createModel.save(null);
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                        model.manager().lookupAllObjects(0, System.currentTimeMillis(), uuids, jumped);
                     }
-                }.start();
-*/
+                }, 1000, 1000, TimeUnit.MILLISECONDS);
 
             }
         });
+
         WebSocketGateway gateway = WebSocketGateway.exposeModelAndResources(model, 8080, TemplateTest.class.getClassLoader());
         gateway.start();
+
         try {
             Thread.sleep(100000);
         } catch (InterruptedException e) {
