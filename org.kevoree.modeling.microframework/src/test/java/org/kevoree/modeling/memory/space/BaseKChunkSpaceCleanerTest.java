@@ -1,4 +1,4 @@
-package org.kevoree.modeling.memory.space.impl;
+package org.kevoree.modeling.memory.space;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,11 +8,14 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.memory.strategy.impl.OffHeapMemoryStrategy;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
-public class KChunkSpaceCleanerTest {
+public abstract class BaseKChunkSpaceCleanerTest {
+
+    public abstract KDataManager createDataManager();
 
     /**
      * @native ts
@@ -21,7 +24,8 @@ public class KChunkSpaceCleanerTest {
     public void test() {
         KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
-        KDataManager manager = DataManagerBuilder.create().build();
+        KDataManager manager = createDataManager();
+
         final KModel universe = dynamicMetaModel.createModel((KInternalDataManager) manager);
         universe.connect(new KCallback<Throwable>() {
             @Override
