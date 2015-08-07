@@ -13,10 +13,11 @@ public class HeapMemoryStrategy implements KMemoryStrategy {
         return new HeapChunkSpace();
     }
 
-    @Override
-    /** @native ts
+    /**
+     * @native ts
      * return new org.kevoree.modeling.memory.space.impl.NoopChunkSpaceManager(p_space);
-     * */
+     */
+    @Override
     public KChunkSpaceManager newSpaceManager(KChunkSpace p_space) {
         return new PhantomQueueChunkSpaceManager(p_space);
     }

@@ -14,6 +14,7 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class HeapChunkSpace implements KChunkSpace {
@@ -26,13 +27,15 @@ public class HeapChunkSpace implements KChunkSpace {
 
     final class InternalState {
 
+        public volatile boolean sparse = false;
+
         public final int elementDataSize;
 
         public final long[] elementK3;
 
         public final int[] elementNext;
 
-        public final int[] elementHash;
+        public final AtomicIntegerArray elementHash;
 
         public final KChunk[] values;
 
@@ -46,7 +49,7 @@ public class HeapChunkSpace implements KChunkSpace {
             this.elementDataSize = p_elementDataSize;
             this.elementK3 = p_elementKE;
             this.elementNext = p_elementNext;
-            this.elementHash = p_elementHash;
+            this.elementHash = new AtomicIntegerArray(p_elementHash);
             this.values = p_values;
             this._elementCount = new AtomicInteger(0);
             this._valuesIndex = new AtomicInteger(0);
@@ -97,7 +100,7 @@ public class HeapChunkSpace implements KChunkSpace {
         InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 3], new int[initialCapacity], new int[initialCapacity], new KChunk[initialCapacity]);
         for (int i = 0; i < initialCapacity; i++) {
             newstate.elementNext[i] = -1;
-            newstate.elementHash[i] = -1;
+            newstate.elementHash.set(i, -1);
         }
         newstate._threshold = (int) (newstate.elementDataSize * LOAD_FACTOR);
         this._state.set(newstate);
@@ -110,7 +113,7 @@ public class HeapChunkSpace implements KChunkSpace {
             return null;
         }
         int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % internalState.elementDataSize;
-        int m = internalState.elementHash[index];
+        int m = internalState.elementHash.get(index);
         while (m != -1) {
             if (universe == internalState.elementK3[(m * 3)] && time == internalState.elementK3[((m * 3) + 1)] && obj == internalState.elementK3[((m * 3) + 2)]) {
                 return internalState.values[m]; /* getValue */
@@ -148,60 +151,59 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     private KChunk internal_put(long universe, long time, long p_obj, KChunk payload) {
-        synchronized (lock) {
-            InternalState currentState;
-            InternalState nextState;
-            KChunk result;
-            int nbTry = 0;
-            do {
-                currentState = _state.get();
-                int entry = -1;
-                int index = -1;
-                int hash = (int) (universe ^ time ^ p_obj);
-                if (currentState.elementDataSize != 0) {
-                    index = (hash & 0x7FFFFFFF) % currentState.elementDataSize;
-                    entry = findNonNullKeyEntry(universe, time, p_obj, index, currentState);
-                }
-                if (entry == -1) {
-                    //value has to be really inserted
-                    int nextValueIndex = currentState._valuesIndex.getAndIncrement();
-                    if (nextValueIndex > currentState._threshold) {
-                        nextState = rehashCapacity(currentState);
-                        index = (hash & 0x7FFFFFFF) % nextState.elementDataSize;
-                    } else {
-                        nextState = currentState;
-                    }
-                    nextState.elementK3[(nextValueIndex * 3)] = universe;
-                    nextState.elementK3[((nextValueIndex * 3) + 1)] = time;
-                    nextState.elementK3[((nextValueIndex * 3) + 2)] = p_obj;
-                    nextState.values[nextValueIndex] = payload;
-
-                    //TODO CAS HERE
-                    nextState.elementNext[nextValueIndex] = nextState.elementHash[index];
-                    nextState.elementHash[index] = nextValueIndex;
-                    //TODO CAS HERE
-
-                    nextState._elementCount.incrementAndGet();
-                    result = payload;
+        // synchronized (lock) {
+        InternalState currentState;
+        InternalState nextState;
+        KChunk result;
+        int nbTry = 0;
+        do {
+            currentState = _state.get();
+            int entry = -1;
+            int index = -1;
+            int hash = (int) (universe ^ time ^ p_obj);
+            if (currentState.elementDataSize != 0) {
+                index = (hash & 0x7FFFFFFF) % currentState.elementDataSize;
+                entry = findNonNullKeyEntry(universe, time, p_obj, index, currentState);
+            }
+            if (entry == -1) {
+                //value has to be really inserted
+                int nextValueIndex = currentState._valuesIndex.getAndIncrement();
+                if (nextValueIndex > currentState._threshold) {
+                    nextState = rehashCapacity(currentState);
+                    index = (hash & 0x7FFFFFFF) % nextState.elementDataSize;
                 } else {
                     nextState = currentState;
-                    result = nextState.values[entry];
                 }
-                nbTry++;
-                if (nbTry == KConfig.CAS_MAX_TRY) {
-                    throw new RuntimeException("CompareAndSwap error, failed to converge");
-                }
-            } while (!_state.compareAndSet(currentState, nextState));
-            return result;
-        }
+                nextState.elementK3[(nextValueIndex * 3)] = universe;
+                nextState.elementK3[((nextValueIndex * 3) + 1)] = time;
+                nextState.elementK3[((nextValueIndex * 3) + 2)] = p_obj;
+                nextState.values[nextValueIndex] = payload;
+
+                nextState.elementNext[nextValueIndex] = nextState.elementHash.getAndSet(index, nextValueIndex);
+                nextState._elementCount.incrementAndGet();
+                result = payload;
+            } else {
+                nextState = currentState;
+                result = nextState.values[entry];
+            }
+            nbTry++;
+            if (nbTry == KConfig.CAS_MAX_TRY) {
+                throw new RuntimeException("CompareAndSwap error, failed to converge");
+            }
+        } while (!_state.compareAndSet(currentState, nextState));
+        return result;
+        //  }
     }
 
     private InternalState rehashCapacity(InternalState previousState) {
         int length = (previousState.elementDataSize == 0 ? 1 : previousState.elementDataSize << 1);
         long[] newElementKV = new long[length * 3];
-        System.arraycopy(previousState.elementK3, 0, newElementKV, 0, previousState.elementDataSize * 3);
         KChunk[] newValues = new KChunk[length];
-        System.arraycopy(previousState.values, 0, newValues, 0, previousState.elementDataSize);
+        boolean previousIsSparse = previousState.sparse;
+        if (!previousIsSparse) {
+            System.arraycopy(previousState.elementK3, 0, newElementKV, 0, previousState.elementDataSize * 3);
+            System.arraycopy(previousState.values, 0, newValues, 0, previousState.elementDataSize);
+        }
         int[] newElementNext = new int[length];
         int[] newElementHash = new int[length];
         for (int i = 0; i < length; i++) {
@@ -209,24 +211,38 @@ public class HeapChunkSpace implements KChunkSpace {
             newElementHash[i] = -1;
         }
         //rehashEveryThing
+        int currentIndex = 0;
         for (int i = 0; i < previousState.elementDataSize; i++) {
             if (previousState.values[i] != null) { //there is a real value
                 int hash = (int) (previousState.elementK3[(i * 3)] ^ previousState.elementK3[(i * 3) + 1] ^ previousState.elementK3[(i * 3) + 2]);
                 int index = (hash & 0x7FFFFFFF) % length;
                 newElementNext[i] = newElementHash[index];
                 newElementHash[index] = i;
+                if (previousIsSparse) {
+                    newValues[currentIndex] = previousState.values[i];
+                    newElementKV[(currentIndex * 3)] = previousState.elementK3[(i * 3)];
+                    newElementKV[(currentIndex * 3) + 1] = previousState.elementK3[(i * 3) + 1];
+                    newElementKV[(currentIndex * 3) + 2] = previousState.elementK3[(i * 3) + 2];
+                    currentIndex++;
+                }
             }
         }
         //setPrimitiveType value for all
         InternalState newState = new InternalState(length, newElementKV, newElementNext, newElementHash, newValues);
         newState._threshold = (int) (length * LOAD_FACTOR);
         newState._valuesIndex.set(previousState._valuesIndex.get());
-        newState._elementCount.set(previousState._elementCount.get());
+        if (previousIsSparse) {
+            newState._elementCount.set(currentIndex);
+            newState._valuesIndex.set(currentIndex);
+        } else {
+            newState._elementCount.set(previousState._elementCount.get());
+            newState._valuesIndex.set(previousState._valuesIndex.get());
+        }
         return newState;
     }
 
     final int findNonNullKeyEntry(long universe, long time, long obj, int index, InternalState internalState) {
-        int m = internalState.elementHash[index];
+        int m = internalState.elementHash.get(index);
         while (m >= 0) {
             if (universe == internalState.elementK3[m * 3] && time == internalState.elementK3[(m * 3) + 1] && obj == internalState.elementK3[(m * 3) + 2]) {
                 return m;
@@ -265,52 +281,46 @@ public class HeapChunkSpace implements KChunkSpace {
 
     }
 
-    private Object lock = new Object();
-
     @Override
     public void remove(long universe, long time, long obj, KMetaModel p_metaModel) {
-        synchronized (lock) {
-            InternalState previousState;
-            int nbTry = 0;
-            do {
-                previousState = _state.get();
-                int hash = (int) (universe ^ time ^ obj);
-                int index = (hash & 0x7FFFFFFF) % previousState.elementDataSize;
-                if (previousState.elementDataSize == 0) {
-                    return;
+        InternalState previousState;
+        int nbTry = 0;
+        do {
+            previousState = _state.get();
+            int hash = (int) (universe ^ time ^ obj);
+            int index = (hash & 0x7FFFFFFF) % previousState.elementDataSize;
+            if (previousState.elementDataSize == 0) {
+                return;
+            }
+            int m = previousState.elementHash.get(index);
+            int last = -1;
+            while (m >= 0) {
+                if (universe == previousState.elementK3[m * 3] && time == previousState.elementK3[(m * 3) + 1] && obj == previousState.elementK3[(m * 3) + 2]) {
+                    break;
                 }
-                int m = previousState.elementHash[index];
-                int last = -1;
-                while (m >= 0) {
-                    if (universe == previousState.elementK3[m * 3] && time == previousState.elementK3[(m * 3) + 1] && obj == previousState.elementK3[(m * 3) + 2]) {
-                        break;
-                    }
-                    last = m;
-                    m = previousState.elementNext[m];
+                last = m;
+                m = previousState.elementNext[m];
+            }
+            if (m == -1) {
+                return;
+            }
+            if (last == -1) {
+                int previousNext = previousState.elementNext[m];
+                if (!previousState.elementHash.compareAndSet(index, m, previousNext)) {
+                    //complex case we are not the head, cause we have no previous just kick the object
                 }
-                if (m == -1) {
-                    return;
-                }
-                if (last == -1) {
-                    if (previousState.elementNext[m] != -1) {
-                        previousState.elementHash[index] = m;
-                    } else {
-                        previousState.elementHash[index] = -1;
-                    }
-                } else {
-                    previousState.elementNext[last] = previousState.elementNext[m];
-                }
-                previousState.elementNext[m] = -1;//flag to dropped value
-                previousState.values[m].free(p_metaModel);
-                previousState.values[m] = null;
-                previousState._elementCount.decrementAndGet();
-                nbTry++;
-                if (nbTry == KConfig.CAS_MAX_TRY) {
-                    throw new RuntimeException("CompareAndSwap error, failed to converge");
-                }
-            } while (!_state.compareAndSet(previousState, previousState));
-
-        }
+            } else {
+                previousState.elementNext[last] = previousState.elementNext[m];
+            }
+            previousState.elementNext[m] = -1;//flag to dropped value
+            previousState.values[m].free(p_metaModel);
+            previousState.values[m] = null;
+            previousState._elementCount.decrementAndGet();
+            nbTry++;
+            if (nbTry == KConfig.CAS_MAX_TRY) {
+                throw new RuntimeException("CompareAndSwap error, failed to converge");
+            }
+        } while (!_state.compareAndSet(previousState, previousState));
     }
 
     @Override
@@ -326,7 +336,7 @@ public class HeapChunkSpace implements KChunkSpace {
             InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 3], new int[initialCapacity], new int[initialCapacity], new KChunk[initialCapacity]);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate.elementNext[i] = -1;
-                newstate.elementHash[i] = -1;
+                newstate.elementHash.set(i, -1);
             }
             newstate._elementCount.set(0);
             newstate._valuesIndex.set(0);

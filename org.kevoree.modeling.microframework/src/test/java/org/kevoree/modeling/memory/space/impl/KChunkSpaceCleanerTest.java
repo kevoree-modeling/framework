@@ -35,31 +35,25 @@ public class KChunkSpaceCleanerTest {
                 universe.save(null);
                 System.gc();
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(1, ((KInternalDataManager) manager).spaceSize());
-
-                /*
-                //Assert.assertEquals(1, universe.manager().cache().size());
+                Assert.assertEquals(0, ((KInternalDataManager) manager).spaceSize());
                 universe.universe(0).time(0).lookup(sensorID, new KCallback<KObject>() {
                     @Override
                     public void on(KObject kObject) {
                         Assert.assertNotNull(kObject);
-                        //Assert.assertEquals(4, universe.manager().cache().size());
-
+                        Assert.assertEquals(4, ((KInternalDataManager) manager).spaceSize());
                         kObject.jump(10, new KCallback<KObject>() {
                             @Override
                             public void on(KObject kObject2) {
                                 Assert.assertNotNull(kObject2);
-                                //Assert.assertEquals(4, universe.manager().cache().size());
+                                Assert.assertEquals(4, ((KInternalDataManager) manager).spaceSize());
                             }
                         });
                     }
                 });
-                */
-
             }
         });
 

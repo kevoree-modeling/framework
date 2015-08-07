@@ -1,6 +1,9 @@
 package org.kevoree.modeling.memory.space.impl;
 
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.abs.AbstractKObject;
+import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 
@@ -80,25 +83,52 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                 e.printStackTrace();
             }
             if (kobj != null) {
-                System.err.println("Drop " + kobj.universe + "," + kobj.time + "," + kobj.obj);
-                _space.remove(kobj.universe, kobj.time, kobj.obj, _metaModel);
+
+                //TODO delegate to resolver this management
+                KChunk resolvedChunk = _space.get(kobj.previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], kobj.previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], kobj.obj);
+                KChunk resolvedTimeTree = _space.get(kobj.previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, kobj.obj);
+                KChunk resolvedUniverseTree = _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, kobj.obj);
+                KChunk resolvedGlobalTree = _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+
+                if (resolvedChunk != null) {
+                    unmarkMemoryElement(resolvedChunk);
+                    if (resolvedChunk.counter() == 0) {
+                        _space.remove(resolvedChunk.universe(), resolvedChunk.time(), resolvedChunk.obj(), _metaModel);
+                    }
+                }
+                if (resolvedTimeTree != null) {
+                    unmarkMemoryElement(resolvedTimeTree);
+                    if (resolvedTimeTree.counter() == 0) {
+                        _space.remove(resolvedTimeTree.universe(), resolvedTimeTree.time(), resolvedTimeTree.obj(), _metaModel);
+                    }
+                }
+                if (resolvedUniverseTree != null) {
+                    unmarkMemoryElement(resolvedUniverseTree);
+                    if (resolvedUniverseTree.counter() == 0) {
+                        _space.remove(resolvedUniverseTree.universe(), resolvedUniverseTree.time(), resolvedUniverseTree.obj(), _metaModel);
+                    }
+                }
+                if (resolvedGlobalTree != null) {
+                    unmarkMemoryElement(resolvedGlobalTree);
+                    if (resolvedGlobalTree.counter() == 0) {
+                        _space.remove(resolvedGlobalTree.universe(), resolvedGlobalTree.time(), resolvedGlobalTree.obj(), _metaModel);
+                    }
+                }
             }
         }
     }
 
     class KObjectPhantomReference extends PhantomReference<KObject> {
 
-        public long universe;
-        public long time;
         public long obj;
+        public long[] previousResolved;
         private KObjectPhantomReference next;
         private KObjectPhantomReference previous;
 
         public KObjectPhantomReference(KObject referent) {
             super(referent, referenceQueue);
-            this.universe = referent.universe();
-            this.time = referent.now();
             this.obj = referent.uuid();
+            previousResolved = ((AbstractKObject) referent).previousResolved();
         }
     }
 
