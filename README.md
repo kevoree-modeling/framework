@@ -48,6 +48,16 @@ TODO
 Traverse and Query data graph
 ==============
 
+From a graph object (aka KObject), a classical operation consist in traversing the graph to collect related information. 
+For instance from a node, a developer can reach subNodes and subSubNodes and so on. KMF offers two consistent and optimized APIs to perform such operations: 
+- KTraversal: typed, using the Java or JavaScript with a fluent API to declare the collecting behaviour. 
+- Queries: untyped, using plain String an a pipe mechanism similar to UNIX pipe to declare collection and filter
+
+Firstly the KTraversal API is available on any KObject
+
+
+
+Additionally 
 
 
 
@@ -74,7 +84,7 @@ model.select("nodes[name=N2]", myDefer.waitResult());
 
 Once all necessary callbacks have injected, you can end the KDefer by giving the final KCallback that will be called once all results are ready:
 
-Here is the exemple in Java:
+Here is the example in Java:
 
 ```java
 myDefer.then(new KCallback<KObject[]>{
@@ -85,7 +95,7 @@ myDefer.then(new KCallback<KObject[]>{
 });
 ```	 
 
-Similarly here is the JavaScript illustration:
+And similarly here is the example in JavaScript:
 
 ```js
 myDefer.then(function(objects){
