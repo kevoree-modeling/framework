@@ -699,6 +699,10 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final void init(String p_payload, KMetaModel p_metaModel, int p_metaClassIndex) {
+        // check if we have an old value stored (init not called for the first time)
+        if (this._start_address != 0 && p_metaClassIndex == -1) {
+            p_metaClassIndex = UNSAFE.getInt(this._start_address + OFFSET_META_CLASS_INDEX);
+        }
         KMetaClass metaClass = p_metaModel.metaClass(p_metaClassIndex);
         initMetaClass(metaClass);
         UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, p_metaClassIndex);
@@ -706,7 +710,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         if (p_payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(p_payload);
-            //KMetaClass metaClass = metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
 
             String[] metaKeys = objectReader.keys();
             for (int i = 0; i < metaKeys.length; i++) {
