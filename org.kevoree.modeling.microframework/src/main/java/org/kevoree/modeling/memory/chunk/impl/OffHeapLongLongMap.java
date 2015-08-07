@@ -391,6 +391,10 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     /* warning: this method is not thread safe */
     @Override
     public void init(String p_payload, KMetaModel p_metaModel, int p_metaClassIndex) {
+        // check if we have an old value stored (init not called for the first time)
+        if (this._start_address != 0 && p_metaClassIndex == -1) {
+            p_metaClassIndex = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX);
+        }
         UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX, p_metaClassIndex);
 
         if (p_payload == null || p_payload.length() == 0) {
