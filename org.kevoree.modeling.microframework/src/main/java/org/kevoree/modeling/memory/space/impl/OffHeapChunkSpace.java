@@ -342,25 +342,21 @@ public class OffHeapChunkSpace implements KChunkSpace {
                 int nextValueIndex = UNSAFE.getAndAddInt(null, this._start_address.get() + OFFSET_STARTADDRESS_VALUES_INDEX, +1);
                 int threshold = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD);
                 if (nextValueIndex > threshold) {
-                    rehashCapacity(elementDataSize);
-                    nextState = this._start_address.get();
-                    index = (hash & 0x7FFFFFFF) % elementDataSize;
+                    return complex_insert(p_universe, p_time, p_obj, p_type, memoryElement, hash, nextValueIndex);
                 } else {
                     nextState = currentState;
                 }
 
-                setUniverse(this._start_address.get(), nextValueIndex, p_universe);
-                setTime(this._start_address.get(), nextValueIndex, p_time);
-                setObj(this._start_address.get(), nextValueIndex, p_obj);
-                setValuePointer(this._start_address.get(), nextValueIndex, memoryElement.memoryAddress());
-                setType(this._start_address.get(), nextValueIndex, p_type);
+                setUniverse(nextState, nextValueIndex, p_universe);
+                setTime(nextState, nextValueIndex, p_time);
+                setObj(nextState, nextValueIndex, p_obj);
+                setValuePointer(nextState, nextValueIndex, memoryElement.memoryAddress());
+                setType(nextState, nextValueIndex, p_type);
 
-                //TODO CAS HERE
-                setNext(this._start_address.get(), nextValueIndex, hash(this._start_address.get(), index));
-                setHash(this._start_address.get(), index, nextValueIndex);
-                //TODO CAS HERE
+                long hashPtr = nextState + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH);
+                setNext(nextState, nextValueIndex, UNSAFE.getAndSetInt(null, hashPtr, nextValueIndex));
+                UNSAFE.getAndAddInt(null, nextState + OFFSET_STARTADDRESS_ELEMENT_COUNT, +1);
 
-                UNSAFE.getAndAddInt(null, this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT, 1);
                 result = p_payload;
 
             } else {
@@ -374,6 +370,39 @@ public class OffHeapChunkSpace implements KChunkSpace {
         } while (!this._start_address.compareAndSet(currentState, nextState));
 
         return result;
+    }
+
+    private synchronized KChunk complex_insert(long p_universe, long p_time, long p_obj, short p_type, KOffHeapChunk p_payload, int p_prehash, int p_nextValueIndex) {
+        long currentState;
+        long nextState;
+        do {
+            currentState = this._start_address.get();
+            int threshold = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD);
+            int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
+            int length = (elementDataSize == 0 ? 1 : elementDataSize << 1);
+
+            if (p_nextValueIndex > threshold) {
+                rehashCapacity(length);
+                nextState = this._start_address.get(); // start pointer pointer changed after rehash
+            } else {
+                nextState = currentState;
+            }
+
+            elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE); // updated after rehash
+            int index = (p_prehash & 0x7FFFFFFF) % elementDataSize;
+            setUniverse(nextState, p_nextValueIndex, p_universe);
+            setTime(nextState, p_nextValueIndex, p_time);
+            setObj(nextState, p_nextValueIndex, p_obj);
+            setType(nextState, p_nextValueIndex, p_type);
+            setValuePointer(p_nextValueIndex, p_nextValueIndex, p_payload.memoryAddress());
+
+            long hashPtr = nextState + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH);
+            setNext(nextState, p_nextValueIndex, UNSAFE.getAndSetInt(null, hashPtr, p_nextValueIndex));
+
+            UNSAFE.getAndAddInt(null, this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_COUNT, 1);
+
+        } while (!this._start_address.compareAndSet(currentState, nextState));
+        return p_payload;
     }
 
     final int findNonNullKeyEntry(long p_universe, long p_time, long p_obj, int p_index) {
