@@ -346,7 +346,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                             public void on(KObject[] updatedObjects) {
                                 _listenerManager.dispatch(updatedObjects);
                             }
-                        });
+                        }).run();
                     }
                 });
             }
