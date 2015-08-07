@@ -73,11 +73,10 @@ For instance from a node, a developer can reach subNodes and subSubNodes and so 
 - KTraversal: typed, using the Java or JavaScript with a fluent API to declare the collecting behaviour. 
 - Queries: untyped, using plain String an a pipe mechanism similar to UNIX pipe to declare collection and filter
 
-Firstly the KTraversal API is available on any KObject
+Un a nutshell, Queries are textual version of the KTraversal API
 
 
-
-Additionally 
+TODO
 
 
 
