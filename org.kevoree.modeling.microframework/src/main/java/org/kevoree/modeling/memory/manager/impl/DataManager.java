@@ -132,6 +132,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
             toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
             toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
             toSaveValues[i] = loopChunk.serialize(_mm);
+            loopChunk.setFlags(0, KChunkFlags.DIRTY_BIT);
             i++;
         }
         toSaveKeys[i * KEY_SIZE] = KConfig.BEGINNING_OF_TIME;
