@@ -7,6 +7,10 @@ import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class KolyfillTest {
 
     //@Test
@@ -17,6 +21,7 @@ public class KolyfillTest {
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
         KMetaReference sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
 
+        ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 
         KModel model = metaModel.createModel(DataManagerBuilder.buildDefault());
         model.connect(new KCallback() {
@@ -49,6 +54,27 @@ public class KolyfillTest {
                         //done
                     }
                 });
+
+
+                long[] uuids = new long[]{sensor.uuid(), sensor2.uuid(), sensor3.uuid()};
+
+                KCallback<KObject[]> jumped = new KCallback<KObject[]>(){
+                    public void on(KObject[] kObjects) {
+                        for (int i = 0; i < kObjects.length; i++) {
+                            kObjects[i].setByName("value", System.currentTimeMillis());
+                        }
+                        model.save(null);
+                    }
+                };
+
+                serviceExecutor.scheduleAtFixedRate(new Runnable() {
+                    @Override
+                    public void run() {
+                        model.manager().lookupAllObjects(0, System.currentTimeMillis(), uuids, jumped);
+                    }
+                }, 1000, 1000, TimeUnit.MILLISECONDS);
+
+
 
             }
         });

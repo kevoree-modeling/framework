@@ -9,9 +9,9 @@
     <script type="text/javascript" src="paperclip.js"></script>
 
     <link rel="import" href="test-module/test-module.html"/>
+
 </head>
 <body>
-
 
 
 
@@ -23,8 +23,8 @@
     sensorClass.addReference("sensors", sensorClass, null, true);
 
     var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://"+window.location.hostname+":8081/cdn");
-    var KmfModel = metaModel.model();
-    KmfModel.setContentDeliveryDriver(wsClient);
+    var dataManager =  org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
+    var KmfModel = metaModel.createModel(dataManager);
     KmfModel.connect(function () {
 
         var newElement = document.createElement("test-module");
@@ -38,6 +38,10 @@
         document.body.appendChild(newElement);
 
     });
+
+
+
+
 </script>
 
 
