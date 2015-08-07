@@ -5,6 +5,7 @@ import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KLongTree;
 import org.kevoree.modeling.memory.space.KChunkSpace;
+import org.kevoree.modeling.memory.space.KChunkTypes;
 
 public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
 
@@ -27,7 +28,7 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
 
     @Override
     public short type() {
-        return 0;
+        return KChunkTypes.LONG_TREE;
     }
 
 }
