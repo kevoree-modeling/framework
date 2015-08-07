@@ -126,14 +126,18 @@ public class DataManager implements KDataManager, KInternalDataManager {
         String[] toSaveValues = new String[dirtyIterator.size() + PREFIX_TO_SAVE_SIZE];
         int i = 0;
         KMetaModel _mm = _model.metaModel();
+        KChunk[] savedChunks = new KChunk[dirtyIterator.size()];
         while (dirtyIterator.hasNext()) {
             KChunk loopChunk = dirtyIterator.next();
-            toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
-            toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
-            toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
-            toSaveValues[i] = loopChunk.serialize(_mm);
-            loopChunk.setFlags(0, KChunkFlags.DIRTY_BIT);
-            i++;
+            if (loopChunk != null) {
+                loopChunk.setFlags(0, KChunkFlags.DIRTY_BIT);
+                toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
+                toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
+                toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
+                toSaveValues[i] = loopChunk.serialize(_mm);
+                savedChunks[i] = loopChunk;
+                i++;
+            }
         }
         toSaveKeys[i * KEY_SIZE] = KConfig.BEGINNING_OF_TIME;
         toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
@@ -145,6 +149,8 @@ public class DataManager implements KDataManager, KInternalDataManager {
         toSaveKeys[i * KEY_SIZE + 2] = _universeKeyCalculator.prefix();
         toSaveValues[i] = "" + _universeKeyCalculator.lastComputedIndex();
         _db.put(toSaveKeys, toSaveValues, callback, this.currentCdnListener);
+        //inform potential GC that these objects may have to cleaned
+        _spaceManager.notifySaved(savedChunks);
     }
 
     @Override

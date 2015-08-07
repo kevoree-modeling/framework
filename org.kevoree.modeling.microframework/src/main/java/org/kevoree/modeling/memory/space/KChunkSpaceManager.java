@@ -30,4 +30,6 @@ public interface KChunkSpaceManager {
 
     void setResolver(KResolver resolver);
 
+    void notifySaved(KChunk[] savedChunks);
+
 }

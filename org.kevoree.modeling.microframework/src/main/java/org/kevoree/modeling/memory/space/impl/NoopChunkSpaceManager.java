@@ -71,4 +71,9 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
 
     }
 
+    @Override
+    public void notifySaved(KChunk[] savedChunks) {
+
+    }
+
 }

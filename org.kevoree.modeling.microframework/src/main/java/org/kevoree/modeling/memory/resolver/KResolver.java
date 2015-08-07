@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.resolver;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 

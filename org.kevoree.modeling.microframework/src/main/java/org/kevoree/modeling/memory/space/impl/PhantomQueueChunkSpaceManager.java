@@ -1,6 +1,5 @@
 package org.kevoree.modeling.memory.space.impl;
 
-import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.KChunk;
@@ -11,7 +10,6 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
-import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -61,6 +59,16 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     @Override
     public void setResolver(KResolver p_resolver) {
         this._resolver = p_resolver;
+    }
+
+    @Override
+    public void notifySaved(KChunk[] savedChunks) {
+        for (int i = 0; i < savedChunks.length; i++) {
+            KChunk loopChunk = savedChunks[i];
+            if (loopChunk != null && loopChunk.counter() == 0 && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                _space.remove(loopChunk.universe(), loopChunk.time(), loopChunk.obj(), _metaModel);
+            }
+        }
     }
 
     @Override
