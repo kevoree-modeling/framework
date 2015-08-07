@@ -159,7 +159,9 @@ public class HeapObjectChunk implements KObjectChunk {
 
     @Override
     public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
-        this._metaClassIndex = metaClassIndex;
+        if(this._metaClassIndex == -1){
+            this._metaClassIndex = metaClassIndex;
+        }
         this.raw = new Object[metaModel.metaClass(metaClassIndex).metaElements().length];
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
