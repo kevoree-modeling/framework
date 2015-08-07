@@ -22,6 +22,8 @@ Getting started
 For impatient: the reflexive Quick and Dirty way
 -------------
 
+
+
 For long term project: custom api generation
 -------------
 
@@ -31,6 +33,14 @@ TODO
 
 
 
-Query language
+Traversal and Query operations
 ==============
+
+
+KDefer: synchronisation barrier
+===============================
+
+
+
+
 
