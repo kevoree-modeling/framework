@@ -1,7 +1,6 @@
 package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
@@ -290,16 +289,18 @@ public class DataManager implements KDataManager, KInternalDataManager {
         return this._db;
     }
 
-    //TODO, check for counter
     private void attachContentDeliveryDriver(KContentDeliveryDriver p_dataBase) {
         currentCdnListener = this._db.addUpdateListener(new KContentUpdateListener() {
             @Override
             public void on(long[] updatedKeys) {
                 long[] toLoadKeys = new long[updatedKeys.length];
+                int toInsertNotifyKey = 0;
+                long[] toNotifyKeys = new long[updatedKeys.length];
                 int nbElements = updatedKeys.length / KEY_SIZE;
                 int toInsertKey = 0;
                 for (int i = 0; i < nbElements; i++) {
                     KChunk currentChunk = _spaceManager.getAndMark(updatedKeys[i * 3], updatedKeys[i * 3 + 1], updatedKeys[i * 3 + 2]);
+                    //reload object if necessary
                     if (currentChunk != null) {
                         if ((currentChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
                             toLoadKeys[toInsertKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
@@ -308,56 +309,44 @@ public class DataManager implements KDataManager, KInternalDataManager {
                             toInsertKey++;
                         }
                         _spaceManager.unmarkMemoryElement(currentChunk);
-                    } else if (_listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2]) && updatedKeys[i * KEY_SIZE + 2] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 1] != KConfig.NULL_LONG) {
+                    }
+                    //check if this is an object chunk
+                    if (_listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2]) && updatedKeys[i * KEY_SIZE] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 1] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 2] != KConfig.NULL_LONG) {
                         //check if the object is listened anyway
-                        toLoadKeys[toInsertKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
-                        toLoadKeys[toInsertKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
-                        toLoadKeys[toInsertKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
-                        toInsertKey++;
+                        toNotifyKeys[toInsertNotifyKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
+                        toNotifyKeys[toInsertNotifyKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
+                        toNotifyKeys[toInsertNotifyKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
+                        toInsertNotifyKey++;
                     }
                 }
-                if (toInsertKey == 0) {
+                if (toInsertKey == 0 && toInsertNotifyKey == 0) {
                     return;
                 }
                 final long[] trimmedToLoad = new long[toInsertKey];
                 System.arraycopy(toLoadKeys, 0, trimmedToLoad, 0, toInsertKey);
+                final long[] trimmedToNotify = new long[toInsertNotifyKey];
+                System.arraycopy(toNotifyKeys, 0, trimmedToNotify, 0, toInsertNotifyKey);
+
                 KMetaModel mm = _model.metaModel();
-                AbstractKModel am = (AbstractKModel) _model;
                 _db.get(trimmedToLoad, new KCallback<String[]>() {
                     @Override
                     public void on(String[] payloads) {
-                        KObject[] updatedElements = new KObject[payloads.length];
-                        int indexToInsert = 0;
                         for (int i = 0; i < payloads.length; i++) {
                             if (payloads[i] != null) {
                                 KChunk currentChunk = _spaceManager.getAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2]);
                                 if (currentChunk != null) {
                                     currentChunk.init(payloads[i], mm, -1);
-                                    if (currentChunk.type() == KChunkTypes.OBJECT_CHUNK) {
-                                        if (_listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2])) {
-                                            KObjectChunk objectChunk = (KObjectChunk) currentChunk;
-                                            updatedElements[indexToInsert] = am.createProxy(currentChunk.universe(), currentChunk.time(), currentChunk.obj(), mm.metaClass(objectChunk.metaClassIndex()), currentChunk.universe(), currentChunk.time());
-                                            indexToInsert++;
-                                        } else {
-                                            _spaceManager.unmarkMemoryElement(currentChunk);
-                                        }
-                                    } else {
-                                        _spaceManager.unmarkMemoryElement(currentChunk);
-                                    }
-                                } else {
-                                    //KObjectChunk objectChunk = (KObjectChunk) _spaceManager.createAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2], KChunkTypes.OBJECT_CHUNK);
-                                    //objectChunk.init(payloads[i], mm, -1);
-                                    //updatedElements[indexToInsert] = am.createProxy(objectChunk.universe(), objectChunk.time(), objectChunk.obj(), mm.metaClass(objectChunk.metaClassIndex()), objectChunk.universe(), objectChunk.time());
-                                    updatedElements[indexToInsert] = null;
+                                    _spaceManager.unmarkMemoryElement(currentChunk);
                                 }
                             }
                         }
-                        if (indexToInsert == 0) {
-                            return;
-                        }
-                        KObject[] trimmedElements = new KObject[indexToInsert];
-                        System.arraycopy(updatedElements, 0, trimmedElements, 0, indexToInsert);
-                        _listenerManager.dispatch(trimmedElements);
+                        //now call a lookup on all elements that have to be notify
+                        _resolver.lookupPreciseKeys(trimmedToNotify, new KCallback<KObject[]>() {
+                            @Override
+                            public void on(KObject[] updatedObjects) {
+                                _listenerManager.dispatch(updatedObjects);
+                            }
+                        });
                     }
                 });
             }

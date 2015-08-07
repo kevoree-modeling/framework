@@ -13,6 +13,8 @@ public interface KResolver {
 
     Runnable lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback);
 
+    Runnable lookupPreciseKeys(long[] keys, KCallback<KObject[]> callback);
+
     KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
 
     KObjectChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);

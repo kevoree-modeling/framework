@@ -179,6 +179,75 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
+    public final Runnable lookupPreciseKeys(long[] keys, KCallback<KObject[]> callback) {
+        final DistortedTimeResolver selfPointer = this;
+        return new Runnable() {
+            @Override
+            public void run() {
+                selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
+                    @Override
+                    public void on(KChunk theGlobalUniverseOrderElement) {
+                        if (theGlobalUniverseOrderElement != null) {
+                            final long[] allOrderedKeys = new long[keys.length * 3];
+                            int insertIndex = 0;
+                            int nbKeys = keys.length / 3;
+                            for (int i = 0; i < nbKeys; i++) {
+                                //objectUniverseOrder
+                                allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
+                                insertIndex++;
+                                allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
+                                insertIndex++;
+                                allOrderedKeys[insertIndex] = keys[i * 3 + 2];
+                                insertIndex++;
+                                //objectTimeORder
+                                allOrderedKeys[insertIndex] = keys[i * 3];
+                                insertIndex++;
+                                allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
+                                insertIndex++;
+                                allOrderedKeys[insertIndex] = keys[i * 3 + 2];
+                                insertIndex++;
+                                //objectChunk
+                                allOrderedKeys[insertIndex] = keys[i * 3];
+                                insertIndex++;
+                                allOrderedKeys[insertIndex] = keys[i * 3 + 1];
+                                insertIndex++;
+                                allOrderedKeys[insertIndex] = keys[i * 3 + 2];
+                                insertIndex++;
+                            }
+                            selfPointer.getOrLoadAndMarkAll(allOrderedKeys, new KCallback<KChunk[]>() {
+
+                                @Override
+                                public void on(KChunk[] kChunks) {
+                                    if (kChunks == null || kChunks.length == 0) {
+                                        selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                        callback.on(new KObject[0]);
+                                        return;
+                                    } else {
+                                        KObject[] finalResult = new KObject[nbKeys];
+                                        int insertIndex = 0;
+                                        int previousClassIndex = -1;
+                                        for (int h = 0; h < kChunks.length; h++) {
+                                            if (kChunks[h] != null && kChunks[h].type() == KChunkTypes.OBJECT_CHUNK) {
+                                                finalResult[insertIndex] = ((AbstractKModel) selfPointer._manager.model()).createProxy(kChunks[h].universe(), kChunks[h].time(), kChunks[h].obj(), selfPointer._manager.model().metaModel().metaClass(previousClassIndex), kChunks[h].universe(), kChunks[h].time());
+                                                insertIndex++;
+                                            } else if (kChunks[h] != null && kChunks[h].type() == KChunkTypes.LONG_LONG_MAP) {
+                                                KLongLongMap casted = (KLongLongMap) kChunks[h];
+                                                previousClassIndex = casted.metaClassIndex();
+                                            }
+                                        }
+                                        selfPointer._spaceManager.registerAll(finalResult);
+                                        callback.on(finalResult);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        };
+    }
+
+    @Override
     public final Runnable lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         final DistortedTimeResolver selfPointer = this;
         return new Runnable() {
