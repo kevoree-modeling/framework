@@ -44,11 +44,19 @@ Publications:
 -------------
 Within the scope of the KMF project several research papers have been published: 
 
+**Foundation papers:**
+
 * Francois Fouquet, Gregory Nain, Brice Morin, Erwan Daubert, Olivier Barais Christmas Plouzeau, and Jean-Marc Jézéquel. **An Eclipse Modelling Framework Alternative to Meet the Models@Runtime Requirements**. In ASM/IEEE 15th Model Driven Engineering Languages ​​and Systems (MODELS'12), 2012. 
 * Thomas Hartmann, Francois Fouquet, Gregory Nain, Jacques Klein, Brice Morin, and Yves Le Traon. **Reasoning at runtime using time-distorted contexts: Amodels@run.time based approach**. In 26th International Conference on Software Engineering and Knowledge Engineering (SEKE'14), 2014.
 * Thomas Hartmann, Francois Fouquet, Gregory Nain, Brice Morin, Jacques Klein, Olivier Barais, and Yves Le Traon. **A Native Versioning Concept to Support Historized Models at Runtime**. In ASM/IEEE 17th International Conference on Model Driven Engineering Languages ​​and Systems (MODELS'14), 2014.
+* Assaad Moawad, Thomas Hartmann, Francois Fouquet, Gregory Nain, Jacques Klein, and Johann Bourcier. **A Model-Driven Approach for Simpler, Safer, and Evolutive Multi-Objective Optimization Development**. In 3rd International Conference on Model-Driven Engineering and Software Development (MODELSWARD'15), 2015.
 * Thomas Hartmann, Assaad Moawad, Francois Fouquet, Gregory Nain, Jacques Klein, and Yves Le Traon. **Stream my Models: Reactive Peer-to-Peer Distributed Models@run.time**. (will appear soon).
 * Assaad Moawad, Thomas Hartmann, Francois Fouquet, Gregory Nain, Jacques Klein, and Yves Le Traon. **Beyond Discrete Modeling: Continuous and Efficient Models@Run.time for IoT**. (will appear soon).
+
+**Application papers:**
+
+* Thomas Hartmann, Francois Fouquet, Jacques Klein, Gregory Nain, and Yves Le Traon. **Reactive Security for Smart Grids Using Models@run.time-Based Simulation and Reasoning**. In Second Open EIT ICT Labs Workshop on Smart Grid Security (SmartGridSec'14), 2014.
+* Thomas Hartmann, Francois Fouquet, Jacques Klein, and Yves Le Traon, Alexander Pelov, Laurent Toutain, and Tanguy Ropitault. **Generating Realistic Smart Grid Communication Topologies Based on Real-Data**. In IEEE 5th International Conference on Smart Grid Communications (SmartGridComm'14), 2014. 	
 
 Getting started
 ==============
