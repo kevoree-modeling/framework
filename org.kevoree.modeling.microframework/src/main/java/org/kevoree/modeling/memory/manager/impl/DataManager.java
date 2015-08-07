@@ -148,9 +148,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
         toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
         toSaveKeys[i * KEY_SIZE + 2] = _universeKeyCalculator.prefix();
         toSaveValues[i] = "" + _universeKeyCalculator.lastComputedIndex();
+        _spaceManager.notifySaved(savedChunks);
         _db.put(toSaveKeys, toSaveValues, callback, this.currentCdnListener);
         //inform potential GC that these objects may have to cleaned
-        _spaceManager.notifySaved(savedChunks);
     }
 
     @Override

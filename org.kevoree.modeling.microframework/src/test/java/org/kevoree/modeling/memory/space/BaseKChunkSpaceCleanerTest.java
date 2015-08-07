@@ -36,14 +36,14 @@ public abstract class BaseKChunkSpaceCleanerTest {
 
                 long sensorID = sensor.uuid();
                 sensor = null;
-                universe.save(null);
                 System.gc();
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
+                //object are dirty cannot be saved
+                Assert.assertEquals(4, ((KInternalDataManager) manager).spaceSize());
                 manager.save(new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {

@@ -107,10 +107,8 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     KChunk spaceChunk = _space.get(relatedKeys[i * 3], relatedKeys[i * 3 + 1], relatedKeys[i * 3 + 2]);
                     if (spaceChunk != null) {
                         unmarkMemoryElement(spaceChunk);
-                        if (spaceChunk.counter() == 0) {
-                            if ((spaceChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-                                _space.remove(spaceChunk.universe(), spaceChunk.time(), spaceChunk.obj(), _metaModel);
-                            }
+                        if (spaceChunk.counter() == 0 && (spaceChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                            _space.remove(spaceChunk.universe(), spaceChunk.time(), spaceChunk.obj(), _metaModel);
                         }
                     }
                 }
