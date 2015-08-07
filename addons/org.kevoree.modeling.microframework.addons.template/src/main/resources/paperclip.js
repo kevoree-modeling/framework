@@ -251,20 +251,23 @@
             });
 
             var keys = typeof path === "string" ? path.split(".") : path;
-            var ct = object;
+            var schema = object;
             var key;
-            for (var i = 0, n = keys.length - 1; i < n; i++) {
+            var ctIndex = keys.length - 2;
+            for (var i = 0; i < ctIndex; i++) {
                 key = keys[i];
-                if (!ct[key]) {
-                    ct[key] = {};
+                if (!schema[key]) {
+                    schema[key] = {};
                 }
-                ct = ct[key];
+                schema = schema[key];
             }
+            var ct = schema[keys[ctIndex]];
             if (ct['_metaClass'] != undefined) {
 
                 var modelListener = ct.manager().model().createListener(ct.universe());
                 modelListener.listen(ct);
-                modelListener.then(function(){
+                modelListener.then(function(newObj){
+                    schema[keys[ctIndex]] = newObj;
                     watcher.apply();
                 });
             }
