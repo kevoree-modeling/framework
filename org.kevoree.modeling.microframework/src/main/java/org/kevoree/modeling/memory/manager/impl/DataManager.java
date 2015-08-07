@@ -322,10 +322,10 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 if (toInsertKey == 0 && toInsertNotifyKey == 0) {
                     return;
                 }
-                final long[] trimmedToLoad = new long[toInsertKey*3];
-                System.arraycopy(toLoadKeys, 0, trimmedToLoad, 0, toInsertKey*3);
-                final long[] trimmedToNotify = new long[toInsertNotifyKey*3];
-                System.arraycopy(toNotifyKeys, 0, trimmedToNotify, 0, toInsertNotifyKey*3);
+                final long[] trimmedToLoad = new long[toInsertKey * 3];
+                System.arraycopy(toLoadKeys, 0, trimmedToLoad, 0, toInsertKey * 3);
+                final long[] trimmedToNotify = new long[toInsertNotifyKey * 3];
+                System.arraycopy(toNotifyKeys, 0, trimmedToNotify, 0, toInsertNotifyKey * 3);
 
                 KMetaModel mm = _model.metaModel();
                 _db.get(trimmedToLoad, new KCallback<String[]>() {
