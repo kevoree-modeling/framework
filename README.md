@@ -43,14 +43,50 @@ TODO
 
 
 
-Traversal and Query operations
+Traverse and Query data graph
 ==============
 
 
-KDefer: synchronisation barrier
-===============================
 
 
+Avoid callback hell using KDefer
+=============
 
+All KMF methods are build around the common asynchronous principle. This means that all results will be given in a KCallback closure (or anonymous function in javascript). Chaining severals operations or collecting severals KObject trough different method calls can leads to a huge nested hierarchy of callback. To avoid this callback hell effect KMF introduces an API named KDefer. In a nutshell, KDefer are barrier object than can be created on demand from the model and able to wait and collector several asynchronous results. The API is death simple, you create a KDefer object and then from it you can create various callbacks that you can inject in various query methods for instance.
+
+The following code snippet illustrates the use of this API in Java code:
+
+```java
+KDefer myDefer = myModel.defer();
+model.select("nodes[n=n1]", myDefer.waitResult());
+model.select("nodes[n=n2]", myDefer.waitResult());
+```	 
+
+and similarly in JavaScript:
+
+```js
+var myDefer = myModel.defer();
+model.select("nodes[name=N1]", myDefer.waitResult());
+model.select("nodes[name=N2]", myDefer.waitResult());
+```	
+
+Once all necessary callbacks have injected, you can end the KDefer by giving the final KCallback that will be called once all results are ready:
+
+Here is the exemple in Java:
+
+```java
+myDefer.then(new KCallback<KObject[]>{
+	void on(KObject[] objects){
+		objects[0] //contains objects with name N0
+		objects[1] //contains objects with name N1	};});
+```	 
+
+Similarly here is the JavaScript illustration:
+
+```js
+myDefer.then(function(objects){
+	objects[0] //contains objects with name N0
+	objects[1] //contains objects with name N1});
+```	
 
 
