@@ -6,8 +6,10 @@ Like EMF, KMF is a modeling framework and code generation facility for building 
 While EMF was primarily designed to support design-time models, KMF is specifically designed to support the models@run.time paradigm and targets runtime models.
 Runtime models of complex systems usually have high requirements regarding memory usage, runtime performance, and thread safety.
 KMF was specifically designed with this requirements in mind. 
-Since its early days as an EMF alternative KMF evolved to a framework for efficient modeling (structuring), processing, and analyzing large-scale data.
-It enables models with millions of elements, which no longer must fit completely into the main memory and supports the distribution of models over thousands of nodes.     
+
+The border between large-scale data management systems and models is becoming less and less strict as models@run.time progressively gains maturity through large-scale and distribution mechanisms.
+Therefore, since its early days as an EMF alternative KMF evolved to a framework for efficient modeling (structuring), processing, and analyzing large-scale data.
+It enables models with millions of elements, which no longer must fit completely into main memory, and supports the distribution of models over thousands of nodes.
  
 KMF provides developers a powerful toolset to model, structure, and reason about complex data (during design- and runtime), while still being a 'lightweight' framework trying to introduce as less overhead as possible.
 Advanced features like a notion of time, a native per object based versioning concept, distribution support, and easy-to-plug machine learning algorithms make KMF a powerful toolset for structuring, processing, and analyzing data.
@@ -16,8 +18,16 @@ A main focus of KMF is on performance and scalability, which are often neglected
 
 Features and Design Principles
 -------------
-KMF was specifically designed with memory usage, runtime performance, and thread safety requirements in mind.
-TODO: async, lazy load etc, end goal data overlay
+As a main design principle KMF was from the beginning designed with strict memory usage, runtime performance, and thread safety requirements in mind.
+To cope at the same time with the large-scale, distributed, and constantly changing nature of modern applications the design of KMF combines ideas from reactive programming, peer-to-peer distribution, big data management, and machine learning.
+Models are defined as observable streams of chunks that are exchanged between nodes in a peer-to-peer manner. 
+A lazy loading strategy allows to transparently access the complete virtual model from every node, although chunks are actually distributed across nodes.
+Observers and automatic reloading of chunks enable a reactive programming style.
+The distributed aspect of many modern applications lead to the decision to design a completely asynchronous core for KMF. 
+ 
+TODO meta model and dynamic models
+
+TODO data overlay
 
 
 Publications:
