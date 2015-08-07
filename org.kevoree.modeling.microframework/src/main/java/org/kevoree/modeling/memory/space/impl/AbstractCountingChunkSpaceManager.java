@@ -78,4 +78,6 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
 
     abstract public void setResolver(KResolver resolver);
 
+    abstract public void notifySaved(KChunk[] savedChunks);
+
 }
