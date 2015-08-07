@@ -15,15 +15,18 @@ A main focus of KMF is on performance and scalability, which are often neglected
 Features and Design Principles
 -------------
 KMF was specifically designed with memory usage, runtime performance, and thread safety requirements in mind.
-
 TODO: async, lazy load etc, end goal data overlay
 
 
 Publications:
 -------------
+Within the scope of the KMF project several research papers have been published: 
 
-TODO insert publication here
-
+* Francois Fouquet, Gregory Nain, Brice Morin, Erwan Daubert, Olivier Barais Christmas Plouzeau, and Jean-Marc Jézéquel. **An Eclipse Modelling Framework Alternative to Meet the Models@Runtime Requirements**. In ASM/IEEE 15th Model Driven Engineering Languages ​​and Systems (MODELS'12), 2012. 
+* Thomas Hartmann, Francois Fouquet, Gregory Nain, Jacques Klein, Brice Morin, and Yves Le Traon. **Reasoning at runtime using time-distorted contexts: Amodels@run.time based approach**. In 26th International Conference on Software Engineering and Knowledge Engineering (SEKE'14), 2014.
+* Thomas Hartmann, Francois Fouquet, Gregory Nain, Brice Morin, Jacques Klein, Olivier Barais, and Yves Le Traon. **A Native Versioning Concept to Support Historized Models at Runtime**. In ASM/IEEE 17th International Conference on Model Driven Engineering Languages ​​and Systems (MODELS'14), 2014.
+* Thomas Hartmann, Assaad Moawad, Francois Fouquet, Gregory Nain, Jacques Klein, and Yves Le Traon. **Stream my Models: Reactive Peer-to-Peer Distributed Models@run.time**. (will appear soon).
+* Assaad Moawad, Thomas Hartmann, Francois Fouquet, Gregory Nain, Jacques Klein, and Yves Le Traon. **Beyond Discrete Modeling: Continuous and Efficient Models@Run.time for IoT**. (will appear soon).
 
 Getting started
 ==============
@@ -77,7 +80,9 @@ Here is the exemple in Java:
 myDefer.then(new KCallback<KObject[]>{
 	void on(KObject[] objects){
 		objects[0] //contains objects with name N0
-		objects[1] //contains objects with name N1	};});
+		objects[1] //contains objects with name N1
+	};
+});
 ```	 
 
 Similarly here is the JavaScript illustration:
@@ -85,7 +90,8 @@ Similarly here is the JavaScript illustration:
 ```js
 myDefer.then(function(objects){
 	objects[0] //contains objects with name N0
-	objects[1] //contains objects with name N1});
+	objects[1] //contains objects with name N1
+});
 ```	
 
 
