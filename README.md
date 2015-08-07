@@ -9,13 +9,12 @@ KMF was specifically designed with this requirements in mind.
  
 KMF provides developers a powerful toolset to model, structure, and reason about complex data (during design- and runtime), while still being a 'lightweight' framework trying to introduce as less overhead as possible.
 Advanced features like a notion of time, a native per object based versioning concept, distribution support, and easy-to-plug machine learning algorithms make KMF a powerful toolset for structuring, processing, and analyzing data.
-  
+A main focus of KMF is on performance and scalability, which are often neglected to a great extend by modeling frameworks.    
 
-TODO scalability and big data 
 
 Features and Design Principles
 -------------
-lightweight
+KMF was specifically designed with memory usage, runtime performance, and thread safety requirements in mind.
 
 TODO: async, lazy load etc, end goal data overlay
 
