@@ -17,6 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceManager implements Runnable {
 
+    /* This is the very first GC collector for KMF, thanks Floreal :-) */
+
     private final ReferenceQueue<KObject> referenceQueue;
     private final AtomicReference<KObjectPhantomReference> headPhantom;
     private KMetaModel _metaModel;

@@ -151,7 +151,6 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     private KChunk internal_put(long universe, long time, long p_obj, KChunk payload) {
-        // synchronized (lock) {
         InternalState currentState;
         InternalState nextState;
         KChunk result;
@@ -169,8 +168,7 @@ public class HeapChunkSpace implements KChunkSpace {
                 //value has to be really inserted
                 int nextValueIndex = currentState._valuesIndex.getAndIncrement();
                 if (nextValueIndex > currentState._threshold) {
-                    nextState = rehashCapacity(currentState);
-                    index = (hash & 0x7FFFFFFF) % nextState.elementDataSize;
+                    return complex_insert(universe, time, p_obj, payload, hash, nextValueIndex);
                 } else {
                     nextState = currentState;
                 }
@@ -192,7 +190,27 @@ public class HeapChunkSpace implements KChunkSpace {
             }
         } while (!_state.compareAndSet(currentState, nextState));
         return result;
-        //  }
+    }
+
+    private synchronized KChunk complex_insert(long universe, long time, long p_obj, KChunk payload, int prehash, int nextValueIndex) {
+        InternalState currentState;
+        InternalState nextState;
+        do {
+            currentState = _state.get();
+            if (nextValueIndex > currentState._threshold) {
+                nextState = rehashCapacity(currentState);
+            } else {
+                nextState = currentState;
+            }
+            int index = (prehash & 0x7FFFFFFF) % nextState.elementDataSize;
+            nextState.elementK3[(nextValueIndex * 3)] = universe;
+            nextState.elementK3[((nextValueIndex * 3) + 1)] = time;
+            nextState.elementK3[((nextValueIndex * 3) + 2)] = p_obj;
+            nextState.values[nextValueIndex] = payload;
+            nextState.elementNext[nextValueIndex] = nextState.elementHash.getAndSet(index, nextValueIndex);
+            nextState._elementCount.incrementAndGet();
+        } while (!_state.compareAndSet(currentState, nextState));
+        return payload;
     }
 
     private InternalState rehashCapacity(InternalState previousState) {
