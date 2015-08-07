@@ -196,7 +196,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public int metaClassIndex() {
-        return 0;
+        return this._metaClassIndex;
     }
 
     @Override
