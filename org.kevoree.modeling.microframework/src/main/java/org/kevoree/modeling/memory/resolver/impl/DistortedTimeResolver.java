@@ -29,6 +29,7 @@ public class DistortedTimeResolver implements KResolver {
     public DistortedTimeResolver(KChunkSpaceManager p_cache, KInternalDataManager p_manager) {
         this._spaceManager = p_cache;
         this._manager = p_manager;
+        this._spaceManager.setResolver(this);
     }
 
     @Override
@@ -725,6 +726,16 @@ public class DistortedTimeResolver implements KResolver {
                 callback.on(results);
             }
         });
+    }
+
+    @Override
+    public long[] getRelatedKeys(long uuid, long[] previousResolution) {
+        return new long[]{
+                previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid,
+                previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, uuid,
+                KConfig.NULL_LONG, KConfig.NULL_LONG, uuid,
+                KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG,
+        };
     }
 
 }

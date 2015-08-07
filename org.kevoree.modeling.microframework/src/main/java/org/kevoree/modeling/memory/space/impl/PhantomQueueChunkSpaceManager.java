@@ -4,6 +4,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 
@@ -22,6 +23,7 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     private final ReferenceQueue<KObject> referenceQueue;
     private final AtomicReference<KObjectPhantomReference> headPhantom;
     private KMetaModel _metaModel;
+    private KResolver _resolver;
 
     public PhantomQueueChunkSpaceManager(KChunkSpace p_storage) {
         super(p_storage);
@@ -56,6 +58,11 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     }
 
     @Override
+    public void setResolver(KResolver p_resolver) {
+        this._resolver = p_resolver;
+    }
+
+    @Override
     public void run() {
         while (true) {
             KObjectPhantomReference kobj = null;
@@ -84,36 +91,16 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (kobj != null) {
-
-                //TODO delegate to resolver this management
-                KChunk resolvedChunk = _space.get(kobj.previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], kobj.previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], kobj.obj);
-                KChunk resolvedTimeTree = _space.get(kobj.previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, kobj.obj);
-                KChunk resolvedUniverseTree = _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, kobj.obj);
-                KChunk resolvedGlobalTree = _space.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
-
-                if (resolvedChunk != null) {
-                    unmarkMemoryElement(resolvedChunk);
-                    if (resolvedChunk.counter() == 0) {
-                        _space.remove(resolvedChunk.universe(), resolvedChunk.time(), resolvedChunk.obj(), _metaModel);
-                    }
-                }
-                if (resolvedTimeTree != null) {
-                    unmarkMemoryElement(resolvedTimeTree);
-                    if (resolvedTimeTree.counter() == 0) {
-                        _space.remove(resolvedTimeTree.universe(), resolvedTimeTree.time(), resolvedTimeTree.obj(), _metaModel);
-                    }
-                }
-                if (resolvedUniverseTree != null) {
-                    unmarkMemoryElement(resolvedUniverseTree);
-                    if (resolvedUniverseTree.counter() == 0) {
-                        _space.remove(resolvedUniverseTree.universe(), resolvedUniverseTree.time(), resolvedUniverseTree.obj(), _metaModel);
-                    }
-                }
-                if (resolvedGlobalTree != null) {
-                    unmarkMemoryElement(resolvedGlobalTree);
-                    if (resolvedGlobalTree.counter() == 0) {
-                        _space.remove(resolvedGlobalTree.universe(), resolvedGlobalTree.time(), resolvedGlobalTree.obj(), _metaModel);
+            if (kobj != null && _resolver != null) {
+                long[] relatedKeys = _resolver.getRelatedKeys(kobj.obj, kobj.previousResolved);
+                int nbKeys = relatedKeys.length / 3;
+                for (int i = 0; i < nbKeys; i++) {
+                    KChunk spaceChunk = _space.get(relatedKeys[i * 3], relatedKeys[i * 3 + 1], relatedKeys[i * 3 + 2]);
+                    if (spaceChunk != null) {
+                        unmarkMemoryElement(spaceChunk);
+                        if (spaceChunk.counter() == 0) {
+                            _space.remove(spaceChunk.universe(), spaceChunk.time(), spaceChunk.obj(), _metaModel);
+                        }
                     }
                 }
             }

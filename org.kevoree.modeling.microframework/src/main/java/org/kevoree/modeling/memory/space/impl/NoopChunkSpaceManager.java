@@ -3,6 +3,7 @@ package org.kevoree.modeling.memory.space.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -62,6 +63,11 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
 
     @Override
     public void registerAll(KObject[] objects) {
+
+    }
+
+    @Override
+    public void setResolver(KResolver resolver) {
 
     }
 
