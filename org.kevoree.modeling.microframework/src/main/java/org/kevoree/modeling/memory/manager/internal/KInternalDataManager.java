@@ -8,15 +8,17 @@ import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.operation.KOperationManager;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public interface KInternalDataManager extends KDataManager {
 
     KListener createListener(long universe);
 
     KContentDeliveryDriver cdn();
 
-    KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
+    KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, AtomicReference<long[]> previousResolution);
 
-    KObjectChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
+    KObjectChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, AtomicReference<long[]> previousResolution);
 
     void initKObject(KObject obj);
 

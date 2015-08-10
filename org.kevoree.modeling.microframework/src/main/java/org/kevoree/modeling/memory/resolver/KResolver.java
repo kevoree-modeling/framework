@@ -6,6 +6,8 @@ import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public interface KResolver {
 
     Runnable lookup(long universe, long time, long uuid, KCallback<KObject> callback);
@@ -16,9 +18,9 @@ public interface KResolver {
 
     Runnable lookupPreciseKeys(long[] keys, KCallback<KObject[]> callback);
 
-    KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
+    KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, AtomicReference<long[]> previousResolution);
 
-    KObjectChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution);
+    KObjectChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, AtomicReference<long[]> previousResolution);
 
     void indexObject(KObject obj);
 

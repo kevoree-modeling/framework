@@ -18,7 +18,7 @@ public class PolynomialExtrapolation implements Extrapolation {
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
         KObjectChunk raw = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         if (raw != null) {
-            Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), ((AbstractKObject) current).previousResolved()[AbstractKObject.TIME_PREVIOUS_INDEX]);
+            Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), raw.time());
             int attTypeId = attribute.attributeType().id();
             switch (attTypeId) {
                 case KPrimitiveTypes.CONTINUOUS_ID:
@@ -165,16 +165,14 @@ public class PolynomialExtrapolation implements Extrapolation {
 
     @Override
     public void mutate(KObject current, KMetaAttribute attribute, Object payload, KInternalDataManager dataManager) {
-        long[] previousResolved = ((AbstractKObject) current).previousResolved();
-        KObjectChunk raw = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), previousResolved);
+        KObjectChunk raw = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         if (raw.getDoubleArraySize(attribute.index(), current.metaClass()) == 0) {
-            raw = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), previousResolved);
+            raw = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         }
-        long chunkResolvedTime = previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX];
-        if (!insert(current.now(), castNumber(payload), chunkResolvedTime, raw, attribute.index(), attribute.precision(), current.metaClass())) {
-            long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + chunkResolvedTime;
-            double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, chunkResolvedTime);
-            KObjectChunk newSegment = dataManager.preciseChunk(current.universe(), prevTime, current.uuid(), current.metaClass(), previousResolved);
+        if (!insert(current.now(), castNumber(payload), raw.time(), raw, attribute.index(), attribute.precision(), current.metaClass())) {
+            long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + raw.time();
+            double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, raw.time());
+            KObjectChunk newSegment = dataManager.preciseChunk(current.universe(), prevTime, current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
             insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
             insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
         }

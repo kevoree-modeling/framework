@@ -23,6 +23,8 @@ import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class DataManager implements KDataManager, KInternalDataManager {
 
     private static final String UNIVERSE_NOT_CONNECTED_ERROR = "Please connect your createModel prior to create a universe or an object";
@@ -161,7 +163,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution) {
+    public KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, AtomicReference<long[]> previousResolution) {
         KObjectChunk resolvedChunk = _resolver.preciseChunk(universe, time, uuid, metaClass, previousResolution);
         if (resolvedChunk != null) {
             return resolvedChunk;
@@ -172,7 +174,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public KObjectChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, long[] previousResolution) {
+    public KObjectChunk closestChunk(long universe, long time, long uuid, KMetaClass metaClass, AtomicReference<long[]> previousResolution) {
         KObjectChunk resolvedChunk = _resolver.closestChunk(universe, time, uuid, metaClass, previousResolution);
         if (resolvedChunk != null) {
             return resolvedChunk;

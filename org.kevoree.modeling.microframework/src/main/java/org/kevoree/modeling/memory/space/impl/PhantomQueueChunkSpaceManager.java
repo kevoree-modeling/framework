@@ -89,7 +89,7 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                 e.printStackTrace();
             }
             if (kobj != null && _resolver != null) {
-                long[] relatedKeys = _resolver.getRelatedKeys(kobj.obj, kobj.previousResolved);
+                long[] relatedKeys = _resolver.getRelatedKeys(kobj.obj, kobj.previousResolved.get());
                 int nbKeys = relatedKeys.length / 3;
                 for (int i = 0; i < nbKeys; i++) {
                     KChunk spaceChunk = _space.get(relatedKeys[i * 3], relatedKeys[i * 3 + 1], relatedKeys[i * 3 + 2]);
@@ -104,7 +104,7 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     class KObjectPhantomReference extends PhantomReference<KObject> {
 
         public long obj;
-        public long[] previousResolved;
+        public AtomicReference<long[]> previousResolved;
         private KObjectPhantomReference next;
         private KObjectPhantomReference previous;
 

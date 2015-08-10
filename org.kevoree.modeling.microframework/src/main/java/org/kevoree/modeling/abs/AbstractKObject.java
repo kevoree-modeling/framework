@@ -21,6 +21,7 @@ import org.kevoree.modeling.util.Checker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractKObject implements KObject {
 
@@ -30,8 +31,8 @@ public abstract class AbstractKObject implements KObject {
     final protected KMetaClass _metaClass;
     final public KInternalDataManager _manager;
     final private static String OUT_OF_CACHE_MSG = "Out of cache Error";
-
-    private final long[] _previousResolveds = new long[2];
+    
+    private final AtomicReference<long[]> _previousResolveds;
     public static final int UNIVERSE_PREVIOUS_INDEX = 0;
     public static final int TIME_PREVIOUS_INDEX = 1;
 
@@ -41,19 +42,20 @@ public abstract class AbstractKObject implements KObject {
         this._uuid = p_uuid;
         this._metaClass = p_metaClass;
         this._manager = p_manager;
-        this._previousResolveds[UNIVERSE_PREVIOUS_INDEX] = p_actualUniverse;
-        this._previousResolveds[TIME_PREVIOUS_INDEX] = p_actualTime;
+        this._previousResolveds = new AtomicReference<long[]>();
+        long[] initResolved = new long[]{p_actualUniverse, p_actualTime};
+        this._previousResolveds.set(initResolved);
     }
 
-    public long[] previousResolved() {
+    public AtomicReference<long[]> previousResolved() {
         return this._previousResolveds;
     }
 
     @Override
     public long timeDephasing() {
-        return _time - this._previousResolveds[TIME_PREVIOUS_INDEX];
+        return _time - this._previousResolveds.get()[TIME_PREVIOUS_INDEX];
     }
-    
+
     @Override
     public long uuid() {
         return _uuid;
