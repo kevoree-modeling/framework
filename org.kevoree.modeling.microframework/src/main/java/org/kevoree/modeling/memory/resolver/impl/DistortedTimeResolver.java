@@ -422,24 +422,24 @@ public class DistortedTimeResolver implements KResolver {
                 currentEntry = (KObjectChunk) _spaceManager.getAndMark(resolvedUniverse, resolvedTime, uuid);
             //}
             if (currentEntry == null) {
-                if (!wasPreviouslyTheSameUniverseTime) {
+                //if (!wasPreviouslyTheSameUniverseTime) {
                     _spaceManager.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
                     previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = resolvedUniverse;
                     previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = resolvedTime;
-                }
+                //}
                 _spaceManager.unmarkMemoryElement(timeTree);
                 _spaceManager.unmarkMemoryElement(globalUniverseTree);
                 _spaceManager.unmarkMemoryElement(objectUniverseTree);
                 return null;
             }
             if (!needTimeCopy && !needUniverseCopy) {
-                if (!wasPreviouslyTheSameUniverseTime) {
+                //if (!wasPreviouslyTheSameUniverseTime) {
                     _spaceManager.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
                     previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = resolvedUniverse;
                     previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = resolvedTime;
-                } else {
-                    _spaceManager.unmarkMemoryElement(currentEntry);
-                }
+                //} else {
+                //    _spaceManager.unmarkMemoryElement(currentEntry);
+               // }
                 _spaceManager.unmarkMemoryElement(timeTree);
                 _spaceManager.unmarkMemoryElement(globalUniverseTree);
                 _spaceManager.unmarkMemoryElement(objectUniverseTree);
