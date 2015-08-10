@@ -3,7 +3,6 @@ package org.kevoree.modeling.memory.space.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.KChunk;
-import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 

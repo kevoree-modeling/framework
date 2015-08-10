@@ -7,23 +7,18 @@ import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 
 import java.util.Calendar;
 
-
-/**
- * Created by assaad on 21/07/15.
- */
 public class DateMathExpressionTest {
-
-
+    
     protected KMathExpressionEngine createEngine() {
         return new MathExpressionEngine();
     }
 
-
-    /** @native ts
+    /**
+     * @native ts
      * var date = new Date(2015,2,11,20,53,47,0);
      * return date.getTime();
      */
-    public double getDate(){
+    public double getDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2015, 02, 11, 20, 53, 47); // date of wednesday 11 march 2015, 20h:53min:47sec
         return (double) calendar.getTimeInMillis();
