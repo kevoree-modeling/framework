@@ -6,7 +6,6 @@ import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.space.KChunkSpace;
-import org.kevoree.modeling.meta.KMetaModel;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;

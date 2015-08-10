@@ -371,9 +371,11 @@ public class DistortedTimeResolver implements KResolver {
             time = time - (time % metaClass.temporalResolution());
         }
         KObjectChunk currentEntry;
+        /*
         if (previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] == universe && previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] == time) {
-            currentEntry = (KObjectChunk) _spaceManager.unsafeGet(universe, time, uuid);
+            currentEntry = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
             if (currentEntry != null) {
+                _spaceManager.unmarkMemoryElement(currentEntry);
                 return currentEntry;
             }
         } else {
@@ -384,6 +386,14 @@ public class DistortedTimeResolver implements KResolver {
                 previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = time;
                 return currentEntry;
             }
+        }*/
+        currentEntry = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
+        if (currentEntry != null) {
+            //TODO maybe CAS here
+            _spaceManager.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+            previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = universe;
+            previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = time;
+            return currentEntry;
         }
         KLongLongMap objectUniverseTree = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
         if (objectUniverseTree == null) {
@@ -406,11 +416,11 @@ public class DistortedTimeResolver implements KResolver {
             boolean needTimeCopy = !useClosest && (resolvedTime != time);
             boolean needUniverseCopy = !useClosest && (resolvedUniverse != universe);
             boolean wasPreviouslyTheSameUniverseTime = previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] == resolvedUniverse && previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] == resolvedTime;
-            if (wasPreviouslyTheSameUniverseTime) {
-                currentEntry = (KObjectChunk) _spaceManager.unsafeGet(resolvedUniverse, resolvedTime, uuid);
-            } else {
+            //if (wasPreviouslyTheSameUniverseTime) {
+             //   currentEntry = (KObjectChunk) _spaceManager.unsafeGet(resolvedUniverse, resolvedTime, uuid);
+            //} else {
                 currentEntry = (KObjectChunk) _spaceManager.getAndMark(resolvedUniverse, resolvedTime, uuid);
-            }
+            //}
             if (currentEntry == null) {
                 if (!wasPreviouslyTheSameUniverseTime) {
                     _spaceManager.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
@@ -427,9 +437,9 @@ public class DistortedTimeResolver implements KResolver {
                     _spaceManager.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
                     previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = resolvedUniverse;
                     previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = resolvedTime;
-                } /*else {
+                } else {
                     _spaceManager.unmarkMemoryElement(currentEntry);
-                }*/
+                }
                 _spaceManager.unmarkMemoryElement(timeTree);
                 _spaceManager.unmarkMemoryElement(globalUniverseTree);
                 _spaceManager.unmarkMemoryElement(objectUniverseTree);
@@ -726,7 +736,7 @@ public class DistortedTimeResolver implements KResolver {
         });
     }
 
-    public final static long resolve_universe(KLongLongMap globalTree, KLongLongMap objUniverseTree, long timeToResolve, long originUniverseId) {
+    public static long resolve_universe(KLongLongMap globalTree, KLongLongMap objUniverseTree, long timeToResolve, long originUniverseId) {
         if (globalTree == null || objUniverseTree == null) {
             return originUniverseId;
         }
@@ -746,7 +756,7 @@ public class DistortedTimeResolver implements KResolver {
         return originUniverseId;
     }
 
-    public final static long[] universeSelectByRange(KLongLongMap globalTree, KLongLongMap objUniverseTree, long rangeMin, long rangeMax, long originUniverseId) {
+    public static long[] universeSelectByRange(KLongLongMap globalTree, KLongLongMap objUniverseTree, long rangeMin, long rangeMax, long originUniverseId) {
         KLongLongMap collected = new ArrayLongLongMap(-1, -1, -1, null);
         long currentUniverse = originUniverseId;
         long previousUniverse = KConfig.NULL_LONG;
@@ -785,9 +795,10 @@ public class DistortedTimeResolver implements KResolver {
                     results[i] = _spaceManager.createAndMark(loopUniverse, loopTime, loopUuid, typeFromKey(loopUniverse, loopTime, loopUuid));
                     int classIndex = -1;
                     if (loopUniverse != KConfig.NULL_LONG && loopTime != KConfig.NULL_LONG && loopUuid != KConfig.NULL_LONG) {
-                        KLongLongMap alreadyLoadedOrder = (KLongLongMap) _spaceManager.unsafeGet(KConfig.NULL_LONG, KConfig.NULL_LONG, loopUuid);
+                        KLongLongMap alreadyLoadedOrder = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, loopUuid);
                         if (alreadyLoadedOrder != null) {
                             classIndex = alreadyLoadedOrder.metaClassIndex();
+                            _spaceManager.unmarkMemoryElement(alreadyLoadedOrder);
                         }
                     }
                     results[i].init(payloads[i], _manager.model().metaModel(), classIndex);
