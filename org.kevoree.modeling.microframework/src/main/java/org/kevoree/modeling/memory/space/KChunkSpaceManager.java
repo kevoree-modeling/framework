@@ -11,9 +11,7 @@ public interface KChunkSpaceManager {
     KChunk getAndMark(long universe, long time, long obj);
 
     void unmark(long universe, long time, long obj);
-
-    KChunk unsafeGet(long universe, long time, long obj);
-
+    
     KChunk createAndMark(long universe, long time, long obj, short type);
 
     void unmarkMemoryElement(KChunk element);

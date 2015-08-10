@@ -40,11 +40,6 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     }
 
     @Override
-    public KChunk unsafeGet(long universe, long time, long obj) {
-        return _space.get(universe, time, obj);
-    }
-
-    @Override
     public KChunk createAndMark(long universe, long time, long obj, short type) {
         KChunk newCreatedElement = _space.create(universe, time, obj, type);
         if (newCreatedElement != null) {
