@@ -139,34 +139,37 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     }
 
     public void clear() {
-        int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
-        int initialCapacity = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_INITIAL_CAPACITY);
+        if (this._start_address != 0) {
 
-        if (elementCount > 0) {
-            long bytes = BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN;
-            long newAddress = UNSAFE.allocateMemory(bytes);
+            int elementCount = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_COUNT);
+            int initialCapacity = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_INITIAL_CAPACITY);
 
-            UNSAFE.copyMemory(this._start_address, newAddress, BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN);
+            if (elementCount > 0) {
+                long bytes = BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN;
+                long newAddress = UNSAFE.allocateMemory(bytes);
 
-            UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_COUNT, 0);
-            UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
-            UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, initialCapacity);
+                UNSAFE.copyMemory(this._start_address, newAddress, BASE_SEGMENT_LEN + initialCapacity * BACK_ELEM_ENTRY_LEN);
 
-            for (int i = 0; i < initialCapacity; i++) {
-                setNext(newAddress, i, -1);
-                setHash(newAddress, i, -1);
-            }
+                UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_COUNT, 0);
+                UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_DROPPED_COUNT, 0);
+                UNSAFE.putInt(newAddress + OFFSET_STARTADDRESS_ELEM_DATA_SIZE, initialCapacity);
 
-            long oldAddress = this._start_address;
-            this._start_address = newAddress;
-            UNSAFE.freeMemory(oldAddress);
+                for (int i = 0; i < initialCapacity; i++) {
+                    setNext(newAddress, i, -1);
+                    setHash(newAddress, i, -1);
+                }
 
-            long elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
-            int threshold = (int) (elementDataSize * this.loadFactor);
-            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
+                long oldAddress = this._start_address;
+                this._start_address = newAddress;
+                UNSAFE.freeMemory(oldAddress);
 
-            if (this._space != null) {
-                this._space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
+                long elementDataSize = UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_ELEM_DATA_SIZE);
+                int threshold = (int) (elementDataSize * this.loadFactor);
+                UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_THRESHOLD, threshold);
+
+                if (this._space != null) {
+                    this._space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
+                }
             }
         }
     }

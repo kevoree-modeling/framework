@@ -815,36 +815,38 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final void free(KMetaModel p_metaModel) {
-        KMetaClass metaClass = p_metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
+        if (this._start_address != 0) {
+            KMetaClass metaClass = p_metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
 
-        for (int i = 0; i < metaClass.metaElements().length; i++) {
-            KMeta meta = metaClass.metaElements()[i];
+            for (int i = 0; i < metaClass.metaElements().length; i++) {
+                KMeta meta = metaClass.metaElements()[i];
 
-            if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
-                KMetaAttribute metaAttribute = (KMetaAttribute) meta;
-                if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                    long ptr = rawPointerForIndex(metaAttribute.index(), metaClass);
+                if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
+                    KMetaAttribute metaAttribute = (KMetaAttribute) meta;
+                    if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                        long ptr = rawPointerForIndex(metaAttribute.index(), metaClass);
+                        long ptr_str_segment = UNSAFE.getLong(ptr);
+                        if (ptr_str_segment != 0) {
+                            UNSAFE.freeMemory(ptr_str_segment);
+//                        _allocated_segments--;
+                        }
+                    }
+                    if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                        long ptr = rawPointerForIndex(metaAttribute.index(), metaClass);
+                        long ptr_segment = UNSAFE.getLong(ptr);
+                        if (ptr_segment != 0) {
+                            UNSAFE.freeMemory(ptr_segment);
+//                        _allocated_segments--;
+                        }
+                    }
+                } else if (meta.metaType().equals(MetaType.REFERENCE)) {
+                    KMetaReference metaReference = (KMetaReference) meta;
+                    long ptr = rawPointerForIndex(metaReference.index(), metaClass);
                     long ptr_str_segment = UNSAFE.getLong(ptr);
                     if (ptr_str_segment != 0) {
                         UNSAFE.freeMemory(ptr_str_segment);
-//                        _allocated_segments--;
-                    }
-                }
-                if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                    long ptr = rawPointerForIndex(metaAttribute.index(), metaClass);
-                    long ptr_segment = UNSAFE.getLong(ptr);
-                    if (ptr_segment != 0) {
-                        UNSAFE.freeMemory(ptr_segment);
-//                        _allocated_segments--;
-                    }
-                }
-            } else if (meta.metaType().equals(MetaType.REFERENCE)) {
-                KMetaReference metaReference = (KMetaReference) meta;
-                long ptr = rawPointerForIndex(metaReference.index(), metaClass);
-                long ptr_str_segment = UNSAFE.getLong(ptr);
-                if (ptr_str_segment != 0) {
-                    UNSAFE.freeMemory(ptr_str_segment);
 //                    _allocated_segments--;
+                    }
                 }
             }
         }

@@ -658,7 +658,9 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     public final void free(KMetaModel p_metaModel) {
-        UNSAFE.freeMemory(this._start_address);
+        if (this._start_address != 0) {
+            UNSAFE.freeMemory(this._start_address);
+        }
     }
 
     @Override
