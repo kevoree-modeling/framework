@@ -379,4 +379,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
     public int spaceSize() {
         return _space.size();
     }
+
+    @Override
+    public void printDebug() {
+        this._space.printDebug();
+    }
 }

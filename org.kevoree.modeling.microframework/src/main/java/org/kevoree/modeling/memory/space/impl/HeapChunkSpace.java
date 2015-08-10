@@ -2,6 +2,7 @@
 package org.kevoree.modeling.memory.space.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.HeapObjectChunk;
@@ -374,6 +375,16 @@ public class HeapChunkSpace implements KChunkSpace {
         internalState._elementCount.set(0);
         internalState._valuesIndex.set(0);
         internalState._threshold = 0;
+    }
+
+    @Override
+    public void printDebug() {
+        InternalState state = _state.get();
+        for (int i = 0; i < state.values.length; i++) {
+            if (state.values[i] != null) {
+                System.err.println(state.elementK3[i * 3] + "," + state.elementK3[i * 3 + 1] + "," + state.elementK3[i * 3 + 1] + "=>" + state.values[i].type() + "(count:" + state.values[i].counter() + ",flag:" + state.values[i].getFlags() + ")");
+            }
+        }
     }
 
 }

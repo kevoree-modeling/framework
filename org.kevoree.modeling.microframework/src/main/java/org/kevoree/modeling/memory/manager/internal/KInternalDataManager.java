@@ -39,4 +39,6 @@ public interface KInternalDataManager extends KDataManager {
 
     int spaceSize();
 
+    void printDebug();
+
 }
