@@ -384,8 +384,11 @@ public class HeapChunkSpace implements KChunkSpace {
             for (int i = 0; i < state.values.length; i++) {
                 KChunk loopChunk = state.values[i];
                 if (loopChunk != null) {
-                    String content = loopChunk.serialize(null);
-                    System.err.println(state.elementK3[i * 3] + "," + state.elementK3[i * 3 + 1] + "," + state.elementK3[i * 3 + 2] + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")"+"==>"+content);
+                    String content = "";
+                    if (loopChunk.type() == KChunkTypes.OBJECT_CHUNK) {
+                        content = loopChunk.serialize(null);
+                    }
+                    System.err.println(state.elementK3[i * 3] + "," + state.elementK3[i * 3 + 1] + "," + state.elementK3[i * 3 + 2] + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + content);
                 }
             }
         } catch (Exception e) {
