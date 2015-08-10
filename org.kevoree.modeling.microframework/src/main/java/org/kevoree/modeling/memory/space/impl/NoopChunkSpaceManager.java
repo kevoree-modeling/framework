@@ -25,12 +25,7 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
     public void unmark(long universe, long time, long obj) {
 
     }
-
-    @Override
-    public KChunk unsafeGet(long universe, long time, long obj) {
-        return this._space.get(universe, time, obj);
-    }
-
+    
     @Override
     public KChunk createAndMark(long universe, long time, long obj, short type) {
         return this._space.create(universe, time, obj, type);
