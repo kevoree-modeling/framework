@@ -427,9 +427,9 @@ public class DistortedTimeResolver implements KResolver {
                     _spaceManager.unmark(previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
                     previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] = resolvedUniverse;
                     previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX] = resolvedTime;
-                } else {
+                } /*else {
                     _spaceManager.unmarkMemoryElement(currentEntry);
-                }
+                }*/
                 _spaceManager.unmarkMemoryElement(timeTree);
                 _spaceManager.unmarkMemoryElement(globalUniverseTree);
                 _spaceManager.unmarkMemoryElement(objectUniverseTree);
