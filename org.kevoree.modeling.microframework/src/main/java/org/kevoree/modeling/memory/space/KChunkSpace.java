@@ -24,6 +24,6 @@ public interface KChunkSpace {
 
     void declareDirty(KChunk dirtyChunk);
 
-    void printDebug();
+    void printDebug(KMetaModel p_metaModel);
 
 }

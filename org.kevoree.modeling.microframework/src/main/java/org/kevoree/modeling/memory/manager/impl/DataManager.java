@@ -382,6 +382,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public void printDebug() {
-        this._space.printDebug();
+        this._space.printDebug(_model.metaModel());
     }
 }

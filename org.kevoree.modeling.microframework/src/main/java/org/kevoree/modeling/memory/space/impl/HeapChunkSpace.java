@@ -378,16 +378,13 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     @Override
-    public void printDebug() {
+    public void printDebug(KMetaModel p_metaModel) {
         try {
             InternalState state = _state.get();
             for (int i = 0; i < state.values.length; i++) {
                 KChunk loopChunk = state.values[i];
                 if (loopChunk != null) {
-                    String content = "";
-                    if (loopChunk.type() == KChunkTypes.OBJECT_CHUNK) {
-                        content = loopChunk.serialize(null);
-                    }
+                    String content = loopChunk.serialize(p_metaModel);
                     System.err.println(state.elementK3[i * 3] + "," + state.elementK3[i * 3 + 1] + "," + state.elementK3[i * 3 + 2] + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + content);
                 }
             }
