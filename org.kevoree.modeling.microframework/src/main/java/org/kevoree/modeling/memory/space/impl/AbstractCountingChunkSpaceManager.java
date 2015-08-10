@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.space.impl;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.KChunk;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
@@ -11,6 +12,8 @@ import org.kevoree.modeling.meta.KMetaModel;
 public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceManager {
 
     protected KChunkSpace _space;
+
+    protected KMetaModel _metaModel;
 
     public AbstractCountingChunkSpaceManager(KChunkSpace p_storage) {
         this._space = p_storage;
@@ -29,7 +32,10 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     public void unmark(long universe, long time, long obj) {
         KChunk resolvedElement = _space.get(universe, time, obj);
         if (resolvedElement != null) {
-            resolvedElement.dec();
+            int newCount = resolvedElement.dec();
+            if (newCount == 0 && (resolvedElement.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                _space.remove(resolvedElement.universe(), resolvedElement.time(), resolvedElement.obj(), _metaModel);
+            }
         }
     }
 
@@ -49,13 +55,20 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
 
     @Override
     public void unmarkMemoryElement(KChunk element) {
-        element.dec();
+        int newCount = element.dec();
+        if (newCount == 0 && (element.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+            _space.remove(element.universe(), element.time(), element.obj(), _metaModel);
+        }
     }
 
     @Override
     public void unmarkAllMemoryElements(KChunk[] elements) {
         for (int i = 0; i < elements.length; i++) {
-            elements[i].dec();
+            KChunk loopChunk = elements[i];
+            int newCount = elements[i].dec();
+            if (newCount == 0 && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                _space.remove(loopChunk.universe(), loopChunk.time(), loopChunk.obj(), _metaModel);
+            }
         }
     }
 

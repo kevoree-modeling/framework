@@ -21,7 +21,6 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
 
     private final ReferenceQueue<KObject> referenceQueue;
     private final AtomicReference<KObjectPhantomReference> headPhantom;
-    private KMetaModel _metaModel;
     private KResolver _resolver;
 
     public PhantomQueueChunkSpaceManager(KChunkSpace p_storage) {
