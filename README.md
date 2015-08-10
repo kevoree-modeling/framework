@@ -15,8 +15,12 @@ KMF provides developers a powerful toolset to model, structure, and reason about
 Advanced features like a notion of time, a native per object based versioning concept, distribution support, and easy-to-plug machine learning algorithms make KMF a powerful toolset for structuring, processing, and analyzing data.
 A main focus of KMF is on performance and scalability, which are often neglected to a great extend by modeling frameworks.    
 
-TODO meta model with code generation AND dynamic models
-TODO support for different programming languages, currently Java + JavaScript 
+KMF supports the definition of formal meta models (inspired by Ecore) with a simple DSL and generates, based on this meta model definition, the necessary facilities to create and manipulate business objects (runtime entities).
+Code can be generated in different programming languages, currently we support Java and JavaScript. 
+By using isomorphic models (models in different languages which use the same API) the same model can be used for example in a backend server and browser front-end. 
+
+For a more light-weight approach KMF also supports the definition of dynamic meta models, which can be defined and instantiated with a simple API - no formal definition and code generation step is necessary.
+
 
 Design Principles and Features
 -------------
@@ -24,21 +28,21 @@ As a main design principle KMF was from the beginning designed with strict memor
 KMF takes efficiency seriously. 
 This includes implementing custom versions of internal core data structures, like hash maps and red-black trees backed by primitive arrays, to improve performance and memory usage.   
 To cope at the same time with the large-scale, distributed, and constantly changing nature of modern applications the design of KMF combines ideas from reactive programming, peer-to-peer distribution, big data management, and machine learning.
+The distributed aspect of many modern applications lead to the decision to design a completely asynchronous core for KMF. 
 Models are defined as observable streams of chunks that are exchanged between nodes in a peer-to-peer manner. 
 A lazy loading strategy allows to transparently access the complete virtual model from every node, although chunks are actually distributed across nodes.
 Observers and automatic reloading of chunks enable a reactive programming style.
-The distributed aspect of many modern applications lead to the decision to design a completely asynchronous core for KMF. 
 
 Features:
 
 * native support for temporal data and reasoning
+* asynchronous method calls
 * support for Java and JavaScript
-* code generation based on a meta model definition or dynamically instantiated meta models
-
-TODO continue feature list
-
-TODO data overlay
-
+* code generation based on a meta model definition **and** dynamically instantiated meta models
+* easy-to-use API to traverse models
+* native mechanisms for distribution 
+* native versioning of models on a per-object basis
+* ...
 
 Publications:
 -------------
