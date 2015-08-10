@@ -60,16 +60,6 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     }
 
     @Override
-    public void notifySaved(KChunk[] savedChunks) {
-        for (int i = 0; i < savedChunks.length; i++) {
-            KChunk loopChunk = savedChunks[i];
-            if (loopChunk != null && loopChunk.counter() == 0 && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-                _space.remove(loopChunk.universe(), loopChunk.time(), loopChunk.obj(), _metaModel);
-            }
-        }
-    }
-
-    @Override
     public void run() {
         while (true) {
             KObjectPhantomReference kobj = null;
@@ -105,9 +95,6 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     KChunk spaceChunk = _space.get(relatedKeys[i * 3], relatedKeys[i * 3 + 1], relatedKeys[i * 3 + 2]);
                     if (spaceChunk != null) {
                         unmarkMemoryElement(spaceChunk);
-                        if (spaceChunk.counter() == 0 && (spaceChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-                            _space.remove(spaceChunk.universe(), spaceChunk.time(), spaceChunk.obj(), _metaModel);
-                        }
                     }
                 }
             }

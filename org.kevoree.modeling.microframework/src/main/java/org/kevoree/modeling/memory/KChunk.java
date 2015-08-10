@@ -38,5 +38,5 @@ public interface KChunk {
     long time();
 
     long obj();
-
+    
 }

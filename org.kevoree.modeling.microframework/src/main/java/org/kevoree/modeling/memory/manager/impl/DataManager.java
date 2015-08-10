@@ -126,9 +126,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
         String[] toSaveValues = new String[dirtyIterator.size() + PREFIX_TO_SAVE_SIZE];
         int i = 0;
         KMetaModel _mm = _model.metaModel();
-        KChunk[] savedChunks = new KChunk[dirtyIterator.size()];
         while (dirtyIterator.hasNext()) {
-            KChunk loopChunk = dirtyIterator.next();
+            long[] loopChunkKeys = dirtyIterator.next();
+            KChunk loopChunk = _spaceManager.getAndMark(loopChunkKeys[0], loopChunkKeys[1], loopChunkKeys[2]);
             if (loopChunk != null) {
                 loopChunk.setFlags(0, KChunkFlags.DIRTY_BIT);
                 toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
@@ -136,11 +136,11 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
                 try {
                     toSaveValues[i] = loopChunk.serialize(_mm);
-                    savedChunks[i] = loopChunk;
                     i++;
-                } catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
+                _spaceManager.unmarkMemoryElement(loopChunk);
             }
         }
         toSaveKeys[i * KEY_SIZE] = KConfig.BEGINNING_OF_TIME;
@@ -152,9 +152,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
         toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
         toSaveKeys[i * KEY_SIZE + 2] = _universeKeyCalculator.prefix();
         toSaveValues[i] = "" + _universeKeyCalculator.lastComputedIndex();
-        _spaceManager.notifySaved(savedChunks);
         _db.put(toSaveKeys, toSaveValues, callback, this.currentCdnListener);
-        //inform potential GC that these objects may have to cleaned
     }
 
     @Override

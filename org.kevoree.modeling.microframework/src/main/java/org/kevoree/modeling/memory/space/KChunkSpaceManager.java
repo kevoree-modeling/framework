@@ -11,7 +11,7 @@ public interface KChunkSpaceManager {
     KChunk getAndMark(long universe, long time, long obj);
 
     void unmark(long universe, long time, long obj);
-    
+
     KChunk createAndMark(long universe, long time, long obj, short type);
 
     void unmarkMemoryElement(KChunk element);
@@ -27,7 +27,5 @@ public interface KChunkSpaceManager {
     void registerAll(KObject[] objects);
 
     void setResolver(KResolver resolver);
-
-    void notifySaved(KChunk[] savedChunks);
 
 }

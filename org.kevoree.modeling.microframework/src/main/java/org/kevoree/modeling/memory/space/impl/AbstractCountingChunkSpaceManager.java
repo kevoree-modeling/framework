@@ -22,7 +22,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     @Override
     public KChunk getAndMark(long universe, long time, long obj) {
         KChunk resolvedElement = _space.get(universe, time, obj);
-        if (resolvedElement != null) {
+        if (resolvedElement != null && (resolvedElement.getFlags() & KChunkFlags.REMOVED_BIT) != KChunkFlags.REMOVED_BIT) {
             resolvedElement.inc();
         }
         return resolvedElement;
@@ -34,6 +34,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         if (resolvedElement != null) {
             int newCount = resolvedElement.dec();
             if (newCount == 0 && (resolvedElement.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                resolvedElement.setFlags(KChunkFlags.REMOVED_BIT, 0);
                 _space.remove(resolvedElement.universe(), resolvedElement.time(), resolvedElement.obj(), _metaModel);
             }
         }
@@ -52,6 +53,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     public void unmarkMemoryElement(KChunk element) {
         int newCount = element.dec();
         if (newCount == 0 && (element.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+            element.setFlags(KChunkFlags.REMOVED_BIT, 0);
             _space.remove(element.universe(), element.time(), element.obj(), _metaModel);
         }
     }
@@ -62,6 +64,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
             KChunk loopChunk = elements[i];
             int newCount = elements[i].dec();
             if (newCount == 0 && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                loopChunk.setFlags(KChunkFlags.REMOVED_BIT, 0);
                 _space.remove(loopChunk.universe(), loopChunk.time(), loopChunk.obj(), _metaModel);
             }
         }
@@ -73,6 +76,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         newCreatedElement.inc();
         int newCount = previous.dec();
         if (newCount == 0 && (previous.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+            previous.setFlags(KChunkFlags.REMOVED_BIT, 0);
             _space.remove(previous.universe(), previous.time(), previous.obj(), _metaModel);
         }
         return newCreatedElement;
@@ -88,7 +92,5 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     abstract public void registerAll(KObject[] objects);
 
     abstract public void setResolver(KResolver resolver);
-
-    abstract public void notifySaved(KChunk[] savedChunks);
 
 }
