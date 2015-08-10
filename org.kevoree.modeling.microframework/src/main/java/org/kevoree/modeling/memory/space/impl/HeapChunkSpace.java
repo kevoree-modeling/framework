@@ -379,11 +379,16 @@ public class HeapChunkSpace implements KChunkSpace {
 
     @Override
     public void printDebug() {
-        InternalState state = _state.get();
-        for (int i = 0; i < state.values.length; i++) {
-            if (state.values[i] != null) {
-                System.err.println(state.elementK3[i * 3] + "," + state.elementK3[i * 3 + 1] + "," + state.elementK3[i * 3 + 1] + "=>" + state.values[i].type() + "(count:" + state.values[i].counter() + ",flag:" + state.values[i].getFlags() + ")");
+        try {
+            InternalState state = _state.get();
+            for (int i = 0; i < state.values.length; i++) {
+                KChunk loopChunk = state.values[i];
+                if (loopChunk != null) {
+                    System.err.println(state.elementK3[i * 3] + "," + state.elementK3[i * 3 + 1] + "," + state.elementK3[i * 3 + 1] + "=>" + state.values[i].type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")");
+                }
             }
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 
