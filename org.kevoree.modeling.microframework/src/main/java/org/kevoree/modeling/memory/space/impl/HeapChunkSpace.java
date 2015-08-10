@@ -332,8 +332,8 @@ public class HeapChunkSpace implements KChunkSpace {
                 previousState.elementNext[last] = previousState.elementNext[m];
             }
             previousState.elementNext[m] = -1;//flag to dropped value
-            previousState.values[m].free(p_metaModel);
             previousState.values[m] = null;
+            previousState.values[m].free(p_metaModel);
             previousState._elementCount.decrementAndGet();
             nbTry++;
             if (nbTry == KConfig.CAS_MAX_TRY) {
