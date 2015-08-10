@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.modeling.microframework.drivers.mapdb</artifactId>
-  <version>4.20.1-SNAPSHOT  </version>
+  <version>4.20.1  </version>
     <name>Kevoree :: Modeling :: Drivers :: MapDB</name>
 
     <parent>
         <artifactId>org.kevoree.modeling.root</artifactId>
         <groupId>org.kevoree.modeling</groupId>
-        <version>4.20.1-SNAPSHOT</version>
+        <version>4.20.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -16,7 +16,7 @@
         <dependency>
             <groupId>org.kevoree.modeling</groupId>
             <artifactId>org.kevoree.modeling.microframework</artifactId>
-            <version>4.20.1-SNAPSHOT</version>
+            <version>4.20.1</version>
         </dependency>
         <dependency>
             <groupId>org.mapdb</groupId>
