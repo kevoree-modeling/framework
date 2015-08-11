@@ -68,11 +68,12 @@ public class ListenerManager {
                     long[] registeredListener = _obj2Listener.get(objs[i]);
                     int foundIndex = -1;
                     for (int j = 0; j < registeredListener.length; j++) {
-                        if (objs[j] == origin.uuid()) {
+                        if (registeredListener[j] == listenerID) {
                             foundIndex = j;
                         }
                     }
                     if (foundIndex != -1) {
+                        //TODO: add copy if listenerIndex == length-1
                         if (foundIndex == 0) {
                             long[] registeredListener2 = new long[registeredListener.length - 1];
                             System.arraycopy(objs, foundIndex, registeredListener2, 0, registeredListener.length - 1);
