@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.*;
+import org.kevoree.modeling.meta.impl.MetaClass;
 import org.kevoree.modeling.util.Checker;
 import org.kevoree.modeling.util.maths.Base64;
 
@@ -162,11 +163,14 @@ public class HeapObjectChunk implements KObjectChunk {
         if(this._metaClassIndex == -1){
             this._metaClassIndex = metaClassIndex;
         }
-        this.raw = new Object[metaModel.metaClass(metaClassIndex).metaElements().length];
+        if(this._metaClassIndex == -1) {
+            return;
+        }
+        KMetaClass metaClass = metaModel.metaClass(_metaClassIndex);
+        this.raw = new Object[metaClass.metaElements().length];
         if (payload != null) {
             JsonObjectReader objectReader = new JsonObjectReader();
             objectReader.parseObject(payload);
-            KMetaClass metaClass = metaModel.metaClass(_metaClassIndex);
             String[] metaKeys = objectReader.keys();
             for (int i = 0; i < metaKeys.length; i++) {
                 Object insideContent = objectReader.get(metaKeys[i]);
