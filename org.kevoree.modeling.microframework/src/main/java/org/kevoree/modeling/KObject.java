@@ -11,7 +11,9 @@ import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 
 public interface KObject {
 
-    /** KObject identification */
+    /**
+     * KObject identification
+     */
     long universe();
 
     long now();
@@ -20,7 +22,9 @@ public interface KObject {
 
     KMetaClass metaClass();
 
-    /** Visitor, KTraversal and Jump strategies */
+    /**
+     * Visitor, KTraversal and Jump strategies
+     */
     void visitAttributes(KModelAttributeVisitor visitor);
 
     void visit(KModelVisitor visitor, KCallback cb);
@@ -29,13 +33,19 @@ public interface KObject {
 
     void jump(long time, KCallback<KObject> callback);
 
-    /** Selector are untyped version of traversal */
+    /**
+     * Selector are untyped version of traversal
+     */
     void select(String query, KCallback<Object[]> cb);
 
-    /** Delete KObject */
+    /**
+     * Delete KObject
+     */
     void delete(KCallback cb);
 
-    /** Reflexive API */
+    /**
+     * Reflexive API
+     */
     void mutate(KActionType actionType, KMetaReference metaReference, KObject param);
 
     void ref(KMetaReference metaReference, KCallback<KObject[]> cb);
@@ -50,7 +60,13 @@ public interface KObject {
 
     long[] getRefValuesByName(String refName);
 
-    /** Time related naviguation */
+    void addByName(String relationName, KObject objToAdd);
+
+    void removeByName(String relationName, KObject objToAdd);
+
+    /**
+     * Time related naviguation
+     */
     long timeDephasing();
 
     void allTimes(KCallback<long[]> cb);
@@ -61,7 +77,9 @@ public interface KObject {
 
     void timesBetween(long beginningOfSearch, long endOfSearch, KCallback<long[]> cb);
 
-    /** Bulk KObject management */
+    /**
+     * Bulk KObject management
+     */
     String toJSON();
 
     boolean equals(Object other);
@@ -71,8 +89,6 @@ public interface KObject {
     void call(KMetaOperation operation, Object[] params, KCallback<Object> cb);
 
     KDataManager manager();
-
-
 
 
 }

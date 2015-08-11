@@ -31,7 +31,7 @@ public abstract class AbstractKObject implements KObject {
     final protected KMetaClass _metaClass;
     final public KInternalDataManager _manager;
     final private static String OUT_OF_CACHE_MSG = "Out of cache Error";
-    
+
     private final AtomicReference<long[]> _previousResolveds;
     public static final int UNIVERSE_PREVIOUS_INDEX = 0;
     public static final int TIME_PREVIOUS_INDEX = 1;
@@ -172,6 +172,22 @@ public abstract class AbstractKObject implements KObject {
         KMetaAttribute transposed = _metaClass.attribute(attributeName);
         if (transposed != null) {
             transposed.strategy().mutate(this, transposed, payload, _manager);
+        }
+    }
+
+    @Override
+    public void addByName(String relationName, KObject objToAdd) {
+        KMetaReference transposed = _metaClass.reference(relationName);
+        if (transposed != null) {
+            mutate(KActionType.ADD, transposed, objToAdd);
+        }
+    }
+
+    @Override
+    public void removeByName(String relationName, KObject objToAdd) {
+        KMetaReference transposed = _metaClass.reference(relationName);
+        if (transposed != null) {
+            mutate(KActionType.REMOVE, transposed, objToAdd);
         }
     }
 
@@ -589,5 +605,6 @@ public abstract class AbstractKObject implements KObject {
     public void timesBetween(long beginningOfSearch, long endOfSearch, KCallback<long[]> cb) {
         internal_times(beginningOfSearch, endOfSearch, cb);
     }
+
 
 }
