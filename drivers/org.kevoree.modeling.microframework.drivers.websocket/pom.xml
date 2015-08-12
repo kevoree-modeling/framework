@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>org.kevoree.modeling</groupId>
-            <artifactId>org.kevoree.modeling.microframework.typescript</artifactId>
+            <artifactId>org.kevoree.modeling.microframework.browser</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
