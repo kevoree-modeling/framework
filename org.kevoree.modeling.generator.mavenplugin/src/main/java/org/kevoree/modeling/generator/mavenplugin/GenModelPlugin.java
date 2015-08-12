@@ -128,12 +128,13 @@ public class GenModelPlugin extends AbstractMojo {
                 TscRunner runner = new TscRunner();
                 runner.runTsc(jsWorkingDir, jsWorkingDir, null, false);
                 final StringBuilder sb = new StringBuilder();
+                /*
                 Files.lines(javaLibJs).forEachOrdered(new Consumer<String>() {
                     @Override
                     public void accept(String line) {
                         sb.append(line).append("\n");
                     }
-                });
+                });*/
                 Files.lines(kmfLibJs).forEachOrdered(new Consumer<String>() {
                     @Override
                     public void accept(String line) {
