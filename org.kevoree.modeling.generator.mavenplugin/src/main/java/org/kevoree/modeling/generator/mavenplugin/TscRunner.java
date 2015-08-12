@@ -113,10 +113,11 @@ public class TscRunner {
                 if (node != null) {
                     node.stop();
                 }
-                /*
                 if (targetTSCBIN != null) {
                     targetTSCBIN.delete();
                 }
+                /*
+
                 if (targetLIBD != null) {
                     targetLIBD.delete();
                 }*/
