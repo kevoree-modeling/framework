@@ -84,7 +84,7 @@ public class App {
                                 sourceTranslator.getAnalyzer().addClasspath(dep);
                             }
                         }
-                        sourceTranslator.translateSources(srcOut.getAbsolutePath(), jsDir.getAbsolutePath(), ctx.getMetaModelName());
+                        sourceTranslator.translateSources(srcOut.getAbsolutePath(), jsDir.getAbsolutePath(), ctx.getMetaModelName(), false, false);
                         System.out.print("Transpile to JS using TSC...");
                         TscRunner runner = new TscRunner();
                         Path tscPath = Paths.get(jsDir.toPath().toString(), GenModelPlugin.TSC_JS);
