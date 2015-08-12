@@ -83,8 +83,6 @@ public class GenModelPlugin extends AbstractMojo {
     public static final String TSC_JS = "tsc.js";
 
 
-
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -125,7 +123,7 @@ public class GenModelPlugin extends AbstractMojo {
                         getLog().info("Add to classpath " + file.getAbsolutePath());
                     }
                 }
-                sourceTranslator.translateSources(targetSrcGenDir.getAbsolutePath(), jsWorkingDir.getAbsolutePath(), project.getArtifactId());
+                sourceTranslator.translateSources(targetSrcGenDir.getAbsolutePath(), jsWorkingDir.getAbsolutePath(), project.getArtifactId(), false, false);
 
                 TscRunner runner = new TscRunner();
                 runner.runTsc(jsWorkingDir, jsWorkingDir, null, false);
@@ -167,7 +165,7 @@ public class GenModelPlugin extends AbstractMojo {
                 }
                 System.setProperty("additional", buffer.toString());
 
-                if(samples){
+                if (samples) {
                     HtmlTemplateGenerator.generateHtml(resourceDir.toPath(), project.getArtifactId() + "-all.js", targetName);
                 }
 
