@@ -130,7 +130,7 @@ public class GenModelPlugin extends AbstractMojo {
                 sourceTranslator.translateSources(targetSrcGenDir.getAbsolutePath(), jsWorkingDir.getAbsolutePath(), project.getArtifactId(), false, false, umd);
 
                 TscRunner runner = new TscRunner();
-                runner.runTsc(jsWorkingDir, jsWorkingDir, null, false, umd);
+                runner.runTsc(jsWorkingDir, classesDirectory, null, false, umd);
                 final StringBuilder sb = new StringBuilder();
                 /*
                 Files.lines(javaLibJs).forEachOrdered(new Consumer<String>() {
@@ -172,9 +172,10 @@ public class GenModelPlugin extends AbstractMojo {
                 }
                 System.setProperty("additional", buffer.toString());
 
+                /*
                 if (samples) {
                     HtmlTemplateGenerator.generateHtml(resourceDir.toPath(), project.getArtifactId() + "-all.js", targetName);
-                }
+                }*/
 
             }
 
