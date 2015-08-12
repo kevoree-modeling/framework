@@ -14,9 +14,9 @@
     dynamicSensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.CONTINUOUS);
     var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://localhost:6000/cdn");
     var model = dynamicMM.createModel(org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build());
-    model.connect(function(){
-        model.lookup(0,0,1,function(obj){
-            if('{"universe":0,"time":0,"uuid":1,"data":{"name":"MyName","value":[0,1,0,0,42.42]}}' != obj.toJSON()){
+    model.connect(function () {
+        model.lookup(0, 0, 1, function (obj) {
+            if ('{"universe":0,"time":0,"uuid":1,"data":{"name":"MyName","value":[0,1,0,0,42.42]}}' != obj.toJSON()) {
                 throw Exception("Bad Result");
             } else {
                 console.log(obj.toJSON());
