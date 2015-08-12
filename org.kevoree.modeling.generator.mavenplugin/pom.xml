@@ -68,6 +68,27 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>copy-ts-file</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="copy microframework ts">
+                                <copy file="../org.kevoree.modeling.microframework.browser/target/generated-sources/org.kevoree.modeling.microframework.browser.ts" tofile="${project.build.directory}/classes/org.kevoree.modeling.microframework.browser.ts" />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -83,7 +104,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.kevoree.modeling</groupId>
-                                    <artifactId>org.kevoree.modeling.microframework.typescript</artifactId>
+                                    <artifactId>org.kevoree.modeling.microframework.browser</artifactId>
                                     <version>${project.version}</version>
                                     <outputDirectory>${project.build.directory}/classes</outputDirectory>
                                     <includes>**/*.js,**/*.ts</includes>

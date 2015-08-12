@@ -29,7 +29,7 @@ public class App {
             public void run() {
                 try {
                     if (args.length != 1 && args.length != 2) {
-                        System.out.println("Bad arguments : <metaModelFile> [<js/jar>]");
+                        System.out.println("Bad arguments : <metaModelFile> [<js/jar/umd>]");
                         return;
                     }
                     String ecore = args[0];
@@ -41,9 +41,15 @@ public class App {
                         System.out.println("Bad input file " + metaModelFile.getName() + " , must be .mm, .ecore or .xsd");
                     }
                     Boolean js = false;
+                    Boolean umd = false;
                     if (args.length > 1 && args[1].toLowerCase().equals("js")) {
                         js = true;
                     }
+                    if (args.length > 1 && args[1].toLowerCase().equals("umd")) {
+                        js = true;
+                        umd = true;
+                    }
+
                     GenerationContext ctx = new GenerationContext();
                     File masterOut = new File("gen");
                     if (System.getProperty("output") != null) {
@@ -84,11 +90,11 @@ public class App {
                                 sourceTranslator.getAnalyzer().addClasspath(dep);
                             }
                         }
-                        sourceTranslator.translateSources(srcOut.getAbsolutePath(), jsDir.getAbsolutePath(), ctx.getMetaModelName(), false, false);
+                        sourceTranslator.translateSources(srcOut.getAbsolutePath(), jsDir.getAbsolutePath(), ctx.getMetaModelName(), false, false,umd);
                         System.out.print("Transpile to JS using TSC...");
                         TscRunner runner = new TscRunner();
                         Path tscPath = Paths.get(jsDir.toPath().toString(), GenModelPlugin.TSC_JS);
-                        runner.runTsc(jsDir, jsDir, null, true);
+                        runner.runTsc(jsDir, jsDir, null, true, umd);
                         System.out.println("done");
                         final StringBuilder sb = new StringBuilder();
                         Files.lines(javaLibJs).forEachOrdered(new Consumer<String>() {

@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kevoree.modeling</groupId>
     <artifactId>org.kevoree.modeling.root</artifactId>
@@ -75,11 +76,8 @@
     <modules>
         <!-- MicroFramework -->
         <module>org.kevoree.modeling.microframework</module>
-        <module>org.kevoree.modeling.microframework.typescript</module>
-        <!--
-        <module>org.kevoree.modeling.microframework.benchmark</module>
-        -->
-
+        <module>org.kevoree.modeling.microframework.browser</module>
+        <module>org.kevoree.modeling.microframework.umd</module>
         <!-- CodeGenerator and associated tools -->
         <module>org.kevoree.modeling.ast</module>
         <module>org.kevoree.modeling.generator</module>

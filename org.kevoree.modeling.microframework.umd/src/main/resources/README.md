@@ -1,0 +1,1 @@
+This package contains the UMD packaged version of the Kevoree Modeling Framework

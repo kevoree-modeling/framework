@@ -1,0 +1,11 @@
+{
+  "name": "org.kevoree.modeling.microframework.umd",
+  "version": "4.21.1-SNAPSHOT",
+  "main": "org.kevoree.modeling.microframework.umd.js",
+  "license": "GPL-3.0",
+  "description": "Kevoree Modeling Framework for UMD packaging",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevoree-modeling/framework.git"
+  }
+}

@@ -20,7 +20,7 @@ import java.util.Locale;
 public class TscRunner {
 
     //runTsc(String tscPath, Path sourceDir, Path targetFile) throws Exception {
-    public static void runTsc(File src, File target, File[] libraries, boolean copyLibDTs) throws Exception {
+    public static void runTsc(File src, File target, File[] libraries, boolean copyLibDTs, boolean umd) throws Exception {
 
         Files.createDirectories(target.toPath());
 
@@ -64,6 +64,11 @@ public class TscRunner {
         paramsCol.add(target.getAbsolutePath());
 
         paramsCol.add("-d");
+
+        if(umd){
+            paramsCol.add("--module");
+            paramsCol.add("umd");
+        }
 
 
         if (testNativeNode()) {

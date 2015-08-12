@@ -75,13 +75,15 @@ public class GenModelPlugin extends AbstractMojo {
     private boolean js = false;
 
     public static final String LIB_D_TS = "lib.d.ts";
-    public static final String KMF_LIB_D_TS = "org.kevoree.modeling.microframework.typescript.d.ts";
+    public static final String KMF_LIB_D_TS = "org.kevoree.modeling.microframework.browser.d.ts";
 
-    public static final String KMF_LIB_JS = "org.kevoree.modeling.microframework.typescript.js";
+    public static final String KMF_LIB_JS = "org.kevoree.modeling.microframework.browser.js";
     public static final String JAVA_LIB_JS = "java.js";
 
     public static final String TSC_JS = "tsc.js";
 
+    @Parameter(defaultValue = "false")
+    private boolean umd = false;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -102,20 +104,22 @@ public class GenModelPlugin extends AbstractMojo {
                 deleteRecusive(jsWorkingDir.toPath());
                 Files.createDirectories(jsWorkingDir.toPath());
 
-                Path javaLibJs = Paths.get(jsWorkingDir.toPath().toString(), JAVA_LIB_JS);
-
                 Path libDts = Paths.get(jsWorkingDir.toPath().toString(), LIB_D_TS);
                 Files.copy(this.getClass().getClassLoader().getResourceAsStream("tsc/" + LIB_D_TS), libDts, StandardCopyOption.REPLACE_EXISTING);
 
-                Files.copy(getClass().getClassLoader().getResourceAsStream(KMF_LIB_D_TS), Paths.get(jsWorkingDir.toPath().toString(), KMF_LIB_D_TS), StandardCopyOption.REPLACE_EXISTING);
+                if (!umd) {
+                    Files.copy(getClass().getClassLoader().getResourceAsStream(KMF_LIB_D_TS), Paths.get(jsWorkingDir.toPath().toString(), KMF_LIB_D_TS), StandardCopyOption.REPLACE_EXISTING);
+                    Path kmfLibJs = Paths.get(jsWorkingDir.toPath().toString(), KMF_LIB_JS);
+                    Files.copy(this.getClass().getClassLoader().getResourceAsStream(KMF_LIB_JS), kmfLibJs, StandardCopyOption.REPLACE_EXISTING);
+                }
 
-                Path kmfLibJs = Paths.get(jsWorkingDir.toPath().toString(), KMF_LIB_JS);
-                Files.copy(this.getClass().getClassLoader().getResourceAsStream(KMF_LIB_JS), kmfLibJs, StandardCopyOption.REPLACE_EXISTING);
 
                 Path tscPath = Paths.get(jsWorkingDir.toPath().toString(), TSC_JS);
                 Files.copy(getClass().getClassLoader().getResourceAsStream(TSC_JS), tscPath, StandardCopyOption.REPLACE_EXISTING);
 
                 SourceTranslator sourceTranslator = new SourceTranslator();
+                sourceTranslator.additionalAppend = "org.kevoree.modeling.microframework.browser.ts";
+                sourceTranslator.exportPackage = new String[]{"org"};
                 for (Artifact a : project.getDependencyArtifacts()) {
                     File file = a.getFile();
                     if (file != null) {
@@ -123,10 +127,10 @@ public class GenModelPlugin extends AbstractMojo {
                         getLog().info("Add to classpath " + file.getAbsolutePath());
                     }
                 }
-                sourceTranslator.translateSources(targetSrcGenDir.getAbsolutePath(), jsWorkingDir.getAbsolutePath(), project.getArtifactId(), false, false);
+                sourceTranslator.translateSources(targetSrcGenDir.getAbsolutePath(), jsWorkingDir.getAbsolutePath(), project.getArtifactId(), false, false, umd);
 
                 TscRunner runner = new TscRunner();
-                runner.runTsc(jsWorkingDir, jsWorkingDir, null, false);
+                runner.runTsc(jsWorkingDir, jsWorkingDir, null, false, umd);
                 final StringBuilder sb = new StringBuilder();
                 /*
                 Files.lines(javaLibJs).forEachOrdered(new Consumer<String>() {
@@ -135,12 +139,15 @@ public class GenModelPlugin extends AbstractMojo {
                         sb.append(line).append("\n");
                     }
                 });*/
+                /*
                 Files.lines(kmfLibJs).forEachOrdered(new Consumer<String>() {
                     @Override
                     public void accept(String line) {
                         sb.append(line).append("\n");
                     }
                 });
+                */
+                /*
                 Files.lines(Paths.get(jsWorkingDir.toPath().toString(), project.getArtifactId() + ".js")).forEachOrdered(new Consumer<String>() {
                     @Override
                     public void accept(String line) {
@@ -150,13 +157,12 @@ public class GenModelPlugin extends AbstractMojo {
                 Files.write(Paths.get(jsWorkingDir.toPath().toString(), project.getArtifactId() + "-all.js"), sb.toString().getBytes());
                 tscPath.toFile().delete();
                 libDts.toFile().delete();
-
                 if (!resourceDir.exists()) {
                     resourceDir.mkdirs();
                 }
                 Path resourceAllJS = Paths.get(resourceDir.toPath().toString(), project.getArtifactId() + "-all.js");
                 Files.copy(Paths.get(jsWorkingDir.toPath().toString(), project.getArtifactId() + "-all.js"), resourceAllJS, StandardCopyOption.REPLACE_EXISTING);
-
+*/
                 StringBuilder buffer = new StringBuilder();
                 for (Artifact artifact : project.getDependencyArtifacts()) {
                     if (buffer.length() != 0) {

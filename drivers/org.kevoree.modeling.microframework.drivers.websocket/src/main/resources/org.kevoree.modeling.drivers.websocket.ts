@@ -1,4 +1,3 @@
-///<reference path='../../../target/jsdeps/java.d.ts'/>
 ///<reference path='../../../target/jsdeps/org.kevoree.modeling.microframework.typescript.d.ts'/>
 
 declare function require(p);

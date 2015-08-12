@@ -1,4 +1,3 @@
-///<reference path='../../../target/jsdeps/global/java.d.ts'/>
 ///<reference path='../../../target/jsdeps/org.kevoree.modeling.microframework.typescript.d.ts'/>
 var org;
 (function (org) {
