@@ -22,6 +22,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -217,11 +218,11 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                     Exception detected = null;
                                                     try {
                                                         String uniIndexPayload = strings[UNIVERSE_INDEX];
-                                                        if (uniIndexPayload == null || uniIndexPayload.equals("")) {
+                                                        if (uniIndexPayload == null || PrimitiveHelper.equals(uniIndexPayload,"")) {
                                                             uniIndexPayload = "0";
                                                         }
                                                         String objIndexPayload = strings[OBJ_INDEX];
-                                                        if (objIndexPayload == null || objIndexPayload.equals("")) {
+                                                        if (objIndexPayload == null || PrimitiveHelper.equals(objIndexPayload,"")) {
                                                             objIndexPayload = "0";
                                                         }
                                                         String globalUniverseTreePayload = strings[GLO_TREE_INDEX];
@@ -233,8 +234,8 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                                 e.printStackTrace();
                                                             }
                                                         }
-                                                        long newUniIndex = Long.parseLong(uniIndexPayload);
-                                                        long newObjIndex = Long.parseLong(objIndexPayload);
+                                                        long newUniIndex = PrimitiveHelper.parseLong(uniIndexPayload);
+                                                        long newObjIndex = PrimitiveHelper.parseLong(objIndexPayload);
                                                         _universeKeyCalculator = new KeyCalculator(prefix, newUniIndex);
                                                         _objectKeyCalculator = new KeyCalculator(prefix, newObjIndex);
                                                         isConnected = true;

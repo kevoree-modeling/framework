@@ -12,6 +12,7 @@ import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaReference;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.Base64;
 import sun.misc.Unsafe;
 
@@ -727,7 +728,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
                             converted = Base64.decodeToInt((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                            converted = Boolean.parseBoolean((String) insideContent);
+                            converted = PrimitiveHelper.parseBoolean((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
                             converted = Base64.decodeToDouble((String) insideContent);
                         } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {

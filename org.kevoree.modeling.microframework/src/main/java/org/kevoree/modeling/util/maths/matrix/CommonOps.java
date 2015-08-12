@@ -1,5 +1,6 @@
 package org.kevoree.modeling.util.maths.matrix;
 
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.matrix.solvers.LUDecompositionAlt_D64;
 import org.kevoree.modeling.util.maths.matrix.solvers.LinearSolverLu_D64;
 
@@ -300,7 +301,7 @@ public class CommonOps {
     }
 
     public static double maxVectorElement(SimpleMatrix matrix){
-        double d = Double.MIN_VALUE;
+        double d = PrimitiveHelper.DOUBLE_MIN_VALUE();
         for (int i = 0; i < matrix.numRows(); i++) {
             if(matrix.getValue2D(i, 0)>d)
                 d = matrix.getValue2D(i, 0);
@@ -308,7 +309,7 @@ public class CommonOps {
         return d;
     }
     public static int maxVectorElementIndex(SimpleMatrix matrix){
-        double d = Double.MIN_VALUE;
+        double d = PrimitiveHelper.DOUBLE_MIN_VALUE();
         int row = 0;
         for (int i = 0; i < matrix.numRows(); i++) {
             if(matrix.getValue2D(i, 0)>d){

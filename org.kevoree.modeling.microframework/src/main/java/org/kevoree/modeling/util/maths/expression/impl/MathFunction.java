@@ -1,5 +1,7 @@
 package org.kevoree.modeling.util.maths.expression.impl;
 
+import org.kevoree.modeling.util.PrimitiveHelper;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -38,160 +40,145 @@ public class MathFunction {
     }
 
 
-    public double eval(double[] p){
-        if(name.equals("NOT")){
+    public double eval(double[] p) {
+        if (PrimitiveHelper.equals(name,"NOT")) {
             return (p[0] == 0) ? 1 : 0;
-        }
-        else if(name.equals("IF")){
-            return !(p[0]==0) ? p[1] : p[2];
-        }
-        else if(name.equals("RAND")){
+        } else if (PrimitiveHelper.equals(name,"IF")) {
+            return !(p[0] == 0) ? p[1] : p[2];
+        } else if (PrimitiveHelper.equals(name,"RAND")) {
             return Math.random();
-        }
-        else if(name.equals("SIN")){
+        } else if (PrimitiveHelper.equals(name,"SIN")) {
             return Math.sin(p[0]);
-        }
-        else if(name.equals("COS")) {
+        } else if (PrimitiveHelper.equals(name,"COS")) {
             return Math.cos(p[0]);
-        }
-        else if(name.equals("TAN")){
+        } else if (PrimitiveHelper.equals(name,"TAN")) {
             return Math.tan(p[0]);
-        }
-        else if(name.equals("ASIN")){
+        } else if (PrimitiveHelper.equals(name,"ASIN")) {
             return Math.asin(p[0]);
-        }
-        else if(name.equals("ACOS")){
+        } else if (PrimitiveHelper.equals(name,"ACOS")) {
             return Math.acos(p[0]);
-        }
-        else if(name.equals("ATAN")){
+        } else if (PrimitiveHelper.equals(name,"ATAN")) {
             return Math.atan(p[0]);
-        }
-        else if(name.equals("MAX")){
-            return p[0]>p[1] ? p[0] : p[1];
-        }
-        else if(name.equals("MIN")){
-            return p[0]<p[1] ? p[0] : p[1];
-        }
-        else if(name.equals("ABS")){
+        } else if (PrimitiveHelper.equals(name,"MAX")) {
+            return p[0] > p[1] ? p[0] : p[1];
+        } else if (PrimitiveHelper.equals(name,"MIN")) {
+            return p[0] < p[1] ? p[0] : p[1];
+        } else if (PrimitiveHelper.equals(name,"ABS")) {
             return Math.abs(p[0]);
-        }
-        else if(name.equals("LOG")){
+        } else if (PrimitiveHelper.equals(name,"LOG")) {
             return Math.log(p[0]);
-        }
-        else if(name.equals("ROUND")){
+        } else if (PrimitiveHelper.equals(name,"ROUND")) {
             long factor = (long) Math.pow(10, p[1]);
             double value = p[0] * factor;
             long tmp = Math.round(value);
             return (double) tmp / factor;
-        }
-        else if(name.equals("FLOOR")) {
-            Math.floor(p[0]);
-        }
-        else if(name.equals("CEILING")){
-            Math.ceil(p[0]);
-        }
-        else if(name.equals("SQRT")){
+        } else if (PrimitiveHelper.equals(name,"FLOOR")) {
+            return Math.floor(p[0]);
+        } else if (PrimitiveHelper.equals(name,"CEILING")) {
+            return Math.ceil(p[0]);
+        } else if (PrimitiveHelper.equals(name,"SQRT")) {
             return Math.sqrt(p[0]);
-        }
-
-        else if(name.equals("SECONDS")){
+        } else if (PrimitiveHelper.equals(name,"SECONDS")) {
             return date_to_seconds(p[0]);
-        }
-        else if(name.equals("MINUTES")){
+        } else if (PrimitiveHelper.equals(name,"MINUTES")) {
             return date_to_minutes(p[0]);
-        }
-        else if(name.equals("HOURS")){
+        } else if (PrimitiveHelper.equals(name,"HOURS")) {
             return date_to_hours(p[0]);
-        }
-        else if(name.equals("DAY")){
+        } else if (PrimitiveHelper.equals(name,"DAY")) {
             return date_to_days(p[0]);
-        }
-        else if(name.equals("MONTH")){
+        } else if (PrimitiveHelper.equals(name,"MONTH")) {
             return date_to_months(p[0]);
-        }
-        else if(name.equals("YEAR")){
+        } else if (PrimitiveHelper.equals(name,"YEAR")) {
             return date_to_year(p[0]);
-        }
-        else if(name.equals("DAYOFWEEK")){
+        } else if (PrimitiveHelper.equals(name,"DAYOFWEEK")) {
             return date_to_dayofweek(p[0]);
         }
         return 0;
     }
 
 
-    /** @native ts
+    /**
+     * @native ts
      * var date = new Date(value);
      * return date.getSeconds();
      */
-    private double date_to_seconds(double value){
+    private double date_to_seconds(double value) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date((long)value));
+        calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.SECOND);
     }
-    /** @native ts
+
+    /**
+     * @native ts
      * var date = new Date(value);
      * return date.getMinutes();
      */
-    private double date_to_minutes(double value){
+    private double date_to_minutes(double value) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date((long)value));
+        calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.MINUTE);
     }
 
-    /** @native ts
+    /**
+     * @native ts
      * var date = new Date(value);
      * return date.getHours();
      */
     private double date_to_hours(double value) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date((long)value));
+        calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
 
-    /** @native ts
+    /**
+     * @native ts
      * var date = new Date(value);
      * return date.getDate();
      */
-    private double date_to_days(double value){
+    private double date_to_days(double value) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date((long)value));
+        calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
 
     //January is 0, december is 11
-    /** @native ts
+
+    /**
+     * @native ts
      * var date = new Date(value);
      * return date.getMonth();
      */
-    private double date_to_months(double value){
+    private double date_to_months(double value) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date((long)value));
+        calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.MONTH);
     }
 
-    /** @native ts
+    /**
+     * @native ts
      * var date = new Date(value);
      * return date.getFullYear();
      */
-    private double date_to_year(double value){
+    private double date_to_year(double value) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date((long)value));
+        calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.YEAR);
     }
 
     //Sunday is 0, friday is 6
-    /** @native ts
+
+    /**
+     * @native ts
      * var date = new Date(value);
      * return date.getDay();
      */
-    private double date_to_dayofweek(double value){
+    private double date_to_dayofweek(double value) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date((long)value));
-        return calendar.get(Calendar.DAY_OF_WEEK)-1;
+        calendar.setTime(new Date((long) value));
+        return calendar.get(Calendar.DAY_OF_WEEK) - 1;
 
     }
-
 
 
 }

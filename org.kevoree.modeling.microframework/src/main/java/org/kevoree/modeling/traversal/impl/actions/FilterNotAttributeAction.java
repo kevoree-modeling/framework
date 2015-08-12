@@ -8,6 +8,7 @@ import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class FilterNotAttributeAction implements KTraversalAction {
 
@@ -55,14 +56,14 @@ public class FilterNotAttributeAction implements KTraversalAction {
                                         KMetaAttribute ref = (KMetaAttribute) metaElements[j];
                                         Object resolved = raw.getPrimitiveType(ref.index(), loopObj.metaClass());
                                         if (resolved == null) {
-                                            if (_expectedValue.toString().equals("*")) {
+                                            if (PrimitiveHelper.equals(_expectedValue.toString(), "*")) {
                                                 addToNext = false;
                                             }
                                         } else {
-                                            if (resolved.equals(_expectedValue)) {
+                                            if (PrimitiveHelper.equals(resolved.toString(), _expectedValue.toString())) {
                                                 addToNext = false;
                                             } else {
-                                                if (resolved.toString().matches(_expectedValue.toString().replace("*", ".*"))) {
+                                                if (PrimitiveHelper.matches(resolved.toString(), _expectedValue.toString().replace("*", ".*"))) {
                                                     addToNext = false;
                                                 }
                                             }
@@ -85,16 +86,16 @@ public class FilterNotAttributeAction implements KTraversalAction {
                                     }
                                 } else {
                                     if (resolved == null) {
-                                        if (!_expectedValue.toString().equals("*")) {
+                                        if (!PrimitiveHelper.equals(_expectedValue.toString(), "*")) {
                                             selectedIndexes[i] = true;
                                             nbSelected++;
                                         }
                                     } else {
 
-                                        if (resolved.equals(_expectedValue)) {
+                                        if (PrimitiveHelper.equals(resolved.toString(), _expectedValue.toString())) {
                                             //noop
                                         } else {
-                                            if (resolved.toString().matches(_expectedValue.toString().replace("*", ".*"))) {
+                                            if (PrimitiveHelper.matches(resolved.toString(), _expectedValue.toString().replace("*", ".*"))) {
                                                 //noop
                                             } else {
                                                 selectedIndexes[i] = true;

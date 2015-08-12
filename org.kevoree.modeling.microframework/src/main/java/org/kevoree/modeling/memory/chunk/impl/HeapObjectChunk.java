@@ -10,6 +10,7 @@ import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaClass;
 import org.kevoree.modeling.util.Checker;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.Base64;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -129,7 +130,7 @@ public class HeapObjectChunk implements KObjectChunk {
             if (j != 0) {
                 builder.append(",");
             }
-            if(encoded){
+            if (encoded) {
                 builder.append("\"");
                 Base64.encodeDoubleToBuffer(castedArr[j], builder);
                 builder.append("\"");
@@ -147,7 +148,7 @@ public class HeapObjectChunk implements KObjectChunk {
             if (j != 0) {
                 builder.append(",");
             }
-            if(encoded){
+            if (encoded) {
                 builder.append("\"");
                 Base64.encodeLongToBuffer(castedArr[j], builder);
                 builder.append("\"");
@@ -160,10 +161,10 @@ public class HeapObjectChunk implements KObjectChunk {
 
     @Override
     public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
-        if(this._metaClassIndex == -1){
+        if (this._metaClassIndex == -1) {
             this._metaClassIndex = metaClassIndex;
         }
-        if(this._metaClassIndex == -1) {
+        if (this._metaClassIndex == -1) {
             return;
         }
         KMetaClass metaClass = metaModel.metaClass(_metaClassIndex);
@@ -191,7 +192,7 @@ public class HeapObjectChunk implements KObjectChunk {
                                 converted = Base64.decodeToInt((String) insideContent);
                                 break;
                             case KPrimitiveTypes.BOOL_ID:
-                                if (insideContent.equals("1")) {
+                                if (PrimitiveHelper.equals(insideContent.toString(), "1")) {
                                     converted = true;
                                 } else {
                                     converted = false;

@@ -1,5 +1,6 @@
 package org.kevoree.modeling.util.maths.expression.impl;
 
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
 import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 
@@ -19,13 +20,13 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         varResolver = new KMathVariableResolver() {
             @Override
             public Double resolve(String potentialVarName) {
-                if (potentialVarName.equals("PI")) {
+                if (PrimitiveHelper.equals(potentialVarName,"PI")) {
                     return Math.PI;
                 }
-                if (potentialVarName.equals("TRUE")) {
+                if (PrimitiveHelper.equals(potentialVarName,"TRUE")) {
                     return 1.0;
                 }
-                if (potentialVarName.equals("FALSE")) {
+                if (PrimitiveHelper.equals(potentialVarName,"FALSE")) {
                     return 0.0;
                 }
                 return null;
@@ -111,8 +112,8 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                 lastFunction = token;
             } else if (isLetter(token.charAt(0))) {
                 stack.push(token);
-            } else if (",".equals(token)) {
-                while (!stack.isEmpty() && !"(".equals(stack.peek())) {
+            } else if (PrimitiveHelper.equals(",",token)) {
+                while (!stack.isEmpty() && !PrimitiveHelper.equals("(",stack.peek())) {
                     outputQueue.add(stack.pop());
                 }
                 if (stack.isEmpty()) {
@@ -131,15 +132,15 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                     token2 = stack.isEmpty() ? null : stack.peek();
                 }
                 stack.push(token);
-            } else if ("(".equals(token)) {
+            } else if (PrimitiveHelper.equals("(",token)) {
                 if (previousToken != null) {
                     if (isNumber(previousToken)) {
                         throw new RuntimeException("Missing operator at character position " + tokenizer.getPos());
                     }
                 }
                 stack.push(token);
-            } else if (")".equals(token)) {
-                while (!stack.isEmpty() && !"(".equals(stack.peek())) {
+            } else if (PrimitiveHelper.equals(")", token)) {
+                while (!stack.isEmpty() && !PrimitiveHelper.equals("(",stack.peek())) {
                     outputQueue.add(stack.pop());
                 }
                 if (stack.isEmpty()) {
@@ -155,7 +156,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         }
         while (!stack.isEmpty()) {
             String element = stack.pop();
-            if ("(".equals(element) || ")".equals(element)) {
+            if (PrimitiveHelper.equals("(",element) || PrimitiveHelper.equals(")",element)) {
                 throw new RuntimeException("Mismatched parentheses");
             }
             if (!MathEntities.getINSTANCE().operators.contains(element)) {
@@ -192,7 +193,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                 double fResult = f.eval(p);
                 stack.push(fResult);
             } else {
-                stack.push(Double.parseDouble(token));
+                stack.push(PrimitiveHelper.parseDouble(token));
             }
         }
         return stack.pop();

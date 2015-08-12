@@ -5,6 +5,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.traversal.query.KQueryEngine;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class QueryEngine implements KQueryEngine {
 
@@ -80,17 +81,17 @@ public class QueryEngine implements KQueryEngine {
                             }
                         }
                         relationName = query.substring(previousKQueryStart, previousKQueryNameEnd).trim();
-                        if (relationName.startsWith("@")) {
+                        if (PrimitiveHelper.startsWith(relationName,"@")) {
                             traversal = traversal.traverseIndex(relationName.substring(1));
-                        } else if (relationName.startsWith("=")) {
+                        } else if (PrimitiveHelper.startsWith(relationName,"=")) {
                             traversal.eval(relationName.substring(1), null);
                             endEval = true;
-                        } else if (relationName.startsWith(">>")) {
+                        } else if (PrimitiveHelper.startsWith(relationName,">>")) {
                             traversal = traversal.traverseQuery(relationName.substring(2));
                             if (atts != null) {
                                 traversal = traversal.attributeQuery(atts);
                             }
-                        } else if (relationName.startsWith("<<")) {
+                        } else if (PrimitiveHelper.startsWith(relationName,"<<")) {
                             traversal = traversal.traverseQuery(relationName);
                             if (atts != null) {
                                 traversal = traversal.attributeQuery(atts);

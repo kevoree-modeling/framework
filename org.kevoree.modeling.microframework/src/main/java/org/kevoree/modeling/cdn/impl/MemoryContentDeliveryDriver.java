@@ -9,6 +9,7 @@ import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.KStringMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.Random;
 
@@ -23,16 +24,16 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
         short previousV;
         if (result != null) {
             try {
-                previousV = Short.parseShort(result);
+                previousV = PrimitiveHelper.parseShort(result);
             } catch (Exception e) {
                 e.printStackTrace();
-                previousV = Short.MIN_VALUE;
+                previousV = PrimitiveHelper.SHORT_MIN_VALUE();
             }
         } else {
             previousV = 0;
         }
-        if (previousV == Short.MAX_VALUE) {
-            nextV = Short.MIN_VALUE;
+        if (previousV == PrimitiveHelper.SHORT_MAX_VALUE()) {
+            nextV = PrimitiveHelper.SHORT_MIN_VALUE();
         } else {
             nextV = (short) (previousV + 1);
         }

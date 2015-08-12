@@ -10,6 +10,7 @@ import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class FilterAttributeQueryAction implements KTraversalAction {
 
@@ -29,7 +30,7 @@ public class FilterAttributeQueryAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         if (context.inputObjects() == null || context.inputObjects().length == 0) {
-            if(_next != null){
+            if (_next != null) {
                 _next.execute(context);
             } else {
                 context.finalCallback().on(context.inputObjects());
@@ -51,16 +52,16 @@ public class FilterAttributeQueryAction implements KTraversalAction {
                             @Override
                             public void on(String key, QueryParam param) {
                                 for (int j = 0; j < metaElements.length; j++) {
-                                    if(metaElements[j] instanceof MetaAttribute){
+                                    if (metaElements[j] instanceof MetaAttribute) {
                                         KMetaAttribute metaAttribute = (KMetaAttribute) metaElements[j];
-                                        if (metaAttribute.metaName().matches("^"+param.name()+"$")) {
+                                        if (PrimitiveHelper.matches(metaAttribute.metaName(), "^" + param.name() + "$")) {
                                             Object o_raw = loopObj.get(metaAttribute);
                                             if (o_raw != null) {
-                                                if (param.value().equals("null")) {
+                                                if (PrimitiveHelper.equals(param.value(), "null")) {
                                                     if (!param.isNegative()) {
                                                         selectedForNext[0] = false;
                                                     }
-                                                } else if (o_raw.toString().matches("^"+param.value()+"$")) {
+                                                } else if (PrimitiveHelper.matches(o_raw.toString(), "^" + param.value() + "$")) {
                                                     if (param.isNegative()) {
                                                         selectedForNext[0] = false;
                                                     }
@@ -70,7 +71,7 @@ public class FilterAttributeQueryAction implements KTraversalAction {
                                                     }
                                                 }
                                             } else {
-                                                if (param.value().equals("null") || param.value().equals("*")) {
+                                                if (PrimitiveHelper.equals(param.value(),"null") || PrimitiveHelper.equals(param.value(),"*")) {
                                                     if (param.isNegative()) {
                                                         selectedForNext[0] = false;
                                                     }
@@ -115,15 +116,15 @@ public class FilterAttributeQueryAction implements KTraversalAction {
         while (iParam < p_paramString.length()) {
             if (p_paramString.charAt(iParam) == ',') {
                 String p = p_paramString.substring(lastStart, iParam).trim();
-                if (!p.equals("") && !p.equals("*")) {
-                    if (p.endsWith("=")) {
+                if (!PrimitiveHelper.equals(p,"") && !PrimitiveHelper.equals(p,"*")) {
+                    if (PrimitiveHelper.endsWith(p, "=")) {
                         p = p + "*";
                     }
                     String[] pArray = p.split("=");
                     QueryParam pObject;
                     if (pArray.length > 1) {
                         String paramKey = pArray[0].trim();
-                        boolean negative = paramKey.endsWith("!");
+                        boolean negative = PrimitiveHelper.endsWith(paramKey, "!");
                         pObject = new QueryParam(paramKey.replace("!", "").replace("*", ".*"), pArray[1].trim().replace("*", ".*"), negative);
                         params.put(pObject.name(), pObject);
                     }
@@ -133,15 +134,15 @@ public class FilterAttributeQueryAction implements KTraversalAction {
             iParam = iParam + 1;
         }
         String lastParam = p_paramString.substring(lastStart, iParam).trim();
-        if (!lastParam.equals("") && !lastParam.equals("*")) {
-            if (lastParam.endsWith("=")) {
+        if (!PrimitiveHelper.equals(lastParam,"") && !PrimitiveHelper.equals(lastParam,"*")) {
+            if (PrimitiveHelper.endsWith(lastParam, "=")) {
                 lastParam = lastParam + "*";
             }
             String[] pArray = lastParam.split("=");
             QueryParam pObject;
             if (pArray.length > 1) {
                 String paramKey = pArray[0].trim();
-                boolean negative = paramKey.endsWith("!");
+                boolean negative = PrimitiveHelper.endsWith(paramKey, "!");
                 pObject = new QueryParam(paramKey.replace("!", "").replace("*", ".*"), pArray[1].trim().replace("*", ".*"), negative);
                 params.put(pObject.name(), pObject);
             }

@@ -3,6 +3,7 @@ package org.kevoree.modeling.traversal.impl.actions;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
 import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 import org.kevoree.modeling.util.maths.expression.impl.MathExpressionEngine;
@@ -32,13 +33,13 @@ public class MathExpressionAction implements KTraversalAction {
                 _engine.setVarResolver(new KMathVariableResolver() {
                     @Override
                     public Double resolve(String potentialVarName) {
-                        if (potentialVarName.equals("PI")) {
+                        if (PrimitiveHelper.equals(potentialVarName,"PI")) {
                             return Math.PI;
                         }
-                        if (potentialVarName.equals("TRUE")) {
+                        if (PrimitiveHelper.equals(potentialVarName,"TRUE")) {
                             return 1.0;
                         }
-                        if (potentialVarName.equals("FALSE")) {
+                        if (PrimitiveHelper.equals(potentialVarName,"FALSE")) {
                             return 0.0;
                         }
                         Object resolved = context.inputObjects()[finalI].getByName(potentialVarName);
@@ -47,13 +48,13 @@ public class MathExpressionAction implements KTraversalAction {
                                 return (double) ((MetaLiteral) resolved).index();
                             } else {
                                 String valueString = resolved.toString();
-                                if(valueString.equals("true")){
+                                if(PrimitiveHelper.equals(valueString,"true")){
                                     return 1.0;
-                                } else if(valueString.equals("false")){
+                                } else if(PrimitiveHelper.equals(valueString,"false")){
                                     return 0.0;
                                 } else {
                                     try {
-                                        return Double.parseDouble(resolved.toString());
+                                        return PrimitiveHelper.parseDouble(resolved.toString());
                                     } catch (Exception e) {
                                         //noop
                                     }

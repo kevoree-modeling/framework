@@ -8,6 +8,7 @@ import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class FilterAttributeAction implements KTraversalAction {
 
@@ -30,7 +31,7 @@ public class FilterAttributeAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         if (context.inputObjects() == null || context.inputObjects().length == 0) {
-            if(_next != null){
+            if (_next != null) {
                 _next.execute(context);
             } else {
                 context.finalCallback().on(context.inputObjects());
@@ -54,14 +55,14 @@ public class FilterAttributeAction implements KTraversalAction {
                                     if (metaElements[j] instanceof MetaAttribute) {
                                         Object resolved = raw.getPrimitiveType(metaElements[j].index(), loopObj.metaClass());
                                         if (resolved == null) {
-                                            if (_expectedValue.toString().equals("*")) {
+                                            if (PrimitiveHelper.equals(_expectedValue.toString(), "*")) {
                                                 addToNext = true;
                                             }
                                         } else {
-                                            if (resolved.equals(_expectedValue)) {
+                                            if (PrimitiveHelper.equals(resolved.toString(), _expectedValue.toString())) {
                                                 addToNext = true;
                                             } else {
-                                                if (resolved.toString().matches(_expectedValue.toString().replace("*", ".*"))) {
+                                                if (PrimitiveHelper.matches(resolved.toString(), _expectedValue.toString().replace("*", ".*"))) {
                                                     addToNext = true;
                                                 }
                                             }
@@ -84,16 +85,16 @@ public class FilterAttributeAction implements KTraversalAction {
                                     }
                                 } else {
                                     if (resolved == null) {
-                                        if (_expectedValue.toString().equals("*")) {
+                                        if (PrimitiveHelper.equals(_expectedValue.toString(), "*")) {
                                             selectedIndexes[i] = true;
                                             nbSelected++;
                                         }
                                     } else {
-                                        if (resolved.equals(_expectedValue)) {
+                                        if (PrimitiveHelper.equals(resolved.toString(), _expectedValue.toString())) {
                                             selectedIndexes[i] = true;
                                             nbSelected++;
                                         } else {
-                                            if (resolved.toString().matches(_expectedValue.toString().replace("*", ".*"))) {
+                                            if (PrimitiveHelper.matches(resolved.toString(), _expectedValue.toString().replace("*", ".*"))) {
                                                 selectedIndexes[i] = true;
                                                 nbSelected++;
                                             }

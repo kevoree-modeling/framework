@@ -10,6 +10,7 @@ import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class DiscreteExtrapolation implements Extrapolation {
 
@@ -74,7 +75,7 @@ public class DiscreteExtrapolation implements Extrapolation {
                     return payload;
                 } else {
                     try {
-                        return Integer.parseInt(payload.toString());
+                        return PrimitiveHelper.parseInt(payload.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -84,7 +85,7 @@ public class DiscreteExtrapolation implements Extrapolation {
                     return payload;
                 } else {
                     try {
-                        return Double.parseDouble(payload.toString());
+                        return PrimitiveHelper.parseDouble(payload.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -94,7 +95,7 @@ public class DiscreteExtrapolation implements Extrapolation {
                     return payload;
                 } else {
                     try {
-                        return Long.parseLong(payload.toString());
+                        return PrimitiveHelper.parseLong(payload.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -114,7 +115,7 @@ public class DiscreteExtrapolation implements Extrapolation {
                     return payload;
                 } else {
                     try {
-                        return Boolean.parseBoolean(payload.toString());
+                        return PrimitiveHelper.parseBoolean(payload.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

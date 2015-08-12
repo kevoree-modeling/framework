@@ -5,6 +5,7 @@ package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.memory.chunk.KStringMap;
 import org.kevoree.modeling.memory.chunk.KStringMapCallBack;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 /**
  * @native ts
@@ -100,7 +101,7 @@ public class ArrayStringMap<V> implements KStringMap<V> {
     final Entry<V> findNonNullKeyEntry(String key, int index) {
         Entry<V> m = elementData[index];
         while (m != null) {
-            if (key.equals(m.key)) {
+            if (PrimitiveHelper.equals(key, m.key)) {
                 return m;
             }
             m = m.next;
@@ -184,7 +185,7 @@ public class ArrayStringMap<V> implements KStringMap<V> {
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % elementDataSize;
         entry = elementData[index];
-        while (entry != null && !(key.equals(entry.key))) {
+        while (entry != null && !(PrimitiveHelper.equals(key, entry.key))) {
             last = entry;
             entry = entry.next;
         }

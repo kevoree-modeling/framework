@@ -13,6 +13,7 @@ import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.MetaType;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class TraverseQueryAction implements KTraversalAction {
 
@@ -41,7 +42,7 @@ public class TraverseQueryAction implements KTraversalAction {
             }
         } else {
             AbstractKObject currentFirstObject = (AbstractKObject) context.inputObjects()[0];
-            KLongLongMap nextIds = new ArrayLongLongMap(-1,-1,-1,null);
+            KLongLongMap nextIds = new ArrayLongLongMap(-1, -1, -1, null);
             for (int i = 0; i < context.inputObjects().length; i++) {
                 try {
                     AbstractKObject loopObj = (AbstractKObject) context.inputObjects()[i];
@@ -70,13 +71,13 @@ public class TraverseQueryAction implements KTraversalAction {
                                     KMetaReference metaReference = (KMetaReference) metaElements[h];
                                     boolean selected = false;
                                     for (int k = 0; k < queries.length; k++) {
-                                        if (queries[k] != null && queries[k].trim().startsWith("<<")) {
-                                            if (metaReference.opposite().metaName().matches(queries[k].trim().substring(2))) {
+                                        if (queries[k] != null && PrimitiveHelper.startsWith(queries[k].trim(), "<<")) {
+                                            if (PrimitiveHelper.matches(metaReference.opposite().metaName(), queries[k].trim().substring(2))) {
                                                 selected = true;
                                                 break;
                                             }
                                         } else {
-                                            if (metaReference.metaName().matches("^" + queries[k] + "$")) {
+                                            if (PrimitiveHelper.matches(metaReference.metaName(), "^" + queries[k] + "$")) {
                                                 selected = true;
                                                 break;
                                             }

@@ -12,6 +12,7 @@ import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Element;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.meta.MetaNode;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class TraversalTest {
 
@@ -182,7 +183,7 @@ public class TraversalTest {
                 node0.traversal().traverse((KMetaReference) node0.metaClass().metaByName("children")).filter(new KTraversalFilter() {
                     @Override
                     public boolean filter(KObject obj) {
-                        return ((Node) obj).getName().equals("child1");
+                        return PrimitiveHelper.equals(((Node) obj).getName(), "child1");
                     }
                 }).then(new KCallback<KObject[]>() {
                     @Override
@@ -266,7 +267,7 @@ public class TraversalTest {
                         node0.traversal().traverseQuery("children").filter(new KTraversalFilter() {
                             @Override
                             public boolean filter(KObject obj) {
-                                return ((Node) obj).getName().equals("child1");
+                                return PrimitiveHelper.equals(((Node) obj).getName(), "child1");
                             }
                         }).then(new KCallback<KObject[]>() {
                             @Override
@@ -280,7 +281,7 @@ public class TraversalTest {
                         node0.traversal().traverseQuery("child*").filter(new KTraversalFilter() {
                             @Override
                             public boolean filter(KObject obj) {
-                                return ((Node) obj).getName().equals("child1");
+                                return PrimitiveHelper.equals(((Node) obj).getName(), "child1");
                             }
                         }).then(new KCallback<KObject[]>() {
                             @Override
@@ -294,7 +295,7 @@ public class TraversalTest {
                         node0.traversal().traverseQuery("*children").filter(new KTraversalFilter() {
                             @Override
                             public boolean filter(KObject obj) {
-                                return ((Node) obj).getName().equals("child1");
+                                return PrimitiveHelper.equals(((Node) obj).getName(), "child1");
                             }
                         }).then(new KCallback<KObject[]>() {
                             @Override
@@ -308,7 +309,7 @@ public class TraversalTest {
                         node0.traversal().traverseQuery("cc,children").filter(new KTraversalFilter() {
                             @Override
                             public boolean filter(KObject obj) {
-                                return ((Node) obj).getName().equals("child1");
+                                return PrimitiveHelper.equals(((Node) obj).getName(), "child1");
                             }
                         }).then(new KCallback<KObject[]>() {
                             @Override
@@ -360,6 +361,7 @@ public class TraversalTest {
                     }
                 });
 
+
                 node0.traversal().traverseQuery("children").attributeQuery("name=child1").then(new KCallback<KObject[]>() {
                     @Override
                     public void on(KObject[] kObjects) {
@@ -374,6 +376,7 @@ public class TraversalTest {
                         Assert.assertEquals(2, kObjects.length);
                     }
                 });
+
 
                 node0.traversal().traverseQuery("children").attributeQuery("name=child*,value!=null").then(new KCallback<KObject[]>() {
                     @Override
@@ -475,7 +478,7 @@ public class TraversalTest {
                 node0.traversal().collect(null, new KTraversalFilter() {
                     @Override
                     public boolean filter(KObject obj) {
-                        if (obj.get(MetaNode.ATT_NAME) != null && obj.get(MetaNode.ATT_NAME).toString().equals("c1")) {
+                        if (obj.get(MetaNode.ATT_NAME) != null && PrimitiveHelper.equals(obj.get(MetaNode.ATT_NAME).toString(), "c1")) {
                             return false;
                         } else {
                             return true;
@@ -491,7 +494,7 @@ public class TraversalTest {
                 node0.traversal().collect(null, new KTraversalFilter() {
                     @Override
                     public boolean filter(KObject obj) {
-                        if (obj.get(MetaNode.ATT_NAME) != null && obj.get(MetaNode.ATT_NAME).toString().equals("c1_1")) {
+                        if (obj.get(MetaNode.ATT_NAME) != null && PrimitiveHelper.equals(obj.get(MetaNode.ATT_NAME).toString(),"c1_1")) {
                             return false;
                         } else {
                             return true;
@@ -507,7 +510,7 @@ public class TraversalTest {
                 node0.traversal().collect(MetaNode.REF_CHILDREN, new KTraversalFilter() {
                     @Override
                     public boolean filter(KObject obj) {
-                        if (obj.get(MetaNode.ATT_NAME) != null && obj.get(MetaNode.ATT_NAME).toString().equals("c1_1")) {
+                        if (obj.get(MetaNode.ATT_NAME) != null && PrimitiveHelper.equals(obj.get(MetaNode.ATT_NAME).toString(),"c1_1")) {
                             return false;
                         } else {
                             return true;

@@ -5,6 +5,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
 import org.kevoree.modeling.traversal.KTraversalIndexResolver;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class TraverseIndexAction implements KTraversalAction {
 
@@ -25,7 +26,7 @@ public class TraverseIndexAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         //TODO enhance this to general index usages
-        if (_indexName.equals("root")) {
+        if (PrimitiveHelper.equals(_indexName,"root")) {
             if (context.inputObjects().length > 0) {
                 context.inputObjects()[0].manager().getRoot(context.inputObjects()[0].universe(), context.inputObjects()[0].now(), new KCallback<KObject>() {
                     @Override

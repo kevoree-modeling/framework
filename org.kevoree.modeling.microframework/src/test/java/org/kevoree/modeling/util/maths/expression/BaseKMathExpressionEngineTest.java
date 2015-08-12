@@ -2,6 +2,7 @@ package org.kevoree.modeling.util.maths.expression;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public abstract class BaseKMathExpressionEngineTest {
 
@@ -13,15 +14,15 @@ public abstract class BaseKMathExpressionEngineTest {
         ex.setVarResolver(new KMathVariableResolver() {
             @Override
             public Double resolve(String potentialVarName) {
-                if (potentialVarName.equals("PI")) {
+                if (PrimitiveHelper.equals(potentialVarName,"PI")) {
                     return Math.PI;
                 }
-                if (potentialVarName.equals("TRUE")) {
+                if (PrimitiveHelper.equals(potentialVarName,"TRUE")) {
                     return 1.0;
                 }
-                if (potentialVarName.equals("FALSE")) {
+                if (PrimitiveHelper.equals(potentialVarName,"FALSE")) {
                     return 0.0;
-                } else if (potentialVarName.equals("price")) {
+                } else if (PrimitiveHelper.equals(potentialVarName,"price")) {
                     return 10.0;
                 }
                 return null;

@@ -172,7 +172,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         int typeId = metaOutput.type().id();
         switch (typeId) {
             case KPrimitiveTypes.BOOL_ID:
-                if (output.equals(true)) {
+                if ((boolean) output) {
                     return 1.0;
                 } else {
                     return 0.0;

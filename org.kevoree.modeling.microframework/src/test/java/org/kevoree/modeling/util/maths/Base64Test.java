@@ -3,6 +3,7 @@ package org.kevoree.modeling.util.maths;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class Base64Test {
 
@@ -54,7 +55,6 @@ public class Base64Test {
     }
 
 
-
     @Test
     public void minIntEncodingTest() {
         testInt(0x80000000);
@@ -98,7 +98,7 @@ public class Base64Test {
      */
     @Test
     public void minDoubleEncodingTest() {
-        testDouble(Double.MIN_VALUE);
+        testDouble(PrimitiveHelper.DOUBLE_MIN_VALUE());
     }
 
     /**
@@ -107,7 +107,7 @@ public class Base64Test {
      */
     @Test
     public void negMaxDoubleEncodingTest() {
-        testDouble(-Double.MAX_VALUE);
+        testDouble(-PrimitiveHelper.DOUBLE_MAX_VALUE());
     }
 
     /**
@@ -116,7 +116,7 @@ public class Base64Test {
      */
     @Test
     public void negMinDoubleEncodingTest() {
-        testDouble(-Double.MIN_VALUE);
+        testDouble(-PrimitiveHelper.DOUBLE_MIN_VALUE());
     }
 
     @Test
@@ -133,7 +133,6 @@ public class Base64Test {
      * var enc = Base64.encodeDouble(val);
      * var dec = Base64.decodeToDouble(enc);
      * org.junit.Assert.assertEquals(val, dec);
-     *
      * var buffer = new java.lang.StringBuilder();
      * Base64.encodeDoubleToBuffer(val, buffer);
      * dec = Base64.decodeToDouble(buffer.toString());
@@ -155,8 +154,6 @@ public class Base64Test {
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertEquals(val, dec, 0);
     }
-
-
 
 
     @Test

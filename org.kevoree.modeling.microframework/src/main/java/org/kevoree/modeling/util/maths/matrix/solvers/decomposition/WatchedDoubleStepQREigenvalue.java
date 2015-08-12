@@ -1,5 +1,6 @@
 package org.kevoree.modeling.util.maths.matrix.solvers.decomposition;
 
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.matrix.Complex64F;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 
@@ -50,7 +51,7 @@ public class WatchedDoubleStepQREigenvalue {
                 x2 -= 2;
             } else if( implicitQR.steps-implicitQR.lastExceptional > implicitQR.exceptionalThreshold ) {
                 // see if the matrix blew up
-                if( Double.isNaN(implicitQR.A.get(x2,x2))) {
+                if( PrimitiveHelper.isNaN(implicitQR.A.get(x2, x2))) {
                     return false;
                 }
 

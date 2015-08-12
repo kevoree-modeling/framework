@@ -12,6 +12,7 @@ import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 import org.kevoree.modeling.memory.chunk.KStringMapCallBack;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +88,7 @@ public class JsonModelLoader {
                 for (int i = 0; i < alls.size(); i++) {
                     try {
                         ArrayStringMap<Object> elem = alls.get(i);
-                        long kid = Long.parseLong(elem.get(JsonFormat.KEY_UUID).toString());
+                        long kid = PrimitiveHelper.parseLong(elem.get(JsonFormat.KEY_UUID).toString());
                         mappedKeys.put(kid, manager.nextObjectKey());
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -120,7 +121,7 @@ public class JsonModelLoader {
     }
 
     private static void loadObj(ArrayStringMap<Object> p_param, KInternalDataManager manager, long universe, long time, KLongLongMap p_mappedKeys, KObject[] p_rootElem) {
-        long kid = Long.parseLong(p_param.get(JsonFormat.KEY_UUID).toString());
+        long kid = PrimitiveHelper.parseLong(p_param.get(JsonFormat.KEY_UUID).toString());
         String meta = p_param.get(JsonFormat.KEY_META).toString();
         KMetaClass metaClass = manager.model().metaModel().metaClassByName(meta);
         KObject current = ((AbstractKModel) manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass, universe, time);
@@ -129,7 +130,7 @@ public class JsonModelLoader {
         p_param.each(new KStringMapCallBack<Object>() {
             @Override
             public void on(String metaKey, Object payload_content) {
-                if (metaKey.equals(JsonFormat.KEY_ROOT)) {
+                if (PrimitiveHelper.equals(metaKey,JsonFormat.KEY_ROOT)) {
                     p_rootElem[0] = current;
                 } else {
                     KMeta metaElement = metaClass.metaByName(metaKey);
@@ -143,7 +144,7 @@ public class JsonModelLoader {
                                     double[] convertedRaw = new double[plainRawSet.length];
                                     for (int l = 0; l < plainRawSet.length; l++) {
                                         try {
-                                            convertedRaw[l] = Double.parseDouble(plainRawSet[l]);
+                                            convertedRaw[l] = PrimitiveHelper.parseDouble(plainRawSet[l]);
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                         }
@@ -156,13 +157,13 @@ public class JsonModelLoader {
                                     if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
                                         converted = JsonString.unescape(rawPayload);
                                     } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                                        converted = Long.parseLong(rawPayload);
+                                        converted = PrimitiveHelper.parseLong(rawPayload);
                                     } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                                        converted = Integer.parseInt(rawPayload);
+                                        converted = PrimitiveHelper.parseInt(rawPayload);
                                     } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                                        converted = Boolean.parseBoolean(rawPayload);
+                                        converted = PrimitiveHelper.parseBoolean(rawPayload);
                                     } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                                        converted = Double.parseDouble(rawPayload);
+                                        converted = PrimitiveHelper.parseDouble(rawPayload);
                                     }
                                     raw.setPrimitiveType(metaElement.index(), converted, current.metaClass());
                                     break;
@@ -188,7 +189,7 @@ public class JsonModelLoader {
         long[] convertedRaw = new long[sizeOfL];
         for (int l = 0; l < sizeOfL; l++) {
             try {
-                long converted = Long.parseLong(getString(plainRawSet, l));
+                long converted = PrimitiveHelper.parseLong(getString(plainRawSet, l));
                 if (p_mappedKeys.contains(converted)) {
                     converted = p_mappedKeys.get(converted);
                 }

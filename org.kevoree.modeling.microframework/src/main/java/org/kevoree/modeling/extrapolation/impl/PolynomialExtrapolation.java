@@ -5,6 +5,7 @@ import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.PolynomialFit;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -25,10 +26,12 @@ public class PolynomialExtrapolation implements Extrapolation {
                     return extrapolatedValue;
                 case KPrimitiveTypes.DOUBLE_ID:
                     return extrapolatedValue;
+                /*
                 case KPrimitiveTypes.LONG_ID:
                     return extrapolatedValue.longValue();
                 case KPrimitiveTypes.INT_ID:
                     return extrapolatedValue.intValue();
+                    */
                 default:
                     return null;
             }
@@ -186,7 +189,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         if (payload instanceof Double) {
             return (Double) payload;
         } else {
-            return Double.parseDouble(payload.toString());
+            return PrimitiveHelper.parseDouble(payload.toString());
         }
     }
 

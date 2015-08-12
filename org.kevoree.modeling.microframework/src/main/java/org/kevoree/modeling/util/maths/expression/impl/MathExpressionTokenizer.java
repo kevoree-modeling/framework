@@ -1,5 +1,7 @@
 package org.kevoree.modeling.util.maths.expression.impl;
 
+import org.kevoree.modeling.util.PrimitiveHelper;
+
 public class MathExpressionTokenizer {
 
     private int pos = 0;
@@ -36,7 +38,7 @@ public class MathExpressionTokenizer {
                 token.append(input.charAt(pos++));
                 ch = pos == input.length() ? '\0' : input.charAt(pos);
             }
-        } else if (ch == MathExpressionEngine.minusSign && MathExpressionEngine.isDigit(peekNextChar()) && ("(".equals(previousToken) || ",".equals(previousToken) || previousToken == null || MathEntities.getINSTANCE().operators.contains(previousToken))) {
+        } else if (ch == MathExpressionEngine.minusSign && MathExpressionEngine.isDigit(peekNextChar()) && (PrimitiveHelper.equals("(",previousToken) || PrimitiveHelper.equals(",",previousToken) || previousToken == null || MathEntities.getINSTANCE().operators.contains(previousToken))) {
             token.append(MathExpressionEngine.minusSign);
             pos++;
             token.append(next());

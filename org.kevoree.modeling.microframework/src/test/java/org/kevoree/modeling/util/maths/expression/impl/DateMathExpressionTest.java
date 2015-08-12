@@ -2,6 +2,7 @@ package org.kevoree.modeling.util.maths.expression.impl;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
 import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 
@@ -30,7 +31,7 @@ public class DateMathExpressionTest {
         ex.setVarResolver(new KMathVariableResolver() {
             @Override
             public Double resolve(String potentialVarName) {
-                if (potentialVarName.equals("time")) {
+                if (PrimitiveHelper.equals(potentialVarName,"time")) {
                     return getDate();
                 }
                 return null;

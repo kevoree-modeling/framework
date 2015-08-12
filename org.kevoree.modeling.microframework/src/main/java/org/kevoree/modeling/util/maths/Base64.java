@@ -1,5 +1,7 @@
 package org.kevoree.modeling.util.maths;
 
+import org.kevoree.modeling.util.PrimitiveHelper;
+
 /**
  * @native ts
  * private static encodeArray = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'];
@@ -11,7 +13,7 @@ package org.kevoree.modeling.util.maths;
  * tmp = -tmp;
  * }
  * for (var i = 47; i >= 5; i -= 6) {
- * if (!(result.equals("") && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
+ * if (!(result === "" && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
  * result += Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F];
  * }
  * }
@@ -39,7 +41,7 @@ package org.kevoree.modeling.util.maths;
  * tmp = -tmp;
  * }
  * for (var i = 29; i >= 5; i -= 6) {
- * if (!(result.equals("") && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
+ * if (!(result === "" && ((tmp / Math.pow(2, i)) & 0x3F) == 0)) {
  * result += Base64.encodeArray[(tmp / Math.pow(2, i)) & 0x3F];
  * }
  * }
@@ -230,7 +232,7 @@ public class Base64 {
             tmp = -tmp;
         }
         for (int i = 47; i >= 5; i -= 6) {
-            if (!(result.equals("") && ((int) (tmp >> i) & 0x3F) == 0)) {
+            if (!(PrimitiveHelper.equals(result,"") && ((int) (tmp >> i) & 0x3F) == 0)) {
                 result += encodeArray[(int) (tmp >> i) & 0x3F];
             }
         }
@@ -267,7 +269,7 @@ public class Base64 {
             tmp = -tmp;
         }
         for (int i = 29; i >= 5; i -= 6) {
-            if (!(result.equals("") && ((tmp >> i) & 0x3F) == 0)) {
+            if (!(PrimitiveHelper.equals(result,"") && ((tmp >> i) & 0x3F) == 0)) {
                 result += Base64.encodeArray[(tmp >> i) & 0x3F];
             }
         }

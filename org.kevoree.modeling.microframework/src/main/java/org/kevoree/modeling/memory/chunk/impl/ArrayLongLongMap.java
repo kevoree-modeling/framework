@@ -13,53 +13,6 @@ import org.kevoree.modeling.util.maths.Base64;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * //TODO maybe redo an optimized version for JS
- * native ts
- * private _counter = 0;
- * private _className : string;
- * constructor(initalCapacity: number, loadFactor : number, p_className : string) { super(initalCapacity,loadFactor);this._className = p_className; }
- * public metaClassName(){ return this._className; }
- * public counter():number { return this._counter; }
- * public inc():void { this._counter++; }
- * public dec():void { this._counter--; }
- * public free():void {  }
- * public size():number { return Object.keys(this).length-3; }
- * public serialize(metaModel: org.kevoree.modeling.meta.KMetaModel): string {
- * var buffer: java.lang.StringBuilder = new java.lang.StringBuilder();
- * if (this._className != null) {buffer.append(this._className);buffer.append(',');}
- * org.kevoree.modeling.util.maths.Base64.encodeIntToBuffer(this.size(),buffer);
- * buffer.append('/');
- * var isFirst: boolean = true;
- * for (var propKey in this) { if(this.hasOwnProperty(propKey) && propKey[0] != '_'){
- * if (!isFirst) {buffer.append(",");} isFirst = false;
- * org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(propKey, buffer);
- * buffer.append(":");
- * org.kevoree.modeling.util.maths.Base64.encodeLongToBuffer(this[propKey], buffer);
- * }}
- * return buffer.toString();
- * }
- * public init(payload: string, metaModel: org.kevoree.modeling.meta.KMetaModel): void {
- * if (payload == null || payload.length == 0) { return; }
- * var initPos: number = 0; var cursor: number = 0;
- * while (cursor < payload.length && payload.charAt(cursor) != ',' && payload.charAt(cursor) != '/'){ cursor++; }
- * if (cursor >= payload.length) { return; }
- * if (payload.charAt(cursor) == ',') { this._className = payload.substring(initPos, cursor);cursor++;initPos = cursor;}
- * while (cursor < payload.length && payload.charAt(cursor) != '/'){cursor++;}
- * var nbElement: number = java.lang.Integer.parseInt(payload.substring(initPos, cursor));
- * while (cursor < payload.length){
- * cursor++;
- * var beginChunk: number = cursor;
- * while (cursor < payload.length && payload.charAt(cursor) != ':'){cursor++;}
- * var middleChunk: number = cursor;
- * while (cursor < payload.length && payload.charAt(cursor) != ','){cursor++;}
- * var loopKey: number = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
- * var loopVal: number = org.kevoree.modeling.util.maths.Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
- * this[loopKey] = loopVal;
- * }
- * }
- * public type(): number { return org.kevoree.modeling.memory.storage.MemoryElementTypes.LONG_LONG_MAP; }
- */
 public class ArrayLongLongMap implements KLongLongMap {
 
     protected volatile int elementCount;
@@ -106,9 +59,6 @@ public class ArrayLongLongMap implements KLongLongMap {
         this.threshold = (int) (newstate.elementDataSize * loadFactor);
     }
 
-    /**
-     * native ts
-     */
     final class InternalState {
 
         public final int elementDataSize;

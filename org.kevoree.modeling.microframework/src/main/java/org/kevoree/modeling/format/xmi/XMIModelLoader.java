@@ -10,6 +10,7 @@ import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.MetaType;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class XMIModelLoader {
 
@@ -85,7 +86,7 @@ public class XMIModelLoader {
                         for (int i = 0; i < reader.getAttributeCount() - 1; i++) {
                             String attrLocalName = reader.getAttributeLocalName(i);
                             String attrLocalValue = reader.getAttributeValue(i);
-                            if (attrLocalName.equals(LOADER_XMI_NS_URI)) {
+                            if (PrimitiveHelper.equals(attrLocalName,LOADER_XMI_NS_URI)) {
                                 nsURI = attrLocalValue;
                             }
                             ns.put(attrLocalName, attrLocalValue);
@@ -118,7 +119,7 @@ public class XMIModelLoader {
                 for (int i = 0; i < (ctx.xmiReader.getAttributeCount() - 1); i++) {
                     String localName = ctx.xmiReader.getAttributeLocalName(i);
                     String xsi = ctx.xmiReader.getAttributePrefix(i);
-                    if (localName.equals(LOADER_XMI_LOCAL_NAME) && xsi.equals(LOADER_XMI_XSI)) {
+                    if (PrimitiveHelper.equals(localName,LOADER_XMI_LOCAL_NAME) && PrimitiveHelper.equals(xsi,LOADER_XMI_XSI)) {
                         xsiType = ctx.xmiReader.getAttributeValue(i);
                         break;
                     }
@@ -146,7 +147,7 @@ public class XMIModelLoader {
         /* Read attributes and References */
         for (int i = 0; i < ctx.xmiReader.getAttributeCount(); i++) {
             String prefix = ctx.xmiReader.getAttributePrefix(i);
-            if (prefix == null || prefix.equals("")) {
+            if (prefix == null || PrimitiveHelper.equals(prefix,"")) {
                 String attrName = ctx.xmiReader.getAttributeLocalName(i).trim();
                 String valueAtt = ctx.xmiReader.getAttributeValue(i).trim();
                 if (valueAtt != null) {
@@ -158,7 +159,7 @@ public class XMIModelLoader {
                             String[] referenceArray = valueAtt.split(" ");
                             for (int j = 0; j < referenceArray.length; j++) {
                                 String xmiRef = referenceArray[j];
-                                String adjustedRef = (xmiRef.startsWith("#") ? xmiRef.substring(1) : xmiRef);
+                                String adjustedRef = (PrimitiveHelper.startsWith(xmiRef,"#") ? xmiRef.substring(1) : xmiRef);
                                 //adjustedRef = (adjustedRef.startsWith("//") ? "/0" + adjustedRef.substring(1) : adjustedRef);
                                 adjustedRef = adjustedRef.replace(".0", "");
                                 KObject ref = ctx.map.get(adjustedRef);
@@ -192,7 +193,7 @@ public class XMIModelLoader {
                     modelElem.mutate(KActionType.ADD, (KMetaReference) modelElem.metaClass().metaByName(subElemName), containedElement);
                     ctx.elementsCount.put(xmiAddress + "/@" + subElemName, i + 1);
                 } else if (tok.equals(XmlToken.END_TAG)) {
-                    if (ctx.xmiReader.getLocalName().equals(elementTagName)) {
+                    if (PrimitiveHelper.equals(ctx.xmiReader.getLocalName(), elementTagName)) {
                         done = true;
                     }
                 }

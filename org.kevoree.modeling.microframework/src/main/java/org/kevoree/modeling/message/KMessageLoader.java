@@ -4,6 +4,7 @@ import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.impl.*;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.Base64;
 
 public class KMessageLoader {
@@ -43,7 +44,7 @@ public class KMessageLoader {
         JsonObjectReader objectReader = new JsonObjectReader();
         objectReader.parseObject(payload);
         try {
-            Integer parsedType = Integer.parseInt(objectReader.get(TYPE_NAME).toString());
+            int parsedType = PrimitiveHelper.parseInt(objectReader.get(TYPE_NAME).toString());
             if (parsedType == EVENTS_TYPE) {
                 Events eventsMessage = null;
                 if (objectReader.get(KEYS_NAME) != null) {
@@ -62,7 +63,7 @@ public class KMessageLoader {
             } else if (parsedType == GET_REQ_TYPE) {
                 GetRequest getKeysRequest = new GetRequest();
                 if (objectReader.get(ID_NAME) != null) {
-                    getKeysRequest.id = Long.parseLong(objectReader.get(ID_NAME).toString());
+                    getKeysRequest.id = PrimitiveHelper.parseLong(objectReader.get(ID_NAME).toString());
                 }
                 if (objectReader.get(KEYS_NAME) != null) {
                     String[] metaInt = objectReader.getAsStringArray(KEYS_NAME);
@@ -76,7 +77,7 @@ public class KMessageLoader {
             } else if (parsedType == GET_RES_TYPE) {
                 GetResult getResult = new GetResult();
                 if (objectReader.get(ID_NAME) != null) {
-                    getResult.id = Long.parseLong(objectReader.get(ID_NAME).toString());
+                    getResult.id = PrimitiveHelper.parseLong(objectReader.get(ID_NAME).toString());
                 }
                 if (objectReader.get(VALUES_NAME) != null) {
                     String[] metaInt = objectReader.getAsStringArray(VALUES_NAME);
@@ -90,7 +91,7 @@ public class KMessageLoader {
             } else if (parsedType == PUT_REQ_TYPE) {
                 PutRequest putRequest = new PutRequest();
                 if (objectReader.get(ID_NAME) != null) {
-                    putRequest.id = Long.parseLong(objectReader.get(ID_NAME).toString());
+                    putRequest.id = PrimitiveHelper.parseLong(objectReader.get(ID_NAME).toString());
                 }
                 String[] toFlatKeys = null;
                 String[] toFlatValues = null;
@@ -114,7 +115,7 @@ public class KMessageLoader {
             } else if (parsedType == PUT_RES_TYPE) {
                 PutResult putResult = new PutResult();
                 if (objectReader.get(ID_NAME) != null) {
-                    putResult.id = Long.parseLong(objectReader.get(ID_NAME).toString());
+                    putResult.id = PrimitiveHelper.parseLong(objectReader.get(ID_NAME).toString());
                 }
                 return putResult;
             } else if (parsedType == OPERATION_CALL_TYPE) {
@@ -145,7 +146,7 @@ public class KMessageLoader {
             } else if (parsedType == OPERATION_RESULT_TYPE) {
                 OperationResultMessage resultMessage = new OperationResultMessage();
                 if (objectReader.get(ID_NAME) != null) {
-                    resultMessage.id = Long.parseLong(objectReader.get(ID_NAME).toString());
+                    resultMessage.id = PrimitiveHelper.parseLong(objectReader.get(ID_NAME).toString());
                 }
                 if (objectReader.get(KEY_NAME) != null) {
                     resultMessage.key = KContentKey.create(objectReader.get(KEY_NAME).toString());
@@ -157,7 +158,7 @@ public class KMessageLoader {
             } else if (parsedType == ATOMIC_GET_INC_REQUEST_TYPE) {
                 AtomicGetIncrementRequest atomicGetMessage = new AtomicGetIncrementRequest();
                 if (objectReader.get(ID_NAME) != null) {
-                    atomicGetMessage.id = Long.parseLong(objectReader.get(ID_NAME).toString());
+                    atomicGetMessage.id = PrimitiveHelper.parseLong(objectReader.get(ID_NAME).toString());
                 }
                 if (objectReader.get(KEYS_NAME) != null) {
                     String[] metaInt = objectReader.getAsStringArray(KEYS_NAME);
@@ -171,11 +172,11 @@ public class KMessageLoader {
             } else if (parsedType == ATOMIC_GET_INC_RESULT_TYPE) {
                 AtomicGetIncrementResult atomicGetResultMessage = new AtomicGetIncrementResult();
                 if (objectReader.get(ID_NAME) != null) {
-                    atomicGetResultMessage.id = Long.parseLong(objectReader.get(ID_NAME).toString());
+                    atomicGetResultMessage.id = PrimitiveHelper.parseLong(objectReader.get(ID_NAME).toString());
                 }
                 if (objectReader.get(VALUE_NAME) != null) {
                     try {
-                        atomicGetResultMessage.value = Short.parseShort(objectReader.get(VALUE_NAME).toString());
+                        atomicGetResultMessage.value = PrimitiveHelper.parseShort(objectReader.get(VALUE_NAME).toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

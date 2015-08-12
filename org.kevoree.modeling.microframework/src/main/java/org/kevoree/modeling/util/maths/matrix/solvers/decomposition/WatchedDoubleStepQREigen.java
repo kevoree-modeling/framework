@@ -1,5 +1,6 @@
 package org.kevoree.modeling.util.maths.matrix.solvers.decomposition;
 
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.Complex64F;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
@@ -490,7 +491,7 @@ public class WatchedDoubleStepQREigen {
         eigen2by2_scale(A.get(x1,x1),A.get(x1,x2),A.get(x2,x1),A.get(x2,x2));
 
         if( checkUncountable &&
-                (Double.isNaN(valueSmall.value0.real) || Double.isNaN(valueSmall.value1.real)) ) {
+                (PrimitiveHelper.isNaN(valueSmall.value0.real) || PrimitiveHelper.isNaN(valueSmall.value1.real)) ) {
             throw new RuntimeException("Uncountable");
         }
 

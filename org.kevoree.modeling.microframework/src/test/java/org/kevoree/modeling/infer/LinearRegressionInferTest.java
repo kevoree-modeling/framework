@@ -12,6 +12,7 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.Random;
 
@@ -88,7 +89,7 @@ public class LinearRegressionInferTest {
                     KObject house=createHouse();
 
                     Object[] output=new Object[1];
-                    output[0] = Double.parseDouble(house.getByName("price").toString());
+                    output[0] = PrimitiveHelper.parseDouble(house.getByName("price").toString());
                     regProfile.genericTrain(new KObject[]{house}, output, null);
                 }
 
@@ -98,8 +99,8 @@ public class LinearRegressionInferTest {
                 regProfile.genericInfer(test, new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] objects) {
-                        double price = Double.parseDouble(test[0].getByName("price").toString());
-                        double calcPrice = Double.parseDouble(objects[0].toString());
+                        double price = PrimitiveHelper.parseDouble(test[0].getByName("price").toString());
+                        double calcPrice = PrimitiveHelper.parseDouble(objects[0].toString());
 
                         Assert.assertTrue(Math.abs(price - calcPrice) < 10);
                         //    KMemorySegment ks = regProfile.manager().chunk(0, 0, regProfile.uuid(), false, regProfile.metaClass(), null);

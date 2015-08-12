@@ -2,8 +2,6 @@ package org.kevoree.modeling;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudView;

@@ -4,23 +4,24 @@ import org.kevoree.modeling.infer.impl.BinaryPerceptronAlg;
 import org.kevoree.modeling.infer.impl.GaussianProfiler;
 import org.kevoree.modeling.infer.impl.KMeanClusterAlg;
 import org.kevoree.modeling.infer.impl.LinearRegressionAlg;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class KInferAlgFactory {
 
     public static final KInferAlg build(String name) {
-        if (name.equals("BinaryPerceptron")) {
+        if (PrimitiveHelper.equals(name, "BinaryPerceptron")) {
             return new BinaryPerceptronAlg();
         }
-        if (name.equals("LinearRegression")) {
+        if (PrimitiveHelper.equals(name, "LinearRegression")) {
             return new LinearRegressionAlg();
         }
-        if (name.equals("KMeanCluster")) {
+        if (PrimitiveHelper.equals(name, "KMeanCluster")) {
             return new KMeanClusterAlg();
         }
-        if (name.equals("GaussianProfiler")) {
+        if (PrimitiveHelper.equals(name, "GaussianProfiler")) {
             return new GaussianProfiler();
         }
-        if (name.equals("GaussianClassifier")) {
+        if (PrimitiveHelper.equals(name, "GaussianClassifier")) {
             return new GaussianProfiler();
         }
         return null;

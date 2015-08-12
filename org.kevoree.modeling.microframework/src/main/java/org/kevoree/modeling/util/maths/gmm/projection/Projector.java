@@ -6,6 +6,7 @@
 package org.kevoree.modeling.util.maths.gmm.projection;
 
 
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.gmm.BaseSampleDistribution;
 import org.kevoree.modeling.util.maths.gmm.MomentMatcher;
 import org.kevoree.modeling.util.maths.gmm.SampleModel;
@@ -54,7 +55,7 @@ public class Projector {
 		int countValidElements = 0;
 		SimpleMatrix invS = null;
 		// if S is almost zero --> singular
-		if (s.elementMaxAbs() < MIN_VALUE || Double.isNaN(s.elementSum())) {
+		if (s.elementMaxAbs() < MIN_VALUE || PrimitiveHelper.isNaN(s.elementSum())) {
 			S = SimpleMatrix.identity(S.numCols()).transpose();
 			invS = SimpleMatrix.identity(d).scale(2d / MIN_VALUE);
 			for (int i = 0; i < validElements.length; i++)
