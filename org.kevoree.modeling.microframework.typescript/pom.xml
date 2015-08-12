@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.kevoree.modeling.microframework.typescript</artifactId>
-  <version>4.21.1-SNAPSHOT  </version>
+    <version>4.21.1-SNAPSHOT</version>
     <name>Kevoree :: Modeling :: MicroFramework :: TypeScript</name>
     <packaging>jar</packaging>
 
@@ -48,6 +49,8 @@
                             <source>${basedir}/../org.kevoree.modeling.microframework/src/main/java</source>
                             <target>${basedir}/target/generated-sources</target>
                             <targetJS>${basedir}/target/classes</targetJS>
+                            <appendJavaStd>true</appendJavaStd>
+                            <appendJunitStd>false</appendJunitStd>
                         </configuration>
                     </execution>
                     <execution>
@@ -63,6 +66,8 @@
                             <libraries>
                                 <library>${basedir}/target/classes</library>
                             </libraries>
+                            <appendJavaStd>false</appendJavaStd>
+                            <appendJunitStd>true</appendJunitStd>
                         </configuration>
                     </execution>
                 </executions>

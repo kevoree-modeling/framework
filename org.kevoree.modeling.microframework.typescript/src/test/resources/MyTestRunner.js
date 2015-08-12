@@ -1,8 +1,7 @@
 var fs = require('fs');
 
 // file is included here:
-eval(fs.readFileSync(__dirname + '/../generated-sources/java.js')+'');
-eval(fs.readFileSync(__dirname + '/../generated-sources/junit.js')+'');
+eval(fs.readFileSync(__dirname + '/../generated-test-sources/junit.js')+'');
 
 eval(fs.readFileSync(__dirname + '/../classes/org.kevoree.modeling.microframework.typescript.js')+'');
 eval(fs.readFileSync(__dirname + '/org.kevoree.modeling.microframework.typescript.js')+'');

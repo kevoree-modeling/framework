@@ -1,7 +1,6 @@
 var fs = require('fs');
 
 // file is included here:
-eval(fs.readFileSync(__dirname + '/../jsdeps/java.js') + '');
 eval(fs.readFileSync(__dirname + '/../jsdeps/org.kevoree.modeling.microframework.typescript.js') + '');
 eval(fs.readFileSync(__dirname + '/../classes/org.kevoree.modeling.drivers.websocket.js') + '');
 
