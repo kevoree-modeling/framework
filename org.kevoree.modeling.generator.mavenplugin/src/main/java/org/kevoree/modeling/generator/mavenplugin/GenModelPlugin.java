@@ -107,11 +107,12 @@ public class GenModelPlugin extends AbstractMojo {
                 Path libDts = Paths.get(jsWorkingDir.toPath().toString(), LIB_D_TS);
                 Files.copy(this.getClass().getClassLoader().getResourceAsStream("tsc/" + LIB_D_TS), libDts, StandardCopyOption.REPLACE_EXISTING);
 
+                /*
                 if (!umd) {
                     Files.copy(getClass().getClassLoader().getResourceAsStream(KMF_LIB_D_TS), Paths.get(jsWorkingDir.toPath().toString(), KMF_LIB_D_TS), StandardCopyOption.REPLACE_EXISTING);
                     Path kmfLibJs = Paths.get(jsWorkingDir.toPath().toString(), KMF_LIB_JS);
                     Files.copy(this.getClass().getClassLoader().getResourceAsStream(KMF_LIB_JS), kmfLibJs, StandardCopyOption.REPLACE_EXISTING);
-                }
+                }*/
 
 
                 Path tscPath = Paths.get(jsWorkingDir.toPath().toString(), TSC_JS);
@@ -162,7 +163,8 @@ public class GenModelPlugin extends AbstractMojo {
                 }
                 Path resourceAllJS = Paths.get(resourceDir.toPath().toString(), project.getArtifactId() + "-all.js");
                 Files.copy(Paths.get(jsWorkingDir.toPath().toString(), project.getArtifactId() + "-all.js"), resourceAllJS, StandardCopyOption.REPLACE_EXISTING);
-*/
+
+
                 StringBuilder buffer = new StringBuilder();
                 for (Artifact artifact : project.getDependencyArtifacts()) {
                     if (buffer.length() != 0) {
@@ -171,11 +173,10 @@ public class GenModelPlugin extends AbstractMojo {
                     buffer.append(artifact.getFile().getAbsolutePath());
                 }
                 System.setProperty("additional", buffer.toString());
-
-                /*
                 if (samples) {
                     HtmlTemplateGenerator.generateHtml(resourceDir.toPath(), project.getArtifactId() + "-all.js", targetName);
-                }*/
+                }
+                */
 
             }
 
