@@ -54,7 +54,7 @@ public static final org.kevoree.modeling.meta.KMetaInferOutput OUT_${output.name
 #end
 
     private Meta${classDeclaration.name}() {
-        super("${classDeclaration.fqn}", ${classDeclaration.index}, null);
+        super("${classDeclaration.fqn}", ${classDeclaration.index},#if(${classDeclaration.inference})org.kevoree.modeling.infer.KInferAlgFactory.build("${classDeclaration.inference}")#else null#end);
         org.kevoree.modeling.meta.KMeta[] temp_all = new org.kevoree.modeling.meta.KMeta[${classDeclaration.attributes.size()}+${classDeclaration.references.size()}+${classDeclaration.operations.size()}+${classDeclaration.inputs.size()}+${classDeclaration.outputs.size()}];
 #set($i = 0)
 #foreach($attribute in $classDeclaration.attributes)
