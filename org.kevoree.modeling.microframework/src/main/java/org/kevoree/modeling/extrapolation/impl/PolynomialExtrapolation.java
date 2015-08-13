@@ -26,12 +26,6 @@ public class PolynomialExtrapolation implements Extrapolation {
                     return extrapolatedValue;
                 case KPrimitiveTypes.DOUBLE_ID:
                     return extrapolatedValue;
-                /*
-                case KPrimitiveTypes.LONG_ID:
-                    return extrapolatedValue.longValue();
-                case KPrimitiveTypes.INT_ID:
-                    return extrapolatedValue.intValue();
-                    */
                 default:
                     return null;
             }
@@ -66,15 +60,15 @@ public class PolynomialExtrapolation implements Extrapolation {
     }
 
     private double maxErr(double precision, int degree) {
-        double tol = precision;
+        //double tol = precision;
     /*    if (_prioritization == Prioritization.HIGHDEGREES) {
             tol = precision / Math.pow(2, _maxDegree - degree);
         } else if (_prioritization == Prioritization.LOWDEGREES) {*/
-        tol = precision / Math.pow(2, degree + 0.5);
+        //double tol = precision / Math.pow(2, degree + 0.5);
        /* } else if (_prioritization == Prioritization.SAMEPRIORITY) {
             tol = precision * degree * 2 / (2 * _maxDegree);
         }*/
-        return tol;
+        return precision / Math.pow(2, degree + 0.5);
     }
 
 
