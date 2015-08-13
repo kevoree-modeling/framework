@@ -1,5 +1,6 @@
 package org.kevoree.modeling.traversal.impl.actions;
 
+import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
@@ -33,24 +34,34 @@ public class MathExpressionAction implements KTraversalAction {
                 _engine.setVarResolver(new KMathVariableResolver() {
                     @Override
                     public Double resolve(String potentialVarName) {
-                        if (PrimitiveHelper.equals(potentialVarName,"PI")) {
+                        if (PrimitiveHelper.equals(potentialVarName, "PI")) {
                             return Math.PI;
                         }
-                        if (PrimitiveHelper.equals(potentialVarName,"TRUE")) {
+                        if (PrimitiveHelper.equals(potentialVarName, "TRUE")) {
                             return 1.0;
                         }
-                        if (PrimitiveHelper.equals(potentialVarName,"FALSE")) {
+                        if (PrimitiveHelper.equals(potentialVarName, "FALSE")) {
                             return 0.0;
                         }
-                        Object resolved = context.inputObjects()[finalI].getByName(potentialVarName);
+                        KObject loopObj = context.inputObjects()[finalI];
+                        if (PrimitiveHelper.equals(potentialVarName, "TIME_MS_NS")) {
+                            return (double) (loopObj.now() / 1000000);
+                        }
+                        if (PrimitiveHelper.equals(potentialVarName, "TIME_NS_MS")) {
+                            return (double) (loopObj.now() * 1000000);
+                        }
+                        if (PrimitiveHelper.equals(potentialVarName, "TIME")) {
+                            return (double) loopObj.now();
+                        }
+                        Object resolved = loopObj.getByName(potentialVarName);
                         if (resolved != null) {
                             if (resolved instanceof MetaLiteral) {
                                 return (double) ((MetaLiteral) resolved).index();
                             } else {
                                 String valueString = resolved.toString();
-                                if(PrimitiveHelper.equals(valueString,"true")){
+                                if (PrimitiveHelper.equals(valueString, "true")) {
                                     return 1.0;
-                                } else if(PrimitiveHelper.equals(valueString,"false")){
+                                } else if (PrimitiveHelper.equals(valueString, "false")) {
                                     return 0.0;
                                 } else {
                                     try {
