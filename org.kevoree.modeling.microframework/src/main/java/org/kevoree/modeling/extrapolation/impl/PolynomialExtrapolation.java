@@ -52,7 +52,8 @@ public class PolynomialExtrapolation implements Extrapolation {
             return segment.getDoubleArrayElem(index, WEIGHTS, meta);
         }
         double t = (time - timeOrigin) / inferSTEP;
-        for (int j = 0; j <= segment.getDoubleArrayElem(index, DEGREE, meta); j++) {
+        double inferArraySize = segment.getDoubleArrayElem(index, DEGREE, meta);
+        for (int j = 0; j <= inferArraySize; j++) {
             result += segment.getDoubleArrayElem(index, (j + WEIGHTS), meta) * power;
             power = power * t;
         }
@@ -124,7 +125,6 @@ public class PolynomialExtrapolation implements Extrapolation {
     private double tempError(double[] computedWeights, double[] times, double[] values) {
         double maxErr = 0;
         double temp;
-        double ds;
         for (int i = 0; i < times.length; i++) {
             temp = Math.abs(values[i] - PolynomialFit.extrapolate(times[i], computedWeights));
             if (temp > maxErr) {
@@ -150,7 +150,6 @@ public class PolynomialExtrapolation implements Extrapolation {
 
     private void initial_feed(long time, double value, KObjectChunk raw, int index, KMetaClass metaClass) {
         //Create initial array of the constant elements + 1 for weights.
-
         raw.extendDoubleArray(index, WEIGHTS + 1, metaClass); //Create N constants and 1 for the weights
         raw.setDoubleArrayElem(index, DEGREE, 0, metaClass); //polynomial degree of 0
         raw.setDoubleArrayElem(index, NUMSAMPLES, 1, metaClass); //contains 1 sample
