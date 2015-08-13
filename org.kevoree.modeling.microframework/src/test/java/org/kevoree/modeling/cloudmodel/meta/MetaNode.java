@@ -1,8 +1,5 @@
 package org.kevoree.modeling.cloudmodel.meta;
 
-import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.abs.*;
-import org.kevoree.modeling.cloudmodel.impl.NodeImpl;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
@@ -28,48 +25,13 @@ public class MetaNode extends MetaClass {
 
     public static final KMetaAttribute ATT_VALUE = new MetaAttribute("value", 1, 5, false, KPrimitiveTypes.STRING, DiscreteExtrapolation.instance());
 
-    public static final KMetaReference REF_CHILDREN = new MetaReference("children", 2, true, false, new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaNode.getInstance();
-        }
-    }, "op_children", new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaNode.getInstance();
-        }
-    });
+    public static final KMetaReference REF_CHILDREN = new MetaReference("children", 2, true, false, 0, "op_children", 0);
 
-    public static final KMetaReference REF_OP_CHILDREN = new MetaReference("op_children", 3, true, false, new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaNode.getInstance();
-        }
-    }, "children", new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaNode.getInstance();
-        }
-    });
+    public static final KMetaReference REF_OP_CHILDREN = new MetaReference("op_children", 3, true, false, 0, "children", 0);
 
-    public static final KMetaReference REF_ELEMENT = new MetaReference("element", 4, true, true, new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaElement.getInstance();
-        }
-    }, "op_element", new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaNode.getInstance();
-        }
-    });
+    public static final KMetaReference REF_ELEMENT = new MetaReference("element", 4, true, true, 1, "op_element", 0);
 
-    public static final KMetaOperation OP_TRIGGER = new MetaOperation("trigger", 5, new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaNode.getInstance();
-        }
-    });
+    public static final KMetaOperation OP_TRIGGER = new MetaOperation("trigger", 5, 0);
 
     public MetaNode() {
         super("org.kevoree.modeling.microframework.test.cloud.Node", 0, null);

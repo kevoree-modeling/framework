@@ -72,7 +72,7 @@ public class TraverseQueryAction implements KTraversalAction {
                                     boolean selected = false;
                                     for (int k = 0; k < queries.length; k++) {
                                         if (queries[k] != null && PrimitiveHelper.startsWith(queries[k].trim(), "<<")) {
-                                            if (PrimitiveHelper.matches(metaReference.opposite().metaName(), queries[k].trim().substring(2))) {
+                                            if (PrimitiveHelper.matches(metaReference.oppositeName(), queries[k].trim().substring(2))) {
                                                 selected = true;
                                                 break;
                                             }

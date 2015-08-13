@@ -1,7 +1,6 @@
 package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.abs.KLazyResolver;
 import org.kevoree.modeling.memory.chunk.KStringMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.*;
@@ -34,7 +33,7 @@ public class MetaDependencies implements KMetaDependencies {
     @Override
     public KMetaDependency dependencyByName(String dependencyName) {
         Integer foundedIndex = _indexes.get(dependencyName);
-        if(foundedIndex != null){
+        if (foundedIndex != null) {
             return _dependencies[foundedIndex];
         } else {
             return null;
@@ -57,18 +56,8 @@ public class MetaDependencies implements KMetaDependencies {
     }
 
     @Override
-    public synchronized KMetaDependency addDependency(String p_dependencyName, KMetaClass p_type, String op_name) {
-        if (op_name != null) {
-            throw new RuntimeException("Not Implemented Yet!");
-            //KMetaDependencies allDependencies = ((MetaClass) p_type).initDependencies();
-            //allDependencies.addDependency(op_name, origin(), null);
-        }
-        KMetaDependency newDependency = new MetaDependency(p_dependencyName, _dependencies.length, this, new KLazyResolver() {
-            @Override
-            public KMeta meta() {
-                return p_type;
-            }
-        }, op_name);
+    public synchronized KMetaDependency addDependency(String p_dependencyName, KMetaClass p_type) {
+        KMetaDependency newDependency = new MetaDependency(p_dependencyName, _dependencies.length, this, p_type.index());
         internal_add_dep(newDependency);
         return newDependency;
     }

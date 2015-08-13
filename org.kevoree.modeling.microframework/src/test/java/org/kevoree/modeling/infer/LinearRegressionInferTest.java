@@ -34,7 +34,7 @@ public class LinearRegressionInferTest {
 
 
         KMetaClass regressionProfile = metaModel.addInferMetaClass("RegressionProfile", new LinearRegressionAlg());
-        regressionProfile.addDependency("House", metaClassHouse, null);
+        regressionProfile.addDependency("House", metaClassHouse);
 
 
         regressionProfile.addInput("length", "@House | =length");

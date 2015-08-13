@@ -213,7 +213,7 @@ public abstract class AbstractKObject implements KObject {
                 if (raw != null) {
                     if (raw.addLongToArray(metaReference.index(), param.uuid(), _metaClass)) {
                         if (setOpposite) {
-                            ((AbstractKObject) param).internal_mutate(KActionType.ADD, metaReference.opposite(), this, false);
+                            ((AbstractKObject) param).internal_mutate(KActionType.ADD, param.metaClass().reference(metaReference.oppositeName()), this, false);
                         }
                     }
                 }
@@ -238,13 +238,13 @@ public abstract class AbstractKObject implements KObject {
                                 @Override
                                 public void on(KObject[] kObjects) {
                                     for (int i = 0; i < kObjects.length; i++) {
-                                        ((AbstractKObject) kObjects[i]).internal_mutate(KActionType.REMOVE, metaReference.opposite(), self, false);
+                                        ((AbstractKObject) kObjects[i]).internal_mutate(KActionType.REMOVE, kObjects[i].metaClass().reference(metaReference.oppositeName()), self, false);
                                     }
-                                    ((AbstractKObject) param).internal_mutate(KActionType.ADD, metaReference.opposite(), self, false);
+                                    ((AbstractKObject) param).internal_mutate(KActionType.ADD, param.metaClass().reference(metaReference.oppositeName()), self, false);
                                 }
                             });
                         } else {
-                            ((AbstractKObject) param).internal_mutate(KActionType.ADD, metaReference.opposite(), this, false);
+                            ((AbstractKObject) param).internal_mutate(KActionType.ADD, param.metaClass().reference(metaReference.oppositeName()), this, false);
                         }
                     }
                 }
@@ -263,7 +263,7 @@ public abstract class AbstractKObject implements KObject {
                                 if (resolvedParams != null) {
                                     for (int dd = 0; dd < resolvedParams.length; dd++) {
                                         if (resolvedParams[dd] != null) {
-                                            ((AbstractKObject) resolvedParams[dd]).internal_mutate(KActionType.REMOVE, metaReference.opposite(), self, false);
+                                            ((AbstractKObject) resolvedParams[dd]).internal_mutate(KActionType.REMOVE, resolvedParams[dd].metaClass().reference(metaReference.oppositeName()), self, false);
                                         }
                                     }
                                 }
@@ -276,7 +276,7 @@ public abstract class AbstractKObject implements KObject {
                 if (payload != null) {
                     if (payload.removeLongToArray(metaReference.index(), param.uuid(), _metaClass)) {
                         if (setOpposite) {
-                            ((AbstractKObject) param).internal_mutate(KActionType.REMOVE, metaReference.opposite(), this, false);
+                            ((AbstractKObject) param).internal_mutate(KActionType.REMOVE, param.metaClass().reference(metaReference.oppositeName()), this, false);
                         }
                     }
                 }

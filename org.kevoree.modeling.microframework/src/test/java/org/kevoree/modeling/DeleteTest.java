@@ -9,7 +9,9 @@ import org.kevoree.modeling.cloudmodel.Element;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
-public class DeleteTest {
+public class
+
+        DeleteTest {
 
     @Test
     public void basicDeleteTest() {

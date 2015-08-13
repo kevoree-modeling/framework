@@ -22,7 +22,7 @@ public interface KMetaClass extends KMeta {
 
     KMetaReference addReference(String referenceName, KMetaClass metaClass, String oppositeName, boolean toMany);
 
-    KMetaDependency addDependency(String dependencyName, KMetaClass p_metaClass, String oppositeName);
+    KMetaDependency addDependency(String dependencyName, KMetaClass p_metaClass);
 
     KMetaInferInput addInput(String name, String extractor);
 

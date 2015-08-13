@@ -1,7 +1,6 @@
 package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.KType;
-import org.kevoree.modeling.abs.KLazyResolver;
 import org.kevoree.modeling.meta.*;
 
 public class MetaInferOutput implements KMetaInferOutput {

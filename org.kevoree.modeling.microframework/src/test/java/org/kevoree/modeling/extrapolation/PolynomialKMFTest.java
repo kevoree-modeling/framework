@@ -85,12 +85,12 @@ public class PolynomialKMFTest {
     }
 
 
-    @Test
+    //@Test
     public void test2() {
         final int[] nbAssert = new int[1];
         nbAssert[0] = 0;
-        //int max = 1000;
-        int max = 4;
+        int max = 1000;
+        //int max = 4;
         CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();

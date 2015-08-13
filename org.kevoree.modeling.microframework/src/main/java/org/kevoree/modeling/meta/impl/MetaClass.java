@@ -2,7 +2,6 @@ package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KType;
-import org.kevoree.modeling.abs.KLazyResolver;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation;
@@ -148,17 +147,7 @@ public class MetaClass implements KMetaClass {
         } else {
             ((MetaClass) p_metaClass).getOrCreate(opName, referenceName, this, true, false);
         }
-        MetaReference tempReference = new MetaReference(referenceName, _meta.length, false, !toMany, new KLazyResolver() {
-            @Override
-            public KMeta meta() {
-                return p_metaClass;
-            }
-        }, opName, new KLazyResolver() {
-            @Override
-            public KMeta meta() {
-                return tempOrigin;
-            }
-        });
+        MetaReference tempReference = new MetaReference(referenceName, _meta.length, false, !toMany, p_metaClass.index(), opName, tempOrigin.index());
         internal_add_meta(tempReference);
         return tempReference;
     }
@@ -169,17 +158,7 @@ public class MetaClass implements KMetaClass {
             return previous;
         }
         final KMetaClass tempOrigin = this;
-        KMetaReference tempReference = new MetaReference(p_name, _meta.length, p_visible, p_single, new KLazyResolver() {
-            @Override
-            public KMeta meta() {
-                return p_oppositeClass;
-            }
-        }, p_oppositeName, new KLazyResolver() {
-            @Override
-            public KMeta meta() {
-                return tempOrigin;
-            }
-        });
+        KMetaReference tempReference = new MetaReference(p_name, _meta.length, p_visible, p_single, p_oppositeClass.index(), p_oppositeName, tempOrigin.index());
         internal_add_meta(tempReference);
         return tempReference;
     }
@@ -187,12 +166,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaOperation addOperation(String operationName) {
         final KMetaClass tempOrigin = this;
-        MetaOperation tempOperation = new MetaOperation(operationName, _meta.length, new KLazyResolver() {
-            @Override
-            public KMeta meta() {
-                return tempOrigin;
-            }
-        });
+        MetaOperation tempOperation = new MetaOperation(operationName, _meta.length, tempOrigin.index());
         internal_add_meta(tempOperation);
         return tempOperation;
     }
@@ -203,10 +177,10 @@ public class MetaClass implements KMetaClass {
     }
 
     @Override
-    public KMetaDependency addDependency(String dependencyName, KMetaClass p_metaClass, String oppositeName) {
+    public KMetaDependency addDependency(String dependencyName, KMetaClass p_metaClass) {
         KMetaDependencies currentDeps = dependencies();
         if (currentDeps != null) {
-            return currentDeps.addDependency(dependencyName, p_metaClass, oppositeName);
+            return currentDeps.addDependency(dependencyName, p_metaClass);
         }
         return null;
     }

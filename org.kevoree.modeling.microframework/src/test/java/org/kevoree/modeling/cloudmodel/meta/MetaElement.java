@@ -3,7 +3,6 @@ package org.kevoree.modeling.cloudmodel.meta;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaClass;
 import org.kevoree.modeling.meta.impl.MetaReference;
-import org.kevoree.modeling.abs.KLazyResolver;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation;
 import org.kevoree.modeling.meta.KMeta;
@@ -29,17 +28,7 @@ public class MetaElement extends MetaClass {
 
     public static final KMetaAttribute ATT_VALUE = new MetaAttribute("value", 1, 5, false, KPrimitiveTypes.CONTINUOUS, PolynomialExtrapolation.instance());
 
-    public static final KMetaReference REF_OP_ELEMENT = new MetaReference("op_element", 2, false, false, new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaNode.getInstance();
-        }
-    }, "element", new KLazyResolver() {
-        @Override
-        public KMeta meta() {
-            return MetaElement.getInstance();
-        }
-    });
+    public static final KMetaReference REF_OP_ELEMENT = new MetaReference("op_element", 2, false, false, 0, "element", 1);
 
     public MetaElement() {
         super("org.kevoree.modeling.microframework.test.cloud.Element", 1,null);

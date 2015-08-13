@@ -1,7 +1,5 @@
 package org.kevoree.modeling.meta.impl;
 
-import org.kevoree.modeling.abs.KLazyResolver;
-import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.meta.MetaType;
 
@@ -11,7 +9,7 @@ public class MetaOperation implements KMetaOperation {
 
     private int _index;
 
-    private KLazyResolver _lazyMetaClass;
+    private int _originMetaClassIndex;
 
     @Override
     public int index() {
@@ -28,17 +26,15 @@ public class MetaOperation implements KMetaOperation {
         return MetaType.OPERATION;
     }
 
-    public MetaOperation(String p_name, int p_index, KLazyResolver p_lazyMetaClass) {
+    public MetaOperation(String p_name, int p_index, int p_originMetaClassIndex) {
         this._name = p_name;
         this._index = p_index;
-        this._lazyMetaClass = p_lazyMetaClass;
+        this._originMetaClassIndex = p_originMetaClassIndex;
     }
 
     @Override
-    public KMetaClass origin() {
-        if(_lazyMetaClass!=null){
-            return (KMetaClass) _lazyMetaClass.meta();
-        }
-        return null;
+    public int originMetaClassIndex() {
+        return _originMetaClassIndex;
     }
+    
 }

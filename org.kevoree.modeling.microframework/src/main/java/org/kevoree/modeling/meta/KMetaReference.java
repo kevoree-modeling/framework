@@ -6,10 +6,10 @@ public interface KMetaReference extends KMeta {
 
     boolean single();
 
-    KMetaClass type();
+    int referredMetaClassIndex();
 
-    KMetaReference opposite();
+    String oppositeName();
 
-    KMetaClass origin();
+    int originMetaClassIndex();
 
 }

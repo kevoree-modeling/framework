@@ -29,11 +29,11 @@ public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.nam
 #end
 
 #foreach($reference in $classDeclaration.references)
-public static final org.kevoree.modeling.meta.KMetaReference REF_${reference.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaReference("${reference.name}", ${reference.index}, ${reference.visible}, ${reference.single}, new org.kevoree.modeling.abs.KLazyResolver() {@Override public org.kevoree.modeling.meta.KMeta meta() {return ${reference.type.pack}.meta.Meta${reference.type.name}.getInstance();}},"${reference.opposite}",new org.kevoree.modeling.abs.KLazyResolver() {@Override public org.kevoree.modeling.meta.KMeta meta() {return ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.getInstance();}});
+public static final org.kevoree.modeling.meta.KMetaReference REF_${reference.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaReference("${reference.name}", ${reference.index}, ${reference.visible}, ${reference.single}, ${reference.type.index},"${reference.opposite}",${classDeclaration.index});
 #end
 
 #foreach($operation in $classDeclaration.operations)
-public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaOperation("${operation.name}", ${operation.index},new org.kevoree.modeling.abs.KLazyResolver() {@Override public org.kevoree.modeling.meta.KMeta meta() {return ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.getInstance();}});
+public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaOperation("${operation.name}", ${operation.index},${classDeclaration.index});
 #end
 
 #foreach($input in $classDeclaration.inputs)

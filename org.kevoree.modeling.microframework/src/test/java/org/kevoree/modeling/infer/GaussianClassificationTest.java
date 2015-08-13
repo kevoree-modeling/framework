@@ -37,7 +37,7 @@ public class GaussianClassificationTest {
         metaClassIris.addAttribute("type", metaEnumIrisType);
 
         KMetaClass inferGaussian = metaModel.addInferMetaClass("GaussianProfile", new GaussianClassifierAlg());
-        inferGaussian.addDependency("Iris", metaClassIris, null);
+        inferGaussian.addDependency("Iris", metaClassIris);
 
         inferGaussian.addInput("sepalLength", "@Iris | =sepalLength");
         inferGaussian.addInput("sepalWidth", "@Iris | =sepalWidth");

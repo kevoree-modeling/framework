@@ -38,10 +38,10 @@ public class HashOperationManager implements KOperationManager {
     @Override
     public void registerOperation(KMetaOperation operation, KOperation callback, KObject target) {
         if (target == null) {
-            KIntMap<KOperation> clazzOperations = staticOperations.get(operation.origin().index());
+            KIntMap<KOperation> clazzOperations = staticOperations.get(operation.originMetaClassIndex());
             if (clazzOperations == null) {
                 clazzOperations = new ArrayIntMap<KOperation>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-                staticOperations.put(operation.origin().index(), clazzOperations);
+                staticOperations.put(operation.originMetaClassIndex(), clazzOperations);
             }
             clazzOperations.put(operation.index(), callback);
         } else {
@@ -68,7 +68,7 @@ public class HashOperationManager implements KOperationManager {
 
     @Override
     public void call(KObject source, KMetaOperation operation, Object[] param, KCallback<Object> callback) {
-        KOperation operationCore = searchOperation(source.uuid(), operation.origin().index(), operation.index());
+        KOperation operationCore = searchOperation(source.uuid(), operation.originMetaClassIndex(), operation.index());
         if (operationCore != null) {
             operationCore.on(source, param, callback);
         } else {

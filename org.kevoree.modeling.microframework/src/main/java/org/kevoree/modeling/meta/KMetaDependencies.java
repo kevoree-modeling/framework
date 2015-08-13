@@ -8,6 +8,6 @@ public interface KMetaDependencies extends KMeta {
 
     KMetaDependency dependencyByName(String dependencyName);
 
-    KMetaDependency addDependency(String dependencyName, KMetaClass type, String oppositeName);
+    KMetaDependency addDependency(String dependencyName, KMetaClass type);
 
 }
