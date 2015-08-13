@@ -1,7 +1,11 @@
 #set($classDeclaration = $context.classDeclaration)
 package ${classDeclaration.pack};
 
+#if($classDeclaration.isInferred())
+public interface ${classDeclaration.name} extends org.kevoree.modeling.KObjectInfer#foreach($parent in $classDeclaration.parents), $parent.getFqn()#end {
+#else
 public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#foreach($parent in $classDeclaration.parents), $parent.getFqn()#end {
+#end
 
 #foreach($attribute in $classDeclaration.attributes)
     public $context.generationContext.getHelper().convertToJavaType(${attribute.getType()}) get${context.generationContext.helper.toCamelCase($attribute.getName())}();
@@ -32,7 +36,7 @@ public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#f
     public void train(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.$dependency.type.name $dependency.name#set($i=$i+1)#end#foreach($output in $classDeclaration.outputs)#if($i!=0), #end${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})} $output.name#set($i=$i+1)#end#if($i!=0),#end org.kevoree.modeling.KCallback callback);
 
     #set($i = 0)
-    public void trainAll(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.${dependency.type.name}[] ${dependency.name}#set($i=$i+1)#end#foreach($output in $classDeclaration.outputs)#if($i!=0), #end${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})} $output.name#set($i=$i+1)#end#if($i!=0),#end org.kevoree.modeling.KCallback callback);
+    public void trainAll(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.${dependency.type.name}[] ${dependency.name}#set($i=$i+1)#end#foreach($output in $classDeclaration.outputs)#if($i!=0), #end${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})}[] $output.name#set($i=$i+1)#end#if($i!=0),#end org.kevoree.modeling.KCallback callback);
 
     #set($i = 0)
     public void infer(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.$dependency.type.name ${dependency.name}#set($i=$i+1)#end#if($i!=0),#end #if($classDeclaration.multipleOutput())org.kevoree.modeling.KCallback<Object[]> callback #else org.kevoree.modeling.KCallback<#foreach($output in $classDeclaration.outputs) ${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})}#end> callback#end);

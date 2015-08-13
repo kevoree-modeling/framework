@@ -37,11 +37,20 @@ public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name
 #end
 
 #foreach($input in $classDeclaration.inputs)
-public static final org.kevoree.modeling.meta.KMetaInferInput IN_${input.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaInferInput("${input.name}", ${input.index}, ${input.extractor});
+public static final org.kevoree.modeling.meta.KMetaInferInput IN_${input.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaInferInput("${input.name}", ${input.index}, "${input.extractor}");
 #end
 
 #foreach($output in $classDeclaration.outputs)
-public static final org.kevoree.modeling.meta.KMetaInferOutput OUT_${output.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaInferOutput("${output.name}", ${input.index}, ${input.extractor});
+
+    #if(${context.generationContext.getHelper().getInstance().isPrimitive(${output.getType()})})
+        #set($attTypeValue = "org.kevoree.modeling.meta.KPrimitiveTypes.$output.getType().toUpperCase()")
+    #else
+        #set($dotIndex = ${output.getType().lastIndexOf('.')})
+        #set($substringIndex = $dotIndex + 1)
+    #*#setPrimitiveType($attTypeValue = "${classDeclaration.pack}.meta.Meta${attribute.getType().substring($substringIndex)}.getInstance()")*#
+        #set($attTypeValue = "${output.getType().substring(0,$dotIndex)}.meta.Meta${output.getType().substring($substringIndex)}.getInstance()")
+    #end
+public static final org.kevoree.modeling.meta.KMetaInferOutput OUT_${output.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaInferOutput("${output.name}", ${output.index}, $attTypeValue);
 #end
 
     private Meta${classDeclaration.name}() {

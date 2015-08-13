@@ -110,22 +110,43 @@ public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferr
 
     #set($i = 0)
     public void train(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.$dependency.type.name $dependency.name#set($i=$i+1)#end#foreach($output in $classDeclaration.outputs)#if($i!=0), #end${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})} $output.name#set($i=$i+1)#end#if($i!=0),#end org.kevoree.modeling.KCallback callback){
-        genericTrain(new org.kevoree.modeling.KObject[]{#foreach($dependency in $classDeclaration.dependencies)${dependency.name}#end},new Object[]{#foreach($output in $classDeclaration.outputs)${output.name}#end},callback);
+        genericTrain(new org.kevoree.modeling.KObject[]{ #set($isFirst=true) #foreach($dependency in $classDeclaration.dependencies)#if($isFirst!=true),#end ${dependency.name} #set($isFirst=false)#end},new Object[]{#foreach($output in $classDeclaration.outputs)${output.name}#end},callback);
     }
 
     #set($i = 0)
-    public void trainAll(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.${dependency.type.name}[] ${dependency.name}#set($i=$i+1)#end#foreach($output in $classDeclaration.outputs)#if($i!=0), #end${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})} $output.name#set($i=$i+1)#end#if($i!=0),#end org.kevoree.modeling.KCallback callback){
-
+    public void trainAll(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.${dependency.type.name}[] ${dependency.name}#set($i=$i+1)#end#foreach($output in $classDeclaration.outputs)#if($i!=0), #end${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})}[] $output.name#set($i=$i+1)#end#if($i!=0),#end org.kevoree.modeling.KCallback callback){
+        genericTrainAll(new org.kevoree.modeling.KObject[][]{ #set($isFirst=true) #foreach($dependency in $classDeclaration.dependencies)#if($isFirst!=true),#end ${dependency.name} #set($isFirst=false)#end},new Object[][]{#foreach($output in $classDeclaration.outputs)${output.name}#end},callback);
     }
 
     #set($i = 0)
     public void infer(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.$dependency.type.name ${dependency.name}#set($i=$i+1)#end #if($i!=0),#end #if($classDeclaration.multipleOutput()) org.kevoree.modeling.KCallback<Object[]> callback #else org.kevoree.modeling.KCallback<#foreach($output in $classDeclaration.outputs) ${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})} #end> callback #end){
+        genericInfer(new org.kevoree.modeling.KObject[]{ #set($isFirst=true) #foreach($dependency in $classDeclaration.dependencies)#if($isFirst!=true),#end ${dependency.name} #set($isFirst=false)#end},
+    #if($classDeclaration.multipleOutput())
+        callback);
+    #else
+        new org.kevoree.modeling.KCallback<Object[]>() {@Override public void on(Object[] objects) {callback.on( (${context.generationContext.getHelper().getInstance().convertToJavaType(${classDeclaration.outputs[0].type})}) objects[0]);}});
+    #end
 
     }
 
     #set($i = 0)
     public void inferAll(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.${dependency.type.name}[] ${dependency.name}#set($i=$i+1)#end #if($i!=0),#end #if($classDeclaration.multipleOutput()) org.kevoree.modeling.KCallback<Object[][]> callback #else org.kevoree.modeling.KCallback<#foreach($output in $classDeclaration.outputs) ${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})} #end []> callback #end){
-        //TODO
+    genericInferAll(new org.kevoree.modeling.KObject[][]{ #set($isFirst=true) #foreach($dependency in $classDeclaration.dependencies)#if($isFirst!=true),#end ${dependency.name} #set($isFirst=false)#end},
+    #if($classDeclaration.multipleOutput())
+        callback);
+    #else
+                new org.kevoree.modeling.KCallback<Object[][]>() {
+                    @Override
+                    public void on(Object[][] objects) {
+                        ${context.generationContext.getHelper().getInstance().convertToJavaType(${classDeclaration.outputs[0].type})}[] resultSet = new ${context.generationContext.getHelper().getInstance().convertToJavaType(${classDeclaration.outputs[0].type})}[objects.length];
+                        for(int i=0;i<objects.length;i++){
+                            resultSet[i] = (${context.generationContext.getHelper().getInstance().convertToJavaType(${classDeclaration.outputs[0].type})})objects[i][0];
+                        }
+                        callback.on(resultSet);
+                    }
+                });
+    #end
+
     }
 
 #end

@@ -56,7 +56,7 @@ public class GenModelPlugin extends AbstractMojo {
     /**
      * Source base directory
      */
-    @Parameter(defaultValue = "${project.build.directory}/js")
+    @Parameter(defaultValue = "${project.build.directory}/generated-sources/kmf-js")
     private File jsWorkingDir;
 
     /**
@@ -132,7 +132,7 @@ public class GenModelPlugin extends AbstractMojo {
 
                 TscRunner runner = new TscRunner();
                 runner.runTsc(jsWorkingDir, classesDirectory, null, false, umd);
-                final StringBuilder sb = new StringBuilder();
+                //final StringBuilder sb = new StringBuilder();
                 /*
                 Files.lines(javaLibJs).forEachOrdered(new Consumer<String>() {
                     @Override
@@ -178,6 +178,8 @@ public class GenModelPlugin extends AbstractMojo {
                 }
                 */
 
+                libDts.toFile().delete();
+                tscPath.toFile().delete();
             }
 
         } catch (Exception e) {
