@@ -16,7 +16,7 @@ public static final org.kevoree.modeling.meta.KLiteral $enumAtt.toUpperCase() = 
         return INSTANCE;
     }
 
-    public MetaSensorState() {
+    public Meta${context.getName()}() {
         super("${context.getFqn()}", ${context.index});
         org.kevoree.modeling.meta.KLiteral[] p_lits_arr = new org.kevoree.modeling.meta.KLiteral[${context.litterals.size()}];
         #set($i = 0)
