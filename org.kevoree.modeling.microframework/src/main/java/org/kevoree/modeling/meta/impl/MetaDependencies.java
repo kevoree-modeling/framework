@@ -56,8 +56,8 @@ public class MetaDependencies implements KMetaDependencies {
     }
 
     @Override
-    public synchronized KMetaDependency addDependency(String p_dependencyName, KMetaClass p_type) {
-        KMetaDependency newDependency = new MetaDependency(p_dependencyName, _dependencies.length, this, p_type.index());
+    public synchronized KMetaDependency addDependency(String p_dependencyName, int p_referredMetaClassIndex) {
+        KMetaDependency newDependency = new MetaDependency(p_dependencyName, _dependencies.length, this, p_referredMetaClassIndex);
         internal_add_dep(newDependency);
         return newDependency;
     }

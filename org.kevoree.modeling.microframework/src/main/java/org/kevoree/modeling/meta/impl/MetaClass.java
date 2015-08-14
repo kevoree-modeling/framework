@@ -43,6 +43,7 @@ public class MetaClass implements KMetaClass {
     public void init(KMeta[] p_metaElements) {
         _indexes.clear();
         _meta = p_metaElements;
+        MetaDependencies tempDependencies = null;
         for (int i = 0; i < _meta.length; i++) {
             _indexes.put(p_metaElements[i].metaName(), p_metaElements[i].index());
         }
@@ -177,10 +178,10 @@ public class MetaClass implements KMetaClass {
     }
 
     @Override
-    public KMetaDependency addDependency(String dependencyName, KMetaClass p_metaClass) {
+    public KMetaDependency addDependency(String dependencyName, int referredMetaClassIndex) {
         KMetaDependencies currentDeps = dependencies();
         if (currentDeps != null) {
-            return currentDeps.addDependency(dependencyName, p_metaClass);
+            return currentDeps.addDependency(dependencyName, referredMetaClassIndex);
         }
         return null;
     }

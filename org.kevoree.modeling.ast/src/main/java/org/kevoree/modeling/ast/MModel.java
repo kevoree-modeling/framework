@@ -53,8 +53,6 @@ public class MModel {
         } else if (classifier instanceof MModelEnum) {
             classifier.setIndex(enumIndex);
             enumIndex = enumIndex + 1;
-        } else {
-
         }
         classifiers.put(classifier.getFqn(), classifier);
     }
@@ -64,6 +62,16 @@ public class MModel {
         for (MModelClassifier cls : classifiers.values()) {
             if (cls instanceof MModelClass) {
                 classes.add((MModelClass) cls);
+            }
+        }
+        return classes;
+    }
+
+    public Collection<MModelEnum> getEnums() {
+        ArrayList<MModelEnum> classes = new ArrayList<MModelEnum>();
+        for (MModelClassifier cls : classifiers.values()) {
+            if (cls instanceof MModelEnum) {
+                classes.add((MModelEnum) cls);
             }
         }
         return classes;
@@ -207,6 +215,7 @@ public class MModel {
                     }
                     newClass.addReference(reference);
                 }
+
                 for (org.kevoree.modeling.ast.MetaModelParser.DependencyDeclarationContext dependencyDeclarationContext : classDeclrContext.dependencyDeclaration()) {
                     final MModelClass depType = model.getOrAddClass(dependencyDeclarationContext.TYPE_NAME().getText());
                     MModelDependency dependency = new MModelDependency(dependencyDeclarationContext.IDENT().getText(), depType);
@@ -351,9 +360,14 @@ public class MModel {
             out.setIndex(globalIndex);
             globalIndex++;
         }
-        for (MModelDependency dep : classRelDecls.getDependencies()) {
-            dep.setIndex(globalIndex);
+        if (classRelDecls.dependencies() != null) {
+            classRelDecls.dependencies().setIndex(globalIndex);
             globalIndex++;
+            int localIndex = 0;
+            for (MModelDependency dep : classRelDecls.dependencies().dependencies.values()) {
+                dep.setIndex(localIndex);
+                localIndex++;
+            }
         }
     }
 

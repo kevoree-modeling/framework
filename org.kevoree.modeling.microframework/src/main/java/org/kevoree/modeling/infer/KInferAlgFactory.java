@@ -1,9 +1,6 @@
 package org.kevoree.modeling.infer;
 
-import org.kevoree.modeling.infer.impl.BinaryPerceptronAlg;
-import org.kevoree.modeling.infer.impl.GaussianProfiler;
-import org.kevoree.modeling.infer.impl.KMeanClusterAlg;
-import org.kevoree.modeling.infer.impl.LinearRegressionAlg;
+import org.kevoree.modeling.infer.impl.*;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class KInferAlgFactory {
@@ -22,7 +19,7 @@ public class KInferAlgFactory {
             return new GaussianProfiler();
         }
         if (PrimitiveHelper.equals(name, "GaussianClassifier")) {
-            return new GaussianProfiler();
+            return new GaussianClassifierAlg();
         }
         return null;
     }

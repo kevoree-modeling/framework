@@ -12,7 +12,13 @@ public class ${context.metaModelName}Model extends org.kevoree.modeling.abs.Abst
     #foreach($class in $context.model.getClasses())
             tempMetaClasses[${class.index}] = ${class.pack}.meta.Meta${class.name}.getInstance();
         #end
-    ((org.kevoree.modeling.meta.impl.MetaModel) _metaModel).init(tempMetaClasses);
+    org.kevoree.modeling.meta.KMetaEnum[] tempEnums = new org.kevoree.modeling.meta.KMetaEnum[${context.model.getEnums().size()}];
+    #foreach($enum in $context.model.getEnums())
+        tempEnums[${enum.index}] = ${enum.pack}.meta.Meta${enum.name}.getInstance();
+    #end
+
+
+    ((org.kevoree.modeling.meta.impl.MetaModel) _metaModel).init(tempMetaClasses,tempEnums);
     }
 
     @Override

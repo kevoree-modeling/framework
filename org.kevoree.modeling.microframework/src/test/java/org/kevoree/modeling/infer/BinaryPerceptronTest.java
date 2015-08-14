@@ -34,7 +34,7 @@ public class BinaryPerceptronTest {
         metaClassPerson.addAttribute("healthy", menaEnumHealthy);
 
         KMetaClass PerceptronClassification = metaModel.addInferMetaClass("PerceptronProfile", new BinaryPerceptronAlg());
-        PerceptronClassification.addDependency("Person", metaClassPerson);
+        PerceptronClassification.addDependency("Person", metaClassPerson.index());
 
 
         PerceptronClassification.addInput("weight", "@Person | =weight");

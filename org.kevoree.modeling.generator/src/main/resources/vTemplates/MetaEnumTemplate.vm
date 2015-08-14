@@ -1,6 +1,12 @@
 package ${context.pack}.meta;
 
-public class Meta${context.getName()} implements org.kevoree.modeling.KType {
+public class Meta${context.getName()} extends org.kevoree.modeling.meta.impl.MetaEnum implements org.kevoree.modeling.KType {
+
+#set($i = 0)
+#foreach($enumAtt in ${context.litterals})
+public static final org.kevoree.modeling.meta.KLiteral $enumAtt.toUpperCase() = new org.kevoree.modeling.meta.impl.MetaLiteral("$enumAtt.toUpperCase()",$i,"${context.getFqn()}");
+    #set($i = $i +1)
+#end
 
     private static Meta${context.getName()} INSTANCE;
     public static Meta${context.getName()} getInstance() {
@@ -10,37 +16,17 @@ public class Meta${context.getName()} implements org.kevoree.modeling.KType {
         return INSTANCE;
     }
 
-#set($i = 0)
-#foreach($enumAtt in ${context.litterals})
-    public static final org.kevoree.modeling.meta.KLiteral $enumAtt.toUpperCase() = new org.kevoree.modeling.meta.impl.MetaLiteral("$enumAtt.toUpperCase()",$i,"${context.getFqn()}");
-    #set($i = $i +1)
-#end
-#set($i = 1)
-
-    public static final org.kevoree.modeling.meta.KLiteral[] values = new org.kevoree.modeling.meta.KLiteral[]{#foreach($enumAtt in ${context.litterals})$enumAtt.toUpperCase()#if($i<${context.litterals.size()}), #end#set($i = $i +1)#end};
-    public static org.kevoree.modeling.meta.KLiteral valueOf(String s) {
-        for(int i = 0; i < values.length; i++) {
-            if(org.kevoree.modeling.util.PrimitiveHelper.equals(s,values[i].metaName())){
-                return values[i];
-            }
-        }
-        return null;
+    public MetaSensorState() {
+        super("${context.getFqn()}", ${context.index});
+        org.kevoree.modeling.meta.KLiteral[] p_lits_arr = new org.kevoree.modeling.meta.KLiteral[${context.litterals.size()}];
+        #set($i = 0)
+        #foreach($enumAtt in ${context.litterals}) p_lits_arr[$i] = $enumAtt.toUpperCase(); #set($i = $i +1) #end
+        init(p_lits_arr);
     }
 
-    @Override
-    public String name() {
-        return "${context.getFqn()}";
-    }
 
-    @Override
-    public boolean isEnum() {
-        return true;
-    }
 
-    @Override
-    public int id() {
-        return ${context.index};
-    }
+
 
 }
 

@@ -36,8 +36,8 @@ public class Recommandation {
         metaClassRating.addAttribute("ratingValue", KPrimitiveTypes.DOUBLE);
 
         KMetaClass recommendationSystem =metaModel.addInferMetaClass("Recommendation", new RecommendationAlg());
-        recommendationSystem.addDependency("user",metaClassUser);
-        recommendationSystem.addDependency("product",metaClassProduct);
+        recommendationSystem.addDependency("user",metaClassUser.index());
+        recommendationSystem.addDependency("product",metaClassProduct.index());
 
         recommendationSystem.addOutput("rating",KPrimitiveTypes.DOUBLE);
 

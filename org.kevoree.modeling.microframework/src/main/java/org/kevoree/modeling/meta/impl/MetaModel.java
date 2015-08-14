@@ -45,11 +45,16 @@ public class MetaModel implements KMetaModel {
         this._metaTypes_indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
-    public void init(KMetaClass[] p_metaClasses) {
+    public void init(KMetaClass[] p_metaClasses, KMetaEnum[] p_metaEnums) {
         _metaClasses_indexes.clear();
+        _metaTypes_indexes.clear();
         _metaClasses = p_metaClasses;
+        _metaTypes = p_metaEnums;
         for (int i = 0; i < _metaClasses.length; i++) {
             _metaClasses_indexes.put(p_metaClasses[i].metaName(), p_metaClasses[i].index());
+        }
+        for (int i = 0; i < _metaTypes.length; i++) {
+            _metaTypes_indexes.put(p_metaEnums[i].metaName(), p_metaEnums[i].index());
         }
     }
 

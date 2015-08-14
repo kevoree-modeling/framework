@@ -55,7 +55,7 @@ public static final org.kevoree.modeling.meta.KMetaInferOutput OUT_${output.name
 
     private Meta${classDeclaration.name}() {
         super("${classDeclaration.fqn}", ${classDeclaration.index},#if(${classDeclaration.inference})org.kevoree.modeling.infer.KInferAlgFactory.build("${classDeclaration.inference}")#else null#end);
-        org.kevoree.modeling.meta.KMeta[] temp_all = new org.kevoree.modeling.meta.KMeta[${classDeclaration.attributes.size()}+${classDeclaration.references.size()}+${classDeclaration.operations.size()}+${classDeclaration.inputs.size()}+${classDeclaration.outputs.size()}];
+        org.kevoree.modeling.meta.KMeta[] temp_all = new org.kevoree.modeling.meta.KMeta[${classDeclaration.attributes.size()}+${classDeclaration.references.size()}+${classDeclaration.operations.size()}+${classDeclaration.inputs.size()}+${classDeclaration.outputs.size()} #if($classDeclaration.containsDependencies()) +1 #end ];
 #set($i = 0)
 #foreach($attribute in $classDeclaration.attributes)
         temp_all[${i}] = ATT_${attribute.name.toUpperCase()};
@@ -77,6 +77,15 @@ public static final org.kevoree.modeling.meta.KMetaInferOutput OUT_${output.name
         temp_all[${i}] = OUT_${output.name.toUpperCase()};
     #set($i = $i +1)
 #end
+
+#if($classDeclaration.containsDependencies())
+    org.kevoree.modeling.meta.KMetaDependencies deps = new org.kevoree.modeling.meta.impl.MetaDependencies(${classDeclaration.dependencies().index}, this);
+    temp_all[${i}] = deps;
+    #foreach($dependency in $classDeclaration.getDependencies())
+        deps.addDependency("$dependency.name", $dependency.type.index);
+    #end
+#end
+
         init(temp_all);
     }
 }

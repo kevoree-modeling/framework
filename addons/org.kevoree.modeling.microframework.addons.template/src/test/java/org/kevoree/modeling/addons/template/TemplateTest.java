@@ -72,7 +72,7 @@ public class TemplateTest {
                     public void run() {
                         model.manager().lookupAllObjects(0, System.currentTimeMillis(), uuids, jumped);
                     }
-                }, 1000, 1000, TimeUnit.MILLISECONDS);
+                }, 5000, 5000, TimeUnit.MILLISECONDS);
 
             }
         });

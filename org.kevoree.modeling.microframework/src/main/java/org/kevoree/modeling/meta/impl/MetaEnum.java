@@ -24,6 +24,13 @@ public class MetaEnum implements KMetaEnum {
         _indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
     }
 
+    protected void init(KLiteral[] lits) {
+        this._literals = lits;
+        for (int i = 0; i < lits.length; i++) {
+            _indexes.put(lits[i].metaName(), lits[i].index());
+        }
+    }
+
     @Override
     public KLiteral[] literals() {
         return this._literals;

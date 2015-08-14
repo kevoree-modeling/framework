@@ -25,7 +25,7 @@ public class BasicEnumInferTest {
         metaClassSensor.addAttribute("state", metaEnumState);
 
         KMetaClass inferAvg = metaModel.addInferMetaClass("SensorProfile", new StatInferAlg());
-        inferAvg.addDependency("sensors", metaClassSensor);
+        inferAvg.addDependency("sensors", metaClassSensor.index());
         inferAvg.addInput("value", "@sensors | =state");
         inferAvg.addOutput("avg_state", metaEnumState);
         return metaModel;

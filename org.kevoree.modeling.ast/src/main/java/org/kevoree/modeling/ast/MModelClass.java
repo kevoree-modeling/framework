@@ -11,9 +11,11 @@ public class MModelClass extends MModelClassifier {
     private Map<String, MModelClass> parents = new HashMap<String, MModelClass>();
     private Map<String, MModelOperation> operations = new HashMap<String, MModelOperation>();
 
-    private Map<String, MModelDependency> dependencies = new HashMap<String, MModelDependency>();
     private Map<String, MModelInput> inputs = new HashMap<String, MModelInput>();
     private Map<String, MModelOutput> outputs = new HashMap<String, MModelOutput>();
+
+
+    private MModelDependencies dependencies = null;
 
     public MModelClass(String name) {
         this.name = name;
@@ -89,11 +91,18 @@ public class MModelClass extends MModelClassifier {
     }
 
     public void addDependency(MModelDependency el) {
-        dependencies.put(el.getName(), el);
+        if (dependencies == null) {
+            dependencies = new MModelDependencies("dependencies", null);
+        }
+        dependencies.dependencies.put(el.getName(), el);
+    }
+
+    public MModelDependencies dependencies() {
+        return dependencies;
     }
 
     public MModelDependency[] getDependencies() {
-        MModelDependency[] flat = dependencies.values().toArray(new MModelDependency[dependencies.size()]);
+        MModelDependency[] flat = dependencies.dependencies.values().toArray(new MModelDependency[dependencies.dependencies.size()]);
         Arrays.sort(flat, new Comparator<MModelDependency>() {
             @Override
             public int compare(MModelDependency o1, MModelDependency o2) {
@@ -228,4 +237,9 @@ public class MModelClass extends MModelClassifier {
         sb.append("]]\n");
         return sb.toString();
     }
+
+    public boolean containsDependencies() {
+        return this.dependencies != null && this.dependencies.dependencies.size() > 0;
+    }
+
 }

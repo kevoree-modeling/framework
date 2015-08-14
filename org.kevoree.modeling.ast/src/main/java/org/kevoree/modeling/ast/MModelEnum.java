@@ -18,13 +18,16 @@ public class MModelEnum extends MModelClassifier {
         return litterals;
     }
 
+    public String getFqn() {
+        return (pack != null ? pack + "." + name : name);
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Enum[ ");
-        int i=0;
-        for(String s : litterals){
-            if(i != 0){
+        int i = 0;
+        for (String s : litterals) {
+            if (i != 0) {
                 sb.append(" , ");
             }
             sb.append(s);

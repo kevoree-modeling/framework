@@ -28,7 +28,7 @@ public class BaseKObjectInferTest {
         metaEnumState.addLiteral("NOK");
 
         KMetaClass inferAvg = metaModel.addInferMetaClass("SensorProfile", new StatInferAlg());
-        inferAvg.addDependency("sensors", metaClassSensor);
+        inferAvg.addDependency("sensors", metaClassSensor.index());
         inferAvg.addInput("value", "@sensors | =value");
         inferAvg.addOutput("avg", KPrimitiveTypes.DOUBLE);
         return metaModel;
