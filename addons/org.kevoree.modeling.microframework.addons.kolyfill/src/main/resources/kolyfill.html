@@ -1,87 +1,96 @@
 <script>
-    var KmfModules = KmfModules || {};
+    var KmfModules = KmfModules || (function () {
 
-    document.registerElement('kmf-module', {
-        prototype: Object.create(HTMLElement.prototype, {
-            createdCallback: {
-                value: function () {
-                    var m = KmfModules._getModule(this.getAttribute("id"));
-                    m.template = this.querySelector('template');
-                    var importCss = this.querySelector('link[rel=import][type=css]');
-                    m.css = importCss.import;
-                    KmfModules._registerUserModule(this);
-                }
-            }
-        })
-    });
+                var _modules = [];
 
-    KmfModules.register = function (id, params) {
-        var m = KmfModules._getModule(id);
-        for (var k in params) {
-            m[k] = params[k];
-        }
-        if (m.baseElement) {
-            KmfModules._fillProperties(m, m.baseElement);
-            m.generate(m.template.innerHTML, m.baseElement, root);
-        }
-    }
-
-    KmfModules._getModule = function (id) {
-        var m = KmfModules[id];
-        if (!m) {
-            m = {};
-            KmfModules[id] = m;
-        }
-        return m;
-    }
-
-    KmfModules._registerUserModule = function (elt) {
-        document.registerElement(elt.getAttribute("id"), {
-            prototype: Object.create(HTMLElement.prototype, {
-                attachedCallback: {
-                    value: function () {
-                        var m = KmfModules._getModule(this.localName);
-                        var root = this.createShadowRoot();
-                        m.root = root;
-                        if (m.css) {
-                            var style = document.createElement("style");
-                            style.innerHTML = m.css.body.innerHTML;
-                            m.root.appendChild(style);
-                        }
-                        m.baseElement = this;
-                        KmfModules._fillProperties(m, this);
-                        m.generate(m.template.innerHTML, this, function (result) {
-                            m.root.appendChild(result);
-                            var onClicks = m.root.querySelectorAll("[on-click]");
-                            for (var i = 0; i < onClicks.length; i++) {
-                                var onClickTag = onClicks[i];
-                                var fctName = onClickTag.getAttribute("on-click");
-                                if (m.hasOwnProperty(fctName) && (typeof m[fctName] == "function")) {
-                                    onClickTag.onclick = m[fctName].bind(m.root);
+                document.registerElement('kmf-module', {
+                    prototype: Object.create(HTMLElement.prototype, {
+                        createdCallback: {
+                            value: function () {
+                                _registerUserModule(this);
+                                var m = _getModule(this.getAttribute("id"));
+                                if (!m.initialized) {
+                                    m.template = this.querySelector('template');
+                                    var importCss = this.querySelector('link[rel=import][type=css]');
+                                    m.css = importCss;
+                                    //console.error("Css loaded", m.css);
+                                    m.initialized = true;
                                 }
                             }
-                        });
+                        }
+                    })
+                });
 
-
+                function _register(id, params) {
+                    var m = _getModule(id);
+                    for (var k in params) {
+                        m[k] = params[k];
+                    }
+                    if (m.baseElement) {
+                        _fillProperties(m, m.baseElement);
+                        m.generate(m.template.innerHTML, m.baseElement, root);
                     }
                 }
-            })
-        });
-    };
 
-    KmfModules._fillProperties = function (m, elt) {
-        var properties;
-        if (elt.properties) {
-            properties = elt.properties;
-        } else {
-            properties = {};
-        }
-        for (var idx = 0; idx < elt.attributes.length; idx++) {
-            if (elt.attributes[idx]) {
-                var att = elt.attributes[idx];
-                properties[att.nodeName] = att.nodeValue;
-            }
-        }
-        elt.properties = properties;
-    }
+                var moduleUuid = 0;
+                function _getModule(id) {
+                    var m = _modules[id] || (_modules[id] = {_uuid : moduleUuid++});
+                    //console.error("Get module", id, _modules,m);
+                    return m;
+                }
+
+                function _registerUserModule(elt) {
+                    document.registerElement(elt.getAttribute("id"), {
+                        prototype: Object.create(HTMLElement.prototype, {
+                            attachedCallback: {
+                                value: function () {
+                                    var m = _getModule(this.localName);
+                                    var root = this.createShadowRoot();
+                                    m.root = root;
+                                    if (m.css) {
+                                        var style = document.createElement("style");
+                                        style.innerHTML = m.css.import.body.innerHTML;
+                                        m.root.appendChild(style);
+                                    } else {
+                                        console.error("Css not loaded !",m);
+                                    }
+                                    m.baseElement = this;
+                                    _fillProperties(m, this);
+                                    m.generate(m.template.innerHTML, this, function (result) {
+                                        m.root.appendChild(result);
+                                        var onClicks = m.root.querySelectorAll("[on-click]");
+                                        for (var i = 0; i < onClicks.length; i++) {
+                                            var onClickTag = onClicks[i];
+                                            var fctName = onClickTag.getAttribute("on-click");
+                                            if (m.hasOwnProperty(fctName) && (typeof m[fctName] == "function")) {
+                                                onClickTag.onclick = m[fctName].bind(m.root);
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        })
+                    });
+                };
+
+                function _fillProperties(m, elt) {
+                    var properties;
+                    if (elt.properties) {
+                        properties = elt.properties;
+                    } else {
+                        properties = {};
+                    }
+                    for (var idx = 0; idx < elt.attributes.length; idx++) {
+                        if (elt.attributes[idx]) {
+                            var att = elt.attributes[idx];
+                            properties[att.nodeName] = att.nodeValue;
+                        }
+                    }
+                    elt.properties = properties;
+                };
+
+                return {
+                    register: _register
+                };
+            })();
 </script>
