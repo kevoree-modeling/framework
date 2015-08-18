@@ -31,9 +31,11 @@ public class AbstractKModelContext implements KModelContext {
         long[] newBounds = new long[]{p_originTime, p_maxTime, p_originUniverse, p_maxUniverse};
         this._bounds.set(newBounds);
         KCallback[] currentStateListeners = this._callbacks.get();
-        for (int i = 0; i < currentStateListeners.length; i++) {
-            if (currentStateListeners[i] != null) {
-                currentStateListeners[i].on(newBounds);
+        if(currentStateListeners != null){
+            for (int i = 0; i < currentStateListeners.length; i++) {
+                if (currentStateListeners[i] != null) {
+                    currentStateListeners[i].on(newBounds);
+                }
             }
         }
     }

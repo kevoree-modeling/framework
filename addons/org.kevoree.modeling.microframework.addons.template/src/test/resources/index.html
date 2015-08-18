@@ -3,7 +3,7 @@
     <script type="text/javascript" src="org.kevoree.modeling.microframework.browser.js"></script>
     <script type="text/javascript" src="org.kevoree.modeling.drivers.websocket.js"></script>
     <script type="text/javascript" src="paperclip.js"></script>
-
+    <script type="text/javascript" src="parser.js"></script>
 
     <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.indigo-pink.min.css">
     <script src="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.min.js"></script>
@@ -34,32 +34,13 @@
     model.connect(function () {
         model.lookup(0, 0, 1, function (obj) {
 
-            var listener = model.universe(0).createListener();
-            listener.listen(obj);
-            listener.then(function (updatedObj) {
-               // console.log("update:" + updatedObj);
-            });
-
-            /*
-            var template = paperclip.template('' +
-                    '<b>uuid:{{elem.uuid}}/value:{{elem.value}}</b>' +
-                    '<input class="form-control" type="text" value="{{ <~>elem.value }}" />' +
-                    '<ul repeat.each="{{elem.sensors}}" repeat.as="i">' +
-                    '<li>item {{i.uuid}} {{i.value}} {{i}} <input class="form-control" type="text" value="{{ <~>i.value }}" /></li>' +
-                    '</ul>' +
-                    '');
-            var view = template.view({elem: obj});
-            document.body.appendChild(view.render());
-*/
-            //ex2, script based template
-
+            console.log(paperclip);
 
             paperclip.modifiers.save = function (elem) {
                 elem.save(function () {
-                    console.log("Model Saved!");
+                    console.log("Model Saved from !",elem);
                 });
             };
-
             var html = document.getElementById("temp2").innerHTML;
             var t = paperclip.template(html);
             var v = t.view({elem: obj, model: model});
