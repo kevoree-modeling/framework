@@ -94,7 +94,7 @@ TODO
 
 
 Avoid callback hell using KDefer
-=============
+================================
 
 All KMF methods are build around the common asynchronous principle. This means that all results will be given in a KCallback closure (or anonymous function in javascript). Chaining severals operations or collecting severals KObject trough different method calls can leads to a huge nested hierarchy of callback. To avoid this callback hell effect KMF introduces an API named KDefer. In a nutshell, KDefer are barrier object than can be created on demand from the model and able to wait and collector several asynchronous results. The API is death simple, you create a KDefer object and then from it you can create various callbacks that you can inject in various query methods for instance.
 
@@ -137,3 +137,18 @@ myDefer.then(function(objects){
 ```	
 
 
+
+
+
+Related work
+============
+
+Facebook relay
+--------------
+
+https://facebook.github.io/relay/
+
+Netflix Falcor
+--------------
+
+http://netflix.github.io/falcor/
