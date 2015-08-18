@@ -12,6 +12,6 @@ public interface KModelContext {
 
     long maxUniverse();
 
-    void listen(KCallback callback);
+    void listen(KCallback<long[]> callback);
 
 }

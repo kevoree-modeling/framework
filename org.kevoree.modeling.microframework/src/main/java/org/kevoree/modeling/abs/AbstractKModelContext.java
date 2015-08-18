@@ -1,68 +1,65 @@
 package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KModelContext;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AbstractKModelContext implements KModelContext {
 
-    private AtomicLong _originTime;
+    public static final int ORIGIN_TIME = 0;
 
-    private AtomicLong _originUniverse;
+    public static final int MAX_TIME = 1;
 
-    private AtomicLong _maxTime;
+    public static final int ORIGIN_UNIVERSE = 2;
 
-    private AtomicLong _maxUniverse;
+    public static final int MAX_UNIVERSE = 3;
+
+    public static final int NB_ELEM = 4;
 
     private AtomicReference<KCallback[]> _callbacks;
 
+    private AtomicReference<long[]> _bounds;
+
     public AbstractKModelContext() {
-        this._originTime = new AtomicLong(KConfig.NULL_LONG);
-        this._originUniverse = new AtomicLong(KConfig.NULL_LONG);
-        this._maxTime = new AtomicLong(KConfig.NULL_LONG);
-        this._maxUniverse = new AtomicLong(KConfig.NULL_LONG);
+        this._bounds = new AtomicReference<long[]>();
         this._callbacks = new AtomicReference<KCallback[]>();
     }
 
     @Override
     public void set(long p_originTime, long p_maxTime, long p_originUniverse, long p_maxUniverse) {
-        this._originTime.set(p_originTime);
-        this._maxTime.set(p_maxTime);
-        this._originUniverse.set(p_originUniverse);
-        this._maxUniverse.set(p_maxUniverse);
+        long[] newBounds = new long[]{p_originTime, p_maxTime, p_originUniverse, p_maxUniverse};
+        this._bounds.set(newBounds);
         KCallback[] currentStateListeners = this._callbacks.get();
         for (int i = 0; i < currentStateListeners.length; i++) {
             if (currentStateListeners[i] != null) {
-                currentStateListeners[i].on(null);
+                currentStateListeners[i].on(newBounds);
             }
         }
     }
 
     @Override
     public long originTime() {
-        return this._originTime.get();
+        return this._bounds.get()[ORIGIN_TIME];
     }
 
     @Override
     public long originUniverse() {
-        return this._originUniverse.get();
+        return this._bounds.get()[ORIGIN_UNIVERSE];
     }
 
     @Override
     public long maxTime() {
-        return this._maxTime.get();
+        return this._bounds.get()[MAX_TIME];
     }
 
     @Override
     public long maxUniverse() {
-        return this._maxUniverse.get();
+        return this._bounds.get()[MAX_UNIVERSE];
     }
 
     @Override
-    public void listen(KCallback new_callback) {
+    public void listen(KCallback<long[]> new_callback) {
         KCallback[] previous;
         KCallback[] next;
         do {

@@ -176,9 +176,9 @@ public class HelloTest {
 
                     final int[] counter = {0};
                     KModelContext context = model.createModelContext();
-                    context.listen(new KCallback() {
+                    context.listen(new KCallback<long[]>() {
                         @Override
-                        public void on(Object o) {
+                        public void on(long[] o) {
                             counter[0]++;
                         }
                     });
