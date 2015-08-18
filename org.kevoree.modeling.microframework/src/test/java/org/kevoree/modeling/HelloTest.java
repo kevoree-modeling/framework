@@ -148,7 +148,47 @@ public class HelloTest {
 
         Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toJSON());
         Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toString());
-
     }
+
+    @Test
+    public void contextTest() {
+        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
+        model.connect(new KCallback<Throwable>() {
+            @Override
+            public void on(Throwable throwable) {
+                if (throwable != null) {
+                    throwable.printStackTrace();
+                } else {
+                    CloudUniverse universe = model.newUniverse();
+                    CloudView time0 = universe.time(0l);
+                    Node root = time0.createNode();
+
+                    time0.setRoot(root, null);
+                    root.setName("root");
+                    Assert.assertEquals("root", root.getName());
+                    Node n1 = time0.createNode();
+                    n1.setName("n1");
+                    Node n2 = time0.createNode();
+                    n2.setName("n2");
+                    root.addChildren(n1);
+                    root.addChildren(n2);
+
+
+                    final int[] counter = {0};
+                    KModelContext context = model.createModelContext();
+                    context.listen(new KCallback() {
+                        @Override
+                        public void on(Object o) {
+                            counter[0]++;
+                        }
+                    });
+                    context.set(0, 0, 0, 0);
+                    Assert.assertEquals(counter[0], 1);
+
+                }
+            }
+        });
+    }
+
 
 }

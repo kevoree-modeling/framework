@@ -116,4 +116,8 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         return _manager.createListener(universe);
     }
 
+    @Override
+    public KModelContext createModelContext() {
+        return new AbstractKModelContext();
+    }
 }

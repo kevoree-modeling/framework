@@ -39,4 +39,6 @@ public interface KModel<A extends KUniverse> {
 
     KListener createListener(long universe);
 
+    KModelContext createModelContext();
+
 }
