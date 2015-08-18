@@ -2,8 +2,16 @@
 <head>
     <script type="text/javascript" src="org.kevoree.modeling.microframework.browser.js"></script>
     <script type="text/javascript" src="org.kevoree.modeling.drivers.websocket.js"></script>
+
+
+    <!--
+    <script type="text/javascript" src="paperclip_old.js"></script>
+    -->
+
+
     <script type="text/javascript" src="paperclip.js"></script>
     <script type="text/javascript" src="parser.js"></script>
+
 
     <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.indigo-pink.min.css">
     <script src="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.min.js"></script>
@@ -13,14 +21,16 @@
 <body>
 
 <script type="text/x-paperclip" id="temp2">
-    <strong>{{elem.value}}</strong>
+    <strong>{{elem.uuid}}, {{elem.value}}</strong>
     <ul>
     <repeat each={{elem.sensors}} as="i">
-        <li>{{i.uuid}}, value:<input class="form-control mdl-textfield__input" pattern="-?[0-9]*(\.[0-9]+)?" type="text" value="{{ <~>i.value }}" /></li>
+        <li>{{i.uuid}}, {{i.value}}, value:<input class="form-control mdl-textfield__input" pattern="-?[0-9]*(\.[0-9]+)?" type="text" value="{{ <~>i.value }}" /></li>
     </repeat>
     </ul>
-    <input type="button" class="form-control" onClick="{{model | save}}" value="Save Model"></input>
+    <input type="button" onclick={{elem | save}} value="ParamSaveModel"></input>
+    <input type="button" onclick={{save}} value="GlobalSaveModel"></input>
 </script>
+
 
 <script>
     var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
@@ -33,19 +43,19 @@
     var model = metaModel.createModel(dataManager);
     model.connect(function () {
         model.lookup(0, 0, 1, function (obj) {
-
-            console.log(paperclip);
-
-            paperclip.modifiers.save = function (elem) {
-                elem.save(function () {
-                    console.log("Model Saved from !",elem);
-                });
+            paperclip.modifiers.save = function (param) {
+                return function(){
+                    console.log('ParamFunctionSave', param);
+                };
             };
             var html = document.getElementById("temp2").innerHTML;
             var t = paperclip.template(html);
-            var v = t.view({elem: obj, model: model});
+            var v = t.view({
+                elem: obj,
+                model: model,
+                save:function(){console.log("GlobalSave")}
+            });
             document.body.appendChild(v.render());
-
         });
     });
 </script>
