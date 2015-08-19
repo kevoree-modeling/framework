@@ -2321,11 +2321,17 @@ function Template(vnode, options) {
 protoclass(Template, {
   __isTemplate: true,
   view: function(context, options) {
-
     // TODO - make compatible with IE 8
     var section     = this.section.clone();
-
     var view = new this.viewClass(section, this, context, options);
+
+    if(options != undefined && options['modelContext'] != undefined && options['modelContext']['listen'] != undefined){
+      var modelContext = options['modelContext'];
+      modelContext.listen(function(){
+        console.log("Hello");
+      });
+      console.log("Registered");
+    }
 
     for (var i = 0, n = this._hydrators.length; i < n; i++) {
       this._hydrators[i].hydrate(section.node || section.start.parentNode, view);

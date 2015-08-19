@@ -32,17 +32,24 @@
     var dataManager = org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
     var model = metaModel.createModel(dataManager);
     var modelContext = model.createModelContext();
+    modelContext.set(0,0,0,0);
 
     model.connect(function () {
+        model.lookup(0, modelContext.originTime(), 1, function (obj) {
+            var t = paperclip.template(document.getElementById("templateListSensor").innerHTML);
+            var v = t.view(
+                    {elem: obj, model: model},
+                    {modelContext: modelContext}
+            );
+            document.getElementById('sensorsList').appendChild(v.render());
+        });
+
+
+       /*
         modelContext.listen(function () {
             document.getElementById('sensorsList').innerHTML = "";
-            model.lookup(0, modelContext.originTime(), 1, function (obj) {
-                var html = document.getElementById("templateListSensor").innerHTML;
-                var t = paperclip.template(html);
-                var v = t.view({elem: obj, model: model});
-                document.getElementById('sensorsList').appendChild(v.render());
-            });
-        });
+
+        });*/
     });
 </script>
 
