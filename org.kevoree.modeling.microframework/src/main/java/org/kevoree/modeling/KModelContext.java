@@ -14,4 +14,6 @@ public interface KModelContext {
 
     void listen(KCallback<long[]> callback);
 
+    KModel model();
+
 }

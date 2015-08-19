@@ -2324,19 +2324,35 @@ protoclass(Template, {
     // TODO - make compatible with IE 8
     var section     = this.section.clone();
     var view = new this.viewClass(section, this, context, options);
-
     if(options != undefined && options['modelContext'] != undefined && options['modelContext']['listen'] != undefined){
       var modelContext = options['modelContext'];
       modelContext.listen(function(){
-        console.log("Hello");
+        var flatCtxReload = {};
+        for(var key in context){
+          if(context[key] != undefined && context[key]['_metaClass'] != undefined){
+            flatCtxReload[context[key].uuid()] = key;
+          }
+        }
+        var toReloadKeys = [];
+        for(var uuidKey in flatCtxReload){
+          toReloadKeys.push(+uuidKey);
+        }
+        modelContext.model().lookupAll(modelContext.originUniverse(), modelContext.originTime(), toReloadKeys, function(objects){
+          if(objects != undefined){
+            for(var i=0;i<objects.length;i++){
+              if(objects[i] != undefined){
+                var previousCtxKey = flatCtxReload[objects[i].uuid()];
+                context[previousCtxKey] = objects[i];
+              }
+            }
+          }
+          view.update();
+        });
       });
-      console.log("Registered");
     }
-
     for (var i = 0, n = this._hydrators.length; i < n; i++) {
       this._hydrators[i].hydrate(section.node || section.start.parentNode, view);
     }
-
     // TODO - set section instead of node
     return view;
   }

@@ -1,6 +1,7 @@
 package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KModelContext;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,7 +22,10 @@ public class AbstractKModelContext implements KModelContext {
 
     private AtomicReference<long[]> _bounds;
 
-    public AbstractKModelContext() {
+    private KModel _origin;
+
+    public AbstractKModelContext(KModel p_origin) {
+        this._origin = p_origin;
         this._bounds = new AtomicReference<long[]>();
         this._callbacks = new AtomicReference<KCallback[]>();
     }
@@ -71,8 +75,16 @@ public class AbstractKModelContext implements KModelContext {
                 previousSize = previous.length;
             }
             next = new KCallback[previousSize + 1];
+            if(previous != null && previousSize > 0){
+                System.arraycopy(previous,0,next,0,previousSize);
+            }
             next[previousSize] = new_callback;
         } while (!_callbacks.compareAndSet(previous, next));
+    }
+
+    @Override
+    public KModel model() {
+        return this._origin;
     }
 
 }

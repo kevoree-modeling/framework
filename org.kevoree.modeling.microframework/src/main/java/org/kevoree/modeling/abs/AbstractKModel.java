@@ -112,12 +112,17 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
+    public void lookupAll(long p_universe, long p_time, long[] p_uuids, KCallback<KObject[]> cb) {
+        _manager.lookupAllObjects(p_universe, p_time, p_uuids, cb);
+    }
+
+    @Override
     public KListener createListener(long universe) {
         return _manager.createListener(universe);
     }
 
     @Override
     public KModelContext createModelContext() {
-        return new AbstractKModelContext();
+        return new AbstractKModelContext(this);
     }
 }

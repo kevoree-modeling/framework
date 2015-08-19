@@ -42,14 +42,12 @@
                     {modelContext: modelContext}
             );
             document.getElementById('sensorsList').appendChild(v.render());
+            var v2 = t.view(
+                    {elem: obj, model: model},
+                    {modelContext: modelContext}
+            );
+            document.getElementById('sensorsList').appendChild(v2.render());
         });
-
-
-       /*
-        modelContext.listen(function () {
-            document.getElementById('sensorsList').innerHTML = "";
-
-        });*/
     });
 </script>
 
