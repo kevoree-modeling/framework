@@ -2324,6 +2324,10 @@ protoclass(Template, {
     // TODO - make compatible with IE 8
     var section     = this.section.clone();
     var view = new this.viewClass(section, this, context, options);
+
+    var previousListener = null;
+    var previousContextPrefix = {};
+
     if(options != undefined && options['modelContext'] != undefined && options['modelContext']['listen'] != undefined){
       var modelContext = options['modelContext'];
       modelContext.listen(function(){
@@ -2348,6 +2352,24 @@ protoclass(Template, {
           }
           view.update();
         });
+      });
+      previousListener = modelContext.model().createListener(modelContext.originUniverse());
+      for(var key in context){
+        if(context[key] != undefined && context[key]['_metaClass'] != undefined){
+          previousListener.listen(context[key]);
+          previousContextPrefix[context[key].uuid()] = key;
+        }
+      }
+      previousListener.then(function(object){
+        if(object != undefined && object != null){
+          if(object.now() >= modelContext.originTime() && object.now() <= modelContext.maxTime()){
+            var previousPath = previousContextPrefix[object.uuid()];
+            if(previousPath){
+              context[previousPath] = object;
+              view.update();
+            }
+          }
+        }
       });
     }
     for (var i = 0, n = this._hydrators.length; i < n; i++) {

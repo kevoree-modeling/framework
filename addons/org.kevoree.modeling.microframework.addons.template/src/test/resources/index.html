@@ -65,6 +65,9 @@
     var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://" + window.location.hostname + ":8080/cdn");
     var dataManager = org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
     var model = metaModel.createModel(dataManager);
+    var modelContext = model.createModelContext();
+    modelContext.set(0,org.kevoree.modeling.KConfig.END_OF_TIME,0,0);
+
     model.connect(function () {
         model.lookup(0, 0, 1, function (obj) {
             paperclip.modifiers.save = function (param) {
@@ -80,7 +83,7 @@
                 save: function () {
                     console.log("GlobalSave")
                 }
-            });
+            },{modelContext:modelContext});
             document.body.appendChild(v.render());
         });
     });
