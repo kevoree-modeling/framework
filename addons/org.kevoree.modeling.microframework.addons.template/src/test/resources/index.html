@@ -22,13 +22,38 @@
 
 <script type="text/x-paperclip" id="temp2">
     <strong>{{elem.uuid}}, {{elem.value}}</strong>
+
     <ul>
     <repeat each={{elem.sensors}} as="i">
-        <li>{{i.uuid}}, {{i.value}}, value:<input class="form-control mdl-textfield__input" pattern="-?[0-9]*(\.[0-9]+)?" type="text" value="{{ <~>i.value }}" /></li>
+        <li>-->{{i.uuid}}, {{i.value}}, value:<input class="form-control mdl-textfield__input" pattern="-?[0-9]*(\.[0-9]+)?" type="text" value="{{ <~>i.value }}" /></li>
     </repeat>
     </ul>
+
+    <ul>
+    <repeat src={{elem}} query="sensors |=value" as="i">
+        <li>==>{{i}}</li>
+    </repeat>
+    </ul>
+
+    <ul>
+    <repeat src={{elem}} query="sensors" as="i">
+        <li>==>{{i.metaClass.metaName()}}
+        <repeat src={{i}} query="=value" as="v">
+            ,value={{v}}
+        </repeat>
+        </li>
+    </repeat>
+    </ul>
+
+    <traverse src="{{elem}}" query="sensors |=value" as="i">
+        <b>{{i}}</b><br />
+    </traverse>
+
     <input type="button" onclick={{elem | save}} value="ParamSaveModel"></input>
+
     <input type="button" onclick={{save}} value="GlobalSaveModel"></input>
+
+
 </script>
 
 
@@ -39,12 +64,12 @@
     sensorClass.addReference("sensors", sensorClass, null, true);
 
     var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://" + window.location.hostname + ":8080/cdn");
-    var dataManager =  org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
+    var dataManager = org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
     var model = metaModel.createModel(dataManager);
     model.connect(function () {
         model.lookup(0, 0, 1, function (obj) {
             paperclip.modifiers.save = function (param) {
-                return function(){
+                return function () {
                     console.log('ParamFunctionSave', param);
                 };
             };
@@ -53,7 +78,9 @@
             var v = t.view({
                 elem: obj,
                 model: model,
-                save:function(){console.log("GlobalSave")}
+                save: function () {
+                    console.log("GlobalSave")
+                }
             });
             document.body.appendChild(v.render());
         });
