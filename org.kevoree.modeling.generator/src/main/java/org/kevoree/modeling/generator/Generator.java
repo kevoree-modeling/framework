@@ -82,6 +82,9 @@ public class Generator {
                     Path filePath = Paths.get(context.targetSrcDir.getAbsolutePath() + File.separator + enumDecl.getPack().replace(".", File.separator) + File.separator + enumDecl.getName() + ".java");
                     callVelocity(filePath, "vTemplates/EnumTemplate.vm", enumDecl);
 
+                    Path enumImplPath = Paths.get(context.targetSrcDir.getAbsolutePath() + File.separator + enumDecl.getPack().replace(".", File.separator) + File.separator + "impl" + File.separator + enumDecl.getName() + "Literal.java");
+                    callVelocity(enumImplPath, "vTemplates/EnumImplTemplate.vm", enumDecl);
+
                 }
             }
         } catch (Exception e) {

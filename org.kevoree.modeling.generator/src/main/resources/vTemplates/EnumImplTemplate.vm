@@ -1,0 +1,7 @@
+package ${context.pack}.impl;
+
+public class ${context.getName()}Literal extends org.kevoree.modeling.meta.impl.MetaLiteral implements ${context.pack}.${context.getName()} {
+    public ${context.getName()}Literal(String p_name, int p_index, String p_className) { super(p_name, p_index, p_className); }
+}
+
+#* @vtlvariable name="context" type="org.kevoree.modeling.ast.MModelEnum" *#
