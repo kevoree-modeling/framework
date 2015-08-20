@@ -40,7 +40,7 @@ public class JsonModelLoader {
      * org.kevoree.modeling.format.json.JsonModelLoader.loadObj(elem2, manager, universe, time, mappedKeys, rootElem);
      * } catch(e){ console.error(e); }
      * }
-     * if (rootElem[0] != null) { manager.setRoot(rootElem[0], (throwable : java.lang.Throwable) => { if (callback != null) { callback(throwable); }}); } else { if (callback != null) { callback(null); } }
+     * if (rootElem[0] != null) { manager.setRoot(rootElem[0], (throwable : Error) => { if (callback != null) { callback(throwable); }}); } else { if (callback != null) { callback(null); } }
      * }
      */
     public static void load(KInternalDataManager manager, long universe, long time, String payload, final KCallback<Throwable> callback) {

@@ -32,13 +32,13 @@ public class KeyCalculator {
     /**
      * @native ts
      * if (this._currentIndex == org.kevoree.modeling.KConfig.KEY_PREFIX_MASK) {
-     * throw new java.lang.IndexOutOfBoundsException("Object Index could not be created because it exceeded the capacity of the current prefix. Ask for a new prefix.");
+     * throw new Error("Object Index could not be created because it exceeded the capacity of the current prefix. Ask for a new prefix.");
      * }
      * this._currentIndex++;
      * var indexHex = this._currentIndex.toString(org.kevoree.modeling.KConfig.PREFIX_SIZE);
      * var objectKey = parseInt(this._prefix + "000000000".substring(0,9-indexHex.length) + indexHex, org.kevoree.modeling.KConfig.PREFIX_SIZE);
      * if (objectKey >= org.kevoree.modeling.KConfig.NULL_LONG) {
-     * throw new java.lang.IndexOutOfBoundsException("Object Index exceeds teh maximum JavaScript number capacity. (2^"+org.kevoree.modeling.KConfig.LONG_SIZE+")");
+     * throw new Error("Object Index exceeds teh maximum JavaScript number capacity. (2^"+org.kevoree.modeling.KConfig.LONG_SIZE+")");
      * }
      * return objectKey;
      */
