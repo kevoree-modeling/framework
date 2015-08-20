@@ -69,7 +69,7 @@
     </developers>
 
     <properties>
-        <java2typescript.plugin.version>40-SNAPSHOT</java2typescript.plugin.version>
+        <java2typescript.plugin.version>40</java2typescript.plugin.version>
     </properties>
 
     <modules>

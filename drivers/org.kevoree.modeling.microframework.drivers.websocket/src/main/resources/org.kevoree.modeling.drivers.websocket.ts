@@ -36,7 +36,7 @@ module org {
                         }
 
 
-                        public connect(callback:(p:java.lang.Throwable) => void):void {
+                        public connect(callback:(p:Error) => void):void {
                             var self = this;
 
                             this.shouldBeConnected = true;
@@ -122,7 +122,7 @@ module org {
 
                         }
 
-                        public close(callback:(p:java.lang.Throwable) => void):void {
+                        public close(callback:(p:Error) => void):void {
                             this.shouldBeConnected = false;
                             this._clientConnection.close();
                             if (callback != null) {
@@ -139,7 +139,7 @@ module org {
                             return this._callbackId;
                         }
 
-                        public put(keys:Float64Array, values:string[], error:(p:java.lang.Throwable) => void, ignoreInterceptor):void {
+                        public put(keys:Float64Array, values:string[], error:(p:Error) => void, ignoreInterceptor):void {
                             var putRequest = new org.kevoree.modeling.message.impl.PutRequest();
                             putRequest.id = this.nextKey();
                             putRequest.keys = keys;
@@ -148,7 +148,7 @@ module org {
                             this._clientConnection.send(putRequest.json());
                         }
 
-                        public get(keys:Float64Array, callback:(p:string[], p1:java.lang.Throwable) => void):void {
+                        public get(keys:Float64Array, callback:(p:string[], p1:Error) => void):void {
                             var getRequest = new org.kevoree.modeling.message.impl.GetRequest();
                             getRequest.id = this.nextKey();
                             getRequest.keys = keys;
@@ -156,7 +156,7 @@ module org {
                             this._clientConnection.send(getRequest.json());
                         }
 
-                        public atomicGetIncrement(keys:Float64Array, callback:(p:number, p1:java.lang.Throwable) => void):void {
+                        public atomicGetIncrement(keys:Float64Array, callback:(p:number, p1:Error) => void):void {
                             var atomicGetRequest = new org.kevoree.modeling.message.impl.AtomicGetIncrementRequest();
                             atomicGetRequest.id = this.nextKey();
                             atomicGetRequest.keys = keys;
@@ -164,7 +164,7 @@ module org {
                             this._clientConnection.send(atomicGetRequest.json());
                         }
 
-                        public remove(keys:Float64Array, error:(p:java.lang.Throwable) => void):void {
+                        public remove(keys:Float64Array, error:(p:Error) => void):void {
                             console.error("Not implemented yet");
                         }
 
