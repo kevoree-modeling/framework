@@ -18,7 +18,7 @@ decl : enumDeclr | classDeclr;
 
 enumDeclr : 'enum' TYPE_NAME '{' IDENT (',' IDENT)* '}';
 
-classDeclr : 'class' TYPE_NAME classParentDeclr? '{' annotationDeclr* (attributeDeclaration | referenceDeclaration | dependencyDeclaration | inputDeclaration | outputDeclaration)* '}';
+classDeclr : 'class' TYPE_NAME classParentDeclr? '{' annotationDeclr* (attributeDeclaration | referenceDeclaration | dependencyDeclaration | inputDeclaration | outputDeclaration | functionDeclaration)* '}';
 
 classParentDeclr : 'extends' TYPE_NAME (',' TYPE_NAME )*;
 
@@ -34,7 +34,7 @@ inputDeclaration : 'input' IDENT STRING;
 
 outputDeclaration : 'output' IDENT ':' attributeType;
 
-functionDeclaration : 'funct' IDENT functionDeclarationParameters? ;
+functionDeclaration : 'func' IDENT functionDeclarationParameters? functionDeclarationReturnType? ;
 
 functionDeclarationParameters : '(' functionDeclarationParameter (',' functionDeclarationParameter)* ')';
 

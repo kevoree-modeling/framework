@@ -7,7 +7,6 @@ class org.kubi.Ecosystem {
     ref* groupes: org.kubi.Group
     ref* technologies: org.kubi.Technology
 
-
     func trigger
     func trigger2 : String
     func trigger3 (s: String) : String

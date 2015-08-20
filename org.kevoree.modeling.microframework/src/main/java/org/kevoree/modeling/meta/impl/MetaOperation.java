@@ -26,15 +26,15 @@ public class MetaOperation implements KMetaOperation {
         return MetaType.OPERATION;
     }
 
+    @Override
+    public int originMetaClassIndex() {
+        return _originMetaClassIndex;
+    }
+
     public MetaOperation(String p_name, int p_index, int p_originMetaClassIndex) {
         this._name = p_name;
         this._index = p_index;
         this._originMetaClassIndex = p_originMetaClassIndex;
     }
 
-    @Override
-    public int originMetaClassIndex() {
-        return _originMetaClassIndex;
-    }
-    
 }

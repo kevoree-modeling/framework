@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class MModelOperation {
 
     public ArrayList<MModelOperationParam> inputParams = new ArrayList<MModelOperationParam>();
-    public MModelOperationParam returnParam = null;
+    public String returnType = null;
     public String name;
     protected int index = -1;
     
@@ -25,8 +25,14 @@ public class MModelOperation {
         return inputParams;
     }
 
-    public MModelOperationParam getReturnParam() {
-        return returnParam;
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public int returnTypeId = 0;
+
+    public int getReturnTypeId() {
+        return returnTypeId;
     }
 
     public String getName() {
@@ -37,7 +43,7 @@ public class MModelOperation {
         MModelOperation cloned = new MModelOperation(this.name);
         cloned.index = index;
         cloned.inputParams = inputParams;
-        cloned.returnParam = returnParam;
+        cloned.returnType = returnType;
         return cloned;
     }
 

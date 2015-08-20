@@ -209,32 +209,51 @@ public class MModelClass extends MModelClassifier {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Class[name:");
-        sb.append(getName());
-        sb.append(", package:");
-        sb.append(getPack());
+        sb.append("class ");
+        sb.append(getPack()+"."+getName());
         sb.append(", parent:");
         sb.append(getParents());
-        sb.append(", attributes[\n");
+        sb.append("{\n \tattributes{\n");
         for (MModelAttribute att : attributes.values()) {
-            sb.append(att.getName());
+            sb.append("\t\t"+att.getName());
             sb.append(":");
             sb.append(att.getType());
-            sb.append(",\n");
+            sb.append("\n");
         }
-        sb.append("]");
-        sb.append(", references:[\n");
+        sb.append("\t}\n");
+        sb.append("\treferences:{\n");
         for (MModelReference att : references.values()) {
-            sb.append(att.getName());
+            sb.append("\t\t"+att.getName());
             sb.append(":");
             sb.append(att.getType().getName());
             if (att.getOpposite() != null) {
                 sb.append(" opposite ");
                 sb.append(att.getOpposite());
             }
-            sb.append(",\n");
+            sb.append("\n");
         }
-        sb.append("]]\n");
+        sb.append("\t}\n\tfunctions:{\n");
+        for (MModelOperation op : operations.values()) {
+            sb.append("\t\t"+op.getName());
+            sb.append("(");
+            boolean isFirst = true;
+            for (MModelOperationParam param : op.inputParams) {
+                if (!isFirst) {
+                    sb.append(", ");
+                }
+                sb.append(param.getName());
+                sb.append(" : ");
+                sb.append(param.getType());
+                isFirst = false;
+            }
+            sb.append(")");
+            if(op.getReturnType() != null){
+                sb.append(":");
+                sb.append(op.getReturnType());
+            }
+            sb.append("\n");
+        }
+        sb.append("\t}\n}\n");
         return sb.toString();
     }
 

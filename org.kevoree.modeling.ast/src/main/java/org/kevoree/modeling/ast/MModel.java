@@ -254,8 +254,24 @@ public class MModel {
                         newClass.setInference(cleanString(annotDecl.STRING().getText()));
                     }
                 }
+                for (org.kevoree.modeling.ast.MetaModelParser.FunctionDeclarationContext functionDeclarationContext : classDeclrContext.functionDeclaration()) {
+                    MModelOperation operation = new MModelOperation(functionDeclarationContext.IDENT().getText());
+                    if (functionDeclarationContext.functionDeclarationReturnType() != null) {
+                        operation.returnType = functionDeclarationContext.functionDeclarationReturnType().attributeType().getText();
+                    }
+                    if (functionDeclarationContext.functionDeclarationParameters() != null) {
+                        for (org.kevoree.modeling.ast.MetaModelParser.FunctionDeclarationParameterContext param : functionDeclarationContext.functionDeclarationParameters().functionDeclarationParameter()) {
+                            MModelOperationParam newParam = new MModelOperationParam();
+                            newParam.name = param.IDENT().getText();
+                            newParam.type = param.attributeType().getText();
+                            operation.inputParams.add(newParam);
+                        }
+                    }
+                    newClass.addOperation(operation);
+                }
             }
         }
+
         //opposite completion
         model.completeOppositeReferences();
         model.consolidateIndexes();
@@ -363,6 +379,31 @@ public class MModel {
                     }
                 }
             }
+            for (MModelOperation out : decl.getOperations()) {
+                if (out.getReturnType() != null) {
+                    if (MMTypeHelper.isPrimitiveTYpe(out.getReturnType())) {
+                        out.returnTypeId = MMTypeHelper.toId(out.getReturnType());
+                    } else {
+                        for (MModelEnum en : getEnums()) {
+                            if (en.getFqn().endsWith(out.getReturnType())) {
+                                out.returnTypeId = en.index;
+                            }
+                        }
+                    }
+                }
+                for (MModelOperationParam param : out.inputParams) {
+                    if (MMTypeHelper.isPrimitiveTYpe(param.getType())) {
+                        param.typeId = MMTypeHelper.toId(param.getType());
+                    } else {
+                        for (MModelEnum en : getEnums()) {
+                            if (en.getFqn().endsWith(param.getType())) {
+                                param.typeId = en.index;
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 
