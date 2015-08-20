@@ -39,4 +39,6 @@ outputDeclaration : 'output' IDENT ':' attributeType;
 
 annotationDeclr : 'with' IDENT (NUMBER|STRING)?;
 
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
+WS : ([ \t\r\n]+ | SL_COMMENT) -> skip ; // skip spaces, tabs, newlines
+
+SL_COMMENT :  '//' ~('\r' | '\n')* ;

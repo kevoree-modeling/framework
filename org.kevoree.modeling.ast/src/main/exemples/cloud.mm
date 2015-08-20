@@ -1,3 +1,5 @@
+//THIS is a comment
+
 with version "1-SNAPSHOT"
 with kmfVersion "4.19.1-SNAPSHOT"
 class org.kubi.Ecosystem {
@@ -11,6 +13,8 @@ class org.kubi.Group {
     ref* groupes: org.kubi.Group
     ref* devices: org.kubi.Device with opposite "groupes"
 }
+
+//THIS IS ANOTHER COMMENT
 
 class org.kubi.Device {
     att id: String
