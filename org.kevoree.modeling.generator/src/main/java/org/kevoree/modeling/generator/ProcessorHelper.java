@@ -81,7 +81,7 @@ public class ProcessorHelper {
         if (isPrimitive(t)) {
             return toEcoreType(t);
         } else {
-            return "org.kevoree.modeling.meta.KLiteral";
+            return t;
         }
     }
 

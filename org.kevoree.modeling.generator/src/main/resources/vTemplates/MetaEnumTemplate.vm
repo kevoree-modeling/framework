@@ -2,9 +2,13 @@ package ${context.pack}.meta;
 
 public class Meta${context.getName()} extends org.kevoree.modeling.meta.impl.MetaEnum implements org.kevoree.modeling.KType {
 
+    static final class Meta${context.getName()}Literal extends org.kevoree.modeling.meta.impl.MetaLiteral implements ${context.pack}.${context.getName()} {
+        public Meta${context.getName()}Literal(String p_name, int p_index, String p_className) { super(p_name, p_index, p_className); }
+    }
+
 #set($i = 0)
 #foreach($enumAtt in ${context.litterals})
-public static final org.kevoree.modeling.meta.KLiteral $enumAtt.toUpperCase() = new org.kevoree.modeling.meta.impl.MetaLiteral("$enumAtt.toUpperCase()",$i,"${context.getFqn()}");
+public static final ${context.pack}.${context.getName()} $enumAtt.toUpperCase() = new Meta${context.getName()}Literal("$enumAtt.toUpperCase()",$i,"${context.getFqn()}");
     #set($i = $i +1)
 #end
 

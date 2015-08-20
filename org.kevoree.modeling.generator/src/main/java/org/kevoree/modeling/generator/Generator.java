@@ -78,6 +78,10 @@ public class Generator {
                     MModelEnum enumDecl = (MModelEnum) classDecl;
                     Path metaFilePath = Paths.get(context.targetSrcDir.getAbsolutePath() + File.separator + enumDecl.getPack().replace(".", File.separator) + File.separator + "meta" + File.separator + "Meta" + enumDecl.getName() + ".java");
                     callVelocity(metaFilePath, "vTemplates/MetaEnumTemplate.vm", enumDecl);
+
+                    Path filePath = Paths.get(context.targetSrcDir.getAbsolutePath() + File.separator + enumDecl.getPack().replace(".", File.separator) + File.separator + enumDecl.getName() + ".java");
+                    callVelocity(filePath, "vTemplates/EnumTemplate.vm", enumDecl);
+
                 }
             }
         } catch (Exception e) {

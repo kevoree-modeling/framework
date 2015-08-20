@@ -1,0 +1,7 @@
+package ${context.pack};
+
+public interface ${context.getName()} extends org.kevoree.modeling.meta.KLiteral {
+
+}
+
+#* @vtlvariable name="context" type="org.kevoree.modeling.ast.MModelEnum" *#
