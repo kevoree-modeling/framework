@@ -6,6 +6,13 @@ class org.kubi.Ecosystem {
     att name: String
     ref* groupes: org.kubi.Group
     ref* technologies: org.kubi.Technology
+
+
+    func trigger
+    func trigger2 : String
+    func trigger3 (s: String) : String
+    func trigger4 (s : String, s2: String) : String
+
 }
 
 class org.kubi.Group {

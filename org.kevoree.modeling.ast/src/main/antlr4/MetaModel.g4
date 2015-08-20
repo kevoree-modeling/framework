@@ -16,14 +16,11 @@ metamodel: annotationDeclr* decl*;
 
 decl : enumDeclr | classDeclr;
 
-enumDeclr :
-    'enum' TYPE_NAME '{' IDENT (',' IDENT)* '}';
+enumDeclr : 'enum' TYPE_NAME '{' IDENT (',' IDENT)* '}';
 
-classDeclr :
-    'class' TYPE_NAME classParentDeclr? '{' annotationDeclr* (attributeDeclaration | referenceDeclaration | dependencyDeclaration | inputDeclaration | outputDeclaration)* '}';
+classDeclr : 'class' TYPE_NAME classParentDeclr? '{' annotationDeclr* (attributeDeclaration | referenceDeclaration | dependencyDeclaration | inputDeclaration | outputDeclaration)* '}';
 
-classParentDeclr :
-    'extends' TYPE_NAME (',' TYPE_NAME )*;
+classParentDeclr : 'extends' TYPE_NAME (',' TYPE_NAME )*;
 
 attributeDeclaration : 'att' IDENT ':' attributeType annotationDeclr*;
 
@@ -36,6 +33,14 @@ dependencyDeclaration : 'dependency' IDENT ':' TYPE_NAME;
 inputDeclaration : 'input' IDENT STRING;
 
 outputDeclaration : 'output' IDENT ':' attributeType;
+
+functionDeclaration : 'funct' IDENT functionDeclarationParameters? ;
+
+functionDeclarationParameters : '(' functionDeclarationParameter (',' functionDeclarationParameter)* ')';
+
+functionDeclarationParameter : IDENT ':' attributeType;
+
+functionDeclarationReturnType : ':' attributeType;
 
 annotationDeclr : 'with' IDENT (NUMBER|STRING)?;
 
