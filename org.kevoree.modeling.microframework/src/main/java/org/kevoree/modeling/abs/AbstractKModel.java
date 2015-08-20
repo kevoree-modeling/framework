@@ -3,7 +3,7 @@ package org.kevoree.modeling.abs;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.operation.KOperation;
+import org.kevoree.modeling.KOperation;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
@@ -70,7 +70,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public void setOperation(KMetaOperation metaOperation, KOperation operation) {
+    public void setClassOperation(KMetaOperation metaOperation, KOperation operation) {
         _manager.operationManager().registerOperation(metaOperation, operation, null);
     }
 

@@ -5,7 +5,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.chunk.KIntMap;
 import org.kevoree.modeling.memory.chunk.KLongMap;
-import org.kevoree.modeling.operation.KOperation;
+import org.kevoree.modeling.KOperation;
 import org.kevoree.modeling.KView;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;

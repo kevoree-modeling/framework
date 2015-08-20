@@ -435,7 +435,7 @@ public abstract class AbstractKObject implements KObject {
                             if (!Checker.isDefined(result)) {
                                 result = KVisitResult.STOP;
                             }
-                            if (result.equals(KVisitResult.CONTINUE)) {
+                            if (resolved != null && result.equals(KVisitResult.CONTINUE)) {
                                 if (traversed == null || !traversed.contains(resolved.uuid())) {
                                     nextDeep.add(resolved);
                                 }

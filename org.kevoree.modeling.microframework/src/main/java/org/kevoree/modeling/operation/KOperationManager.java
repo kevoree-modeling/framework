@@ -2,6 +2,7 @@ package org.kevoree.modeling.operation;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KOperation;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.message.KMessage;
 

@@ -5,7 +5,6 @@ import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
-import org.kevoree.modeling.operation.KOperation;
 
 public interface KModel<A extends KUniverse> {
 
@@ -17,7 +16,7 @@ public interface KModel<A extends KUniverse> {
 
     KDataManager manager();
 
-    void setOperation(KMetaOperation metaOperation, KOperation operation);
+    void setClassOperation(KMetaOperation metaOperation, KOperation operation);
 
     void setInstanceOperation(KMetaOperation metaOperation, KObject target, KOperation operation);
 
