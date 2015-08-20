@@ -20,7 +20,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         KObjectChunk raw = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         if (raw != null) {
             Double extrapolatedValue = extrapolateValue(raw, current.metaClass(), attribute.index(), current.now(), raw.time());
-            int attTypeId = attribute.attributeType().id();
+            int attTypeId = attribute.attributeTypeId();
             switch (attTypeId) {
                 case KPrimitiveTypes.CONTINUOUS_ID:
                     return extrapolatedValue;

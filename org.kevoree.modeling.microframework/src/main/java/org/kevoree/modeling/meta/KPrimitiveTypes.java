@@ -19,4 +19,8 @@ public class KPrimitiveTypes {
     public static final KType DOUBLE = new AbstractDataType("DOUBLE", false, DOUBLE_ID);
     public static final KType CONTINUOUS = new AbstractDataType("CONTINUOUS", false, CONTINUOUS_ID);
 
+    public static boolean isEnum(int attributeTypeId) {
+        return attributeTypeId >= 0;
+    }
+
 }

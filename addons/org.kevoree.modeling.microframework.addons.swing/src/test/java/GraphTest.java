@@ -1,6 +1,7 @@
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.swingViewer.ViewerListener;
 import org.graphstream.ui.swingViewer.ViewerPipe;
+import org.junit.Test;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;

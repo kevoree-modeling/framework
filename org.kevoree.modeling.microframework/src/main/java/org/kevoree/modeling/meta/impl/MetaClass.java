@@ -129,7 +129,7 @@ public class MetaClass implements KMetaClass {
         } else {
             extrapolation = DiscreteExtrapolation.instance();
         }
-        KMetaAttribute tempAttribute = new MetaAttribute(attributeName, _meta.length, precisionCleaned, false, p_type, extrapolation);
+        KMetaAttribute tempAttribute = new MetaAttribute(attributeName, _meta.length, precisionCleaned, false, p_type.id(), extrapolation);
         internal_add_meta(tempAttribute);
         return tempAttribute;
     }
@@ -195,7 +195,7 @@ public class MetaClass implements KMetaClass {
 
     @Override
     public KMetaInferOutput addOutput(String p_name, KType p_type) {
-        KMetaInferOutput newOutput = new MetaInferOutput(p_name, _meta.length, p_type);
+        KMetaInferOutput newOutput = new MetaInferOutput(p_name, _meta.length, p_type.id());
         internal_add_meta(newOutput);
         return newOutput;
     }

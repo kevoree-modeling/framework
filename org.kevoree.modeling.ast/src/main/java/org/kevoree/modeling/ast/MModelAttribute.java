@@ -6,6 +6,7 @@ public class MModelAttribute {
     private String type;
     private double precision = -1;
     protected int index = -1;
+    public int typeId = 0;
 
     public Integer getIndex() {
         return index;
@@ -22,6 +23,10 @@ public class MModelAttribute {
 
     public String getType() {
         return type;
+    }
+
+    public int getTypeId(){
+        return typeId;
     }
 
     public Double getPrecision() {

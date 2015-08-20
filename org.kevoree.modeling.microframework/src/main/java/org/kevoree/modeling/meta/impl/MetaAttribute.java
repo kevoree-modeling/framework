@@ -1,6 +1,5 @@
 package org.kevoree.modeling.meta.impl;
 
-import org.kevoree.modeling.KType;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.meta.KMetaAttribute;
@@ -16,13 +15,13 @@ public class MetaAttribute implements KMetaAttribute {
 
     private boolean _key;
 
-    private KType _metaType;
+    private int _attributeTypeId;
 
     private Extrapolation _extrapolation;
 
     @Override
-    public KType attributeType() {
-        return _metaType;
+    public int attributeTypeId() {
+        return _attributeTypeId;
     }
 
     @Override
@@ -64,13 +63,13 @@ public class MetaAttribute implements KMetaAttribute {
     public void setPrecision(double p_precision) {
         this._precision = p_precision;
     }
-    
-    public MetaAttribute(String p_name, int p_index, double p_precision, boolean p_key, KType p_metaType, Extrapolation p_extrapolation) {
+
+    public MetaAttribute(String p_name, int p_index, double p_precision, boolean p_key, int p_attributeTypeId, Extrapolation p_extrapolation) {
         this._name = p_name;
         this._index = p_index;
         this._precision = p_precision;
         this._key = p_key;
-        this._metaType = p_metaType;
+        this._attributeTypeId = p_attributeTypeId;
         this._extrapolation = p_extrapolation;
         if (this._extrapolation == null) {
             this._extrapolation = DiscreteExtrapolation.instance();

@@ -27,8 +27,9 @@ public class DiscreteExtrapolation implements Extrapolation {
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
         KObjectChunk payload = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         if (payload != null) {
-            if (attribute.attributeType().isEnum()) {
-                return ((KMetaEnum) attribute.attributeType()).literal((int) payload.getPrimitiveType(attribute.index(), current.metaClass()));
+            if (KPrimitiveTypes.isEnum(attribute.attributeTypeId())) {
+                KMetaEnum metaEnum = ((AbstractKObject) current)._manager.model().metaModel().metaTypes()[attribute.attributeTypeId()];
+                return metaEnum.literal((int) payload.getPrimitiveType(attribute.index(), current.metaClass()));
             } else {
                 return payload.getPrimitiveType(attribute.index(), current.metaClass());
             }
@@ -43,11 +44,11 @@ public class DiscreteExtrapolation implements Extrapolation {
         KObjectChunk internalPayload = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         //The object is also automatically cset to Dirty
         if (internalPayload != null) {
-            if (attribute.attributeType().isEnum()) {
+            if (KPrimitiveTypes.isEnum(attribute.attributeTypeId())) {
                 if (payload instanceof MetaLiteral) {
                     internalPayload.setPrimitiveType(attribute.index(), ((KLiteral) payload).index(), current.metaClass());
                 } else {
-                    KMetaEnum metaEnum = (KMetaEnum) attribute.attributeType();
+                    KMetaEnum metaEnum = ((AbstractKObject) current)._manager.model().metaModel().metaTypes()[attribute.attributeTypeId()];
                     KLiteral foundLiteral = metaEnum.literalByName(payload.toString());
                     if (foundLiteral != null) {
                         internalPayload.setPrimitiveType(attribute.index(), foundLiteral.index(), current.metaClass());
@@ -68,7 +69,7 @@ public class DiscreteExtrapolation implements Extrapolation {
      * return payload;
      */
     private final Object convert(KMetaAttribute attribute, Object payload) {
-        int attTypeId = attribute.attributeType().id();
+        int attTypeId = attribute.attributeTypeId();
         switch (attTypeId) {
             case KPrimitiveTypes.INT_ID:
                 if (payload instanceof Integer) {

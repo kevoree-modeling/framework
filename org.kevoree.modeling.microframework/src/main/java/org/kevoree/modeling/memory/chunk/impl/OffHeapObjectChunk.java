@@ -74,19 +74,29 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         int size = 0;
         if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
             KMetaAttribute metaAttribute = (KMetaAttribute) meta;
-
-            if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                size = 8; // reserve space for a native pointer
-            } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                size = 8;
-            } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                size = 4;
-            } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                size = 1;
-            } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                size = 8;
-            } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
-                size = 8; // native pointer to the double[]
+            int attributeTypeId = metaAttribute.attributeTypeId();
+            switch (attributeTypeId) {
+                case KPrimitiveTypes.STRING_ID:
+                    size = 8; // reserve space for a native pointer
+                    break;
+                case KPrimitiveTypes.LONG_ID:
+                    size = 8;
+                    break;
+                case KPrimitiveTypes.INT_ID:
+                    size = 4;
+                    break;
+                case KPrimitiveTypes.BOOL_ID:
+                    size = 1;
+                    break;
+                case KPrimitiveTypes.DOUBLE_ID:
+                    size = 8;
+                    break;
+                case KPrimitiveTypes.CONTINUOUS_ID:
+                    size = 8; // native pointer to the double[]
+                    break;
+                default:
+                    size = 4;
+                    break;
             }
         } else if (meta.metaType().equals(MetaType.REFERENCE)) {
             size = 8;
@@ -130,7 +140,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             KMeta meta = metaClass.metaElements()[i];
             if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                 KMetaAttribute metaAttribute = (KMetaAttribute) meta;
-                if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                if (metaAttribute.attributeTypeId() == KPrimitiveTypes.STRING_ID) {
                     long clone_ptr = clonedEntry.rawPointerForIndex(metaAttribute.index(), metaClass);
                     if (UNSAFE.getLong(clone_ptr) != 0) {
                         long clone_ptr_str_segment = UNSAFE.getLong(clone_ptr);
@@ -146,7 +156,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                         }
                     }
                 }
-                if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
                     long clone_ptr = clonedEntry.rawPointerForIndex(metaAttribute.index(), metaClass);
                     if (UNSAFE.getLong(clone_ptr) != 0) {
                         long clone_ptr_str_segment = UNSAFE.getLong(clone_ptr);
@@ -454,8 +464,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
             if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                 KMetaAttribute metaAttribute = (KMetaAttribute) meta;
-
-                if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                if (metaAttribute.attributeTypeId() == KPrimitiveTypes.STRING_ID) {
                     long ptr_str_segment = UNSAFE.getLong(ptr);
                     if (ptr_str_segment != 0) {
                         int size = UNSAFE.getInt(ptr_str_segment);
@@ -466,15 +475,15 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                         result = new String(bytes, "UTF-8");
                     }
 
-                } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
+                } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.LONG_ID) {
                     result = UNSAFE.getLong(ptr);
-                } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
+                } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.INT_ID) {
                     result = UNSAFE.getInt(ptr);
-                } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
+                } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.BOOL_ID) {
                     result = UNSAFE.getByte(ptr) != 0;
-                } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+                } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.DOUBLE_ID) {
                     result = UNSAFE.getDouble(ptr);
-                } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
                     result = getDoubleArray(p_index, p_metaClass);
                 }
             }
@@ -522,7 +531,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                 KMeta meta = metaElements[i];
                 if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                     MetaAttribute metaAttribute = (MetaAttribute) meta;
-                    if (metaAttribute.attributeType() != KPrimitiveTypes.CONTINUOUS) {
+                    if (metaAttribute.attributeTypeId() != KPrimitiveTypes.CONTINUOUS_ID) {
                         Object o = getPrimitiveType(meta.index(), metaClass);
                         if (o != null) {
                             if (isFirst) {
@@ -609,15 +618,15 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                         }
                         builder.append(metaElements[i].metaName());
                         builder.append("\":");
-                        if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                        if (metaAttribute.attributeTypeId() == KPrimitiveTypes.STRING_ID) {
                             builder.append("\"");
                             builder.append(JsonString.encode((String) o));
                             builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.LONG_ID) {
                             builder.append("\"");
                             Base64.encodeLongToBuffer((long) o, builder);
                             builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
                             builder.append("[");
                             double[] castedArr = (double[]) o;
                             for (int j = 0; j < castedArr.length; j++) {
@@ -629,21 +638,21 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                                 builder.append("\"");
                             }
                             builder.append("]");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.BOOL_ID) {
                             if ((boolean) o) {
                                 builder.append("1");
                             } else {
                                 builder.append("0");
                             }
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.DOUBLE_ID) {
                             builder.append("\"");
                             Base64.encodeDoubleToBuffer((double) o, builder);
                             builder.append("\"");
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.INT_ID) {
                             builder.append("\"");
                             Base64.encodeIntToBuffer((int) o, builder);
                             builder.append("\"");
-                        } else if (metaAttribute.attributeType().isEnum()) {
+                        } else if (KPrimitiveTypes.isEnum(metaAttribute.attributeTypeId())) {
                             Base64.encodeIntToBuffer((int) o, builder);
                         }
                     }
@@ -721,17 +730,17 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
                         KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
                         Object converted = null;
-                        if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                        if (metaAttribute.attributeTypeId() == KPrimitiveTypes.STRING_ID) {
                             converted = JsonString.unescape((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.LONG_ID) {
                             converted = Base64.decodeToLong((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.INT_ID) {
                             converted = Base64.decodeToInt((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.BOOL_ID) {
                             converted = PrimitiveHelper.parseBoolean((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.DOUBLE_ID) {
                             converted = Base64.decodeToDouble((String) insideContent);
-                        } else if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
                             String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
                             double[] convertedRaw = new double[plainRawSet.length];
                             for (int l = 0; l < plainRawSet.length; l++) {
@@ -744,7 +753,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                             converted = convertedRaw;
                         }
 
-                        if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                        if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
                             double[] infer = (double[]) converted;
                             internal_extendDoubleArray(metaAttribute.index(), infer.length, metaClass, false);
                             for (int k = 0; k < infer.length; k++) {
@@ -824,7 +833,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
                 if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
                     KMetaAttribute metaAttribute = (KMetaAttribute) meta;
-                    if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
+                    if (metaAttribute.attributeTypeId() == KPrimitiveTypes.STRING_ID) {
                         long ptr = rawPointerForIndex(metaAttribute.index(), metaClass);
                         long ptr_str_segment = UNSAFE.getLong(ptr);
                         if (ptr_str_segment != 0) {
@@ -832,7 +841,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 //                        _allocated_segments--;
                         }
                     }
-                    if (metaAttribute.attributeType() == KPrimitiveTypes.CONTINUOUS) {
+                    if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
                         long ptr = rawPointerForIndex(metaAttribute.index(), metaClass);
                         long ptr_segment = UNSAFE.getLong(ptr);
                         if (ptr_segment != 0) {

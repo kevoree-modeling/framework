@@ -23,7 +23,7 @@ public class JsonRaw {
             KMeta loopMeta = metaElements[i];
             if (loopMeta != null && loopMeta.metaType().equals(MetaType.ATTRIBUTE)) {
                 KMetaAttribute metaAttribute = (KMetaAttribute) loopMeta;
-                int metaAttId = metaAttribute.attributeType().id();
+                int metaAttId = metaAttribute.attributeTypeId();
                 if (metaAttId == KPrimitiveTypes.CONTINUOUS_ID) {
                     double[] inferAtt = raw.getDoubleArray(loopMeta.index(), p_metaClass);
                     if (inferAtt != null) {

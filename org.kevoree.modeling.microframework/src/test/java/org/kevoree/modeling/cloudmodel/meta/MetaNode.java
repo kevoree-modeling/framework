@@ -21,9 +21,9 @@ public class MetaNode extends MetaClass {
         return INSTANCE;
     }
 
-    public static final KMetaAttribute ATT_NAME = new MetaAttribute("name", 0, 5, true, KPrimitiveTypes.STRING, DiscreteExtrapolation.instance());
+    public static final KMetaAttribute ATT_NAME = new MetaAttribute("name", 0, 5, true, KPrimitiveTypes.STRING.id(), DiscreteExtrapolation.instance());
 
-    public static final KMetaAttribute ATT_VALUE = new MetaAttribute("value", 1, 5, false, KPrimitiveTypes.STRING, DiscreteExtrapolation.instance());
+    public static final KMetaAttribute ATT_VALUE = new MetaAttribute("value", 1, 5, false, KPrimitiveTypes.STRING.id(), DiscreteExtrapolation.instance());
 
     public static final KMetaReference REF_CHILDREN = new MetaReference("children", 2, true, false, 0, "op_children", 0);
 

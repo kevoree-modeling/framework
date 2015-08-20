@@ -70,9 +70,6 @@ public class ProcessorHelper {
 
 
     public boolean isPrimitive(String tDecl) {
-
-
-
         if (toEcoreType(tDecl).startsWith("java.lang.")) {
             return true;
         } else {

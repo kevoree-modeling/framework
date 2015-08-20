@@ -73,7 +73,7 @@ public class HeapObjectChunk implements KObjectChunk {
                     builder.append("\":");
                     if (metaElements[i].metaType() == MetaType.ATTRIBUTE) {
                         KMetaAttribute metaAttribute = (KMetaAttribute) metaElements[i];
-                        int metaAttId = metaAttribute.attributeType().id();
+                        int metaAttId = metaAttribute.attributeTypeId();
                         switch (metaAttId) {
                             case KPrimitiveTypes.STRING_ID:
                                 builder.append("\"");
@@ -106,7 +106,7 @@ public class HeapObjectChunk implements KObjectChunk {
                                 builder.append("\"");
                                 break;
                             default:
-                                if (metaAttribute.attributeType().isEnum()) {
+                                if (KPrimitiveTypes.isEnum(metaAttribute.attributeTypeId())) {
                                     Base64.encodeIntToBuffer((int) raw[i], builder);
                                 }
                                 break;
@@ -180,7 +180,7 @@ public class HeapObjectChunk implements KObjectChunk {
                     if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
                         KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
                         Object converted = null;
-                        int metaAttId = metaAttribute.attributeType().id();
+                        int metaAttId = metaAttribute.attributeTypeId();
                         switch (metaAttId) {
                             case KPrimitiveTypes.STRING_ID:
                                 converted = JsonString.unescape((String) insideContent);
@@ -488,7 +488,7 @@ public class HeapObjectChunk implements KObjectChunk {
                     builder.append("\":");
                     if (metaElements[i].metaType() == MetaType.ATTRIBUTE) {
                         KMetaAttribute metaAttribute = (KMetaAttribute) metaElements[i];
-                        int metaAttId = metaAttribute.attributeType().id();
+                        int metaAttId = metaAttribute.attributeTypeId();
                         switch (metaAttId) {
                             case KPrimitiveTypes.STRING_ID:
                                 builder.append("\"");
@@ -515,7 +515,7 @@ public class HeapObjectChunk implements KObjectChunk {
                                 builder.append(raw[i]);
                                 break;
                             default:
-                                if (metaAttribute.attributeType().isEnum()) {
+                                if (KPrimitiveTypes.isEnum(metaAttribute.attributeTypeId())) {
                                     Base64.encodeIntToBuffer((int) raw[i], builder);
                                 }
                                 break;

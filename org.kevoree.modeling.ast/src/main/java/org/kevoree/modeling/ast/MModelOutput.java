@@ -6,6 +6,8 @@ public class MModelOutput {
     private String type;
     protected int index = -1;
 
+    public int typeId = 0;
+
     public Integer getIndex() {
         return index;
     }
@@ -21,6 +23,10 @@ public class MModelOutput {
 
     public String getType() {
         return type;
+    }
+
+    public int getTypeId(){
+        return typeId;
     }
 
     public void setIndex(int index) {

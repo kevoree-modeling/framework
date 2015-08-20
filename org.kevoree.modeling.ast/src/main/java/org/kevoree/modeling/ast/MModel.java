@@ -259,6 +259,7 @@ public class MModel {
         //opposite completion
         model.completeOppositeReferences();
         model.consolidateIndexes();
+        model.consolidateTypeIds();
         return model;
     }
 
@@ -335,6 +336,33 @@ public class MModel {
     public void consolidateIndexes() {
         for (MModelClass decl : getClasses()) {
             internal_consolidate(decl);
+        }
+    }
+
+    public void consolidateTypeIds() {
+        for (MModelClass decl : getClasses()) {
+            for (MModelAttribute att : decl.getAttributes()) {
+                if (MMTypeHelper.isPrimitiveTYpe(att.getType())) {
+                    att.typeId = MMTypeHelper.toId(att.getType());
+                } else {
+                    for (MModelEnum en : getEnums()) {
+                        if (en.getFqn().endsWith(att.getType())) {
+                            att.typeId = en.index;
+                        }
+                    }
+                }
+            }
+            for (MModelOutput out : decl.getOutputs()) {
+                if (MMTypeHelper.isPrimitiveTYpe(out.getType())) {
+                    out.typeId = MMTypeHelper.toId(out.getType());
+                } else {
+                    for (MModelEnum en : getEnums()) {
+                        if (en.getFqn().endsWith(out.getType())) {
+                            out.typeId = en.index;
+                        }
+                    }
+                }
+            }
         }
     }
 

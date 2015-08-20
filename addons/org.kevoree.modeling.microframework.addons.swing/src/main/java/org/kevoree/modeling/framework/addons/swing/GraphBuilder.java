@@ -5,6 +5,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
@@ -57,7 +58,7 @@ public class GraphBuilder {
     }
 
     private static void createEdges(Graph graph, KObject elem) {
-        KObjectChunk rawPayload = ((KInternalDataManager)elem.manager()).preciseChunk(elem.universe(), elem.now(), elem.uuid(), elem.metaClass(), null);
+        KObjectChunk rawPayload = ((KInternalDataManager)elem.manager()).preciseChunk(elem.universe(), elem.now(), elem.uuid(), elem.metaClass(), ((AbstractKObject)elem).previousResolved());
         for (KMeta meta : elem.metaClass().metaElements()) {
             if (meta instanceof KMetaReference) {
                 KMetaReference metaRef = (KMetaReference) meta;

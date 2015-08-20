@@ -24,14 +24,14 @@ public class MetaElement extends MetaClass {
         return INSTANCE;
     }
 
-    public static final KMetaAttribute ATT_NAME = new MetaAttribute("name", 0, 5, true, KPrimitiveTypes.STRING, DiscreteExtrapolation.instance());
+    public static final KMetaAttribute ATT_NAME = new MetaAttribute("name", 0, 5, true, KPrimitiveTypes.STRING.id(), DiscreteExtrapolation.instance());
 
-    public static final KMetaAttribute ATT_VALUE = new MetaAttribute("value", 1, 5, false, KPrimitiveTypes.CONTINUOUS, PolynomialExtrapolation.instance());
+    public static final KMetaAttribute ATT_VALUE = new MetaAttribute("value", 1, 5, false, KPrimitiveTypes.CONTINUOUS.id(), PolynomialExtrapolation.instance());
 
     public static final KMetaReference REF_OP_ELEMENT = new MetaReference("op_element", 2, false, false, 0, "element", 1);
 
     public MetaElement() {
-        super("org.kevoree.modeling.microframework.test.cloud.Element", 1,null);
+        super("org.kevoree.modeling.microframework.test.cloud.Element", 1, null);
         KMeta[] temp = new KMeta[3];
         temp[0] = ATT_NAME;
         temp[1] = ATT_VALUE;

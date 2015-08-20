@@ -1,6 +1,5 @@
 package org.kevoree.modeling.meta.impl;
 
-import org.kevoree.modeling.KType;
 import org.kevoree.modeling.meta.*;
 
 public class MetaInferOutput implements KMetaInferOutput {
@@ -9,9 +8,9 @@ public class MetaInferOutput implements KMetaInferOutput {
 
     private int _index;
 
-    private KType _type;
+    private int _type;
 
-    public MetaInferOutput(String p_name, int p_index, KType p_type) {
+    public MetaInferOutput(String p_name, int p_index, int p_type) {
         this._name = p_name;
         this._index = p_index;
         this._type = p_type;
@@ -33,7 +32,7 @@ public class MetaInferOutput implements KMetaInferOutput {
     }
 
     @Override
-    public KType type() {
+    public int attributeTypeId() {
         return this._type;
     }
 

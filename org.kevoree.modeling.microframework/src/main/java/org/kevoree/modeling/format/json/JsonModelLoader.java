@@ -130,14 +130,14 @@ public class JsonModelLoader {
         p_param.each(new KStringMapCallBack<Object>() {
             @Override
             public void on(String metaKey, Object payload_content) {
-                if (PrimitiveHelper.equals(metaKey,JsonFormat.KEY_ROOT)) {
+                if (PrimitiveHelper.equals(metaKey, JsonFormat.KEY_ROOT)) {
                     p_rootElem[0] = current;
                 } else {
                     KMeta metaElement = metaClass.metaByName(metaKey);
                     if (payload_content != null) {
                         if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
                             KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
-                            int metaAttId = metaAttribute.attributeType().id();
+                            int metaAttId = metaAttribute.attributeTypeId();
                             switch (metaAttId) {
                                 case KPrimitiveTypes.CONTINUOUS_ID:
                                     String[] plainRawSet = (String[]) p_param.get(metaAttribute.metaName());
@@ -154,16 +154,22 @@ public class JsonModelLoader {
                                 default:
                                     Object converted = null;
                                     String rawPayload = p_param.get(metaElement.metaName()).toString();
-                                    if (metaAttribute.attributeType() == KPrimitiveTypes.STRING) {
-                                        converted = JsonString.unescape(rawPayload);
-                                    } else if (metaAttribute.attributeType() == KPrimitiveTypes.LONG) {
-                                        converted = PrimitiveHelper.parseLong(rawPayload);
-                                    } else if (metaAttribute.attributeType() == KPrimitiveTypes.INT) {
-                                        converted = PrimitiveHelper.parseInt(rawPayload);
-                                    } else if (metaAttribute.attributeType() == KPrimitiveTypes.BOOL) {
-                                        converted = PrimitiveHelper.parseBoolean(rawPayload);
-                                    } else if (metaAttribute.attributeType() == KPrimitiveTypes.DOUBLE) {
-                                        converted = PrimitiveHelper.parseDouble(rawPayload);
+                                    switch (metaAttId) {
+                                        case KPrimitiveTypes.STRING_ID:
+                                            converted = JsonString.unescape(rawPayload);
+                                            break;
+                                        case KPrimitiveTypes.LONG_ID:
+                                            converted = PrimitiveHelper.parseLong(rawPayload);
+                                            break;
+                                        case KPrimitiveTypes.INT_ID:
+                                            converted = PrimitiveHelper.parseInt(rawPayload);
+                                            break;
+                                        case KPrimitiveTypes.BOOL_ID:
+                                            converted = PrimitiveHelper.parseBoolean(rawPayload);
+                                            break;
+                                        case KPrimitiveTypes.DOUBLE_ID:
+                                            converted = PrimitiveHelper.parseDouble(rawPayload);
+                                            break;
                                     }
                                     raw.setPrimitiveType(metaElement.index(), converted, current.metaClass());
                                     break;
@@ -201,28 +207,29 @@ public class JsonModelLoader {
         return convertedRaw;
     }
 
-    /** @native ts
-     *  if(plainRawSet != null && plainRawSet != undefined){
-     *      if(plainRawSet.size != undefined){
-     *          return plainRawSet.size();
-     *      } else {
-     *          return plainRawSet.length;
-     *      }
-     *  }
-     *
-     * */
-    private static int sizeOfList(ArrayList<String> plainRawSet){
+    /**
+     * @native ts
+     * if(plainRawSet != null && plainRawSet != undefined){
+     * if(plainRawSet.size != undefined){
+     * return plainRawSet.size();
+     * } else {
+     * return plainRawSet.length;
+     * }
+     * }
+     */
+    private static int sizeOfList(ArrayList<String> plainRawSet) {
         return plainRawSet.size();
     }
 
-    /** @native ts
+    /**
+     * @native ts
      * if(plainRawSet.get != undefined){
-     *     return plainRawSet.get(l);
+     * return plainRawSet.get(l);
      * } else {
-     *     return plainRawSet[l];
+     * return plainRawSet[l];
      * }
-     * */
-    private static String getString(ArrayList<String> plainRawSet, int l){
+     */
+    private static String getString(ArrayList<String> plainRawSet, int l) {
         return plainRawSet.get(l);
     }
 

@@ -169,7 +169,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
         if (output == null) {
             return 0;
         }
-        int typeId = metaOutput.type().id();
+        int typeId = metaOutput.attributeTypeId();
         switch (typeId) {
             case KPrimitiveTypes.BOOL_ID:
                 if ((boolean) output) {
@@ -188,8 +188,8 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             case KPrimitiveTypes.STRING_ID:
                 throw new RuntimeException("String are not managed yet");
             default:
-                if (metaOutput.type().isEnum()) {
-                    KMetaEnum metaEnum = (KMetaEnum) metaOutput.type();
+                if (KPrimitiveTypes.isEnum(metaOutput.attributeTypeId())) {
+                    KMetaEnum metaEnum = _manager.model().metaModel().metaTypes()[metaOutput.attributeTypeId()];
                     if (output instanceof MetaLiteral) {
                         return (double) ((MetaLiteral) output).index();
                     } else {
@@ -204,7 +204,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
     }
 
     private Object internalReverseOutput(double inferred, KMetaInferOutput metaOutput) {
-        int typeId = metaOutput.type().id();
+        int typeId = metaOutput.attributeTypeId();
         switch (typeId) {
             case KPrimitiveTypes.BOOL_ID:
                 if (inferred >= 0.5) {
@@ -223,9 +223,9 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             case KPrimitiveTypes.STRING_ID:
                 throw new RuntimeException("String are not managed yet");
             default:
-                if (metaOutput.type().isEnum()) {
+                if (KPrimitiveTypes.isEnum(metaOutput.attributeTypeId())) {
                     int ceiledInferred = math_ceil(inferred);
-                    KMetaEnum metaEnum = (KMetaEnum) metaOutput.type();
+                    KMetaEnum metaEnum = _manager.model().metaModel().metaTypes()[metaOutput.attributeTypeId()];
                     return metaEnum.literal(ceiledInferred);
                 }
                 return null;
