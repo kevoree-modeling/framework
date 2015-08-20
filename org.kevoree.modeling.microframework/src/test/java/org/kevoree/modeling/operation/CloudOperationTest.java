@@ -1,6 +1,7 @@
 package org.kevoree.modeling.operation;
 
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KOperation;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudModel;
@@ -9,9 +10,6 @@ import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.meta.MetaNode;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
-/**
- * Created by gregory.nain on 27/11/14.
- */
 public class CloudOperationTest {
 
     public static void main(String[] args) {
