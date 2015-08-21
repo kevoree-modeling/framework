@@ -5,12 +5,12 @@
     <parent>
         <artifactId>org.kevoree.modeling.root</artifactId>
         <groupId>org.kevoree.modeling</groupId>
-        <version>4.23.1-SNAPSHOT</version>
+        <version>4.24.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.kevoree.modeling.generator.mavenplugin</artifactId>
-  <version>4.23.1-SNAPSHOT  </version>
+  <version>4.24.0  </version>
     <name>Kevoree :: Modeling :: Generator :: MavenPlugin</name>
     <packaging>maven-plugin</packaging>
 
