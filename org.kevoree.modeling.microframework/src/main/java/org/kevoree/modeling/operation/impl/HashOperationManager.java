@@ -66,6 +66,9 @@ public class HashOperationManager implements KOperationManager {
 
     @Override
     public void invoke(KObject source, KMetaOperation operation, Object[] param, KOperationStrategy strategy, KCallback callback) {
+        if (operation == null) {
+            throw new RuntimeException("Operation must be defined to invoke an operation");
+        }
         int[] paramTypes = operation.paramTypes();
         if (paramTypes.length != 0) {
             if (paramTypes.length != param.length) {
@@ -102,8 +105,7 @@ public class HashOperationManager implements KOperationManager {
             KMetaOperation mo = mc.operation(message.operationName());
             final KOperation operationCore = searchOperation(sourceKey[2], mc.index(), mo.index());
             if (operationCore != null) {
-                KView view = _manager.model().universe(sourceKey[0]).time(sourceKey[1]);
-                view.lookup(sourceKey[2], new KCallback<KObject>() {
+                _manager.lookup(sourceKey[0], sourceKey[1],sourceKey[2], new KCallback<KObject>() {
                     public void on(KObject kObject) {
                         if (kObject != null) {
                             operationCore.on(kObject, OperationStrategies.unserializeParam(mo, message.values()), new KCallback<Object>() {

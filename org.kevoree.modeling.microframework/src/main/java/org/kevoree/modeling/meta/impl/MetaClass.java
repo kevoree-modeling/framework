@@ -82,7 +82,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaOperation operation(String name) {
         KMeta resolved = metaByName(name);
-        if (resolved != null && resolved.metaType() == MetaType.OUTPUT) {
+        if (resolved != null && resolved.metaType() == MetaType.OPERATION) {
             return (KMetaOperation) resolved;
         }
         return null;
