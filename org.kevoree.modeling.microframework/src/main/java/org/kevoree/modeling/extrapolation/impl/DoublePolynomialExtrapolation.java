@@ -5,11 +5,11 @@ import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.util.PrimitiveHelper;
-import org.kevoree.modeling.util.maths.PolynomialFit;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
+import org.kevoree.modeling.util.PrimitiveHelper;
+import org.kevoree.modeling.util.maths.PolynomialFit;
 
 public class DoublePolynomialExtrapolation implements Extrapolation {
 
