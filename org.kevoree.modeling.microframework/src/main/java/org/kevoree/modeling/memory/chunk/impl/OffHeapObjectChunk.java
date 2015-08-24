@@ -435,6 +435,18 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         internal_extendDoubleArray(p_index, p_newSize, p_metaClass, true);
     }
 
+    @Override
+    public void clearDoubleArray(int p_index, KMetaClass p_metaClass) {
+        KMeta meta = p_metaClass.meta(p_index);
+        //TODO check for INFER, INPUT, OUTPUT, DEPENDENCY
+        long ptr = rawPointerForIndex(p_index, p_metaClass);
+        long ptr_ref_segment = UNSAFE.getLong(ptr);
+        if (ptr_ref_segment != 0) {
+            UNSAFE.freeMemory(ptr_ref_segment);
+            UNSAFE.putLong(ptr, 0);
+        }
+    }
+
     private void internal_extendDoubleArray(int p_index, int p_newSize, KMetaClass p_metaClass, boolean p_setDirty) {
         long ptr = rawPointerForIndex(p_index, p_metaClass);
         long ptr_segment = UNSAFE.getLong(ptr);

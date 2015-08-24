@@ -115,7 +115,7 @@ public class OperationStrategies {
         @Override
         public void invoke(final KContentDeliveryDriver cdn, final KMetaOperation metaOperation, final KObject source, final Object[] param, final KOperationManager manager, final KCallback callback) {
             //Prepare the message
-            Message operationCall = new Message();
+            KMessage operationCall = new Message();
             operationCall.setKeys(new long[]{source.universe(), source.now(), source.uuid()});
             operationCall.setClassName(source.metaClass().metaName());
             operationCall.setOperationName(metaOperation.metaName());
@@ -140,6 +140,7 @@ public class OperationStrategies {
                     }
                 }
             };
+            internals[0].on(null);//initiate
         }
     };
 

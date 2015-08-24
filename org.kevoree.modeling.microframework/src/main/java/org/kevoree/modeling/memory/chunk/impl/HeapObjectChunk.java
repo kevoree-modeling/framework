@@ -448,6 +448,11 @@ public class HeapObjectChunk implements KObjectChunk {
     }
 
     @Override
+    public void clearDoubleArray(int index, KMetaClass metaClass) {
+        raw[index] = null;
+    }
+
+    @Override
     public void setPrimitiveType(int index, Object content, KMetaClass p_metaClass) {
         raw[index] = content;
         internal_set_dirty();

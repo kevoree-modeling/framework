@@ -42,4 +42,6 @@ public interface KObjectChunk extends KChunk {
 
     void extendDoubleArray(int index, int newSize, KMetaClass metaClass);
 
+    void clearDoubleArray(int index, KMetaClass metaClass);
+
 }
