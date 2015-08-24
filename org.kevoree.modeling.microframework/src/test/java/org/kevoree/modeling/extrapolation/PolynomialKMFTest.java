@@ -14,7 +14,7 @@ import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
 public class PolynomialKMFTest {
 
-    @Test
+   @Test
     public void test() {
         final int[] nbAssert = new int[1];
         nbAssert[0] = 0;
@@ -85,12 +85,12 @@ public class PolynomialKMFTest {
     }
 
 
-    //@Test
+    @Test
     public void test2() {
         final int[] nbAssert = new int[1];
         nbAssert[0] = 0;
-        int max = 1000;
-        //int max = 4;
+       int max = 1000;
+      // int max = 25;
         CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
@@ -130,11 +130,19 @@ public class PolynomialKMFTest {
                 public void on(KObject element) {
                     nbAssert[0]++;
                     double valss = ((Element) element).getValue();
+               //     System.out.println(valss+" , "+val[finalI]+" , "+ MetaElement.ATT_VALUE.precision()+ " , "+Math.abs(valss - val[finalI]));
                     Assert.assertTrue(Math.abs(valss - val[finalI]) < MetaElement.ATT_VALUE.precision());
                 }
             });
         }
         Assert.assertEquals(nbAssert[0], max + 1);
+
+        element.allTimes(new KCallback<long[]>() {
+            @Override
+            public void on(long[] collected2) {
+                Assert.assertEquals(87, collected2.length);
+            }
+        });
     }
 
 }
