@@ -21,9 +21,10 @@ public class MatrixFeatures {
         return (mat.getNumCols() == 1 || mat.getNumRows() == 1);
     }
 
+    /*
     public static boolean isSquare( DenseMatrix64F mat ) {
         return mat.numCols == mat.numRows;
-    }
+    }*/
 
 
     public static boolean isSymmetricDouble( DenseMatrix64F m , double tol ) {
@@ -47,7 +48,7 @@ public class MatrixFeatures {
         return true;
     }
 
-
+/*
     public static boolean isSymmetric( DenseMatrix64F m ) {
         return isSymmetricDouble(m,0.0);
     }
@@ -133,7 +134,7 @@ public class MatrixFeatures {
         }
 
         return true;
-    }
+    }*/
 
 
     public static boolean isIdentical( DenseMatrix64F a, DenseMatrix64F b , double tol ) {
@@ -163,7 +164,7 @@ public class MatrixFeatures {
         return true;
     }
 
-
+/*
     public static boolean isIdentity( DenseMatrix64F mat , double tol )
     {
         // see if the result is an identity matrix
@@ -241,7 +242,7 @@ public class MatrixFeatures {
             }
         }
         return true;
-    }
+    }*/
 
 
 /*

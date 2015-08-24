@@ -65,7 +65,7 @@ public class MatrixMultProduct {
     }
 
 
-
+/*
     public static void inner_reorder_upper(DenseMatrix64F a, DenseMatrix64F c) {
         for( int i = 0; i < a.numCols; i++ ) {
             int indexC = i*c.numCols+i;
@@ -83,5 +83,5 @@ public class MatrixMultProduct {
                 }
             }
         }
-    }
+    }*/
 }

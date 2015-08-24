@@ -11,11 +11,11 @@ public class CommonOps {
     public static int BLOCK_WIDTH = 60;
     public static int TRANSPOSE_SWITCH = 375;
     public static int MULT_COLUMN_SWITCH = 15;
-    public static int MULT_TRANAB_COLUMN_SWITCH = 40;
-    public static int MULT_INNER_SWITCH = 100;
+    //public static int MULT_TRANAB_COLUMN_SWITCH = 40;
+   // public static int MULT_INNER_SWITCH = 100;
     public static double EPS = Math.pow(2,-52);
 
-
+/*
     public static final double TOL32 = 1e-4;
     public static final double TOL64 = 1e-8;
     public static int CMULT_COLUMN_SWITCH = 7;
@@ -23,7 +23,7 @@ public class CommonOps {
     public static int SWITCH_BLOCK64_QR = 1500;
     public static int BLOCK_WIDTH_CHOL = 20;
     public static int BLOCK_SIZE = BLOCK_WIDTH*BLOCK_WIDTH;
-
+*/
 
     public static void mult( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -42,6 +42,7 @@ public class CommonOps {
         }
     }
 
+    /*
     public static void multalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
         if( b.numCols >= MULT_COLUMN_SWITCH ) {
@@ -50,7 +51,7 @@ public class CommonOps {
             MatrixMatrixMult.mult_smallalpha(alpha, a, b, c);
         }
     }
-
+*/
 
     public static void multTransA( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -68,7 +69,7 @@ public class CommonOps {
         }
     }
 
-
+/*
     public static void multTransalphaA( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
         if( a.numCols >= MULT_COLUMN_SWITCH ||
@@ -78,7 +79,7 @@ public class CommonOps {
             MatrixMatrixMult.multTransA_smallalpha(alpha, a, b, c);
         }
     }
-
+*/
 
     public static void multTransB( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -89,7 +90,7 @@ public class CommonOps {
         }
     }
 
-
+/*
     public static void multTransalphaB( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
         MatrixMatrixMult.multTransBalpha(alpha, a, b, c);
@@ -226,6 +227,7 @@ public class CommonOps {
             MatrixMatrixMult.multAddTransAB(a,b,c);
         }
     }
+ */
 
     public static void subvector(DenseMatrix64F A, int rowA, int colA, int length , boolean row, int offsetV, DenseMatrix64F v) {
         if( row ) {
@@ -275,6 +277,7 @@ public class CommonOps {
         return newVector;
     }
 
+    /*
     public static SimpleMatrix ones(int rows, int cols) {
         SimpleMatrix matrix = new SimpleMatrix(rows, cols);
         for (int i = 0; i < rows; i++) {
@@ -284,7 +287,7 @@ public class CommonOps {
         }
         return matrix;
     }
-
+*/
     public static SimpleMatrix doubleListToMatrix(double[] valueList) {
         SimpleMatrix m = new SimpleMatrix(1, valueList.length);
         for (int i = 0; i < valueList.length; i++)
@@ -319,7 +322,7 @@ public class CommonOps {
         }
         return row;
     }
-
+/*
     public static void multAddTransABalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
         if( a.numCols >= MULT_TRANAB_COLUMN_SWITCH ) {
@@ -328,7 +331,7 @@ public class CommonOps {
             MatrixMatrixMult.multAddTransABalpha(alpha, a, b, c);
         }
     }
-
+*/
 
     public static double trace( DenseMatrix64F a ) {
         int N = Math.min(a.numRows,a.numCols);
@@ -1047,7 +1050,7 @@ public class CommonOps {
         }
     }
 
-
+/*
     public static void scalemat( double alpha , DenseMatrix64F a , DenseMatrix64F b)
     {
         if( a.numRows != b.numRows || a.numCols != b.numCols )
@@ -1104,7 +1107,7 @@ public class CommonOps {
             b.data[i] = a.data[i]/alpha;
         }
     }
-
+*/
 
     public static void changeSign( DenseMatrix64F a )
     {
@@ -1115,7 +1118,7 @@ public class CommonOps {
         }
     }
 
-
+/*
     public static void changeSign2mat( DenseMatrix64F input , DenseMatrix64F output)
     {
         if( input.numRows != output.numRows || input.numCols != output.numCols )
@@ -1127,7 +1130,7 @@ public class CommonOps {
             output.data[i] = -input.data[i];
         }
     }
-
+*/
 
     public static void fill(DenseMatrix64F a, double value)
     {

@@ -157,6 +157,7 @@ public class MatrixMatrixMult {
             aIndexStart += a.numCols;
         }
     }
+    /*
     public static void mult_aux( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c , double []aux )
     {
         if( aux == null ) aux = new double[ b.numRows ];
@@ -176,7 +177,7 @@ public class MatrixMatrixMult {
                 c.setValueAtIndex(i * c.numCols+j , total );
             }
         }
-    }
+    }*/
 
     public static void multTransA_reorder( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -361,7 +362,7 @@ public class MatrixMatrixMult {
         }
     }
 
-
+/*
     public static void multAdd_aux( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c , double []aux )
     {
             if( aux == null ) aux = new double[ b.numRows ];
@@ -382,7 +383,7 @@ public class MatrixMatrixMult {
             }
         }
     }
-
+*/
 
     public static void multAddTransA_reorder( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -780,7 +781,7 @@ public class MatrixMatrixMult {
         }
     }
 
-
+/*
     public static void multAdd_auxalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c , double []aux )
     {
         if( aux == null ) aux = new double[ b.numRows ];
@@ -801,7 +802,7 @@ public class MatrixMatrixMult {
             }
         }
     }
-
+*/
 
     public static void multAddTransA_reorderalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {

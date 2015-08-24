@@ -248,6 +248,7 @@ public class SimpleMatrix{
     }
 
 
+    /*
     public SimpleMatrix elementDiv( SimpleMatrix b )
     {
         SimpleMatrix c = createMatrix(mat.numRows,mat.numCols);
@@ -300,7 +301,7 @@ public class SimpleMatrix{
         CommonOps.changeSign(A.getMatrix());
         return A;
     }
-
+*/
 
 
 
