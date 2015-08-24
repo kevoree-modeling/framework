@@ -67,5 +67,15 @@ public class KContentDeliveryDriverMock implements KContentDeliveryDriver {
     public void removeUpdateListener(int id) {
     }
 
+    @Override
+    public String[] peers() {
+        return new String[0];
+    }
+
+    @Override
+    public void sendToPeer(String peer, KMessage message) {
+
+    }
+
 
 }

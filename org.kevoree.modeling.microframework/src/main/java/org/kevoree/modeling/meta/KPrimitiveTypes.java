@@ -12,15 +12,16 @@ public class KPrimitiveTypes {
     public static final int DOUBLE_ID = -5;
     public static final int CONTINUOUS_ID = -6;
 
-    public static final KType BOOL = new AbstractDataType("BOOL", false, BOOL_ID);
-    public static final KType STRING = new AbstractDataType("STRING", false, STRING_ID);
-    public static final KType LONG = new AbstractDataType("LONG", false, LONG_ID);
-    public static final KType INT = new AbstractDataType("INT", false, INT_ID);
-    public static final KType DOUBLE = new AbstractDataType("DOUBLE", false, DOUBLE_ID);
-    public static final KType CONTINUOUS = new AbstractDataType("CONTINUOUS", false, CONTINUOUS_ID);
+    public static final KType BOOL = new AbstractDataType("BOOL", BOOL_ID);
+    public static final KType STRING = new AbstractDataType("STRING", STRING_ID);
+    public static final KType LONG = new AbstractDataType("LONG", LONG_ID);
+    public static final KType INT = new AbstractDataType("INT", INT_ID);
+    public static final KType DOUBLE = new AbstractDataType("DOUBLE", DOUBLE_ID);
+    public static final KType CONTINUOUS = new AbstractDataType("CONTINUOUS", CONTINUOUS_ID);
 
     public static boolean isEnum(int attributeTypeId) {
         return attributeTypeId >= 0;
     }
+
 
 }

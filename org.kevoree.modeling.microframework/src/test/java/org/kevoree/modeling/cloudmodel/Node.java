@@ -2,6 +2,7 @@ package org.kevoree.modeling.cloudmodel;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.operation.KOperationStrategy;
 
 /**
  * Created by duke on 10/9/14.
@@ -26,6 +27,6 @@ public interface Node extends KObject {
 
     void getElement(KCallback<Element> obj);
 
-    void trigger(String param, KCallback<String> callback);
+    void trigger(String param, KOperationStrategy strategy, KCallback<String> callback);
 
 }

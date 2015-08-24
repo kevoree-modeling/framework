@@ -8,7 +8,7 @@ public class MModelOperation {
     public String returnType = null;
     public String name;
     protected int index = -1;
-    
+
     public Integer getIndex() {
         return index;
     }

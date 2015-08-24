@@ -7,8 +7,7 @@ import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.message.KMessage;
-import org.kevoree.modeling.message.KMessageLoader;
-import org.kevoree.modeling.message.impl.Events;
+import org.kevoree.modeling.message.impl.Message;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
@@ -33,12 +32,12 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
                     jedis2.subscribe(new JedisPubSub() {
                         @Override
                         public void onMessage(String channel, String message) {
-                            KMessage msg = KMessageLoader.load(message);
-                            if (msg instanceof Events) {
+                            KMessage msg = Message.load(message);
+                            if (msg != null && msg.type() != null && msg.type() == Message.EVENTS_TYPE) {
                                 additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
                                     @Override
                                     public void on(int key, KContentUpdateListener value) {
-                                        value.on(((Events) msg).allKeys());
+                                        value.on(msg.keys());
                                     }
                                 });
                             }
@@ -103,7 +102,9 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
         if (jedis != null) {
             jedis.mset(elems);
         }
-        Events events = new Events(p_keys);
+        KMessage events = new Message();
+        events.setType(Message.EVENTS_TYPE);
+        events.setKeys(p_keys);
         jedis.publish("kmf", events.json());
         if (p_callback != null) {
             p_callback.on(null);
@@ -169,6 +170,16 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }
+    }
+
+    @Override
+    public String[] peers() {
+        return new String[0];
+    }
+
+    @Override
+    public void sendToPeer(String peer, KMessage message) {
+        //NOOP
     }
 
 }

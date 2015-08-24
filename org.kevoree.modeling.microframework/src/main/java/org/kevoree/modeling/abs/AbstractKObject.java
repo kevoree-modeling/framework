@@ -1,16 +1,14 @@
 package org.kevoree.modeling.abs;
 
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KActionType;
-import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.*;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.meta.*;
+import org.kevoree.modeling.operation.KOperationStrategy;
 import org.kevoree.modeling.traversal.query.impl.QueryEngine;
 import org.kevoree.modeling.traversal.visitor.KModelAttributeVisitor;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
@@ -576,8 +574,13 @@ public abstract class AbstractKObject implements KObject {
     }
 
     @Override
-    public void call(KMetaOperation p_operation, Object[] p_params, KCallback<Object> cb) {
-        _manager.operationManager().call(this, p_operation, p_params, cb);
+    public void invokeOperation(KMetaOperation p_operation, Object[] p_params, KOperationStrategy strategy, KCallback cb) {
+        _manager.operationManager().invoke(this, p_operation, p_params, strategy, cb);
+    }
+
+    @Override
+    public void invokeOperationByName(String operationName, Object[] p_params, KOperationStrategy strategy, KCallback cb) {
+        _manager.operationManager().invoke(this, _metaClass.operation(operationName), p_params, strategy, cb);
     }
 
     @Override
@@ -608,6 +611,5 @@ public abstract class AbstractKObject implements KObject {
     public void timesBetween(long beginningOfSearch, long endOfSearch, KCallback<long[]> cb) {
         internal_times(beginningOfSearch, endOfSearch, cb);
     }
-
 
 }

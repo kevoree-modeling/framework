@@ -12,4 +12,8 @@ public class MModelOperationParam {
     public String getType() {
         return type;
     }
+
+    public int getTypeId() {
+        return typeId;
+    }
 }

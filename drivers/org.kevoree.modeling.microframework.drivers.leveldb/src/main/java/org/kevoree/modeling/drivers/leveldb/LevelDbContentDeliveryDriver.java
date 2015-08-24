@@ -10,6 +10,7 @@ import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
+import org.kevoree.modeling.message.KMessage;
 
 import java.io.File;
 import java.io.IOException;
@@ -184,6 +185,16 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }
+    }
+
+    @Override
+    public String[] peers() {
+        return new String[0];
+    }
+
+    @Override
+    public void sendToPeer(String peer, KMessage message) {
+        //NOOP
     }
 
 }

@@ -3,6 +3,7 @@ package org.kevoree.modeling.cloudmodel.impl;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.operation.KOperationStrategy;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -88,10 +89,10 @@ public class NodeImpl extends AbstractKObject implements Node {
     }
 
     @Override
-    public void trigger(String param, final KCallback<String> callback) {
+    public void trigger(String param, KOperationStrategy strategy, final KCallback<String> callback) {
         Object[] internal_params = new Object[1];
         internal_params[0] = param;
-        _manager.operationManager().call(this, MetaNode.OP_TRIGGER, internal_params, new KCallback<Object>() {
+        _manager.operationManager().invoke(this, MetaNode.OP_TRIGGER, internal_params, strategy, new KCallback<Object>() {
             @Override
             public void on(Object o) {
                 if (callback != null) {

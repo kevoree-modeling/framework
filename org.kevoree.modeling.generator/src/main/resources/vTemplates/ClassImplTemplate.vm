@@ -91,18 +91,14 @@ public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferr
 #end
 
 #foreach($operation in $classDeclaration.operations)
-    public void ${operation.name}(#foreach($p in $operation.inputParams)$p.type p_$p.name, #{end}final org.kevoree.modeling.KCallback<#if(${operation.returnParam})$operation.returnParam.type#{else}Boolean#end> p_result){
+    public void ${operation.name}(#foreach($p in $operation.inputParams)$p.type p_$p.name, #{end}final org.kevoree.modeling.operation.KOperationStrategy strategy, final org.kevoree.modeling.KCallback#if(${operation.returnType})<$operation.returnType>#end callback){
         Object[] ${operation.name}_params = new Object[$operation.inputParams.size()];
     #set($paramIndex = 0)
 #foreach($p in $operation.inputParams)
         ${operation.name}_params[$paramIndex] = p_$p.name;
 #set($paramIndex = $paramIndex + 1)
 #{end}
-        _manager.operationManager().call(this, ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.OP_${operation.name.toUpperCase()}, ${operation.name}_params, new org.kevoree.modeling.KCallback<Object>() {
-            public void on(Object o) {
-                p_result.on((#if(${operation.returnParam})$operation.returnParam.type#{else}Boolean#end)o);
-            }
-        });
+        _manager.operationManager().invoke(this, ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.OP_${operation.name.toUpperCase()}, ${operation.name}_params,strategy, callback);
     }
 #end
 

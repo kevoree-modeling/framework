@@ -5,6 +5,7 @@ import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.operation.KOperationStrategy;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.visitor.KModelAttributeVisitor;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
@@ -86,9 +87,10 @@ public interface KObject {
 
     KMetaReference[] referencesWith(KObject o);
 
-    void call(KMetaOperation operation, Object[] params, KCallback<Object> cb);
+    void invokeOperation(KMetaOperation operation, Object[] params, KOperationStrategy strategy, KCallback cb);
+
+    void invokeOperationByName(String operationName, Object[] params, KOperationStrategy strategy, KCallback cb);
 
     KDataManager manager();
-
 
 }

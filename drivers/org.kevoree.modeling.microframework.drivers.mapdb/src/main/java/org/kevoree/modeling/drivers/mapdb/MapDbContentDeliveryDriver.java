@@ -6,6 +6,7 @@ import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
+import org.kevoree.modeling.message.KMessage;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 
@@ -55,7 +56,7 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
         int nbKeys = keys.length / 3;
         String[] results = new String[nbKeys];
         for (int i = 0; i < nbKeys; i++) {
-            results[i] = (String) m.get(KContentKey.toString(keys,i));
+            results[i] = (String) m.get(KContentKey.toString(keys, i));
         }
         callback.on(results);
     }
@@ -67,7 +68,7 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
         } else {
             int nbKeys = p_keys.length / 3;
             for (int i = 0; i < nbKeys; i++) {
-                m.put(KContentKey.toString(p_keys,i), p_values[i]);
+                m.put(KContentKey.toString(p_keys, i), p_values[i]);
             }
             if (additionalInterceptors != null) {
                 additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
@@ -133,6 +134,16 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }
+    }
+
+    @Override
+    public String[] peers() {
+        return new String[0];
+    }
+
+    @Override
+    public void sendToPeer(String peer, KMessage message) {
+        //NOOP
     }
 
 }

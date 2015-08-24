@@ -4,8 +4,6 @@ public interface KType {
 
     String name();
 
-    boolean isEnum();
-
     int id();
 
 }

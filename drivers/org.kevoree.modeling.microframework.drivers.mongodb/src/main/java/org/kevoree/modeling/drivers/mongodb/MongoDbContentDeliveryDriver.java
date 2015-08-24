@@ -12,6 +12,7 @@ import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
+import org.kevoree.modeling.message.KMessage;
 
 import java.net.UnknownHostException;
 import java.util.Random;
@@ -179,5 +180,14 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
         }
     }
 
+    @Override
+    public String[] peers() {
+        return new String[0];
+    }
+
+    @Override
+    public void sendToPeer(String peer, KMessage message) {
+        //NOOP
+    }
 
 }

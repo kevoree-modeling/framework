@@ -1,11 +1,13 @@
 package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.KOperation;
 import org.kevoree.modeling.KUniverse;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.meta.KMetaOperation;
 
 class GenericModel extends AbstractKModel {
 

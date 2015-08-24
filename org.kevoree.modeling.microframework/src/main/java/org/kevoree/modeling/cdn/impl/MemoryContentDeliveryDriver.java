@@ -9,6 +9,7 @@ import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.KStringMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
+import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.Random;
@@ -128,6 +129,16 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }
+    }
+
+    @Override
+    public String[] peers() {
+        return new String[0];
+    }
+
+    @Override
+    public void sendToPeer(String peer, KMessage message) {
+        //NOOP
     }
 
 }

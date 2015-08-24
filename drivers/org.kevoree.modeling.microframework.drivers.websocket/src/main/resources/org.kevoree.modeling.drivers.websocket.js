@@ -1,4 +1,4 @@
-///<reference path='../../../target/jsdeps/org.kevoree.modeling.microframework.typescript.d.ts'/>
+///<reference path='../../../target/jsdeps/org.kevoree.modeling.microframework.browser.d.ts'/>
 var org;
 (function (org) {
     var kevoree;
@@ -39,49 +39,45 @@ var org;
                                 this._clientConnection = new WebSocket(this._connectionUri);
                             }
                             this._clientConnection.onmessage = function (message) {
-                                var msg = org.kevoree.modeling.message.KMessageLoader.load(message.data);
+                                var msg = org.kevoree.modeling.message.impl.Message.load(message.data);
                                 switch (msg.type()) {
-                                    case org.kevoree.modeling.message.KMessageLoader.GET_RES_TYPE:
+                                    case org.kevoree.modeling.message.impl.Message.GET_RES_TYPE:
                                         {
-                                            var getResult = msg;
-                                            var foundCB = self._getCallbacks[getResult.id];
+                                            var foundCB = self._getCallbacks[msg.id()];
                                             if (foundCB != null && foundCB != undefined) {
-                                                foundCB(getResult.values, null);
+                                                foundCB(msg.values(), null);
                                             }
-                                            delete self._getCallbacks[getResult.id];
+                                            delete self._getCallbacks[msg.id()];
                                         }
                                         break;
-                                    case org.kevoree.modeling.message.KMessageLoader.PUT_RES_TYPE:
+                                    case org.kevoree.modeling.message.impl.Message.PUT_RES_TYPE:
                                         {
-                                            var putResult = msg;
-                                            var foundCB = self._putCallbacks[putResult.id];
+                                            var foundCB = self._putCallbacks[msg.id()];
                                             if (foundCB != null && foundCB != undefined) {
                                                 foundCB(null);
                                             }
-                                            delete self._putCallbacks[putResult.id];
+                                            delete self._putCallbacks[msg.id()];
                                         }
                                         break;
-                                    case org.kevoree.modeling.message.KMessageLoader.ATOMIC_GET_INC_RESULT_TYPE:
+                                    case org.kevoree.modeling.message.impl.Message.ATOMIC_GET_INC_RESULT_TYPE:
                                         {
-                                            var atomicGetResult = msg;
-                                            var foundCB = self._atomicGetCallbacks[atomicGetResult.id];
+                                            var foundCB = self._atomicGetCallbacks[msg.id()];
                                             if (foundCB != null && foundCB != undefined) {
-                                                foundCB(atomicGetResult.value, null);
+                                                foundCB(msg.values()[0], null);
                                             }
-                                            delete self._atomicGetCallbacks[atomicGetResult.id];
+                                            delete self._atomicGetCallbacks[msg.id()];
                                         }
                                         break;
-                                    case org.kevoree.modeling.message.KMessageLoader.OPERATION_CALL_TYPE:
-                                    case org.kevoree.modeling.message.KMessageLoader.OPERATION_RESULT_TYPE:
+                                    case org.kevoree.modeling.message.impl.Message.OPERATION_CALL_TYPE:
+                                    case org.kevoree.modeling.message.impl.Message.OPERATION_RESULT_TYPE:
                                         {
                                         }
                                         break;
-                                    case org.kevoree.modeling.message.KMessageLoader.EVENTS_TYPE:
+                                    case org.kevoree.modeling.message.impl.Message.EVENTS_TYPE:
                                         {
-                                            var eventsMsg = msg;
                                             for (var id in self.listeners) {
                                                 var listener = self.listeners[id];
-                                                listener(eventsMsg.allKeys());
+                                                listener(msg.keys());
                                             }
                                         }
                                         break;
@@ -126,29 +122,38 @@ var org;
                             return this._callbackId;
                         };
                         WebSocketCDNClient.prototype.put = function (keys, values, error, ignoreInterceptor) {
-                            var putRequest = new org.kevoree.modeling.message.impl.PutRequest();
-                            putRequest.id = this.nextKey();
-                            putRequest.keys = keys;
-                            putRequest.values = values;
-                            this._putCallbacks[putRequest.id] = error;
+                            var putRequest = new org.kevoree.modeling.message.impl.Message();
+                            putRequest.setType(org.kevoree.modeling.message.impl.Message.PUT_REQ_TYPE);
+                            putRequest.setID(this.nextKey());
+                            putRequest.setKeys(keys);
+                            putRequest.setValues(values);
+                            this._putCallbacks[putRequest.id()] = error;
                             this._clientConnection.send(putRequest.json());
                         };
                         WebSocketCDNClient.prototype.get = function (keys, callback) {
-                            var getRequest = new org.kevoree.modeling.message.impl.GetRequest();
-                            getRequest.id = this.nextKey();
-                            getRequest.keys = keys;
-                            this._getCallbacks[getRequest.id] = callback;
+                            var getRequest = new org.kevoree.modeling.message.impl.Message();
+                            getRequest.setType(org.kevoree.modeling.message.impl.Message.GET_REQ_TYPE);
+                            getRequest.setID(this.nextKey());
+                            getRequest.setKeys(keys);
+                            this._getCallbacks[getRequest.id()] = callback;
                             this._clientConnection.send(getRequest.json());
                         };
                         WebSocketCDNClient.prototype.atomicGetIncrement = function (keys, callback) {
-                            var atomicGetRequest = new org.kevoree.modeling.message.impl.AtomicGetIncrementRequest();
-                            atomicGetRequest.id = this.nextKey();
-                            atomicGetRequest.keys = keys;
-                            this._atomicGetCallbacks[atomicGetRequest.id] = callback;
+                            var atomicGetRequest = new org.kevoree.modeling.message.impl.Message();
+                            atomicGetRequest.setType(org.kevoree.modeling.message.impl.Message.ATOMIC_GET_INC_REQUEST_TYPE);
+                            atomicGetRequest.setID(this.nextKey());
+                            atomicGetRequest.setKeys(keys);
+                            this._atomicGetCallbacks[atomicGetRequest.id()] = callback;
                             this._clientConnection.send(atomicGetRequest.json());
                         };
                         WebSocketCDNClient.prototype.remove = function (keys, error) {
                             console.error("Not implemented yet");
+                        };
+                        WebSocketCDNClient.prototype.peers = function () {
+                            return ["Server"];
+                        };
+                        WebSocketCDNClient.prototype.sendToPeer = function (peer, msg) {
+                            this._clientConnection.send(msg.json());
                         };
                         return WebSocketCDNClient;
                     })();

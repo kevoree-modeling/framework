@@ -2,8 +2,30 @@ package org.kevoree.modeling.message;
 
 public interface KMessage {
 
-    String json();
+    Integer id();
 
-    int type();
+    void setID(Integer val);
+
+    Integer type();
+
+    void setType(Integer val);
+
+    String operationName();
+
+    void setOperationName(String val);
+
+    String className();
+
+    void setClassName(String val);
+
+    long[] keys();
+
+    void setKeys(long[] val);
+
+    String[] values();
+
+    void setValues(String[] val);
+
+    String json();
 
 }

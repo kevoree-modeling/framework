@@ -1,6 +1,7 @@
 package org.kevoree.modeling.cdn;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.message.KMessage;
 
 public interface KContentDeliveryDriver {
 
@@ -19,5 +20,9 @@ public interface KContentDeliveryDriver {
     int addUpdateListener(KContentUpdateListener interceptor);
 
     void removeUpdateListener(int id);
+
+    String[] peers();
+
+    void sendToPeer(String peer, KMessage message);
 
 }

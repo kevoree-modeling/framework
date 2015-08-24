@@ -177,8 +177,7 @@ public class MModelClass extends MModelClassifier {
 
     public Collection<MModelOperation> getOperations() {
         HashMap<String, MModelOperation> collected = new HashMap<String, MModelOperation>();
-        HashMap<String, MModelClass> passed = new HashMap<String, MModelClass>();
-        deep_collect_ops(collected, passed);
+        deep_collect_ops(collected, new HashMap<String, MModelClass>());
         for (String collectedKey : collected.keySet()) {
             if (!operations.containsKey(collectedKey)) {
                 operations.put(collectedKey, collected.get(collectedKey).clone());
@@ -188,9 +187,7 @@ public class MModelClass extends MModelClassifier {
     }
 
     private void deep_collect_ops(HashMap<String, MModelOperation> collector, HashMap<String, MModelClass> passed) {
-        if (passed.containsKey(this.getName())) {
-            return;
-        } else {
+        if (!passed.containsKey(this.getName())) {
             for (String key : operations.keySet()) {
                 if (!collector.containsKey(key)) {
                     collector.put(key, operations.get(key));
@@ -210,12 +207,12 @@ public class MModelClass extends MModelClassifier {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class ");
-        sb.append(getPack()+"."+getName());
+        sb.append(getPack() + "." + getName());
         sb.append(", parent:");
         sb.append(getParents());
         sb.append("{\n \tattributes{\n");
         for (MModelAttribute att : attributes.values()) {
-            sb.append("\t\t"+att.getName());
+            sb.append("\t\t" + att.getName());
             sb.append(":");
             sb.append(att.getType());
             sb.append("\n");
@@ -223,7 +220,7 @@ public class MModelClass extends MModelClassifier {
         sb.append("\t}\n");
         sb.append("\treferences:{\n");
         for (MModelReference att : references.values()) {
-            sb.append("\t\t"+att.getName());
+            sb.append("\t\t" + att.getName());
             sb.append(":");
             sb.append(att.getType().getName());
             if (att.getOpposite() != null) {
@@ -234,7 +231,7 @@ public class MModelClass extends MModelClassifier {
         }
         sb.append("\t}\n\tfunctions:{\n");
         for (MModelOperation op : operations.values()) {
-            sb.append("\t\t"+op.getName());
+            sb.append("\t\t" + op.getName());
             sb.append("(");
             boolean isFirst = true;
             for (MModelOperationParam param : op.inputParams) {
@@ -247,7 +244,7 @@ public class MModelClass extends MModelClassifier {
                 isFirst = false;
             }
             sb.append(")");
-            if(op.getReturnType() != null){
+            if (op.getReturnType() != null) {
                 sb.append(":");
                 sb.append(op.getReturnType());
             }

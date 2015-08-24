@@ -26,7 +26,7 @@ public static final org.kevoree.modeling.meta.KMetaReference REF_${reference.nam
 #end
 
 #foreach($operation in $classDeclaration.operations)
-public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaOperation("${operation.name}", ${operation.index},${classDeclaration.index});
+public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaOperation("${operation.name}", ${operation.index},${classDeclaration.index}, new int[]{#set($isNotFirst=false) #foreach($operationParam in $operation.inputParams)#if($isNotFirst),#end #set($isNotFirst=true) ${operationParam.typeId}#end}, ${operation.returnTypeId});
 #end
 
 #foreach($input in $classDeclaration.inputs)

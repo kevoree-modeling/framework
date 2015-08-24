@@ -27,7 +27,7 @@ public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#f
 #end
 
 #foreach($operation in $classDeclaration.operations)
-    public void ${operation.name}(#foreach($p in $operation.inputParams)$p.type $p.name, #{end}org.kevoree.modeling.KCallback<#if(${operation.returnParam})$operation.returnParam.type#{else}Boolean#end> result);
+    public void ${operation.name}(#foreach($p in $operation.inputParams)$p.type $p.name, #{end}final org.kevoree.modeling.operation.KOperationStrategy strategy, final org.kevoree.modeling.KCallback#if(${operation.returnType})<$operation.returnType>#end callback);
 #end
 
 #if($classDeclaration.isInferred())
@@ -44,6 +44,9 @@ public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#f
     #set($i = 0)
     public void inferAll(#foreach($dependency in $classDeclaration.dependencies)#if($i!=0), #end${dependency.type.pack}.${dependency.type.name}[] ${dependency.name}#set($i=$i+1)#end#if($i!=0),#end #if($classDeclaration.multipleOutput())org.kevoree.modeling.KCallback<Object[][]> callback #else org.kevoree.modeling.KCallback<#foreach($output in $classDeclaration.outputs) ${context.generationContext.getHelper().getInstance().convertToJavaType(${output.type})}#end[]> callback#end);
 #end
+
+
+
 
 }
 #* @vtlvariable name="context" type="org.kevoree.modeling.generator.ClassGenerationContext" *#

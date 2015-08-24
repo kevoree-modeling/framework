@@ -20,6 +20,10 @@ public interface KModel<A extends KUniverse> {
 
     void setInstanceOperation(KMetaOperation metaOperation, KObject target, KOperation operation);
 
+    void setClassOperationByName(String metaClassName, String metaOperationName, KOperation operation);
+
+    void setInstanceOperationByName(String metaClassName, String metaOperationName, KObject target, KOperation operation);
+
     KMetaModel metaModel();
 
     KDefer defer();

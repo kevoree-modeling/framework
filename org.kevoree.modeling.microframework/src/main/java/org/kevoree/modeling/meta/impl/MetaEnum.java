@@ -65,11 +65,6 @@ public class MetaEnum implements KMetaEnum {
     }
 
     @Override
-    public boolean isEnum() {
-        return true;
-    }
-
-    @Override
     public int id() {
         return _index;
     }

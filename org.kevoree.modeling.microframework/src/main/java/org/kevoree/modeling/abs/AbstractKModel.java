@@ -71,12 +71,32 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     @Override
     public void setClassOperation(KMetaOperation metaOperation, KOperation operation) {
-        _manager.operationManager().registerOperation(metaOperation, operation, null);
+        _manager.operationManager().register(metaOperation, operation, null);
     }
 
     @Override
     public void setInstanceOperation(KMetaOperation metaOperation, KObject target, KOperation operation) {
-        _manager.operationManager().registerOperation(metaOperation, operation, target);
+        _manager.operationManager().register(metaOperation, operation, target);
+    }
+
+    @Override
+    public void setClassOperationByName(String metaClassName, String metaOperationName, KOperation operation) {
+        this.setInstanceOperationByName(metaClassName, metaOperationName, null, operation);
+    }
+
+    @Override
+    public void setInstanceOperationByName(String metaClassName, String metaOperationName, KObject target, KOperation operation) {
+        KMetaClass tempMC = _manager.model().metaModel().metaClassByName(metaClassName);
+        if (tempMC != null) {
+            KMetaOperation tempMO = tempMC.operation(metaOperationName);
+            if (tempMO != null) {
+                _manager.operationManager().register(tempMO, operation, target);
+            } else {
+                throw new RuntimeException("MetaOperation not found with name " + metaOperationName + " on MetaClass " + metaClassName);
+            }
+        } else {
+            throw new RuntimeException("MetaClass not found with name " + metaClassName);
+        }
     }
 
     @Override
@@ -125,4 +145,5 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     public KModelContext createModelContext() {
         return new AbstractKModelContext(this);
     }
+
 }

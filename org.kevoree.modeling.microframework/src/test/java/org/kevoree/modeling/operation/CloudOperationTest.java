@@ -36,7 +36,7 @@ public class CloudOperationTest {
                     }
                 });
 
-                n.trigger("MyParam", new KCallback<String>() {
+                n.trigger("MyParam", null, new KCallback<String>() {
                     @Override
                     public void on(String s) {
                         System.out.println("Operation execution result :  " + s);

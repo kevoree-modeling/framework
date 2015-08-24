@@ -60,8 +60,10 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
         interceptorId = ((KInternalDataManager) wrapped.manager()).cdn().addUpdateListener(new KContentUpdateListener() {
             @Override
             public void on(long[] updatedKeys) {
-                Events events = new Events(updatedKeys);
-                String payload = events.json();
+                KMessage message = new Message();
+                message.setType(Message.EVENTS_TYPE);
+                message.setKeys(updatedKeys);
+                String payload = message.json();
                 _connectedChannels_hash.each(new KIntMapCallBack<WebSocketChannel>() {
                     @Override
                     public void on(int key, WebSocketChannel channel) {
@@ -94,32 +96,38 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
     @Override
     protected void onFullTextMessage(final WebSocketChannel p_channel, BufferedTextMessage message) throws IOException {
         String payload = message.getData();
-        KMessage msg = KMessageLoader.load(payload);
+        KMessage msg = Message.load(payload);
+        if(msg == null){
+            System.err.println("ignored message:"+payload);
+            return;
+        }
         switch (msg.type()) {
-            case KMessageLoader.GET_REQ_TYPE: {
-                final GetRequest getRequest = (GetRequest) msg;
-                ((KInternalDataManager) wrapped.manager()).cdn().get(getRequest.keys, new KCallback<String[]>() {
+            case Message.GET_REQ_TYPE: {
+                ((KInternalDataManager) wrapped.manager()).cdn().get(msg.keys(), new KCallback<String[]>() {
                     public void on(String[] strings) {
-                        GetResult getResultMessage = new GetResult();
-                        getResultMessage.id = getRequest.id;
-                        getResultMessage.values = strings;
+                        KMessage getResultMessage = new Message();
+                        getResultMessage.setType(Message.GET_RES_TYPE);
+                        getResultMessage.setID(msg.id());
+                        getResultMessage.setValues(strings);
                         WebSockets.sendText(getResultMessage.json(), p_channel, null);
                     }
                 });
             }
             break;
-            case KMessageLoader.PUT_REQ_TYPE: {
-                final PutRequest putRequest = (PutRequest) msg;
-                ((KInternalDataManager) wrapped.manager()).cdn().put(putRequest.keys, putRequest.values, new KCallback<Throwable>() {
+            case Message.PUT_REQ_TYPE: {
+                ((KInternalDataManager) wrapped.manager()).cdn().put(msg.keys(), msg.values(), new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
                         if (throwable == null) {
-                            PutResult putResultMessage = new PutResult();
-                            putResultMessage.id = putRequest.id;
+                            KMessage putResultMessage = new Message();
+                            putResultMessage.setType(Message.PUT_RES_TYPE);
+                            putResultMessage.setID(msg.id());
                             WebSockets.sendText(putResultMessage.json(), p_channel, null);
 
                             //inform everybody that somebody has written in the CDN
-                            Events events = new Events(putRequest.keys);
+                            KMessage events = new Message();
+                            events.setType(Message.EVENTS_TYPE);
+                            events.setKeys(msg.keys());
                             String payload = events.json();
                             _connectedChannels_hash.each(new KIntMapCallBack<WebSocketChannel>() {
                                 @Override
@@ -135,15 +143,15 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
                 }, interceptorId);
             }
             break;
-            case KMessageLoader.ATOMIC_GET_INC_REQUEST_TYPE: {
-                final AtomicGetIncrementRequest atomicGetRequest = (AtomicGetIncrementRequest) msg;
-                ((KInternalDataManager) wrapped.manager()).cdn().atomicGetIncrement(atomicGetRequest.keys, new KCallback<Short>() {
+            case Message.ATOMIC_GET_INC_REQUEST_TYPE: {
+                ((KInternalDataManager) wrapped.manager()).cdn().atomicGetIncrement(msg.keys(), new KCallback<Short>() {
                     @Override
                     public void on(Short s) {
                         if (s != null) {
-                            AtomicGetIncrementResult atomicGetResultMessage = new AtomicGetIncrementResult();
-                            atomicGetResultMessage.id = atomicGetRequest.id;
-                            atomicGetResultMessage.value = s;
+                            KMessage atomicGetResultMessage = new Message();
+                            atomicGetResultMessage.setType(Message.ATOMIC_GET_INC_RESULT_TYPE);
+                            atomicGetResultMessage.setID(msg.id());
+                            atomicGetResultMessage.setValues(new String[]{s.toString()});
                             _hash_prefix.put(p_channel.hashCode(), s);
                             WebSockets.sendText(atomicGetResultMessage.json(), p_channel, null);
                         }
@@ -151,9 +159,9 @@ public class WebSocketGateway extends AbstractReceiveListener implements WebSock
                 });
             }
             break;
-            case KMessageLoader.OPERATION_CALL_TYPE:
-            case KMessageLoader.OPERATION_RESULT_TYPE: {
-                ((KInternalDataManager) wrapped.manager()).operationManager().operationEventReceived(msg);
+            case Message.OPERATION_CALL_TYPE:
+            case Message.OPERATION_RESULT_TYPE: {
+                ((KInternalDataManager) wrapped.manager()).operationManager().dispatch(null, msg);
             }
             break;
             /*

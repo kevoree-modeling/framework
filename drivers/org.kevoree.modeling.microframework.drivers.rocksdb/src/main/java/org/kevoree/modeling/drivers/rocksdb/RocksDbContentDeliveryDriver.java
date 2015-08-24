@@ -6,6 +6,7 @@ import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
+import org.kevoree.modeling.message.KMessage;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -69,7 +70,7 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
         try {
             byte[] bulkResult = db.get(KContentKey.toString(key, 0).getBytes());
             String result = null;
-            if(bulkResult != null){
+            if (bulkResult != null) {
                 result = new String(bulkResult);
             }
             short nextV;
@@ -187,6 +188,16 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
         if (additionalInterceptors != null) {
             additionalInterceptors.remove(id);
         }
+    }
+
+    @Override
+    public String[] peers() {
+        return new String[0];
+    }
+
+    @Override
+    public void sendToPeer(String peer, KMessage message) {
+        //NOOP
     }
 
 }
