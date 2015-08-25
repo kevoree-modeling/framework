@@ -8,10 +8,14 @@ public interface KMetaOperation extends KMeta {
 
     int[] paramTypes();
 
+    boolean[] paramMultiplicities();
+
     int returnType();
 
-    void addParam(KType type);
+    boolean returnTypeIsArray();
 
-    void setReturnType(KType type);
+    void addParam(KType type, boolean isArray);
+
+    void setReturnType(KType type, boolean isArray);
 }
 

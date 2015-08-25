@@ -6,19 +6,19 @@ public class Meta${classDeclaration.name} extends org.kevoree.modeling.meta.impl
 private static Meta${classDeclaration.name} INSTANCE = null;
 
 public static Meta${classDeclaration.name} getInstance() {
-    if (INSTANCE == null) {
-        INSTANCE = new Meta${classDeclaration.name}();
-    }
-    return INSTANCE;
+if (INSTANCE == null) {
+INSTANCE = new Meta${classDeclaration.name}();
+}
+return INSTANCE;
 }
 
 #foreach($attribute in $classDeclaration.attributes)
 
-#if($attribute.type == "Continuous")
-public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, #if($context.generationContext.helper.isNull(${attribute.precision}))0#{else}$attribute.precision#end, #if($attribute.id)true#{else}false#end, ${attribute.typeId}, org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation.instance());
-#else
-public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, 0, #if($attribute.id)true#{else}false#end, ${attribute.typeId}, org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation.instance());
-#end
+    #if($attribute.type == "Continuous")
+    public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, #if($context.generationContext.helper.isNull(${attribute.precision}))0#{else}$attribute.precision#end, #if($attribute.id)true#{else}false#end, ${attribute.typeId}, org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation.instance());
+    #else
+    public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, 0, #if($attribute.id)true#{else}false#end, ${attribute.typeId}, org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation.instance());
+    #end
 #end
 
 #foreach($reference in $classDeclaration.references)
@@ -26,7 +26,7 @@ public static final org.kevoree.modeling.meta.KMetaReference REF_${reference.nam
 #end
 
 #foreach($operation in $classDeclaration.operations)
-public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaOperation("${operation.name}", ${operation.index},${classDeclaration.index}, new int[]{#set($isNotFirst=false) #foreach($operationParam in $operation.inputParams)#if($isNotFirst),#end #set($isNotFirst=true) ${operationParam.typeId}#end}, ${operation.returnTypeId});
+public static final org.kevoree.modeling.meta.KMetaOperation OP_${operation.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaOperation("${operation.name}", ${operation.index},${classDeclaration.index}, new int[]{#set($isNotFirst=false) #foreach($operationParam in $operation.inputParams)#if($isNotFirst),#end #set($isNotFirst=true) ${operationParam.typeId}#end}, ${operation.returnTypeId}, new boolean[]{#set($isNotFirst=false) #foreach($operationParam in $operation.inputParams)#if($isNotFirst),#end #set($isNotFirst=true) ${operationParam.array}#end} , ${operation.returnTypeIsArray});
 #end
 
 #foreach($input in $classDeclaration.inputs)
@@ -37,41 +37,41 @@ public static final org.kevoree.modeling.meta.KMetaInferInput IN_${input.name.to
 public static final org.kevoree.modeling.meta.KMetaInferOutput OUT_${output.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaInferOutput("${output.name}", ${output.index}, ${output.typeId});
 #end
 
-    private Meta${classDeclaration.name}() {
-        super("${classDeclaration.fqn}", ${classDeclaration.index},#if(${classDeclaration.inference})org.kevoree.modeling.infer.KInferAlgFactory.build("${classDeclaration.inference}")#else null#end);
-        org.kevoree.modeling.meta.KMeta[] temp_all = new org.kevoree.modeling.meta.KMeta[${classDeclaration.attributes.size()}+${classDeclaration.references.size()}+${classDeclaration.operations.size()}+${classDeclaration.inputs.size()}+${classDeclaration.outputs.size()} #if($classDeclaration.containsDependencies()) +1 #end ];
+private Meta${classDeclaration.name}() {
+super("${classDeclaration.fqn}", ${classDeclaration.index},#if(${classDeclaration.inference})org.kevoree.modeling.infer.KInferAlgFactory.build("${classDeclaration.inference}")#else null#end);
+org.kevoree.modeling.meta.KMeta[] temp_all = new org.kevoree.modeling.meta.KMeta[${classDeclaration.attributes.size()}+${classDeclaration.references.size()}+${classDeclaration.operations.size()}+${classDeclaration.inputs.size()}+${classDeclaration.outputs.size()} #if($classDeclaration.containsDependencies()) +1 #end ];
 #set($i = 0)
 #foreach($attribute in $classDeclaration.attributes)
-        temp_all[${i}] = ATT_${attribute.name.toUpperCase()};
+temp_all[${i}] = ATT_${attribute.name.toUpperCase()};
     #set($i = $i +1)
 #end
 #foreach($reference in $classDeclaration.references)
-        temp_all[${i}] = REF_${reference.name.toUpperCase()};
+temp_all[${i}] = REF_${reference.name.toUpperCase()};
     #set($i = $i +1)
 #end
 #foreach($operation in $classDeclaration.operations)
-        temp_all[${i}] = OP_${operation.name.toUpperCase()};
+temp_all[${i}] = OP_${operation.name.toUpperCase()};
     #set($i = $i +1)
 #end
 #foreach($input in $classDeclaration.inputs)
-        temp_all[${i}] = IN_${input.name.toUpperCase()};
+temp_all[${i}] = IN_${input.name.toUpperCase()};
     #set($i = $i +1)
 #end
 #foreach($output in $classDeclaration.outputs)
-        temp_all[${i}] = OUT_${output.name.toUpperCase()};
+temp_all[${i}] = OUT_${output.name.toUpperCase()};
     #set($i = $i +1)
 #end
 
 #if($classDeclaration.containsDependencies())
-    org.kevoree.modeling.meta.KMetaDependencies deps = new org.kevoree.modeling.meta.impl.MetaDependencies(${classDeclaration.dependencies().index}, this);
-    temp_all[${i}] = deps;
+org.kevoree.modeling.meta.KMetaDependencies deps = new org.kevoree.modeling.meta.impl.MetaDependencies(${classDeclaration.dependencies().index}, this);
+temp_all[${i}] = deps;
     #foreach($dependency in $classDeclaration.getDependencies())
-        deps.addDependency("$dependency.name", $dependency.type.index);
+    deps.addDependency("$dependency.name", $dependency.type.index);
     #end
 #end
 
-        init(temp_all);
-    }
+init(temp_all);
+}
 }
 #* @vtlvariable name="context" type="org.kevoree.modeling.generator.ClassGenerationContext" *#
 #* @vtlvariable name="classDeclaration" type="org.kevoree.modeling.ast.MModelClass" *#

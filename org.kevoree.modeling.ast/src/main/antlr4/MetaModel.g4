@@ -38,9 +38,11 @@ functionDeclaration : 'func' IDENT functionDeclarationParameters? functionDeclar
 
 functionDeclarationParameters : '(' functionDeclarationParameter (',' functionDeclarationParameter)* ')';
 
-functionDeclarationParameter : IDENT ':' attributeType;
+functionDeclarationParameter : IDENT ':' attributeType functionDeclarationMultiplicity?;
 
-functionDeclarationReturnType : ':' attributeType;
+functionDeclarationMultiplicity : '[]';
+
+functionDeclarationReturnType : ':' attributeType functionDeclarationMultiplicity?;
 
 annotationDeclr : 'with' IDENT (NUMBER|STRING)?;
 

@@ -11,6 +11,7 @@ class org.kubi.Ecosystem {
     func trigger2 : String
     func trigger3 (s: String) : String
     func trigger4 (s : String, s2: String) : String
+    func trigger5 (s : String, s2: String[], s3: org.kubi.Device[], s4 : org.kubi.ParameterType[]) : String[]
 
 }
 

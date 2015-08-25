@@ -5,6 +5,13 @@ public class MModelOperationParam {
     public String type;
     public int typeId;
 
+    public boolean isArray() {
+        return isArray;
+    }
+
+    public boolean isArray = false;
+
+
     public String getName() {
         return name;
     }

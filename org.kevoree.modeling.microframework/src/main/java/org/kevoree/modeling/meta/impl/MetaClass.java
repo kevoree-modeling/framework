@@ -167,7 +167,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaOperation addOperation(String operationName) {
         final KMetaClass tempOrigin = this;
-        MetaOperation tempOperation = new MetaOperation(operationName, _meta.length, tempOrigin.index(), new int[]{}, -1);
+        MetaOperation tempOperation = new MetaOperation(operationName, _meta.length, tempOrigin.index(), new int[]{}, -1, new boolean[]{}, false);
         internal_add_meta(tempOperation);
         return tempOperation;
     }

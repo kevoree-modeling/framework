@@ -31,6 +31,18 @@ public class MModelOperation {
 
     public int returnTypeId = 0;
 
+    public boolean isReturnTypeIsArray() {
+        return returnTypeIsArray;
+    }
+
+    public void setReturnTypeIsArray(boolean returnTypeIsArray) {
+        this.returnTypeIsArray = returnTypeIsArray;
+    }
+
+    public boolean returnTypeIsArray = false;
+
+
+
     public int getReturnTypeId() {
         return returnTypeId;
     }

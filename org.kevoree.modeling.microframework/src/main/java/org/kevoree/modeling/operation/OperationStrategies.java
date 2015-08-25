@@ -1,11 +1,14 @@
 package org.kevoree.modeling.operation;
 
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.KType;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.impl.Message;
+import org.kevoree.modeling.meta.KLiteral;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.util.PrimitiveHelper;
@@ -13,103 +16,83 @@ import org.kevoree.modeling.util.maths.Base64;
 
 public class OperationStrategies {
 
-    public static String serializeReturn(KMetaOperation metaOperation, Object result) {
-        switch (metaOperation.returnType()) {
-            case KPrimitiveTypes.BOOL_ID:
-                if ((Boolean) result) {
-                    return "1";
-                } else {
-                    return "0";
+    public static String serialize(int type, Object elem, boolean isArray) {
+        if (isArray) {
+            Object[] elements = (Object[]) elem;
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < elements.length; i++) {
+                if (i != 0) {
+                    builder.append(KConfig.KEY_SEP);
                 }
+                builder.append(serialize(type, elements[i], false));
+            }
+            return builder.toString();
+        } else {
+            switch (type) {
+                case KPrimitiveTypes.BOOL_ID:
+                    if ((Boolean) elem) {
+                        return "1";
+                    } else {
+                        return "0";
+                    }
+                case KPrimitiveTypes.STRING_ID:
+                    return JsonString.encode(elem.toString());
+                case KPrimitiveTypes.DOUBLE_ID:
+                    return Base64.encodeDouble((Double) elem);
+                case KPrimitiveTypes.INT_ID:
+                    return Base64.encodeInt((Integer) elem);
+                case KPrimitiveTypes.LONG_ID:
+                    return Base64.encodeLong((Integer) elem);
+                default:
+                    return Base64.encodeInt(((KLiteral) elem).index());
+            }
+        }
+    }
+
+    public static String[] serializeParam(KMetaOperation metaOperation, Object[] param) {
+        int[] paramTypes = metaOperation.paramTypes();
+        boolean[] paramIsArray = metaOperation.paramMultiplicities();
+        String[] stringParams = new String[paramTypes.length];
+        for (int i = 0; i < paramTypes.length; i++) {
+            stringParams[i] = serialize(paramTypes[i], param[i], paramIsArray[i]);
+        }
+        return stringParams;
+    }
+
+    public static String serializeReturn(KMetaOperation metaOperation, Object result) {
+        return serialize(metaOperation.returnType(), result, metaOperation.returnTypeIsArray());
+    }
+
+    public static Object unserialize(int type, String payload) {
+        switch (type) {
+            case KPrimitiveTypes.BOOL_ID:
+                return PrimitiveHelper.equals(payload, "1");
             case KPrimitiveTypes.STRING_ID:
-                return JsonString.encode(result.toString());
+                return JsonString.unescape(payload);
             case KPrimitiveTypes.DOUBLE_ID:
-                return Base64.encodeDouble((Double) result);
+                return Base64.decodeToDouble(payload);
             case KPrimitiveTypes.INT_ID:
-                return Base64.encodeInt((Integer) result);
+                return Base64.decodeToInt(payload);
             case KPrimitiveTypes.LONG_ID:
-                return Base64.encodeLong((Integer) result);
+                return Base64.decodeToLong(payload);
             default:
                 return null;
         }
     }
 
     public static Object unserializeReturn(KMetaOperation metaOperation, String resultString) {
-        switch (metaOperation.returnType()) {
-            case KPrimitiveTypes.BOOL_ID:
-                return PrimitiveHelper.equals(resultString, "1");
-            case KPrimitiveTypes.STRING_ID:
-                return JsonString.unescape(resultString);
-            case KPrimitiveTypes.DOUBLE_ID:
-                return Base64.decodeToDouble(resultString);
-            case KPrimitiveTypes.INT_ID:
-                return Base64.decodeToInt(resultString);
-            case KPrimitiveTypes.LONG_ID:
-                return Base64.decodeToLong(resultString);
-            default:
-                return null;
-        }
+        return unserialize(metaOperation.returnType(), resultString);
     }
 
     public static Object[] unserializeParam(KMetaOperation metaOperation, String[] param) {
         int[] paramTypes = metaOperation.paramTypes();
         Object[] objParam = new Object[paramTypes.length];
         for (int i = 0; i < paramTypes.length; i++) {
-            switch (paramTypes[i]) {
-                case KPrimitiveTypes.BOOL_ID:
-                    objParam[i] = PrimitiveHelper.equals(param[i], "1");
-                    break;
-                case KPrimitiveTypes.STRING_ID:
-                    objParam[i] = JsonString.unescape(param[i]);
-                    break;
-                case KPrimitiveTypes.DOUBLE_ID:
-                    objParam[i] = Base64.decodeToDouble(param[i]);
-                    break;
-                case KPrimitiveTypes.INT_ID:
-                    objParam[i] = Base64.decodeToInt(param[i]);
-                    break;
-                case KPrimitiveTypes.LONG_ID:
-                    objParam[i] = Base64.decodeToLong(param[i]);
-                    break;
-                default:
-                    objParam[i] = null;
-                    break;
-            }
+            objParam[i] = unserialize(paramTypes[i], param[i]);
         }
         return objParam;
     }
 
-    public static String[] serializeParam(KMetaOperation metaOperation, Object[] param) {
-        int[] paramTypes = metaOperation.paramTypes();
-        String[] stringParams = new String[paramTypes.length];
-        for (int i = 0; i < paramTypes.length; i++) {
-            switch (paramTypes[i]) {
-                case KPrimitiveTypes.BOOL_ID:
-                    if ((Boolean) param[i]) {
-                        stringParams[i] = "1";
-                    } else {
-                        stringParams[i] = "0";
-                    }
-                    break;
-                case KPrimitiveTypes.STRING_ID:
-                    stringParams[i] = JsonString.encode(param[i].toString());
-                    break;
-                case KPrimitiveTypes.DOUBLE_ID:
-                    stringParams[i] = Base64.encodeDouble((Double) param[i]);
-                    break;
-                case KPrimitiveTypes.INT_ID:
-                    stringParams[i] = Base64.encodeInt((Integer) param[i]);
-                    break;
-                case KPrimitiveTypes.LONG_ID:
-                    stringParams[i] = Base64.encodeLong((Integer) param[i]);
-                    break;
-                default:
-                    stringParams[i] = null;
-                    break;
-            }
-        }
-        return stringParams;
-    }
 
     public static KOperationStrategy ONLY_ONE = new KOperationStrategy() {
         @Override

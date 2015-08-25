@@ -91,7 +91,7 @@ public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferr
 #end
 
 #foreach($operation in $classDeclaration.operations)
-    public void ${operation.name}(#foreach($p in $operation.inputParams)$p.type p_$p.name, #{end}final org.kevoree.modeling.operation.KOperationStrategy strategy, final org.kevoree.modeling.KCallback#if(${operation.returnType})<$operation.returnType>#end callback){
+    public void ${operation.name}(#foreach($p in $operation.inputParams)$context.generationContext.getHelper().convertToJavaType($p.type)#if($p.array)[]#end p_$p.name, #{end}final org.kevoree.modeling.operation.KOperationStrategy strategy, final org.kevoree.modeling.KCallback#if(${operation.returnType})<$context.generationContext.getHelper().convertToJavaType($operation.returnType)#if($operation.returnTypeIsArray)[]#end>#end callback){
         Object[] ${operation.name}_params = new Object[$operation.inputParams.size()];
     #set($paramIndex = 0)
 #foreach($p in $operation.inputParams)

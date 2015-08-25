@@ -258,6 +258,9 @@ public class MModel {
                     MModelOperation operation = new MModelOperation(functionDeclarationContext.IDENT().getText());
                     if (functionDeclarationContext.functionDeclarationReturnType() != null) {
                         operation.returnType = functionDeclarationContext.functionDeclarationReturnType().attributeType().getText();
+                        if (functionDeclarationContext.functionDeclarationReturnType().functionDeclarationMultiplicity() != null) {
+                            operation.returnTypeIsArray = true;
+                        }
                     }
                     if (functionDeclarationContext.functionDeclarationParameters() != null) {
                         for (org.kevoree.modeling.ast.MetaModelParser.FunctionDeclarationParameterContext param : functionDeclarationContext.functionDeclarationParameters().functionDeclarationParameter()) {
@@ -265,13 +268,15 @@ public class MModel {
                             newParam.name = param.IDENT().getText();
                             newParam.type = param.attributeType().getText();
                             operation.inputParams.add(newParam);
+                            if (param.functionDeclarationMultiplicity() != null) {
+                                newParam.isArray = true;
+                            }
                         }
                     }
                     newClass.addOperation(operation);
                 }
             }
         }
-
         //opposite completion
         model.completeOppositeReferences();
         model.consolidateIndexes();

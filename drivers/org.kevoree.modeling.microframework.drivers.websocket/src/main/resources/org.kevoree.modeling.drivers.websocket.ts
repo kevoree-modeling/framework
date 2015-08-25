@@ -174,7 +174,11 @@ module org {
                             return ["Server"];
                         }
 
-                        public sendToPeer(peer:string, msg:org.kevoree.modeling.message.KMessage) {
+                        public sendToPeer(peer:string, msg:org.kevoree.modeling.message.KMessage, callback:org.kevoree.modeling.KCallback<org.kevoree.modeling.message.KMessage>) {
+                            if(callback != null){
+                                msg.setID(this.nextKey());
+                                this._callbacks[msg.id()] = callback;
+                            }
                             this._clientConnection.send(msg.json());
                         }
 

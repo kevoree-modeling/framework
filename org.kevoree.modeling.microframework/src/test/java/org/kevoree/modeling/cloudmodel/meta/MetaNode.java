@@ -31,7 +31,7 @@ public class MetaNode extends MetaClass {
 
     public static final KMetaReference REF_ELEMENT = new MetaReference("element", 4, true, true, 1, "op_element", 0);
 
-    public static final KMetaOperation OP_TRIGGER = new MetaOperation("trigger", 5, 0, new int[]{}, -1);
+    public static final KMetaOperation OP_TRIGGER = new MetaOperation("trigger", 5, 0, new int[]{}, -1, new boolean[]{}, false);
 
     public MetaNode() {
         super("org.kevoree.modeling.microframework.test.cloud.Node", 0, null);

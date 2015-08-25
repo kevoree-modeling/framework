@@ -156,7 +156,11 @@ var org;
                         WebSocketPeer.prototype.peers = function () {
                             return ["Server"];
                         };
-                        WebSocketPeer.prototype.sendToPeer = function (peer, msg) {
+                        WebSocketPeer.prototype.sendToPeer = function (peer, msg, callback) {
+                            if (callback != null) {
+                                msg.setID(this.nextKey());
+                                this._callbacks[msg.id()] = callback;
+                            }
                             this._clientConnection.send(msg.json());
                         };
                         return WebSocketPeer;
