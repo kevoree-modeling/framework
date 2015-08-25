@@ -73,11 +73,18 @@ public class OperationStrategies {
             int previous = 0;
             while (i < payload.length()) {
                 if (payload.charAt(i) == KConfig.KEY_SEP) {
-
+                    if (i != previous) {
+                        params.add(payload.substring(previous + 1, i));
+                    }
+                    previous = i;
                 }
                 i++;
             }
-            return null;
+            Object[] result = new Object[params.size()];
+            for (int j = 0; j < params.size(); j++) {
+                result[j] = unserialize(type, params.get(j), false);
+            }
+            return result;
         } else {
             switch (type) {
                 case KPrimitiveTypes.BOOL_ID:
@@ -138,5 +145,29 @@ public class OperationStrategies {
         }
     };
 
+    public static KOperationStrategy NAMED_PEER(String peerName) {
+        return new KOperationStrategy() {
+            @Override
+            public void invoke(final KContentDeliveryDriver cdn, final KMetaOperation metaOperation, final KObject source, final Object[] param, final KOperationManager manager, final KCallback callback) {
+                //Prepare the message
+                KMessage operationCall = new Message();
+                operationCall.setType(Message.OPERATION_CALL_TYPE);
+                operationCall.setKeys(new long[]{source.universe(), source.now(), source.uuid()});
+                operationCall.setClassName(source.metaClass().metaName());
+                operationCall.setOperationName(metaOperation.metaName());
+                operationCall.setValues(serializeParam(metaOperation, param));
+                cdn.sendToPeer(peerName, operationCall, new KCallback<KMessage>() {
+                    @Override
+                    public void on(KMessage message) {
+                        if (message.values() != null) {
+                            callback.on(unserializeReturn(metaOperation, message.values()[0]));
+                        } else {
+                            callback.on(unserializeReturn(metaOperation, null));
+                        }
+                    }
+                });
+            }
+        };
+    }
 
 }
