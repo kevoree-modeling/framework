@@ -9,6 +9,7 @@ import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.impl.Message;
 import org.kevoree.modeling.meta.KLiteral;
+import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.util.PrimitiveHelper;
@@ -66,7 +67,7 @@ public class OperationStrategies {
         return serialize(metaOperation.returnType(), result, metaOperation.returnTypeIsArray());
     }
 
-    public static Object unserialize(int type, String payload, boolean isArray) {
+    public static Object unserialize(KMetaModel metaModel, int type, String payload, boolean isArray) {
         if (isArray) {
             List<String> params = new ArrayList<String>();
             int i = 0;
@@ -82,7 +83,7 @@ public class OperationStrategies {
             }
             Object[] result = new Object[params.size()];
             for (int j = 0; j < params.size(); j++) {
-                result[j] = unserialize(type, params.get(j), false);
+                result[j] = unserialize(metaModel, type, params.get(j), false);
             }
             return result;
         } else {
@@ -99,24 +100,21 @@ public class OperationStrategies {
                     return Base64.decodeToLong(payload);
                 default:
                     int literalIndex = Base64.decodeToInt(payload);
-                    //TODO transform literal ID into Literal
-                    return null;
+                    return metaModel.metaTypes()[type].literal(literalIndex);
             }
         }
-
-
     }
 
-    public static Object unserializeReturn(KMetaOperation metaOperation, String resultString) {
-        return unserialize(metaOperation.returnType(), resultString, metaOperation.returnTypeIsArray());
+    public static Object unserializeReturn(KMetaModel metaModel, KMetaOperation metaOperation, String resultString) {
+        return unserialize(metaModel, metaOperation.returnType(), resultString, metaOperation.returnTypeIsArray());
     }
 
-    public static Object[] unserializeParam(KMetaOperation metaOperation, String[] param) {
+    public static Object[] unserializeParam(KMetaModel metaModel, KMetaOperation metaOperation, String[] param) {
         int[] paramTypes = metaOperation.paramTypes();
         boolean[] paramMultiplicities = metaOperation.paramMultiplicities();
         Object[] objParam = new Object[paramTypes.length];
         for (int i = 0; i < paramTypes.length; i++) {
-            objParam[i] = unserialize(paramTypes[i], param[i], paramMultiplicities[i]);
+            objParam[i] = unserialize(metaModel, paramTypes[i], param[i], paramMultiplicities[i]);
         }
         return objParam;
     }
@@ -136,9 +134,9 @@ public class OperationStrategies {
                 @Override
                 public void on(KMessage message) {
                     if (message.values() != null) {
-                        callback.on(unserializeReturn(metaOperation, message.values()[0]));
+                        callback.on(unserializeReturn(source.manager().model().metaModel(), metaOperation, message.values()[0]));
                     } else {
-                        callback.on(unserializeReturn(metaOperation, null));
+                        callback.on(unserializeReturn(source.manager().model().metaModel(), metaOperation, null));
                     }
                 }
             });
@@ -160,9 +158,9 @@ public class OperationStrategies {
                     @Override
                     public void on(KMessage message) {
                         if (message.values() != null) {
-                            callback.on(unserializeReturn(metaOperation, message.values()[0]));
+                            callback.on(unserializeReturn(source.manager().model().metaModel(), metaOperation, message.values()[0]));
                         } else {
-                            callback.on(unserializeReturn(metaOperation, null));
+                            callback.on(unserializeReturn(source.manager().model().metaModel(), metaOperation, null));
                         }
                     }
                 });

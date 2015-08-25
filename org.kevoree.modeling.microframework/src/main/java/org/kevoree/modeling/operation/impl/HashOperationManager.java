@@ -78,7 +78,7 @@ public class HashOperationManager implements KOperationManager {
                 _manager.lookup(sourceKey[0], sourceKey[1], sourceKey[2], new KCallback<KObject>() {
                     public void on(KObject kObject) {
                         if (kObject != null) {
-                            finalResolved.on(kObject, OperationStrategies.unserializeParam(mo, message.values()), new KCallback<Object>() {
+                            finalResolved.on(kObject, OperationStrategies.unserializeParam(_manager.model().metaModel(), mo, message.values()), new KCallback<Object>() {
                                 public void on(Object operationResult) {
                                     if (message.id() != null) {
                                         KMessage operationResultMessage = new Message();
