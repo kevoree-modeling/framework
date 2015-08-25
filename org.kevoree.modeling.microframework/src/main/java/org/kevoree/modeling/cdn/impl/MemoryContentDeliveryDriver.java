@@ -2,6 +2,7 @@ package org.kevoree.modeling.cdn.impl;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
@@ -87,7 +88,7 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void connect(KCallback<Throwable> callback) {
+    public void connect(KModel model, KCallback<Throwable> callback) {
         if (callback != null) {
             callback.on(null);
         }
@@ -137,7 +138,7 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void sendToPeer(String peer, KMessage message) {
+    public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
         //NOOP
     }
 

@@ -9,27 +9,26 @@ var org;
             (function (drivers) {
                 var websocket;
                 (function (websocket) {
-                    var WebSocketCDNClient = (function () {
-                        function WebSocketCDNClient(connectionUri) {
+                    var WebSocketPeer = (function () {
+                        function WebSocketPeer(connectionUri) {
                             this._callbackId = 0;
                             this._reconnectionDelay = 3000;
-                            this._getCallbacks = {};
-                            this._putCallbacks = {};
-                            this._atomicGetCallbacks = {};
+                            this._callbacks = {};
                             this.listeners = [];
                             this.shouldBeConnected = false;
                             this._connectionUri = connectionUri;
                         }
-                        WebSocketCDNClient.prototype.addUpdateListener = function (listener) {
+                        WebSocketPeer.prototype.addUpdateListener = function (listener) {
                             var i = Math.random();
                             this.listeners[i] = listener;
                             return i;
                         };
-                        WebSocketCDNClient.prototype.removeUpdateListener = function (id) {
+                        WebSocketPeer.prototype.removeUpdateListener = function (id) {
                             delete this.listeners[id];
                         };
-                        WebSocketCDNClient.prototype.connect = function (callback) {
+                        WebSocketPeer.prototype.connect = function (model, callback) {
                             var self = this;
+                            this._manager = model.manager();
                             this.shouldBeConnected = true;
                             if (typeof require !== "undefined") {
                                 var wsNodeJS = require('ws');
@@ -43,29 +42,29 @@ var org;
                                 switch (msg.type()) {
                                     case org.kevoree.modeling.message.impl.Message.GET_RES_TYPE:
                                         {
-                                            var foundCB = self._getCallbacks[msg.id()];
+                                            var foundCB = self._callbacks[msg.id()];
                                             if (foundCB != null && foundCB != undefined) {
                                                 foundCB(msg.values(), null);
                                             }
-                                            delete self._getCallbacks[msg.id()];
+                                            delete self._callbacks[msg.id()];
                                         }
                                         break;
                                     case org.kevoree.modeling.message.impl.Message.PUT_RES_TYPE:
                                         {
-                                            var foundCB = self._putCallbacks[msg.id()];
+                                            var foundCB = self._callbacks[msg.id()];
                                             if (foundCB != null && foundCB != undefined) {
                                                 foundCB(null);
                                             }
-                                            delete self._putCallbacks[msg.id()];
+                                            delete self._callbacks[msg.id()];
                                         }
                                         break;
                                     case org.kevoree.modeling.message.impl.Message.ATOMIC_GET_INC_RESULT_TYPE:
                                         {
-                                            var foundCB = self._atomicGetCallbacks[msg.id()];
+                                            var foundCB = self._callbacks[msg.id()];
                                             if (foundCB != null && foundCB != undefined) {
                                                 foundCB(msg.values()[0], null);
                                             }
-                                            delete self._atomicGetCallbacks[msg.id()];
+                                            delete self._callbacks[msg.id()];
                                         }
                                         break;
                                     case org.kevoree.modeling.message.impl.Message.OPERATION_CALL_TYPE:
@@ -95,7 +94,7 @@ var org;
                                     console.log("Try reconnection in " + self._reconnectionDelay + " milliseconds.");
                                     //try to reconnect
                                     setTimeout(function () {
-                                        self.connect(null);
+                                        self.connect(model, null);
                                     }, self._reconnectionDelay);
                                 }
                             };
@@ -103,16 +102,21 @@ var org;
                                 if (callback != null) {
                                     callback(null);
                                 }
+                                //inform server about capabilities
+                                var operationMappings = new org.kevoree.modeling.message.impl.Message();
+                                operationMappings.setType(org.kevoree.modeling.message.impl.Message.OPERATION_MAPPING);
+                                operationMappings.setValues(self._manager.operationManager().mappings());
+                                self._clientConnection.send(operationMappings.json());
                             };
                         };
-                        WebSocketCDNClient.prototype.close = function (callback) {
+                        WebSocketPeer.prototype.close = function (callback) {
                             this.shouldBeConnected = false;
                             this._clientConnection.close();
                             if (callback != null) {
                                 callback(null);
                             }
                         };
-                        WebSocketCDNClient.prototype.nextKey = function () {
+                        WebSocketPeer.prototype.nextKey = function () {
                             if (this._callbackId == 1000000) {
                                 this._callbackId = 0;
                             }
@@ -121,43 +125,43 @@ var org;
                             }
                             return this._callbackId;
                         };
-                        WebSocketCDNClient.prototype.put = function (keys, values, error, ignoreInterceptor) {
+                        WebSocketPeer.prototype.put = function (keys, values, error, ignoreInterceptor) {
                             var putRequest = new org.kevoree.modeling.message.impl.Message();
                             putRequest.setType(org.kevoree.modeling.message.impl.Message.PUT_REQ_TYPE);
                             putRequest.setID(this.nextKey());
                             putRequest.setKeys(keys);
                             putRequest.setValues(values);
-                            this._putCallbacks[putRequest.id()] = error;
+                            this._callbacks[putRequest.id()] = error;
                             this._clientConnection.send(putRequest.json());
                         };
-                        WebSocketCDNClient.prototype.get = function (keys, callback) {
+                        WebSocketPeer.prototype.get = function (keys, callback) {
                             var getRequest = new org.kevoree.modeling.message.impl.Message();
                             getRequest.setType(org.kevoree.modeling.message.impl.Message.GET_REQ_TYPE);
                             getRequest.setID(this.nextKey());
                             getRequest.setKeys(keys);
-                            this._getCallbacks[getRequest.id()] = callback;
+                            this._callbacks[getRequest.id()] = callback;
                             this._clientConnection.send(getRequest.json());
                         };
-                        WebSocketCDNClient.prototype.atomicGetIncrement = function (keys, callback) {
+                        WebSocketPeer.prototype.atomicGetIncrement = function (keys, callback) {
                             var atomicGetRequest = new org.kevoree.modeling.message.impl.Message();
                             atomicGetRequest.setType(org.kevoree.modeling.message.impl.Message.ATOMIC_GET_INC_REQUEST_TYPE);
                             atomicGetRequest.setID(this.nextKey());
                             atomicGetRequest.setKeys(keys);
-                            this._atomicGetCallbacks[atomicGetRequest.id()] = callback;
+                            this._callbacks[atomicGetRequest.id()] = callback;
                             this._clientConnection.send(atomicGetRequest.json());
                         };
-                        WebSocketCDNClient.prototype.remove = function (keys, error) {
+                        WebSocketPeer.prototype.remove = function (keys, error) {
                             console.error("Not implemented yet");
                         };
-                        WebSocketCDNClient.prototype.peers = function () {
+                        WebSocketPeer.prototype.peers = function () {
                             return ["Server"];
                         };
-                        WebSocketCDNClient.prototype.sendToPeer = function (peer, msg) {
+                        WebSocketPeer.prototype.sendToPeer = function (peer, msg) {
                             this._clientConnection.send(msg.json());
                         };
-                        return WebSocketCDNClient;
+                        return WebSocketPeer;
                     })();
-                    websocket.WebSocketCDNClient = WebSocketCDNClient;
+                    websocket.WebSocketPeer = WebSocketPeer;
                 })(websocket = drivers.websocket || (drivers.websocket = {}));
             })(drivers = modeling.drivers || (modeling.drivers = {}));
         })(modeling = kevoree.modeling || (kevoree.modeling = {}));

@@ -32,7 +32,6 @@ public interface KInternalDataManager extends KDataManager {
 
     void delete(KUniverse universe, KCallback<Throwable> callback);
 
-    //TODO clean these method
     KOperationManager operationManager();
 
     void setModel(KModel model);

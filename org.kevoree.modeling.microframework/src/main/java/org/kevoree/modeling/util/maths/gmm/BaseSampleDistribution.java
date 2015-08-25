@@ -26,6 +26,7 @@ public abstract class BaseSampleDistribution {
     // forgetting factor, to be used for non-stationary distributions
     protected double mForgettingFactor;
 
+    /*
     public double getForgettingFactor() {
         return mForgettingFactor;
     }
@@ -33,7 +34,7 @@ public abstract class BaseSampleDistribution {
     public void setForgettingFactor(double forgettingFactor) {
         this.mForgettingFactor = forgettingFactor;
     }
-
+*/
 
 
     public double getGlobalWeight() {
@@ -66,17 +67,19 @@ public abstract class BaseSampleDistribution {
         this.mGlobalWeight = this.mGlobalWeight*scaleFactor;
     }
 
+    /*
     public void setSubspaceGlobalCovariance(SimpleMatrix subspaceCovariance) {
         this.mSubspaceGlobalCovariance = subspaceCovariance;
-    }
+    }*/
 
     public SimpleMatrix getSubspaceInverseCovariance() {
         return mSubspaceInverseCovariance;
     }
 
+    /*
     public void setSubspaceInverseCovariance(SimpleMatrix subspaceInverseCovariance) {
         this.mSubspaceInverseCovariance = subspaceInverseCovariance;
-    }
+    }*/
 
 
     abstract public double evaluateMatrix(SimpleMatrix pointVector);

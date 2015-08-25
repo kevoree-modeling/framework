@@ -133,7 +133,7 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void connect(KCallback<Throwable> callback) {
+    public void connect(KModel model, KCallback<Throwable> callback) {
         //noop
         if (callback != null) {
             callback.on(null);
@@ -178,7 +178,8 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void sendToPeer(String peer, KMessage message) {
+    public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
+        callback.on(null);
         //NOOP
     }
 

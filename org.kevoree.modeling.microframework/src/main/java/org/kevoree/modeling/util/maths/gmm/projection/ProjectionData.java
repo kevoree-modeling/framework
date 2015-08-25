@@ -14,6 +14,6 @@ public class ProjectionData {
 	public SimpleSVD<?> mSVD;
 	public double[] mValidElements;
 	public int mCountValidElements;
-	public SimpleMatrix mBandwidthMatrix;
+	//public SimpleMatrix mBandwidthMatrix;
 	public SimpleMatrix mGlobalMean;
 }

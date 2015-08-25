@@ -16,13 +16,9 @@ public interface KModel<A extends KUniverse> {
 
     KDataManager manager();
 
-    void setClassOperation(KMetaOperation metaOperation, KOperation operation);
+    void setOperation(KMetaOperation metaOperation, KOperation operation);
 
-    void setInstanceOperation(KMetaOperation metaOperation, KObject target, KOperation operation);
-
-    void setClassOperationByName(String metaClassName, String metaOperationName, KOperation operation);
-
-    void setInstanceOperationByName(String metaClassName, String metaOperationName, KObject target, KOperation operation);
+    void setOperationByName(String metaClassName, String metaOperationName, KOperation operation);
 
     KMetaModel metaModel();
 

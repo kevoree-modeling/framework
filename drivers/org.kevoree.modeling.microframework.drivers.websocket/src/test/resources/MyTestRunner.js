@@ -9,7 +9,7 @@ var dynamicSensorClass = dynamicMM.addMetaClass("sensor");
 dynamicSensorClass.addAttribute("name", org.kevoree.modeling.meta.KPrimitiveTypes.STRING);
 dynamicSensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.CONTINUOUS);
 var model = dynamicMM.createModel(org.kevoree.modeling.memory.manager.DataManagerBuilder.create()
-    .withContentDeliveryDriver(new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://localhost:6000/cdn"))
+    .withContentDeliveryDriver(new org.kevoree.modeling.drivers.websocket.WebSocketPeer("ws://localhost:9000/testRoomId?peerId=jspeer"))
     .build());
 model.connect(function () {
     model.lookup(0, 0, 1, function (obj) {
@@ -18,6 +18,7 @@ model.connect(function () {
         } else {
             console.log(obj.toJSON());
         }
+
         var obj = model.createByName("sensor", 0, 0);
         obj.setByName("name", "sensor#3");
         obj.setByName("value", 42.52);

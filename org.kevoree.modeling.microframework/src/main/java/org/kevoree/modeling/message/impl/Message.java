@@ -12,10 +12,11 @@ public class Message implements KMessage {
     private static final int TYPE_INDEX = 1;
     private static final int OPERATION_INDEX = 2;
     private static final int CLASS_INDEX = 3;
-    private static final int KEYS_INDEX = 4;
-    private static final int VALUES_INDEX = 5;
+    private static final int PEER_INDEX = 4;
+    private static final int KEYS_INDEX = 5;
+    private static final int VALUES_INDEX = 6;
 
-    private static final String[] KEYS_NAME = new String[]{"id", "type", "op", "class", "keys", "values"};
+    private static final String[] KEYS_NAME = new String[]{"id", "type", "op", "class", "peer", "keys", "values"};
 
     public static final int EVENTS_TYPE = 0;
     public static final int GET_REQ_TYPE = 1;
@@ -26,8 +27,9 @@ public class Message implements KMessage {
     public static final int OPERATION_RESULT_TYPE = 6;
     public static final int ATOMIC_GET_INC_REQUEST_TYPE = 7;
     public static final int ATOMIC_GET_INC_RESULT_TYPE = 8;
+    public static final int OPERATION_MAPPING = 9;
 
-    private static final int NB_ELEM = 6;
+    private static final int NB_ELEM = 7;
 
     private Object[] internal = new Object[NB_ELEM];
 
@@ -92,6 +94,16 @@ public class Message implements KMessage {
     }
 
     @Override
+    public String peer() {
+        return (String) internal[PEER_INDEX];
+    }
+
+    @Override
+    public void setPeer(String val) {
+        internal[PEER_INDEX] = val;
+    }
+
+    @Override
     public String json() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("{");
@@ -104,7 +116,7 @@ public class Message implements KMessage {
                 isFirst = false;
                 buffer.append("\"");
                 buffer.append(KEYS_NAME[i]);
-                if(i < 4){
+                if (i < 5) {
                     buffer.append("\":\"");
                 } else {
                     buffer.append("\":");
@@ -123,6 +135,9 @@ public class Message implements KMessage {
                         JsonString.encodeBuffer(buffer, (String) internal[i]);
                         break;
                     case 4:
+                        JsonString.encodeBuffer(buffer, (String) internal[i]);
+                        break;
+                    case 5:
                         long[] keys = (long[]) internal[i];
                         buffer.append("[");
                         for (int j = 0; j < keys.length; j++) {
@@ -135,7 +150,7 @@ public class Message implements KMessage {
                         }
                         buffer.append("]");
                         break;
-                    case 5:
+                    case 6:
                         String[] values = (String[]) internal[i];
                         buffer.append("[");
                         for (int j = 0; j < values.length; j++) {
@@ -149,7 +164,7 @@ public class Message implements KMessage {
                         buffer.append("]");
                         break;
                 }
-                if(i < 4){
+                if (i < 5) {
                     buffer.append("\"");
                 }
 
@@ -178,6 +193,9 @@ public class Message implements KMessage {
             }
             if (objectReader.get(KEYS_NAME[OPERATION_INDEX]) != null) {
                 msg.setOperationName(JsonString.unescape(objectReader.get(KEYS_NAME[OPERATION_INDEX]).toString()));
+            }
+            if (objectReader.get(KEYS_NAME[PEER_INDEX]) != null) {
+                msg.setPeer(JsonString.unescape(objectReader.get(KEYS_NAME[PEER_INDEX]).toString()));
             }
             if (objectReader.get(KEYS_NAME[KEYS_INDEX]) != null) {
                 String[] objIdsRaw = objectReader.getAsStringArray(KEYS_NAME[KEYS_INDEX]);

@@ -197,7 +197,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 connectCallback.on(new Exception("Please attach a KDataBase AND a KBroker first !"));
             }
         } else {
-            _db.connect(new KCallback<Throwable>() {
+            _db.connect(this._model,new KCallback<Throwable>() {
                 @Override
                 public void on(Throwable throwable) {
                     if (throwable == null) {

@@ -1,9 +1,8 @@
 package org.kevoree.modeling.microframework.addons.kolyfill.test;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
+import org.kevoree.modeling.drivers.websocket.gateway.WebSocketGateway;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
-import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
@@ -78,8 +77,8 @@ public class KolyfillTest {
 
             }
         });
-        WebSocketGateway gateway = WebSocketGateway.exposeModelAndResources(model, 8081, KolyfillTest.class.getClassLoader());
-        gateway.start();
+        //WebSocketGateway gateway = WebSocketGateway.exposeModelAndResources(model, 8081, KolyfillTest.class.getClassLoader());
+        //gateway.start();
         try {
             Thread.sleep(100000);
         } catch (InterruptedException e) {

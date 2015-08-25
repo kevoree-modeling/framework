@@ -1,6 +1,7 @@
 package org.kevoree.modeling.cdn;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.message.KMessage;
 
 public interface KContentDeliveryDriver {
@@ -13,7 +14,7 @@ public interface KContentDeliveryDriver {
 
     void remove(long[] keys, KCallback<Throwable> error);
 
-    void connect(KCallback<Throwable> callback);
+    void connect(KModel model, KCallback<Throwable> callback);
 
     void close(KCallback<Throwable> callback);
 
@@ -23,6 +24,5 @@ public interface KContentDeliveryDriver {
 
     String[] peers();
 
-    void sendToPeer(String peer, KMessage message);
-
+    void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback);
 }

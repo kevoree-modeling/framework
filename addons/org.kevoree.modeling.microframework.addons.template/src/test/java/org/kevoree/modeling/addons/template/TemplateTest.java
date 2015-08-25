@@ -1,7 +1,7 @@
 package org.kevoree.modeling.addons.template;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.drivers.websocket.WebSocketGateway;
+import org.kevoree.modeling.drivers.websocket.gateway.WebSocketGateway;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -77,8 +77,8 @@ public class TemplateTest {
             }
         });
 
-        WebSocketGateway gateway = WebSocketGateway.exposeModelAndResources(model, 8080, TemplateTest.class.getClassLoader());
-        gateway.start();
+        //WebSocketGateway gateway = WebSocketGateway.exposeModelAndResources(model, 8080, TemplateTest.class.getClassLoader());
+        //gateway.start();
 
         try {
             Thread.sleep(100000);

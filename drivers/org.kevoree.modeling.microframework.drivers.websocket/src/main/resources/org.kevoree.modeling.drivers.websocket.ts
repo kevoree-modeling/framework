@@ -7,16 +7,16 @@ module org {
         export module modeling {
             export module drivers {
                 export module websocket {
-                    export class WebSocketCDNClient implements org.kevoree.modeling.cdn.KContentDeliveryDriver {
+                    export class WebSocketPeer implements org.kevoree.modeling.cdn.KContentDeliveryDriver {
 
                         private _callbackId = 0;
                         private _reconnectionDelay = 3000;
                         private _clientConnection:WebSocket;
                         private _connectionUri:string;
 
-                        private _getCallbacks = {};
-                        private _putCallbacks = {};
-                        private _atomicGetCallbacks = {};
+                        private _callbacks = {};
+
+                        private _manager:org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 
                         constructor(connectionUri) {
                             this._connectionUri = connectionUri;
@@ -35,10 +35,9 @@ module org {
                             delete this.listeners[id];
                         }
 
-
-                        public connect(callback:(p:Error) => void):void {
+                        public connect(model:org.kevoree.modeling.KModel<any>, callback:org.kevoree.modeling.KCallback<Error>):void {
                             var self = this;
-
+                            this._manager = <org.kevoree.modeling.memory.manager.internal.KInternalDataManager> model.manager();
                             this.shouldBeConnected = true;
 
                             if (typeof require !== "undefined") {
@@ -53,29 +52,29 @@ module org {
                                 switch (msg.type()) {
                                     case org.kevoree.modeling.message.impl.Message.GET_RES_TYPE:
                                     {
-                                        var foundCB = self._getCallbacks[msg.id()];
+                                        var foundCB = self._callbacks[msg.id()];
                                         if (foundCB != null && foundCB != undefined) {
                                             foundCB(msg.values(), null);
                                         }
-                                        delete self._getCallbacks[msg.id()];
+                                        delete self._callbacks[msg.id()];
                                     }
                                         break;
                                     case org.kevoree.modeling.message.impl.Message.PUT_RES_TYPE:
                                     {
-                                        var foundCB = self._putCallbacks[msg.id()];
+                                        var foundCB = self._callbacks[msg.id()];
                                         if (foundCB != null && foundCB != undefined) {
                                             foundCB(null);
                                         }
-                                        delete self._putCallbacks[msg.id()];
+                                        delete self._callbacks[msg.id()];
                                     }
                                         break;
                                     case org.kevoree.modeling.message.impl.Message.ATOMIC_GET_INC_RESULT_TYPE:
                                     {
-                                        var foundCB = self._atomicGetCallbacks[msg.id()];
+                                        var foundCB = self._callbacks[msg.id()];
                                         if (foundCB != null && foundCB != undefined) {
                                             foundCB(msg.values()[0], null);
                                         }
-                                        delete self._atomicGetCallbacks[msg.id()];
+                                        delete self._callbacks[msg.id()];
                                     }
                                         break;
                                     case org.kevoree.modeling.message.impl.Message.OPERATION_CALL_TYPE:
@@ -106,7 +105,7 @@ module org {
                                     console.log("Try reconnection in " + self._reconnectionDelay + " milliseconds.");
                                     //try to reconnect
                                     setTimeout(function () {
-                                        self.connect(null)
+                                        self.connect(model, null)
                                     }, self._reconnectionDelay);
                                 }
                             };
@@ -114,8 +113,12 @@ module org {
                                 if (callback != null) {
                                     callback(null);
                                 }
+                                //inform server about capabilities
+                                var operationMappings:org.kevoree.modeling.message.KMessage = new org.kevoree.modeling.message.impl.Message();
+                                operationMappings.setType(org.kevoree.modeling.message.impl.Message.OPERATION_MAPPING);
+                                operationMappings.setValues(self._manager.operationManager().mappings());
+                                self._clientConnection.send(operationMappings.json());
                             };
-
                         }
 
                         public close(callback:(p:Error) => void):void {
@@ -135,13 +138,13 @@ module org {
                             return this._callbackId;
                         }
 
-                        public put(keys:Float64Array, values:string[], error:(p:Error) => void, ignoreInterceptor):void {
+                        public put(keys:Float64Array, values:string[], error:org.kevoree.modeling.KCallback<Error>, ignoreInterceptor):void {
                             var putRequest = new org.kevoree.modeling.message.impl.Message();
                             putRequest.setType(org.kevoree.modeling.message.impl.Message.PUT_REQ_TYPE);
                             putRequest.setID(this.nextKey());
                             putRequest.setKeys(keys);
                             putRequest.setValues(values);
-                            this._putCallbacks[putRequest.id()] = error;
+                            this._callbacks[putRequest.id()] = error;
                             this._clientConnection.send(putRequest.json());
                         }
 
@@ -150,7 +153,7 @@ module org {
                             getRequest.setType(org.kevoree.modeling.message.impl.Message.GET_REQ_TYPE);
                             getRequest.setID(this.nextKey());
                             getRequest.setKeys(keys);
-                            this._getCallbacks[getRequest.id()] = callback;
+                            this._callbacks[getRequest.id()] = callback;
                             this._clientConnection.send(getRequest.json());
                         }
 
@@ -159,7 +162,7 @@ module org {
                             atomicGetRequest.setType(org.kevoree.modeling.message.impl.Message.ATOMIC_GET_INC_REQUEST_TYPE);
                             atomicGetRequest.setID(this.nextKey());
                             atomicGetRequest.setKeys(keys);
-                            this._atomicGetCallbacks[atomicGetRequest.id()] = callback;
+                            this._callbacks[atomicGetRequest.id()] = callback;
                             this._clientConnection.send(atomicGetRequest.json());
                         }
 
@@ -167,11 +170,11 @@ module org {
                             console.error("Not implemented yet");
                         }
 
-                        public peers():string[]{
+                        public peers():string[] {
                             return ["Server"];
                         }
 
-                        public sendToPeer(peer :string, msg : org.kevoree.modeling.message.KMessage){
+                        public sendToPeer(peer:string, msg:org.kevoree.modeling.message.KMessage) {
                             this._clientConnection.send(msg.json());
                         }
 

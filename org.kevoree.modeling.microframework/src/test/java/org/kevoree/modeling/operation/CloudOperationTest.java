@@ -21,7 +21,7 @@ public class CloudOperationTest {
                 CloudView view = dimension.time(0L);
                 Node n = view.createNode();
 
-                model.setClassOperation(MetaNode.OP_TRIGGER, new KOperation<Node, String>() {
+                model.setOperation(MetaNode.OP_TRIGGER, new KOperation<Node, String>() {
                     @Override
                     public void on(Node source, Object[] params, KCallback<String> result) {
                         String parameters = "[";

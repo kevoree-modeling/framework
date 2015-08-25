@@ -159,7 +159,7 @@ public class ArrayIntMap<V> implements KIntMap<V> {
         rehashCapacity(elementDataSize);
     }
 
-    public V remove(long key) {
+    public V remove(int key) {
         Entry<V> entry = removeEntry(key);
         if (entry == null) {
             return null;
@@ -168,11 +168,10 @@ public class ArrayIntMap<V> implements KIntMap<V> {
         }
     }
 
-    Entry<V> removeEntry(long key) {
+    Entry<V> removeEntry(int key) {
         Entry<V> entry;
         Entry<V> last = null;
-        int hash = (int) key;
-        int index = (hash & 0x7FFFFFFF) % elementDataSize;
+        int index = (key & 0x7FFFFFFF) % elementDataSize;
         entry = elementData[index];
         while (entry != null && !(/*((int)chunk.key) == hash &&*/ key == entry.key)) {
             last = entry;

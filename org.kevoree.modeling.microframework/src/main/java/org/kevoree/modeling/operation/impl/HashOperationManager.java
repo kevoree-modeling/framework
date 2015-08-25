@@ -2,6 +2,7 @@ package org.kevoree.modeling.operation.impl;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.memory.chunk.KIntMap;
+import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.KLongMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongMap;
@@ -14,54 +15,28 @@ import org.kevoree.modeling.operation.KOperationManager;
 import org.kevoree.modeling.operation.KOperationStrategy;
 import org.kevoree.modeling.operation.OperationStrategies;
 
+import java.util.ArrayList;
+
 public class HashOperationManager implements KOperationManager {
 
     /* TODO enhance it */
     private KIntMap<KIntMap<KOperation>> staticOperations;
 
-    private KLongMap<KIntMap<KOperation>> instanceOperations;
-
-    private KLongMap<KCallback<KMessage>> remoteCallCallbacks = new ArrayLongMap<KCallback<KMessage>>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-
     private KInternalDataManager _manager;
-
-    private int _callbackId = 0;
 
     public HashOperationManager(KInternalDataManager p_manager) {
         this.staticOperations = new ArrayIntMap<KIntMap<KOperation>>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-        this.instanceOperations = new ArrayLongMap<KIntMap<KOperation>>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         this._manager = p_manager;
     }
 
     @Override
-    public synchronized void register(KMetaOperation operation, KOperation callback, KObject target) {
-        if (target == null) {
-            KIntMap<KOperation> clazzOperations = staticOperations.get(operation.originMetaClassIndex());
-            if (clazzOperations == null) {
-                clazzOperations = new ArrayIntMap<KOperation>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-                staticOperations.put(operation.originMetaClassIndex(), clazzOperations);
-            }
-            clazzOperations.put(operation.index(), callback);
-        } else {
-            KIntMap<KOperation> objectOperations = instanceOperations.get(target.uuid());
-            if (objectOperations == null) {
-                objectOperations = new ArrayIntMap<KOperation>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-                instanceOperations.put(target.uuid(), objectOperations);
-            }
-            objectOperations.put(operation.index(), callback);
+    public synchronized void register(KMetaOperation operation, KOperation callback) {
+        KIntMap<KOperation> clazzOperations = staticOperations.get(operation.originMetaClassIndex());
+        if (clazzOperations == null) {
+            clazzOperations = new ArrayIntMap<KOperation>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+            staticOperations.put(operation.originMetaClassIndex(), clazzOperations);
         }
-    }
-
-    private KOperation searchOperation(long source, int clazz, int operation) {
-        KIntMap<KOperation> objectOperations = instanceOperations.get(source);
-        if (objectOperations != null) {
-            return objectOperations.get(operation);
-        }
-        KIntMap<KOperation> clazzOperations = staticOperations.get(clazz);
-        if (clazzOperations != null) {
-            return clazzOperations.get(operation);
-        }
-        return null;
+        clazzOperations.put(operation.index(), callback);
     }
 
     @Override
@@ -75,69 +50,92 @@ public class HashOperationManager implements KOperationManager {
                 throw new RuntimeException("Bad Number of arguments for method " + operation.metaName());
             }
         }
-        KOperation operationCore = searchOperation(source.uuid(), operation.originMetaClassIndex(), operation.index());
-        if (operationCore != null) {
-            operationCore.on(source, param, callback);
+        KIntMap<KOperation> clazzOperations = staticOperations.get(operation.originMetaClassIndex());
+        KOperation resolved = null;
+        if (clazzOperations != null) {
+            resolved = clazzOperations.get(operation.index());
+        }
+        if (resolved != null) {
+            resolved.on(source, param, callback);
         } else {
             strategy.invoke(_manager.cdn(), operation, source, param, this, callback);
         }
     }
 
-    public synchronized int nextKey() {
-        if (_callbackId == KConfig.CALLBACK_HISTORY) {
-            _callbackId = 0;
-        } else {
-            _callbackId++;
-        }
-        return _callbackId;
-    }
-
     @Override
-    public void dispatch(String fromPeer, KMessage message) {
-        if (message.type() == Message.OPERATION_RESULT_TYPE) {
-            KCallback<KMessage> cb = remoteCallCallbacks.get(message.id());
-            if (cb != null) {
-                cb.on(message);
-            }
-        } else if (message.type() == Message.OPERATION_CALL_TYPE) {
+    public void dispatch(KMessage message) {
+        if (message.type() == Message.OPERATION_CALL_TYPE) {
             long[] sourceKey = message.keys();
             KMetaClass mc = _manager.model().metaModel().metaClassByName(message.className());
             KMetaOperation mo = mc.operation(message.operationName());
-            final KOperation operationCore = searchOperation(sourceKey[2], mc.index(), mo.index());
-            if (operationCore != null) {
-                _manager.lookup(sourceKey[0], sourceKey[1],sourceKey[2], new KCallback<KObject>() {
+            KIntMap<KOperation> clazzOperations = staticOperations.get(mc.index());
+            KOperation resolved = null;
+            if (clazzOperations != null) {
+                resolved = clazzOperations.get(mo.index());
+            }
+            if (resolved != null) {
+                final KOperation finalResolved = resolved;
+                _manager.lookup(sourceKey[0], sourceKey[1], sourceKey[2], new KCallback<KObject>() {
                     public void on(KObject kObject) {
                         if (kObject != null) {
-                            operationCore.on(kObject, OperationStrategies.unserializeParam(mo, message.values()), new KCallback<Object>() {
+                            finalResolved.on(kObject, OperationStrategies.unserializeParam(mo, message.values()), new KCallback<Object>() {
                                 public void on(Object operationResult) {
-                                    KMessage operationResultMessage = new Message();
-                                    operationResultMessage.setID(message.id());
-                                    operationResultMessage.setType(Message.OPERATION_RESULT_TYPE);
-                                    operationResultMessage.setValues(new String[]{OperationStrategies.serializeReturn(mo, operationResult)});
-                                    _manager.cdn().sendToPeer(fromPeer, operationResultMessage);
+                                    if (message.id() != null) {
+                                        KMessage operationResultMessage = new Message();
+                                        operationResultMessage.setPeer(message.peer());
+                                        operationResultMessage.setID(message.id());
+                                        operationResultMessage.setType(Message.OPERATION_RESULT_TYPE);
+                                        operationResultMessage.setValues(new String[]{OperationStrategies.serializeReturn(mo, operationResult)});
+                                        _manager.cdn().sendToPeer(message.peer(), operationResultMessage, null);
+                                    }
                                 }
                             });
                         } else {
-                            KMessage operationResultMessage = new Message();
-                            operationResultMessage.setID(message.id());
-                            operationResultMessage.setType(Message.OPERATION_RESULT_TYPE);
-                            operationResultMessage.setValues(null);
-                            _manager.cdn().sendToPeer(fromPeer, operationResultMessage);
+                            if (message.id() != null) {
+                                KMessage operationResultMessage = new Message();
+                                operationResultMessage.setID(message.id());
+                                operationResultMessage.setPeer(message.peer());
+                                operationResultMessage.setType(Message.OPERATION_RESULT_TYPE);
+                                operationResultMessage.setValues(null);
+                                _manager.cdn().sendToPeer(message.peer(), operationResultMessage, null);
+                            }
                         }
                     }
                 });
+            } else {
+                if (message.id() != null) {
+                    KMessage operationResultMessage = new Message();
+                    operationResultMessage.setID(message.id());
+                    operationResultMessage.setPeer(message.peer());
+                    operationResultMessage.setType(Message.OPERATION_RESULT_TYPE);
+                    operationResultMessage.setValues(null);
+                    _manager.cdn().sendToPeer(message.peer(), operationResultMessage, null);
+                }
             }
-        } else {
-            System.err.println("BAD ROUTING !");
-            //Wrong routing.
         }
     }
 
     @Override
-    public void send(String peer, KMessage message, KCallback<KMessage> callback) {
-        message.setID(nextKey());
-        remoteCallCallbacks.put(message.id(), callback);
-        _manager.cdn().sendToPeer(peer, message);
+    public String[] mappings() {
+        ArrayList<String> mappings = new ArrayList<String>();
+        staticOperations.each(new KIntMapCallBack<KIntMap<KOperation>>() {
+            @Override
+            public void on(int key, KIntMap<KOperation> value) {
+                if (value != null) {
+                    KMetaClass metaClass = _manager.model().metaModel().metaClass(key);
+                    String metaClassName = metaClass.metaName();
+                    value.each(new KIntMapCallBack<KOperation>() {
+                        @Override
+                        public void on(int key, KOperation value) {
+                            KMetaOperation metaOperation = (KMetaOperation) metaClass.meta(key);
+                            mappings.add(metaClassName);
+                            mappings.add(metaOperation.metaName());
+                        }
+                    });
+                }
+            }
+        });
+        return mappings.toArray(new String[mappings.size()]);
     }
 
 }

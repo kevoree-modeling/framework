@@ -8,12 +8,12 @@ import org.kevoree.modeling.message.KMessage;
 
 public interface KOperationManager {
 
-    void register(KMetaOperation operation, KOperation callback, KObject target);
+    void register(KMetaOperation operation, KOperation callback);
 
     void invoke(KObject source, KMetaOperation operation, Object[] param, KOperationStrategy strategy, KCallback callback);
 
-    void dispatch(String fromPeer, KMessage message);
-
-    void send(String peer, KMessage message, KCallback<KMessage> callback);
+    void dispatch(KMessage message);
+    
+    String[] mappings();
 
 }

@@ -139,7 +139,7 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void connect(KCallback<Throwable> callback) {
+    public void connect(KModel model, KCallback<Throwable> callback) {
         mongoClient = new MongoClient(host, port);
         db = mongoClient.getDB(dbName);
         table = db.getCollection(KMF_COL);
@@ -186,8 +186,8 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void sendToPeer(String peer, KMessage message) {
-        //NOOP
+    public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
+        callback.on(null);
     }
 
 }

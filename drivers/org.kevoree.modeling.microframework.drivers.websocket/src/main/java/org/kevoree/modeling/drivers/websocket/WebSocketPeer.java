@@ -7,11 +7,13 @@ import io.undertow.websockets.core.WebSocketVersion;
 import io.undertow.websockets.core.WebSockets;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongMap;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.impl.Message;
 import org.xnio.BufferAllocator;
@@ -28,25 +30,34 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 
-public class WebSocketCDNClient extends AbstractReceiveListener implements KContentDeliveryDriver {
+public class WebSocketPeer extends AbstractReceiveListener implements KContentDeliveryDriver {
 
-    private static final int CALLBACK_SIZE = 100000;
+    private static final int CALLBACK_SIZE = 1000000;
 
     private UndertowWSClient _client;
 
     private AtomicInteger _atomicInteger = null;
 
-    private final ArrayLongMap<Object> _callbacks = new ArrayLongMap<Object>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+    private final ArrayLongMap<KCallback> _callbacks = new ArrayLongMap<KCallback>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
 
-    public WebSocketCDNClient(String url) {
+    private KInternalDataManager _manager;
+
+    public WebSocketPeer(String url) {
         _client = new UndertowWSClient(url);
     }
 
     @Override
-    public void connect(KCallback<Throwable> callback) {
+    public void connect(KModel model, KCallback<Throwable> callback) {
+        this._manager = (KInternalDataManager) model.manager();
         _client.connect(this);
         _atomicInteger = new AtomicInteger();
         callback.on(null);
+
+        //inform server about capabilities
+        KMessage operationMappings = new Message();
+        operationMappings.setType(Message.OPERATION_MAPPING);
+        operationMappings.setValues(_manager.operationManager().mappings());
+        WebSockets.sendText(operationMappings.json(), _client.getChannel(), null);
     }
 
     @Override
@@ -74,30 +85,35 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
         KMessage msg = Message.load(payload);
         switch (msg.type()) {
             case Message.GET_RES_TYPE: {
-                Object callbackRegistered = _callbacks.get(msg.id());
+                KCallback callbackRegistered = _callbacks.get(msg.id());
                 if (callbackRegistered != null) {
-                    ((KCallback) callbackRegistered).on(msg.values());
-                } else {
-                    System.err.println();
+                    callbackRegistered.on(msg.values());
                 }
                 _callbacks.remove(msg.id());
             }
             break;
             case Message.PUT_RES_TYPE: {
-                Object callbackRegistered = _callbacks.get(msg.id());
+                KCallback callbackRegistered = _callbacks.get(msg.id());
                 if (callbackRegistered != null) {
-                    ((KCallback) callbackRegistered).on(null);
-                } else {
-                    System.err.println();
+                    callbackRegistered.on(null);
                 }
             }
             break;
             case Message.ATOMIC_GET_INC_RESULT_TYPE: {
-                Object callbackRegistered = _callbacks.get(msg.id());
+                KCallback callbackRegistered = _callbacks.get(msg.id());
                 if (callbackRegistered != null) {
-                    ((KCallback) callbackRegistered).on(Short.parseShort(msg.values()[0]));
-                } else {
-                    System.err.println();
+                    callbackRegistered.on(Short.parseShort(msg.values()[0]));
+                }
+            }
+            break;
+            case Message.OPERATION_CALL_TYPE: {
+                _manager.operationManager().dispatch(msg);
+            }
+            break;
+            case Message.OPERATION_RESULT_TYPE: {
+                KCallback callbackRegistered = _callbacks.get(msg.id());
+                if (callbackRegistered != null) {
+                    callbackRegistered.on(msg);
                 }
             }
             break;
@@ -113,7 +129,7 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
             }
             break;
             default: {
-                System.err.println("MessageType not supported:" + msg.type());
+                System.err.println("MessageType not supported:" + msg.type() + "->" + msg.json());
             }
         }
     }
@@ -190,7 +206,6 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
     }
 
     class UndertowWSClient {
-
         private ByteBufferSlicePool _buffer;
         private XnioWorker _worker;
         private WebSocketChannel _webSocketChannel = null;
@@ -209,10 +224,7 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
                         .set(Options.TCP_NODELAY, true)
                         .set(Options.CORK, true)
                         .getMap());
-
                 _buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
-
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -246,12 +258,16 @@ public class WebSocketCDNClient extends AbstractReceiveListener implements KCont
 
     @Override
     public String[] peers() {
-        return new String[0];
+        return new String[]{"server"};
     }
 
     @Override
-    public void sendToPeer(String peer, KMessage message) {
-        //NOOP, TODO P2P execution here
+    public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
+        if (callback != null) {
+            message.setID(nextKey());
+            _callbacks.put(message.id(), callback);
+        }
+        WebSockets.sendText(message.json(), _client.getChannel(), null);
     }
 
 }

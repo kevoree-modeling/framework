@@ -116,31 +116,21 @@ public class OperationStrategies {
         public void invoke(final KContentDeliveryDriver cdn, final KMetaOperation metaOperation, final KObject source, final Object[] param, final KOperationManager manager, final KCallback callback) {
             //Prepare the message
             KMessage operationCall = new Message();
+            operationCall.setType(Message.OPERATION_CALL_TYPE);
             operationCall.setKeys(new long[]{source.universe(), source.now(), source.uuid()});
             operationCall.setClassName(source.metaClass().metaName());
             operationCall.setOperationName(metaOperation.metaName());
             operationCall.setValues(serializeParam(metaOperation, param));
-            //now try to send sequentially...
-            String[] peers = cdn.peers();
-            final int[] i = {0};
-            final KCallback<KMessage>[] internals = new KCallback[1];
-            internals[0] = new KCallback<KMessage>() {
+            cdn.sendToPeer(null, operationCall, new KCallback<KMessage>() {
                 @Override
-                public void on(KMessage o) {
-                    if (o == null || o.values() == null || o.values().length == 0) {
-                        if (i[0] < peers.length) {
-                            String selectedPeer = peers[i[0]];
-                            i[0]++;
-                            manager.send(selectedPeer, operationCall, internals[0]);
-                        } else {
-                            callback.on(null);
-                        }
+                public void on(KMessage message) {
+                    if (message.values() != null) {
+                        callback.on(unserializeReturn(metaOperation, message.values()[0]));
                     } else {
-                        callback.on(unserializeReturn(metaOperation, o.values()[0]));
+                        callback.on(unserializeReturn(metaOperation, null));
                     }
                 }
-            };
-            internals[0].on(null);//initiate
+            });
         }
     };
 
