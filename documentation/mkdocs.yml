@@ -1,8 +1,0 @@
-site_name: Kevoree Modeling Framework
-pages:
-- [index.md, Home]
-- [start.md, Getting Started in Java]
-- [start_js.md, Getting Started in JavaScript]
-- [reflexive.md, Reflexive API]
-- [about.md, About]
-theme: readthedocs
