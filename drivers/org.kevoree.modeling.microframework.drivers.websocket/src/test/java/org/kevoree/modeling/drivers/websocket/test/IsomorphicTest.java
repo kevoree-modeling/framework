@@ -45,8 +45,8 @@ public class IsomorphicTest {
 
         KModel model = dynamicMM.createModel(DataManagerBuilder.create().withContentDeliveryDriver(new WebSocketPeer("ws://localhost:" + PORT + "/testRoomId?peerId=javapeer")).build());
         KMetaOperation operationTrigger = dynamicSensorClass.addOperation("trigger");
-        operationTrigger.setReturnType(KPrimitiveTypes.STRING);
-        operationTrigger.addParam(KPrimitiveTypes.STRING);
+        operationTrigger.setReturnType(KPrimitiveTypes.STRING, false);
+        operationTrigger.addParam(KPrimitiveTypes.STRING, false);
         model.setOperation(operationTrigger, new KOperation() {
             @Override
             public void on(KObject source, Object[] params, KCallback result) {
@@ -55,7 +55,7 @@ public class IsomorphicTest {
         });
 
         final CountDownLatch latch = new CountDownLatch(1);
-        
+
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -103,6 +103,20 @@ public class IsomorphicTest {
                     params[0] = "node";
                 }
                 String basePath = IsomorphicTest.class.getClassLoader().getResource(file).getFile().replaceAll("%20", " ");
+
+                /*
+                System.out.println("NPM install in " + new File(basePath.toString().substring(0, basePath.toString().lastIndexOf("/"))).getAbsolutePath());
+                String[] params_npm = new String[3];
+                params_npm[0] = "npm";
+                params_npm[1] = "install";
+                params_npm[2] = "ws";
+                ProcessBuilder pbNPM = new ProcessBuilder(params_npm);
+                pbNPM.directory(new File(basePath.toString().substring(0, basePath.toString().lastIndexOf("/"))));
+                pbNPM.redirectError();
+                pbNPM.redirectOutput();
+                int resNPM = pbNPM.start().waitFor();
+                */
+
                 params[1] = basePath;
                 ProcessBuilder pb = new ProcessBuilder(params);
                 pb.directory(new File(basePath.toString().substring(0, basePath.toString().lastIndexOf("/"))));

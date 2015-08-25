@@ -16,7 +16,7 @@ public class LevelDbTest {
     public void test() throws IOException {
 
         final LevelDbContentDeliveryDriver driver = new LevelDbContentDeliveryDriver("target/temp");
-        driver.connect(null,new KCallback<Throwable>() {
+        driver.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
                 long[] keys = new long[]{

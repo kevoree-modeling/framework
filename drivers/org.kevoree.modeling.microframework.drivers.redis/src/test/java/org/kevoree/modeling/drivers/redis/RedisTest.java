@@ -19,7 +19,7 @@ public class RedisTest {
         redisServer.start();
 
         RedisContentDeliveryDriver driver = new RedisContentDeliveryDriver("0.0.0.0", 6379);
-        driver.connect(null,new KCallback<Throwable>() {
+        driver.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
 

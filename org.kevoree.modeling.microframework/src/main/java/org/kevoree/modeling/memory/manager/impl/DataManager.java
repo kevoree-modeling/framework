@@ -17,6 +17,8 @@ import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.manager.KDataManager;
+import org.kevoree.modeling.message.KMessage;
+import org.kevoree.modeling.message.impl.Message;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.scheduler.KScheduler;
@@ -197,10 +199,16 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 connectCallback.on(new Exception("Please attach a KDataBase AND a KBroker first !"));
             }
         } else {
-            _db.connect(this._model,new KCallback<Throwable>() {
+            _db.connect(new KCallback<Throwable>() {
                 @Override
                 public void on(Throwable throwable) {
                     if (throwable == null) {
+
+                        KMessage operationMapping = new Message();
+                        operationMapping.setType(Message.OPERATION_MAPPING);
+                        operationMapping.setValues(_operationManager.mappings());
+                        _db.sendToPeer(null, operationMapping, null);
+
                         _db.atomicGetIncrement(new long[]{KConfig.END_OF_TIME, KConfig.NULL_LONG, KConfig.NULL_LONG},
                                 new KCallback<Short>() {
                                     @Override
@@ -218,11 +226,11 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                     Exception detected = null;
                                                     try {
                                                         String uniIndexPayload = strings[UNIVERSE_INDEX];
-                                                        if (uniIndexPayload == null || PrimitiveHelper.equals(uniIndexPayload,"")) {
+                                                        if (uniIndexPayload == null || PrimitiveHelper.equals(uniIndexPayload, "")) {
                                                             uniIndexPayload = "0";
                                                         }
                                                         String objIndexPayload = strings[OBJ_INDEX];
-                                                        if (objIndexPayload == null || PrimitiveHelper.equals(objIndexPayload,"")) {
+                                                        if (objIndexPayload == null || PrimitiveHelper.equals(objIndexPayload, "")) {
                                                             objIndexPayload = "0";
                                                         }
                                                         String globalUniverseTreePayload = strings[GLO_TREE_INDEX];
@@ -304,7 +312,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private void attachContentDeliveryDriver(KContentDeliveryDriver p_dataBase) {
         currentCdnListener = this._db.addUpdateListener(new KContentUpdateListener() {
             @Override
-            public void on(long[] updatedKeys) {
+            public void onKeysUpdate(long[] updatedKeys) {
                 long[] toLoadKeys = new long[updatedKeys.length];
                 int toInsertNotifyKey = 0;
                 long[] toNotifyKeys = new long[updatedKeys.length];
@@ -361,6 +369,11 @@ public class DataManager implements KDataManager, KInternalDataManager {
                         }).run();
                     }
                 });
+            }
+
+            @Override
+            public void onOperationCall(KMessage operationCallMessage) {
+                _operationManager.dispatch(operationCallMessage);
             }
         });
     }

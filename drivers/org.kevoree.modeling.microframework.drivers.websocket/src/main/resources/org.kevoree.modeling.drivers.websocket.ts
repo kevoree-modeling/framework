@@ -8,23 +8,16 @@ module org {
             export module drivers {
                 export module websocket {
                     export class WebSocketPeer implements org.kevoree.modeling.cdn.KContentDeliveryDriver {
-
                         private _callbackId = 0;
                         private _reconnectionDelay = 3000;
                         private _clientConnection:WebSocket;
                         private _connectionUri:string;
-
                         private _callbacks = {};
-
-                        private _manager:org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-
                         constructor(connectionUri) {
                             this._connectionUri = connectionUri;
                         }
-
                         listeners = [];
                         shouldBeConnected = false;
-
                         public addUpdateListener(listener):number {
                             var i = Math.random();
                             this.listeners[i] = listener;
@@ -35,9 +28,8 @@ module org {
                             delete this.listeners[id];
                         }
 
-                        public connect(model:org.kevoree.modeling.KModel<any>, callback:org.kevoree.modeling.KCallback<Error>):void {
+                        public connect(callback:org.kevoree.modeling.KCallback<Error>):void {
                             var self = this;
-                            this._manager = <org.kevoree.modeling.memory.manager.internal.KInternalDataManager> model.manager();
                             this.shouldBeConnected = true;
 
                             if (typeof require !== "undefined") {
@@ -105,7 +97,7 @@ module org {
                                     console.log("Try reconnection in " + self._reconnectionDelay + " milliseconds.");
                                     //try to reconnect
                                     setTimeout(function () {
-                                        self.connect(model, null)
+                                        self.connect(null)
                                     }, self._reconnectionDelay);
                                 }
                             };
@@ -113,11 +105,6 @@ module org {
                                 if (callback != null) {
                                     callback(null);
                                 }
-                                //inform server about capabilities
-                                var operationMappings:org.kevoree.modeling.message.KMessage = new org.kevoree.modeling.message.impl.Message();
-                                operationMappings.setType(org.kevoree.modeling.message.impl.Message.OPERATION_MAPPING);
-                                operationMappings.setValues(self._manager.operationManager().mappings());
-                                self._clientConnection.send(operationMappings.json());
                             };
                         }
 

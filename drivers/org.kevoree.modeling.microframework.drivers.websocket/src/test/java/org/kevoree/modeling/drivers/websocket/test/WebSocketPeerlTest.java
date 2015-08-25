@@ -37,8 +37,8 @@ public class WebSocketPeerlTest {
         dynamicSensorClass.addAttribute("name", KPrimitiveTypes.STRING);
         dynamicSensorClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
         KMetaOperation operationTrigger = dynamicSensorClass.addOperation("trigger");
-        operationTrigger.setReturnType(KPrimitiveTypes.STRING);
-        operationTrigger.addParam(KPrimitiveTypes.STRING);
+        operationTrigger.setReturnType(KPrimitiveTypes.STRING, false);
+        operationTrigger.addParam(KPrimitiveTypes.STRING, false);
 
         KModel model = dynamicMM.createModel(DataManagerBuilder.create().withContentDeliveryDriver(new WebSocketPeer("ws://localhost:" + PORT + "/testRoomId")).build());
         model.setOperation(operationTrigger, new KOperation() {

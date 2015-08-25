@@ -7,13 +7,11 @@ import io.undertow.websockets.core.WebSocketVersion;
 import io.undertow.websockets.core.WebSockets;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongMap;
-import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.impl.Message;
 import org.xnio.BufferAllocator;
@@ -40,24 +38,15 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
 
     private final ArrayLongMap<KCallback> _callbacks = new ArrayLongMap<KCallback>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
 
-    private KInternalDataManager _manager;
-
     public WebSocketPeer(String url) {
         _client = new UndertowWSClient(url);
     }
 
     @Override
-    public void connect(KModel model, KCallback<Throwable> callback) {
-        this._manager = (KInternalDataManager) model.manager();
+    public void connect(KCallback<Throwable> callback) {
         _client.connect(this);
         _atomicInteger = new AtomicInteger();
         callback.on(null);
-
-        //inform server about capabilities
-        KMessage operationMappings = new Message();
-        operationMappings.setType(Message.OPERATION_MAPPING);
-        operationMappings.setValues(_manager.operationManager().mappings());
-        WebSockets.sendText(operationMappings.json(), _client.getChannel(), null);
     }
 
     @Override
@@ -107,7 +96,14 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
             }
             break;
             case Message.OPERATION_CALL_TYPE: {
-                _manager.operationManager().dispatch(msg);
+                if (additionalInterceptors != null) {
+                    additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
+                        @Override
+                        public void on(int key, KContentUpdateListener value) {
+                            value.onOperationCall(msg);
+                        }
+                    });
+                }
             }
             break;
             case Message.OPERATION_RESULT_TYPE: {
@@ -122,7 +118,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
                     additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
                         @Override
                         public void on(int key, KContentUpdateListener value) {
-                            value.on(msg.keys());
+                            value.onKeysUpdate(msg.keys());
                         }
                     });
                 }
@@ -168,7 +164,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
                 @Override
                 public void on(int key, KContentUpdateListener value) {
                     if (value != null && key != excludeListener) {
-                        value.on(p_keys);
+                        value.onKeysUpdate(p_keys);
                     }
                 }
             });

@@ -26,9 +26,8 @@ var org;
                         WebSocketPeer.prototype.removeUpdateListener = function (id) {
                             delete this.listeners[id];
                         };
-                        WebSocketPeer.prototype.connect = function (model, callback) {
+                        WebSocketPeer.prototype.connect = function (callback) {
                             var self = this;
-                            this._manager = model.manager();
                             this.shouldBeConnected = true;
                             if (typeof require !== "undefined") {
                                 var wsNodeJS = require('ws');
@@ -94,7 +93,7 @@ var org;
                                     console.log("Try reconnection in " + self._reconnectionDelay + " milliseconds.");
                                     //try to reconnect
                                     setTimeout(function () {
-                                        self.connect(model, null);
+                                        self.connect(null);
                                     }, self._reconnectionDelay);
                                 }
                             };
@@ -102,11 +101,6 @@ var org;
                                 if (callback != null) {
                                     callback(null);
                                 }
-                                //inform server about capabilities
-                                var operationMappings = new org.kevoree.modeling.message.impl.Message();
-                                operationMappings.setType(org.kevoree.modeling.message.impl.Message.OPERATION_MAPPING);
-                                operationMappings.setValues(self._manager.operationManager().mappings());
-                                self._clientConnection.send(operationMappings.json());
                             };
                         };
                         WebSocketPeer.prototype.close = function (callback) {

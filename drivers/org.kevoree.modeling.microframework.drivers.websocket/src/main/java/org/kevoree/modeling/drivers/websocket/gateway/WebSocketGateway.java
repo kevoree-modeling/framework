@@ -58,7 +58,7 @@ public class WebSocketGateway implements WebSocketConnectionCallback, HttpHandle
         _server.start();
         interceptorId = wrapped.addUpdateListener(new KContentUpdateListener() {
             @Override
-            public void on(long[] updatedKeys) {
+            public void onKeysUpdate(long[] updatedKeys) {
                 KMessage message = new Message();
                 message.setType(Message.EVENTS_TYPE);
                 message.setKeys(updatedKeys);
@@ -69,6 +69,11 @@ public class WebSocketGateway implements WebSocketConnectionCallback, HttpHandle
                         WebSockets.sendText(payload, channel, null);
                     }
                 });
+            }
+
+            @Override
+            public void onOperationCall(KMessage operationCallMessage) {
+                //TODO dispatch from one CDN to other, warning for loop
             }
         });
     }

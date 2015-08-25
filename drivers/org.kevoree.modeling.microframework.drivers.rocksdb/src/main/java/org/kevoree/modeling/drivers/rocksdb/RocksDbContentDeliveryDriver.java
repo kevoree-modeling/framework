@@ -54,7 +54,7 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
                 @Override
                 public void on(int key, KContentUpdateListener value) {
                     if (value != null && key != excludeListener) {
-                        value.on(p_keys);
+                        value.onKeysUpdate(p_keys);
                     }
                 }
             });
@@ -151,7 +151,7 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void connect(KModel model, KCallback<Throwable> callback) {
+    public void connect(KCallback<Throwable> callback) {
         //noop
         if (callback != null) {
             callback.on(null);

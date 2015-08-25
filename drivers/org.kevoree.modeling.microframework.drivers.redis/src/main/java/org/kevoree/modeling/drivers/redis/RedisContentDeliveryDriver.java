@@ -37,7 +37,7 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
                                 additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
                                     @Override
                                     public void on(int key, KContentUpdateListener value) {
-                                        value.on(msg.keys());
+                                        value.onKeysUpdate(msg.keys());
                                     }
                                 });
                             }
@@ -133,7 +133,7 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
     }
 
     @Override
-    public void connect(KModel model, KCallback<Throwable> callback) {
+    public void connect(KCallback<Throwable> callback) {
         //noop
         if (callback != null) {
             callback.on(null);

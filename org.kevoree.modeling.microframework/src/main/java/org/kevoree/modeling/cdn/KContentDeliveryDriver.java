@@ -14,7 +14,7 @@ public interface KContentDeliveryDriver {
 
     void remove(long[] keys, KCallback<Throwable> error);
 
-    void connect(KModel model, KCallback<Throwable> callback);
+    void connect(KCallback<Throwable> callback);
 
     void close(KCallback<Throwable> callback);
 

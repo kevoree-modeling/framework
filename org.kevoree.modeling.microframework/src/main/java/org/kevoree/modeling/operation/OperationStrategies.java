@@ -14,6 +14,9 @@ import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.Base64;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OperationStrategies {
 
     public static String serialize(int type, Object elem, boolean isArray) {
@@ -63,32 +66,50 @@ public class OperationStrategies {
         return serialize(metaOperation.returnType(), result, metaOperation.returnTypeIsArray());
     }
 
-    public static Object unserialize(int type, String payload) {
-        switch (type) {
-            case KPrimitiveTypes.BOOL_ID:
-                return PrimitiveHelper.equals(payload, "1");
-            case KPrimitiveTypes.STRING_ID:
-                return JsonString.unescape(payload);
-            case KPrimitiveTypes.DOUBLE_ID:
-                return Base64.decodeToDouble(payload);
-            case KPrimitiveTypes.INT_ID:
-                return Base64.decodeToInt(payload);
-            case KPrimitiveTypes.LONG_ID:
-                return Base64.decodeToLong(payload);
-            default:
-                return null;
+    public static Object unserialize(int type, String payload, boolean isArray) {
+        if (isArray) {
+            List<String> params = new ArrayList<String>();
+            int i = 0;
+            int previous = 0;
+            while (i < payload.length()) {
+                if (payload.charAt(i) == KConfig.KEY_SEP) {
+
+                }
+                i++;
+            }
+            return null;
+        } else {
+            switch (type) {
+                case KPrimitiveTypes.BOOL_ID:
+                    return PrimitiveHelper.equals(payload, "1");
+                case KPrimitiveTypes.STRING_ID:
+                    return JsonString.unescape(payload);
+                case KPrimitiveTypes.DOUBLE_ID:
+                    return Base64.decodeToDouble(payload);
+                case KPrimitiveTypes.INT_ID:
+                    return Base64.decodeToInt(payload);
+                case KPrimitiveTypes.LONG_ID:
+                    return Base64.decodeToLong(payload);
+                default:
+                    int literalIndex = Base64.decodeToInt(payload);
+                    //TODO transform literal ID into Literal
+                    return null;
+            }
         }
+
+
     }
 
     public static Object unserializeReturn(KMetaOperation metaOperation, String resultString) {
-        return unserialize(metaOperation.returnType(), resultString);
+        return unserialize(metaOperation.returnType(), resultString, metaOperation.returnTypeIsArray());
     }
 
     public static Object[] unserializeParam(KMetaOperation metaOperation, String[] param) {
         int[] paramTypes = metaOperation.paramTypes();
+        boolean[] paramMultiplicities = metaOperation.paramMultiplicities();
         Object[] objParam = new Object[paramTypes.length];
         for (int i = 0; i < paramTypes.length; i++) {
-            objParam[i] = unserialize(paramTypes[i], param[i]);
+            objParam[i] = unserialize(paramTypes[i], param[i], paramMultiplicities[i]);
         }
         return objParam;
     }
