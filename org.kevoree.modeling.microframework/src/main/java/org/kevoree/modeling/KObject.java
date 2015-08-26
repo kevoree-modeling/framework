@@ -42,7 +42,7 @@ public interface KObject {
     /**
      * Delete KObject
      */
-    void delete(KCallback cb);
+    void removeFromAll(KCallback cb);
 
     /**
      * Reflexive API

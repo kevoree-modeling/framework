@@ -14,7 +14,7 @@ public interface KChunkSpace {
 
     void clear(KMetaModel metaModel);
 
-    void delete(KMetaModel metaModel);
+    void free(KMetaModel metaModel);
 
     void remove(long universe, long time, long obj, KMetaModel metaModel);
 

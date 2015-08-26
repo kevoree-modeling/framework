@@ -40,7 +40,7 @@ public class HeapListener implements KListener {
     }
 
     @Override
-    public void delete() {
+    public void destroy() {
         _listenerManager.manageRegistration(_id, null);
     }
 

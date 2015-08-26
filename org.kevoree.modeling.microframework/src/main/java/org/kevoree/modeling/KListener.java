@@ -8,7 +8,7 @@ public interface KListener {
 
     void listen(KObject obj);
 
-    void delete();
+    void destroy();
 
     void then(KCallback<KObject> updatedObjects);
 

@@ -45,7 +45,7 @@ public class
                                                     n2_2.getElement(new KCallback<Element>() {
                                                         @Override
                                                         public void on(Element element) {
-                                                            element.delete(new KCallback<Throwable>() {
+                                                            element.removeFromAll(new KCallback<Throwable>() {
                                                                 @Override
                                                                 public void on(Throwable throwable) {
                                                                     n2_2.jump(3, new KCallback<KObject>() {
@@ -61,7 +61,7 @@ public class
                                                                                     n42.setName("n42");
                                                                                     n2_3.addChildren(n42);
 
-                                                                                    n42.delete(null);
+                                                                                    n42.removeFromAll(null);
 
                                                                                     CloudView factory2_2 = universe.time(1l);
                                                                                     factory2_2.select("@root", new KCallback<Object[]>() {

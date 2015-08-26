@@ -75,7 +75,7 @@ public abstract class AbstractKObject implements KObject {
     }
 
     @Override
-    public void delete(KCallback cb) {
+    public void removeFromAll(KCallback cb) {
         final KObject selfPointer = this;
         KObjectChunk rawPayload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
         if (rawPayload == null) {

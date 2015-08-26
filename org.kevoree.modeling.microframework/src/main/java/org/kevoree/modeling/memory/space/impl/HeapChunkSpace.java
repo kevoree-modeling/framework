@@ -366,7 +366,7 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     @Override
-    public void delete(KMetaModel metaModel) {
+    public void free(KMetaModel metaModel) {
         InternalState internalState = _state.getAndSet(null);
         for (int i = 0; i < internalState.elementDataSize; i++) {
             if (internalState.values[i] != null) {

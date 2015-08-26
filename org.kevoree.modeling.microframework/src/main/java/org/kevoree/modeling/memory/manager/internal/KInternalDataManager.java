@@ -30,7 +30,7 @@ public interface KInternalDataManager extends KDataManager {
 
     long nextModelKey();
 
-    void delete(KUniverse universe, KCallback<Throwable> callback);
+    void deleteUniverse(KUniverse universe, KCallback<Throwable> callback);
 
     KOperationManager operationManager();
 

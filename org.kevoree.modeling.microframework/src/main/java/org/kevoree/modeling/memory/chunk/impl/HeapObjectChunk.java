@@ -306,22 +306,11 @@ public class HeapObjectChunk implements KObjectChunk {
 
     @Override
     public long[] getLongArray(int index, KMetaClass p_metaClass) {
-        if (raw != null) {
-            Object previousObj = raw[index];
-            if (previousObj != null) {
-                try {
-                    return (long[]) previousObj;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    raw[index] = null;
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } else {
-            return null;
+        Object previousObj = raw[index];
+        if (previousObj != null) {
+            return (long[]) previousObj;
         }
+        return null;
     }
 
     @Override
@@ -385,22 +374,11 @@ public class HeapObjectChunk implements KObjectChunk {
 
     @Override
     public double[] getDoubleArray(int index, KMetaClass metaClass) {
-        if (raw != null) {
-            Object previousObj = raw[index];
-            if (previousObj != null) {
-                try {
-                    return (double[]) previousObj;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    raw[index] = null;
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } else {
-            return null;
+        Object previousObj = raw[index];
+        if (previousObj != null) {
+            return (double[]) previousObj;
         }
+        return null;
     }
 
     @Override

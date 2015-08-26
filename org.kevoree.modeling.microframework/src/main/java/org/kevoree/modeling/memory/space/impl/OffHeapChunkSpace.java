@@ -572,7 +572,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
     }
 
     @Override
-    public void delete(KMetaModel p_metaModel) {
+    public void free(KMetaModel p_metaModel) {
         // TODO this method is not thread-safe
         int elementDataSize = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_ELEMENT_DATA_SIZE);
 

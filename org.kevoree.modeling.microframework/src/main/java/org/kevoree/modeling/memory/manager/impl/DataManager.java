@@ -275,7 +275,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public void delete(KUniverse p_universe, KCallback<Throwable> callback) {
+    public void deleteUniverse(KUniverse p_universe, KCallback<Throwable> callback) {
         throw new RuntimeException("Not implemented yet !");
     }
 

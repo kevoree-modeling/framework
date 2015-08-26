@@ -90,9 +90,9 @@ package org.kevoree.modeling.util;
  * }
  * public static encodeDouble(d : number) {
  * var result = "";
- * var float = new Float64Array(1);
- * var bytes = new Uint8Array(float.buffer);
- * float[0] = d;
+ * var floatArr = new Float64Array(1);
+ * var bytes = new Uint8Array(floatArr.buffer);
+ * floatArr[0] = d;
  * var exponent = ((bytes[7] & 0x7f) << 4 | bytes[6] >> 4) - 0x3ff;
  * var signAndExp = (((bytes[7] >> 7)&0x1) << 11) + (exponent + 1023);
  * //encode sign + exp
@@ -115,9 +115,9 @@ package org.kevoree.modeling.util;
  * }
  * public static encodeDoubleToBuffer(d : number, buffer : java.lang.StringBuilder) {
  * var result = "";
- * var float = new Float64Array(1);
- * var bytes = new Uint8Array(float.buffer);
- * float[0] = d;
+ * var floatArr = new Float64Array(1);
+ * var bytes = new Uint8Array(floatArr.buffer);
+ * floatArr[0] = d;
  * var exponent = ((bytes[7] & 0x7f) << 4 | bytes[6] >> 4) - 0x3ff;
  * var signAndExp = (((bytes[7] >> 7)&0x1) << 11) + (exponent + 1023);
  * //encode sign + exp
