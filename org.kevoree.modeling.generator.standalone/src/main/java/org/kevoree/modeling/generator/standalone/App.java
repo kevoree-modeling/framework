@@ -3,6 +3,7 @@ package org.kevoree.modeling.generator.standalone;
 import org.kevoree.modeling.action.VersionAnalyzer;
 import org.kevoree.modeling.generator.GenerationContext;
 import org.kevoree.modeling.generator.Generator;
+import org.kevoree.modeling.generator.JSOptimizer;
 import org.kevoree.modeling.generator.mavenplugin.GenModelPlugin;
 import org.kevoree.modeling.generator.mavenplugin.TscRunner;
 import org.kevoree.modeling.java2typescript.SourceTranslator;
@@ -77,6 +78,12 @@ public class App {
                         TscRunner runner = new TscRunner();
                         Path tscPath = Paths.get(jsDir.toPath().toString(), GenModelPlugin.TSC_JS);
                         runner.runTsc(jsDir, jsDir, null, true, umd);
+
+                        File input = new File(jsDir.getAbsolutePath(), ctx.getMetaModelName() + ".js");
+                        File outputMin = new File(jsDir.getAbsolutePath(), ctx.getMetaModelName() + ".min.js");
+                        JSOptimizer.optimize(input, outputMin);
+
+
                         tscPath.toFile().delete();
                         libDts.toFile().delete();
                     }
