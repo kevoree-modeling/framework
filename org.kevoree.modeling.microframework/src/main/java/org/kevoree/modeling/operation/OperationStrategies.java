@@ -11,8 +11,8 @@ import org.kevoree.modeling.meta.KLiteral;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
-import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.Base64;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,7 +127,11 @@ public class OperationStrategies {
     }
 
     public static Object unserializeReturn(KMetaModel metaModel, KMetaOperation metaOperation, String resultString) {
-        return unserialize(metaModel, metaOperation.returnType(), resultString, metaOperation.returnTypeIsArray());
+        if (resultString != null) {
+            return unserialize(metaModel, metaOperation.returnType(), resultString, metaOperation.returnTypeIsArray());
+        } else {
+            return null;
+        }
     }
 
     public static Object[] unserializeParam(KMetaModel metaModel, KMetaOperation metaOperation, String[] param) {
