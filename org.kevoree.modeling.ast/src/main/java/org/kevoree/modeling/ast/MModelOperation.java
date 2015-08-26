@@ -56,6 +56,7 @@ public class MModelOperation {
         cloned.index = index;
         cloned.inputParams = inputParams;
         cloned.returnType = returnType;
+        cloned.returnTypeIsArray = returnTypeIsArray;
         return cloned;
     }
 
