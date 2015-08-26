@@ -75,13 +75,35 @@ public class OperationStrategies {
             while (i < payload.length()) {
                 if (payload.charAt(i) == KConfig.KEY_SEP) {
                     if (i != previous) {
-                        params.add(payload.substring(previous + 1, i));
+                        params.add(payload.substring(previous, i));
                     }
-                    previous = i;
+                    previous = i+1;
                 }
                 i++;
             }
-            Object[] result = new Object[params.size()];
+            if (i != previous) {
+                params.add(payload.substring(previous, i));
+            }
+            Object[] result;
+            switch (type) {
+                case KPrimitiveTypes.BOOL_ID:
+                    result = new Boolean[params.size()];
+                    break;
+                case KPrimitiveTypes.STRING_ID:
+                    result = new String[params.size()];
+                    break;
+                case KPrimitiveTypes.DOUBLE_ID:
+                    result = new Double[params.size()];
+                    break;
+                case KPrimitiveTypes.INT_ID:
+                    result = new Integer[params.size()];
+                    break;
+                case KPrimitiveTypes.LONG_ID:
+                    result = new Long[params.size()];
+                    break;
+                default:
+                    result = new KLiteral[params.size()];
+            }
             for (int j = 0; j < params.size(); j++) {
                 result[j] = unserialize(metaModel, type, params.get(j), false);
             }

@@ -36,19 +36,36 @@ public class WebSocketPeerlTest {
         KMetaClass dynamicSensorClass = dynamicMM.addMetaClass("sensor");
         dynamicSensorClass.addAttribute("name", KPrimitiveTypes.STRING);
         dynamicSensorClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
+
         KMetaOperation operationTrigger = dynamicSensorClass.addOperation("trigger");
         operationTrigger.setReturnType(KPrimitiveTypes.STRING, false);
         operationTrigger.addParam(KPrimitiveTypes.STRING, false);
 
+        KMetaOperation operationTriggerArray = dynamicSensorClass.addOperation("triggerArray");
+        operationTriggerArray.setReturnType(KPrimitiveTypes.STRING, true);
+        operationTriggerArray.addParam(KPrimitiveTypes.STRING, true);
+
         KModel model = dynamicMM.createModel(DataManagerBuilder.create().withContentDeliveryDriver(new WebSocketPeer("ws://localhost:" + PORT + "/testRoomId")).build());
+
         model.setOperation(operationTrigger, new KOperation() {
             @Override
             public void on(KObject source, Object[] params, KCallback result) {
-                result.on("ThisIsARemoteResult");
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < params.length; i++) {
+                    builder.append(params[i]);
+                }
+                result.on("ThisIsARemoteResult with " + builder.toString());
             }
         });
 
-        CountDownLatch latch = new CountDownLatch(1);
+        model.setOperation(operationTriggerArray, new KOperation() {
+            @Override
+            public void on(KObject source, Object[] params, KCallback result) {
+                result.on(new String[]{"ThisIsARemoteResult with " + ((String[]) params[0])[0]});
+            }
+        });
+
+        CountDownLatch latch = new CountDownLatch(2);
 
         model.connect(new KCallback() {
             @Override
@@ -70,12 +87,11 @@ public class WebSocketPeerlTest {
                                 model2.lookup(0, 0, sensorUUID, new KCallback<KObject>() {
                                     @Override
                                     public void on(KObject kObject) {
+
                                         kObject.invokeOperationByName("trigger", new String[]{"hello"}, OperationStrategies.ONLY_ONE, new KCallback<String>() {
                                             @Override
                                             public void on(String operationResult) {
-
-                                                Assert.assertEquals("ThisIsARemoteResult", operationResult);
-
+                                                Assert.assertEquals("ThisIsARemoteResult with hello", operationResult);
                                                 latch.countDown();
                                                 Assert.assertEquals(kObject, sensor);
                                                 Assert.assertEquals("{\"universe\":0,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"MyName\",\"value\":[0.0,1.0,0.0,0.0,42.42]}}", sensor.toJSON());
@@ -83,6 +99,21 @@ public class WebSocketPeerlTest {
 
                                             }
                                         });
+
+                                        kObject.invokeOperationByName("triggerArray", new Object[]{new String[]{"hello"}}, OperationStrategies.ONLY_ONE, new KCallback<String[]>() {
+                                            @Override
+                                            public void on(String[] operationResult) {
+
+                                                Assert.assertEquals("ThisIsARemoteResult with hello", operationResult[0]);
+
+                                                latch.countDown();
+                                                Assert.assertEquals(kObject, sensor);
+                                                Assert.assertEquals("{\"universe\":0,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"MyName\",\"value\":[0.0,1.0,0.0,0.0,42.42]}}", sensor.toJSON());
+
+                                            }
+                                        });
+
+
                                     }
                                 });
                             }

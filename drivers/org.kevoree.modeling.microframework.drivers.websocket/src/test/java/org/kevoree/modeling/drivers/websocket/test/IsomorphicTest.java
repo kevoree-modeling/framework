@@ -63,7 +63,6 @@ public class IsomorphicTest {
                 sensor.set(dynamicSensorClass.attribute("name"), "MyName");
                 sensor.set(dynamicSensorClass.attribute("value"), "42.42");
                 long sensorUUID = sensor.uuid();
-
                 model.save(new KCallback() {
                     @Override
                     public void on(Object o) {
