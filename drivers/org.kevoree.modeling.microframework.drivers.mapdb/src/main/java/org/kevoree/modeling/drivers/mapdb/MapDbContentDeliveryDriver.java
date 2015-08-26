@@ -1,6 +1,7 @@
 package org.kevoree.modeling.drivers.mapdb;
 
-import org.kevoree.modeling.*;
+import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
@@ -143,7 +144,9 @@ public class MapDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
-        callback.on(null);
+        if (callback != null) {
+            callback.on(null);
+        }
     }
 
 }

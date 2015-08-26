@@ -1,17 +1,14 @@
 package org.kevoree.modeling.drivers.rocksdb;
 
-import org.kevoree.modeling.*;
+import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.message.KMessage;
-import org.rocksdb.Options;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
-import org.rocksdb.WriteBatch;
-import org.rocksdb.WriteOptions;
+import org.rocksdb.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -197,7 +194,9 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
-        callback.on(null);
+        if (callback != null) {
+            callback.on(null);
+        }
     }
 
 }

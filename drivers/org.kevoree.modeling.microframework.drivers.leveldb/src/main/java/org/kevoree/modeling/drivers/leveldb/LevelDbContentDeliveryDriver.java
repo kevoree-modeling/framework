@@ -4,7 +4,8 @@ import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
-import org.kevoree.modeling.*;
+import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
@@ -32,6 +33,13 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void connect(KCallback<Throwable> callback) {
+        if (_isConnected) {
+            if (callback != null) {
+                callback.on(null);
+            }
+            return;
+        }
+
         File location = new File(_storagePath);
         if (!location.exists()) {
             location.mkdirs();
@@ -194,7 +202,9 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
-        callback.on(null);
+        if (callback != null) {
+            callback.on(null);
+        }
     }
 
 }

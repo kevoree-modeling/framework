@@ -1,8 +1,9 @@
 package org.kevoree.modeling.drivers.redis;
 
-import org.kevoree.modeling.*;
-import org.kevoree.modeling.cdn.KContentDeliveryDriver;
+import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
+import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
@@ -179,8 +180,9 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
-        callback.on(null);
-        //NOOP
+        if (callback != null) {
+            callback.on(null);
+        }
     }
 
 }

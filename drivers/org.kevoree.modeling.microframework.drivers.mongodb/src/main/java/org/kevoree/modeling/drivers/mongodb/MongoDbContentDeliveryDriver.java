@@ -1,14 +1,10 @@
 package org.kevoree.modeling.drivers.mongodb;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import org.kevoree.modeling.*;
-import org.kevoree.modeling.cdn.KContentDeliveryDriver;
+import com.mongodb.*;
+import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KContentKey;
+import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.memory.chunk.KIntMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
@@ -187,7 +183,9 @@ public class MongoDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void sendToPeer(String peer, KMessage message, KCallback<KMessage> callback) {
-        callback.on(null);
+        if (callback != null) {
+            callback.on(null);
+        }
     }
 
 }
