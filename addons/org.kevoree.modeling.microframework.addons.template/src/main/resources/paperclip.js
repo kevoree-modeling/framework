@@ -265,7 +265,7 @@ module.exports = {
   easein        : require(6),
   easeout       : require(7),
   enable        : require(8),
-  onclick         : require(4)
+  onclick       : require(4)
 };
 
 },{"10":10,"12":12,"15":15,"16":16,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9}],14:[function(require,module,exports){
@@ -644,6 +644,10 @@ module.exports = Base.extend(RepeatComponent, {
         var child;
         if (as) {
           properties       = { };
+          for (var parentKey in parent.context) {
+              properties[parentKey] = parent.context[parentKey];
+          }
+          properties.prototype = parent.context.prototype;
           properties[key]  = k;
           properties[as]   = model;
         } else {
