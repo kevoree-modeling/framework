@@ -11,13 +11,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.kevoree.modeling.generator.GenerationContext;
 import org.kevoree.modeling.generator.Generator;
+import org.kevoree.modeling.generator.JSOptimizer;
 import org.kevoree.modeling.java2typescript.SourceTranslator;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.function.Consumer;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class GenModelPlugin extends AbstractMojo {
@@ -27,12 +27,6 @@ public class GenModelPlugin extends AbstractMojo {
      */
     @Parameter
     private File metaModelFile;
-
-    /**
-     * Source base directory
-     */
-    @Parameter(defaultValue = "${project.build.directory}/generated-sources/kmf")
-    private File targetSrcGenDir;
 
     /**
      * code containerRoot package
@@ -52,6 +46,11 @@ public class GenModelPlugin extends AbstractMojo {
     @Parameter(defaultValue = "${project.build.directory}/classes")
     private File classesDirectory;
 
+    /**
+     * Source base directory
+     */
+    @Parameter(defaultValue = "${project.build.directory}/generated-sources/kmf")
+    private File targetSrcGenDir;
 
     /**
      * Source base directory
@@ -59,31 +58,17 @@ public class GenModelPlugin extends AbstractMojo {
     @Parameter(defaultValue = "${project.build.directory}/generated-sources/kmf-js")
     private File jsWorkingDir;
 
-    /**
-     * Resource base directory
-     */
-    @Parameter(defaultValue = "${project.basedir}/src/main/resources")
-    private File resourceDir;
-
-    /**
-     * Generate Samples
-     */
-    @Parameter(defaultValue = "false")
-    private boolean samples = false;
-
     @Parameter(defaultValue = "false")
     private boolean js = false;
 
     public static final String LIB_D_TS = "lib.d.ts";
-    public static final String KMF_LIB_D_TS = "org.kevoree.modeling.microframework.browser.d.ts";
-
-    public static final String KMF_LIB_JS = "org.kevoree.modeling.microframework.browser.js";
-    public static final String JAVA_LIB_JS = "java.js";
-
     public static final String TSC_JS = "tsc.js";
 
     @Parameter(defaultValue = "false")
     private boolean umd = false;
+
+    @Parameter(defaultValue = "true")
+    private boolean min = true;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -103,21 +88,10 @@ public class GenModelPlugin extends AbstractMojo {
             if (js) {
                 deleteRecusive(jsWorkingDir.toPath());
                 Files.createDirectories(jsWorkingDir.toPath());
-
                 Path libDts = Paths.get(jsWorkingDir.toPath().toString(), LIB_D_TS);
                 Files.copy(this.getClass().getClassLoader().getResourceAsStream("tsc/" + LIB_D_TS), libDts, StandardCopyOption.REPLACE_EXISTING);
-
-                /*
-                if (!umd) {
-                    Files.copy(getClass().getClassLoader().getResourceAsStream(KMF_LIB_D_TS), Paths.get(jsWorkingDir.toPath().toString(), KMF_LIB_D_TS), StandardCopyOption.REPLACE_EXISTING);
-                    Path kmfLibJs = Paths.get(jsWorkingDir.toPath().toString(), KMF_LIB_JS);
-                    Files.copy(this.getClass().getClassLoader().getResourceAsStream(KMF_LIB_JS), kmfLibJs, StandardCopyOption.REPLACE_EXISTING);
-                }*/
-
-
                 Path tscPath = Paths.get(jsWorkingDir.toPath().toString(), TSC_JS);
                 Files.copy(getClass().getClassLoader().getResourceAsStream(TSC_JS), tscPath, StandardCopyOption.REPLACE_EXISTING);
-
                 SourceTranslator sourceTranslator = new SourceTranslator();
                 sourceTranslator.additionalAppend = "org.kevoree.modeling.microframework.browser.ts";
                 sourceTranslator.exportPackage = new String[]{"org"};
@@ -129,68 +103,25 @@ public class GenModelPlugin extends AbstractMojo {
                     }
                 }
                 sourceTranslator.translateSources(targetSrcGenDir.getAbsolutePath(), jsWorkingDir.getAbsolutePath(), project.getArtifactId(), false, false, umd);
-
                 TscRunner runner = new TscRunner();
                 runner.runTsc(jsWorkingDir, classesDirectory, null, false, umd);
-                //final StringBuilder sb = new StringBuilder();
-                /*
-                Files.lines(javaLibJs).forEachOrdered(new Consumer<String>() {
-                    @Override
-                    public void accept(String line) {
-                        sb.append(line).append("\n");
-                    }
-                });*/
-                /*
-                Files.lines(kmfLibJs).forEachOrdered(new Consumer<String>() {
-                    @Override
-                    public void accept(String line) {
-                        sb.append(line).append("\n");
-                    }
-                });
-                */
-                /*
-                Files.lines(Paths.get(jsWorkingDir.toPath().toString(), project.getArtifactId() + ".js")).forEachOrdered(new Consumer<String>() {
-                    @Override
-                    public void accept(String line) {
-                        sb.append(line).append("\n");
-                    }
-                });
-                Files.write(Paths.get(jsWorkingDir.toPath().toString(), project.getArtifactId() + "-all.js"), sb.toString().getBytes());
-                tscPath.toFile().delete();
-                libDts.toFile().delete();
-                if (!resourceDir.exists()) {
-                    resourceDir.mkdirs();
-                }
-                Path resourceAllJS = Paths.get(resourceDir.toPath().toString(), project.getArtifactId() + "-all.js");
-                Files.copy(Paths.get(jsWorkingDir.toPath().toString(), project.getArtifactId() + "-all.js"), resourceAllJS, StandardCopyOption.REPLACE_EXISTING);
 
-
-                StringBuilder buffer = new StringBuilder();
-                for (Artifact artifact : project.getDependencyArtifacts()) {
-                    if (buffer.length() != 0) {
-                        buffer.append(File.pathSeparator);
-                    }
-                    buffer.append(artifact.getFile().getAbsolutePath());
+                //generate the min.js
+                if (min) {
+                    File input = new File(classesDirectory.getAbsolutePath(), project.getArtifactId() + ".js");
+                    File outputMin = new File(classesDirectory.getAbsolutePath(), project.getArtifactId() + ".min.js");
+                    JSOptimizer.optimize(input, outputMin);
                 }
-                System.setProperty("additional", buffer.toString());
-                if (samples) {
-                    HtmlTemplateGenerator.generateHtml(resourceDir.toPath(), project.getArtifactId() + "-all.js", targetName);
-                }
-                */
 
                 libDts.toFile().delete();
                 tscPath.toFile().delete();
             }
-
         } catch (Exception e) {
             getLog().error(e);
             throw new MojoExecutionException("KMF Compilation error !", e);
         }
-
         project.addCompileSourceRoot(targetSrcGenDir.getAbsolutePath());
-
     }
-
 
     private void deleteRecusive(Path directory) {
         try {
