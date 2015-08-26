@@ -41,8 +41,6 @@ public class MModelOperation {
 
     public boolean returnTypeIsArray = false;
 
-
-
     public int getReturnTypeId() {
         return returnTypeId;
     }
