@@ -8,7 +8,7 @@ import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.KMetaModel;
-import org.kevoree.modeling.util.maths.Base64;
+import org.kevoree.modeling.util.Base64;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;

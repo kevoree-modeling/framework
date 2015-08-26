@@ -3,8 +3,7 @@ package org.kevoree.modeling.message.impl;
 import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.KMessage;
-import org.kevoree.modeling.util.PrimitiveHelper;
-import org.kevoree.modeling.util.maths.Base64;
+import org.kevoree.modeling.util.Base64;
 
 public class Message implements KMessage {
 

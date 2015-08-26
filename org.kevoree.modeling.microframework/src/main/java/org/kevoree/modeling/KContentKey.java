@@ -1,6 +1,6 @@
 package org.kevoree.modeling;
 
-import org.kevoree.modeling.util.maths.Base64;
+import org.kevoree.modeling.util.Base64;
 
 public class KContentKey {
 

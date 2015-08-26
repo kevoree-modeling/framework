@@ -3,7 +3,6 @@ package org.kevoree.modeling.operation;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.KType;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.message.KMessage;
@@ -13,7 +12,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.util.PrimitiveHelper;
-import org.kevoree.modeling.util.maths.Base64;
+import org.kevoree.modeling.util.Base64;
 
 import java.util.ArrayList;
 import java.util.List;

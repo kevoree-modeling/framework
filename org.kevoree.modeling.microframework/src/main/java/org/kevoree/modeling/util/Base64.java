@@ -1,6 +1,4 @@
-package org.kevoree.modeling.util.maths;
-
-import org.kevoree.modeling.util.PrimitiveHelper;
+package org.kevoree.modeling.util;
 
 /**
  * @native ts
@@ -232,7 +230,7 @@ public class Base64 {
             tmp = -tmp;
         }
         for (int i = 47; i >= 5; i -= 6) {
-            if (!(PrimitiveHelper.equals(result,"") && ((int) (tmp >> i) & 0x3F) == 0)) {
+            if (!(PrimitiveHelper.equals(result, "") && ((int) (tmp >> i) & 0x3F) == 0)) {
                 result += encodeArray[(int) (tmp >> i) & 0x3F];
             }
         }
@@ -269,7 +267,7 @@ public class Base64 {
             tmp = -tmp;
         }
         for (int i = 29; i >= 5; i -= 6) {
-            if (!(PrimitiveHelper.equals(result,"") && ((tmp >> i) & 0x3F) == 0)) {
+            if (!(PrimitiveHelper.equals(result, "") && ((tmp >> i) & 0x3F) == 0)) {
                 result += Base64.encodeArray[(tmp >> i) & 0x3F];
             }
         }
@@ -328,6 +326,7 @@ public class Base64 {
 
     /**
      * Encodes a boolean array into a Base64 string
+     *
      * @param boolArr the array to encode
      * @return the string encoding the array.
      */
@@ -378,6 +377,7 @@ public class Base64 {
      * Encodes a double into Base64 string Following the IEEE-754.
      * 2 first chars for sign + exponent; remaining chars on the right for the mantissa.
      * Trailing 'A's (aka 0) are dismissed for compression.
+     *
      * @param d the double to encode
      * @return the encoding string
      */
@@ -390,7 +390,7 @@ public class Base64 {
         //encode mantissa
         result += Base64.encodeArray[(int) (l >> 48) & 0x0F];
         for (int i = 42; i >= 0; i -= 6) {
-            if(((l >> i) & 0x3F) == 0 && (l & (~(0xFFFFFFFFFFFFFFFFl << i))) == 0) {
+            if (((l >> i) & 0x3F) == 0 && (l & (~(0xFFFFFFFFFFFFFFFFl << i))) == 0) {
                 break;
             }
             result += Base64.encodeArray[(int) (l >> i) & 0x3F];
@@ -406,7 +406,7 @@ public class Base64 {
         //encode mantisse
         buffer.append(Base64.encodeArray[(int) (l >> 48) & 0x0F]);
         for (int i = 42; i >= 0; i -= 6) {
-            if(((l >> i) & 0x3F) == 0 && (l & (~(0xFFFFFFFFFFFFFFFFl << i))) == 0) {
+            if (((l >> i) & 0x3F) == 0 && (l & (~(0xFFFFFFFFFFFFFFFFl << i))) == 0) {
                 return;
             }
             buffer.append(Base64.encodeArray[(int) (l >> i) & 0x3F]);
@@ -424,7 +424,7 @@ public class Base64 {
         result += ((long) Base64.decodeArray[s.charAt(1)] & 0xFF) << 52;
         //Mantisse
         for (int i = 2; i < (offsetEnd - offsetBegin); i++) {
-            result += ((long) Base64.decodeArray[s.charAt( offsetBegin + i)] & 0xFF) << (48 - (6 * (i-2)));
+            result += ((long) Base64.decodeArray[s.charAt(offsetBegin + i)] & 0xFF) << (48 - (6 * (i - 2)));
         }
         return Double.longBitsToDouble(result);
     }

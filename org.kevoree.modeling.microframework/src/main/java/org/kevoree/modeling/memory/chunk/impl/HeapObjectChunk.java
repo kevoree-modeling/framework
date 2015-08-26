@@ -8,10 +8,9 @@ import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.*;
-import org.kevoree.modeling.meta.impl.MetaClass;
 import org.kevoree.modeling.util.Checker;
 import org.kevoree.modeling.util.PrimitiveHelper;
-import org.kevoree.modeling.util.maths.Base64;
+import org.kevoree.modeling.util.Base64;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;

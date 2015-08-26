@@ -3,6 +3,7 @@ package org.kevoree.modeling.util.maths;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.util.Base64;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class Base64Test {

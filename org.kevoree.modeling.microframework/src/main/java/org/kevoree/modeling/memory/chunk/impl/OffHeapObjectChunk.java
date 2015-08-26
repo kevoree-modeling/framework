@@ -13,7 +13,7 @@ import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaReference;
 import org.kevoree.modeling.util.PrimitiveHelper;
-import org.kevoree.modeling.util.maths.Base64;
+import org.kevoree.modeling.util.Base64;
 import sun.misc.Unsafe;
 
 import java.io.UnsupportedEncodingException;
