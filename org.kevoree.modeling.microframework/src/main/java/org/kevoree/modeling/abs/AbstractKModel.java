@@ -9,6 +9,8 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.defer.impl.Defer;
+import org.kevoree.modeling.traversal.KTraversal;
+import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.util.Checker;
 
 public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
@@ -136,4 +138,15 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         return new AbstractKModelContext(this);
     }
 
+    @Override
+    public KTraversal createTraversal(KObject[] startingElements) {
+        return new Traversal(startingElements);
+    }
+
+    @Override
+    public KTraversal createReusableTraversal() {
+        return new Traversal(null);
+    }
+
 }
+

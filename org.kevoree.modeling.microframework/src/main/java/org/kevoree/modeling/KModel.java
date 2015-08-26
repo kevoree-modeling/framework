@@ -5,6 +5,7 @@ import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
+import org.kevoree.modeling.traversal.KTraversal;
 
 public interface KModel<A extends KUniverse> {
 
@@ -30,16 +31,20 @@ public interface KModel<A extends KUniverse> {
 
     void close(KCallback cb);
 
-    KObject createByName(String metaClassName, long universe, long time);
-
-    KObject create(KMetaClass clazz, long universe, long time);
-
     void lookup(long universe, long time, long uuid, KCallback<KObject> cb);
 
     void lookupAll(long universe, long time, long[] uuids, KCallback<KObject[]> cb);
+
+    KObject createByName(String metaClassName, long universe, long time);
+
+    KObject create(KMetaClass clazz, long universe, long time);
 
     KListener createListener(long universe);
 
     KModelContext createModelContext();
 
+    KTraversal createTraversal(KObject[] startingElements);
+
+    KTraversal createReusableTraversal();
+    
 }
