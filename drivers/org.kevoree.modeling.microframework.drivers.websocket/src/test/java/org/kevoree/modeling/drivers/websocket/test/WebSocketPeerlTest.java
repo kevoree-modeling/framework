@@ -100,11 +100,11 @@ public class WebSocketPeerlTest {
                                             }
                                         });
 
-                                        kObject.invokeOperationByName("triggerArray", new Object[]{new String[]{"hello"}}, OperationStrategies.ONLY_ONE, new KCallback<String[]>() {
+                                        kObject.invokeOperationByName("triggerArray", new Object[]{new String[]{"hello,hello"}}, OperationStrategies.ONLY_ONE, new KCallback<String[]>() {
                                             @Override
                                             public void on(String[] operationResult) {
 
-                                                Assert.assertEquals("ThisIsARemoteResult with hello", operationResult[0]);
+                                                Assert.assertEquals("ThisIsARemoteResult with hello,hello", operationResult[0]);
 
                                                 latch.countDown();
                                                 Assert.assertEquals(kObject, sensor);
