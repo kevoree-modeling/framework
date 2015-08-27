@@ -26,6 +26,10 @@ public interface KMessage {
 
     void setValues(String[] val);
 
+    String[] values2();
+
+    void setValues2(String[] val);
+
     String peer();
 
     void setPeer(String val);

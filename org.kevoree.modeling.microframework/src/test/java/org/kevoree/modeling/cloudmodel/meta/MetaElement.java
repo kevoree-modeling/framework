@@ -10,9 +10,6 @@ import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 
-/**
- * Created by duke on 07/12/14.
- */
 public class MetaElement extends MetaClass {
 
     private static MetaElement INSTANCE = null;
@@ -31,7 +28,7 @@ public class MetaElement extends MetaClass {
     public static final KMetaReference REF_OP_ELEMENT = new MetaReference("op_element", 2, false, false, 0, "element", 1);
 
     public MetaElement() {
-        super("org.kevoree.modeling.microframework.test.cloud.Element", 1, null);
+        super("org.kevoree.modeling.microframework.test.cloud.Element", 1, null, new int[]{});
         KMeta[] temp = new KMeta[3];
         temp[0] = ATT_NAME;
         temp[1] = ATT_VALUE;

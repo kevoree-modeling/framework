@@ -9,6 +9,6 @@ import org.kevoree.modeling.operation.KOperationManager;
 
 public interface KOperationStrategy {
 
-    void invoke(KContentDeliveryDriver cdn, KMetaOperation metaOperation, KObject source, Object[] param, KOperationManager manager, KCallback callback);
+    void invoke(KContentDeliveryDriver cdn, KMetaOperation metaOperation, KObject source, Object[] param, KOperationManager manager, KCallback callback, String[] additionalClassNames);
 
 }

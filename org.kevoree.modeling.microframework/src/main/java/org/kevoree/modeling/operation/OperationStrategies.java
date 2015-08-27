@@ -76,7 +76,7 @@ public class OperationStrategies {
                     if (i != previous) {
                         params.add(payload.substring(previous, i));
                     }
-                    previous = i+1;
+                    previous = i + 1;
                 }
                 i++;
             }
@@ -147,7 +147,7 @@ public class OperationStrategies {
 
     public static KOperationStrategy ONLY_ONE = new KOperationStrategy() {
         @Override
-        public void invoke(final KContentDeliveryDriver cdn, final KMetaOperation metaOperation, final KObject source, final Object[] param, final KOperationManager manager, final KCallback callback) {
+        public void invoke(final KContentDeliveryDriver cdn, final KMetaOperation metaOperation, final KObject source, final Object[] param, final KOperationManager manager, final KCallback callback, String[] additionalClassNames) {
             //Prepare the message
             KMessage operationCall = new Message();
             operationCall.setType(Message.OPERATION_CALL_TYPE);
@@ -155,6 +155,7 @@ public class OperationStrategies {
             operationCall.setClassName(source.metaClass().metaName());
             operationCall.setOperationName(metaOperation.metaName());
             operationCall.setValues(serializeParam(metaOperation, param));
+            operationCall.setValues2(additionalClassNames);
             cdn.sendToPeer(null, operationCall, new KCallback<KMessage>() {
                 @Override
                 public void on(KMessage message) {
@@ -171,7 +172,7 @@ public class OperationStrategies {
     public static KOperationStrategy NAMED_PEER(String peerName) {
         return new KOperationStrategy() {
             @Override
-            public void invoke(final KContentDeliveryDriver cdn, final KMetaOperation metaOperation, final KObject source, final Object[] param, final KOperationManager manager, final KCallback callback) {
+            public void invoke(final KContentDeliveryDriver cdn, final KMetaOperation metaOperation, final KObject source, final Object[] param, final KOperationManager manager, final KCallback callback, String[] additionalClassNames) {
                 //Prepare the message
                 KMessage operationCall = new Message();
                 operationCall.setType(Message.OPERATION_CALL_TYPE);
@@ -179,6 +180,7 @@ public class OperationStrategies {
                 operationCall.setClassName(source.metaClass().metaName());
                 operationCall.setOperationName(metaOperation.metaName());
                 operationCall.setValues(serializeParam(metaOperation, param));
+                operationCall.setValues2(additionalClassNames);
                 cdn.sendToPeer(peerName, operationCall, new KCallback<KMessage>() {
                     @Override
                     public void on(KMessage message) {

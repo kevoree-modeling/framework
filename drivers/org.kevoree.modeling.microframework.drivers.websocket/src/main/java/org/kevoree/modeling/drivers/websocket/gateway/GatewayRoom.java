@@ -108,6 +108,19 @@ public class GatewayRoom extends AbstractReceiveListener {
                 //lookup for targets (first reply win!)
                 String concatKey = msg.className() + "," + msg.operationName();
                 String[] targets = _concatKey_to_peerIds.get(concatKey);
+                String[] additionalClassNames = msg.values2();
+                if (additionalClassNames != null && additionalClassNames.length > 0) {
+                    int i = 0;
+                    int additionaClassNamesSize = additionalClassNames.length;
+                    while (targets == null && i < additionaClassNamesSize) {
+                        concatKey = additionalClassNames[i] + "," + msg.operationName();
+                        targets = _concatKey_to_peerIds.get(concatKey);
+                        if (targets != null) {
+                            msg.setClassName(additionalClassNames[i]);
+                        }
+                        i++;
+                    }
+                }
                 if (targets == null || targets.length == 0) {
                     KMessage msgReply = new Message();
                     msgReply.setType(Message.OPERATION_RESULT_TYPE);

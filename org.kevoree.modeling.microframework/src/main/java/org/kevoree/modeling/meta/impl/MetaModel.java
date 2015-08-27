@@ -125,11 +125,11 @@ public class MetaModel implements KMetaModel {
         } else {
             if (_metaClasses == null) {
                 _metaClasses = new KMetaClass[1];
-                _metaClasses[0] = new MetaClass(metaClassName, 0, alg);
+                _metaClasses[0] = new MetaClass(metaClassName, 0, alg, new int[]{});
                 _metaClasses_indexes.put(metaClassName, _metaClasses[0].index());
                 return _metaClasses[0];
             } else {
-                KMetaClass newMetaClass = new MetaClass(metaClassName, _metaClasses.length, alg);
+                KMetaClass newMetaClass = new MetaClass(metaClassName, _metaClasses.length, alg, new int[]{});
                 internal_add_meta_class(newMetaClass);
                 return newMetaClass;
             }

@@ -14,8 +14,9 @@ public class Message implements KMessage {
     private static final int PEER_INDEX = 4;
     private static final int KEYS_INDEX = 5;
     private static final int VALUES_INDEX = 6;
+    private static final int VALUES2_INDEX = 7;
 
-    private static final String[] KEYS_NAME = new String[]{"id", "type", "op", "class", "peer", "keys", "values"};
+    private static final String[] KEYS_NAME = new String[]{"id", "type", "op", "class", "peer", "keys", "values", "values2"};
 
     public static final int EVENTS_TYPE = 0;
     public static final int GET_REQ_TYPE = 1;
@@ -28,7 +29,7 @@ public class Message implements KMessage {
     public static final int ATOMIC_GET_INC_RESULT_TYPE = 8;
     public static final int OPERATION_MAPPING = 9;
 
-    private static final int NB_ELEM = 7;
+    private static final int NB_ELEM = 8;
 
     private Object[] internal = new Object[NB_ELEM];
 
@@ -90,6 +91,16 @@ public class Message implements KMessage {
     @Override
     public void setValues(String[] val) {
         internal[VALUES_INDEX] = val;
+    }
+
+    @Override
+    public String[] values2() {
+        return (String[]) internal[VALUES2_INDEX];
+    }
+
+    @Override
+    public void setValues2(String[] val) {
+        internal[VALUES2_INDEX] = val;
     }
 
     @Override
@@ -162,6 +173,19 @@ public class Message implements KMessage {
                         }
                         buffer.append("]");
                         break;
+                    case 7:
+                        String[] values2 = (String[]) internal[i];
+                        buffer.append("[");
+                        for (int j = 0; j < values2.length; j++) {
+                            if (j != 0) {
+                                buffer.append(",");
+                            }
+                            buffer.append("\"");
+                            JsonString.encodeBuffer(buffer, values2[j]);
+                            buffer.append("\"");
+                        }
+                        buffer.append("]");
+                        break;
                 }
                 if (i < 5) {
                     buffer.append("\"");
@@ -219,6 +243,18 @@ public class Message implements KMessage {
                     }
                 }
                 msg.setValues(p_values);
+            }
+            if (objectReader.get(KEYS_NAME[VALUES2_INDEX]) != null) {
+                String[] objIdsRaw = objectReader.getAsStringArray(KEYS_NAME[VALUES2_INDEX]);
+                String[] p_values = new String[objIdsRaw.length];
+                for (int i = 0; i < objIdsRaw.length; i++) {
+                    try {
+                        p_values[i] = JsonString.unescape(objIdsRaw[i]);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                msg.setValues2(p_values);
             }
             return msg;
         } catch (Exception e) {

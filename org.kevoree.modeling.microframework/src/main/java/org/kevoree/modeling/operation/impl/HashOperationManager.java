@@ -10,6 +10,7 @@ import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.impl.Message;
 import org.kevoree.modeling.meta.KMetaClass;
+import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.operation.KOperationManager;
 import org.kevoree.modeling.operation.KOperationStrategy;
@@ -58,7 +59,26 @@ public class HashOperationManager implements KOperationManager {
         if (resolved != null) {
             resolved.on(source, param, callback);
         } else {
-            strategy.invoke(_manager.cdn(), operation, source, param, this, callback);
+            KMetaClass mc = source.metaClass();
+            KMetaModel mm = source.manager().model().metaModel();
+            ArrayList<String> parentClasses = null;
+            parentClasses = new ArrayList<String>();
+            while (resolved == null && mc.metaParents().length > 0) {
+                int[] metaParents = mc.metaParents();
+                for (int i = 0; i < metaParents.length; i++) {
+                    KMetaClass loopMetaClass = mm.metaClass(metaParents[i]);
+                    if (loopMetaClass.operation(operation.metaName()) != null) {
+                        clazzOperations = staticOperations.get(operation.originMetaClassIndex());
+                        resolved = clazzOperations.get(operation.originMetaClassIndex());
+                        if (resolved == null) {
+                            mc = loopMetaClass;
+                            parentClasses.add(loopMetaClass.metaName());
+                        }
+                    }
+                }
+            }
+            String[] flatted = parentClasses.toArray(new String[parentClasses.size()]);
+            strategy.invoke(_manager.cdn(), operation, source, param, this, callback, flatted);
         }
     }
 

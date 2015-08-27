@@ -26,13 +26,16 @@ public class MetaClass implements KMetaClass {
 
     private KMetaInferOutput[] _cachedOutputs = null;
 
+    private int[] _parents = null;
+
     private long _temporalResolution = 1;
 
-    protected MetaClass(String p_name, int p_index, KInferAlg p_alg) {
+    protected MetaClass(String p_name, int p_index, KInferAlg p_alg, int[] p_parents) {
         this._name = p_name;
         this._index = p_index;
         this._meta = new KMeta[0];
         this._alg = p_alg;
+        this._parents = p_parents;
         _indexes = new ArrayStringMap<Integer>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
         if (this._alg != null) {
             //in case of inference algorithm, we always inject a multi dependency object
@@ -59,6 +62,11 @@ public class MetaClass implements KMetaClass {
             }
         }
         return null;
+    }
+
+    @Override
+    public int[] metaParents() {
+        return this._parents;
     }
 
     @Override
@@ -285,5 +293,14 @@ public class MetaClass implements KMetaClass {
         _meta = incArray;
         _indexes.put(p_new_meta.metaName(), p_new_meta.index());
     }
+
+    @Override
+    public void addParent(KMeta parentMetaClass) {
+        int[] newParents = new int[this._parents.length + 1];
+        System.arraycopy(this._parents, 0, newParents, 0, this._parents.length);
+        newParents[this._parents.length] = parentMetaClass.index();
+        this._parents = newParents;
+    }
+
 
 }

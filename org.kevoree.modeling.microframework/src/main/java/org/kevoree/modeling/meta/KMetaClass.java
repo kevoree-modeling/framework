@@ -12,6 +12,8 @@ public interface KMetaClass extends KMeta {
 
     KMeta metaByName(String name);
 
+    int[] metaParents();
+
     KMetaAttribute attribute(String name);
 
     KMetaReference reference(String name);
@@ -41,5 +43,7 @@ public interface KMetaClass extends KMeta {
     long temporalResolution();
 
     void setTemporalResolution(long tempo);
+
+    void addParent(KMeta parentMetaClass);
 
 }
