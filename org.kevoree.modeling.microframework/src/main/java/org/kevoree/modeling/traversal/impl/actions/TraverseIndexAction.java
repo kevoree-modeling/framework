@@ -26,7 +26,7 @@ public class TraverseIndexAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         //TODO enhance this to general index usages
-        if (PrimitiveHelper.equals(_indexName,"root")) {
+        if (PrimitiveHelper.equals(_indexName, "root")) {
             if (context.inputObjects().length > 0) {
                 context.inputObjects()[0].manager().getRoot(context.inputObjects()[0].universe(), context.inputObjects()[0].now(), new KCallback<KObject>() {
                     @Override
@@ -44,9 +44,9 @@ public class TraverseIndexAction implements KTraversalAction {
             }
         } else {
             KTraversalIndexResolver resolver = context.indexResolver();
-            if(resolver != null){
+            if (resolver != null) {
                 KObject[] resolved = resolver.resolve(this._indexName);
-                if(resolved != null){
+                if (resolved != null) {
                     if (_next == null) {
                         context.finalCallback().on(resolved);
                     } else {
