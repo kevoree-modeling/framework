@@ -53,6 +53,9 @@ public class TraverseIndexAction implements KTraversalAction {
                         context.setInputObjects(resolved);
                         _next.execute(context);
                     }
+                } else {
+                    context.setInputObjects(new KObject[0]);
+                    _next.execute(context);
                 }
             } else {
                 if (_next == null) {
