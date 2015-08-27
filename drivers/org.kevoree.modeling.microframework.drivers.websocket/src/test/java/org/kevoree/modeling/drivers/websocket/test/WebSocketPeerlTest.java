@@ -83,12 +83,13 @@ public class WebSocketPeerlTest {
                 sensor.set(dynamicSensorClass.attribute("name"), "MyChild");
                 sensor.set(dynamicSensorClass.attribute("value"), "52.52");
 
+                /*
                 sensorChild.invokeOperationByName("trigger", new Object[]{"SayHello"}, OperationStrategies.ONLY_ONE, new KCallback() {
                     @Override
                     public void on(Object o) {
                         
                     }
-                });
+                });*/
 
 
                 long sensorUUID = sensor.uuid();
