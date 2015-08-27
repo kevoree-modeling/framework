@@ -75,6 +75,7 @@ public class HashOperationManager implements KOperationManager {
                     if (loopMetaOperation != null) {
                         foundParent = i;
                     }
+                    i++;
                 }
                 if (foundParent == -1) {
                     mc = null;
