@@ -78,13 +78,15 @@ public class ProcessorHelper {
     }
 
     public String convertToJavaType(String t) {
+        if (t == null) {
+            return "java.lang.Object";
+        }
         if (isPrimitive(t)) {
             return toEcoreType(t);
         } else {
             return t;
         }
     }
-
 
 
     public String toCamelCase(String ref) {

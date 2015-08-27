@@ -16,6 +16,8 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.operation.KOperationManager;
+import org.kevoree.modeling.operation.KOperationStrategy;
 import org.kevoree.modeling.operation.OperationStrategies;
 
 import java.util.concurrent.CountDownLatch;
@@ -76,6 +78,19 @@ public class WebSocketPeerlTest {
                 KObject sensor = model.create(dynamicSensorClass, 0, 0);
                 sensor.set(dynamicSensorClass.attribute("name"), "MyName");
                 sensor.set(dynamicSensorClass.attribute("value"), "42.42");
+
+                KObject sensorChild = model.create(dynamicSensorClassChild, 0, 0);
+                sensor.set(dynamicSensorClass.attribute("name"), "MyChild");
+                sensor.set(dynamicSensorClass.attribute("value"), "52.52");
+
+                sensorChild.invokeOperationByName("trigger", new Object[]{"SayHello"}, OperationStrategies.ONLY_ONE, new KCallback() {
+                    @Override
+                    public void on(Object o) {
+                        
+                    }
+                });
+
+
                 long sensorUUID = sensor.uuid();
 
                 model.save(new KCallback() {
@@ -90,7 +105,6 @@ public class WebSocketPeerlTest {
                                 model2.lookup(0, 0, sensorUUID, new KCallback<KObject>() {
                                     @Override
                                     public void on(KObject kObject) {
-
                                         kObject.invokeOperationByName("trigger", new String[]{"hello"}, OperationStrategies.ONLY_ONE, new KCallback<String>() {
                                             @Override
                                             public void on(String operationResult) {
@@ -98,21 +112,15 @@ public class WebSocketPeerlTest {
                                                 latch.countDown();
                                                 Assert.assertEquals(kObject, sensor);
                                                 Assert.assertEquals("{\"universe\":0,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"MyName\",\"value\":[0.0,1.0,0.0,0.0,42.42]}}", sensor.toJSON());
-
-
                                             }
                                         });
-
                                         kObject.invokeOperationByName("triggerArray", new Object[]{new String[]{"hello,hello"}}, OperationStrategies.ONLY_ONE, new KCallback<String[]>() {
                                             @Override
                                             public void on(String[] operationResult) {
-
                                                 Assert.assertEquals("ThisIsARemoteResult with hello,hello", operationResult[0]);
-
                                                 latch.countDown();
                                                 Assert.assertEquals(kObject, sensor);
                                                 Assert.assertEquals("{\"universe\":0,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"MyName\",\"value\":[0.0,1.0,0.0,0.0,42.42]}}", sensor.toJSON());
-
                                             }
                                         });
 
