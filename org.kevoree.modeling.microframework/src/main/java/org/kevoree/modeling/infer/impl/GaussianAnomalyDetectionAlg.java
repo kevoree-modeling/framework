@@ -100,7 +100,7 @@ public class GaussianAnomalyDetectionAlg implements KInferAlg {
                         state.add(j * NUMOFFIELDS + SUMSQUARE, trainingSet.get(i, j) * trainingSet.get(i, j));
                     }
                 }
-
+                state.add(length * NUMOFFIELDS, 1); //update counter
                 double newEpsilon=getProba(trainingSet,i,state,origin.metaClass().dependencies());
                 double epsilon=state.get(length * NUMOFFIELDS+1);
                 if(newEpsilon<epsilon){
