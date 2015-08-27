@@ -21,6 +21,9 @@ public class KInferAlgFactory {
         if (PrimitiveHelper.equals(name, "GaussianClassifier")) {
             return new GaussianClassifierAlg();
         }
+        if (PrimitiveHelper.equals(name, "GaussianAnomalyDetection")) {
+            return new GaussianAnomalyDetectionAlg();
+        }
         if (PrimitiveHelper.equals(name, "Winnow")) {
             return new WinnowAlg();
         }
