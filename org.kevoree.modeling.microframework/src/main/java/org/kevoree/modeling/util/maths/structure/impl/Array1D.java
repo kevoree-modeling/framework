@@ -3,6 +3,7 @@ package org.kevoree.modeling.util.maths.structure.impl;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.util.maths.structure.KArray1D;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
 
 public class Array1D implements KArray1D {
 
@@ -42,7 +43,42 @@ public class Array1D implements KArray1D {
 
     @Override
     public double add(int index, double value) {
-        return set(index,get(index)+value);
+        return set(index, get(index) + value);
+    }
+
+    @Override
+    public double mult(int index, double value) {
+        return set(index,get(index)*value);
+    }
+
+    @Override
+    public void addAll(double value) {
+        for(int i=0;i<_size;i++){
+            add(i,value);
+        }
+    }
+
+    @Override
+    public void multAll(double value) {
+        for(int i=0;i<_size;i++){
+            mult(i,value);
+        }
+    }
+
+    @Override
+    public void setAll(double value) {
+        //Fill value
+
+    }
+
+    @Override
+    public void addElement(int index, int numElem) {
+
+    }
+
+    @Override
+    public KArray2D clone() {
+        return null;
     }
 
 

@@ -49,7 +49,49 @@ public class Array2D implements KArray2D {
     }
 
     @Override
-    public double add(int rawIndex, int columnIndex, double value) {
-        return set(rawIndex,columnIndex,get(rawIndex,columnIndex)+value);
+    public double add(int rowIndex, int columnIndex, double value) {
+        return set(rowIndex,columnIndex,get(rowIndex,columnIndex)+value);
+    }
+
+    @Override
+    public double mult(int rowIndex, int columnIndex, double value) {
+        return set(rowIndex,columnIndex,get(rowIndex,columnIndex)*value);
+    }
+
+    @Override
+    public void addAll(double value) {
+        for(int i=0;i<_nbColumns*_nbRows;i++){
+            this._segment.setDoubleArrayElem(this._segmentIndex, this._offset + i, this._segment.getDoubleArrayElem(this._segmentIndex,this._offset+i,this._metaClass)+ value, this._metaClass);
+        }
+    }
+
+    @Override
+    public void multAll(double value) {
+        for(int i=0;i<_nbColumns*_nbRows;i++){
+            this._segment.setDoubleArrayElem(this._segmentIndex, this._offset + i, this._segment.getDoubleArrayElem(this._segmentIndex,this._offset+i,this._metaClass)*value, this._metaClass);
+        }
+    }
+
+    @Override
+    public void setAll(double value) {
+        for(int i=0;i<_nbColumns*_nbRows;i++){
+            this._segment.setDoubleArrayElem(this._segmentIndex, this._offset + i, value, this._metaClass);
+        }
+    }
+
+    @Override
+    public void addRow(int rowindex, int numRow) {
+//toDo
+    }
+
+    @Override
+    public void addCol(int colIndex, int numCol) {
+//toDo
+    }
+
+    @Override
+    public KArray2D clone() {
+        //toDO
+        return null;
     }
 }
