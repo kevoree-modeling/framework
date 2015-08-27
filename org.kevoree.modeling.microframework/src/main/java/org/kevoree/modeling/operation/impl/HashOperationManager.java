@@ -65,28 +65,32 @@ public class HashOperationManager implements KOperationManager {
             parentClasses = new ArrayList<String>();
             while (resolved == null && mc != null && mc.metaParents().length > 0) {
                 int[] metaParents = mc.metaParents();
-                boolean parentFound = false;
-                for (int i = 0; i < metaParents.length; i++) {
-                    KMetaClass parentMetaClass = mm.metaClass(metaParents[i]);
-                    KMetaOperation loopMetaOperation = parentMetaClass.operation(operation.metaName());
+                int foundParent = -1;
+                int i = 0;
+                KMetaClass loopMetaClass = null;
+                KMetaOperation loopMetaOperation = null;
+                while (i < metaParents.length && foundParent == -1) {
+                    loopMetaClass = mm.metaClass(metaParents[i]);
+                    loopMetaOperation = loopMetaClass.operation(operation.metaName());
                     if (loopMetaOperation != null) {
-                        parentFound = true;
-                        mc = parentMetaClass;
-                        parentClasses.add(parentMetaClass.metaName());
-                        clazzOperations = staticOperations.get(loopMetaOperation.originMetaClassIndex());
-                        resolved = clazzOperations.get(loopMetaOperation.index());
-                        if (resolved != null) {
-                            mc = null;
-                            i = metaParents.length; //stop forLoop
-                        }
+                        foundParent = i;
                     }
                 }
-                if (!parentFound) {
+                if (foundParent == -1) {
                     mc = null;
+                } else {
+                    parentClasses.add(loopMetaClass.metaName());
+                    mc = loopMetaClass;
+                    clazzOperations = staticOperations.get(loopMetaOperation.originMetaClassIndex());
+                    resolved = clazzOperations.get(loopMetaOperation.index());
                 }
             }
-            String[] flatted = parentClasses.toArray(new String[parentClasses.size()]);
-            strategy.invoke(_manager.cdn(), operation, source, param, this, callback, flatted);
+            if (resolved != null) {
+                resolved.on(source, param, callback);
+            } else {
+                String[] flatted = parentClasses.toArray(new String[parentClasses.size()]);
+                strategy.invoke(_manager.cdn(), operation, source, param, this, callback, flatted);
+            }
         }
     }
 
