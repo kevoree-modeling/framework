@@ -86,4 +86,27 @@ public class NativeArray2D implements KArray2D {
         System.arraycopy(_back,0,newArr._back,0,_nbColumns*_nbRows);
         return newArr;
     }
+
+    @Override
+    public double getAtIndex(int index) {
+        return this._back[index];
+    }
+
+    @Override
+    public double setAtIndex(int index, double value) {
+        this._back[index]=value;
+        return value;
+    }
+
+    @Override
+    public double addAtIndex(int index, double value) {
+        this._back[index]+=value;
+        return  this._back[index];
+    }
+
+    @Override
+    public double multAtIndex(int index, double value) {
+        this._back[index]=this._back[index]*value;
+        return  this._back[index];
+    }
 }

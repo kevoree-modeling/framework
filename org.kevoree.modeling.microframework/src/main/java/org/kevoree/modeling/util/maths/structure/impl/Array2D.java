@@ -94,4 +94,25 @@ public class Array2D implements KArray2D {
         //toDO
         return null;
     }
+
+    @Override
+    public double getAtIndex(int index) {
+        return this._segment.getDoubleArrayElem(this._segmentIndex, this._offset + index, this._metaClass);
+    }
+
+    @Override
+    public double setAtIndex(int index, double value) {
+        this._segment.setDoubleArrayElem(this._segmentIndex, this._offset + index, value, this._metaClass);
+        return value;
+    }
+
+    @Override
+    public double addAtIndex(int index, double value) {
+        return this.setAtIndex(index, getAtIndex(index)+value);
+    }
+
+    @Override
+    public double multAtIndex(int index, double value) {
+        return this.setAtIndex(index, getAtIndex(index)*value);
+    }
 }

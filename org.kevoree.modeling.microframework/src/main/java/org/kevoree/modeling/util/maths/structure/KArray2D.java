@@ -27,7 +27,11 @@ public interface KArray2D {
     KArray2D clone();
 
 
+    double getAtIndex(int index);
 
+    double setAtIndex(int index, double value);
 
+    double addAtIndex(int index, double value);
 
+    double multAtIndex(int index, double value);
 }
