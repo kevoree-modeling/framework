@@ -29,7 +29,7 @@ public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#f
 #foreach($operation in $classDeclaration.operations)
     public void ${operation.name}(#foreach($p in $operation.inputParams)$context.generationContext.getHelper().convertToJavaType($p.type)#if($p.array)[]#end $p.name, #{end}final org.kevoree.modeling.operation.KOperationStrategy strategy, final org.kevoree.modeling.KCallback#if(${operation.returnType})<$context.generationContext.getHelper().convertToJavaType($operation.returnType)#if($operation.returnTypeIsArray)[]#end>#end callback);
 
-    public static interface ${context.generationContext.helper.toCamelCase($operation.name)} extends org.kevoree.modeling.KOperation<${classDeclaration.pack}.${classDeclaration.name},$context.generationContext.getHelper().convertToJavaType($operation.returnType)#if($operation.returnTypeIsArray)[]#end> {}
+    public static interface ${context.generationContext.helper.toCamelCase($operation.name)}Operation extends org.kevoree.modeling.KOperation<${classDeclaration.pack}.${classDeclaration.name},$context.generationContext.getHelper().convertToJavaType($operation.returnType)#if($operation.returnTypeIsArray)[]#end> {}
 
 #end
 
