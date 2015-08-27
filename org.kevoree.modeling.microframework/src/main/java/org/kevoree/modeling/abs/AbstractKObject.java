@@ -581,10 +581,10 @@ public abstract class AbstractKObject implements KObject {
     @Override
     public void invokeOperationByName(String operationName, Object[] p_params, KOperationStrategy strategy, KCallback cb) {
         KMetaOperation metaOp = _metaClass.operation(operationName);
-        if(metaOp == null){
-            throw new RuntimeException("Operation not founded with name "+operationName+" in the metaClass "+_metaClass.metaName());
+        if (metaOp == null) {
+            throw new RuntimeException("Operation not founded with name " + operationName + " in the metaClass " + _metaClass.metaName());
         }
-        _manager.operationManager().invoke(this,metaOp , p_params, strategy, cb);
+        _manager.operationManager().invoke(this, metaOp, p_params, strategy, cb);
     }
 
     @Override

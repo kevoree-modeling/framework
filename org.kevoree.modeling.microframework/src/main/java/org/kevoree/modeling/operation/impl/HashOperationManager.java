@@ -67,15 +67,17 @@ public class HashOperationManager implements KOperationManager {
                 int[] metaParents = mc.metaParents();
                 boolean parentFound = false;
                 for (int i = 0; i < metaParents.length; i++) {
-                    KMetaClass loopMetaClass = mm.metaClass(metaParents[i]);
-                    KMetaOperation loopMetaOperation = loopMetaClass.operation(operation.metaName());
+                    KMetaClass parentMetaClass = mm.metaClass(metaParents[i]);
+                    KMetaOperation loopMetaOperation = parentMetaClass.operation(operation.metaName());
                     if (loopMetaOperation != null) {
+                        parentFound = true;
+                        mc = parentMetaClass;
+                        parentClasses.add(parentMetaClass.metaName());
                         clazzOperations = staticOperations.get(loopMetaOperation.originMetaClassIndex());
                         resolved = clazzOperations.get(loopMetaOperation.index());
-                        if (resolved == null) {
-                            parentFound = true;
-                            mc = loopMetaClass;
-                            parentClasses.add(loopMetaClass.metaName());
+                        if (resolved != null) {
+                            mc = null;
+                            i = metaParents.length; //stop forLoop
                         }
                     }
                 }
