@@ -37,6 +37,9 @@ public class WebSocketPeerlTest {
         dynamicSensorClass.addAttribute("name", KPrimitiveTypes.STRING);
         dynamicSensorClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
 
+        KMetaClass dynamicSensorClassChild = dynamicMM.addMetaClass("sensorChild");
+        dynamicSensorClassChild.addParent(dynamicSensorClass);
+
         KMetaOperation operationTrigger = dynamicSensorClass.addOperation("trigger");
         operationTrigger.setReturnType(KPrimitiveTypes.STRING, false);
         operationTrigger.addParam(KPrimitiveTypes.STRING, false);
