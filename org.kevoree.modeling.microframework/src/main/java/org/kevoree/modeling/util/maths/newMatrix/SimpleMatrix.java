@@ -15,17 +15,19 @@ public class SimpleMatrix {
     public static KArray2D transpose (KArray2D matA){
         NativeArray2D result= new NativeArray2D(matA.nbColumns(),matA.nbRows());
 
-        for(int i=0; i<matA.nbRows();i++){
-            for(int j=0;j<matA.nbColumns();j++){
-                result.set(j,i,matA.get(i,j));
-            }
+        if(matA.nbColumns()==matA.nbRows()){
+            transposeSquare(matA, result);
         }
-
+        else if( matA.nbColumns() > TRANSPOSE_SWITCH && matA.nbRows() > TRANSPOSE_SWITCH )
+            transposeBlock(matA, result);
+        else
+            transposeStandard(matA, result);
+        
         return result;
     }
 
     public static KArray2D multiply (KArray2D matA, KArray2D matB){
-        
+
         NativeArray2D matC= new NativeArray2D(matA.nbRows(),matB.nbColumns());
 
         if( matB.nbColumns() == 1 ) {
@@ -35,9 +37,62 @@ public class SimpleMatrix {
         } else {
             mult_small(matA, matB, matC);
         }
-        
+
         return matC;
     }
+
+    private static void transposeSquare(KArray2D matA, NativeArray2D result) {
+        int index = 1;
+        int indexEnd = matA.nbColumns();
+        for( int i = 0; i < matA.nbRows();
+             i++ , index += i+1 , indexEnd += matA.nbColumns() ) {
+            int indexOther = (i+1)*matA.nbColumns() + i;
+            int n=i*(matA.nbColumns()+1);
+            result.setAtIndex(n,matA.getAtIndex(n));
+            for( ; index < indexEnd; index++, indexOther += matA.nbColumns()) {
+                result.setAtIndex(index,matA.getAtIndex(indexOther));
+                result.setAtIndex(indexOther,matA.getAtIndex(index));
+            }
+        }
+    }
+
+    private static void transposeStandard(KArray2D matA, KArray2D result) {
+        int index = 0;
+        for( int i = 0; i < result.nbRows(); i++ ) {
+            int index2 = i;
+
+            int end = index + result.nbColumns();
+            while( index < end ) {
+                result.setAtIndex(index++,matA.getAtIndex(index2));
+                index2 += matA.nbColumns();
+            }
+        }
+    }
+
+    private static void transposeBlock(KArray2D matA, KArray2D result) {
+        for( int i = 0; i < matA.nbRows(); i += BLOCK_WIDTH ) {
+            int blockHeight = Math.min( BLOCK_WIDTH , matA.nbRows() - i);
+
+            int indexSrc = i*matA.nbColumns();
+            int indexDst = i;
+
+            for( int j = 0; j < matA.nbColumns(); j += BLOCK_WIDTH ) {
+                int blockWidth = Math.min( BLOCK_WIDTH , matA.nbColumns() - j);
+                int indexSrcEnd = indexSrc + blockWidth;
+                for( ; indexSrc < indexSrcEnd;  indexSrc++ ) {
+                    int rowSrc = indexSrc;
+                    int rowDst = indexDst;
+                    int end = rowDst + blockHeight;
+                    for( ; rowDst < end; rowSrc += matA.nbColumns() ) {
+                        result.setAtIndex(rowDst++, matA.getAtIndex(rowSrc));
+                    }
+                    indexDst += result.nbColumns();
+                }
+            }
+        }
+    }
+
+
 
     private static void mult_small(KArray2D matA, KArray2D matB, KArray2D matC) {
         int aIndexStart = 0;
@@ -116,5 +171,13 @@ public class SimpleMatrix {
         }
     }
 
+    public static KArray2D identity(int width ) {
+        KArray2D ret = new NativeArray2D(width,width);
+        ret.setAll(0);
+        for(int i=0;i<width;i++){
+            ret.set(i,i,1);
+        }
+        return ret;
+    }
 
 }
