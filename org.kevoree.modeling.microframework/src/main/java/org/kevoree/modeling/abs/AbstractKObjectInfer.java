@@ -78,7 +78,7 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                         k++;
                     }
                 }
-                NativeArray2D extractedOutputs = new NativeArray2D(1, _metaClass.inputs().length);
+                NativeArray2D extractedOutputs = new NativeArray2D(1, _metaClass.outputs().length);
                 for (int i = 0; i < p_dependencies.length; i++) {
                     for (int j = 0; j < _metaClass.outputs().length; j++) {
                         KMetaInferOutput metaInferOutput = _metaClass.outputs()[j];
