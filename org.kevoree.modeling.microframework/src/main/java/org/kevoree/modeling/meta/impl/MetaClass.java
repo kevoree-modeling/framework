@@ -46,7 +46,6 @@ public class MetaClass implements KMetaClass {
     public void init(KMeta[] p_metaElements) {
         _indexes.clear();
         _meta = p_metaElements;
-        MetaDependencies tempDependencies = null;
         for (int i = 0; i < _meta.length; i++) {
             _indexes.put(p_metaElements[i].metaName(), p_metaElements[i].index());
         }
