@@ -1,5 +1,6 @@
 package org.kevoree.modeling.util.maths.matrix;
 
+/*
 public class SimpleMatrixHashable extends SimpleMatrix {
 
     public SimpleMatrixHashable(SimpleMatrix m) {
@@ -21,3 +22,4 @@ public class SimpleMatrixHashable extends SimpleMatrix {
         return (int) this.getValue2D(this.numRows()-1,0);
     }
 }
+*/

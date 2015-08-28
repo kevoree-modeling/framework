@@ -4,7 +4,7 @@ package org.kevoree.modeling.util.maths.matrix;
 public class MatrixFeatures {
 
 
-
+/*
     public static boolean isZeros( DenseMatrix64F m , double tol )
     {
         int length = m.getNumElements();
@@ -15,7 +15,7 @@ public class MatrixFeatures {
         }
         return true;
     }
-
+*/
 
     public static boolean isVector( DenseMatrix64F mat ) {
         return (mat.getNumCols() == 1 || mat.getNumRows() == 1);

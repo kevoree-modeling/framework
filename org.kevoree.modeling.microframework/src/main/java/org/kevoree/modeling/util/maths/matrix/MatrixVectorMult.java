@@ -25,6 +25,7 @@ public class MatrixVectorMult {
     }
 
 
+    /*
     public static void multAdd( DenseMatrix64F A , DenseMatrix64F B , DenseMatrix64F C )
     {
 
@@ -43,7 +44,7 @@ public class MatrixVectorMult {
 
             C.plus(cIndex++ , total );
         }
-    }
+    }*/
 
 
     public static void multTransA_small( DenseMatrix64F A , DenseMatrix64F B , DenseMatrix64F C )
@@ -86,7 +87,7 @@ public class MatrixVectorMult {
         }
     }
 
-
+/*
     public static void multAddTransA_small( DenseMatrix64F A , DenseMatrix64F B , DenseMatrix64F C )
     {
         int cIndex = 0;
@@ -118,7 +119,7 @@ public class MatrixVectorMult {
                 C.plus( i , A.getValueAtIndex(indexA++) * B_val );
             }
         }
-    }
+    }*/
 
 
 }

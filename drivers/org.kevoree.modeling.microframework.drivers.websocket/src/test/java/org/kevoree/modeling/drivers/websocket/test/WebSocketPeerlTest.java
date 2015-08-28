@@ -79,9 +79,12 @@ public class WebSocketPeerlTest {
                 sensor.set(dynamicSensorClass.attribute("name"), "MyName");
                 sensor.set(dynamicSensorClass.attribute("value"), "42.42");
 
+               // System.err.println("Created "+sensor.toJSON());
+
                 KObject sensorChild = model.create(dynamicSensorClassChild, 0, 0);
-                sensor.set(dynamicSensorClass.attribute("name"), "MyChild");
-                sensor.set(dynamicSensorClass.attribute("value"), "52.52");
+              //  sensorChild.set(dynamicSensorClass.attribute("name"), "MyChild");
+              // sensorChild.set(dynamicSensorClass.attribute("value"), "52.52");
+
 
                 /*
                 sensorChild.invokeOperationByName("trigger", new Object[]{"SayHello"}, OperationStrategies.ONLY_ONE, new KCallback() {
@@ -106,6 +109,7 @@ public class WebSocketPeerlTest {
                                 model2.lookup(0, 0, sensorUUID, new KCallback<KObject>() {
                                     @Override
                                     public void on(KObject kObject) {
+
                                         kObject.invokeOperationByName("trigger", new String[]{"hello"}, OperationStrategies.ONLY_ONE, new KCallback<String>() {
                                             @Override
                                             public void on(String operationResult) {

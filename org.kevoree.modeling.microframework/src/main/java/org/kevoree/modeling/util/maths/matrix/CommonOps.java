@@ -250,6 +250,7 @@ public class CommonOps {
         return matrix;
     }
 
+    /*
     public static SimpleMatrix elemSqrt(SimpleMatrix matrix) {
         for (int i = 0; i < matrix.numRows(); i++) {
             for (int j = 0; j < matrix.numCols(); j++) {
@@ -277,7 +278,6 @@ public class CommonOps {
         return newVector;
     }
 
-    /*
     public static SimpleMatrix ones(int rows, int cols) {
         SimpleMatrix matrix = new SimpleMatrix(rows, cols);
         for (int i = 0; i < rows; i++) {
@@ -287,7 +287,7 @@ public class CommonOps {
         }
         return matrix;
     }
-*/
+
     public static SimpleMatrix doubleListToMatrix(double[] valueList) {
         SimpleMatrix m = new SimpleMatrix(1, valueList.length);
         for (int i = 0; i < valueList.length; i++)
@@ -322,7 +322,7 @@ public class CommonOps {
         }
         return row;
     }
-/*
+
     public static void multAddTransABalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
         if( a.numCols >= MULT_TRANAB_COLUMN_SWITCH ) {
@@ -733,7 +733,7 @@ public class CommonOps {
         return max;
     }
 
-
+/*
     public static double elementMin( DenseMatrix64F a ) {
         final int size = a.getNumElements();
 
@@ -772,7 +772,7 @@ public class CommonOps {
         for( int i = 0; i < length; i++ ) {
             a.times(i, b.getValueAtIndex(i));
         }
-    }
+    }*/
 
 
     public static void elementMult( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
@@ -785,7 +785,7 @@ public class CommonOps {
         }
     }
 
-
+/*
     public static void elementDiv2mat( DenseMatrix64F a , DenseMatrix64F b )
     {
         int length = a.getNumElements();
@@ -805,7 +805,7 @@ public class CommonOps {
             c.setValueAtIndex(i, a.getValueAtIndex(i) / b.getValueAtIndex(i));
         }
     }
-
+*/
 
     public static double elementSum( DenseMatrix64F mat ) {
         double total = 0;
@@ -819,7 +819,7 @@ public class CommonOps {
         return total;
     }
 
-
+/*
     public static double elementSumAbs( DenseMatrix64F mat ) {
         double total = 0;
 
@@ -917,7 +917,7 @@ public class CommonOps {
         }
         return output;
     }
-
+*/
 
     public static void addEquals( DenseMatrix64F a , DenseMatrix64F b )
     {
@@ -948,7 +948,7 @@ public class CommonOps {
         }
     }
 
-
+/*
     public static void addbeta ( DenseMatrix64F a , double beta , DenseMatrix64F b , DenseMatrix64F c )
     {
         final int length = a.getNumElements();
@@ -1028,7 +1028,7 @@ public class CommonOps {
             a.data[i] -= b.data[i];
         }
     }
-
+*/
 
     public static void subtract3mat (DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c)
     {

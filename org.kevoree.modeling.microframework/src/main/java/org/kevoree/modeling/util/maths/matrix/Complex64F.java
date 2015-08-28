@@ -28,6 +28,7 @@ public class Complex64F{
         this.real = real;
     }
 
+    /*
     public double getImaginary() {
         return imaginary;
     }
@@ -35,17 +36,19 @@ public class Complex64F{
     public void setImaginary(double imaginary) {
         this.imaginary = imaginary;
     }
+    */
 
     public void setValues(double real, double imaginary) {
         this.real = real;
         this.imaginary = imaginary;
     }
 
+    /*
     public void setComplex(Complex64F a) {
         this.real = a.real;
         this.imaginary = a.imaginary;
     }
-
+*/
     public boolean isReal() {
         return imaginary == 0.0;
     }
@@ -58,9 +61,16 @@ public class Complex64F{
         }
     }
 
+    public Complex64F times( Complex64F a ) {
+        Complex64F ret = new Complex64F();
+        ComplexMath64F.multiply(this,a,ret);
+        return ret;
+    }
+
+    /*
     public Complex64F plus( Complex64F a ) {
         Complex64F ret = new Complex64F();
-        ComplexMath64F.plus(this,a,ret);
+        ComplexMath64F.plus(this, a, ret);
         return ret;
     }
 
@@ -70,15 +80,10 @@ public class Complex64F{
         return ret;
     }
 
-    public Complex64F times( Complex64F a ) {
-        Complex64F ret = new Complex64F();
-        ComplexMath64F.multiply(this,a,ret);
-        return ret;
-    }
-
     public Complex64F divide( Complex64F a ) {
         Complex64F ret = new Complex64F();
         ComplexMath64F.divide(this,a,ret);
         return ret;
     }
+    */
 }

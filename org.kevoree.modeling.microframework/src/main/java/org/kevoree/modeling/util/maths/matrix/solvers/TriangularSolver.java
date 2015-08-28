@@ -2,6 +2,7 @@ package org.kevoree.modeling.util.maths.matrix.solvers;
 
 public class TriangularSolver {
 
+    /*
     public static void invertLower( double L[] , int m ) {
         for( int i = 0; i < m; i++ ) {
             double L_ii = L[ i*m + i ];
@@ -63,7 +64,7 @@ public class TriangularSolver {
             }
             b[i] = sum/L[i*n+i];
         }
-    }
+    }*/
 
     public static void solveU2arr( double U[] , double []b , int n )
     {
@@ -89,7 +90,7 @@ public class TriangularSolver {
         }
     }
 
-
+/*
     public static void solveUArray( double []U , int startU , int strideU , int widthU ,
                                double []b , int startB , int strideB , int widthB )
     {
@@ -102,5 +103,5 @@ public class TriangularSolver {
                 b[startB + i*strideB + colB] = sum/U[ startU + i*strideU + i ];
             }
         }
-    }
+    }*/
 }

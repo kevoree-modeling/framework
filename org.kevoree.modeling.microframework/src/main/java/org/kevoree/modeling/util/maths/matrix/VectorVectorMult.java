@@ -1,5 +1,5 @@
 package org.kevoree.modeling.util.maths.matrix;
-
+    /*
 public class VectorVectorMult {
 
     public static double innerProd(DenseMatrix64F x, DenseMatrix64F y) {
@@ -13,7 +13,7 @@ public class VectorVectorMult {
         return total;
     }
 
-    /*
+
     public static double innerProdA(DenseMatrix64F x, DenseMatrix64F A, DenseMatrix64F y) {
         int n = A.numRows;
         int m = A.numCols;
@@ -128,5 +128,5 @@ public class VectorVectorMult {
                 A.data[matrixIndex++] += gamma * elementU * w.data[j];
             }
         }
-    }*/
-}
+    }
+}*/
