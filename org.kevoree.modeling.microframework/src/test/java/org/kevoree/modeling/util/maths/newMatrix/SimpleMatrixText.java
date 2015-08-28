@@ -104,8 +104,8 @@ public class SimpleMatrixText {
     @Test
     public void multiplyTest() {
 
-        int[] dimA={300,1000};
-        int[] dimB={1000,500};
+        int[] dimA={30,100};
+        int[] dimB={100,50};
 
         NativeArray2D matA= new NativeArray2D(dimA[0],dimA[1]);
 
@@ -126,18 +126,10 @@ public class SimpleMatrixText {
 
         NativeArray2D matC= new NativeArray2D(matA.nbRows(),matB.nbColumns());
 
-        long start=System.nanoTime();
+
         traditional(matA, matB,matC);
-        long end=System.nanoTime();
-        System.out.println("Java " + ((double) (end - start)) / 1000000 + " ms");
-
-
-
-        start=System.nanoTime();
         KArray2D matRes = SimpleMatrix.multiply(matA, matB);
-        end=System.nanoTime();
-        System.out.println("EJML ported "+((double)(end-start))/1000000+ " ms");
-
+        
 
         Assert.assertTrue(matRes.nbRows()==matC.nbRows());
         Assert.assertTrue(matRes.nbColumns()==matC.nbColumns());
