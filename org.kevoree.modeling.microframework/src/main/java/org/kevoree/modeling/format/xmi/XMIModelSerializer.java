@@ -3,11 +3,12 @@ package org.kevoree.modeling.format.xmi;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 
+/*
 public class XMIModelSerializer {
 
     public static void save(KObject model, final KCallback<String> callback) {
         callback.on(null);
-/*
+
         if (createModel == null) {
         } else {
             final SerializationContext context = new SerializationContext();
@@ -212,6 +213,8 @@ public class XMIModelSerializer {
         });
         thisTask.ready();
         return thisTask;
-        */
+
     }
 }
+
+*/

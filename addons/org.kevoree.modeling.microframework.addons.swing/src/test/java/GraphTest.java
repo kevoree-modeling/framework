@@ -36,13 +36,13 @@ public class GraphTest {
                 Random random = new Random();
                 for (int i = 0; i < random.nextInt(PRIMARY); i++) {
                     KObject sub = view0_0.create(nodeClazz);
-                    root.mutate(KActionType.ADD, nodeClazz.reference("children"), sub);
+                    root.add(nodeClazz.reference("children"), sub,null);
                     for (int j = 0; j < random.nextInt(SECONDARY); j++) {
                         KObject sub2 = view0_0.create(nodeClazz);
                         if (j % 10 == 0) {
-                            sub.mutate(KActionType.ADD, nodeClazz.reference("neighbor"), sub2);
+                            sub.add(nodeClazz.reference("neighbor"), sub2,null);
                         } else {
-                            sub.mutate(KActionType.ADD, nodeClazz.reference("children"), sub2);
+                            sub.add(nodeClazz.reference("children"), sub2,null);
                         }
                     }
                 }

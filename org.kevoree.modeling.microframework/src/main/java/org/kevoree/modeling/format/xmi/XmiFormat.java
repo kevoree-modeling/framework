@@ -5,6 +5,7 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.format.KModelFormat;
 import org.kevoree.modeling.memory.manager.KDataManager;
 
+/*
 public class XmiFormat implements KModelFormat {
 
     private KDataManager _manager;
@@ -44,3 +45,4 @@ public class XmiFormat implements KModelFormat {
         XMIModelLoader.load(_manager, _universe, _time, payload, cb);
     }
 }
+*/

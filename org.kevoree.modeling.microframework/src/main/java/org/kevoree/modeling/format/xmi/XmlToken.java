@@ -1,5 +1,6 @@
 package org.kevoree.modeling.format.xmi;
 
+/*
 public enum XmlToken {
     XML_HEADER,
     END_DOCUMENT,
@@ -7,4 +8,4 @@ public enum XmlToken {
     END_TAG,
     COMMENT,
     SINGLETON_TAG
-}
+}*/

@@ -4,13 +4,11 @@ import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.format.KModelFormat;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KView;
-import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.format.json.JsonFormat;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.traversal.query.impl.QueryEngine;
 import org.kevoree.modeling.util.Checker;
-import org.kevoree.modeling.format.xmi.XmiFormat;
 
 public abstract class AbstractKView implements KView {
 
@@ -93,9 +91,10 @@ public abstract class AbstractKView implements KView {
         return new JsonFormat(_universe, _time, _manager);
     }
 
+    /*
     public KModelFormat xmi() {
         return new XmiFormat(_universe, _time, _manager);
-    }
+    }*/
 
     @Override
     public boolean equals(Object obj) {

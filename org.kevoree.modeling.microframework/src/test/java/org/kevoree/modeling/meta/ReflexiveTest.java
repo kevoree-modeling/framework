@@ -2,7 +2,6 @@ package org.kevoree.modeling.meta;
 
 import org.junit.Test;
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
@@ -36,14 +35,18 @@ public class ReflexiveTest {
                 KObject sensor = universe.universe(0).time(0).create(sensorMetaClass);
                 sensor.set(sensor.metaClass().attribute("name"), "Sensor#1");
 
-                home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
-
-                universe.universe(0).time(0).json().save(home, new KCallback<String>() {
+                home.addByName("sensors", sensor, new KCallback() {
                     @Override
-                    public void on(String s) {
+                    public void on(Object o) {
+                        universe.universe(0).time(0).json().save(home, new KCallback<String>() {
+                            @Override
+                            public void on(String s) {
 
+                            }
+                        });
                     }
                 });
+
 
             }
         });

@@ -9,6 +9,7 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 
 import java.util.ArrayList;
 
+/*
 public class SerializationContext {
     public boolean ignoreGeneratedID = false;
     public KObject model;
@@ -23,4 +24,4 @@ public class SerializationContext {
 
     ArrayList<String> packageList = new ArrayList<String>();
 
-}
+}*/

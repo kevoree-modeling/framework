@@ -1,6 +1,7 @@
 package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
@@ -107,18 +108,26 @@ public abstract class AbstractKObject implements KObject {
             _manager.lookupAllObjects(_universe, _time, flatCollected, new KCallback<KObject[]>() {
                 @Override
                 public void on(KObject[] resolved) {
+                    KDefer defer = manager().model().defer();
                     for (int i = 0; i < resolved.length; i++) {
                         if (resolved[i] != null) {
                             //TODO optimize
                             KMetaReference[] linkedReferences = resolved[i].referencesWith(selfPointer);
                             for (int j = 0; j < linkedReferences.length; j++) {
-                                ((AbstractKObject) resolved[i]).internal_mutate(KActionType.REMOVE, linkedReferences[j], selfPointer, false);
+                                ((AbstractKObject) resolved[i]).internal_remove(linkedReferences[j], selfPointer, false, defer.waitResult());
                             }
                         }
                     }
-                    if (cb != null) {
-                        cb.on(null);
-                    }
+                    defer.then(new KCallback<Object[]>() {
+                        @Override
+                        public void on(Object[] objects) {
+                            if (cb != null) {
+                                cb.on(null);
+                            }
+                        }
+                    });
+
+
                 }
             });
         }
@@ -174,109 +183,166 @@ public abstract class AbstractKObject implements KObject {
     }
 
     @Override
-    public void addByName(String relationName, KObject objToAdd) {
-        KMetaReference transposed = _metaClass.reference(relationName);
-        if (transposed != null) {
-            mutate(KActionType.ADD, transposed, objToAdd);
-        }
-    }
-
-    @Override
-    public void removeByName(String relationName, KObject objToAdd) {
-        KMetaReference transposed = _metaClass.reference(relationName);
-        if (transposed != null) {
-            mutate(KActionType.REMOVE, transposed, objToAdd);
-        }
-    }
-
-    @Override
-    public void mutate(KActionType actionType, final KMetaReference metaReference, KObject param) {
-        internal_mutate(actionType, metaReference, param, true);
-    }
-
-    public void internal_mutate(KActionType actionType, final KMetaReference metaReferenceP, KObject param, final boolean setOpposite) {
-        final KMetaReference metaReference = internal_transpose_ref(metaReferenceP);
+    public void addByName(String relationName, KObject objToAdd, KCallback callback) {
+        KMetaReference metaReference = _metaClass.reference(relationName);
         if (metaReference == null) {
-            if (metaReferenceP == null) {
-                throw new RuntimeException("Bad KMF usage, the reference " + " is null in metaClass named " + metaClass().metaName());
-            } else {
-                throw new RuntimeException("Bad KMF usage, the reference named " + metaReferenceP.metaName() + " is not part of " + metaClass().metaName());
+            throw new RuntimeException("Bad KMF usage, the reference named " + relationName + " is not part of " + metaClass().metaName());
+        }
+        internal_add(metaReference, objToAdd, true, callback);
+    }
+
+    @Override
+    public void add(KMetaReference p_metaReference, KObject objToAdd, KCallback callback) {
+        final KMetaReference metaReference = internal_transpose_ref(p_metaReference);
+        if (metaReference == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaReference.metaName() + " is not part of " + metaClass().metaName());
+        }
+        if (metaReference.single()) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaReference.metaName() + " is single and must bu used through the setRef method");
+        }
+        internal_add(metaReference, objToAdd, true, callback);
+    }
+
+    private void internal_add(final KMetaReference p_metaReference, KObject p_param, final boolean p_setOpposite, KCallback callback) {
+        KObjectChunk raw = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
+        if (raw != null) {
+            if (raw.addLongToArray(p_metaReference.index(), p_param.uuid(), _metaClass)) {
+                if (p_setOpposite) {
+                    KMetaReference oppositeRef = p_param.metaClass().reference(p_metaReference.oppositeName());
+                    if (oppositeRef.single()) {
+                        ((AbstractKObject) p_param).internal_set(oppositeRef, this, false, callback);
+                    } else {
+                        ((AbstractKObject) p_param).internal_add(oppositeRef, this, false, callback);
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.on(null);
+                    }
+                }
             }
         }
-        if (actionType.equals(KActionType.ADD)) {
-            if (metaReference.single()) {
-                internal_mutate(KActionType.SET, metaReference, param, setOpposite);
-            } else {
-                KObjectChunk raw = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
-                if (raw != null) {
-                    if (raw.addLongToArray(metaReference.index(), param.uuid(), _metaClass)) {
-                        if (setOpposite) {
-                            ((AbstractKObject) param).internal_mutate(KActionType.ADD, param.metaClass().reference(metaReference.oppositeName()), this, false);
-                        }
+    }
+
+    @Override
+    public void removeByName(String relationName, KObject objToAdd, KCallback callback) {
+        KMetaReference metaReference = _metaClass.reference(relationName);
+        if (metaReference == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + relationName + " is not part of " + metaClass().metaName());
+        }
+        internal_remove(metaReference, objToAdd, true, callback);
+    }
+
+    @Override
+    public void remove(KMetaReference p_metaReference, KObject objToRemove, KCallback callback) {
+        final KMetaReference metaReference = internal_transpose_ref(p_metaReference);
+        if (metaReference == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaReference.metaName() + " is not part of " + metaClass().metaName());
+        }
+        if (metaReference.single()) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaReference.metaName() + " is single and must bu used through the setRef method");
+        }
+        internal_remove(metaReference, objToRemove, true, callback);
+    }
+
+    private void internal_remove(final KMetaReference p_metaReference, KObject objToRemove, final boolean p_setOpposite, KCallback callback) {
+        KObjectChunk payload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
+        if (payload != null) {
+            if (payload.removeLongToArray(p_metaReference.index(), objToRemove.uuid(), _metaClass)) {
+                if (p_setOpposite) {
+                    KMetaReference oppositeMetaRef = objToRemove.metaClass().reference(p_metaReference.oppositeName());
+                    if (oppositeMetaRef.single()) {
+                        ((AbstractKObject) objToRemove).internal_set(oppositeMetaRef, this, false, callback);
+                    } else {
+                        ((AbstractKObject) objToRemove).internal_remove(oppositeMetaRef, this, false, callback);
                     }
-                }
-            }
-        } else if (actionType.equals(KActionType.SET)) {
-            if (!metaReference.single()) {
-                internal_mutate(KActionType.ADD, metaReference, param, setOpposite);
-            } else {
-                if (param == null) {
-                    internal_mutate(KActionType.REMOVE, metaReference, null, setOpposite);
                 } else {
-                    KObjectChunk payload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
-                    long[] previous = payload.getLongArray(metaReference.index(), _metaClass);
-                    //override
-                    long[] singleValue = new long[1];
-                    singleValue[0] = param.uuid();
-                    payload.setPrimitiveType(metaReference.index(), singleValue, _metaClass);
-                    if (setOpposite) {
-                        if (previous != null) {
-                            KObject self = this;
-                            _manager.lookupAllObjects(_universe, _time, previous, new KCallback<KObject[]>() {
-                                @Override
-                                public void on(KObject[] kObjects) {
-                                    for (int i = 0; i < kObjects.length; i++) {
-                                        ((AbstractKObject) kObjects[i]).internal_mutate(KActionType.REMOVE, kObjects[i].metaClass().reference(metaReference.oppositeName()), self, false);
-                                    }
-                                    ((AbstractKObject) param).internal_mutate(KActionType.ADD, param.metaClass().reference(metaReference.oppositeName()), self, false);
-                                }
-                            });
-                        } else {
-                            ((AbstractKObject) param).internal_mutate(KActionType.ADD, param.metaClass().reference(metaReference.oppositeName()), this, false);
-                        }
+                    if (callback != null) {
+                        callback.on(null);
                     }
                 }
             }
-        } else if (actionType.equals(KActionType.REMOVE)) {
-            if (metaReference.single()) {
-                KObjectChunk raw = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
-                long[] previousKid = raw.getLongArray(metaReference.index(), _metaClass);
-                raw.setPrimitiveType(metaReference.index(), null, _metaClass);
-                if (setOpposite) {
-                    if (previousKid != null) {
-                        final KObject self = this;
-                        _manager.lookupAllObjects(_universe, _time, previousKid, new KCallback<KObject[]>() {
-                            @Override
-                            public void on(KObject[] resolvedParams) {
-                                if (resolvedParams != null) {
-                                    for (int dd = 0; dd < resolvedParams.length; dd++) {
-                                        if (resolvedParams[dd] != null) {
-                                            ((AbstractKObject) resolvedParams[dd]).internal_mutate(KActionType.REMOVE, resolvedParams[dd].metaClass().reference(metaReference.oppositeName()), self, false);
-                                        }
+        }
+    }
+
+    @Override
+    public void setRef(final KMetaReference p_metaReference, final KObject objToset, final KCallback callback) {
+        final KMetaReference metaReference = internal_transpose_ref(p_metaReference);
+        if (metaReference == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaReference.metaName() + " is not part of " + metaClass().metaName());
+        }
+        if (!metaReference.single()) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaReference.metaName() + " is multiple and must bu used through add* or remove* methods");
+        }
+        internal_set(metaReference, objToset, true, callback);
+    }
+
+    private void internal_set(final KMetaReference p_metaReference, KObject p_param, final boolean p_setOpposite, KCallback callback) {
+        final KObject selfObject = this;
+        KObjectChunk chunk = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
+        long[] previousVal = chunk.getLongArray(p_metaReference.index(), _metaClass);
+        if (p_param != null) {
+            long[] singleValueArray = new long[1];
+            singleValueArray[0] = p_param.uuid();
+            chunk.setPrimitiveType(p_metaReference.index(), singleValueArray, _metaClass);
+        } else {
+            chunk.setPrimitiveType(p_metaReference.index(), null, _metaClass);
+        }
+        if (previousVal != null && previousVal.length > 0) {
+            if (previousVal[0] == p_param.uuid()) {
+                callback.on(null);
+                return;
+            }
+            _manager.lookup(_universe, _time, previousVal[0], new KCallback<KObject>() {
+                @Override
+                public void on(KObject previousObject) {
+                    KMetaReference previousOppositeRef = previousObject.metaClass().reference(p_metaReference.oppositeName());
+                    KCallback afterPreviousModification = new KCallback() {
+                        @Override
+                        public void on(Object o) {
+                            if (p_setOpposite) {
+                                if (p_param != null) {
+                                    KMetaReference oppositeRef = p_param.metaClass().reference(p_metaReference.oppositeName());
+                                    if (oppositeRef.single()) {
+                                        ((AbstractKObject) p_param).internal_set(oppositeRef, selfObject, false, callback);
+                                    } else {
+                                        ((AbstractKObject) p_param).internal_add(oppositeRef, selfObject, false, callback);
                                     }
+                                } else {
+                                    if (callback != null) {
+                                        callback.on(null);
+                                    }
+                                }
+                            } else {
+                                if (callback != null) {
+                                    callback.on(null);
                                 }
                             }
-                        });
+                        }
+                    };
+                    if (previousOppositeRef.single()) {
+                        ((AbstractKObject) previousObject).internal_set(previousOppositeRef, null, false, afterPreviousModification);
+                    } else {
+                        ((AbstractKObject) previousObject).internal_remove(previousOppositeRef, selfObject, false, afterPreviousModification);
+                    }
+                }
+            });
+        } else {
+            if (p_setOpposite) {
+                if (p_param != null) {
+                    KMetaReference oppositeRef = p_param.metaClass().reference(p_metaReference.oppositeName());
+                    if (oppositeRef.single()) {
+                        ((AbstractKObject) p_param).internal_set(oppositeRef, this, false, callback);
+                    } else {
+                        ((AbstractKObject) p_param).internal_add(oppositeRef, this, false, callback);
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.on(null);
                     }
                 }
             } else {
-                KObjectChunk payload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
-                if (payload != null) {
-                    if (payload.removeLongToArray(metaReference.index(), param.uuid(), _metaClass)) {
-                        if (setOpposite) {
-                            ((AbstractKObject) param).internal_mutate(KActionType.REMOVE, param.metaClass().reference(metaReference.oppositeName()), this, false);
-                        }
-                    }
+                if (callback != null) {
+                    callback.on(null);
                 }
             }
         }
@@ -333,16 +399,30 @@ public abstract class AbstractKObject implements KObject {
         if (transposed == null) {
             throw new RuntimeException("Bad KMF usage, the reference named " + p_refName + " is not part of " + metaClass().metaName());
         } else {
-            KObjectChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
-            if (raw == null) {
+            return internal_getRefValues(transposed);
+        }
+    }
+
+    @Override
+    public long[] getRefValues(KMetaReference p_reference) {
+        KMetaReference transposed = internal_transpose_ref(p_reference);
+        if (transposed == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_reference + " is not part of " + metaClass().metaName());
+        } else {
+            return internal_getRefValues(transposed);
+        }
+    }
+
+    private final long[] internal_getRefValues(KMetaReference transposedReference) {
+        KObjectChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
+        if (raw == null) {
+            return new long[0];
+        } else {
+            long[] o = raw.getLongArray(transposedReference.index(), _metaClass);
+            if (o == null) {
                 return new long[0];
             } else {
-                long[] o = raw.getLongArray(transposed.index(), _metaClass);
-                if (o == null) {
-                    return new long[0];
-                } else {
-                    return o;
-                }
+                return o;
             }
         }
     }

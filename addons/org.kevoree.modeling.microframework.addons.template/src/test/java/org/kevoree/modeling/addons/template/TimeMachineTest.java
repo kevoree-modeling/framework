@@ -45,8 +45,8 @@ public class TimeMachineTest {
                 KObject sensor3 = model.create(sensorClass, 0, 0);
                 sensor3.set(sensorValueAtt, "44");
 
-                sensor.mutate(KActionType.ADD, sensorsRef, sensor2);
-                sensor.mutate(KActionType.ADD, sensorsRef, sensor3);
+                sensor.add(sensorsRef, sensor2, null);
+                sensor.add(sensorsRef, sensor3, null);
 
                 Random rand = new Random();
 

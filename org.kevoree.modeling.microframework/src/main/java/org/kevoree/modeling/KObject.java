@@ -45,12 +45,27 @@ public interface KObject {
     void removeFromAll(KCallback cb);
 
     /**
-     * Reflexive API
+     * Reflexive References API
      */
-    void mutate(KActionType actionType, KMetaReference metaReference, KObject param);
+    void addByName(String relationName, KObject objToAdd, KCallback callback);
+
+    void add(KMetaReference metaReference, KObject objToAdd, KCallback callback);
+
+    void removeByName(String relationName, KObject objToRemove, KCallback callback);
+
+    void remove(KMetaReference metaReference, KObject objToRemove, KCallback callback);
 
     void ref(KMetaReference metaReference, KCallback<KObject[]> cb);
 
+    long[] getRefValuesByName(String refName);
+
+    long[] getRefValues(KMetaReference metaReference);
+
+    void setRef(KMetaReference metaReference, KObject objToset, KCallback callback);
+
+    /**
+     * Reflexive Attributes API
+     */
     Object get(KMetaAttribute attribute);
 
     Object getByName(String atributeName);
@@ -58,12 +73,6 @@ public interface KObject {
     void set(KMetaAttribute attribute, Object payload);
 
     void setByName(String atributeName, Object payload);
-
-    long[] getRefValuesByName(String refName);
-
-    void addByName(String relationName, KObject objToAdd);
-
-    void removeByName(String relationName, KObject objToAdd);
 
     /**
      * Time related naviguation

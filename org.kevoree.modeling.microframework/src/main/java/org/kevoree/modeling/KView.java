@@ -21,8 +21,9 @@ public interface KView {
 
     KModelFormat json();
 
-    KModelFormat xmi();
-
+    /*
+        KModelFormat xmi();
+    */
     boolean equals(Object other);
 
     void setRoot(KObject elem, KCallback cb);

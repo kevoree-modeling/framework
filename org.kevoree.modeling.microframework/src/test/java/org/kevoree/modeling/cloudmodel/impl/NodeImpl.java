@@ -1,7 +1,6 @@
 package org.kevoree.modeling.cloudmodel.impl;
 
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.operation.KOperationStrategy;
 import org.kevoree.modeling.abs.AbstractKObject;
@@ -11,9 +10,6 @@ import org.kevoree.modeling.cloudmodel.Element;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.meta.MetaNode;
 
-/**
- * Created by duke on 10/10/14.
- */
 public class NodeImpl extends AbstractKObject implements Node {
 
     public NodeImpl(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long previousUniverse, long previousTime) {
@@ -44,13 +40,13 @@ public class NodeImpl extends AbstractKObject implements Node {
 
     @Override
     public Node addChildren(Node p_obj) {
-        this.mutate(KActionType.ADD, MetaNode.REF_CHILDREN, p_obj);
+        this.add(MetaNode.REF_CHILDREN, p_obj,null);
         return this;
     }
 
     @Override
     public Node removeChildren(Node p_obj) {
-        this.mutate(KActionType.REMOVE, MetaNode.REF_CHILDREN, p_obj);
+        this.remove(MetaNode.REF_CHILDREN, p_obj, null);
         return this;
     }
 
@@ -72,7 +68,7 @@ public class NodeImpl extends AbstractKObject implements Node {
 
     @Override
     public Node setElement(Element p_obj) {
-        this.mutate(KActionType.SET, MetaNode.REF_ELEMENT, p_obj);
+        this.setRef(MetaNode.REF_ELEMENT, p_obj, null);
         return this;
     }
 

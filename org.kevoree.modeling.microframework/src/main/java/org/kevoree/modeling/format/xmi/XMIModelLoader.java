@@ -2,7 +2,6 @@ package org.kevoree.modeling.format.xmi;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
@@ -12,6 +11,7 @@ import org.kevoree.modeling.meta.KMetaReference;
 import org.kevoree.modeling.meta.MetaType;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
+/*
 public class XMIModelLoader {
 
     public static final String LOADER_XMI_LOCAL_NAME = "type";
@@ -144,7 +144,6 @@ public class XMIModelLoader {
             throw new Exception("Could not create an object for local name " + elementTagName);
         }
         ctx.map.put(xmiAddress, modelElem);
-        /* Read attributes and References */
         for (int i = 0; i < ctx.xmiReader.getAttributeCount(); i++) {
             String prefix = ctx.xmiReader.getAttributePrefix(i);
             if (prefix == null || PrimitiveHelper.equals(prefix,"")) {
@@ -207,3 +206,4 @@ public class XMIModelLoader {
 }
 
 
+*/

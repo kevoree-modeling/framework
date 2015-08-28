@@ -2,6 +2,7 @@ package org.kevoree.modeling.format.xmi;
 
 import java.util.ArrayList;
 
+/*
 public class XmlParser {
 
     private String payload;
@@ -115,9 +116,6 @@ public class XmlParser {
         }
     }
 
-    /**
-     * Reads XML header <?xml version="1.0" encoding="UTF-8"?>
-     */
     private void read_xmlHeader() {
         read_tagName();
         read_attributes();
@@ -200,9 +198,7 @@ public class XmlParser {
     }
 
 }
-
-
-
+*/
 
 
 

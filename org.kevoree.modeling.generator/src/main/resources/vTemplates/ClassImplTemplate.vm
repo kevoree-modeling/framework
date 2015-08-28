@@ -29,8 +29,8 @@ public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferr
     #if($ref.single)
 
     @Override
-    public ${classDeclaration.pack}.${classDeclaration.name} set${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj) {
-        mutate(org.kevoree.modeling.KActionType.SET, ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj);
+    public ${classDeclaration.pack}.${classDeclaration.name} set${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj, org.kevoree.modeling.KCallback callback) {
+        this.setRef(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj,callback);
         return this;
     }
 
@@ -54,14 +54,14 @@ public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferr
     #{else}
 
     @Override
-    public ${classDeclaration.pack}.${classDeclaration.name} add${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj) {
-        mutate(org.kevoree.modeling.KActionType.ADD, ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj);
+    public ${classDeclaration.pack}.${classDeclaration.name} add${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj, org.kevoree.modeling.KCallback callback) {
+        this.add(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj,callback);
         return this;
     }
 
     @Override
-    public ${classDeclaration.pack}.${classDeclaration.name} remove${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj) {
-        mutate(org.kevoree.modeling.KActionType.REMOVE, ${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj);
+    public ${classDeclaration.pack}.${classDeclaration.name} remove${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj, org.kevoree.modeling.KCallback callback) {
+        remove(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj,callback);
         return this;
     }
 

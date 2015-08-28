@@ -6,9 +6,9 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
 
-/**
- * Created by assaad on 03/03/15.
- */
+import java.util.concurrent.CountDownLatch;
+
+/** @ignore ts */
 public class MultiUniverseTest {
 
     private MetaModel dynamicMetaModel;
@@ -118,25 +118,38 @@ public class MultiUniverseTest {
     }
 
     private void insert(long uId, long time, final double value) {
-
+        CountDownLatch latch = new CountDownLatch(1);
         model.universe(uId).time(time).lookup(object.uuid(), new KCallback<KObject>() {
             @Override
             public void on(KObject kObject) {
                 kObject.set(kObject.metaClass().attribute("value"), value);
+                latch.countDown();
+
             }
         });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public double get(long uId, long time) {
         final Object[] myvalue = {null};
+        CountDownLatch latch = new CountDownLatch(1);
         model.universe(uId).time(time).lookup(object.uuid(), new KCallback<KObject>() {
-
             @Override
             public void on(KObject kObject) {
                 myvalue[0] = kObject.get(kObject.metaClass().attribute("value"));
+                latch.countDown();
             }
 
         });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return (double) myvalue[0];
     }
 

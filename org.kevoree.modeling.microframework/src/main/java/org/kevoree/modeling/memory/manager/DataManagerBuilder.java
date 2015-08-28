@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.strategy.impl.HeapMemoryStrategy;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
+import org.kevoree.modeling.scheduler.impl.ExecutorServiceScheduler;
 
 public class DataManagerBuilder {
 
@@ -24,9 +25,15 @@ public class DataManagerBuilder {
         return _driver;
     }
 
+    /**
+     * @native ts
+     * if (this._scheduler == null) { this._scheduler = new org.kevoree.modeling.scheduler.impl.DirectScheduler(); }
+     * return this._scheduler;
+     */
     public KScheduler scheduler() {
         if (this._scheduler == null) {
-            this._scheduler = new DirectScheduler();
+            //this._scheduler = new DirectScheduler();
+            this._scheduler = new ExecutorServiceScheduler();
         }
         return _scheduler;
     }

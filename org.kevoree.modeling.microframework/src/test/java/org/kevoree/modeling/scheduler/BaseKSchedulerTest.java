@@ -8,6 +8,7 @@ import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
+/** @ignore ts */
 public abstract class BaseKSchedulerTest {
 
     public abstract KScheduler createScheduler();

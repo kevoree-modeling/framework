@@ -97,22 +97,24 @@ public class SpeedTest {
                 KObject sensor = universe.universe(0).time(0).create(sensorMetaClass);
                 sensor.set(sensor.metaClass().attribute("name"), "Sensor#1");
 
-                home.mutate(KActionType.ADD, (KMetaReference) home.metaClass().metaByName("sensors"), sensor);
+                home.addByName("sensors", sensor, new KCallback() {
+                    @Override
+                    public void on(Object o) {
 
-                long before = System.currentTimeMillis();
-                KMetaAttribute att = sensor.metaClass().attribute("value");
-                //   att.setExtrapolation(new PolynomialExtrapolation());
-                ((MetaAttribute) att)._precision = 0.1;
+                        long before = System.currentTimeMillis();
+                        KMetaAttribute att = sensor.metaClass().attribute("value");
+                        //   att.setExtrapolation(new PolynomialExtrapolation());
+                        ((MetaAttribute) att)._precision = 0.1;
 
-                for (int i = 0; i < 5000000; i++) {
-                    sensor.jump(i, new KCallback<KObject>() {
-                        @Override
-                        public void on(KObject timedObject) {
-                            timedObject.set(att, 3d);
+                        for (int i = 0; i < 5000000; i++) {
+                            sensor.jump(i, new KCallback<KObject>() {
+                                @Override
+                                public void on(KObject timedObject) {
+                                    timedObject.set(att, 3d);
+                                }
+                            });
                         }
-                    });
-                }
-                long middle = System.currentTimeMillis();
+                        long middle = System.currentTimeMillis();
                 /*
                 for(int i=0;i<5000000;i++){
                     sensor.jump2(i, new Callback<KObject>() {
@@ -123,9 +125,14 @@ public class SpeedTest {
                     });
                 }
                 */
-                long after = System.currentTimeMillis();
-                System.out.println(middle - before);
-                System.out.println(after - middle);
+                        long after = System.currentTimeMillis();
+                        System.out.println(middle - before);
+                        System.out.println(after - middle);
+
+                    }
+                });
+
+
 
             }
         });

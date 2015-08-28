@@ -1,9 +1,9 @@
 package org.kevoree.modeling.format.xmi;
 
-import org.kevoree.modeling.KActionType;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.meta.KMetaReference;
 
+/*
 public class XMIResolveCommand {
 
     private XMILoadingContext context;
@@ -33,4 +33,4 @@ public class XMIResolveCommand {
         }
         throw new Exception("KMF Load error : reference " + ref + " not found in map when trying to  " + mutatorType + " " + refName + "  on " + target.metaClass().metaName() + "(uuid:" + target.uuid() + ")");
     }
-}
+}*/

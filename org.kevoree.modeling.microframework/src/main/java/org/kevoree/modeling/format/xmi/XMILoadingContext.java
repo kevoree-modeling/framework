@@ -7,9 +7,7 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 
 import java.util.ArrayList;
 
-/**
- * Created by duke on 10/27/14.
- */
+/*
 public class XMILoadingContext {
 
     public XmlParser xmiReader;
@@ -25,3 +23,4 @@ public class XMILoadingContext {
     public KCallback<Throwable> successCallback;
 
 }
+*/

@@ -40,58 +40,62 @@ public class DistortedTimeResolver implements KResolver {
         return new Runnable() {
             @Override
             public void run() {
-                selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
-                    @Override
-                    public void on(KChunk theGlobalUniverseOrderElement) {
-                        if (theGlobalUniverseOrderElement != null) {
-                            selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid, new KCallback<KChunk>() {
-                                @Override
-                                public void on(KChunk theObjectUniverseOrderElement) {
-                                    if (theObjectUniverseOrderElement == null) {
-                                        selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                        callback.on(null);
-                                    } else {
-                                        long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, universe);
-                                        selfPointer.getOrLoadAndMark(closestUniverse, KConfig.NULL_LONG, uuid, new KCallback<KChunk>() {
-                                            @Override
-                                            public void on(KChunk theObjectTimeTreeElement) {
-                                                if (theObjectTimeTreeElement == null) {
-                                                    selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
-                                                    selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                                    callback.on(null);
-                                                } else {
-                                                    long closestTime = ((KLongTree) theObjectTimeTreeElement).previousOrEqual(time);
-                                                    if (closestTime == KConfig.NULL_LONG) {
-                                                        selfPointer._spaceManager.unmarkMemoryElement(theObjectTimeTreeElement);
+                try {
+                    selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
+                        @Override
+                        public void on(KChunk theGlobalUniverseOrderElement) {
+                            if (theGlobalUniverseOrderElement != null) {
+                                selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid, new KCallback<KChunk>() {
+                                    @Override
+                                    public void on(KChunk theObjectUniverseOrderElement) {
+                                        if (theObjectUniverseOrderElement == null) {
+                                            selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                            callback.on(null);
+                                        } else {
+                                            long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, universe);
+                                            selfPointer.getOrLoadAndMark(closestUniverse, KConfig.NULL_LONG, uuid, new KCallback<KChunk>() {
+                                                @Override
+                                                public void on(KChunk theObjectTimeTreeElement) {
+                                                    if (theObjectTimeTreeElement == null) {
                                                         selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
                                                         selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
                                                         callback.on(null);
-                                                        return;
-                                                    }
-                                                    selfPointer.getOrLoadAndMark(closestUniverse, closestTime, uuid, new KCallback<KChunk>() {
-                                                        @Override
-                                                        public void on(KChunk theObjectChunk) {
-                                                            if (theObjectChunk == null) {
-                                                                selfPointer._spaceManager.unmarkMemoryElement(theObjectTimeTreeElement);
-                                                                selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
-                                                                selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                                                callback.on(null);
-                                                            } else {
-                                                                KObject newProxy = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuid, selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunk).metaClassIndex()), closestUniverse, closestTime);
-                                                                selfPointer._spaceManager.register(newProxy);
-                                                                callback.on(newProxy);
-                                                            }
+                                                    } else {
+                                                        long closestTime = ((KLongTree) theObjectTimeTreeElement).previousOrEqual(time);
+                                                        if (closestTime == KConfig.NULL_LONG) {
+                                                            selfPointer._spaceManager.unmarkMemoryElement(theObjectTimeTreeElement);
+                                                            selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
+                                                            selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                                            callback.on(null);
+                                                            return;
                                                         }
-                                                    });
+                                                        selfPointer.getOrLoadAndMark(closestUniverse, closestTime, uuid, new KCallback<KChunk>() {
+                                                            @Override
+                                                            public void on(KChunk theObjectChunk) {
+                                                                if (theObjectChunk == null) {
+                                                                    selfPointer._spaceManager.unmarkMemoryElement(theObjectTimeTreeElement);
+                                                                    selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
+                                                                    selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                                                    callback.on(null);
+                                                                } else {
+                                                                    KObject newProxy = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuid, selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunk).metaClassIndex()), closestUniverse, closestTime);
+                                                                    selfPointer._spaceManager.register(newProxy);
+                                                                    callback.on(newProxy);
+                                                                }
+                                                            }
+                                                        });
+                                                    }
                                                 }
-                                            }
-                                        });
+                                            });
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -102,80 +106,84 @@ public class DistortedTimeResolver implements KResolver {
         return new Runnable() {
             @Override
             public void run() {
-                selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
-                    @Override
-                    public void on(KChunk theGlobalUniverseOrderElement) {
-                        if (theGlobalUniverseOrderElement != null) {
-                            final long[] tempObjectUniverseKeys = new long[uuids.length * 3];
-                            for (int i = 0; i < uuids.length; i++) {
-                                tempObjectUniverseKeys[i * 3] = KConfig.NULL_LONG;
-                                tempObjectUniverseKeys[i * 3 + 1] = KConfig.NULL_LONG;
-                                tempObjectUniverseKeys[i * 3 + 2] = uuids[i];
-                            }
-                            selfPointer.getOrLoadAndMarkAll(tempObjectUniverseKeys, new KCallback<KChunk[]>() {
-                                @Override
-                                public void on(KChunk[] objectUniverseOrderElements) {
-                                    if (objectUniverseOrderElements == null || objectUniverseOrderElements.length == 0) {
-                                        selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                        callback.on(new KObject[0]);
-                                        return;
-                                    }
-                                    final long[] tempObjectTimeTreeKeys = new long[uuids.length * 3];
-                                    for (int i = 0; i < uuids.length; i++) {
-                                        long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) objectUniverseOrderElements[i], time, universe);
-                                        tempObjectTimeTreeKeys[i * 3] = closestUniverse;
-                                        tempObjectTimeTreeKeys[i * 3 + 1] = KConfig.NULL_LONG;
-                                        tempObjectTimeTreeKeys[i * 3 + 2] = uuids[i];
-                                    }
-                                    selfPointer.getOrLoadAndMarkAll(tempObjectTimeTreeKeys, new KCallback<KChunk[]>() {
-                                        @Override
-                                        public void on(KChunk[] objectTimeTreeElements) {
-                                            if (objectTimeTreeElements == null || objectTimeTreeElements.length == 0) {
-                                                selfPointer._spaceManager.unmarkAllMemoryElements(objectUniverseOrderElements);
-                                                selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                                callback.on(new KObject[0]);
-                                                return;
-                                            }
-                                            final long[] tempObjectChunkKeys = new long[uuids.length * 3];
-                                            for (int i = 0; i < uuids.length; i++) {
-                                                long closestTime = ((KLongTree) objectTimeTreeElements[i]).previousOrEqual(time);
-                                                if (closestTime != KConfig.NULL_LONG) {
-                                                    tempObjectChunkKeys[i * 3] = tempObjectTimeTreeKeys[i * 3];
-                                                    tempObjectChunkKeys[i * 3 + 1] = closestTime;
-                                                    tempObjectChunkKeys[i * 3 + 2] = uuids[i];
-                                                } else {
-                                                    System.arraycopy(KContentKey.NULL_KEY, 0, tempObjectChunkKeys, (i * 3), 3);
+                try {
+                    selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
+                        @Override
+                        public void on(KChunk theGlobalUniverseOrderElement) {
+                            if (theGlobalUniverseOrderElement != null) {
+                                final long[] tempObjectUniverseKeys = new long[uuids.length * 3];
+                                for (int i = 0; i < uuids.length; i++) {
+                                    tempObjectUniverseKeys[i * 3] = KConfig.NULL_LONG;
+                                    tempObjectUniverseKeys[i * 3 + 1] = KConfig.NULL_LONG;
+                                    tempObjectUniverseKeys[i * 3 + 2] = uuids[i];
+                                }
+                                selfPointer.getOrLoadAndMarkAll(tempObjectUniverseKeys, new KCallback<KChunk[]>() {
+                                    @Override
+                                    public void on(KChunk[] objectUniverseOrderElements) {
+                                        if (objectUniverseOrderElements == null || objectUniverseOrderElements.length == 0) {
+                                            selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                            callback.on(new KObject[0]);
+                                            return;
+                                        }
+                                        final long[] tempObjectTimeTreeKeys = new long[uuids.length * 3];
+                                        for (int i = 0; i < uuids.length; i++) {
+                                            long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) objectUniverseOrderElements[i], time, universe);
+                                            tempObjectTimeTreeKeys[i * 3] = closestUniverse;
+                                            tempObjectTimeTreeKeys[i * 3 + 1] = KConfig.NULL_LONG;
+                                            tempObjectTimeTreeKeys[i * 3 + 2] = uuids[i];
+                                        }
+                                        selfPointer.getOrLoadAndMarkAll(tempObjectTimeTreeKeys, new KCallback<KChunk[]>() {
+                                            @Override
+                                            public void on(KChunk[] objectTimeTreeElements) {
+                                                if (objectTimeTreeElements == null || objectTimeTreeElements.length == 0) {
+                                                    selfPointer._spaceManager.unmarkAllMemoryElements(objectUniverseOrderElements);
+                                                    selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                                    callback.on(new KObject[0]);
+                                                    return;
                                                 }
-                                            }
-                                            selfPointer.getOrLoadAndMarkAll(tempObjectChunkKeys, new KCallback<KChunk[]>() {
-                                                @Override
-                                                public void on(KChunk[] theObjectChunks) {
-                                                    if (theObjectChunks == null || theObjectChunks.length == 0) {
-                                                        selfPointer._spaceManager.unmarkAllMemoryElements(objectTimeTreeElements);
-                                                        selfPointer._spaceManager.unmarkAllMemoryElements(objectUniverseOrderElements);
-                                                        selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                                        callback.on(new KObject[0]);
+                                                final long[] tempObjectChunkKeys = new long[uuids.length * 3];
+                                                for (int i = 0; i < uuids.length; i++) {
+                                                    long closestTime = ((KLongTree) objectTimeTreeElements[i]).previousOrEqual(time);
+                                                    if (closestTime != KConfig.NULL_LONG) {
+                                                        tempObjectChunkKeys[i * 3] = tempObjectTimeTreeKeys[i * 3];
+                                                        tempObjectChunkKeys[i * 3 + 1] = closestTime;
+                                                        tempObjectChunkKeys[i * 3 + 2] = uuids[i];
                                                     } else {
-                                                        KObject[] finalResult = new KObject[uuids.length];
-                                                        for (int h = 0; h < theObjectChunks.length; h++) {
-                                                            if (theObjectChunks[h] != null) {
-                                                                finalResult[h] = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuids[h], selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1]);
-                                                            } else {
-                                                                finalResult[h] = null;
-                                                            }
-                                                        }
-                                                        selfPointer._spaceManager.registerAll(finalResult);
-                                                        callback.on(finalResult);
+                                                        System.arraycopy(KContentKey.NULL_KEY, 0, tempObjectChunkKeys, (i * 3), 3);
                                                     }
                                                 }
-                                            });
-                                        }
-                                    });
-                                }
-                            });
+                                                selfPointer.getOrLoadAndMarkAll(tempObjectChunkKeys, new KCallback<KChunk[]>() {
+                                                    @Override
+                                                    public void on(KChunk[] theObjectChunks) {
+                                                        if (theObjectChunks == null || theObjectChunks.length == 0) {
+                                                            selfPointer._spaceManager.unmarkAllMemoryElements(objectTimeTreeElements);
+                                                            selfPointer._spaceManager.unmarkAllMemoryElements(objectUniverseOrderElements);
+                                                            selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                                            callback.on(new KObject[0]);
+                                                        } else {
+                                                            KObject[] finalResult = new KObject[uuids.length];
+                                                            for (int h = 0; h < theObjectChunks.length; h++) {
+                                                                if (theObjectChunks[h] != null) {
+                                                                    finalResult[h] = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuids[h], selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1]);
+                                                                } else {
+                                                                    finalResult[h] = null;
+                                                                }
+                                                            }
+                                                            selfPointer._spaceManager.registerAll(finalResult);
+                                                            callback.on(finalResult);
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -186,65 +194,69 @@ public class DistortedTimeResolver implements KResolver {
         return new Runnable() {
             @Override
             public void run() {
-                selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
-                    @Override
-                    public void on(KChunk theGlobalUniverseOrderElement) {
-                        if (theGlobalUniverseOrderElement != null) {
-                            final long[] allOrderedKeys = new long[keys.length * 3];
-                            int insertIndex = 0;
-                            int nbKeys = keys.length / 3;
-                            for (int i = 0; i < nbKeys; i++) {
-                                //objectUniverseOrder
-                                allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
-                                insertIndex++;
-                                allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
-                                insertIndex++;
-                                allOrderedKeys[insertIndex] = keys[i * 3 + 2];
-                                insertIndex++;
-                                //objectTimeORder
-                                allOrderedKeys[insertIndex] = keys[i * 3];
-                                insertIndex++;
-                                allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
-                                insertIndex++;
-                                allOrderedKeys[insertIndex] = keys[i * 3 + 2];
-                                insertIndex++;
-                                //objectChunk
-                                allOrderedKeys[insertIndex] = keys[i * 3];
-                                insertIndex++;
-                                allOrderedKeys[insertIndex] = keys[i * 3 + 1];
-                                insertIndex++;
-                                allOrderedKeys[insertIndex] = keys[i * 3 + 2];
-                                insertIndex++;
-                            }
-                            selfPointer.getOrLoadAndMarkAll(allOrderedKeys, new KCallback<KChunk[]>() {
-
-                                @Override
-                                public void on(KChunk[] kChunks) {
-                                    if (kChunks == null || kChunks.length == 0) {
-                                        selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                        callback.on(new KObject[0]);
-                                        return;
-                                    } else {
-                                        KObject[] finalResult = new KObject[nbKeys];
-                                        int insertIndex = 0;
-                                        int previousClassIndex = -1;
-                                        for (int h = 0; h < kChunks.length; h++) {
-                                            if (kChunks[h] != null && kChunks[h].type() == KChunkTypes.OBJECT_CHUNK) {
-                                                finalResult[insertIndex] = ((AbstractKModel) selfPointer._manager.model()).createProxy(kChunks[h].universe(), kChunks[h].time(), kChunks[h].obj(), selfPointer._manager.model().metaModel().metaClass(previousClassIndex), kChunks[h].universe(), kChunks[h].time());
-                                                insertIndex++;
-                                            } else if (kChunks[h] != null && kChunks[h].type() == KChunkTypes.LONG_LONG_MAP) {
-                                                KLongLongMap casted = (KLongLongMap) kChunks[h];
-                                                previousClassIndex = casted.metaClassIndex();
-                                            }
-                                        }
-                                        selfPointer._spaceManager.registerAll(finalResult);
-                                        callback.on(finalResult);
-                                    }
+                try {
+                    selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
+                        @Override
+                        public void on(KChunk theGlobalUniverseOrderElement) {
+                            if (theGlobalUniverseOrderElement != null) {
+                                final long[] allOrderedKeys = new long[keys.length * 3];
+                                int insertIndex = 0;
+                                int nbKeys = keys.length / 3;
+                                for (int i = 0; i < nbKeys; i++) {
+                                    //objectUniverseOrder
+                                    allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
+                                    insertIndex++;
+                                    allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
+                                    insertIndex++;
+                                    allOrderedKeys[insertIndex] = keys[i * 3 + 2];
+                                    insertIndex++;
+                                    //objectTimeORder
+                                    allOrderedKeys[insertIndex] = keys[i * 3];
+                                    insertIndex++;
+                                    allOrderedKeys[insertIndex] = KConfig.NULL_LONG;
+                                    insertIndex++;
+                                    allOrderedKeys[insertIndex] = keys[i * 3 + 2];
+                                    insertIndex++;
+                                    //objectChunk
+                                    allOrderedKeys[insertIndex] = keys[i * 3];
+                                    insertIndex++;
+                                    allOrderedKeys[insertIndex] = keys[i * 3 + 1];
+                                    insertIndex++;
+                                    allOrderedKeys[insertIndex] = keys[i * 3 + 2];
+                                    insertIndex++;
                                 }
-                            });
+                                selfPointer.getOrLoadAndMarkAll(allOrderedKeys, new KCallback<KChunk[]>() {
+
+                                    @Override
+                                    public void on(KChunk[] kChunks) {
+                                        if (kChunks == null || kChunks.length == 0) {
+                                            selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                            callback.on(new KObject[0]);
+                                            return;
+                                        } else {
+                                            KObject[] finalResult = new KObject[nbKeys];
+                                            int insertIndex = 0;
+                                            int previousClassIndex = -1;
+                                            for (int h = 0; h < kChunks.length; h++) {
+                                                if (kChunks[h] != null && kChunks[h].type() == KChunkTypes.OBJECT_CHUNK) {
+                                                    finalResult[insertIndex] = ((AbstractKModel) selfPointer._manager.model()).createProxy(kChunks[h].universe(), kChunks[h].time(), kChunks[h].obj(), selfPointer._manager.model().metaModel().metaClass(previousClassIndex), kChunks[h].universe(), kChunks[h].time());
+                                                    insertIndex++;
+                                                } else if (kChunks[h] != null && kChunks[h].type() == KChunkTypes.LONG_LONG_MAP) {
+                                                    KLongLongMap casted = (KLongLongMap) kChunks[h];
+                                                    previousClassIndex = casted.metaClassIndex();
+                                                }
+                                            }
+                                            selfPointer._spaceManager.registerAll(finalResult);
+                                            callback.on(finalResult);
+                                        }
+                                    }
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -255,102 +267,106 @@ public class DistortedTimeResolver implements KResolver {
         return new Runnable() {
             @Override
             public void run() {
-                selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
-                    @Override
-                    public void on(KChunk theGlobalUniverseOrderElement) {
-                        if (theGlobalUniverseOrderElement != null) {
-                            selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid, new KCallback<KChunk>() {
-                                @Override
-                                public void on(KChunk theObjectUniverseOrderElement) {
-                                    if (theObjectUniverseOrderElement == null) {
-                                        selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                        callback.on(null);
-                                    } else {
-                                        final long[] closestUniverses = new long[times.length];
-                                        ArrayLongLongMap closestUnikUniverse = new ArrayLongLongMap(-1, -1, -1, null);
-                                        int nbUniverseToload = 0;
-                                        for (int i = 0; i < times.length; i++) {
-                                            closestUniverses[i] = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, times[i], universe);
-                                            if (!closestUnikUniverse.contains(closestUniverses[i])) {
-                                                closestUnikUniverse.put(closestUniverses[i], nbUniverseToload);
-                                                nbUniverseToload++;
-                                            }
-                                        }
-                                        long[] toLoadUniverseKeys = new long[nbUniverseToload * 3];
-                                        closestUnikUniverse.each(new KLongLongMapCallBack() {
-                                            @Override
-                                            public void on(long key, long value) {
-                                                int currentIndex = (int) (value * 3);
-                                                toLoadUniverseKeys[currentIndex] = value;
-                                                toLoadUniverseKeys[currentIndex + 1] = KConfig.NULL_LONG;
-                                                toLoadUniverseKeys[currentIndex + 2] = uuid;
-                                            }
-                                        });
-                                        selfPointer.getOrLoadAndMarkAll(toLoadUniverseKeys, new KCallback<KChunk[]>() {
-                                            @Override
-                                            public void on(KChunk[] objectTimeTreeElements) {
-                                                if (objectTimeTreeElements == null || objectTimeTreeElements.length == 0) {
-                                                    selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
-                                                    selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                                    callback.on(null);
-                                                } else {
-                                                    final long[] closestTimes = new long[times.length];
-                                                    final ArrayLongLongMap closestUnikTimes = new ArrayLongLongMap(-1, -1, -1, null);
-                                                    ArrayLongLongMap reverseTimeUniverse = new ArrayLongLongMap(-1, -1, -1, null);
-                                                    int nbTimesToload = 0;
-                                                    for (int i = 0; i < times.length; i++) {
-                                                        int alignedIndexOfUniverse = (int) closestUnikUniverse.get(closestUniverses[i]);
-                                                        closestTimes[i] = ((KLongTree) objectTimeTreeElements[alignedIndexOfUniverse]).previousOrEqual(times[i]);
-                                                        if (!closestUnikTimes.contains(closestTimes[i])) {
-                                                            closestUnikTimes.put(closestTimes[i], nbTimesToload);
-                                                            reverseTimeUniverse.put(closestTimes[i], closestUniverses[i]);
-                                                            nbTimesToload++;
-                                                        }
-                                                    }
-                                                    long[] toLoadTimesKeys = new long[nbTimesToload * 3];
-                                                    closestUnikTimes.each(new KLongLongMapCallBack() {
-                                                        @Override
-                                                        public void on(long key, long value) {
-                                                            int currentIndex = (int) (value * 3);
-                                                            toLoadTimesKeys[currentIndex] = reverseTimeUniverse.get(key);
-                                                            toLoadTimesKeys[currentIndex + 1] = key;
-                                                            toLoadTimesKeys[currentIndex + 2] = uuid;
-                                                        }
-                                                    });
-                                                    selfPointer.getOrLoadAndMarkAll(toLoadTimesKeys, new KCallback<KChunk[]>() {
-                                                        @Override
-                                                        public void on(KChunk[] objectChunks) {
-                                                            if (objectChunks == null || objectChunks.length == 0) {
-                                                                selfPointer._spaceManager.unmarkAllMemoryElements(objectTimeTreeElements);
-                                                                selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
-                                                                selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
-                                                                callback.on(null);
-                                                            } else {
-                                                                KObject[] result = new KObject[times.length];
-                                                                for (int i = 0; i < times.length; i++) {
-                                                                    long resolvedUniverse = closestUniverses[i];
-                                                                    long resolvedTime = closestTimes[i];
-                                                                    int indexChunks = (int) closestUnikTimes.get(closestTimes[i]);
-                                                                    if (indexChunks != -1 && resolvedUniverse != KConfig.NULL_LONG && resolvedTime != KConfig.NULL_LONG) {
-                                                                        result[i] = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, times[i], uuid, selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) objectChunks[indexChunks]).metaClassIndex()), resolvedUniverse, resolvedTime);
-                                                                    } else {
-                                                                        result[i] = null;
-                                                                    }
-                                                                }
-                                                                selfPointer._spaceManager.registerAll(result);
-                                                                callback.on(result);
-                                                            }
-                                                        }
-                                                    });
+                try {
+                    selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
+                        @Override
+                        public void on(KChunk theGlobalUniverseOrderElement) {
+                            if (theGlobalUniverseOrderElement != null) {
+                                selfPointer.getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid, new KCallback<KChunk>() {
+                                    @Override
+                                    public void on(KChunk theObjectUniverseOrderElement) {
+                                        if (theObjectUniverseOrderElement == null) {
+                                            selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                            callback.on(null);
+                                        } else {
+                                            final long[] closestUniverses = new long[times.length];
+                                            ArrayLongLongMap closestUnikUniverse = new ArrayLongLongMap(-1, -1, -1, null);
+                                            int nbUniverseToload = 0;
+                                            for (int i = 0; i < times.length; i++) {
+                                                closestUniverses[i] = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, times[i], universe);
+                                                if (!closestUnikUniverse.contains(closestUniverses[i])) {
+                                                    closestUnikUniverse.put(closestUniverses[i], nbUniverseToload);
+                                                    nbUniverseToload++;
                                                 }
                                             }
-                                        });
+                                            long[] toLoadUniverseKeys = new long[nbUniverseToload * 3];
+                                            closestUnikUniverse.each(new KLongLongMapCallBack() {
+                                                @Override
+                                                public void on(long key, long value) {
+                                                    int currentIndex = (int) (value * 3);
+                                                    toLoadUniverseKeys[currentIndex] = value;
+                                                    toLoadUniverseKeys[currentIndex + 1] = KConfig.NULL_LONG;
+                                                    toLoadUniverseKeys[currentIndex + 2] = uuid;
+                                                }
+                                            });
+                                            selfPointer.getOrLoadAndMarkAll(toLoadUniverseKeys, new KCallback<KChunk[]>() {
+                                                @Override
+                                                public void on(KChunk[] objectTimeTreeElements) {
+                                                    if (objectTimeTreeElements == null || objectTimeTreeElements.length == 0) {
+                                                        selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
+                                                        selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                                        callback.on(null);
+                                                    } else {
+                                                        final long[] closestTimes = new long[times.length];
+                                                        final ArrayLongLongMap closestUnikTimes = new ArrayLongLongMap(-1, -1, -1, null);
+                                                        ArrayLongLongMap reverseTimeUniverse = new ArrayLongLongMap(-1, -1, -1, null);
+                                                        int nbTimesToload = 0;
+                                                        for (int i = 0; i < times.length; i++) {
+                                                            int alignedIndexOfUniverse = (int) closestUnikUniverse.get(closestUniverses[i]);
+                                                            closestTimes[i] = ((KLongTree) objectTimeTreeElements[alignedIndexOfUniverse]).previousOrEqual(times[i]);
+                                                            if (!closestUnikTimes.contains(closestTimes[i])) {
+                                                                closestUnikTimes.put(closestTimes[i], nbTimesToload);
+                                                                reverseTimeUniverse.put(closestTimes[i], closestUniverses[i]);
+                                                                nbTimesToload++;
+                                                            }
+                                                        }
+                                                        long[] toLoadTimesKeys = new long[nbTimesToload * 3];
+                                                        closestUnikTimes.each(new KLongLongMapCallBack() {
+                                                            @Override
+                                                            public void on(long key, long value) {
+                                                                int currentIndex = (int) (value * 3);
+                                                                toLoadTimesKeys[currentIndex] = reverseTimeUniverse.get(key);
+                                                                toLoadTimesKeys[currentIndex + 1] = key;
+                                                                toLoadTimesKeys[currentIndex + 2] = uuid;
+                                                            }
+                                                        });
+                                                        selfPointer.getOrLoadAndMarkAll(toLoadTimesKeys, new KCallback<KChunk[]>() {
+                                                            @Override
+                                                            public void on(KChunk[] objectChunks) {
+                                                                if (objectChunks == null || objectChunks.length == 0) {
+                                                                    selfPointer._spaceManager.unmarkAllMemoryElements(objectTimeTreeElements);
+                                                                    selfPointer._spaceManager.unmarkMemoryElement(theObjectUniverseOrderElement);
+                                                                    selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                                                    callback.on(null);
+                                                                } else {
+                                                                    KObject[] result = new KObject[times.length];
+                                                                    for (int i = 0; i < times.length; i++) {
+                                                                        long resolvedUniverse = closestUniverses[i];
+                                                                        long resolvedTime = closestTimes[i];
+                                                                        int indexChunks = (int) closestUnikTimes.get(closestTimes[i]);
+                                                                        if (indexChunks != -1 && resolvedUniverse != KConfig.NULL_LONG && resolvedTime != KConfig.NULL_LONG) {
+                                                                            result[i] = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, times[i], uuid, selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) objectChunks[indexChunks]).metaClassIndex()), resolvedUniverse, resolvedTime);
+                                                                        } else {
+                                                                            result[i] = null;
+                                                                        }
+                                                                    }
+                                                                    selfPointer._spaceManager.registerAll(result);
+                                                                    callback.on(result);
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
     }

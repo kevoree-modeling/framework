@@ -1,6 +1,7 @@
 package org.kevoree.modeling.meta.impl;
 
 import org.kevoree.modeling.abs.AbstractKView;
+import org.kevoree.modeling.format.KModelFormat;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 
