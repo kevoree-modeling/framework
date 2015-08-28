@@ -40,9 +40,9 @@ public interface KObject {
     void select(String query, KCallback<Object[]> callback);
 
     /**
-     * Delete KObject
+     * Detach KObject
      */
-    void removeFromAllReferee(KCallback cb);
+    void detach(KCallback cb);
 
     /**
      * Reflexive References API

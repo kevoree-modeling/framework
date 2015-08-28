@@ -76,7 +76,7 @@ public abstract class AbstractKObject implements KObject {
     }
 
     @Override
-    public void removeFromAllReferee(KCallback callback) {
+    public void detach(KCallback callback) {
         final KObject selfPointer = this;
         KObjectChunk rawPayload = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
         if (rawPayload == null) {
