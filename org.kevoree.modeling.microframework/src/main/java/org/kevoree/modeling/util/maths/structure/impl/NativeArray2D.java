@@ -66,7 +66,7 @@ public class NativeArray2D implements KArray2D {
 
     @Override
     public void setAll(double value) {
-        Arrays.fill(_back,value);
+        //Arrays.fill(_back,value);
     }
 
     @Override

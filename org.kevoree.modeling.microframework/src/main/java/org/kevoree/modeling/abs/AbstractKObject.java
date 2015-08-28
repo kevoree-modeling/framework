@@ -288,7 +288,7 @@ public abstract class AbstractKObject implements KObject {
             chunk.setPrimitiveType(p_metaReference.index(), null, _metaClass);
         }
         if (previousVal != null && previousVal.length > 0) {
-            if (previousVal[0] == p_param.uuid()) {
+            if (p_param != null && previousVal[0] == p_param.uuid()) {
                 callback.on(null);
                 return;
             }
