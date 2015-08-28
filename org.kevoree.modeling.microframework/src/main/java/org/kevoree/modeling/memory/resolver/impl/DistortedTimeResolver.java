@@ -728,6 +728,7 @@ public class DistortedTimeResolver implements KResolver {
                             KLongTree timeTree = (KLongTree) timeTrees[i];
                             if (timeTree != null) {
                                 long currentDivergenceTime = objUniverse.get(collectedUniverse[i]);
+                                currentDivergenceTime = currentDivergenceTime > startTime ? currentDivergenceTime : startTime;
                                 final long finalPreviousDivergenceTime = previousDivergenceTime;
                                 timeTree.range(currentDivergenceTime, previousDivergenceTime, new KTreeWalker() {
                                     @Override
