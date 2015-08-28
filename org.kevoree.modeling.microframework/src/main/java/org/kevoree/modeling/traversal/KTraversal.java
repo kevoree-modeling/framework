@@ -3,11 +3,11 @@ package org.kevoree.modeling.traversal;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.meta.KMetaAttribute;
-import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.KMetaRelation;
 
 public interface KTraversal {
 
-    KTraversal traverse(KMetaReference metaReference);
+    KTraversal traverse(KMetaRelation metaReference);
 
     KTraversal traverseQuery(String metaReferenceQuery);
 
@@ -25,7 +25,7 @@ public interface KTraversal {
 
     void map(KMetaAttribute attribute, KCallback<Object[]> cb);
 
-    KTraversal collect(KMetaReference metaReference, KTraversalFilter continueCondition);
+    KTraversal collect(KMetaRelation metaReference, KTraversalFilter continueCondition);
 
     KTraversal traverseTime(long timeOffset, long steps, KTraversalFilter continueCondition);
 

@@ -1,7 +1,6 @@
 package org.kevoree.modeling.microframework.addons.kolyfill.test;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.drivers.websocket.gateway.WebSocketGateway;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -18,7 +17,7 @@ public class KolyfillTest {
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
-        KMetaReference sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
+        KMetaRelation sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
 
         ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 

@@ -1,8 +1,5 @@
 package org.kevoree.modeling.format.xmi;
 
-import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.meta.KMetaReference;
-
 /*
 public class XMIResolveCommand {
 

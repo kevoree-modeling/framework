@@ -2,12 +2,12 @@ package org.kevoree.modeling.cloudmodel.meta;
 
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaClass;
-import org.kevoree.modeling.meta.impl.MetaReference;
+import org.kevoree.modeling.meta.impl.MetaRelation;
 import org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation;
 import org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation;
 import org.kevoree.modeling.meta.KMeta;
 import org.kevoree.modeling.meta.KMetaAttribute;
-import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.KMetaRelation;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 
 public class MetaElement extends MetaClass {
@@ -25,7 +25,7 @@ public class MetaElement extends MetaClass {
 
     public static final KMetaAttribute ATT_VALUE = new MetaAttribute("value", 1, 5, false, KPrimitiveTypes.CONTINUOUS.id(), PolynomialExtrapolation.instance());
 
-    public static final KMetaReference REF_OP_ELEMENT = new MetaReference("op_element", 2, false, false, 0, "element", 1);
+    public static final KMetaRelation REF_OP_ELEMENT = new MetaRelation("op_element", 2, false, 0, "element", 1, -1);
 
     public MetaElement() {
         super("org.kevoree.modeling.microframework.test.cloud.Element", 1, null, new int[]{});

@@ -4,7 +4,7 @@ import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaOperation;
-import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.KMetaRelation;
 import org.kevoree.modeling.operation.KOperationStrategy;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.visitor.KModelAttributeVisitor;
@@ -28,7 +28,7 @@ public interface KObject {
      */
     void visitAttributes(KModelAttributeVisitor visitor);
 
-    void visit(KModelVisitor visitor, KCallback cb);
+    void visit(KModelVisitor visitor, KCallback callback);
 
     KTraversal traversal();
 
@@ -37,7 +37,7 @@ public interface KObject {
     /**
      * Selector are untyped version of traversal
      */
-    void select(String query, KCallback<Object[]> cb);
+    void select(String query, KCallback<Object[]> callback);
 
     /**
      * Delete KObject
@@ -47,32 +47,32 @@ public interface KObject {
     /**
      * Reflexive References API
      */
-    void addByName(String relationName, KObject objToAdd, KCallback callback);
+    void addByName(String metaRelationName, KObject objToAdd);
 
-    void add(KMetaReference metaReference, KObject objToAdd, KCallback callback);
+    void add(KMetaRelation metaRelation, KObject objToAdd);
 
-    void removeByName(String relationName, KObject objToRemove, KCallback callback);
+    void removeByName(String metaRelationName, KObject objToRemove);
 
-    void remove(KMetaReference metaReference, KObject objToRemove, KCallback callback);
+    void remove(KMetaRelation metaRelation, KObject objToRemove);
 
-    void ref(KMetaReference metaReference, KCallback<KObject[]> cb);
+    void getRelationByName(String metaRelationName, KCallback<KObject[]> callback);
 
-    long[] getRefValuesByName(String refName);
+    void getRelation(KMetaRelation metaRelation, KCallback<KObject[]> callback);
 
-    long[] getRefValues(KMetaReference metaReference);
+    long[] getRelationValuesByName(String metaRelationName);
 
-    void setRef(KMetaReference metaReference, KObject objToset, KCallback callback);
+    long[] getRelationValues(KMetaRelation metaRelation);
 
     /**
      * Reflexive Attributes API
      */
-    Object get(KMetaAttribute attribute);
+    Object get(KMetaAttribute metaAttribute);
 
-    Object getByName(String atributeName);
+    Object getByName(String metaAttributeName);
 
-    void set(KMetaAttribute attribute, Object payload);
+    void set(KMetaAttribute metaAttribute, Object payload);
 
-    void setByName(String atributeName, Object payload);
+    void setByName(String metaAttributeName, Object payload);
 
     /**
      * Time related naviguation
@@ -94,7 +94,7 @@ public interface KObject {
 
     boolean equals(Object other);
 
-    KMetaReference[] referencesWith(KObject o);
+    KMetaRelation[] referencesWith(KObject o);
 
     void invokeOperation(KMetaOperation operation, Object[] params, KOperationStrategy strategy, KCallback cb);
 

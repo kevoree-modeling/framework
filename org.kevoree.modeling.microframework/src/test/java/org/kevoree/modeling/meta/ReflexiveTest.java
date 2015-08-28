@@ -35,15 +35,12 @@ public class ReflexiveTest {
                 KObject sensor = universe.universe(0).time(0).create(sensorMetaClass);
                 sensor.set(sensor.metaClass().attribute("name"), "Sensor#1");
 
-                home.addByName("sensors", sensor, new KCallback() {
-                    @Override
-                    public void on(Object o) {
-                        universe.universe(0).time(0).json().save(home, new KCallback<String>() {
-                            @Override
-                            public void on(String s) {
+                home.addByName("sensors", sensor);
 
-                            }
-                        });
+                universe.universe(0).time(0).json().save(home, new KCallback<String>() {
+                    @Override
+                    public void on(String s) {
+
                     }
                 });
 

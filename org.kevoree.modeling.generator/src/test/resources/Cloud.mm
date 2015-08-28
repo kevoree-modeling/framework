@@ -1,6 +1,6 @@
 class org.kevoree.cloud.Cloud {
-    ref* nodes: org.kevoree.cloud.Node
-    ref* elements: org.kevoree.cloud.Element
+    ref nodes: org.kevoree.cloud.Node
+    ref elements: org.kevoree.cloud.Element
 }
 
 class org.kevoree.cloud.Node {

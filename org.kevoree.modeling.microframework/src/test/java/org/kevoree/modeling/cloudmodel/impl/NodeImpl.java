@@ -40,19 +40,19 @@ public class NodeImpl extends AbstractKObject implements Node {
 
     @Override
     public Node addChildren(Node p_obj) {
-        this.add(MetaNode.REF_CHILDREN, p_obj,null);
+        this.add(MetaNode.REF_CHILDREN, p_obj);
         return this;
     }
 
     @Override
     public Node removeChildren(Node p_obj) {
-        this.remove(MetaNode.REF_CHILDREN, p_obj, null);
+        this.remove(MetaNode.REF_CHILDREN, p_obj);
         return this;
     }
 
     @Override
     public void getChildren(final KCallback<Node[]> p_callback) {
-        this.ref(MetaNode.REF_CHILDREN, new KCallback<KObject[]>() {
+        this.getRelation(MetaNode.REF_CHILDREN, new KCallback<KObject[]>() {
             @Override
             public void on(KObject[] kObjects) {
                 if (p_callback != null) {
@@ -67,14 +67,14 @@ public class NodeImpl extends AbstractKObject implements Node {
     }
 
     @Override
-    public Node setElement(Element p_obj) {
-        this.setRef(MetaNode.REF_ELEMENT, p_obj, null);
+    public Node addElement(Element p_obj) {
+        this.add(MetaNode.REF_ELEMENT, p_obj);
         return this;
     }
 
     @Override
     public void getElement(final KCallback<Element> p_callback) {
-        this.ref(MetaNode.REF_ELEMENT, new KCallback<KObject[]>() {
+        this.getRelation(MetaNode.REF_ELEMENT, new KCallback<KObject[]>() {
             @Override
             public void on(KObject[] kObject) {
                 if (p_callback != null && kObject.length > 0) {

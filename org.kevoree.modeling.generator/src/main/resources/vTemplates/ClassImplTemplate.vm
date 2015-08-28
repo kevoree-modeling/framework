@@ -26,42 +26,15 @@ public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferr
 #foreach($ref in $classDeclaration.references)
     #if($ref.visible)
 
-    #if($ref.single)
-
     @Override
-    public ${classDeclaration.pack}.${classDeclaration.name} set${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj, org.kevoree.modeling.KCallback callback) {
-        this.setRef(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj,callback);
+    public ${classDeclaration.pack}.${classDeclaration.name} add${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj) {
+        this.add(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REL_${ref.getName().toUpperCase()}, p_obj);
         return this;
     }
 
     @Override
-    public void get${context.generationContext.helper.toCamelCase(${ref.getName()})}(final org.kevoree.modeling.KCallback<${ref.getType().fqn}> cb) {
-        if(cb == null){
-            return;
-        }
-        this.ref(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, new org.kevoree.modeling.KCallback<org.kevoree.modeling.KObject[]>() {
-            @Override
-            public void on(org.kevoree.modeling.KObject[] kObjects) {
-                if(kObjects.length >0){
-                    cb.on((${ref.getType().fqn}) kObjects[0]);
-                } else {
-                    cb.on(null);
-                }
-            }
-        });
-    }
-
-    #{else}
-
-    @Override
-    public ${classDeclaration.pack}.${classDeclaration.name} add${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj, org.kevoree.modeling.KCallback callback) {
-        this.add(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj,callback);
-        return this;
-    }
-
-    @Override
-    public ${classDeclaration.pack}.${classDeclaration.name} remove${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj, org.kevoree.modeling.KCallback callback) {
-        remove(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, p_obj,callback);
+    public ${classDeclaration.pack}.${classDeclaration.name} remove${context.generationContext.helper.toCamelCase(${ref.getName()})}(${ref.getType().fqn} p_obj) {
+        remove(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REL_${ref.getName().toUpperCase()}, p_obj);
         return this;
     }
 
@@ -70,7 +43,7 @@ public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferr
         if(cb == null){
             return;
         }
-        this.ref(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()}, new org.kevoree.modeling.KCallback<org.kevoree.modeling.KObject[]>() {
+        this.getRelation(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REL_${ref.getName().toUpperCase()}, new org.kevoree.modeling.KCallback<org.kevoree.modeling.KObject[]>() {
             @Override
             public void on(org.kevoree.modeling.KObject[] kObjects) {
                 ${ref.getType().fqn}[] casted = new ${ref.getType().fqn}[kObjects.length];
@@ -83,9 +56,8 @@ public class ${classDeclaration.name}Impl extends #if($classDeclaration.isInferr
     }
 
     public int sizeOf${context.generationContext.helper.toCamelCase($ref.getName())}() {
-        return size(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REF_${ref.getName().toUpperCase()});
+        return size(${classDeclaration.pack}.meta.Meta${classDeclaration.name}.REL_${ref.getName().toUpperCase()});
     }
-    #end
 
     #end
 #end

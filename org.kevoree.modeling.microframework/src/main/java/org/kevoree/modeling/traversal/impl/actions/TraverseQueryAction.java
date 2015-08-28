@@ -2,14 +2,13 @@ package org.kevoree.modeling.traversal.impl.actions;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
-import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.KMetaRelation;
 import org.kevoree.modeling.meta.MetaType;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
@@ -68,7 +67,7 @@ public class TraverseQueryAction implements KTraversalAction {
                             }
                             for (int h = 0; h < metaElements.length; h++) {
                                 if (metaElements[h] != null && metaElements[h].metaType() == MetaType.REFERENCE) {
-                                    KMetaReference metaReference = (KMetaReference) metaElements[h];
+                                    KMetaRelation metaReference = (KMetaRelation) metaElements[h];
                                     boolean selected = false;
                                     for (int k = 0; k < queries.length; k++) {
                                         if (queries[k] != null && PrimitiveHelper.startsWith(queries[k].trim(), "<<")) {

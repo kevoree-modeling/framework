@@ -2,14 +2,13 @@ package org.kevoree.modeling.traversal.impl.actions;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
-import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.KMetaRelation;
 import org.kevoree.modeling.meta.MetaType;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
@@ -18,9 +17,9 @@ public class TraverseAction implements KTraversalAction {
 
     private KTraversalAction _next;
 
-    private KMetaReference _reference;
+    private KMetaRelation _reference;
 
-    public TraverseAction(KMetaReference p_reference) {
+    public TraverseAction(KMetaRelation p_reference) {
         this._reference = p_reference;
     }
 
@@ -49,7 +48,7 @@ public class TraverseAction implements KTraversalAction {
                             KMeta[] metaElements = loopObj.metaClass().metaElements();
                             for (int j = 0; j < metaElements.length; j++) {
                                 if (metaElements[j] != null && metaElements[j].metaType() == MetaType.REFERENCE) {
-                                    KMetaReference ref = (KMetaReference) metaElements[j];
+                                    KMetaRelation ref = (KMetaRelation) metaElements[j];
                                     long[] resolved = raw.getLongArray(ref.index(), currentObject.metaClass());
                                     if (resolved != null) {
                                         for (int k = 0; k < resolved.length; k++) {
@@ -59,7 +58,7 @@ public class TraverseAction implements KTraversalAction {
                                 }
                             }
                         } else {
-                            KMetaReference translatedRef = loopObj.internal_transpose_ref(_reference);
+                            KMetaRelation translatedRef = loopObj.internal_transpose_ref(_reference);
                             if (translatedRef != null) {
                                 long[] resolved = raw.getLongArray(translatedRef.index(), currentObject.metaClass());
                                 if (resolved != null) {

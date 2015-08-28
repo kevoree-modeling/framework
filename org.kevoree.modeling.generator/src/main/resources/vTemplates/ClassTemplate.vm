@@ -14,15 +14,10 @@ public interface ${classDeclaration.name} extends org.kevoree.modeling.KObject#f
 
 #foreach($rel in $classDeclaration.references)
 #if($rel.visible)
-#if($rel.single)
-    public ${classDeclaration.pack}.${classDeclaration.name} set${context.generationContext.helper.toCamelCase($rel.getName())}($rel.getType().fqn p_obj, org.kevoree.modeling.KCallback callback);
-    public void get${context.generationContext.helper.toCamelCase($rel.getName())}(org.kevoree.modeling.KCallback<${rel.getType().fqn}> cb);
-#{else}
-    public ${classDeclaration.pack}.${classDeclaration.name} add${context.generationContext.helper.toCamelCase($rel.getName())}($rel.getType().fqn p_obj, org.kevoree.modeling.KCallback callback);
-    public ${classDeclaration.pack}.${classDeclaration.name} remove${context.generationContext.helper.toCamelCase($rel.getName())}($rel.getType().fqn p_obj, org.kevoree.modeling.KCallback callback);
+    public ${classDeclaration.pack}.${classDeclaration.name} add${context.generationContext.helper.toCamelCase($rel.getName())}($rel.getType().fqn p_obj);
+    public ${classDeclaration.pack}.${classDeclaration.name} remove${context.generationContext.helper.toCamelCase($rel.getName())}($rel.getType().fqn p_obj);
     public void get${context.generationContext.helper.toCamelCase($rel.getName())}(org.kevoree.modeling.KCallback<${rel.getType().fqn}[]> cb);
     public int sizeOf${context.generationContext.helper.toCamelCase($rel.getName())}();
-#end
 #end
 #end
 

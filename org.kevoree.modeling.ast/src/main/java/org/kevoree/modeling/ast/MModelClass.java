@@ -7,7 +7,7 @@ public class MModelClass extends MModelClassifier {
     //public int globalIndex = 0;
 
     private Map<String, MModelAttribute> attributes = new HashMap<String, MModelAttribute>();
-    private Map<String, MModelReference> references = new HashMap<String, MModelReference>();
+    private Map<String, MModelRelation> references = new HashMap<String, MModelRelation>();
     private Map<String, MModelClass> parents = new HashMap<String, MModelClass>();
     private Map<String, MModelOperation> operations = new HashMap<String, MModelOperation>();
 
@@ -86,7 +86,7 @@ public class MModelClass extends MModelClassifier {
         }
     }
 
-    public void addReference(MModelReference ref) {
+    public void addReference(MModelRelation ref) {
         references.put(ref.getName(), ref);
     }
 
@@ -139,8 +139,8 @@ public class MModelClass extends MModelClassifier {
         return this.getOutputs().length > 1;
     }
 
-    public Collection<MModelReference> getReferences() {
-        HashMap<String, MModelReference> collected = new HashMap<String, MModelReference>();
+    public Collection<MModelRelation> getReferences() {
+        HashMap<String, MModelRelation> collected = new HashMap<String, MModelRelation>();
         HashMap<String, MModelClass> passed = new HashMap<String, MModelClass>();
         deep_collect_refs(collected, passed);
         for (String collectedKey : collected.keySet()) {
@@ -151,7 +151,7 @@ public class MModelClass extends MModelClassifier {
         return references.values();
     }
 
-    private void deep_collect_refs(HashMap<String, MModelReference> collector, HashMap<String, MModelClass> passed) {
+    private void deep_collect_refs(HashMap<String, MModelRelation> collector, HashMap<String, MModelClass> passed) {
         if (passed.containsKey(this.getName())) {
             return;
         } else {
@@ -219,7 +219,7 @@ public class MModelClass extends MModelClassifier {
         }
         sb.append("\t}\n");
         sb.append("\treferences:{\n");
-        for (MModelReference att : references.values()) {
+        for (MModelRelation att : references.values()) {
             sb.append("\t\t" + att.getName());
             sb.append(":");
             sb.append(att.getType().getName());

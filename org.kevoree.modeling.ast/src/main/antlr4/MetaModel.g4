@@ -26,7 +26,7 @@ attributeDeclaration : 'att' IDENT ':' attributeType annotationDeclr*;
 
 attributeType : 'String' | 'Double' | 'Long' | 'Continuous' | 'Int' | 'Bool' | TYPE_NAME;
 
-referenceDeclaration : ('ref' | 'ref*') IDENT ':' TYPE_NAME annotationDeclr*;
+referenceDeclaration : 'rel' IDENT ':' TYPE_NAME annotationDeclr*;
 
 dependencyDeclaration : 'dependency' IDENT ':' TYPE_NAME;
 

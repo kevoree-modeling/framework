@@ -23,7 +23,7 @@ public interface Node extends KObject {
 
     void getChildren(KCallback<Node[]> callback);
 
-    Node setElement(Element obj);
+    Node addElement(Element obj);
 
     void getElement(KCallback<Element> obj);
 

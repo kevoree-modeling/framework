@@ -11,7 +11,7 @@ import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
-import org.kevoree.modeling.meta.impl.MetaReference;
+import org.kevoree.modeling.meta.impl.MetaRelation;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.Base64;
 import sun.misc.Unsafe;
@@ -173,7 +173,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                 }
 
             } else if (meta.metaType().equals(MetaType.REFERENCE)) {
-                KMetaReference metaReference = (KMetaReference) meta;
+                KMetaRelation metaReference = (KMetaRelation) meta;
                 long clone_ptr = clonedEntry.rawPointerForIndex(metaReference.index(), metaClass);
                 if (UNSAFE.getLong(clone_ptr) != 0) {
                     long clone_ptr_ref_segment = UNSAFE.getLong(clone_ptr);
@@ -584,7 +584,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     }
 
                 } else if (meta.metaType().equals(MetaType.REFERENCE)) {
-                    MetaReference metaReference = (MetaReference) meta;
+                    MetaRelation metaReference = (MetaRelation) meta;
                     long[] o = getLongArray(metaReference.index(), metaClass);
                     if (o != null) {
                         builder.append(",\"");
@@ -775,7 +775,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                             internal_setPrimitiveType(metaAttribute.index(), converted, metaClass, false);
                         }
 
-                    } else if (metaElement != null && metaElement instanceof KMetaReference) {
+                    } else if (metaElement != null && metaElement instanceof KMetaRelation) {
                         try {
                             String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
                             long[] convertedRaw = new long[plainRawSet.length];
@@ -862,7 +862,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                         }
                     }
                 } else if (meta.metaType().equals(MetaType.REFERENCE)) {
-                    KMetaReference metaReference = (KMetaReference) meta;
+                    KMetaRelation metaReference = (KMetaRelation) meta;
                     long ptr = rawPointerForIndex(metaReference.index(), metaClass);
                     long ptr_str_segment = UNSAFE.getLong(ptr);
                     if (ptr_str_segment != 0) {

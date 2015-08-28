@@ -201,16 +201,16 @@ public class MModel {
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.ReferenceDeclarationContext refDecl : classDeclrContext.referenceDeclaration()) {
                     final MModelClass refType = model.getOrAddClass(refDecl.TYPE_NAME().getText());
-                    MModelReference reference = model.getOrAddReference(newClass, refDecl.IDENT().getText(), refType);
-                    if (refDecl.getText().trim().startsWith("ref*")) {
-                        reference.setSingle(false);
-                    }
+                    MModelRelation reference = model.getOrAddReference(newClass, refDecl.IDENT().getText(), refType);
                     for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : refDecl.annotationDeclr()) {
                         if (annotDecl.IDENT().getText().toLowerCase().equals("opposite") && annotDecl.STRING() != null) {
                             reference.setOpposite(cleanString(annotDecl.STRING().getText()));
-                            MModelReference oppRef = model.getOrAddReference(refType, reference.getOpposite(), newClass);
+                            MModelRelation oppRef = model.getOrAddReference(refType, reference.getOpposite(), newClass);
                             oppRef.setVisible(true);
                             oppRef.setOpposite(reference.getName());
+                        }
+                        if (annotDecl.IDENT().getText().toLowerCase().equals("maxbound") && annotDecl.NUMBER() != null) {
+                            reference.setMaxBound(Integer.parseInt(annotDecl.NUMBER().getText()));
                         }
                     }
                     newClass.addReference(reference);
@@ -288,13 +288,13 @@ public class MModel {
         System.out.println(build(new File("/Users/duke/Documents/dev/kevoree-modeling/framework/org.kevoree.modeling.ast/src/main/exemples/cloud.mm")));
     }
 
-    private MModelReference getOrAddReference(MModelClass owner, String refName, MModelClass refType) {
-        for (MModelReference registeredRef : owner.getReferences()) {
+    private MModelRelation getOrAddReference(MModelClass owner, String refName, MModelClass refType) {
+        for (MModelRelation registeredRef : owner.getReferences()) {
             if (registeredRef.getName().equals(refName)) {
                 return registeredRef;
             }
         }
-        MModelReference reference = new MModelReference(refName, refType);
+        MModelRelation reference = new MModelRelation(refName, refType);
         owner.addReference(reference);
         return reference;
     }
@@ -337,13 +337,12 @@ public class MModel {
 
     private void completeOppositeReferences() {
         for (MModelClass classDecl : getClasses()) {
-            for (MModelReference ref : classDecl.getReferences().toArray(new MModelReference[classDecl.getReferences().size()])) {
+            for (MModelRelation ref : classDecl.getReferences().toArray(new MModelRelation[classDecl.getReferences().size()])) {
                 if (ref.getOpposite() == null) {
                     //Create opposite relation
 
-                    MModelReference op_ref = getOrAddReference(ref.getType(), "op_" + classDecl.getName() + "_" + ref.getName(), classDecl);
+                    MModelRelation op_ref = getOrAddReference(ref.getType(), "op_" + classDecl.getName() + "_" + ref.getName(), classDecl);
                     op_ref.setVisible(false);
-                    op_ref.setSingle(false);
                     op_ref.setOpposite(ref.getName());
 
                     //add the relation on  the other side
@@ -418,7 +417,7 @@ public class MModel {
             att.setIndex(globalIndex);
             globalIndex++;
         }
-        for (MModelReference ref : classRelDecls.getReferences()) {
+        for (MModelRelation ref : classRelDecls.getReferences()) {
             ref.setIndex(globalIndex);
             globalIndex++;
         }

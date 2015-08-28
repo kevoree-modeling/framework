@@ -1,7 +1,6 @@
 package org.kevoree.modeling.addons.template;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.drivers.websocket.gateway.WebSocketGateway;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
@@ -18,7 +17,7 @@ public class TemplateTest {
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
-        KMetaReference sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
+        KMetaRelation sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
 
         ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -45,8 +44,8 @@ public class TemplateTest {
                 KObject sensor3 = model.create(sensorClass, 0, 0);
                 sensor3.set(sensorValueAtt, "44");
 
-                sensor.add(sensorsRef, sensor2,null);
-                sensor.add(sensorsRef, sensor3,null);
+                sensor.add(sensorsRef, sensor2);
+                sensor.add(sensorsRef, sensor3);
 
                 model.save(new KCallback() {
                     @Override

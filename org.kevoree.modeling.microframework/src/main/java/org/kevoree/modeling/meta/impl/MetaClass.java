@@ -78,10 +78,10 @@ public class MetaClass implements KMetaClass {
     }
 
     @Override
-    public KMetaReference reference(String name) {
+    public KMetaRelation reference(String name) {
         KMeta resolved = metaByName(name);
         if (resolved != null && resolved.metaType() == MetaType.REFERENCE) {
-            return (KMetaReference) resolved;
+            return (KMetaRelation) resolved;
         }
         return null;
     }
@@ -142,31 +142,31 @@ public class MetaClass implements KMetaClass {
     }
 
     @Override
-    public KMetaReference addReference(String referenceName, KMetaClass p_metaClass, String oppositeName, boolean toMany) {
+    public KMetaRelation addReference(String referenceName, KMetaClass p_metaClass, String oppositeName, boolean toMany) {
         return internal_addref(referenceName, p_metaClass, oppositeName, toMany);
     }
 
-    private KMetaReference internal_addref(String referenceName, KMetaClass p_metaClass, String oppositeName, boolean toMany) {
+    private KMetaRelation internal_addref(String referenceName, KMetaClass p_metaClass, String oppositeName, boolean toMany) {
         final KMetaClass tempOrigin = this;
         String opName = oppositeName;
         if (opName == null) {
             opName = "op_" + referenceName;
-            ((MetaClass) p_metaClass).getOrCreate(opName, referenceName, this, false, false);
+            ((MetaClass) p_metaClass).getOrCreate(opName, referenceName, this, false);
         } else {
-            ((MetaClass) p_metaClass).getOrCreate(opName, referenceName, this, true, false);
+            ((MetaClass) p_metaClass).getOrCreate(opName, referenceName, this, true);
         }
-        MetaReference tempReference = new MetaReference(referenceName, _meta.length, false, !toMany, p_metaClass.index(), opName, tempOrigin.index());
+        MetaRelation tempReference = new MetaRelation(referenceName, _meta.length, !toMany, p_metaClass.index(), opName, tempOrigin.index(),-1);
         internal_add_meta(tempReference);
         return tempReference;
     }
 
-    private KMetaReference getOrCreate(String p_name, String p_oppositeName, KMetaClass p_oppositeClass, boolean p_visible, boolean p_single) {
-        KMetaReference previous = reference(p_name);
+    private KMetaRelation getOrCreate(String p_name, String p_oppositeName, KMetaClass p_oppositeClass, boolean p_visible) {
+        KMetaRelation previous = reference(p_name);
         if (previous != null) {
             return previous;
         }
         final KMetaClass tempOrigin = this;
-        KMetaReference tempReference = new MetaReference(p_name, _meta.length, p_visible, p_single, p_oppositeClass.index(), p_oppositeName, tempOrigin.index());
+        KMetaRelation tempReference = new MetaRelation(p_name, _meta.length, p_visible, p_oppositeClass.index(), p_oppositeName, tempOrigin.index(), -1);
         internal_add_meta(tempReference);
         return tempReference;
     }

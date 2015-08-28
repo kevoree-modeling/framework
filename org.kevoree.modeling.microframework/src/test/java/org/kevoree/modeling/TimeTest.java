@@ -83,7 +83,7 @@ public class TimeTest {
         // create node0 and element0 and link them
         final Node node0 = t0.createNode();
         final Element element0 = t0.createElement();
-        node0.setElement(element0);
+        node0.addElement(element0);
 /*
                 node0.getElement(new Callback<Element>() {
                     @Override
@@ -145,7 +145,7 @@ public class TimeTest {
 
         // create elem1 and link node0 to elem1
         final Element elem1 = t1.createElement();
-        node0.setElement(elem1);
+        node0.addElement(elem1);
 
         // at t0 node0.getElement should be null
         t0.lookup(node0.uuid(), new KCallback<KObject>() {
@@ -194,7 +194,7 @@ public class TimeTest {
                 node0.setValue("0");
 
                 final Element elem0 = t0.createElement();
-                node0.setElement(elem0);
+                node0.addElement(elem0);
 
                 // create time1
                 final CloudView t1 = dimension0.time(1l);
@@ -254,7 +254,7 @@ public class TimeTest {
         t1.lookup(node0.uuid(), new KCallback<KObject>() {
             @Override
             public void on(KObject node0Back) {
-                ((Node) node0Back).setElement(element);
+                ((Node) node0Back).addElement(element);
             }
         });
         model.save(new KCallback<Throwable>() {
@@ -305,7 +305,7 @@ public class TimeTest {
             @Override
             public void on(Object[] kObjects) {
                 if (kObjects != null && kObjects.length > 0) {
-                    ((Node) kObjects[0]).setElement(element);
+                    ((Node) kObjects[0]).addElement(element);
 
 
                 }

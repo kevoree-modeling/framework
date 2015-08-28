@@ -11,7 +11,7 @@ import org.kevoree.modeling.memory.chunk.KLongMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.meta.KMeta;
-import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.KMetaRelation;
 import org.kevoree.modeling.meta.MetaType;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
@@ -21,11 +21,11 @@ public class DeepCollectAction implements KTraversalAction {
 
     private KTraversalAction _next;
 
-    private KMetaReference _reference;
+    private KMetaRelation _reference;
 
     private KTraversalFilter _continueCondition;
 
-    public DeepCollectAction(KMetaReference p_reference, KTraversalFilter p_continueCondition) {
+    public DeepCollectAction(KMetaRelation p_reference, KTraversalFilter p_continueCondition) {
         this._reference = p_reference;
         this._continueCondition = p_continueCondition;
     }
@@ -119,7 +119,7 @@ public class DeepCollectAction implements KTraversalAction {
                                 }
                             }
                         } else {
-                            KMetaReference translatedRef = loopObj.internal_transpose_ref(_reference);
+                            KMetaRelation translatedRef = loopObj.internal_transpose_ref(_reference);
                             if (translatedRef != null) {
                                 long[] resolved = raw.getLongArray(translatedRef.index(), loopObj.metaClass());
                                 if (resolved != null) {

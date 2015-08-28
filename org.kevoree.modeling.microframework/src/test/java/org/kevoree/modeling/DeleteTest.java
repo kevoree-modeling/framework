@@ -9,9 +9,7 @@ import org.kevoree.modeling.cloudmodel.Element;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
-public class
-
-        DeleteTest {
+public class DeleteTest {
 
     @Test
     public void basicDeleteTest() {
@@ -37,7 +35,7 @@ public class
                                         @Override
                                         public void on(Object[] results) {
                                             Node n2 = (Node) results[0];
-                                            n2.setElement(e);
+                                            n2.addElement(e);
                                             n2.jump(2, new KCallback<KObject>() {
                                                 @Override
                                                 public void on(KObject kObject) {

@@ -34,7 +34,7 @@ public class PolynomialKMFTest {
                 t0.setRoot(node, null);
                 final Element element = t0.createElement();
                 element.setName("e0");
-                node.setElement(element);
+                node.addElement(element);
                 KDefer waiter = model.defer();
                 for (int i = 200; i < 1000; i++) {
                     dimension0.time(i).lookup(element.uuid(), waiter.waitResult());
@@ -103,7 +103,7 @@ public class PolynomialKMFTest {
         t0.setRoot(node, null);
         final Element element = t0.createElement();
         element.setName("e0");
-        node.setElement(element);
+        node.addElement(element);
         //insert 20 variations in time
 
 

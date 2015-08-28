@@ -3,7 +3,7 @@ package org.kevoree.modeling.traversal.impl;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.meta.KMetaAttribute;
-import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.KMetaRelation;
 import org.kevoree.modeling.traversal.KTraversalIndexResolver;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.KTraversalAction;
@@ -42,7 +42,7 @@ public class Traversal implements KTraversal {
 
 
     @Override
-    public KTraversal traverse(KMetaReference p_metaReference) {
+    public KTraversal traverse(KMetaRelation p_metaReference) {
         return internal_chain_action(new TraverseAction(p_metaReference));
     }
 
@@ -72,7 +72,7 @@ public class Traversal implements KTraversal {
     }
 
     @Override
-    public KTraversal collect(KMetaReference metaReference, KTraversalFilter continueCondition) {
+    public KTraversal collect(KMetaRelation metaReference, KTraversalFilter continueCondition) {
         return internal_chain_action(new DeepCollectAction(metaReference, continueCondition));
     }
 

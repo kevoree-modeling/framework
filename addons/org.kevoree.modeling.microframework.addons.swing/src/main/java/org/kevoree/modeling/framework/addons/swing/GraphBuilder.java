@@ -12,7 +12,7 @@ import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
-import org.kevoree.modeling.meta.KMetaReference;
+import org.kevoree.modeling.meta.KMetaRelation;
 
 /**
  * Created by duke on 7/1/14.
@@ -60,8 +60,8 @@ public class GraphBuilder {
     private static void createEdges(Graph graph, KObject elem) {
         KObjectChunk rawPayload = ((KInternalDataManager)elem.manager()).preciseChunk(elem.universe(), elem.now(), elem.uuid(), elem.metaClass(), ((AbstractKObject)elem).previousResolved());
         for (KMeta meta : elem.metaClass().metaElements()) {
-            if (meta instanceof KMetaReference) {
-                KMetaReference metaRef = (KMetaReference) meta;
+            if (meta instanceof KMetaRelation) {
+                KMetaRelation metaRef = (KMetaRelation) meta;
                 long[] relatedElems = rawPayload.getLongArray(metaRef.index(), elem.metaClass());
                 if (relatedElems != null) {
                     for (int i = 0; i < relatedElems.length; i++) {

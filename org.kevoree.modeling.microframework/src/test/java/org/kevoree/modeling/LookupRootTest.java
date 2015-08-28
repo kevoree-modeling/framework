@@ -21,7 +21,7 @@ public class LookupRootTest {
         // create node0 and element0 and link them
         final Node node0 = t0.createNode();
         final Element element0 = t0.createElement();
-        node0.setElement(element0);
+        node0.addElement(element0);
 
         t0.setRoot(node0, new KCallback<Throwable>() {
             @Override
@@ -67,7 +67,7 @@ public class LookupRootTest {
         // create node0 and element0 and link them
         final Node node0 = t0.createNode();
         final Element element0 = t0.createElement();
-        node0.setElement(element0);
+        node0.addElement(element0);
 
 
         t0.setRoot(node0, new KCallback<Throwable>() {
