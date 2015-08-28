@@ -2,9 +2,9 @@ package org.kevoree.modeling.util.maths.structure;
 
 public interface KArray2D {
 
-    int nbRows();
+    int rows();
 
-    int nbColumns();
+    int columns();
 
     double get(int rowIndex, int columnIndex);
 
@@ -12,19 +12,11 @@ public interface KArray2D {
 
     double add(int rowIndex, int columnIndex, double value);
 
-    double mult(int rowIndex, int columnIndex, double value);
-
-    void addAll(double value);
-
-    void multAll(double value);
-
     void setAll(double value);
 
     void addRow(int rowindex, int numRow);
 
     void addCol(int colIndex, int numCol);
-
-    KArray2D clone();
 
 
     double getAtIndex(int index);
@@ -33,5 +25,10 @@ public interface KArray2D {
 
     double addAtIndex(int index, double value);
 
-    double multAtIndex(int index, double value);
+    KArray2D clone();
+
+    double[] data();
+
+    void setData(double[] data);
+
 }

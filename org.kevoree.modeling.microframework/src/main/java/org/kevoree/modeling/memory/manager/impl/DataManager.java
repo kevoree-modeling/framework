@@ -25,6 +25,7 @@ import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
 import org.kevoree.modeling.util.PrimitiveHelper;
+import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -40,6 +41,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private final KResolver _resolver;
     private final KChunkSpace _space;
     private final KChunkSpaceManager _spaceManager;
+    private final KBlas _blas;
 
     private KeyCalculator _objectKeyCalculator = null;
     private KeyCalculator _universeKeyCalculator = null;
@@ -60,7 +62,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
         this._model = p_model;
     }
 
-    public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KMemoryStrategy p_factory) {
+    public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KMemoryStrategy p_factory, KBlas p_blas) {
         this._space = p_factory.newSpace();
         this._spaceManager = p_factory.newSpaceManager(_space);
         this._resolver = new DistortedTimeResolver(this._spaceManager, this);
@@ -70,7 +72,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
         this._scheduler = p_scheduler;
         attachContentDeliveryDriver(new MemoryContentDeliveryDriver());
         this._operationManager = new HashOperationManager(this);
+        this._blas = p_blas;
     }
+
 
     @Override
     public final KModel model() {
@@ -85,6 +89,11 @@ public class DataManager implements KDataManager, KInternalDataManager {
         } else {
             callback.on(null);
         }
+    }
+
+    @Override
+    public KBlas blas() {
+        return this._blas;
     }
 
     /* Key Management Section */

@@ -47,23 +47,12 @@ public class Array1D implements KArray1D {
     }
 
     @Override
-    public double mult(int index, double value) {
-        return set(index,get(index)*value);
-    }
-
-    @Override
     public void addAll(double value) {
-        for(int i=0;i<_size;i++){
-            add(i,value);
+        for (int i = 0; i < _size; i++) {
+            add(i, value);
         }
     }
 
-    @Override
-    public void multAll(double value) {
-        for(int i=0;i<_size;i++){
-            mult(i,value);
-        }
-    }
 
     @Override
     public void setAll(double value) {
@@ -77,8 +66,18 @@ public class Array1D implements KArray1D {
     }
 
     @Override
-    public KArray2D clone() {
+    public KArray1D clone() {
         return null;
+    }
+
+    @Override
+    public double[] data() {
+        return this._segment.getDoubleArray(this._segmentIndex, this._metaClass);
+    }
+
+    @Override
+    public void setData(double[] data) {
+
     }
 
 

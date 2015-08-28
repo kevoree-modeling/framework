@@ -47,7 +47,7 @@ public class Distribution {
     }
 
     public static double gaussianArray(KArray2D features, int row, double[] means, double[] variances) {
-        int dim = features.nbColumns();
+        int dim = features.columns();
         double p = 1;
 
         for (int i = 0; i < dim; i++) {

@@ -36,7 +36,7 @@ public class LinearRegressionAlg implements KInferAlg {
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
         for (int i = 0; i < iterations; i++) {
-            for (int row = 0; row < trainingSet.nbRows(); row++) {
+            for (int row = 0; row < trainingSet.rows(); row++) {
                 double h = estimate(trainingSet,row, state);
                 double error = -alpha * (h - expectedResultSet.get(row,0));
 
@@ -50,10 +50,10 @@ public class LinearRegressionAlg implements KInferAlg {
 
     private double estimate(KArray2D training, int row, Array1D state) {
         double result = 0;
-        for (int i = 0; i < training.nbColumns(); i++) {
+        for (int i = 0; i < training.columns(); i++) {
             result = result + training.get(row,i) * state.get(i);
         }
-        result = result + state.get(training.nbColumns());
+        result = result + state.get(training.columns());
         return result;
     }
 
@@ -67,8 +67,8 @@ public class LinearRegressionAlg implements KInferAlg {
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
-        KArray2D results = new NativeArray2D(features.nbRows(),1);
-        for (int i = 0; i < features.nbRows(); i++) {
+        KArray2D results = new NativeArray2D(features.rows(),1);
+        for (int i = 0; i < features.rows(); i++) {
             results.set(i,0, estimate(features,i, state));
         }
         return results;

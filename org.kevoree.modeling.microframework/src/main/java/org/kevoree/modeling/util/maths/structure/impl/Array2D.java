@@ -28,12 +28,12 @@ public class Array2D implements KArray2D {
     }
 
     @Override
-    public int nbRows() {
+    public int rows() {
         return this._nbRows;
     }
 
     @Override
-    public int nbColumns() {
+    public int columns() {
         return this._nbColumns;
     }
 
@@ -50,31 +50,12 @@ public class Array2D implements KArray2D {
 
     @Override
     public double add(int rowIndex, int columnIndex, double value) {
-        return set(rowIndex,columnIndex,get(rowIndex,columnIndex)+value);
-    }
-
-    @Override
-    public double mult(int rowIndex, int columnIndex, double value) {
-        return set(rowIndex,columnIndex,get(rowIndex,columnIndex)*value);
-    }
-
-    @Override
-    public void addAll(double value) {
-        for(int i=0;i<_nbColumns*_nbRows;i++){
-            this._segment.setDoubleArrayElem(this._segmentIndex, this._offset + i, this._segment.getDoubleArrayElem(this._segmentIndex,this._offset+i,this._metaClass)+ value, this._metaClass);
-        }
-    }
-
-    @Override
-    public void multAll(double value) {
-        for(int i=0;i<_nbColumns*_nbRows;i++){
-            this._segment.setDoubleArrayElem(this._segmentIndex, this._offset + i, this._segment.getDoubleArrayElem(this._segmentIndex,this._offset+i,this._metaClass)*value, this._metaClass);
-        }
+        return set(rowIndex, columnIndex, get(rowIndex, columnIndex) + value);
     }
 
     @Override
     public void setAll(double value) {
-        for(int i=0;i<_nbColumns*_nbRows;i++){
+        for (int i = 0; i < _nbColumns * _nbRows; i++) {
             this._segment.setDoubleArrayElem(this._segmentIndex, this._offset + i, value, this._metaClass);
         }
     }
@@ -96,6 +77,16 @@ public class Array2D implements KArray2D {
     }
 
     @Override
+    public double[] data() {
+        return new double[0];
+    }
+
+    @Override
+    public void setData(double[] data) {
+
+    }
+
+    @Override
     public double getAtIndex(int index) {
         return this._segment.getDoubleArrayElem(this._segmentIndex, this._offset + index, this._metaClass);
     }
@@ -108,11 +99,7 @@ public class Array2D implements KArray2D {
 
     @Override
     public double addAtIndex(int index, double value) {
-        return this.setAtIndex(index, getAtIndex(index)+value);
+        return this.setAtIndex(index, getAtIndex(index) + value);
     }
 
-    @Override
-    public double multAtIndex(int index, double value) {
-        return this.setAtIndex(index, getAtIndex(index)*value);
-    }
 }

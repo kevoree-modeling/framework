@@ -68,7 +68,7 @@ public class GaussianProfiler implements KInferAlg {
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
         //update the state
-        for (int i = 0; i < trainingSet.nbRows(); i++) {
+        for (int i = 0; i < trainingSet.rows(); i++) {
             int output = (int) trainingSet.get(i,0);
             for (int j = 1; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
@@ -125,13 +125,13 @@ public class GaussianProfiler implements KInferAlg {
             return null;
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-        KArray2D result = new NativeArray2D(features.nbRows(),1);
+        KArray2D result = new NativeArray2D(features.rows(),1);
 
-        for (int j = 0; j < features.nbRows(); j++) {
+        for (int j = 0; j < features.rows(); j++) {
             int output = (int) features.get(j,0);
 
-            double[] values = new double[features.nbColumns() - 1];
-            for (int i = 0; i < features.nbColumns() - 1; i++) {
+            double[] values = new double[features.columns() - 1];
+            for (int i = 0; i < features.columns() - 1; i++) {
                 values[i] = features.get(j,i + 1);
             }
             result.set(j,0,getProba(values, output, state, origin.metaClass().dependencies()));

@@ -1,6 +1,7 @@
 package org.kevoree.modeling.memory.manager;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 
 public interface KDataManager {
 
@@ -21,5 +22,7 @@ public interface KDataManager {
     void connect(KCallback<Throwable> callback);
 
     void close(KCallback<Throwable> callback);
+
+    KBlas blas();
 
 }

@@ -19,7 +19,7 @@ public class KMeanClusterAlg implements KInferAlg {
 
     @Override
     public void train(KArray2D trainingSet, KArray2D expectedResultSet, KObject origin, KInternalDataManager manager) {
-        if (trainingSet.nbRows() < k) {
+        if (trainingSet.rows() < k) {
             throw new RuntimeException("training setPrimitiveType not enough");
         }
         KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
@@ -44,7 +44,7 @@ public class KMeanClusterAlg implements KInferAlg {
             int[] counters = new int[k];
 
 
-            for (int i = 0; i < trainingSet.nbRows(); i++) {
+            for (int i = 0; i < trainingSet.rows(); i++) {
                 //Step 1, classify according to current centroids
                 temporalClassification = classify(trainingSet,i, state);
 
@@ -63,7 +63,7 @@ public class KMeanClusterAlg implements KInferAlg {
                     }
                 } else {
                     Random rand = new Random();
-                    int pos = rand.nextInt(trainingSet.nbRows());
+                    int pos = rand.nextInt(trainingSet.rows());
                     for (int j = 0; j < origin.metaClass().inputs().length; j++) {
                         state.set(j + i * origin.metaClass().inputs().length, trainingSet.get(pos,j));
                     }
@@ -77,8 +77,8 @@ public class KMeanClusterAlg implements KInferAlg {
         int classNum = -1;
         for (int i = 0; i < k; i++) {
             double currentdist = 0;
-            for (int j = 0; j < features.nbColumns(); j++) {
-                currentdist += (features.get(row,j)- state.get(i * features.nbColumns() + j)) * (features.get(row,j) - state.get(i * features.nbColumns() + j));
+            for (int j = 0; j < features.columns(); j++) {
+                currentdist += (features.get(row,j)- state.get(i * features.columns() + j)) * (features.get(row,j) - state.get(i * features.columns() + j));
             }
             if (maxdistance < 0) {
                 maxdistance = currentdist;
@@ -103,9 +103,9 @@ public class KMeanClusterAlg implements KInferAlg {
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
-        KArray2D result = new NativeArray2D(features.nbRows(),1);
+        KArray2D result = new NativeArray2D(features.rows(),1);
 
-        for (int inst = 0; inst < features.nbRows(); inst++) {
+        for (int inst = 0; inst < features.rows(); inst++) {
             result.set(inst,0, classify(features,inst, state));
         }
         return result;

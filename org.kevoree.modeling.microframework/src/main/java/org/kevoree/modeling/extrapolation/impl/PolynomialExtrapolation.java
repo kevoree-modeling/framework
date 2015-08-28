@@ -99,9 +99,9 @@ public class PolynomialExtrapolation implements Extrapolation {
             int ss = Math.min(deg * 2, num);
             double[] times = new double[ss + 1];
             double[] values = new double[ss + 1];
-            double last=raw.getDoubleArrayElem(index, LASTTIME, metaClass);
+            double last = raw.getDoubleArrayElem(index, LASTTIME, metaClass);
             for (int i = 0; i < ss; i++) {
-                times[i] = ((double) i * (last+1) )/ss;
+                times[i] = ((double) i * (last + 1)) / ss;
                 values[i] = internal_extrapolate(times[i], raw, index, metaClass);
             }
             times[ss] = (time - timeOrigin) / raw.getDoubleArrayElem(index, STEP, metaClass);
@@ -170,7 +170,7 @@ public class PolynomialExtrapolation implements Extrapolation {
             long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + raw.time();
             double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, raw.time());
             KObjectChunk newSegment = dataManager.preciseChunk(current.universe(), prevTime, current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
-            newSegment.clearDoubleArray(attribute.index(),current.metaClass());
+            newSegment.clearDoubleArray(attribute.index(), current.metaClass());
             insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
             insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
         }

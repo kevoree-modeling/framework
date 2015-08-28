@@ -29,13 +29,13 @@ public class StatInferAlg implements KInferAlg {
                 ks.setDoubleArrayElem(dependenciesIndex, i, 0, origin.metaClass());
             }
         }
-        Array1D state = new Array1D(NUMOFFIELDS * trainingSet.nbColumns() + 1, 0, dependenciesIndex, ks, origin.metaClass());
+        Array1D state = new Array1D(NUMOFFIELDS * trainingSet.columns() + 1, 0, dependenciesIndex, ks, origin.metaClass());
 
         //update the state
-        for (int i = 0; i < trainingSet.nbRows(); i++) {
+        for (int i = 0; i < trainingSet.rows(); i++) {
             for (int j = 0; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
-                if (state.get(NUMOFFIELDS * trainingSet.nbColumns()) == 0) {
+                if (state.get(NUMOFFIELDS * trainingSet.columns()) == 0) {
                     state.set(MIN + j * NUMOFFIELDS, trainingSet.get(i,j));
                     state.set(MAX + j * NUMOFFIELDS, trainingSet.get(i,j));
                     state.set(SUM + j * NUMOFFIELDS, trainingSet.get(i,j));

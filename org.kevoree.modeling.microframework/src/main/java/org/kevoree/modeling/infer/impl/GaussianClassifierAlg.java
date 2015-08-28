@@ -6,8 +6,6 @@ import org.kevoree.modeling.infer.KInferAlg;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaDependencies;
-import org.kevoree.modeling.meta.KMetaEnum;
-import org.kevoree.modeling.meta.impl.MetaEnum;
 import org.kevoree.modeling.util.maths.Distribution;
 import org.kevoree.modeling.util.maths.structure.KArray1D;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
@@ -76,7 +74,7 @@ public class GaussianClassifierAlg implements KInferAlg {
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
         //update the state
-        for (int i = 0; i < trainingSet.nbRows(); i++) {
+        for (int i = 0; i < trainingSet.rows(); i++) {
             int output = (int) expectedResultSet.get(i, 0);
             for (int j = 0; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
@@ -134,9 +132,9 @@ public class GaussianClassifierAlg implements KInferAlg {
             return null;
         }
         KArray1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-        KArray2D result = new NativeArray2D(features.nbRows(), 1);
+        KArray2D result = new NativeArray2D(features.rows(), 1);
 
-        for (int j = 0; j < features.nbRows(); j++) {
+        for (int j = 0; j < features.rows(); j++) {
             double maxprob = 0;
             double prob = 0;
             for (int output = 0; output < maxOutput; output++) {

@@ -35,7 +35,7 @@ public class WinnowAlg implements KInferAlg {
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
         for (int iter = 0; iter < iterations; iter++) {
-            for (int inst = 0; inst < trainingSet.nbRows(); inst++) {
+            for (int inst = 0; inst < trainingSet.rows(); inst++) {
                 if (calculate(trainingSet,inst, state) == expectedResultSet.get(inst,0)) {
                     continue;
                 }
@@ -56,10 +56,10 @@ public class WinnowAlg implements KInferAlg {
 
     private double calculate(KArray2D features, int row, Array1D state) {
         double result = 0;
-        for (int i = 0; i < features.nbColumns(); i++) {
+        for (int i = 0; i < features.columns(); i++) {
             result += state.get(i) * features.get(row,i);
         }
-        if (result >= features.nbColumns()) {
+        if (result >= features.columns()) {
             return 1.0;
         } else {
             return 0.0;
@@ -75,8 +75,8 @@ public class WinnowAlg implements KInferAlg {
             return null;
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-        KArray2D result = new NativeArray2D(features.nbRows(),1);
-        for (int inst = 0; inst < features.nbRows(); inst++) {
+        KArray2D result = new NativeArray2D(features.rows(),1);
+        for (int inst = 0; inst < features.rows(); inst++) {
             result.set(inst,0, calculate(features,inst, state));
         }
         return result;

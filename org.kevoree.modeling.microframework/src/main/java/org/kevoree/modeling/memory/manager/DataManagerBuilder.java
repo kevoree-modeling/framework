@@ -9,6 +9,8 @@ import org.kevoree.modeling.memory.strategy.impl.HeapMemoryStrategy;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 import org.kevoree.modeling.scheduler.impl.ExecutorServiceScheduler;
+import org.kevoree.modeling.util.maths.structure.blas.KBlas;
+import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 
 public class DataManagerBuilder {
 
@@ -18,11 +20,20 @@ public class DataManagerBuilder {
 
     private KMemoryStrategy _strategy;
 
+    private KBlas _blas;
+
     public KContentDeliveryDriver driver() {
         if (this._driver == null) {
             this._driver = new MemoryContentDeliveryDriver();
         }
         return _driver;
+    }
+
+    public KBlas blas() {
+        if (this._blas == null) {
+            this._blas = new JavaBlas();
+        }
+        return _blas;
     }
 
     /**
@@ -64,8 +75,13 @@ public class DataManagerBuilder {
         return this;
     }
 
+    public DataManagerBuilder withBlas(KBlas p_blas) {
+        this._blas = p_blas;
+        return this;
+    }
+
     public KInternalDataManager build() {
-        return new DataManager(driver(), scheduler(), strategy());
+        return new DataManager(driver(), scheduler(), strategy(), blas());
     }
 
     public static KInternalDataManager buildDefault() {

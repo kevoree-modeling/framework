@@ -147,10 +147,10 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
                     }
                 }
                 KArray2D extractedOutputs = _metaClass.inferAlg().infer(extractedInputs, selfObject, _manager);
-                Object[][] result = new Object[extractedOutputs.nbRows()][extractedOutputs.nbColumns()];
-                for (int i = 0; i < extractedOutputs.nbRows(); i++) {
-                    result[i] = new Object[extractedOutputs.nbColumns()];
-                    for (int j = 0; j < extractedOutputs.nbColumns(); j++) {
+                Object[][] result = new Object[extractedOutputs.rows()][extractedOutputs.columns()];
+                for (int i = 0; i < extractedOutputs.rows(); i++) {
+                    result[i] = new Object[extractedOutputs.columns()];
+                    for (int j = 0; j < extractedOutputs.columns(); j++) {
                         result[i][j] = internalReverseOutput(extractedOutputs.get(i, j), _metaClass.outputs()[j]);
                     }
                 }

@@ -164,7 +164,7 @@ public class QRxColPivDecompositionHouseholderColumn_D64
 
         double val=0;
 
-        for(int k=0;k<dataQR.nbRows();k++){
+        for(int k=0;k<dataQR.rows();k++){
             val= dataQR.get(k,j);
             dataQR.set(k,j,dataQR.get(k,largestIndex));
             dataQR.set(k,largestIndex,val);

@@ -79,7 +79,7 @@ public class GaussianAnomalyDetectionAlg implements KInferAlg {
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
         //update the state
-        for (int i = 0; i < trainingSet.nbRows(); i++) {
+        for (int i = 0; i < trainingSet.rows(); i++) {
             int output = (int) expectedResultSet.get(i, 0); //0: normal, 1:anomaly
             if (output == 0) {
                 for (int j = 0; j < origin.metaClass().inputs().length; j++) {
@@ -129,10 +129,10 @@ public class GaussianAnomalyDetectionAlg implements KInferAlg {
             return null;
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
-        KArray2D result = new NativeArray2D(features.nbRows(),1);
+        KArray2D result = new NativeArray2D(features.rows(),1);
 
         double epsilon=state.get(length * NUMOFFIELDS+1);
-        for (int i = 0; i < features.nbRows(); i++) {
+        for (int i = 0; i < features.rows(); i++) {
 
             if(getProba(features,i, state, origin.metaClass().dependencies())>=epsilon) {
                 result.set(i, 0, 0);
