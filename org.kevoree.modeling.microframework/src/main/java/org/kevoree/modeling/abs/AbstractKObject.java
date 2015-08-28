@@ -238,6 +238,66 @@ public abstract class AbstractKObject implements KObject {
         }
     }
 
+    @Override
+    public void addAllByName(String p_metaRelationName, KObject[] objsToAdd) {
+        final KMetaRelation metaReference = _metaClass.reference(p_metaRelationName);
+        if (metaReference == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaRelationName + " is not part of " + metaClass().metaName());
+        }
+        for (int i = 0; i < objsToAdd.length; i++) {
+            internal_add(metaReference, objsToAdd[i], true);
+        }
+    }
+
+    @Override
+    public void addAll(KMetaRelation p_metaRelation, KObject[] objsToAdd) {
+        final KMetaRelation transposedRelation = internal_transpose_ref(p_metaRelation);
+        if (transposedRelation == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaRelation.metaName() + " is not part of " + metaClass().metaName());
+        }
+        for (int i = 0; i < objsToAdd.length; i++) {
+            internal_add(transposedRelation, objsToAdd[i], true);
+        }
+    }
+
+    @Override
+    public void removeAllByName(final String p_metaRelationName, final KCallback callback) {
+        final KMetaRelation metaReference = _metaClass.reference(p_metaRelationName);
+        if (metaReference == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaRelationName + " is not part of " + metaClass().metaName());
+        }
+        this.internal_removeAll(metaReference, callback);
+    }
+
+    @Override
+    public void removeAll(final KMetaRelation p_metaRelation, final KCallback callback) {
+        final KMetaRelation transposedRelation = internal_transpose_ref(p_metaRelation);
+        if (transposedRelation == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaRelation.metaName() + " is not part of " + metaClass().metaName());
+        }
+        this.internal_removeAll(transposedRelation, callback);
+    }
+
+    private void internal_removeAll(final KMetaRelation p_metaRelation, final KCallback callback) {
+        final KObject selfPointer = this;
+        KObjectChunk currentChunk = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
+        this._manager.lookupAllObjects(_universe, _time, currentChunk.getLongArray(p_metaRelation.index(), _metaClass), new KCallback<KObject[]>() {
+            @Override
+            public void on(KObject[] previousObjs) {
+                for (int i = 0; i < previousObjs.length; i++) {
+                    if (previousObjs[i] != null) {
+                        KMetaRelation oppositeRelation = previousObjs[i].metaClass().reference(p_metaRelation.oppositeName());
+                        ((AbstractKObject) previousObjs[i]).internal_remove(oppositeRelation, selfPointer, false);
+                    }
+                }
+                currentChunk.clearLongArray(p_metaRelation.index(), _metaClass);
+                if (callback != null) {
+                    callback.on(null);
+                }
+            }
+        });
+    }
+
     public int size(KMetaRelation p_metaReference) {
         KMetaRelation transposed = internal_transpose_ref(p_metaReference);
         if (transposed == null) {

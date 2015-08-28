@@ -55,6 +55,14 @@ public interface KObject {
 
     void remove(KMetaRelation metaRelation, KObject objToRemove);
 
+    void addAllByName(String metaRelationName, KObject[] objsToAdd);
+
+    void addAll(KMetaRelation metaRelation, KObject[] objsToAdd);
+
+    void removeAllByName(String metaRelationName, KCallback callback);
+
+    void removeAll(KMetaRelation metaRelation, KCallback callback);
+
     void getRelationByName(String metaRelationName, KCallback<KObject[]> callback);
 
     void getRelation(KMetaRelation metaRelation, KCallback<KObject[]> callback);
