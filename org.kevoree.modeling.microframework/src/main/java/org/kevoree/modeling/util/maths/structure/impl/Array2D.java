@@ -72,18 +72,22 @@ public class Array2D implements KArray2D {
 
     @Override
     public KArray2D clone() {
-        //toDO
-        return null;
+        NativeArray2D cloned = new NativeArray2D(_nbRows, _nbColumns);
+        cloned.setData(this.data());
+        return cloned;
     }
 
     @Override
     public double[] data() {
-        return new double[0];
+        //TODO manage offset
+        return this._segment.getDoubleArray(this._segmentIndex, this._metaClass);
     }
 
     @Override
-    public void setData(double[] data) {
-
+    public void setData(double[] p_data) {
+        for (int i = 0; i < p_data.length; i++) {
+            setAtIndex(i, p_data[i]);
+        }
     }
 
     @Override
