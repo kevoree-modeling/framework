@@ -30,9 +30,9 @@ public class TestMatrix {
         KBlas netlib = new NetlibBlas();
         KBlas cuda = new JCudaBlas();
 
-        int r=1024*4;
-        int[] dimA = {r, r};
-        int[] dimB = {r, r};
+        //int r=1024*16;
+        int[] dimA = {1000, 1200};
+        int[] dimB = {1200, 2500};
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
 
@@ -51,12 +51,12 @@ public class TestMatrix {
             }
         }
 
-      //  NativeArray2D matC = new NativeArray2D(matA.rows(), matB.columns());
+        NativeArray2D matC = new NativeArray2D(matA.rows(), matB.columns());
 
         System.out.println("Data generated");
         long start, end;
 
-   /*    start = System.nanoTime();
+       start = System.nanoTime();
         traditional(matA, matB, matC);
         end = System.nanoTime();
         System.out.println("for java " + ((double) (end - start)) / 1000000000 + " s");
@@ -66,12 +66,13 @@ public class TestMatrix {
         end = System.nanoTime();
         System.out.println("ejml java " + ((double) (end - start)) / 1000000000 + " s");
 
-*/
+
 
         start = System.nanoTime();
         KArray2D matCuda = MatrixOperations.multiply(matA, matB, cuda);
         end = System.nanoTime();
         System.out.println("Cuda " + ((double) (end - start)) / 1000000000 + " s");
+        cuda.shutdown();
 
         start = System.nanoTime();
         KArray2D matNetlib = MatrixOperations.multiply(matA, matB, netlib);
@@ -80,8 +81,6 @@ public class TestMatrix {
 
 
 
-
-/*
         Assert.assertTrue(matRes.rows() == matC.rows());
         Assert.assertTrue(matRes.columns() == matC.columns());
         for (int i = 0; i <  matA.rows(); i++) {
@@ -90,7 +89,7 @@ public class TestMatrix {
                 Assert.assertEquals(matCuda.get(i, j), matC.get(i, j),eps);
                 Assert.assertEquals(matNetlib.get(i, j), matC.get(i, j),eps);
             }
-        }*/
+        }
 
     }
 }
