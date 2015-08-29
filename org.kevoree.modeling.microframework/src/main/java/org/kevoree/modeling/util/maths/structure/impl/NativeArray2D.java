@@ -19,6 +19,12 @@ public class NativeArray2D implements KArray2D {
         this._back = new double[p_nbRows * p_nbColumns];
     }
 
+    private int getIndex(int p_rowIndex, int p_columnIndex) {
+        //Column-major for blas library
+        return p_rowIndex + (this._nbRows* p_columnIndex);
+        //row-major: (p_rowIndex * this._nbColumns) + p_columnIndex
+    }
+
     @Override
     public int rows() {
         return this._nbRows;
@@ -31,12 +37,12 @@ public class NativeArray2D implements KArray2D {
 
     @Override
     public double get(int p_rowIndex, int p_columnIndex) {
-        return this._back[(p_rowIndex * this._nbColumns) + p_columnIndex];
+        return this._back[getIndex(p_rowIndex,p_columnIndex)];
     }
 
     @Override
     public double set(int p_rowIndex, int p_columnIndex, double value) {
-        this._back[(p_rowIndex * this._nbColumns) + p_columnIndex] = value;
+        this._back[getIndex(p_rowIndex,p_columnIndex)] = value;
         return value;
     }
 

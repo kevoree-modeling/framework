@@ -41,16 +41,17 @@ public class Array2DTest {
         int count = 0;
 
         //fill it
-        for (int i = 0; i < nbLines; i++) {
-            for (int j = 0; j < nbColumn; j++) {
+        //We go to column major representation
+        for (int j = 0; j < nbColumn; j++) {
+            for (int i = 0; i < nbLines; i++) {
                 array.set(i, j, count);
                 count++;
             }
         }
         //test content
         count = 0;
-        for (int i = 0; i < nbLines; i++) {
-            for (int j = 0; j < nbColumn; j++) {
+        for (int j = 0; j < nbColumn; j++) {
+            for (int i = 0; i < nbLines; i++) {
                 Assert.assertTrue(array.get(i, j) == count);
                 Assert.assertTrue(segment.getDoubleArrayElem(mc.dependencies().index(), count, mc) == count);
                 count++;

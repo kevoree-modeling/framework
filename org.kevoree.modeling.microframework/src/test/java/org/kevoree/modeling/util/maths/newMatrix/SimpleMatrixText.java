@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 import org.kevoree.modeling.util.maths.matrix.TransposeAlgs;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
+import org.kevoree.modeling.util.maths.structure.blas.KBlas;
+import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 
@@ -14,8 +16,9 @@ import java.util.Random;
  * @ignore ts
  */
 public class SimpleMatrixText {
-    @Test
+
     public void transposeTest() {
+
         NativeArray2D matA = new NativeArray2D(3, 5);
 
         //test normal transpose
@@ -102,6 +105,8 @@ public class SimpleMatrixText {
     @Test
     public void multiplyTest() {
 
+        KBlas java = new JavaBlas();
+
         int[] dimA = {30, 100};
         int[] dimB = {100, 50};
 
@@ -126,7 +131,7 @@ public class SimpleMatrixText {
 
 
         traditional(matA, matB, matC);
-        KArray2D matRes = MatrixOperations.multiply(matA, matB, null);
+        KArray2D matRes = MatrixOperations.multiply(matA, matB, java);
 
 
         Assert.assertTrue(matRes.rows() == matC.rows());

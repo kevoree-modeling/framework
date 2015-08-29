@@ -7,7 +7,6 @@ import org.kevoree.modeling.util.maths.structure.KArray2D;
 public class Array2D implements KArray2D {
 
     private int _nbRows;
-
     private int _nbColumns;
 
     private int _offset;
@@ -37,14 +36,21 @@ public class Array2D implements KArray2D {
         return this._nbColumns;
     }
 
+    private int getIndex(int p_rowIndex, int p_columnIndex) {
+       //Column-major for blas library
+       return this._offset + p_rowIndex + (this._nbRows* p_columnIndex);
+        //row-major: this._offset + (p_rowIndex * this._nbColumns) + p_columnIndex
+
+    }
+
     @Override
     public double get(int p_rowIndex, int p_columnIndex) {
-        return this._segment.getDoubleArrayElem(this._segmentIndex, this._offset + (p_rowIndex * this._nbColumns) + p_columnIndex, this._metaClass);
+        return this._segment.getDoubleArrayElem(this._segmentIndex,getIndex(p_rowIndex,p_columnIndex) , this._metaClass);
     }
 
     @Override
     public double set(int p_rowIndex, int p_columnIndex, double value) {
-        this._segment.setDoubleArrayElem(this._segmentIndex, this._offset + (p_rowIndex * this._nbColumns) + p_columnIndex, value, this._metaClass);
+        this._segment.setDoubleArrayElem(this._segmentIndex,getIndex(p_rowIndex,p_columnIndex), value, this._metaClass);
         return value;
     }
 
