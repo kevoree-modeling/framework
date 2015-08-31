@@ -33,7 +33,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public void close(KCallback cb) {
+    public void disconnect(KCallback cb) {
         _manager.close(cb);
     }
 

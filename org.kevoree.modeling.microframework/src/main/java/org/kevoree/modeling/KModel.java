@@ -9,6 +9,7 @@ import org.kevoree.modeling.traversal.KTraversal;
 
 public interface KModel<A extends KUniverse> {
 
+    /** Current Model state variables accessor */
     long key();
 
     A newUniverse();
@@ -17,24 +18,29 @@ public interface KModel<A extends KUniverse> {
 
     KDataManager manager();
 
+    KMetaModel metaModel();
+
+    /** Create a new KDefer */
+    KDefer defer();
+
+    /** Operation Management */
     void setOperation(KMetaOperation metaOperation, KOperation operation);
 
     void setOperationByName(String metaClassName, String metaOperationName, KOperation operation);
 
-    KMetaModel metaModel();
+    /** Life cycle management */
+    void save(KCallback callback);
 
-    KDefer defer();
+    void connect(KCallback callback);
 
-    void save(KCallback cb);
+    void disconnect(KCallback callback);
 
-    void connect(KCallback cb);
-
-    void close(KCallback cb);
-
+    /** Lookup primitives */
     void lookup(long universe, long time, long uuid, KCallback<KObject> cb);
 
     void lookupAll(long universe, long time, long[] uuids, KCallback<KObject[]> cb);
 
+    /** Creation methods */
     KObject createByName(String metaClassName, long universe, long time);
 
     KObject create(KMetaClass clazz, long universe, long time);

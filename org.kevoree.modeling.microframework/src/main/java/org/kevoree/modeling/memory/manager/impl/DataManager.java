@@ -289,10 +289,14 @@ public class DataManager implements KDataManager, KInternalDataManager {
             if (_db != null) {
                 _db.close(callback);
             } else {
-                callback.on(null);
+                if (callback != null) {
+                    callback.on(null);
+                }
             }
         } else {
-            callback.on(null);
+            if (callback != null) {
+                callback.on(null);
+            }
         }
     }
 
