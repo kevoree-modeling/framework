@@ -81,7 +81,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         //Set the step
         if (raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass) == 1) {
             double timeStep = time - timeOrigin;
-            if (timeOrigin <= 0) {
+            if (timeOrigin == 0) {
                 raw.setDoubleArrayElem(index, WEIGHTS, value, metaClass);
                 return true;
             } else {
