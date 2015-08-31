@@ -14,12 +14,7 @@ import org.kevoree.modeling.memory.chunk.impl.ArrayIntMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayLongMap;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.impl.Message;
-import org.xnio.BufferAllocator;
-import org.xnio.ByteBufferSlicePool;
-import org.xnio.OptionMap;
-import org.xnio.Options;
-import org.xnio.Xnio;
-import org.xnio.XnioWorker;
+import org.xnio.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -231,15 +226,14 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
                 _webSocketChannel = io.undertow.websockets.client.WebSocketClient.connect(_worker, _buffer, OptionMap.EMPTY, new URI(_url), WebSocketVersion.V13).get();
                 _webSocketChannel.getReceiveSetter().set(listener);
                 _webSocketChannel.resumeReceives();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
         public void close() {
             try {
+                _worker.shutdown();
                 _webSocketChannel.close();
             } catch (IOException e) {
                 e.printStackTrace();
