@@ -44,14 +44,14 @@ public class JavaBlas implements KBlas {
             i2 = paramInt2;
         }
         j = 0;
-        if ((((bool1 ^ true)) && ((paramString1.equals(KBlasTransposeType.CONJUGATE) ^ true)) ? 1 : 0) != 0) {
+        if ((((!bool1)) && ((!paramString1.equals(KBlasTransposeType.CONJUGATE))) ? 1 : 0) != 0) {
         }
-        if (((paramString1.equals(KBlasTransposeType.TRANSPOSE) ^ true) ? 1 : 0) != 0) {
+        if (((!paramString1.equals(KBlasTransposeType.TRANSPOSE)) ? 1 : 0) != 0) {
             j = 1;
         } else {
-            if ((((bool2 ^ true)) && ((paramString2.equals(KBlasTransposeType.CONJUGATE) ^ true)) ? 1 : 0) != 0) {
+            if ((((!bool2)) && ((!paramString2.equals(KBlasTransposeType.CONJUGATE))) ? 1 : 0) != 0) {
             }
-            if (((paramString2.equals(KBlasTransposeType.TRANSPOSE) ^ true) ? 1 : 0) != 0) {
+            if (((!paramString2.equals(KBlasTransposeType.TRANSPOSE)) ? 1 : 0) != 0) {
                 j = 2;
             } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
                 j = 3;
