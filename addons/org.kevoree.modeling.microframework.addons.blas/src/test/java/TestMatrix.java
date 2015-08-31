@@ -1,5 +1,6 @@
 
 import org.junit.Assert;
+import org.junit.Test;
 import org.kevoree.modeling.blas.JCudaBlas;
 import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
@@ -14,83 +15,99 @@ import java.util.Random;
  * Created by assaa_000 on 29/08/2015.
  */
 public class TestMatrix {
-    private static void traditional(KArray2D matA, KArray2D matB, KArray2D matC) {
+
+    private void traditional(KArray2D matA, KArray2D matB, KArray2D matC, double alpha, double beta) {
         for (int i = 0; i < matC.rows(); i++) {
             for (int j = 0; j < matC.columns(); j++) {
+                matC.set(i, j, beta * matC.get(i, j));
                 for (int k = 0; k < matA.columns(); k++) {
-                    matC.add(i, j, matA.get(i, k) * matB.get(k, j));
+                    matC.add(i, j, alpha * matA.get(i, k) * matB.get(k, j));
                 }
             }
         }
     }
 
+    private void initMatrice(KArray2D matA, boolean random) {
+        Random rand = new Random();
+        int k = 0;
+        for (int j = 0; j < matA.columns(); j++) {
+            for (int i = 0; i < matA.rows(); i++) {
+                if (random) {
+                    matA.set(i, j, rand.nextDouble());
+                } else {
+                    matA.set(i, j, k);
+                }
+                k++;
+            }
+        }
+    }
 
-    public static void main (String[] arg) {
-        double eps =1e-7;
-        KBlas java = new JavaBlas();
-        KBlas netlib = new NetlibBlas();
-        KBlas cuda = new JCudaBlas();
+    @Test
+    public void multiplyTest() {
 
-        //int r=1024*16;
-        int[] dimA = {1000, 1200};
-        int[] dimB = {1200, 2500};
+        KBlas javaBlas = new JavaBlas();
+        KBlas netlibBlas = new NetlibBlas();
+        KBlas jCudaBlas = new JCudaBlas();
+
+        int r = 512;
+        int[] dimA = {r, r + 1};
+        int[] dimB = {r + 1, r};
+        boolean rand = true;
+        double alpha = 0.7;
+        double beta = 0.3;
+        double eps = 1e-7;
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
-
-        Random rand = new Random();
-        for (int i = 0; i < matA.rows(); i++) {
-            for (int j = 0; j < matA.columns(); j++) {
-                matA.set(i, j, rand.nextDouble());
-            }
-        }
+        initMatrice(matA, rand);
 
         NativeArray2D matB = new NativeArray2D(dimB[0], dimB[1]);
+        initMatrice(matB, rand);
 
-        for (int i = 0; i < matB.rows(); i++) {
-            for (int j = 0; j < matB.columns(); j++) {
-                matB.set(i, j, rand.nextDouble());
-            }
-        }
 
-        NativeArray2D matC = new NativeArray2D(matA.rows(), matB.columns());
+        NativeArray2D matOriginal = new NativeArray2D(matA.rows(), matB.columns());
+        initMatrice(matOriginal, rand);
+
+        KArray2D matTrad = matOriginal.clone();
+        KArray2D matNetlib = matOriginal.clone();
+        KArray2D matJava = matOriginal.clone();
+        KArray2D matCuda = matOriginal.clone();
 
         System.out.println("Data generated");
-        long start, end;
+        long timestart, timeend;
 
-       start = System.nanoTime();
-        traditional(matA, matB, matC);
-        end = System.nanoTime();
-        System.out.println("for java " + ((double) (end - start)) / 1000000000 + " s");
+        timestart=System.currentTimeMillis();
+        traditional(matA, matB, matTrad, alpha, beta);
+        timeend=System.currentTimeMillis();
+        System.out.println("original " + ((double) (timeend - timestart)) / 1000);
 
-        start = System.nanoTime();
-        KArray2D matRes = MatrixOperations.multiply(matA, matB, java);
-        end = System.nanoTime();
-        System.out.println("ejml java " + ((double) (end - start)) / 1000000000 + " s");
+        timestart=System.currentTimeMillis();
+        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matJava, javaBlas);
+        timeend=System.currentTimeMillis();
+        System.out.println("Java blas " + ((double) (timeend - timestart)) / 1000);
 
+        timestart=System.currentTimeMillis();
+        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matNetlib, netlibBlas);
+        timeend=System.currentTimeMillis();
+        System.out.println("Netlib Blas " + ((double) (timeend - timestart)) / 1000);
 
-
-        start = System.nanoTime();
-        KArray2D matCuda = MatrixOperations.multiply(matA, matB, cuda);
-        end = System.nanoTime();
-        System.out.println("Cuda " + ((double) (end - start)) / 1000000000 + " s");
-        cuda.shutdown();
-
-        start = System.nanoTime();
-        KArray2D matNetlib = MatrixOperations.multiply(matA, matB, netlib);
-        end = System.nanoTime();
-        System.out.println("Netlib " + ((double) (end - start)) / 1000000000 + " s");
+        timestart=System.currentTimeMillis();
+        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matCuda, jCudaBlas);
+        timeend=System.currentTimeMillis();
+        System.out.println("Cuda Blas " + ((double) (timeend - timestart)) / 1000);
 
 
 
-        Assert.assertTrue(matRes.rows() == matC.rows());
-        Assert.assertTrue(matRes.columns() == matC.columns());
-        for (int i = 0; i <  matA.rows(); i++) {
-            for (int j = 0; j < matB.columns(); j++) {
-                Assert.assertEquals(matRes.get(i, j), matC.get(i, j),eps);
-                Assert.assertEquals(matCuda.get(i, j), matC.get(i, j),eps);
-                Assert.assertEquals(matNetlib.get(i, j), matC.get(i, j),eps);
+        for (int i = 0; i < matOriginal.rows(); i++) {
+            for (int j = 0; j < matOriginal.columns(); j++) {
+                Assert.assertEquals(matTrad.get(i, j), matJava.get(i, j), eps);
+                Assert.assertEquals(matTrad.get(i, j), matNetlib.get(i, j), eps);
+                Assert.assertEquals(matTrad.get(i, j), matCuda.get(i, j), eps);
             }
         }
 
+        javaBlas.shutdown();
+        netlibBlas.shutdown();
+        jCudaBlas.shutdown();
+        System.out.println("Test succeeded");
     }
 }

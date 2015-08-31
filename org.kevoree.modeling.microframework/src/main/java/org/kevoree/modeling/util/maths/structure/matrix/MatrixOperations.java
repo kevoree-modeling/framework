@@ -26,6 +26,11 @@ public class MatrixOperations {
         return matC;
     }
 
+    public static void multiplyAlphaBeta(double alpha, KArray2D matA, KArray2D matB, double beta, KArray2D matC, KBlas blas) {
+        blas.dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, alpha, matA, matB, beta, matC);
+
+    }
+
 
     public static KArray2D createIdentity(int width) {
         KArray2D ret = new NativeArray2D(width, width);

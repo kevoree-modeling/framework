@@ -72,7 +72,7 @@ public class SimpleMatrixText {
         }
 
         //test BIG transpose
-        matA = new NativeArray2D(380, 381);
+        matA = new NativeArray2D(450, 600);
 
         k = 1;
         for (int i = 0; i < matA.rows(); i++) {
@@ -94,12 +94,29 @@ public class SimpleMatrixText {
     }
 
 
-    private void traditional(KArray2D matA, KArray2D matB, KArray2D matC) {
+    private void traditional(KArray2D matA, KArray2D matB, KArray2D matC,double alpha, double beta) {
         for (int i = 0; i < matC.rows(); i++) {
             for (int j = 0; j < matC.columns(); j++) {
+                matC.set(i,j,beta*matC.get(i,j));
                 for (int k = 0; k < matA.columns(); k++) {
-                    matC.add(i, j, matA.get(i, k) * matB.get(k, j));
+                    matC.add(i, j, alpha*matA.get(i, k) * matB.get(k, j));
                 }
+            }
+        }
+    }
+
+    private void initMatrice(KArray2D matA, boolean random){
+        Random rand = new Random();
+        int k=0;
+        for (int j = 0; j < matA.columns(); j++) {
+            for (int i = 0; i < matA.rows(); i++) {
+                if(random){
+                    matA.set(i, j, rand.nextDouble());
+                }
+                else {
+                    matA.set(i, j, k);
+                }
+                k++;
             }
         }
     }
@@ -109,39 +126,35 @@ public class SimpleMatrixText {
 
         KBlas java = new JavaBlas();
 
-        int[] dimA = {30, 100};
-        int[] dimB = {100, 50};
+        int[] dimA = {300, 400};
+        int[] dimB = {400, 200};
+        boolean rand=true;
+        double alpha=0.7;
+        double beta =0.3;
+        double eps=1e-7;
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
-
-        Random rand = new Random();
-        for (int i = 0; i < matA.rows(); i++) {
-            for (int j = 0; j < matA.columns(); j++) {
-                matA.set(i, j, rand.nextDouble());
-            }
-        }
+        initMatrice(matA,rand);
 
         NativeArray2D matB = new NativeArray2D(dimB[0], dimB[1]);
+        initMatrice(matB, rand);
 
-        for (int i = 0; i < matB.rows(); i++) {
-            for (int j = 0; j < matB.columns(); j++) {
-                matB.set(i, j, rand.nextDouble());
-            }
-        }
 
         NativeArray2D matC = new NativeArray2D(matA.rows(), matB.columns());
+        initMatrice(matC, rand);
+
+        KArray2D matresult =matC.clone();
 
 
-        traditional(matA, matB, matC);
-        KArray2D matRes = MatrixOperations.multiply(matA, matB, java);
 
 
-        Assert.assertTrue(matRes.rows() == matC.rows());
-        Assert.assertTrue(matRes.columns() == matC.columns());
+        traditional(matA, matB, matC, alpha, beta);
+        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matresult, java);
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 2; j++) {
-                Assert.assertTrue(matRes.get(i, j) == matC.get(i, j));
+
+        for (int i = 0; i < matC.rows(); i++) {
+            for (int j = 0; j < matC.columns(); j++) {
+                Assert.assertEquals(matresult.get(i, j), matC.get(i, j), eps);
             }
         }
 
