@@ -19,6 +19,8 @@ public interface KBlas {
     //trans: 'c': matA -> conjugateTransp(matA)
     void dgemm(KBlasTransposeType transa, KBlasTransposeType transb, double alpha, KArray2D matA, KArray2D matB, double beta,  KArray2D matC);
 
+    void trans(KArray2D matA, KArray2D result);
+
     void shutdown();
 
 }

@@ -1,3 +1,4 @@
+
 import org.junit.Assert;
 import org.kevoree.modeling.blas.JCudaBlas;
 import org.kevoree.modeling.blas.NetlibBlas;

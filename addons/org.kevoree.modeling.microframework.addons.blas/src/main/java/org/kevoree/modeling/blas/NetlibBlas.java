@@ -4,12 +4,18 @@ import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import com.github.fommil.netlib.BLAS;
 import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
+import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 
 public class NetlibBlas implements KBlas {
     private BLAS blas;
 
     public NetlibBlas() {
         blas = BLAS.getInstance();
+    }
+
+    @Override
+    public void trans(KArray2D matA, KArray2D result) {
+        new JavaBlas().trans(matA,result);
     }
 
     @Override
@@ -34,7 +40,7 @@ public class NetlibBlas implements KBlas {
     private static final String TRANSPOSE_TYPE_TRANSPOSE = "t";
 
     private static String transTypeToChar(KBlasTransposeType type) {
-        if (type.equals(KBlasTransposeType.CONJUCATE)) {
+        if (type.equals(KBlasTransposeType.CONJUGATE)) {
             return TRANSPOSE_TYPE_CONJUCATE;
         } else if (type.equals(KBlasTransposeType.NOTRANSPOSE)) {
             return TRANSPOSE_TYPE_NOTRANSPOSE;

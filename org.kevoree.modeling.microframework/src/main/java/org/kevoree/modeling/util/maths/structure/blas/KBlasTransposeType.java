@@ -2,7 +2,7 @@ package org.kevoree.modeling.util.maths.structure.blas;
 
 public enum KBlasTransposeType {
 
-    NOTRANSPOSE, TRANSPOSE, CONJUCATE;
+    NOTRANSPOSE, TRANSPOSE, CONJUGATE;
 
 }
 

@@ -6,6 +6,7 @@ import jcuda.jcublas.JCublas;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
+import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 
 public class JCudaBlas implements KBlas {
 
@@ -51,6 +52,11 @@ public class JCudaBlas implements KBlas {
         JCublas.cublasFree(d_C);
     }
 
+    @Override
+    public void trans(KArray2D matA, KArray2D result) {
+       new JavaBlas().trans(matA,result);
+    }
+
     private static final char TRANSPOSE_TYPE_CONJUCATE = 'c';
 
     private static final char TRANSPOSE_TYPE_NOTRANSPOSE = 'n';
@@ -58,7 +64,7 @@ public class JCudaBlas implements KBlas {
     private static final char TRANSPOSE_TYPE_TRANSPOSE = 't';
 
     private static char transTypeToChar(KBlasTransposeType type) {
-        if (type.equals(KBlasTransposeType.CONJUCATE)) {
+        if (type.equals(KBlasTransposeType.CONJUGATE)) {
             return TRANSPOSE_TYPE_CONJUCATE;
         } else if (type.equals(KBlasTransposeType.NOTRANSPOSE)) {
             return TRANSPOSE_TYPE_NOTRANSPOSE;

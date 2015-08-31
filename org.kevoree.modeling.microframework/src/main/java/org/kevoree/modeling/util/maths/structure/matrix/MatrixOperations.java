@@ -10,13 +10,7 @@ public class MatrixOperations {
 
     public static KArray2D transpose(KArray2D matA, KBlas blas) {
         KArray2D result = new NativeArray2D(matA.columns(), matA.rows());
-     /*   if (matA.columns() == matA.rows()) {
-            transposeSquare(matA, result, blas);
-        } else if (matA.columns() > TRANSPOSE_SWITCH && matA.rows() > TRANSPOSE_SWITCH) {
-            transposeBlock(matA, result, blas);
-        } else {
-            transposeStandard(matA, result, blas);
-        }*/
+        blas.trans(matA,result);
         return result;
     }
 

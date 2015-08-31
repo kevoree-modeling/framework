@@ -17,7 +17,9 @@ import java.util.Random;
  */
 public class SimpleMatrixText {
 
+    @Test
     public void transposeTest() {
+        KBlas java = new JavaBlas();
 
         NativeArray2D matA = new NativeArray2D(3, 5);
 
@@ -30,7 +32,7 @@ public class SimpleMatrixText {
             }
         }
 
-        KArray2D matB = MatrixOperations.transpose(matA, null);
+        KArray2D matB = MatrixOperations.transpose(matA, java);
 
         Assert.assertTrue(matA.columns() == matB.rows());
         Assert.assertTrue(matA.rows() == matB.columns());
@@ -59,7 +61,7 @@ public class SimpleMatrixText {
 
         TransposeAlgs.square(test);
 
-        matB = MatrixOperations.transpose(matA, null);
+        matB = MatrixOperations.transpose(matA, java);
         Assert.assertTrue(matA.columns() == matB.rows());
         Assert.assertTrue(matA.rows() == matB.columns());
 
@@ -80,7 +82,7 @@ public class SimpleMatrixText {
             }
         }
 
-        matB = MatrixOperations.transpose(matA, null);
+        matB = MatrixOperations.transpose(matA, java);
         Assert.assertTrue(matA.columns() == matB.rows());
         Assert.assertTrue(matA.rows() == matB.columns());
 
