@@ -126,8 +126,9 @@ public class SimpleMatrixText {
 
         KBlas java = new JavaBlas();
 
-        int[] dimA = {300, 400};
-        int[] dimB = {400, 200};
+        int r=2000;
+        int[] dimA = {r, r+5};
+        int[] dimB = {r+5, r};
         boolean rand=true;
         double alpha=0.7;
         double beta =0.3;
@@ -142,15 +143,20 @@ public class SimpleMatrixText {
 
         NativeArray2D matC = new NativeArray2D(matA.rows(), matB.columns());
         initMatrice(matC, rand);
-
         KArray2D matresult =matC.clone();
 
 
+        long timestart, timeend;
 
-
+        timestart=System.currentTimeMillis();
         traditional(matA, matB, matC, alpha, beta);
-        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matresult, java);
+        timeend=System.currentTimeMillis();
+        System.out.println("For loop " + ((double) (timeend - timestart)) / 1000);
 
+        timestart=System.currentTimeMillis();
+        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matresult, java);
+        timeend=System.currentTimeMillis();
+        System.out.println("Java blas " + ((double) (timeend - timestart)) / 1000);
 
         for (int i = 0; i < matC.rows(); i++) {
             for (int j = 0; j < matC.columns(); j++) {
