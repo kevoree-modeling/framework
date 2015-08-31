@@ -73,21 +73,20 @@ public class PolynomialExtrapolation implements Extrapolation {
     }
 
 
-    public boolean insert(long time, double value, long timeOrigin, KObjectChunk raw, int index, double precision, KMetaClass metaClass) {
+    public boolean insert(final long time, final double value, final long timeOrigin, final KObjectChunk raw, final int index, final double precision, final KMetaClass metaClass) {
         if (raw.getDoubleArraySize(index, metaClass) == 0) {
             initial_feed(time, value, raw, index, metaClass);
             return true;
         }
         //Set the step
         if (raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass) == 1) {
-            double timeStep = time - timeOrigin;
-            //if (timeOrigin == 0) {
-            //    raw.clearDoubleArray(index, metaClass);
-            //    initial_feed(time, value, raw, index, metaClass);
-            //    return true;
-            //} else {
-                raw.setDoubleArrayElem(index, STEP, timeStep, metaClass);
-            //}
+            long timeStep = time - timeOrigin;
+            if (timeStep == 0) {
+                raw.setDoubleArrayElem(index, WEIGHTS, value, metaClass);
+                return true;
+            } else {
+                raw.setDoubleArrayElem(index, STEP, (double) timeStep, metaClass);
+            }
         }
         int deg = (int) raw.getDoubleArrayElem(index, DEGREE, metaClass);
         int num = (int) raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass);
