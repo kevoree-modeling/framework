@@ -81,12 +81,13 @@ public class PolynomialExtrapolation implements Extrapolation {
         //Set the step
         if (raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass) == 1) {
             double timeStep = time - timeOrigin;
-            if (timeOrigin == 0) {
-                raw.setDoubleArrayElem(index, WEIGHTS, value, metaClass);
-                return true;
-            } else {
+            //if (timeOrigin == 0) {
+            //    raw.clearDoubleArray(index, metaClass);
+            //    initial_feed(time, value, raw, index, metaClass);
+            //    return true;
+            //} else {
                 raw.setDoubleArrayElem(index, STEP, timeStep, metaClass);
-            }
+            //}
         }
         int deg = (int) raw.getDoubleArrayElem(index, DEGREE, metaClass);
         int num = (int) raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass);
