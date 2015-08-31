@@ -4,6 +4,8 @@ public interface KScheduler {
 
     void dispatch(Runnable runnable);
 
+    void start();
+
     void stop();
 
 }

@@ -45,7 +45,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     private KeyCalculator _objectKeyCalculator = null;
     private KeyCalculator _universeKeyCalculator = null;
-    private boolean isConnected = false;
+    private volatile boolean isConnected = false;
 
     private Short prefix;
     private KModel _model;
@@ -79,16 +79,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public final KModel model() {
         return _model;
-    }
-
-    @Override
-    public final void close(KCallback<Throwable> callback) {
-        isConnected = false;
-        if (_db != null) {
-            _db.close(callback);
-        } else {
-            callback.on(null);
-        }
     }
 
     @Override
@@ -130,7 +120,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private static final int KEY_SIZE = 3;
 
     @Override
-    public void save(final KCallback<Throwable> callback) {
+    public synchronized void save(final KCallback<Throwable> callback) {
         final DataManager selfPointer = this;
         _scheduler.dispatch(new Runnable() {
             @Override
@@ -203,7 +193,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public void connect(final KCallback<Throwable> connectCallback) {
+    public synchronized void connect(final KCallback<Throwable> connectCallback) {
         if (isConnected) {
             if (connectCallback != null) {
                 connectCallback.on(null);
@@ -214,6 +204,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 connectCallback.on(new Exception("Please attach a KDataBase AND a KBroker first !"));
             }
         } else {
+            _scheduler.start();
             _db.connect(new KCallback<Throwable>() {
                 @Override
                 public void on(Throwable throwable) {
@@ -288,6 +279,23 @@ public class DataManager implements KDataManager, KInternalDataManager {
             });
         }
     }
+
+
+    @Override
+    public synchronized final void close(KCallback<Throwable> callback) {
+        if (isConnected) {
+            _scheduler.stop();
+            isConnected = false;
+            if (_db != null) {
+                _db.close(callback);
+            } else {
+                callback.on(null);
+            }
+        } else {
+            callback.on(null);
+        }
+    }
+
 
     @Override
     public void deleteUniverse(KUniverse p_universe, KCallback<Throwable> callback) {

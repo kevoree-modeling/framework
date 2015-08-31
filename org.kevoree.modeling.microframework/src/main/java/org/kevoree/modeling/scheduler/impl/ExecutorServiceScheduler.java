@@ -12,12 +12,24 @@ import java.util.concurrent.ForkJoinWorkerThread;
  */
 public class ExecutorServiceScheduler implements KScheduler {
 
-    //  private ExecutorService _service = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, true);
-    private ExecutorService _service = Executors.newWorkStealingPool();
+    private ExecutorService _service;
 
     @Override
     public void dispatch(Runnable p_runnable) {
         _service.submit(p_runnable);
+    }
+
+    @Override
+    public void start() {
+        _service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                if (_service != null && !_service.isShutdown()) {
+                    _service.shutdown();
+                }
+            }
+        });
     }
 
     @Override
