@@ -12,7 +12,8 @@ import java.util.concurrent.ForkJoinWorkerThread;
  */
 public class ExecutorServiceScheduler implements KScheduler {
 
-    private ExecutorService _service = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, true);
+    //  private ExecutorService _service = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, true);
+    private ExecutorService _service = Executors.newWorkStealingPool();
 
     @Override
     public void dispatch(Runnable p_runnable) {
@@ -23,5 +24,5 @@ public class ExecutorServiceScheduler implements KScheduler {
     public void stop() {
         _service.shutdown();
     }
-    
+
 }
