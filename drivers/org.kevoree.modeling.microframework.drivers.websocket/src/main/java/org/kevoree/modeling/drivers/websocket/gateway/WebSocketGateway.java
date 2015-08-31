@@ -95,7 +95,6 @@ public class WebSocketGateway implements WebSocketConnectionCallback, HttpHandle
         if (roomId.length() == 0) {
             webSocketChannel.setCloseReason("RoomID should be defined!");
             try {
-                webSocketChannel.sendClose();
                 webSocketChannel.close();
             } catch (IOException e) {
                 e.printStackTrace();

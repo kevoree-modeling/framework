@@ -25,7 +25,7 @@ model.connect(function () {
         console.log(obj.toJSON());
 
         model.save(function () {
-            model.close(function () {
+            model.disconnect(function () {
             });
         });
 

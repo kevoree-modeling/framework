@@ -22,14 +22,6 @@ public class ExecutorServiceScheduler implements KScheduler {
     @Override
     public void start() {
         _service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                if (_service != null && !_service.isShutdown()) {
-                    _service.shutdown();
-                }
-            }
-        });
     }
 
     @Override

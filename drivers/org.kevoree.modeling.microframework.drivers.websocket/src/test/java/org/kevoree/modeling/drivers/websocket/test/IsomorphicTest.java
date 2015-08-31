@@ -80,7 +80,6 @@ public class IsomorphicTest {
             }
         });
 
-
         try {
             latch.await(4000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -93,6 +92,15 @@ public class IsomorphicTest {
 
 
     private int launchRunner(String file) {
+
+        /*
+        try {
+            Thread.sleep(1000000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+
         if (testNativeNode()) {
             try {
                 String[] params = new String[2];
