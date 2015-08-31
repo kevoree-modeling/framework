@@ -126,7 +126,7 @@ public class SimpleMatrixText {
 
         KBlas java = new JavaBlas();
 
-        int r=2000;
+        int r=500;
         int[] dimA = {r, r+5};
         int[] dimB = {r+5, r};
         boolean rand=true;

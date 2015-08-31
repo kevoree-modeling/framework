@@ -49,7 +49,7 @@ public class TestMatrix {
         KBlas netlibBlas = new NetlibBlas();
    //     KBlas jCudaBlas = new JCudaBlas();
 
-        int r = 512*3;
+        int r = 512*2;
         int[] dimA = {r, r + 1};
         int[] dimB = {r + 1, r};
         boolean rand = true;
