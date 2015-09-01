@@ -480,6 +480,7 @@ public class DistortedTimeResolver implements KResolver {
                     currentEntry.addDependency(universe, time, uuid);
                     //addition mark, will be unmarked when currentEntry will be removed
                     _spaceManager.markMemoryElement(clonedChunk);
+                    _spaceManager.unmarkMemoryElement(currentEntry);
 
                     if (!needUniverseCopy) {
                         timeTree.insert(time);
