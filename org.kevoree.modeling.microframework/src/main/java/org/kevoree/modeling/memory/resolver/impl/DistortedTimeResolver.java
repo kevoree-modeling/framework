@@ -432,7 +432,7 @@ public class DistortedTimeResolver implements KResolver {
             boolean needUniverseCopy = !useClosest && (resolvedUniverse != universe);
             currentEntry = (KObjectChunk) _spaceManager.getAndMark(resolvedUniverse, resolvedTime, uuid);
             if (currentEntry == null) {
-                System.err.println("Desphasing marking not done yet !!!!");
+                System.err.println("DePhasing marking not done yet !!!!");
                 _spaceManager.unmarkMemoryElement(timeTree);
                 _spaceManager.unmarkMemoryElement(globalUniverseTree);
                 _spaceManager.unmarkMemoryElement(objectUniverseTree);
@@ -490,12 +490,11 @@ public class DistortedTimeResolver implements KResolver {
                     _spaceManager.unmarkMemoryElement(objectUniverseTree);
                     return clonedChunk;
                 } else {
-                    System.err.println("Desphasing marking not done yet !!!!");
                     _spaceManager.unmarkMemoryElement(currentEntry);
                     _spaceManager.unmarkMemoryElement(timeTree);
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
                     _spaceManager.unmarkMemoryElement(objectUniverseTree);
-                    return null;
+                    return (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
                 }
             }
         } else {
