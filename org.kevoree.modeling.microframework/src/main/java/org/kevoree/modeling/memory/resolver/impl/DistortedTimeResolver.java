@@ -495,7 +495,17 @@ public class DistortedTimeResolver implements KResolver {
                     _spaceManager.unmarkMemoryElement(timeTree);
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
                     _spaceManager.unmarkMemoryElement(objectUniverseTree);
-                    return (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
+                    KObjectChunk waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
+                    int i = 0;
+                    while (waitingChunk == null && i < KConfig.CAS_MAX_TRY) {
+                        waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
+                        i++;
+                    }
+                    if (waitingChunk == null) {
+                        throw new RuntimeException("CAS synchronisation problem!");
+                    } else {
+                        return waitingChunk;
+                    }
                 }
             }
         } else {
