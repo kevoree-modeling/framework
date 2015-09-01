@@ -417,6 +417,17 @@ public class ArrayLongLongMap implements KLongLongMap {
         return this._obj;
     }
 
+    @Override
+    public long[] dependencies() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void addDependency(long universe, long time, long uuid) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
 }
 
 

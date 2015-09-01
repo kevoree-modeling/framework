@@ -955,4 +955,15 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
     }
 
+    @Override
+    public long[] dependencies() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void addDependency(long universe, long time, long uuid) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
 }

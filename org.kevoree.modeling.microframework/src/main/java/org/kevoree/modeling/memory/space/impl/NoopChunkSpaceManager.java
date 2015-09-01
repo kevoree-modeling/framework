@@ -37,6 +37,11 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
     }
 
     @Override
+    public void markMemoryElement(KChunk element) {
+
+    }
+
+    @Override
     public void unmarkAllMemoryElements(KChunk[] elements) {
 
     }

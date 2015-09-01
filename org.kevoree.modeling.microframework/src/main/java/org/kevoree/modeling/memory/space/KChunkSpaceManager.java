@@ -16,6 +16,8 @@ public interface KChunkSpaceManager {
 
     void unmarkMemoryElement(KChunk element);
 
+    void markMemoryElement(KChunk element);
+
     void unmarkAllMemoryElements(KChunk[] elements);
 
     KObjectChunk cloneAndMark(KObjectChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel);

@@ -744,4 +744,14 @@ public abstract class AbstractArrayTree implements KChunk {
 
     public abstract short type();
 
+    @Override
+    public long[] dependencies() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void addDependency(long universe, long time, long uuid) {
+       throw new RuntimeException("Not implemented yet");
+    }
 }

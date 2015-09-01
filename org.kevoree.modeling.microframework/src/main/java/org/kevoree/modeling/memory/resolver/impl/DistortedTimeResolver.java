@@ -477,6 +477,10 @@ public class DistortedTimeResolver implements KResolver {
                 } while (!previousResolution.compareAndSet(previous, current));
                 if (diff) {
                     KObjectChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
+                    currentEntry.addDependency(universe, time, uuid);
+                    //addition mark, will be unmarked when currentEntry will be removed
+                    _spaceManager.markMemoryElement(clonedChunk);
+
                     if (!needUniverseCopy) {
                         timeTree.insert(time);
                     } else {

@@ -567,6 +567,18 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             _space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
         }
     }
+
+    @Override
+    public long[] dependencies() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void addDependency(long universe, long time, long uuid) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
 }
 
 

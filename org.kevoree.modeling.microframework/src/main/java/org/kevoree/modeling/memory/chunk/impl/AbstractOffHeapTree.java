@@ -711,4 +711,16 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     public long obj() {
         return this._obj;
     }
+
+    @Override
+    public long[] dependencies() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void addDependency(long universe, long time, long uuid) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
 }
