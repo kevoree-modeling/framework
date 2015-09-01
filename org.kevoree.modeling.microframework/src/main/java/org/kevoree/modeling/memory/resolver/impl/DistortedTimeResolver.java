@@ -484,10 +484,6 @@ public class DistortedTimeResolver implements KResolver {
                         _spaceManager.unmarkMemoryElement(timeTree);
                         objectUniverseTree.put(universe, time);
                     }
-                    //TODO remove below
-                    _spaceManager.getAndMark(universe, time, uuid);
-
-                    //END OF TODO REMOVE 
                     _spaceManager.unmarkMemoryElement(currentEntry);
                     _spaceManager.unmarkMemoryElement(timeTree);
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
