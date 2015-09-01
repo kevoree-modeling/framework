@@ -477,6 +477,9 @@ public class DistortedTimeResolver implements KResolver {
                 } while (!previousResolution.compareAndSet(previous, current));
                 if (diff) {
                     KObjectChunk clonedChunk = _spaceManager.cloneMarkAndUnmark(currentEntry, universe, time, uuid, _manager.model().metaModel());
+                    if (currentEntry.counter() != 0) {
+                        System.err.println("WARNING!!! DANGEROUS DEPHASING UNMARK NOT IMPLEMENTED YET!!!");
+                    }
                     if (!needUniverseCopy) {
                         timeTree.insert(time);
                     } else {
@@ -485,13 +488,12 @@ public class DistortedTimeResolver implements KResolver {
                         _spaceManager.unmarkMemoryElement(timeTree);
                         objectUniverseTree.put(universe, time);
                     }
-                    _spaceManager.unmarkMemoryElement(currentEntry);
+//                    _spaceManager.unmarkMemoryElement(currentEntry);
                     _spaceManager.unmarkMemoryElement(timeTree);
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
                     _spaceManager.unmarkMemoryElement(objectUniverseTree);
                     return clonedChunk;
                 } else {
-                    _spaceManager.unmarkMemoryElement(currentEntry);
                     _spaceManager.unmarkMemoryElement(timeTree);
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
                     _spaceManager.unmarkMemoryElement(objectUniverseTree);
@@ -504,6 +506,7 @@ public class DistortedTimeResolver implements KResolver {
                     if (waitingChunk == null) {
                         throw new RuntimeException("CAS synchronisation problem!");
                     } else {
+                        _spaceManager.unmarkMemoryElement(currentEntry);
                         return waitingChunk;
                     }
                 }
