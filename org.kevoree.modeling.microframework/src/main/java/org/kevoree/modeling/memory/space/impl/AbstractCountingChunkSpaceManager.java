@@ -33,8 +33,8 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         KChunk resolvedElement = _space.get(universe, time, obj);
         if (resolvedElement != null) {
             int newCount = resolvedElement.dec();
-            if (newCount == 0 && (resolvedElement.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-                removeElement(resolvedElement);
+            if (newCount == 0) {
+                cleanDependenciesAndPotentiallyRemoveChunk(resolvedElement);
             }
         }
     }
@@ -51,8 +51,8 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     @Override
     public void unmarkMemoryElement(KChunk element) {
         int newCount = element.dec();
-        if (newCount == 0 && (element.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-            removeElement(element);
+        if (newCount == 0) {
+            cleanDependenciesAndPotentiallyRemoveChunk(element);
         }
     }
 
@@ -67,20 +67,22 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         for (int i = 0; i < elements.length; i++) {
             KChunk loopChunk = elements[i];
             int newCount = elements[i].dec();
-            if (newCount == 0 && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-                removeElement(loopChunk);
+            if (newCount == 0) {
+                cleanDependenciesAndPotentiallyRemoveChunk(loopChunk);
             }
         }
     }
 
-    private final void removeElement(KChunk toRemoveChunk) {
+    private final void cleanDependenciesAndPotentiallyRemoveChunk(KChunk toRemoveChunk) {
         long[] dependencies = toRemoveChunk.dependencies();
-        toRemoveChunk.setFlags(KChunkFlags.REMOVED_BIT, 0);
-        _space.remove(toRemoveChunk.universe(), toRemoveChunk.time(), toRemoveChunk.obj(), _metaModel);
         if (dependencies != null && dependencies.length > 0) {
             for (int i = 0; i < dependencies.length; i = i + 3) {
                 unmark(dependencies[i], dependencies[i + 1], dependencies[i + 2]);
             }
+        }
+        if ((toRemoveChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+            toRemoveChunk.setFlags(KChunkFlags.REMOVED_BIT, 0);
+            _space.remove(toRemoveChunk.universe(), toRemoveChunk.time(), toRemoveChunk.obj(), _metaModel);
         }
     }
 
