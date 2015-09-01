@@ -71,14 +71,15 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     }
 
     @Override
-    public KObjectChunk cloneMarkAndUnmark(KObjectChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel) {
+    public KObjectChunk cloneAndMark(KObjectChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel) {
         KObjectChunk newCreatedElement = _space.clone(previous, newUniverse, newTime, obj, metaModel);
         newCreatedElement.inc();
+        /*
         int newCount = previous.dec();
         if (newCount == 0 && (previous.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
             previous.setFlags(KChunkFlags.REMOVED_BIT, 0);
             _space.remove(previous.universe(), previous.time(), previous.obj(), _metaModel);
-        }
+        }*/
         return newCreatedElement;
     }
 

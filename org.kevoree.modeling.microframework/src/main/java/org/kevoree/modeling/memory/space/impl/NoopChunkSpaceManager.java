@@ -42,7 +42,7 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
     }
 
     @Override
-    public KObjectChunk cloneMarkAndUnmark(KObjectChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel) {
+    public KObjectChunk cloneAndMark(KObjectChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel) {
         return this._space.clone(previous, newUniverse, newTime, obj, metaModel);
     }
 
