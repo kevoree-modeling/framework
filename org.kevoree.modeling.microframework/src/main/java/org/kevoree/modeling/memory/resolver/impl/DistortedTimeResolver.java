@@ -433,6 +433,7 @@ public class DistortedTimeResolver implements KResolver {
             currentEntry = (KObjectChunk) _spaceManager.getAndMark(resolvedUniverse, resolvedTime, uuid);
             if (currentEntry == null) {
                 //TODO cache miss here, we unMark everything used Chunk and go out
+                System.err.println("DePhasing problem, null chunk unexpected");
                 _spaceManager.unmarkMemoryElement(timeTree);
                 _spaceManager.unmarkMemoryElement(globalUniverseTree);
                 _spaceManager.unmarkMemoryElement(objectUniverseTree);
