@@ -429,12 +429,122 @@ public class Base64 {
         return Double.longBitsToDouble(result);
     }
 
+
+
+
+    public static String encodeString(String s) {
+        String result = "";
+
+        int sLength = s.length();
+        int charIdx = 0;
+        char currentSourceChar;
+        int currentEncodedChar = 0;
+        int freeBitsInCurrentChar = 6;
+
+        while(charIdx < sLength) {
+            currentSourceChar = s.charAt(charIdx);
+            if(freeBitsInCurrentChar == 6) {
+                result += Base64.encodeArray[currentSourceChar >> 2 & 0x3F];
+                currentEncodedChar = (currentSourceChar & 0x3) << 4;
+                freeBitsInCurrentChar = 4;
+            } else if(freeBitsInCurrentChar == 4) {
+                result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 4) & 0xF)) & 0x3F];
+                currentEncodedChar = (currentSourceChar & 0xF) << 2;
+                freeBitsInCurrentChar = 2;
+            } else if(freeBitsInCurrentChar == 2) {
+                result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 6) & 0x3)) & 0x3F];
+                result += Base64.encodeArray[currentSourceChar & 0x3F];
+                freeBitsInCurrentChar = 6;
+            }
+            charIdx++;
+        }
+
+        if(freeBitsInCurrentChar != 6) {
+            result += Base64.encodeArray[currentEncodedChar];
+        }
+
+        return result;
+    }
+
+    public static void encodeStringToBuffer(String s, StringBuilder buffer) {
+        int sLength = s.length();
+        char currentSourceChar;
+        int currentEncodedChar = 0;
+        int freeBitsInCurrentChar = 6;
+
+        for(int charIdx = 0; charIdx < sLength; charIdx++) {
+            currentSourceChar = s.charAt(charIdx);
+            if(freeBitsInCurrentChar == 6) {
+                buffer.append(Base64.encodeArray[currentSourceChar >> 2 & 0x3F]);
+                currentEncodedChar = (currentSourceChar & 0x3) << 4;
+                freeBitsInCurrentChar = 4;
+            } else if(freeBitsInCurrentChar == 4) {
+                buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 4) & 0xF)) & 0x3F]);
+                currentEncodedChar = (currentSourceChar & 0xF) << 2;
+                freeBitsInCurrentChar = 2;
+            } else if(freeBitsInCurrentChar == 2) {
+                buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 6) & 0x3)) & 0x3F]);
+                buffer.append(Base64.encodeArray[currentSourceChar & 0x3F]);
+                freeBitsInCurrentChar = 6;
+            }
+        }
+
+        if(freeBitsInCurrentChar != 6) {
+            buffer.append(Base64.encodeArray[currentEncodedChar]);
+        }
+    }
+
+    public static String decodeToString(String s) {
+        return decodeToStringWithBounds(s, 0, s.length());
+    }
+
+    public static String decodeToStringWithBounds(String s, int offsetBegin, int offsetEnd) {
+        String result = "";
+
+        int currentSourceChar;
+        int currentDecodedChar = 0;
+        int freeBitsInCurrentChar = 8;
+
+        for(int charIdx = offsetBegin; charIdx < offsetEnd; charIdx++) {
+            currentSourceChar = Base64.decodeArray[s.charAt(charIdx)];
+            if(freeBitsInCurrentChar == 8) {
+                currentDecodedChar = currentSourceChar << 2;
+                freeBitsInCurrentChar = 2;
+            } else if(freeBitsInCurrentChar == 2) {
+                result += (char)(currentDecodedChar | (currentSourceChar >> 4));
+                currentDecodedChar = (currentSourceChar & 0xF) << 4;
+                freeBitsInCurrentChar = 4;
+            } else if(freeBitsInCurrentChar == 4) {
+                result += (char)(currentDecodedChar | (currentSourceChar >> 2));
+                currentDecodedChar = (currentSourceChar & 0x3) << 6;
+                freeBitsInCurrentChar = 6;
+            } else if(freeBitsInCurrentChar == 6) {
+                result += (char)(currentDecodedChar | currentSourceChar);
+                freeBitsInCurrentChar = 8;
+            }
+        }
+
+        return result;
+    }
+
+
     /*
+
     private static String printBits(long val) {
         String toString = Long.toBinaryString(val);
         String res = "";
 
         for (int i = 0; i < 64 - toString.length(); i++) {
+            res += "0";
+        }
+        return res + toString;
+    }
+
+    private static String printBits(int val) {
+        String toString = Integer.toBinaryString(val);
+        String res = "";
+
+        for (int i = 0; i < 32 - toString.length(); i++) {
             res += "0";
         }
         return res + toString;

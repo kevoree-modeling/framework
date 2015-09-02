@@ -181,6 +181,40 @@ public class Base64Test {
         }
     }
 
+
+    @Test
+    public void emptyStringEncodingTest() { testString(""); }
+
+    @Test
+    public void l1StringEncodingTest() { testString("a"); }
+
+    @Test
+    public void l2StringEncodingTest() { testString("ab"); }
+
+    @Test
+    public void l3StringEncodingTest() { testString("abc"); }
+
+    @Test
+    public void l4StringEncodingTest() { testString("abcd"); }
+
+    private void testString(String val) {
+        //System.out.println("Encode");
+        String enc = Base64.encodeString(val);
+        //System.out.println("Decode");
+        String dec = Base64.decodeToString(enc);
+        //System.out.println(val + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(val, dec);
+
+        //System.out.println("Encode");
+        StringBuilder buffer = new StringBuilder();
+        Base64.encodeStringToBuffer(val, buffer);
+        //System.out.println("Decode");
+        dec = Base64.decodeToString(buffer.toString());
+        //System.out.println(val + " -> " + enc + " -> " + dec);
+        Assert.assertEquals(val, dec);
+    }
+
+
     /*
 
         private String printBits(Long val) {
