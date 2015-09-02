@@ -216,7 +216,121 @@ public class JavaBlas implements KBlas {
     }
 
 
+    @Override
+    public void dgetri(int paramInt1, double[] paramArrayOfDouble1, int paramInt2, int paramInt3, int[] paramArrayOfInt, int paramInt4, double[] paramArrayOfDouble2, int paramInt5, int paramInt6, int[] paramintW)
+    {
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        int m = 0;
+        int n = 0;
+        int i1 = 0;
+        int i2 = 0;
+        int i3 = 0;
+        int i4 = 0;
+        int i5 = 0;
+        int i6 = 0;
+        int i7 = 0;
+        paramintW[0] = 0;
+        i5 = ilaenv(1, "DGETRI", " ", paramInt1, -1, -1, -1);
+        i4 = paramInt1 * i5;
+        paramArrayOfDouble2[paramInt5] = i4;
+        i = paramInt6 != -1 ? 0 : 1;
+        if ((paramInt1 >= 0 ? 0 : 1) != 0)
+        {
+            paramintW[0] = -1;
+        }
+        else if ((paramInt3 >= Math.max(1, paramInt1) ? 0 : 1) != 0)
+        {
+            paramintW[0] = -3;
+        }
 
+        if ((paramintW[0] == 0 ? 0 : 1) != 0)
+        {
+            //Xerbla.xerbla("DGETRI", -paramintW[0]);
+            return;
+        }
+        if (i != 0) {
+            return;
+        }
+        if ((paramInt1 != 0 ? 0 : 1) != 0) {
+            return;
+        }
+        dtrtri(KBlasOrientationType.UPPER, KBlasUnitType.NONUNIT, paramInt1, paramArrayOfDouble1, paramInt2, paramInt3, paramintW);
+        if ((paramintW[0] <= 0 ? 0 : 1) != 0) {
+            return;
+        }
+        i6 = 2;
+        i3 = paramInt1;
+        if (((i5 >= paramInt1 ? 0 : 1) != 0 ? 1 : 0) != 0)
+        {
+            k = Math.max(i3 * i5, 1);
+            if ((paramInt6 >= k ? 0 : 1) != 0)
+            {
+                i5 = paramInt6 / i3;
+                i6 = Math.max(2, ilaenv(2, "DGETRI", " ", paramInt1, -1, -1, -1));
+            }
+        }
+        else
+        {
+            k = paramInt1;
+        }
+        int i9;
+        if (((i5 < paramInt1 ? 0 : 1) == 0 ? 0 : 1) != 0)
+        {
+            m = paramInt1;
+            for (int i8 = (1 - paramInt1 + -1) / -1; i8 > 0; i8--)
+            {
+                j = m + 1;
+                for (i9 = paramInt1 - (m + 1) + 1; i9 > 0; i9--)
+                {
+                    paramArrayOfDouble2[(j - 1 + paramInt5)] = paramArrayOfDouble1[(j - 1 + (m - 1) * paramInt3 + paramInt2)];
+                    paramArrayOfDouble1[(j - 1 + (m - 1) * paramInt3 + paramInt2)] = 0.0D;
+                    j += 1;
+                }
+                if ((m >= paramInt1 ? 0 : 1) != 0) {
+                    dgemv(KBlasTransposeType.NOTRANSPOSE, paramInt1, paramInt1 - m, -1.0D, paramArrayOfDouble1, (m ) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble2, m + paramInt5, 1, 1.0D, paramArrayOfDouble1, (m - 1) * paramInt3 + paramInt2, 1);
+                }
+                m += -1;
+            }
+        }
+        else
+        {
+            i7 = (paramInt1 - 1) / i5 * i5 + 1;
+            m = i7;
+            for (int i8 = (1 - i7 + -i5) / -i5; i8 > 0; i8--)
+            {
+                n = Math.min(i5, paramInt1 - m + 1);
+                i1 = m;
+                for (i9 = m + n - 1 - m + 1; i9 > 0; i9--)
+                {
+                    j = i1 + 1;
+                    for (int i10 = paramInt1 - (i1 + 1) + 1; i10 > 0; i10--)
+                    {
+                        paramArrayOfDouble2[(j + (i1 - m) * i3 - 1 + paramInt5)] = paramArrayOfDouble1[(j - 1 + (i1 - 1) * paramInt3 + paramInt2)];
+                        paramArrayOfDouble1[(j - 1 + (i1 - 1) * paramInt3 + paramInt2)] = 0.0D;
+                        j += 1;
+                    }
+                    i1 += 1;
+                }
+                if ((m + n > paramInt1 ? 0 : 1) != 0) {
+                    dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, paramInt1, n, paramInt1 - m - n + 1, -1.0D, paramArrayOfDouble1, (m + n - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble2, m + n - 1 + paramInt5, i3, 1.0D, paramArrayOfDouble1, (m - 1) * paramInt3 + paramInt2, paramInt3);
+                }
+                dtrsm(KBlasSideType.RIGHT, KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, KBlasUnitType.UNIT, paramInt1, n, 1.0D, paramArrayOfDouble2, m - 1 + paramInt5, i3, paramArrayOfDouble1, (m - 1) * paramInt3 + paramInt2, paramInt3);
+                m += -i5;
+            }
+        }
+        m = paramInt1 - 1;
+        for (int i8 = (1 - (paramInt1 - 1) + -1) / -1; i8 > 0; i8--)
+        {
+            i2 = paramArrayOfInt[(m - 1 + paramInt4)];
+            if ((i2 == m ? 0 : 1) != 0) {
+                dswap(paramInt1, paramArrayOfDouble1, (m - 1) * paramInt3 + paramInt2, 1, paramArrayOfDouble1, (i2 - 1) * paramInt3 + paramInt2, 1);
+            }
+            m += -1;
+        }
+        paramArrayOfDouble2[(paramInt5)] = k;
+    }
 
     @Override
     public void dgetrf(int paramInt1, int paramInt2, double[] paramArrayOfDouble, int paramInt3, int paramInt4, int[] paramArrayOfInt, int paramInt5, int[] info) {
@@ -310,8 +424,8 @@ public class JavaBlas implements KBlas {
         }
         }
 
-        @Override
-        public void trans(KArray2D matA, KArray2D result) {
+    @Override
+    public void trans(KArray2D matA, KArray2D result) {
         if (matA.columns() == matA.rows()) {
             transposeSquare(matA, result);
         } else if (matA.columns() > TRANSPOSE_SWITCH && matA.rows() > TRANSPOSE_SWITCH) {
@@ -338,7 +452,706 @@ public class JavaBlas implements KBlas {
     }
 
 
-    private void transposeSquare(KArray2D matA, KArray2D result) {
+    public static void dtrti2(KBlasOrientationType paramString1, KBlasUnitType paramString2, int paramInt1, double[] paramArrayOfDouble, int paramInt2, int paramInt3, int[] paramintW)
+    {
+        boolean bool1 = false;
+        boolean bool2 = false;
+        int i = 0;
+        double d = 0.0D;
+        paramintW[0] = 0;
+        bool2 = paramString1.equals(KBlasOrientationType.UPPER);
+        bool1 = paramString2.equals(KBlasUnitType.NONUNIT);
+        if ((((!bool2)) && ((!paramString1.equals(KBlasOrientationType.LOWER))) ? 1 : 0) != 0) {
+            paramintW[0] = -1;
+        } else if ((((!bool1)) && ((!paramString2.equals(KBlasUnitType.UNIT))) ? 1 : 0) != 0) {
+            paramintW[0] = -2;
+        } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+            paramintW[0] = -3;
+        } else if ((paramInt3 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+            paramintW[0] = -5;
+        }
+        if ((paramintW[0] == 0 ? 0 : 1) != 0)
+        {
+            //Xerbla.xerbla("DTRTI2", -paramintW[0]);
+            return;
+        }
+        int j;
+        if (bool2)
+        {
+            i = 1;
+            for (j = paramInt1 - 1 + 1; j > 0; j--)
+            {
+                if (bool1)
+                {
+                    paramArrayOfDouble[(i - 1 + (i - 1) * paramInt3 + paramInt2)] = (1.0D / paramArrayOfDouble[(i - 1 + (i - 1) * paramInt3 + paramInt2)]);
+                    d = -paramArrayOfDouble[(i - 1 + (i - 1) * paramInt3 + paramInt2)];
+                }
+                else
+                {
+                    d = -1.0D;
+                }
+                dtrmv(KBlasOrientationType.UPPER, KBlasTransposeType.NOTRANSPOSE, paramString2, i - 1, paramArrayOfDouble, paramInt2, paramInt3, paramArrayOfDouble, (i - 1) * paramInt3 + paramInt2, 1);
+                dscal(i - 1, d, paramArrayOfDouble, (i - 1) * paramInt3 + paramInt2, 1);
+                i += 1;
+            }
+        }
+        else
+        {
+            i = paramInt1;
+            for (j = (1 - paramInt1 + -1) / -1; j > 0; j--)
+            {
+                if (bool1) {
+                    paramArrayOfDouble[(i - 1 + (i - 1) * paramInt3 + paramInt2)] = (1.0D / paramArrayOfDouble[(i - 1 + (i - 1) * paramInt3 + paramInt2)]);
+                    d = -paramArrayOfDouble[(i - 1 + (i - 1) * paramInt3 + paramInt2)];
+                }
+                else
+                {
+                    d = -1.0D;
+                }
+                if ((i >= paramInt1 ? 0 : 1) != 0)
+                {
+                    dtrmv(KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, paramString2, paramInt1 - i, paramArrayOfDouble, i + (i + 1 - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble, i + (i - 1) * paramInt3 + paramInt2, 1);
+                    dscal(paramInt1 - i, d, paramArrayOfDouble, i + (i - 1) * paramInt3 + paramInt2, 1);
+                }
+                i += -1;
+            }
+        }
+    }
+
+    public static void dtrmv(KBlasOrientationType paramString1, KBlasTransposeType paramString2, KBlasUnitType paramString3, int paramInt1, double[] paramArrayOfDouble1, int paramInt2, int paramInt3, double[] paramArrayOfDouble2, int paramInt4, int paramInt5)
+    {
+        double d = 0.0D;
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        int m = 0;
+        int n = 0;
+        int i1 = 0;
+        boolean bool = false;
+        j = 0;
+        if ((((!paramString1.equals(KBlasOrientationType.UPPER))) && ((!paramString1.equals(KBlasOrientationType.LOWER))) ? 1 : 0) != 0)
+        {
+            j = 1;
+        }
+        else
+        {
+           // if ((((!paramString2.equals(KBlasTransposeType.NOTRANSPOSE))) && ((!paramString2.equals(KBlasTransposeType.TRANSPOSE))) ? 1 : 0) != 0) {}
+            if (((!paramString2.equals(KBlasTransposeType.CONJUGATE)) ? 1 : 0) != 0) {
+                j = 2;
+            } else if ((((!paramString3.equals(KBlasUnitType.UNIT))) && ((!paramString3.equals(KBlasUnitType.NONUNIT))) ? 1 : 0) != 0) {
+                j = 3;
+            } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+                j = 4;
+            } else if ((paramInt3 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+                j = 6;
+            } else if ((paramInt5 != 0 ? 0 : 1) != 0) {
+                j = 8;
+            }
+        }
+        if ((j == 0 ? 0 : 1) != 0)
+        {
+            //Xerbla.xerbla("DTRMV ", j);
+            return;
+        }
+        if ((paramInt1 != 0 ? 0 : 1) != 0) {
+            return;
+        }
+        bool = paramString3.equals(KBlasUnitType.NONUNIT);
+        if ((paramInt5 > 0 ? 0 : 1) != 0) {
+            i1 = 1 - (paramInt1 - 1) * paramInt5;
+        } else if ((paramInt5 == 1 ? 0 : 1) != 0) {
+            i1 = 1;
+        }
+        int i2;
+        int i3;
+        if (paramString2.equals(KBlasTransposeType.NOTRANSPOSE))
+        {
+            if (paramString1.equals(KBlasOrientationType.UPPER))
+            {
+                if ((paramInt5 != 1 ? 0 : 1) != 0)
+                {
+                    m = 1;
+                    for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                    {
+                        if ((paramArrayOfDouble2[(m - 1 + paramInt4)] == 0.0D ? 0 : 1) != 0)
+                        {
+                            d = paramArrayOfDouble2[(m - 1 + paramInt4)];
+                            i = 1;
+                            for (i3 = m - 1; i3 > 0; i3--)
+                            {
+                                paramArrayOfDouble2[(i - 1 + paramInt4)] += d * paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt3 + paramInt2)];
+                                i += 1;
+                            }
+                            if (bool) {
+                                paramArrayOfDouble2[(m - 1 + paramInt4)] *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt3 + paramInt2)];
+                            }
+                        }
+                        m += 1;
+                    }
+                }
+                else
+                {
+                    n = i1;
+                    m = 1;
+                    for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                    {
+                        if ((paramArrayOfDouble2[(n - 1 + paramInt4)] == 0.0D ? 0 : 1) != 0)
+                        {
+                            d = paramArrayOfDouble2[(n - 1 + paramInt4)];
+                            k = i1;
+                            i = 1;
+                            for (i3 = m - 1; i3 > 0; i3--)
+                            {
+                                paramArrayOfDouble2[(k - 1 + paramInt4)] += d * paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt3 + paramInt2)];
+                                k += paramInt5;
+                                i += 1;
+                            }
+                            if (bool) {
+                                paramArrayOfDouble2[(n - 1 + paramInt4)] *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt3 + paramInt2)];
+                            }
+                        }
+                        n += paramInt5;
+                        m += 1;
+                    }
+                }
+            }
+            else if ((paramInt5 != 1 ? 0 : 1) != 0)
+            {
+                m = paramInt1;
+                for (i2 = (1 - paramInt1 + -1) / -1; i2 > 0; i2--)
+                {
+                    if ((paramArrayOfDouble2[(m - 1 + paramInt4)] == 0.0D ? 0 : 1) != 0)
+                    {
+                        d = paramArrayOfDouble2[(m - 1 + paramInt4)];
+                        i = paramInt1;
+                        for (i3 = (m + 1 - paramInt1 + -1) / -1; i3 > 0; i3--)
+                        {
+                            paramArrayOfDouble2[(i - 1 + paramInt4)] += d * paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt3 + paramInt2)];
+                            i += -1;
+                        }
+                        if (bool) {
+                            paramArrayOfDouble2[(m - 1 + paramInt4)] *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt3 + paramInt2)];
+                        }
+                    }
+                    m += -1;
+                }
+            }
+            else
+            {
+                i1 += (paramInt1 - 1) * paramInt5;
+                n = i1;
+                m = paramInt1;
+                for (i2 = (1 - paramInt1 + -1) / -1; i2 > 0; i2--)
+                {
+                    if ((paramArrayOfDouble2[(n - 1 + paramInt4)] == 0.0D ? 0 : 1) != 0)
+                    {
+                        d = paramArrayOfDouble2[(n - 1 + paramInt4)];
+                        k = i1;
+                        i = paramInt1;
+                        for (i3 = (m + 1 - paramInt1 + -1) / -1; i3 > 0; i3--)
+                        {
+                            paramArrayOfDouble2[(k - 1 + paramInt4)] += d * paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt3 + paramInt2)];
+                            k -= paramInt5;
+                            i += -1;
+                        }
+                        if (bool) {
+                            paramArrayOfDouble2[(n - 1 + paramInt4)] *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt3 + paramInt2)];
+                        }
+                    }
+                    n -= paramInt5;
+                    m += -1;
+                }
+            }
+        }
+        else if (paramString1.equals(KBlasOrientationType.UPPER))
+        {
+            if ((paramInt5 != 1 ? 0 : 1) != 0)
+            {
+                m = paramInt1;
+                for (i2 = (1 - paramInt1 + -1) / -1; i2 > 0; i2--)
+                {
+                    d = paramArrayOfDouble2[(m - 1 + paramInt4)];
+                    if (bool) {
+                        d *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt3 + paramInt2)];
+                    }
+                    i = m - 1;
+                    for (i3 = (1 - (m - 1) + -1) / -1; i3 > 0; i3--)
+                    {
+                        d += paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt3 + paramInt2)] * paramArrayOfDouble2[(i - 1 + paramInt4)];
+                        i += -1;
+                    }
+                    paramArrayOfDouble2[(m - 1 + paramInt4)] = d;
+                    m += -1;
+                }
+            }
+            else
+            {
+                n = i1 + (paramInt1 - 1) * paramInt5;
+                m = paramInt1;
+                for (i2 = (1 - paramInt1 + -1) / -1; i2 > 0; i2--)
+                {
+                    d = paramArrayOfDouble2[(n - 1 + paramInt4)];
+                    k = n;
+                    if (bool) {
+                        d *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt3 + paramInt2)];
+                    }
+                    i = m - 1;
+                    for (i3 = (1 - (m - 1) + -1) / -1; i3 > 0; i3--)
+                    {
+                        k -= paramInt5;
+                        d += paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt3 + paramInt2)] * paramArrayOfDouble2[(k - 1 + paramInt4)];
+                        i += -1;
+                    }
+                    paramArrayOfDouble2[(n - 1 + paramInt4)] = d;
+                    n -= paramInt5;
+                    m += -1;
+                }
+            }
+        }
+        else if ((paramInt5 != 1 ? 0 : 1) != 0)
+        {
+            m = 1;
+            for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+            {
+                d = paramArrayOfDouble2[(m - 1 + paramInt4)];
+                if (bool) {
+                    d *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt3 + paramInt2)];
+                }
+                i = m + 1;
+                for (i3 = paramInt1 - (m + 1) + 1; i3 > 0; i3--)
+                {
+                    d += paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt3 + paramInt2)] * paramArrayOfDouble2[(i - 1 + paramInt4)];
+                    i += 1;
+                }
+                paramArrayOfDouble2[(m - 1 + paramInt4)] = d;
+                m += 1;
+            }
+        }
+        else
+        {
+            n = i1;
+            m = 1;
+            for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+            {
+                d = paramArrayOfDouble2[(n - 1 + paramInt4)];
+                k = n;
+                if (bool) {
+                    d *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt3 + paramInt2)];
+                }
+                i = m + 1;
+                for (i3 = paramInt1 - (m + 1) + 1; i3 > 0; i3--)
+                {
+                    k += paramInt5;
+                    d += paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt3 + paramInt2)] * paramArrayOfDouble2[(k - 1 + paramInt4)];
+                    i += 1;
+                }
+                paramArrayOfDouble2[(n - 1 + paramInt4)] = d;
+                n += paramInt5;
+                m += 1;
+            }
+        }
+    }
+
+    public static void dtrmm(KBlasSideType paramString1, KBlasOrientationType paramString2, KBlasTransposeType paramString3, KBlasUnitType paramString4, int paramInt1, int paramInt2, double paramDouble, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, double[] paramArrayOfDouble2, int paramInt5, int paramInt6)
+    {
+        double d = 0.0D;
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        int m = 0;
+        int n = 0;
+        boolean bool1 = false;
+        boolean bool2 = false;
+        boolean bool3 = false;
+        bool1 = paramString1.equals(KBlasSideType.LEFT);
+        if (bool1) {
+            n = paramInt1;
+        } else {
+            n = paramInt2;
+        }
+        bool2 = paramString4.equals(KBlasUnitType.NONUNIT);
+        bool3 = paramString2.equals(KBlasOrientationType.UPPER);
+        j = 0;
+        if ((((!bool1)) && ((!paramString1.equals(KBlasSideType.RIGHT))) ? 1 : 0) != 0)
+        {
+            j = 1;
+        }
+        else if ((((!bool3)) && ((!paramString2.equals(KBlasOrientationType.LOWER))) ? 1 : 0) != 0)
+        {
+            j = 2;
+        }
+        else
+        {
+           // if ((((!paramString3.equals(KBlasTransposeType.NOTRANSPOSE))) && ((!paramString3.equals(KBlasTransposeType.TRANSPOSE))) ? 1 : 0) != 0) {}
+            if (((!paramString3.equals(KBlasTransposeType.CONJUGATE)) ? 1 : 0) != 0) {
+                j = 3;
+            } else if ((((!paramString4.equals(KBlasUnitType.UNIT))) && ((!paramString4.equals(KBlasUnitType.NONUNIT))) ? 1 : 0) != 0) {
+                j = 4;
+            } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+                j = 5;
+            } else if ((paramInt2 >= 0 ? 0 : 1) != 0) {
+                j = 6;
+            } else if ((paramInt4 >= Math.max(1, n) ? 0 : 1) != 0) {
+                j = 9;
+            } else if ((paramInt6 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+                j = 11;
+            }
+        }
+        if ((j == 0 ? 0 : 1) != 0)
+        {
+            //Xerbla.xerbla("DTRMM ", j);
+            return;
+        }
+        if ((paramInt2 != 0 ? 0 : 1) != 0) {
+            return;
+        }
+        int i1;
+        int i2;
+        if ((paramDouble != 0.0D ? 0 : 1) != 0)
+        {
+            k = 1;
+            for (i1 = paramInt2 - 1 + 1; i1 > 0; i1--)
+            {
+                i = 1;
+                for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                {
+                    paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] = 0.0D;
+                    i += 1;
+                }
+                k += 1;
+            }
+            return;
+        }
+        int i3;
+        if (bool1)
+        {
+            if (paramString3.equals(KBlasTransposeType.NOTRANSPOSE))
+            {
+                if (bool3)
+                {
+                    k = 1;
+                    for (i1 = paramInt2 - 1 + 1; i1 > 0; i1--)
+                    {
+                        m = 1;
+                        for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                        {
+                            if ((paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)] == 0.0D ? 0 : 1) != 0)
+                            {
+                                d = paramDouble * paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)];
+                                i = 1;
+                                for (i3 = m - 1; i3 > 0; i3--)
+                                {
+                                    paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] += d * paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt4 + paramInt3)];
+                                    i += 1;
+                                }
+                                if (bool2) {
+                                    d *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt4 + paramInt3)];
+                                }
+                                paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)] = d;
+                            }
+                            m += 1;
+                        }
+                        k += 1;
+                    }
+                }
+                else
+                {
+                    k = 1;
+                    for (i1 = paramInt2 - 1 + 1; i1 > 0; i1--)
+                    {
+                        m = paramInt1;
+                        for (i2 = (1 - paramInt1 + -1) / -1; i2 > 0; i2--)
+                        {
+                            if ((paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)] == 0.0D ? 0 : 1) != 0)
+                            {
+                                d = paramDouble * paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)];
+                                paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)] = d;
+                                if (bool2) {
+                                    paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)] *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt4 + paramInt3)];
+                                }
+                                i = m + 1;
+                                for (i3 = paramInt1 - (m + 1) + 1; i3 > 0; i3--)
+                                {
+                                    paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] += d * paramArrayOfDouble1[(i - 1 + (m - 1) * paramInt4 + paramInt3)];
+                                    i += 1;
+                                }
+                            }
+                            m += -1;
+                        }
+                        k += 1;
+                    }
+                }
+            }
+            else if (bool3)
+            {
+                k = 1;
+                for (i1 = paramInt2 - 1 + 1; i1 > 0; i1--)
+                {
+                    i = paramInt1;
+                    for (i2 = (1 - paramInt1 + -1) / -1; i2 > 0; i2--)
+                    {
+                        d = paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)];
+                        if (bool2) {
+                            d *= paramArrayOfDouble1[(i - 1 + (i - 1) * paramInt4 + paramInt3)];
+                        }
+                        m = 1;
+                        for (i3 = i - 1; i3 > 0; i3--)
+                        {
+                            d += paramArrayOfDouble1[(m - 1 + (i - 1) * paramInt4 + paramInt3)] * paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)];
+                            m += 1;
+                        }
+                        paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] = (paramDouble * d);
+                        i += -1;
+                    }
+                    k += 1;
+                }
+            }
+            else
+            {
+                k = 1;
+                for (i1 = paramInt2 - 1 + 1; i1 > 0; i1--)
+                {
+                    i = 1;
+                    for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                    {
+                        d = paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)];
+                        if (bool2) {
+                            d *= paramArrayOfDouble1[(i - 1 + (i - 1) * paramInt4 + paramInt3)];
+                        }
+                        m = i + 1;
+                        for (i3 = paramInt1 - (i + 1) + 1; i3 > 0; i3--)
+                        {
+                            d += paramArrayOfDouble1[(m - 1 + (i - 1) * paramInt4 + paramInt3)] * paramArrayOfDouble2[(m - 1 + (k - 1) * paramInt6 + paramInt5)];
+                            m += 1;
+                        }
+                        paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] = (paramDouble * d);
+                        i += 1;
+                    }
+                    k += 1;
+                }
+            }
+        }
+        else if (paramString3.equals(KBlasTransposeType.NOTRANSPOSE))
+        {
+            if (bool3)
+            {
+                k = paramInt2;
+                for (i1 = (1 - paramInt2 + -1) / -1; i1 > 0; i1--)
+                {
+                    d = paramDouble;
+                    if (bool2) {
+                        d *= paramArrayOfDouble1[(k - 1 + (k - 1) * paramInt4 + paramInt3)];
+                    }
+                    i = 1;
+                    for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                    {
+                        paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] = (d * paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)]);
+                        i += 1;
+                    }
+                    m = 1;
+                    for (i2 = k - 1; i2 > 0; i2--)
+                    {
+                        if ((paramArrayOfDouble1[(m - 1 + (k - 1) * paramInt4 + paramInt3)] == 0.0D ? 0 : 1) != 0)
+                        {
+                            d = paramDouble * paramArrayOfDouble1[(m - 1 + (k - 1) * paramInt4 + paramInt3)];
+                            i = 1;
+                            for (i3 = paramInt1 - 1 + 1; i3 > 0; i3--)
+                            {
+                                paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] += d * paramArrayOfDouble2[(i - 1 + (m - 1) * paramInt6 + paramInt5)];
+                                i += 1;
+                            }
+                        }
+                        m += 1;
+                    }
+                    k += -1;
+                }
+            }
+            else
+            {
+                k = 1;
+                for (i1 = paramInt2 - 1 + 1; i1 > 0; i1--)
+                {
+                    d = paramDouble;
+                    if (bool2) {
+                        d *= paramArrayOfDouble1[(k - 1 + (k - 1) * paramInt4 + paramInt3)];
+                    }
+                    i = 1;
+                    for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                    {
+                        paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] = (d * paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)]);
+                        i += 1;
+                    }
+                    m = k + 1;
+                    for (i2 = paramInt2 - (k + 1) + 1; i2 > 0; i2--)
+                    {
+                        if ((paramArrayOfDouble1[(m - 1 + (k - 1) * paramInt4 + paramInt3)] == 0.0D ? 0 : 1) != 0)
+                        {
+                            d = paramDouble * paramArrayOfDouble1[(m - 1 + (k - 1) * paramInt4 + paramInt3)];
+                            i = 1;
+                            for (i3 = paramInt1 - 1 + 1; i3 > 0; i3--)
+                            {
+                                paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] += d * paramArrayOfDouble2[(i - 1 + (m - 1) * paramInt6 + paramInt5)];
+                                i += 1;
+                            }
+                        }
+                        m += 1;
+                    }
+                    k += 1;
+                }
+            }
+        }
+        else if (bool3)
+        {
+            m = 1;
+            for (i1 = paramInt2 - 1 + 1; i1 > 0; i1--)
+            {
+                k = 1;
+                for (i2 = m - 1; i2 > 0; i2--)
+                {
+                    if ((paramArrayOfDouble1[(k - 1 + (m - 1) * paramInt4 + paramInt3)] == 0.0D ? 0 : 1) != 0)
+                    {
+                        d = paramDouble * paramArrayOfDouble1[(k - 1 + (m - 1) * paramInt4 + paramInt3)];
+                        i = 1;
+                        for (i3 = paramInt1 - 1 + 1; i3 > 0; i3--)
+                        {
+                            paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] += d * paramArrayOfDouble2[(i - 1 + (m - 1) * paramInt6 + paramInt5)];
+                            i += 1;
+                        }
+                    }
+                    k += 1;
+                }
+                d = paramDouble;
+                if (bool2) {
+                    d *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt4 + paramInt3)];
+                }
+                if ((d == 1.0D ? 0 : 1) != 0)
+                {
+                    i = 1;
+                    for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                    {
+                        paramArrayOfDouble2[(i - 1 + (m - 1) * paramInt6 + paramInt5)] = (d * paramArrayOfDouble2[(i - 1 + (m - 1) * paramInt6 + paramInt5)]);
+                        i += 1;
+                    }
+                }
+                m += 1;
+            }
+        }
+        else
+        {
+            m = paramInt2;
+            for (i1 = (1 - paramInt2 + -1) / -1; i1 > 0; i1--)
+            {
+                k = m + 1;
+                for (i2 = paramInt2 - (m + 1) + 1; i2 > 0; i2--)
+                {
+                    if ((paramArrayOfDouble1[(k - 1 + (m - 1) * paramInt4 + paramInt3)] == 0.0D ? 0 : 1) != 0)
+                    {
+                        d = paramDouble * paramArrayOfDouble1[(k - 1 + (m - 1) * paramInt4 + paramInt3)];
+                        i = 1;
+                        for (i3 = paramInt1 - 1 + 1; i3 > 0; i3--)
+                        {
+                            paramArrayOfDouble2[(i - 1 + (k - 1) * paramInt6 + paramInt5)] += d * paramArrayOfDouble2[(i - 1 + (m - 1) * paramInt6 + paramInt5)];
+                            i += 1;
+                        }
+                    }
+                    k += 1;
+                }
+                d = paramDouble;
+                if (bool2) {
+                    d *= paramArrayOfDouble1[(m - 1 + (m - 1) * paramInt4 + paramInt3)];
+                }
+                if ((d == 1.0D ? 0 : 1) != 0)
+                {
+                    i = 1;
+                    for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
+                    {
+                        paramArrayOfDouble2[(i - 1 + (m - 1) * paramInt6 + paramInt5)] = (d * paramArrayOfDouble2[(i - 1 + (m - 1) * paramInt6 + paramInt5)]);
+                        i += 1;
+                    }
+                }
+                m += -1;
+            }
+        }
+    }
+
+    public void dtrtri(KBlasOrientationType paramString1, KBlasUnitType paramString2, int paramInt1, double[] paramArrayOfDouble, int paramInt2, int paramInt3, int[] paramintW)
+    {
+        boolean bool1 = false;
+        boolean bool2 = false;
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        int m = 0;
+        paramintW[0] = 0;
+        bool2 = paramString1.equals(KBlasOrientationType.UPPER);
+        bool1 = paramString2.equals(KBlasUnitType.NONUNIT);
+        if ((((!bool2)) && ((!paramString1.equals(KBlasOrientationType.LOWER))) ? 1 : 0) != 0) {
+            paramintW[0] = -1;
+        } else if ((((!bool1)) && ((!paramString2.equals(KBlasUnitType.UNIT))) ? 1 : 0) != 0) {
+            paramintW[0] = -2;
+        } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+            paramintW[0] = -3;
+        } else if ((paramInt3 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+            paramintW[0] = -5;
+        }
+        if (( paramintW[0] == 0 ? 0 : 1) != 0)
+        {
+            //Xerbla.xerbla("DTRTRI", - paramintW[0]);
+            return;
+        }
+        if ((paramInt1 != 0 ? 0 : 1) != 0) {
+            return;
+        }
+        int n;
+        if (bool1)
+        {
+            paramintW[0] = 1;
+            for (n = paramInt1 - 1 + 1; n > 0; n--)
+            {
+                if ((paramArrayOfDouble[( paramintW[0] - 1 + ( paramintW[0] - 1) * paramInt3 + paramInt2)] != 0.0D ? 0 : 1) != 0) {
+                    return;
+                }
+                paramintW[0] += 1;
+            }
+            paramintW[0] = 0;
+        }
+        k = ilaenv(1, "DTRTRI","", paramInt1, -1, -1, -1);
+        if (((k < paramInt1 ? 0 : 1) == 0 ? 0 : 1) != 0)
+        {
+            dtrti2(paramString1, paramString2, paramInt1, paramArrayOfDouble, paramInt2, paramInt3, paramintW);
+        }
+        else if (bool2)
+        {
+            i = 1;
+            for (n = (paramInt1 - 1 + k) / k; n > 0; n--)
+            {
+                j = Math.min(k, paramInt1 - i + 1);
+                dtrmm(KBlasSideType.LEFT, KBlasOrientationType.UPPER, KBlasTransposeType.NOTRANSPOSE, paramString2, i - 1, j, 1.0D, paramArrayOfDouble, paramInt2, paramInt3, paramArrayOfDouble, (i - 1) * paramInt3 + paramInt2, paramInt3);
+                dtrsm(KBlasSideType.RIGHT, KBlasOrientationType.UPPER, KBlasTransposeType.NOTRANSPOSE, paramString2, i - 1, j, -1.0D, paramArrayOfDouble, i - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble, (i - 1) * paramInt3 + paramInt2, paramInt3);
+                dtrti2(KBlasOrientationType.UPPER, paramString2, j, paramArrayOfDouble, i - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3, paramintW);
+                i += k;
+            }
+        }
+        else
+        {
+            m = (paramInt1 - 1) / k * k + 1;
+            i = m;
+            for (n = (1 - m + -k) / -k; n > 0; n--)
+            {
+                j = Math.min(k, paramInt1 - i + 1);
+                if ((i + j > paramInt1 ? 0 : 1) != 0)
+                {
+                    dtrmm(KBlasSideType.LEFT, KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, paramString2, paramInt1 - i - j + 1, j, 1.0D, paramArrayOfDouble, i + j - 1 + (i + j - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble, i + j - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3);
+                    dtrsm(KBlasSideType.RIGHT, KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, paramString2, paramInt1 - i - j + 1, j, -1.0D, paramArrayOfDouble, i - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble, i + j - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3);
+                }
+                dtrti2(KBlasOrientationType.LOWER, paramString2, j, paramArrayOfDouble, i - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3, paramintW);
+                i += -k;
+            }
+        }
+    }
+
+
+    private static void transposeSquare(KArray2D matA, KArray2D result) {
         int index = 1;
         int indexEnd = matA.columns();
         for (int i = 0; i < matA.rows();
@@ -353,7 +1166,7 @@ public class JavaBlas implements KBlas {
         }
     }
 
-    private void transposeStandard(KArray2D matA, KArray2D result) {
+    private static void transposeStandard(KArray2D matA, KArray2D result) {
         int index = 0;
         for (int i = 0; i < result.columns(); i++) {
             int index2 = i;
@@ -365,7 +1178,7 @@ public class JavaBlas implements KBlas {
         }
     }
 
-    private void transposeBlock(KArray2D matA, KArray2D result) {
+    private static void transposeBlock(KArray2D matA, KArray2D result) {
         for (int j = 0; j < matA.columns(); j += BLOCK_WIDTH) {
             int blockWidth = Math.min(BLOCK_WIDTH, matA.columns() - j);
             int indexSrc = j * matA.rows();
@@ -389,6 +1202,178 @@ public class JavaBlas implements KBlas {
         }
     }
 
+    public static void dgemv(KBlasTransposeType paramString, int paramInt1, int paramInt2, double paramDouble1, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, double[] paramArrayOfDouble2, int paramInt5, int paramInt6, double paramDouble2, double[] paramArrayOfDouble3, int paramInt7, int paramInt8)
+    {
+        double d = 0.0D;
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        int m = 0;
+        int n = 0;
+        int i1 = 0;
+        int i2 = 0;
+        int i3 = 0;
+        int i4 = 0;
+        int i5 = 0;
+        int i6 = 0;
+
+        if (paramString.equals(KBlasTransposeType.NOTRANSPOSE))
+        {
+            i5 = paramInt2;
+            i6 = paramInt1;
+        }
+        else
+        {
+            i5 = paramInt1;
+            i6 = paramInt2;
+        }
+        if ((paramInt6 <= 0 ? 0 : 1) != 0) {
+            i3 = 1;
+        } else {
+            i3 = 1 - (i5 - 1) * paramInt6;
+        }
+        if ((paramInt8 <= 0 ? 0 : 1) != 0) {
+            i4 = 1;
+        } else {
+            i4 = 1 - (i6 - 1) * paramInt8;
+        }
+        int i7;
+        if ((paramDouble2 == 1.0D ? 0 : 1) != 0) {
+            if ((paramInt8 != 1 ? 0 : 1) != 0)
+            {
+                if ((paramDouble2 != 0.0D ? 0 : 1) != 0)
+                {
+                    i = 1;
+                    for (i7 = i6 - 1 + 1; i7 > 0; i7--)
+                    {
+                        paramArrayOfDouble3[(i - 1 + paramInt7)] = 0.0D;
+                        i += 1;
+                    }
+                }
+                else
+                {
+                    i = 1;
+                    for (i7 = i6 - 1 + 1; i7 > 0; i7--)
+                    {
+                        paramArrayOfDouble3[(i - 1 + paramInt7)] = (paramDouble2 * paramArrayOfDouble3[(i - 1 + paramInt7)]);
+                        i += 1;
+                    }
+                }
+            }
+            else
+            {
+                m = i4;
+                if ((paramDouble2 != 0.0D ? 0 : 1) != 0)
+                {
+                    i = 1;
+                    for (i7 = i6 - 1 + 1; i7 > 0; i7--)
+                    {
+                        paramArrayOfDouble3[(m - 1 + paramInt7)] = 0.0D;
+                        m += paramInt8;
+                        i += 1;
+                    }
+                }
+                else
+                {
+                    i = 1;
+                    for (i7 = i6 - 1 + 1; i7 > 0; i7--)
+                    {
+                        paramArrayOfDouble3[(m - 1 + paramInt7)] = (paramDouble2 * paramArrayOfDouble3[(m - 1 + paramInt7)]);
+                        m += paramInt8;
+                        i += 1;
+                    }
+                }
+            }
+        }
+        if ((paramDouble1 != 0.0D ? 0 : 1) != 0) {
+            return;
+        }
+        int i8;
+        if (paramString.equals(KBlasTransposeType.NOTRANSPOSE))
+        {
+            i1 = i3;
+            if ((paramInt8 != 1 ? 0 : 1) != 0)
+            {
+                n = 1;
+                for (i7 = paramInt2 - 1 + 1; i7 > 0; i7--)
+                {
+                    if ((paramArrayOfDouble2[(i1 - 1 + paramInt5)] == 0.0D ? 0 : 1) != 0)
+                    {
+                        d = paramDouble1 * paramArrayOfDouble2[(i1 - 1 + paramInt5)];
+                        i = 1;
+                        for (i8 = paramInt1 - 1 + 1; i8 > 0; i8--)
+                        {
+                            paramArrayOfDouble3[(i - 1 + paramInt7)] += d * paramArrayOfDouble1[(i - 1 + (n - 1) * paramInt4 + paramInt3)];
+                            i += 1;
+                        }
+                    }
+                    i1 += paramInt6;
+                    n += 1;
+                }
+            }
+            else
+            {
+                n = 1;
+                for (i7 = paramInt2 - 1 + 1; i7 > 0; i7--)
+                {
+                    if ((paramArrayOfDouble2[(i1 - 1 + paramInt5)] == 0.0D ? 0 : 1) != 0)
+                    {
+                        d = paramDouble1 * paramArrayOfDouble2[(i1 - 1 + paramInt5)];
+                        m = i4;
+                        i = 1;
+                        for (i8 = paramInt1 - 1 + 1; i8 > 0; i8--)
+                        {
+                            paramArrayOfDouble3[(m - 1 + paramInt7)] += d * paramArrayOfDouble1[(i - 1 + (n - 1) * paramInt4 + paramInt3)];
+                            m += paramInt8;
+                            i += 1;
+                        }
+                    }
+                    i1 += paramInt6;
+                    n += 1;
+                }
+            }
+        }
+        else
+        {
+            i2 = i4;
+            if ((paramInt6 != 1 ? 0 : 1) != 0)
+            {
+                n = 1;
+                for (i7 = paramInt2 - 1 + 1; i7 > 0; i7--)
+                {
+                    d = 0.0D;
+                    i = 1;
+                    for (i8 = paramInt1 - 1 + 1; i8 > 0; i8--)
+                    {
+                        d += paramArrayOfDouble1[(i - 1 + (n - 1) * paramInt4 + paramInt3)] * paramArrayOfDouble2[(i - 1 + paramInt5)];
+                        i += 1;
+                    }
+                    paramArrayOfDouble3[(i2 - 1 + paramInt7)] += paramDouble1 * d;
+                    i2 += paramInt8;
+                    n += 1;
+                }
+            }
+            else
+            {
+                n = 1;
+                for (i7 = paramInt2 - 1 + 1; i7 > 0; i7--)
+                {
+                    d = 0.0D;
+                    k = i3;
+                    i = 1;
+                    for (i8 = paramInt1 - 1 + 1; i8 > 0; i8--)
+                    {
+                        d += paramArrayOfDouble1[(i - 1 + (n - 1) * paramInt4 + paramInt3)] * paramArrayOfDouble2[(k - 1 + paramInt5)];
+                        k += paramInt6;
+                        i += 1;
+                    }
+                    paramArrayOfDouble3[(i2 - 1 + paramInt7)] += paramDouble1 * d;
+                    i2 += paramInt8;
+                    n += 1;
+                }
+            }
+        }
+    }
 
     private static int ilaenv(int i, String dgetrf, String s, int paramInt1, int paramInt2, int i1, int i2) {
         return 50; //todo block size - reImplement later

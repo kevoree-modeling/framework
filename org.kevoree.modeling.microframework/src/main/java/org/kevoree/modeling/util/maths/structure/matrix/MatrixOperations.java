@@ -1,9 +1,12 @@
 package org.kevoree.modeling.util.maths.structure.matrix;
 
+import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
+
+import java.util.Random;
 
 public class MatrixOperations {
 
@@ -28,6 +31,14 @@ public class MatrixOperations {
         //blas.dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, 1, matA, matB, 0, matC);
         blas.dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, matC.rows(), matC.columns(), matA.columns(), 1.0, matA.data(), 0, matA.rows(), matB.data(), 0, matB.rows(), 0.0, matC.data(), 0, matC.rows());
         return matC;
+    }
+
+    public static void copyMatrix(KArray2D matA, SimpleMatrix ejmlmatA) {
+        for(int i=0;i<matA.rows();i++){
+            for(int j=0;j<matA.columns();j++){
+                ejmlmatA.setValue2D(i,j,matA.get(i,j));
+            }
+        }
     }
 
     public static KArray2D multiplyTransposeAlpha(KBlasTransposeType transA, KBlasTransposeType transB,KArray2D matA, KArray2D matB, double alpha, KBlas blas) {
@@ -66,7 +77,7 @@ public class MatrixOperations {
 
     public static void multiplyAlphaBetaResult(double alpha, KArray2D matA, KArray2D matB, double beta, KArray2D matC, KBlas blas) {
         //  blas.dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, alpha, matA, matB, beta, matC);
-        if (testDimensions(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, matA, matB, matC)) {
+        if (testDimensionsABC(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, matA, matB, matC)) {
             blas.dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, matC.rows(), matC.columns(), matA.columns(), alpha, matA.data(), 0, matA.rows(), matB.data(), 0, matB.rows(), beta, matC.data(), 0, matC.rows());
         } else {
             throw new RuntimeException("Dimensions mismatch between A,B and C");
@@ -76,7 +87,7 @@ public class MatrixOperations {
     public static void multiplyTransposeAlphaBetaResult(KBlasTransposeType transA, KBlasTransposeType transB, double alpha, KArray2D matA, KArray2D matB, double beta, KArray2D matC, KBlas blas) {
         //  blas.dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, alpha, matA, matB, beta, matC);
 
-        if (testDimensions(transA, transB, matA, matB, matC)) {
+        if (testDimensionsABC(transA, transB, matA, matB, matC)) {
             int k;
             if (transA.equals(KBlasTransposeType.NOTRANSPOSE)) {
                 k = matA.columns();
@@ -90,7 +101,7 @@ public class MatrixOperations {
         }
     }
 
-    public static boolean testDimensions(KBlasTransposeType transA, KBlasTransposeType transB, KArray2D matA, KArray2D matB, KArray2D matC) {
+    public static boolean testDimensionsABC(KBlasTransposeType transA, KBlasTransposeType transB, KArray2D matA, KArray2D matB, KArray2D matC) {
 
         if(transA.equals(KBlasTransposeType.NOTRANSPOSE)) {
             if(transB.equals(KBlasTransposeType.NOTRANSPOSE)){
@@ -130,6 +141,42 @@ public class MatrixOperations {
         }
     }
 
+
+    public static void initMatrice(KArray2D matA, boolean random){
+        Random rand = new Random();
+        int k=0;
+        for (int j = 0; j < matA.columns(); j++) {
+            for (int i = 0; i < matA.rows(); i++) {
+                if(random){
+                    matA.set(i, j, rand.nextDouble());
+                }
+                else {
+                    matA.set(i, j, k);
+                }
+                k++;
+            }
+        }
+    }
+
+    public static KArray2D invert( KArray2D mat, KBlas blas ) {
+        if(mat.rows()!=mat.columns()){
+            return null;
+        }
+
+        DenseLU alg = new DenseLU(mat.rows(),mat.columns());
+        KArray2D result = new NativeArray2D(mat.rows(),mat.columns());
+        NativeArray2D A_temp=new NativeArray2D(mat.rows(),mat.columns());
+        System.arraycopy(mat.data(),0,A_temp.data(),0,mat.columns()*mat.rows());
+
+        DenseLU dlu = new DenseLU(A_temp.rows(),A_temp.columns());
+        if (dlu.invert(A_temp,blas)){
+            result.setData(A_temp.data());
+            return result;
+        }
+        else {
+            return null;
+        }
+    }
 
     public static KArray2D createIdentity(int width) {
         KArray2D ret = new NativeArray2D(width, width);

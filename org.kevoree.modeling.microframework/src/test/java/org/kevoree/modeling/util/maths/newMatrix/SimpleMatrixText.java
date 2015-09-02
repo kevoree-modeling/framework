@@ -127,21 +127,7 @@ public class SimpleMatrixText {
         }
     }
 
-    private void initMatrice(KArray2D matA, boolean random){
-        Random rand = new Random();
-        int k=0;
-        for (int j = 0; j < matA.columns(); j++) {
-            for (int i = 0; i < matA.rows(); i++) {
-                if(random){
-                    matA.set(i, j, rand.nextDouble());
-                }
-                else {
-                    matA.set(i, j, k);
-                }
-                k++;
-            }
-        }
-    }
+
 
     @Test
     public void multiplyTest() {
@@ -161,10 +147,10 @@ public class SimpleMatrixText {
 
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
-        initMatrice(matA,rand);
+        MatrixOperations.initMatrice(matA, rand);
 
         NativeArray2D matB = new NativeArray2D(dimB[0], dimB[1]);
-        initMatrice(matB, rand);
+        MatrixOperations.initMatrice(matB, rand);
 
         int[] dimC= new int[2];
 
@@ -187,16 +173,16 @@ public class SimpleMatrixText {
 
 
         NativeArray2D matC = new NativeArray2D(dimC[0],dimC[1]);
-        initMatrice(matC, rand);
+        MatrixOperations.initMatrice(matC, rand);
         KArray2D matresult =matC.clone();
 
         SimpleMatrix ejmlmatA= new SimpleMatrix(dimA[0], dimA[1]);
         SimpleMatrix ejmlmatB= new SimpleMatrix(dimB[0], dimB[1]);
         SimpleMatrix ejmlmatC= new SimpleMatrix(dimC[0], dimC[1]);
 
-        copyMatrix(matA,ejmlmatA);
-        copyMatrix(matB, ejmlmatB);
-        copyMatrix(matC,ejmlmatC);
+        MatrixOperations.copyMatrix(matA, ejmlmatA);
+        MatrixOperations.copyMatrix(matB, ejmlmatB);
+        MatrixOperations.copyMatrix(matC, ejmlmatC);
 
         System.out.println("Init done");
 
@@ -229,11 +215,5 @@ public class SimpleMatrixText {
 
     }
 
-    private void copyMatrix(NativeArray2D matA, SimpleMatrix ejmlmatA) {
-        for(int i=0;i<matA.rows();i++){
-            for(int j=0;j<matA.columns();j++){
-                ejmlmatA.setValue2D(i,j,matA.get(i,j));
-            }
-        }
-    }
+
 }

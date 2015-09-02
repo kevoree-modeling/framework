@@ -12,6 +12,10 @@ public class DenseLU {
      */
     private KArray2D LU;
 
+    public KArray2D getLU(){
+        return LU;
+    }
+
     /**
      * Row pivotations
      */
@@ -71,6 +75,52 @@ public class DenseLU {
     }
 
 
+    public KArray2D getLower()
+    {
+        int numRows = LU.rows();
+        int numCols = LU.rows() < LU.columns() ? LU.rows() : LU.columns();
+        NativeArray2D lower = new NativeArray2D(numRows,numCols);
+
+
+        for( int i = 0; i < numCols; i++ ) {
+            lower.set(i,i,1.0);
+
+            for( int j = 0; j < i; j++ ) {
+                lower.set(i,j, LU.get(i,j));
+            }
+        }
+
+        if( numRows > numCols ) {
+            for( int i = numCols; i < numRows; i++ ) {
+                for( int j = 0; j < numCols; j++ ) {
+                    lower.set(i,j, LU.get(i,j));
+                }
+            }
+        }
+        return lower;
+    }
+
+
+    public KArray2D getUpper()
+    {
+        int numRows = LU.rows() < LU.columns() ? LU.rows() : LU.columns();
+        int numCols = LU.columns();
+
+        KArray2D upper = new NativeArray2D(numRows, numCols);
+
+
+        for( int i = 0; i < numRows; i++ ) {
+            for( int j = i; j < numCols; j++ ) {
+                upper.set(i,j, LU.get(i,j));
+            }
+        }
+
+        return upper;
+    }
+
+
+
+
     /**
      * Returns the row pivots
      */
@@ -89,17 +139,13 @@ public class DenseLU {
      * Computes <code>A\B</code>, overwriting <code>B</code>
      */
     public KArray2D solve(KArray2D B, KBlas blas) {
-        return solve(B, KBlasTransposeType.NOTRANSPOSE,blas);
+        return transsolve(B, KBlasTransposeType.NOTRANSPOSE, blas);
     }
 
-    /**
-     * Computes <code>A<sup>T</sup>\B</code>, overwriting <code>B</code>
-     */
-    public KArray2D transSolve(KArray2D B, KBlas blas) {
-        return solve(B, KBlasTransposeType.TRANSPOSE, blas);
-    }
 
-    private KArray2D solve(KArray2D B, KBlasTransposeType trans, KBlas blas) {
+
+
+    private KArray2D transsolve(KArray2D B, KBlasTransposeType trans, KBlas blas) {
         if (singular) {
          //   throw new MatrixSingularException();
         }
@@ -117,5 +163,28 @@ public class DenseLU {
         return B;
     }
 
+    public boolean invert(KArray2D A, KBlas blas) {
+        int[] info = new int[1];
+        info[0]=0;
+        blas.dgetrf(A.rows(), A.columns(), A.data(), 0,A.rows(), piv,0, info);
+
+        if (info[0] > 0)
+            singular = true;
+        else if (info[0] < 0)
+            throw new IllegalArgumentException();
+
+        int lwork = A.rows()*A.rows();
+        double[] work = new double[lwork];
+
+        blas.dgetri(A.rows(),A.data(),0,A.rows(),piv,0,work,0,lwork,info);
+
+        if(info[0]!=0){
+            return false;
+        }
+        else {
+            return true;
+        }
+
+    }
 }
 
