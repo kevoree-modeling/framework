@@ -1,7 +1,8 @@
-package org.kevoree.modeling.util.maths.newMatrix;
+package test;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.matrix.solvers.LUDecompositionAlt_D64;
@@ -22,6 +23,8 @@ public class DenseLUTest {
         int[] dimA = {r, r};
 
         KBlas java = new JavaBlas();
+        KBlas netlib = new NetlibBlas();
+
 
         NativeArray2D A=new NativeArray2D(dimA[0],dimA[1]);
         A.set(0, 0, 3);
@@ -53,7 +56,7 @@ public class DenseLUTest {
 
     @Test
     public void invertMatrix(){
-        int r=4;
+        int r=2000;
         int[] dimA = {r, r};
         boolean rand=true;
         double eps=1e-7;
@@ -61,6 +64,7 @@ public class DenseLUTest {
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
         MatrixOperations.initMatrice(matA, rand);
         JavaBlas java = new JavaBlas();
+        KBlas netlib = new NetlibBlas();
 
         SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0],dimA[1]);
         MatrixOperations.copyMatrix(matA, ejmlmatA);
@@ -68,9 +72,9 @@ public class DenseLUTest {
         long timestart,timeend;
 
         timestart=System.currentTimeMillis();
-        KArray2D res= MatrixOperations.invert(matA,java);
+        KArray2D res= MatrixOperations.invert(matA,netlib);
         timeend=System.currentTimeMillis();
-        System.out.println("java blas invert " + ((double) (timeend - timestart)) / 1000);
+        System.out.println("java netlib invert " + ((double) (timeend - timestart)) / 1000);
 
         timestart=System.currentTimeMillis();
         SimpleMatrix resEjml= ejmlmatA.invert();

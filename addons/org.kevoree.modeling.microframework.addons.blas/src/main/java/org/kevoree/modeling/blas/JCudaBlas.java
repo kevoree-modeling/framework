@@ -21,12 +21,13 @@ public class JCudaBlas implements KBlas {
     }
 
     @Override
-    public void dscal(double alpha, KArray2D matA) {
+    public void dscale(double alpha, KArray2D matA) {
 
     }
 
-    @Override
-    public void dgemm(KBlasTransposeType transa, KBlasTransposeType transb, double alpha, KArray2D matA, KArray2D matB, double beta, KArray2D matC) {
+
+
+    public void dgemm2(KBlasTransposeType transa, KBlasTransposeType transb, double alpha, KArray2D matA, KArray2D matB, double beta, KArray2D matC) {
         // Allocate memory on the device
         Pointer d_A = new Pointer();
         Pointer d_B = new Pointer();
@@ -50,6 +51,26 @@ public class JCudaBlas implements KBlas {
         JCublas.cublasFree(d_A);
         JCublas.cublasFree(d_B);
         JCublas.cublasFree(d_C);
+    }
+
+    @Override
+    public void dgemm(KBlasTransposeType paramString1, KBlasTransposeType paramString2, int paramInt1, int paramInt2, int paramInt3, double paramDouble1, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, double paramDouble2, double[] paramArrayOfDouble3, int paramInt8, int paramInt9) {
+
+    }
+
+    @Override
+    public void dgetrs(KBlasTransposeType paramString, int paramInt1, int paramInt2, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, int[] paramArrayOfInt, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, int[] paramintW) {
+
+    }
+
+    @Override
+    public void dgetri(int paramInt1, double[] paramArrayOfDouble1, int paramInt2, int paramInt3, int[] paramArrayOfInt, int paramInt4, double[] paramArrayOfDouble2, int paramInt5, int paramInt6, int[] paramintW) {
+
+    }
+
+    @Override
+    public void dgetrf(int paramInt1, int paramInt2, double[] paramArrayOfDouble, int paramInt3, int paramInt4, int[] paramArrayOfInt, int paramInt5, int[] paramintW) {
+
     }
 
     @Override
