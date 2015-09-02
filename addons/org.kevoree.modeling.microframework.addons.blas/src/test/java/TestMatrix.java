@@ -1,7 +1,6 @@
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kevoree.modeling.blas.JCudaBlas;
 import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
@@ -81,17 +80,17 @@ public class TestMatrix {
         System.out.println("For loop " + ((double) (timeend - timestart)) / 1000);
 
         timestart=System.currentTimeMillis();
-        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matJava, javaBlas);
+        MatrixOperations.multiplyAlphaBetaResult(alpha, matA, matB, beta, matJava, javaBlas);
         timeend=System.currentTimeMillis();
         System.out.println("Java blas " + ((double) (timeend - timestart)) / 1000);
 
         timestart=System.currentTimeMillis();
-        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matNetlib, netlibBlas);
+        MatrixOperations.multiplyAlphaBetaResult(alpha, matA, matB, beta, matNetlib, netlibBlas);
         timeend=System.currentTimeMillis();
         System.out.println("Netlib Blas " + ((double) (timeend - timestart)) / 1000);
 
         timestart=System.currentTimeMillis();
-    //    MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matCuda, jCudaBlas);
+    //    MatrixOperations.multiplyAlphaBetaResult(alpha, matA, matB, beta, matCuda, jCudaBlas);
         timeend=System.currentTimeMillis();
         System.out.println("Cuda Blas " + ((double) (timeend - timestart)) / 1000);
 

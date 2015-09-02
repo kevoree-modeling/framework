@@ -6,6 +6,7 @@ import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 import org.kevoree.modeling.util.maths.matrix.TransposeAlgs;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
+import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
@@ -94,12 +95,31 @@ public class SimpleMatrixText {
     }
 
 
-    private void traditional(KArray2D matA, KArray2D matB, KArray2D matC,double alpha, double beta) {
+    private void traditional(KBlasTransposeType transA, KBlasTransposeType transB, KArray2D matA, KArray2D matB, KArray2D matC,double alpha, double beta) {
+       int dim=0;
+        if(transA.equals(KBlasTransposeType.NOTRANSPOSE)){
+            dim=matA.columns();
+        }
+        else {
+            dim=matA.rows();
+        }
+
         for (int i = 0; i < matC.rows(); i++) {
             for (int j = 0; j < matC.columns(); j++) {
                 matC.set(i,j,beta*matC.get(i,j));
-                for (int k = 0; k < matA.columns(); k++) {
-                    matC.add(i, j, alpha*matA.get(i, k) * matB.get(k, j));
+                for (int k = 0; k < dim; k++) {
+                    if(transA.equals(KBlasTransposeType.NOTRANSPOSE)&& transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+                        matC.add(i, j, alpha * matA.get(i, k) * matB.get(k, j));
+                    }
+                    else if( transA.equals(KBlasTransposeType.TRANSPOSE) && transB.equals(KBlasTransposeType.NOTRANSPOSE)){
+                        matC.add(i, j, alpha * matA.get(k,i) * matB.get(k, j));
+                    }
+                    else if ( transA.equals(KBlasTransposeType.NOTRANSPOSE) && transB.equals(KBlasTransposeType.TRANSPOSE)){
+                        matC.add(i, j, alpha * matA.get(i, k) * matB.get(j, k));
+                    }
+                    else{
+                        matC.add(i, j, alpha * matA.get(k, i) * matB.get(j, k));
+                    }
                 }
             }
         }
@@ -126,9 +146,11 @@ public class SimpleMatrixText {
 
         KBlas java = new JavaBlas();
 
-        int r=500;
-        int[] dimA = {r, r+5};
-        int[] dimB = {r+5, r};
+        int r=800;
+        int[] dimA = {r, r+3};
+        int[] dimB = {r, r+3};
+        KBlasTransposeType transA=KBlasTransposeType.NOTRANSPOSE;
+        KBlasTransposeType transB=KBlasTransposeType.TRANSPOSE;
         boolean rand=true;
         double alpha=0.7;
         double beta =0.3;
@@ -140,8 +162,27 @@ public class SimpleMatrixText {
         NativeArray2D matB = new NativeArray2D(dimB[0], dimB[1]);
         initMatrice(matB, rand);
 
+        int[] dimC= new int[2];
 
-        NativeArray2D matC = new NativeArray2D(matA.rows(), matB.columns());
+        if(transA.equals(KBlasTransposeType.NOTRANSPOSE)&& transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+            dimC[0]=dimA[0];
+            dimC[1]=dimB[1];
+        }
+        else if( transA.equals(KBlasTransposeType.TRANSPOSE) && transB.equals(KBlasTransposeType.NOTRANSPOSE)){
+            dimC[0]=dimA[1];
+            dimC[1]=dimB[1];
+        }
+        else if ( transA.equals(KBlasTransposeType.NOTRANSPOSE) && transB.equals(KBlasTransposeType.TRANSPOSE)){
+            dimC[0]=dimA[0];
+            dimC[1]=dimB[0];
+        }
+        else{
+            dimC[0]=dimA[1];
+            dimC[1]=dimB[0];
+        }
+
+
+        NativeArray2D matC = new NativeArray2D(dimC[0],dimC[1]);
         initMatrice(matC, rand);
         KArray2D matresult =matC.clone();
 
@@ -149,12 +190,12 @@ public class SimpleMatrixText {
         long timestart, timeend;
 
         timestart=System.currentTimeMillis();
-        traditional(matA, matB, matC, alpha, beta);
+        traditional(transA,transB,matA, matB, matC, alpha, beta);
         timeend=System.currentTimeMillis();
         System.out.println("For loop " + ((double) (timeend - timestart)) / 1000);
 
         timestart=System.currentTimeMillis();
-        MatrixOperations.multiplyAlphaBeta(alpha, matA, matB, beta, matresult, java);
+        MatrixOperations.multiplyTransposeAlphaBetaResult(transA, transB, alpha, matA, matB, beta, matresult, java);
         timeend=System.currentTimeMillis();
         System.out.println("Java blas " + ((double) (timeend - timestart)) / 1000);
 
