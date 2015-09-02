@@ -17,39 +17,45 @@ import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
  * Created by assaad on 02/09/15.
  */
 public class DenseLUTest {
-    //@Test
+    @Test
     public void testLUFactorize(){
-        int r=2;
+        int r=2000;
         int[] dimA = {r, r};
 
         KBlas java = new JavaBlas();
         KBlas netlib = new NetlibBlas();
 
+        boolean rand=true;
+        double eps=1e-7;
 
-        NativeArray2D A=new NativeArray2D(dimA[0],dimA[1]);
-        A.set(0, 0, 3);
-        A.set(0, 1, 1);
-        A.set(1, 0, -6);
-        A.set(1, 1, -4);
+        NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
+        MatrixOperations.initMatrice(matA, rand);
+
+        DenseMatrix64F ejmlmatA = new DenseMatrix64F(dimA[0],dimA[1]);
+        MatrixOperations.copyMatrixDense(matA, ejmlmatA);
+
+
 
         DenseLU dlu = new DenseLU(dimA[0],dimA[1]);
-        dlu.factor(A, java);
 
+        System.out.println("Init done");
+
+        long timestart,timeend;
+
+        timestart=System.currentTimeMillis();
+        dlu.factor(matA, netlib);
         KArray2D res= dlu.getLU();
+        timeend=System.currentTimeMillis();
+        System.out.println("Netlib Factorizarion " + ((double) (timeend - timestart)) / 1000+" s");
 
-        res=dlu.getLower();
-        res=dlu.getUpper();
-        System.out.println("done");
-
-        DenseMatrix64F ej=new DenseMatrix64F(dimA[0],dimA[1]);
-        ej.set(0,0,3);
-        ej.set(0,1,1);
-        ej.set(1, 0, -6);
-        ej.set(1, 1, -4);
 
         LUDecompositionAlt_D64 ludec = new LUDecompositionAlt_D64();
-        ludec.decompose(ej);
+        timestart=System.currentTimeMillis();
+        ludec.decompose(ejmlmatA);
         DenseMatrix64F luejml = ludec.getLU();
+        timeend=System.currentTimeMillis();
+        System.out.println("EJML Factorizarion " + ((double) (timeend - timestart)) / 1000+" s");
+
 
         System.out.println("done");
     }
@@ -70,16 +76,17 @@ public class DenseLUTest {
         MatrixOperations.copyMatrix(matA, ejmlmatA);
 
         long timestart,timeend;
+        System.out.println("Init done");
 
         timestart=System.currentTimeMillis();
         KArray2D res= MatrixOperations.invert(matA,netlib);
         timeend=System.currentTimeMillis();
-        System.out.println("java netlib invert " + ((double) (timeend - timestart)) / 1000);
+        System.out.println("Netlib invert " + ((double) (timeend - timestart)) / 1000+" s");
 
         timestart=System.currentTimeMillis();
         SimpleMatrix resEjml= ejmlmatA.invert();
         timeend=System.currentTimeMillis();
-        System.out.println("java ejml invert " + ((double) (timeend - timestart)) / 1000);
+        System.out.println("Ejml invert " + ((double) (timeend - timestart)) / 1000+" s");
 
         assert res != null;
         for (int i = 0; i < matA.rows(); i++) {

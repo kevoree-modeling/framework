@@ -1,5 +1,6 @@
 package org.kevoree.modeling.util.maths.structure.matrix;
 
+import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
@@ -187,4 +188,11 @@ public class MatrixOperations {
         return ret;
     }
 
+    public static void copyMatrixDense(NativeArray2D matA, DenseMatrix64F ejmlmatA) {
+        for(int i=0;i<matA.rows();i++){
+            for(int j=0;j<matA.columns();j++){
+                ejmlmatA.set(i,j,matA.get(i,j));
+            }
+        }
+    }
 }
