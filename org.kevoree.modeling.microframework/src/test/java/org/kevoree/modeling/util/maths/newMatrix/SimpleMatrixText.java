@@ -2,7 +2,9 @@ package org.kevoree.modeling.util.maths.newMatrix;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
+import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.matrix.TransposeAlgs;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
@@ -146,15 +148,17 @@ public class SimpleMatrixText {
 
         KBlas java = new JavaBlas();
 
-        int r=800;
+        int r=100;
         int[] dimA = {r, r+3};
-        int[] dimB = {r, r+3};
+        int[] dimB = {r+3, r+5};
         KBlasTransposeType transA=KBlasTransposeType.NOTRANSPOSE;
-        KBlasTransposeType transB=KBlasTransposeType.TRANSPOSE;
+        KBlasTransposeType transB=KBlasTransposeType.NOTRANSPOSE;
         boolean rand=true;
-        double alpha=0.7;
-        double beta =0.3;
+        double alpha=0.8;
+        double beta =0.2;
         double eps=1e-7;
+
+
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
         initMatrice(matA,rand);
@@ -186,11 +190,20 @@ public class SimpleMatrixText {
         initMatrice(matC, rand);
         KArray2D matresult =matC.clone();
 
+        SimpleMatrix ejmlmatA= new SimpleMatrix(dimA[0], dimA[1]);
+        SimpleMatrix ejmlmatB= new SimpleMatrix(dimB[0], dimB[1]);
+        SimpleMatrix ejmlmatC= new SimpleMatrix(dimC[0], dimC[1]);
+
+        copyMatrix(matA,ejmlmatA);
+        copyMatrix(matB, ejmlmatB);
+        copyMatrix(matC,ejmlmatC);
+
+        System.out.println("Init done");
 
         long timestart, timeend;
 
         timestart=System.currentTimeMillis();
-        traditional(transA,transB,matA, matB, matC, alpha, beta);
+        traditional(transA, transB, matA, matB, matC, alpha, beta);
         timeend=System.currentTimeMillis();
         System.out.println("For loop " + ((double) (timeend - timestart)) / 1000);
 
@@ -199,12 +212,28 @@ public class SimpleMatrixText {
         timeend=System.currentTimeMillis();
         System.out.println("Java blas " + ((double) (timeend - timestart)) / 1000);
 
+
+        timestart=System.currentTimeMillis();
+        CommonOps.multAlphaBeta(alpha, ejmlmatA.getMatrix(), ejmlmatB.getMatrix(), ejmlmatC.getMatrix(), beta);
+        timeend=System.currentTimeMillis();
+        System.out.println("EJML " + ((double) (timeend - timestart)) / 1000);
+
+
         for (int i = 0; i < matC.rows(); i++) {
             for (int j = 0; j < matC.columns(); j++) {
                 Assert.assertEquals(matresult.get(i, j), matC.get(i, j), eps);
+                Assert.assertEquals(ejmlmatC.getValue2D(i, j), matC.get(i, j), eps);
             }
         }
 
 
+    }
+
+    private void copyMatrix(NativeArray2D matA, SimpleMatrix ejmlmatA) {
+        for(int i=0;i<matA.rows();i++){
+            for(int j=0;j<matA.columns();j++){
+                ejmlmatA.setValue2D(i,j,matA.get(i,j));
+            }
+        }
     }
 }

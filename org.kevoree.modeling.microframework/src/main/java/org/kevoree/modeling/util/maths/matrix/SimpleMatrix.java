@@ -339,6 +339,7 @@ public class SimpleMatrix{
     }
 */
 
+
     public SimpleMatrix transpose() {
         SimpleMatrix ret = createMatrix(mat.numCols, mat.numRows);
         CommonOps.transposeMatrix(mat, ret.getMatrix());

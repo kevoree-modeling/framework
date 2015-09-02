@@ -42,16 +42,31 @@ public class CommonOps {
         }
     }
 
-    /*
-    public static void multalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
+
+    public static void multAddalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
         if( b.numCols >= MULT_COLUMN_SWITCH ) {
-            MatrixMatrixMult.mult_reorderalpha(alpha, a, b, c);
+            MatrixMatrixMult.multAdd_reorderalpha(alpha, a, b, c);
         } else {
-            MatrixMatrixMult.mult_smallalpha(alpha, a, b, c);
+            MatrixMatrixMult.multAdd_smallalpha(alpha, a, b, c);
         }
     }
-*/
+
+
+
+
+
+    public static void multAlphaBetaTransA( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c, double beta )
+    {
+        // TODO add a matrix vectory multiply here
+        c.scale(beta);
+        if( a.numCols >= MULT_COLUMN_SWITCH ||
+                b.numCols >= MULT_COLUMN_SWITCH ) {
+            MatrixMatrixMult.multAlphaTransA_reorder(alpha, a, b, c);
+        } else {
+            MatrixMatrixMult.multAlphaTransA_small(alpha, a, b, c);
+        }
+    }
 
     public static void multTransA( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -80,6 +95,8 @@ public class CommonOps {
         }
     }
 */
+
+
 
     public static void multTransB( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
@@ -334,7 +351,7 @@ public class CommonOps {
 */
 
     public static double trace( DenseMatrix64F a ) {
-        int N = Math.min(a.numRows,a.numCols);
+        int N = Math.min(a.numRows, a.numCols);
         double sum = 0;
         int index = 0;
         for( int i = 0; i < N; i++ ) {
@@ -1180,5 +1197,10 @@ public class CommonOps {
         int h = srcY1-srcY0;
             extractImpl(src,srcY0,srcX0,dst,dstY0,dstX0, h, w);
 
+    }
+
+    public static void multAlphaBeta(double alpha, DenseMatrix64F matrix, DenseMatrix64F matrix1, DenseMatrix64F matrix2, double beta) {
+        matrix2.scale(beta);
+        multAddalpha(alpha,matrix,matrix1,matrix2);
     }
 }

@@ -302,6 +302,126 @@ public class MatrixMatrixMult {
         }
     }
 
+
+    public static void multAlphaTransA_reorder( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
+    {
+        if( a.numCols == 0 || a.numRows == 0 ) {
+            CommonOps.fill(c,0);
+            return;
+        }
+        double valA;
+
+        for( int i = 0; i < a.numCols; i++ ) {
+            int indexC_start = i*c.numCols;
+
+            // first assign R
+            valA = alpha*a.getValueAtIndex(i);
+            int indexB = 0;
+            int end = indexB+b.numCols;
+            int indexC = indexC_start;
+            while( indexB<end ) {
+                c.plus(indexC++, valA * b.getValueAtIndex(indexB++));
+            }
+            // now increment it
+            for( int k = 1; k < a.numRows; k++ ) {
+                valA = alpha*a.get(k,i);
+                end = indexB+b.numCols;
+                indexC = indexC_start;
+                // this is the loop for j
+                while( indexB<end ) {
+                    c.plus( indexC++ , valA*b.getValueAtIndex(indexB++));
+                }
+            }
+        }
+    }
+
+
+    public static void multAlphaTransA_small( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
+    {
+
+        int cIndex = 0;
+
+        for( int i = 0; i < a.numCols; i++ ) {
+            for( int j = 0; j < b.numCols; j++ ) {
+                int indexA = i;
+                int indexB = j;
+                int end = indexB + b.numRows*b.numCols;
+
+                double total = 0;
+
+                // loop for k
+                for(; indexB < end; indexB += b.numCols ) {
+                    total += a.getValueAtIndex(indexA) * b.getValueAtIndex(indexB);
+                    indexA += a.numCols;
+                }
+
+                c.plus(cIndex++, alpha * total);
+            }
+        }
+    }
+
+    public static void multAdd_reorderalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
+    {
+        if( a.numCols == 0 || a.numRows == 0 ) {
+            return;
+        }
+        double valA;
+        int indexCbase= 0;
+        int endOfKLoop = b.numRows*b.numCols;
+
+        for( int i = 0; i < a.numRows; i++ ) {
+            int indexA = i*a.numCols;
+
+            // need to assign c.data to a value initially
+            int indexB = 0;
+            int indexC = indexCbase;
+            int end = indexB + b.numCols;
+
+            valA = alpha*a.getValueAtIndex(indexA++);
+
+            while( indexB < end ) {
+                c.plus(indexC++ , valA*b.getValueAtIndex(indexB++));
+            }
+
+            // now add to it
+            while( indexB != endOfKLoop ) { // k loop
+                indexC = indexCbase;
+                end = indexB + b.numCols;
+
+                valA = alpha*a.getValueAtIndex(indexA++);
+
+                while( indexB < end ) { // j loop
+                    c.plus(indexC++ , valA*b.getValueAtIndex(indexB++));
+                }
+            }
+            indexCbase += c.numCols;
+        }
+    }
+
+    public static void multAdd_smallalpha( double alpha , DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
+    {
+        int aIndexStart = 0;
+        int cIndex = 0;
+
+        for( int i = 0; i < a.numRows; i++ ) {
+            for( int j = 0; j < b.numCols; j++ ) {
+                double total = 0;
+
+                int indexA = aIndexStart;
+                int indexB = j;
+                int end = indexA + b.numRows;
+                while( indexA < end ) {
+                    total += a.getValueAtIndex(indexA++) * b.getValueAtIndex(indexB);
+                    indexB += b.numCols;
+                }
+
+                c.plus( cIndex++ , alpha*total );
+            }
+            aIndexStart += a.numCols;
+        }
+    }
+
+
     /*
     public static void multAdd_reorder( DenseMatrix64F a , DenseMatrix64F b , DenseMatrix64F c )
     {
