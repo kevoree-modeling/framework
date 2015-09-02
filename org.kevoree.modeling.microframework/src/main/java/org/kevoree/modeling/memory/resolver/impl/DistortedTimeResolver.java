@@ -477,11 +477,11 @@ public class DistortedTimeResolver implements KResolver {
                 } while (!previousResolution.compareAndSet(previous, current));
                 if (diff) {
                     KObjectChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
-                    currentEntry.addDependency(universe, time, uuid);
-                    //addition mark, will be unmarked when currentEntry will be removed
-                    _spaceManager.markMemoryElement(clonedChunk);
-                    _spaceManager.unmarkMemoryElement(currentEntry);
-
+                    if (currentEntry.counter() > 1) { //test if we are alone on this chunk or not
+                        //double marking strategy
+                        currentEntry.addDependency(universe, time, uuid);
+                        _spaceManager.markMemoryElement(clonedChunk);
+                    }
                     if (!needUniverseCopy) {
                         timeTree.insert(time);
                     } else {
@@ -490,7 +490,10 @@ public class DistortedTimeResolver implements KResolver {
                         _spaceManager.unmarkMemoryElement(timeTree);
                         objectUniverseTree.put(universe, time);
                     }
+                    //double unmarking, because, we should not use anymore this object
                     _spaceManager.unmarkMemoryElement(currentEntry);
+                    _spaceManager.unmarkMemoryElement(currentEntry);
+                    //free the rest of used object
                     _spaceManager.unmarkMemoryElement(timeTree);
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
                     _spaceManager.unmarkMemoryElement(objectUniverseTree);
