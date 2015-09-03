@@ -177,7 +177,9 @@ public class HeapChunkSpace implements KChunkSpace {
                 nextState.elementK3[((nextValueIndex * 3) + 2)] = p_obj;
                 nextState.values[nextValueIndex] = payload;
 
+                //TODO sync risk here
                 nextState.elementNext[nextValueIndex] = nextState.elementHash.getAndSet(index, nextValueIndex);
+
                 nextState._elementCount.incrementAndGet();
                 result = payload;
             } else {
