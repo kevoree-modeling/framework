@@ -27,6 +27,12 @@ public class LUDecompositionAlt_D64{
         vv = new double[ maxWidth ];
         indx = new int[ maxWidth ];
         pivot = new int[ maxWidth ];
+
+        for(int i=0;i<maxWidth;i++){
+            vv[i]=0;
+            indx[i]=0;
+            pivot[i]=0;
+        }
     }
 
     public DenseMatrix64F getLU() {
@@ -200,12 +206,15 @@ public class LUDecompositionAlt_D64{
                 int rowP = p*n;
                 int rowJ = j*n;
                 int endP = rowP+n;
-                for (;rowP < endP; rowP++,rowJ++) {
+                for (rowP = p*n; rowP < endP; rowP++) {
                     double t = dataLU[rowP];
                     dataLU[rowP] = dataLU[rowJ];
                     dataLU[rowJ] = t;
+                    rowJ++;
                 }
-                int k = pivot[p]; pivot[p] = pivot[j]; pivot[j] = k;
+                int k = pivot[p];
+                pivot[p] = pivot[j];
+                pivot[j] = k;
                 pivsign = -pivsign;
             }
             indx[j] = p;
@@ -219,8 +228,8 @@ public class LUDecompositionAlt_D64{
                     }
                 }
             }
-        }
 
+        }
         return true;
     }
 }

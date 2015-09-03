@@ -12,6 +12,9 @@ public class DenseMatrix64F {
         data = new double[numRows * numCols];
         this.numRows = numRows;
         this.numCols = numCols;
+        for(int i=0;i<numCols*numRows;i++){
+            data[i]=0;
+        }
     }
 
     public DenseMatrix64F constructorDenseMatrix(DenseMatrix64F orig) {

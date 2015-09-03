@@ -16,8 +16,8 @@ import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 public class MatrixInvertTest {
     @Test
     public void invertMatrix() {
-        int r = 2000;
-        int times=10;
+        int r = 100;
+        int times=2;
         int[] dimA = {r, r};
         boolean rand = true;
         double eps=1e-7;

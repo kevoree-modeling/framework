@@ -67,7 +67,7 @@ public class DenseLU {
         if (info[0] > 0)
             singular = true;
         else if (info[0] < 0)
-            throw new IllegalArgumentException();
+            throw new RuntimeException();
 
         LU.setData(A.data());
 
@@ -150,7 +150,7 @@ public class DenseLU {
          //   throw new MatrixSingularException();
         }
         if (B.rows() != LU.rows())
-            throw new IllegalArgumentException("B.numRows() != LU.numRows()");
+            throw new RuntimeException("B.numRows() != LU.numRows()");
 
         int[] info = new int[1];
         blas.dgetrs(trans, LU.rows(),
@@ -158,7 +158,7 @@ public class DenseLU {
                 B.data(), 0,LU.rows(), info);
 
         if (info[0] < 0)
-            throw new IllegalArgumentException();
+            throw new RuntimeException();
 
         return B;
     }
@@ -171,7 +171,7 @@ public class DenseLU {
         if (info[0] > 0)
             singular = true;
         else if (info[0] < 0)
-            throw new IllegalArgumentException();
+            throw new RuntimeException();
 
         int lwork = A.rows()*A.rows();
         double[] work = new double[lwork];

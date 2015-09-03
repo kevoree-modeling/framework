@@ -31,11 +31,11 @@ public class DenseLUTest {
 
         KArray2D res= dlu.getLU();
 
-        res=dlu.getLower();
-        res=dlu.getUpper();
+       // res=dlu.getLower();
+      //  res=dlu.getUpper();
        // System.out.println("done");
 
-        DenseMatrix64F ej=new DenseMatrix64F(dimA[0],dimA[1]);
+  /*      DenseMatrix64F ej=new DenseMatrix64F(dimA[0],dimA[1]);
         ej.set(0,0,3);
         ej.set(0,1,1);
         ej.set(1, 0, -6);
@@ -43,7 +43,7 @@ public class DenseLUTest {
 
         LUDecompositionAlt_D64 ludec = new LUDecompositionAlt_D64();
         ludec.decompose(ej);
-        DenseMatrix64F luejml = ludec.getLU();
+        DenseMatrix64F luejml = ludec.getLU();*/
 
       //  System.out.println("done");
         //todo add assert here

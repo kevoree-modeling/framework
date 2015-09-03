@@ -49,7 +49,7 @@ public class TestMatrix {
         KBlas netlibBlas = new NetlibBlas();
    //     KBlas jCudaBlas = new JCudaBlas();
 
-        int r = 512*2;
+        int r = 100;
         int[] dimA = {r, r + 1};
         int[] dimB = {r + 1, r};
         boolean rand = true;
@@ -90,10 +90,10 @@ public class TestMatrix {
         timeend=System.currentTimeMillis();
         System.out.println("Netlib Blas " + ((double) (timeend - timestart)) / 1000);
 
-        timestart=System.currentTimeMillis();
+       // timestart=System.currentTimeMillis();
     //    MatrixOperations.multiplyAlphaBetaResult(alpha, matA, matB, beta, matCuda, jCudaBlas);
-        timeend=System.currentTimeMillis();
-        System.out.println("Cuda Blas " + ((double) (timeend - timestart)) / 1000);
+    //    timeend=System.currentTimeMillis();
+     //   System.out.println("Cuda Blas " + ((double) (timeend - timestart)) / 1000);
 
 
 

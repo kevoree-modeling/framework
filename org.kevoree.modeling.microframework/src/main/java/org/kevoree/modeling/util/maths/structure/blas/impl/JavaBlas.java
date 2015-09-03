@@ -1,5 +1,6 @@
 package org.kevoree.modeling.util.maths.structure.blas.impl;
 
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.*;
 
@@ -1644,7 +1645,7 @@ public class JavaBlas implements KBlas {
         if (((paramInt2 != 0 ? 0 : 1) == 0 ? 0 : 1) != 0) {
             return;
         }
-        d =  Double.MIN_VALUE; //dlamch("S"); //toDo implement later
+        d = PrimitiveHelper.DOUBLE_MIN_VALUE(); //dlamch("S"); //toDo implement later
         j = 1;
         for (int m = Math.min(paramInt1, paramInt2) ; m > 0; m--) {
             k = j - 1 + idamax(paramInt1 - j + 1, paramArrayOfDouble, j - 1 + (j - 1) * paramInt4 + paramInt3, 1);
@@ -1652,7 +1653,7 @@ public class JavaBlas implements KBlas {
             if ((paramArrayOfDouble[(k - 1 + (j - 1) * paramInt4 + paramInt3)] !=0.0D))
             {
                 if ((k == j ? 0 : 1) != 0) {
-                    dswap(paramInt2, paramArrayOfDouble, j - 1 + (1 - 1) * paramInt4 + paramInt3, paramInt4, paramArrayOfDouble, k - 1 + (1 - 1) * paramInt4 + paramInt3, paramInt4);
+                    dswap(paramInt2, paramArrayOfDouble, j - 1 + paramInt3, paramInt4, paramArrayOfDouble, k - 1 + paramInt3, paramInt4);
                 }
                 if ((j >= paramInt1 ? 0 : 1) != 0) {
                     if ((Math.abs(paramArrayOfDouble[(j - 1 + (j - 1) * paramInt4 + paramInt3)]) < d ? 0 : 1) != 0)

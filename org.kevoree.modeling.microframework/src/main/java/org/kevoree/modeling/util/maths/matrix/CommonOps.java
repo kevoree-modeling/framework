@@ -462,8 +462,9 @@ public class CommonOps {
         if (solver.modifiesA())
             mat = mat.copy();
 
-        if (!solver.setA(mat))
+        if (!solver.setA(mat)) {
             return false;
+        }
         solver.invert(result);
         return true;
     }

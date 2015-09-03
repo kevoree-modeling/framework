@@ -30,6 +30,7 @@ public class LinearSolverLu_D64 {
     public boolean setA(DenseMatrix64F A) {
         _setA(A);
         return decomp.decompose(A);
+
     }
 
 
@@ -43,11 +44,21 @@ public class LinearSolverLu_D64 {
 
         for( int j = 0; j < n; j++ ) {
             // don't need to change inv into an identity matrix before hand
-            for( int i = 0; i < n; i++ ) vv[i] = i == j ? 1 : 0;
+            for( int i = 0; i < n; i++ ) {
+                if(i==j){
+                    vv[i]=1;
+                }
+                else {
+                    vv[i]=0;
+                }
+            }
             decomp._solveVectorInternal(vv);
 //            for( int i = 0; i < n; i++ ) dataInv[i* n +j] = vv[i];
             int index = j;
-            for( int i = 0; i < n; i++ , index += n) dataInv[ index ] = vv[i];
+            for( int i = 0; i < n; i++) {
+                dataInv[ index ] = vv[i];
+                index += n;
+            }
         }
     }
 

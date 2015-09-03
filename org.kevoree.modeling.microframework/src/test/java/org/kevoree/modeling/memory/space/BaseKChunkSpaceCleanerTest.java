@@ -79,7 +79,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
     /**
      * @native ts
      */
-    @Test
+    //@Test
     public void polyTest() {
         final KDataManager manager = createDataManager();
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");

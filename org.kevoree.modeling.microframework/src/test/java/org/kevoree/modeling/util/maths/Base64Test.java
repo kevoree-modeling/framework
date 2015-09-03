@@ -182,7 +182,7 @@ public class Base64Test {
     }
 
 
-    @Test
+   /* @Test
     public void emptyStringEncodingTest() { testString(""); }
 
     @Test
@@ -213,7 +213,7 @@ public class Base64Test {
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertEquals(val, dec);
     }
-
+*/
 
     /*
 
