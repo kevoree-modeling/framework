@@ -2,7 +2,7 @@ package org.kevoree.modeling.memory.chunk;
 
 public interface KLongTree extends KTree {
 
-    void insert(long key);
+    void insertKey(long key);
 
     long previousOrEqual(long key);
 

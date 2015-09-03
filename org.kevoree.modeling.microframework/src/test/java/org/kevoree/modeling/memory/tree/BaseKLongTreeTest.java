@@ -18,7 +18,7 @@ public abstract class BaseKLongTreeTest {
 
         //long start = System.currentTimeMillis();
         for (long i = 0; i <= 100000; i++) {
-            tree.insert(i);
+            tree.insertKey(i);
         }
         //long end = System.currentTimeMillis();
         //System.out.println(end - start + " ms");
@@ -34,7 +34,7 @@ public abstract class BaseKLongTreeTest {
         KLongTree tree = createKLongTree();
         tree.init(null, null, -1);
         for (long i = 0; i <= 2; i++) {
-            tree.insert(i);
+            tree.insertKey(i);
         }
 
         String saved0 = tree.serialize(null);
@@ -60,9 +60,9 @@ public abstract class BaseKLongTreeTest {
             tree.init(null, null, -1);
             for (long i = MIN; i <= j; i++) {
                 if ((i % 3) == 0L) {
-                    tree.insert(i);
+                    tree.insertKey(i);
                 } else {
-                    tree.insert(i);
+                    tree.insertKey(i);
                 }
             }
         }
@@ -176,12 +176,12 @@ public abstract class BaseKLongTreeTest {
         tree.init(null, null, -1);
 
         for (long i = 0; i <= 6; i++) {
-            tree.insert(i);
+            tree.insertKey(i);
         }
-        tree.insert(8L);
-        tree.insert(10L);
-        tree.insert(11L);
-        tree.insert(13L);
+        tree.insertKey(8L);
+        tree.insertKey(10L);
+        tree.insertKey(11L);
+        tree.insertKey(13L);
         //printTree(tree.root);
         Assert.assertEquals(tree.previousOrEqual(-1), KConfig.NULL_LONG);
         Assert.assertEquals(tree.previousOrEqual(0), 0L);
@@ -223,14 +223,14 @@ public abstract class BaseKLongTreeTest {
         tree.init(null, null, -1);
 
         for (long i = 0; i <= 6; i++) {
-            tree.insert(i);
+            tree.insertKey(i);
         }
         Assert.assertTrue(tree.previousOrEqual(-1) == KConfig.NULL_LONG);
         Assert.assertTrue(tree.previousOrEqual(0) == 0l);
         Assert.assertTrue(tree.previousOrEqual(1) == 1l);
         Assert.assertTrue(tree.previousOrEqual(0) == 0l);
 
-        tree.insert(7);
+        tree.insertKey(7);
         Assert.assertTrue(tree.previousOrEqual(7) == 7l);
         Assert.assertTrue(tree.previousOrEqual(7) == 7l);
         Assert.assertTrue(tree.previousOrEqual(8) == 7l);
@@ -247,7 +247,7 @@ public abstract class BaseKLongTreeTest {
         tree.init(null, null, -1);
 
         for (int i = 0; i < RANGE_TEST_SIZE; i++) {
-            tree.insert(i);
+            tree.insertKey(i);
         }
 
         final MutableInteger integer = new MutableInteger();

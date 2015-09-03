@@ -1,8 +1,6 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.memory.KChunk;
-import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KLongTree;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
@@ -22,7 +20,7 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
         }
     }
 
-    public void insert(long p_key) {
+    public void insertKey(long p_key) {
         internal_insert(p_key, p_key);
     }
 

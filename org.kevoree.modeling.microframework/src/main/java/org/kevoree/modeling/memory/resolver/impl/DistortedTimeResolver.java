@@ -488,10 +488,10 @@ public class DistortedTimeResolver implements KResolver {
 */
 
                     if (!needUniverseCopy) {
-                        timeTree.insert(time);
+                        timeTree.insertKey(time);
                     } else {
                         KLongTree newTemporalTree = (KLongTree) _spaceManager.createAndMark(universe, KConfig.NULL_LONG, uuid, KChunkTypes.LONG_TREE);
-                        newTemporalTree.insert(time);
+                        newTemporalTree.insertKey(time);
                         _spaceManager.unmarkMemoryElement(timeTree);
                         objectUniverseTree.put(universe, time);
                     }
@@ -543,7 +543,7 @@ public class DistortedTimeResolver implements KResolver {
         //initiate time management
         KLongTree timeTree = (KLongTree) _spaceManager.createAndMark(obj.universe(), KConfig.NULL_LONG, obj.uuid(), KChunkTypes.LONG_TREE);
         timeTree.init(null, _manager.model().metaModel(), metaClassIndex);
-        timeTree.insert(obj.now());
+        timeTree.insertKey(obj.now());
         //initiate universe management
         KLongLongMap universeTree = (KLongLongMap) _spaceManager.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, obj.uuid(), KChunkTypes.LONG_LONG_MAP);
         universeTree.init(null, _manager.model().metaModel(), metaClassIndex);

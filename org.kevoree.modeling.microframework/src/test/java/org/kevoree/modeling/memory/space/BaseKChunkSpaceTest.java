@@ -45,8 +45,8 @@ public abstract class BaseKChunkSpaceTest {
         // KLongTree
         KLongTree longTree = (KLongTree) chunkSpace.create(0, KConfig.NULL_LONG, 0, KChunkTypes.LONG_TREE);
         longTree.init(null, null, -1);
-        longTree.insert(0);
-        longTree.insert(1);
+        longTree.insertKey(0);
+        longTree.insertKey(1);
         KLongTree retrievedLongTree = (KLongTree) chunkSpace.get(0, KConfig.NULL_LONG, 0);
         Assert.assertEquals(0, retrievedLongTree.lookup(0));
         Assert.assertEquals(1, retrievedLongTree.lookup(1));
