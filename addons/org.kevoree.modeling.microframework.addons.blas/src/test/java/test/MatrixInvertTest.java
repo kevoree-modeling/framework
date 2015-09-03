@@ -55,9 +55,12 @@ public class MatrixInvertTest {
 
         assert res != null;
         assert resJ != null;
+        assert resnJ != null;
         for (int i = 0; i < matA.rows(); i++) {
             for (int j = 0; j < matA.columns(); j++) {
                 Assert.assertEquals(res.get(i, j), resJ.get(i, j), eps);
+                Assert.assertEquals(res.get(i, j), resnJ.get(i, j), eps);
+                Assert.assertEquals(res.get(i, j), resEjml.getValue2D(i, j), eps);
             }
         }
 
