@@ -352,11 +352,12 @@ public class SvdImplicitQrAlgorithm {
 //        Q.print();
 //        System.out.println();
         int endA = rowA + Q.numCols;
-        for( ; rowA != endA; rowA++ , rowB++ ) {
+        for( ; rowA != endA; rowA++ ) {
             double a = Q.getValueAtIndex(rowA);
             double b = Q.getValueAtIndex(rowB);
             Q.setValueAtIndex(rowA, c * a + s * b);
             Q.setValueAtIndex(rowB, -s*a + c*b);
+            rowB++;
         }
     }
 

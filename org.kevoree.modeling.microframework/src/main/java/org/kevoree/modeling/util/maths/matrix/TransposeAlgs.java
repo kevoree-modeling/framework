@@ -6,14 +6,16 @@ public class TransposeAlgs {
     {
         int index = 1;
         int indexEnd = mat.numCols;
-        for( int i = 0; i < mat.numRows;
-             i++ , index += i+1 , indexEnd += mat.numCols ) {
+        for( int i = 0; i < mat.numRows; i++ ) {
             int indexOther = (i+1)*mat.numCols + i;
-            for( ; index < indexEnd; index++, indexOther += mat.numCols) {
+            for( ; index < indexEnd; index++) {
                 double val = mat.data[ index ];
                 mat.data[ index ] = mat.data[ indexOther ];
                 mat.data[indexOther] = val;
+                indexOther += mat.numCols;
             }
+            index += i+2;
+            indexEnd += mat.numCols;
         }
     }
 

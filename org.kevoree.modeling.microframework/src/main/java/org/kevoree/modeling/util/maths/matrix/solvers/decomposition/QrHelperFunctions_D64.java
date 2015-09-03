@@ -105,8 +105,9 @@ public class QrHelperFunctions_D64 {
 //
 //        if( Double.isInfinite(div_u)) {
         int indexB = j*numCols+startB;
-        for( int i = j; i < numRows; i++ , indexB += numCols ) {
+        for( int i = j; i < numRows; i++) {
             b[indexB] = u[i] /= u_0;
+            indexB += numCols;
         }
 //        } else {
 //            int indexB = j*getNumCols+startB;

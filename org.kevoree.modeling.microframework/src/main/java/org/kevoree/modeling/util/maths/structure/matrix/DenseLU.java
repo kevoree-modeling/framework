@@ -168,6 +168,18 @@ public class DenseLU {
         info[0]=0;
         blas.dgetrf(A.rows(), A.columns(), A.data(), 0,A.rows(), piv,0, info);
 
+       /* System.out.println("After f");
+        for(int i=0;i<A.rows()*A.columns(); i++){
+            System.out.print(A.getAtIndex(i)+" ");
+        }
+        System.out.println();
+
+        System.out.println("PIV");
+        for(int i=0;i<piv.length; i++){
+            System.out.print(piv[i]+" ");
+        }
+        System.out.println();*/
+
         if (info[0] > 0)
             singular = true;
         else if (info[0] < 0)
@@ -175,6 +187,9 @@ public class DenseLU {
 
         int lwork = A.rows()*A.rows();
         double[] work = new double[lwork];
+        for(int i=0;i<lwork;i++){
+            work[i]=0;
+        }
 
         blas.dgetri(A.rows(),A.data(),0,A.rows(),piv,0,work,0,lwork,info);
 

@@ -594,8 +594,9 @@ public class CommonOps {
         Arrays.fill(mat.data, 0, mat.getNumElements(), 0);
 
         int index = 0;
-        for( int i = 0; i < width; i++ , index += mat.numCols + 1) {
+        for( int i = 0; i < width; i++) {
             mat.data[index] = 1;
+            index += mat.numCols + 1;
         }
     }
 
@@ -715,8 +716,9 @@ public class CommonOps {
             out = new DenseMatrix64F(a.numRows,1);
 
         int index = column;
-        for (int i = 0; i < a.numRows; i++, index += a.numCols ) {
+        for (int i = 0; i < a.numRows; i++ ) {
             out.data[i] = a.data[index];
+            index += a.numCols;
         }
         return out;
     }

@@ -114,10 +114,16 @@ public class LinearSolverLu_D64 {
 
         for( int j = 0; j < numCols; j++ ) {
             int index = j;
-            for( int i = 0; i < this.numCols; i++ , index += numCols ) vv[i] = dataB[index];
+            for( int i = 0; i < this.numCols; i++){
+                vv[i] = dataB[index];
+                index += numCols;
+            }
             decomp._solveVectorInternal(vv);
             index = j;
-            for( int i = 0; i < this.numCols; i++ , index += numCols ) dataX[index] = vv[i];
+            for( int i = 0; i < this.numCols; i++ ){
+                dataX[index] = vv[i];
+                index += numCols;
+            }
         }
 
         if( doImprove ) {
