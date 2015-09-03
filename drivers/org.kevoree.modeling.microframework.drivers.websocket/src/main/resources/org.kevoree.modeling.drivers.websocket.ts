@@ -132,7 +132,7 @@ module org {
                             putRequest.setKeys(keys);
                             putRequest.setValues(values);
                             this._callbacks[putRequest.id()] = error;
-                            this._clientConnection.send(putRequest.json());
+                            this._clientConnection.send(putRequest.save());
                         }
 
                         public get(keys:Float64Array, callback:(p:string[], p1:Error) => void):void {
@@ -141,7 +141,7 @@ module org {
                             getRequest.setID(this.nextKey());
                             getRequest.setKeys(keys);
                             this._callbacks[getRequest.id()] = callback;
-                            this._clientConnection.send(getRequest.json());
+                            this._clientConnection.send(getRequest.save());
                         }
 
                         public atomicGetIncrement(keys:Float64Array, callback:(p:number, p1:Error) => void):void {
@@ -150,7 +150,7 @@ module org {
                             atomicGetRequest.setID(this.nextKey());
                             atomicGetRequest.setKeys(keys);
                             this._callbacks[atomicGetRequest.id()] = callback;
-                            this._clientConnection.send(atomicGetRequest.json());
+                            this._clientConnection.send(atomicGetRequest.save());
                         }
 
                         public remove(keys:Float64Array, error:(p:Error) => void):void {
@@ -166,7 +166,7 @@ module org {
                                 msg.setID(this.nextKey());
                                 this._callbacks[msg.id()] = callback;
                             }
-                            this._clientConnection.send(msg.json());
+                            this._clientConnection.send(msg.save());
                         }
 
                     }

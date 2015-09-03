@@ -34,6 +34,6 @@ public interface KMessage {
 
     void setPeer(String val);
 
-    String json();
+    String save();
 
 }

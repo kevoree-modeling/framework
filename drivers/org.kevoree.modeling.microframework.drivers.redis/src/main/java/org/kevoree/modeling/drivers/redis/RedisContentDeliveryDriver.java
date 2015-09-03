@@ -106,7 +106,7 @@ public class RedisContentDeliveryDriver implements KContentDeliveryDriver {
         KMessage events = new Message();
         events.setType(Message.EVENTS_TYPE);
         events.setKeys(p_keys);
-        jedis.publish("kmf", events.json());
+        jedis.publish("kmf", events.save());
         if (p_callback != null) {
             p_callback.on(null);
         }

@@ -1,14 +1,13 @@
 package org.kevoree.modeling.message.impl;
 
-import org.kevoree.modeling.format.json.JsonObjectReader;
-import org.kevoree.modeling.format.json.JsonString;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.util.Base64;
 
 public class Message implements KMessage {
 
-    private static final int ID_INDEX = 0;
-    private static final int TYPE_INDEX = 1;
+    private static final int TYPE_INDEX = 0;
+    private static final int ID_INDEX = 1;
     private static final int OPERATION_INDEX = 2;
     private static final int CLASS_INDEX = 3;
     private static final int PEER_INDEX = 4;
@@ -16,7 +15,7 @@ public class Message implements KMessage {
     private static final int VALUES_INDEX = 6;
     private static final int VALUES2_INDEX = 7;
 
-    private static final String[] KEYS_NAME = new String[]{"id", "type", "op", "class", "peer", "keys", "values", "values2"};
+    private static final char[] KEYS_NAME = new char[]{'T', 'I', 'O', 'C', 'P', 'K', 'V', 'W'}; //type, ids, operation, class, peer, keys, values, values2
 
     public static final int EVENTS_TYPE = 0;
     public static final int GET_REQ_TYPE = 1;
@@ -114,23 +113,17 @@ public class Message implements KMessage {
     }
 
     @Override
-    public String json() {
+    public String save() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("{");
         boolean isFirst = true;
         for (int i = 0; i < NB_ELEM; i++) {
             if (internal[i] != null) {
                 if (!isFirst) {
-                    buffer.append(",");
+                    buffer.append(KConfig.ELEM_SEP);
                 }
                 isFirst = false;
-                buffer.append("\"");
                 buffer.append(KEYS_NAME[i]);
-                if (i < 5) {
-                    buffer.append("\":\"");
-                } else {
-                    buffer.append("\":");
-                }
+                buffer.append(KConfig.VAL_SEP);
                 switch (i) {
                     case 0:
                         Base64.encodeIntToBuffer((Integer) internal[i], buffer);
@@ -139,61 +132,41 @@ public class Message implements KMessage {
                         Base64.encodeIntToBuffer((Integer) internal[i], buffer);
                         break;
                     case 2:
-                        JsonString.encodeBuffer(buffer, (String) internal[i]);
+                        Base64.encodeStringToBuffer((String) internal[i], buffer);
                         break;
                     case 3:
-                        JsonString.encodeBuffer(buffer, (String) internal[i]);
+                        Base64.encodeStringToBuffer((String) internal[i], buffer);
                         break;
                     case 4:
-                        JsonString.encodeBuffer(buffer, (String) internal[i]);
+                        Base64.encodeStringToBuffer((String) internal[i], buffer);
                         break;
                     case 5:
-                        long[] keys = (long[]) internal[i];
-                        buffer.append("[");
-                        for (int j = 0; j < keys.length; j++) {
-                            if (j != 0) {
-                                buffer.append(",");
-                            }
-                            buffer.append("\"");
-                            Base64.encodeLongToBuffer(keys[j], buffer);
-                            buffer.append("\"");
+                        long[] lkeys = (long[]) internal[i];
+                        Base64.encodeIntToBuffer(lkeys.length, buffer);
+                        for (int j = 0; j < lkeys.length; j++) {
+                            buffer.append(KConfig.VAL_SEP);
+                            Base64.encodeLongToBuffer(lkeys[j], buffer);
                         }
-                        buffer.append("]");
                         break;
                     case 6:
-                        String[] values = (String[]) internal[i];
-                        buffer.append("[");
-                        for (int j = 0; j < values.length; j++) {
-                            if (j != 0) {
-                                buffer.append(",");
-                            }
-                            buffer.append("\"");
-                            JsonString.encodeBuffer(buffer, values[j]);
-                            buffer.append("\"");
+                        String[] lvalues = (String[]) internal[i];
+                        Base64.encodeIntToBuffer(lvalues.length, buffer);
+                        for (int j = 0; j < lvalues.length; j++) {
+                            buffer.append(KConfig.VAL_SEP);
+                            Base64.encodeStringToBuffer(lvalues[j], buffer);
                         }
-                        buffer.append("]");
                         break;
                     case 7:
-                        String[] values2 = (String[]) internal[i];
-                        buffer.append("[");
-                        for (int j = 0; j < values2.length; j++) {
-                            if (j != 0) {
-                                buffer.append(",");
-                            }
-                            buffer.append("\"");
-                            JsonString.encodeBuffer(buffer, values2[j]);
-                            buffer.append("\"");
+                        String[] lvalues2 = (String[]) internal[i];
+                        Base64.encodeIntToBuffer(lvalues2.length, buffer);
+                        for (int j = 0; j < lvalues2.length; j++) {
+                            buffer.append(KConfig.VAL_SEP);
+                            Base64.encodeStringToBuffer(lvalues2[j], buffer);
                         }
-                        buffer.append("]");
                         break;
                 }
-                if (i < 5) {
-                    buffer.append("\"");
-                }
-
             }
         }
-        buffer.append("}");
         return buffer.toString();
     }
 
@@ -202,65 +175,92 @@ public class Message implements KMessage {
         if (payload == null) {
             return null;
         }
-        JsonObjectReader objectReader = new JsonObjectReader();
-        objectReader.parseObject(payload);
-        try {
-            if (objectReader.get(KEYS_NAME[TYPE_INDEX]) != null) {
-                msg.setType(Base64.decodeToInt(objectReader.get(KEYS_NAME[TYPE_INDEX]).toString()));
-            }
-            if (objectReader.get(KEYS_NAME[ID_INDEX]) != null) {
-                msg.setID(Base64.decodeToInt(objectReader.get(KEYS_NAME[ID_INDEX]).toString()));
-            }
-            if (objectReader.get(KEYS_NAME[CLASS_INDEX]) != null) {
-                msg.setClassName(JsonString.unescape(objectReader.get(KEYS_NAME[CLASS_INDEX]).toString()));
-            }
-            if (objectReader.get(KEYS_NAME[OPERATION_INDEX]) != null) {
-                msg.setOperationName(JsonString.unescape(objectReader.get(KEYS_NAME[OPERATION_INDEX]).toString()));
-            }
-            if (objectReader.get(KEYS_NAME[PEER_INDEX]) != null) {
-                msg.setPeer(JsonString.unescape(objectReader.get(KEYS_NAME[PEER_INDEX]).toString()));
-            }
-            if (objectReader.get(KEYS_NAME[KEYS_INDEX]) != null) {
-                String[] objIdsRaw = objectReader.getAsStringArray(KEYS_NAME[KEYS_INDEX]);
-                long[] p_keys = new long[objIdsRaw.length];
-                for (int i = 0; i < objIdsRaw.length; i++) {
-                    try {
-                        p_keys[i] = Base64.decodeToLong(objIdsRaw[i]);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+        int i = 0;
+        int readElemIndex = -1;
+        int previousValStart = -1;
+        long[] longArray = null;
+        String[] stringArray = null;
+        int currentArrayIndex = -1;
+        while (i < payload.length()) {
+            if (payload.charAt(i) == KConfig.ELEM_SEP) {
+                if (readElemIndex != -1) {
+                    //VAL DETECTED, CONVERT AND INSERT IT
+                    if (readElemIndex < 2) {
+                        //int val
+                        msg.internal[readElemIndex] = Base64.decodeToIntWithBounds(payload,previousValStart, i);
+                    } else if (readElemIndex < 5) {
+                        //String val
+                        msg.internal[readElemIndex] = Base64.decodeToStringWithBounds(payload, previousValStart, i);
+                    } else {
+                        if (readElemIndex == 5 && longArray != null) {
+                            //long[] val
+                            longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(payload,previousValStart, i);
+                            msg.internal[readElemIndex] = longArray;
+                            longArray = null;
+                        } else if (stringArray != null) {
+                            //String[] val
+                            stringArray[currentArrayIndex] = Base64.decodeToStringWithBounds(payload, previousValStart, i);
+                            msg.internal[readElemIndex] = stringArray;
+                            stringArray = null;
+                        }
                     }
                 }
-                msg.setKeys(p_keys);
-            }
-            if (objectReader.get(KEYS_NAME[VALUES_INDEX]) != null) {
-                String[] objIdsRaw = objectReader.getAsStringArray(KEYS_NAME[VALUES_INDEX]);
-                String[] p_values = new String[objIdsRaw.length];
-                for (int i = 0; i < objIdsRaw.length; i++) {
-                    try {
-                        p_values[i] = JsonString.unescape(objIdsRaw[i]);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                previousValStart = -1;
+                readElemIndex = -1;
+            } else if (payload.charAt(i) == KConfig.VAL_SEP) {
+                if (readElemIndex == -1) {
+                    char pastType = payload.charAt(i - 1);
+                    for (int h = 0; h < NB_ELEM; h++) {
+                        if (pastType == KEYS_NAME[h]) {
+                            readElemIndex = h;
+                        }
+                    }
+                } else {
+                    if (readElemIndex > 5) {
+                        //first value is size;
+                        if (stringArray == null) {
+                            stringArray = new String[Base64.decodeToIntWithBounds(payload, previousValStart, i)];
+                            currentArrayIndex = 0;
+                        } else {
+                            stringArray[currentArrayIndex] = Base64.decodeToStringWithBounds(payload, previousValStart, i);
+                            currentArrayIndex++;
+                        }
+                    } else {
+                        if (longArray == null) {
+                            longArray = new long[Base64.decodeToIntWithBounds(payload,previousValStart, i)];
+                            currentArrayIndex = 0;
+                        } else {
+                            longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(payload,previousValStart, i);
+                            currentArrayIndex++;
+                        }
                     }
                 }
-                msg.setValues(p_values);
+                previousValStart = i + 1;
             }
-            if (objectReader.get(KEYS_NAME[VALUES2_INDEX]) != null) {
-                String[] objIdsRaw = objectReader.getAsStringArray(KEYS_NAME[VALUES2_INDEX]);
-                String[] p_values = new String[objIdsRaw.length];
-                for (int i = 0; i < objIdsRaw.length; i++) {
-                    try {
-                        p_values[i] = JsonString.unescape(objIdsRaw[i]);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                msg.setValues2(p_values);
-            }
-            return msg;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            //iterate for next round
+            i++;
         }
+        if (readElemIndex != -1) {
+            //VAL DETECTED, CONVERT AND INSERT IT
+            if (readElemIndex < 2) {
+                //int val
+                msg.internal[readElemIndex] = Base64.decodeToInt(payload.substring(previousValStart, i));
+            } else if (readElemIndex < 5) {
+                //String val
+                msg.internal[readElemIndex] = Base64.decodeToStringWithBounds(payload, previousValStart, i);
+            } else {
+                if (readElemIndex == 5 && longArray != null) {
+                    //long[] val
+                    longArray[currentArrayIndex] = Base64.decodeToLong(payload.substring(previousValStart, i));
+                    msg.internal[readElemIndex] = longArray;
+                } else if (stringArray != null) {
+                    //String[] val
+                    stringArray[currentArrayIndex] = Base64.decodeToStringWithBounds(payload, previousValStart, i);
+                    msg.internal[readElemIndex] = stringArray;
+                }
+            }
+        }
+        return msg;
     }
 
 }

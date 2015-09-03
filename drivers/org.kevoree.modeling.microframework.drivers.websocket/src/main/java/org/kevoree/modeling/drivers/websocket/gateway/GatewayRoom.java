@@ -55,7 +55,7 @@ public class GatewayRoom extends AbstractReceiveListener {
                         getResultMessage.setType(Message.GET_RES_TYPE);
                         getResultMessage.setID(msg.id());
                         getResultMessage.setValues(strings);
-                        WebSockets.sendText(getResultMessage.json(), currentChannel, null);
+                        WebSockets.sendText(getResultMessage.save(), currentChannel, null);
                     }
                 });
             }
@@ -68,12 +68,12 @@ public class GatewayRoom extends AbstractReceiveListener {
                             KMessage putResultMessage = new Message();
                             putResultMessage.setType(Message.PUT_RES_TYPE);
                             putResultMessage.setID(msg.id());
-                            WebSockets.sendText(putResultMessage.json(), currentChannel, null);
+                            WebSockets.sendText(putResultMessage.save(), currentChannel, null);
                             //inform everybody that somebody has written in the CDN
                             KMessage events = new Message();
                             events.setType(Message.EVENTS_TYPE);
                             events.setKeys(msg.keys());
-                            String payload = events.json();
+                            String payload = events.save();
                             _peerId_to_channel.each(new KStringMapCallBack<WebSocketChannel>() {
                                 @Override
                                 public void on(String key, WebSocketChannel value) {
@@ -96,7 +96,7 @@ public class GatewayRoom extends AbstractReceiveListener {
                             atomicGetResultMessage.setType(Message.ATOMIC_GET_INC_RESULT_TYPE);
                             atomicGetResultMessage.setID(msg.id());
                             atomicGetResultMessage.setValues(new String[]{s.toString()});
-                            WebSockets.sendText(atomicGetResultMessage.json(), currentChannel, null);
+                            WebSockets.sendText(atomicGetResultMessage.save(), currentChannel, null);
                         }
                     }
                 });
@@ -126,9 +126,9 @@ public class GatewayRoom extends AbstractReceiveListener {
                     msgReply.setType(Message.OPERATION_RESULT_TYPE);
                     msgReply.setID(msg.id());
                     msgReply.setValues(null);
-                    WebSockets.sendText(msgReply.json(), currentChannel, null);
+                    WebSockets.sendText(msgReply.save(), currentChannel, null);
                 } else {
-                    String newMsg = msg.json();
+                    String newMsg = msg.save();
                     for (int i = 0; i < targets.length; i++) {
                         WebSocketChannel targetChannel = _peerId_to_channel.get(targets[i]);
                         if (targetChannel != null) {

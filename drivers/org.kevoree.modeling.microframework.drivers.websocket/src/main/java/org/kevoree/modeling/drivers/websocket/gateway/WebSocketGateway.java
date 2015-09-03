@@ -62,7 +62,7 @@ public class WebSocketGateway implements WebSocketConnectionCallback, HttpHandle
                 KMessage message = new Message();
                 message.setType(Message.EVENTS_TYPE);
                 message.setKeys(updatedKeys);
-                String payload = message.json();
+                String payload = message.save();
                 _connectedChannels_hash.each(new KIntMapCallBack<WebSocketChannel>() {
                     @Override
                     public void on(int key, WebSocketChannel channel) {

@@ -126,7 +126,7 @@ var org;
                             putRequest.setKeys(keys);
                             putRequest.setValues(values);
                             this._callbacks[putRequest.id()] = error;
-                            this._clientConnection.send(putRequest.json());
+                            this._clientConnection.send(putRequest.save());
                         };
                         WebSocketPeer.prototype.get = function (keys, callback) {
                             var getRequest = new org.kevoree.modeling.message.impl.Message();
@@ -134,7 +134,7 @@ var org;
                             getRequest.setID(this.nextKey());
                             getRequest.setKeys(keys);
                             this._callbacks[getRequest.id()] = callback;
-                            this._clientConnection.send(getRequest.json());
+                            this._clientConnection.send(getRequest.save());
                         };
                         WebSocketPeer.prototype.atomicGetIncrement = function (keys, callback) {
                             var atomicGetRequest = new org.kevoree.modeling.message.impl.Message();
@@ -142,7 +142,7 @@ var org;
                             atomicGetRequest.setID(this.nextKey());
                             atomicGetRequest.setKeys(keys);
                             this._callbacks[atomicGetRequest.id()] = callback;
-                            this._clientConnection.send(atomicGetRequest.json());
+                            this._clientConnection.send(atomicGetRequest.save());
                         };
                         WebSocketPeer.prototype.remove = function (keys, error) {
                             console.error("Not implemented yet");
@@ -155,7 +155,7 @@ var org;
                                 msg.setID(this.nextKey());
                                 this._callbacks[msg.id()] = callback;
                             }
-                            this._clientConnection.send(msg.json());
+                            this._clientConnection.send(msg.save());
                         };
                         return WebSocketPeer;
                     })();

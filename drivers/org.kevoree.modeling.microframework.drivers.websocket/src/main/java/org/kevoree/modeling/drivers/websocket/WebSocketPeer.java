@@ -18,7 +18,6 @@ import org.xnio.*;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
@@ -120,7 +119,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
             }
             break;
             default: {
-                System.err.println("MessageType not supported:" + msg.type() + "->" + msg.json());
+                System.err.println("MessageType not supported:" + msg.type() + "->" + msg.save());
             }
         }
     }
@@ -132,7 +131,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
         atomicGetRequest.setID(nextKey());
         atomicGetRequest.setKeys(key);
         _callbacks.put(atomicGetRequest.id(), callback);
-        WebSockets.sendText(atomicGetRequest.json(), _client.getChannel(), null);
+        WebSockets.sendText(atomicGetRequest.save(), _client.getChannel(), null);
     }
 
     @Override
@@ -142,7 +141,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
         getRequest.setKeys(keys);
         getRequest.setID(nextKey());
         _callbacks.put(getRequest.id(), callback);
-        WebSockets.sendText(getRequest.json(), _client.getChannel(), null);
+        WebSockets.sendText(getRequest.save(), _client.getChannel(), null);
     }
 
     @Override
@@ -153,7 +152,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
         putRequest.setValues(p_values);
         putRequest.setID(nextKey());
         _callbacks.put(putRequest.id(), p_callback);
-        WebSockets.sendText(putRequest.json(), _client.getChannel(), null);
+        WebSockets.sendText(putRequest.save(), _client.getChannel(), null);
         if (additionalInterceptors != null) {
             additionalInterceptors.each(new KIntMapCallBack<KContentUpdateListener>() {
                 @Override
@@ -257,7 +256,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
             message.setID(nextKey());
             _callbacks.put(message.id(), callback);
         }
-        WebSockets.sendText(message.json(), _client.getChannel(), null);
+        WebSockets.sendText(message.save(), _client.getChannel(), null);
     }
 
 }
