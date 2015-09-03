@@ -3,6 +3,7 @@ package test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.blas.NetlibBlas;
+import org.kevoree.modeling.blas.NetlibJavaBlas;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
@@ -24,6 +25,7 @@ public class MatrixInvertTest {
         MatrixOperations.initMatrice(matA, rand);
         JavaBlas javablas = new JavaBlas();
         NetlibBlas nativeblas = new NetlibBlas();
+        NetlibJavaBlas netlibJavaBlas = new NetlibJavaBlas();
 
 
         long timestart, timeend;
@@ -37,6 +39,11 @@ public class MatrixInvertTest {
         KArray2D resJ = MatrixOperations.invert(matA, javablas);
         timeend = System.currentTimeMillis();
         System.out.println("Java blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+
+        timestart = System.currentTimeMillis();
+        KArray2D resnJ = MatrixOperations.invert(matA, netlibJavaBlas);
+        timeend = System.currentTimeMillis();
+        System.out.println("Netlib Java blas invert " + ((double) (timeend - timestart)) / 1000+" s");
 
         assert res != null;
         assert resJ != null;
