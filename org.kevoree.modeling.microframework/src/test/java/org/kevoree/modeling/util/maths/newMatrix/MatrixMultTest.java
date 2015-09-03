@@ -18,7 +18,7 @@ import java.util.Random;
 /**
  * @ignore ts
  */
-public class SimpleMatrixText {
+public class MatrixMultTest {
 
     @Test
     public void transposeTest() {
@@ -184,25 +184,25 @@ public class SimpleMatrixText {
         MatrixOperations.copyMatrix(matB, ejmlmatB);
         MatrixOperations.copyMatrix(matC, ejmlmatC);
 
-        System.out.println("Init done");
+      //  System.out.println("Init done");
 
-        long timestart, timeend;
+        //long timestart, timeend;
 
-        timestart=System.currentTimeMillis();
+        //timestart=System.currentTimeMillis();
         traditional(transA, transB, matA, matB, matC, alpha, beta);
-        timeend=System.currentTimeMillis();
-        System.out.println("For loop " + ((double) (timeend - timestart)) / 1000);
+        //timeend=System.currentTimeMillis();
+       // System.out.println("For loop " + ((double) (timeend - timestart)) / 1000);
 
-        timestart=System.currentTimeMillis();
+       // timestart=System.currentTimeMillis();
         MatrixOperations.multiplyTransposeAlphaBetaResult(transA, transB, alpha, matA, matB, beta, matresult, java);
-        timeend=System.currentTimeMillis();
-        System.out.println("Java blas " + ((double) (timeend - timestart)) / 1000);
+       // timeend=System.currentTimeMillis();
+       // System.out.println("Java blas " + ((double) (timeend - timestart)) / 1000);
 
 
-        timestart=System.currentTimeMillis();
+       // timestart=System.currentTimeMillis();
         CommonOps.multAlphaBeta(alpha, ejmlmatA.getMatrix(), ejmlmatB.getMatrix(), ejmlmatC.getMatrix(), beta);
-        timeend=System.currentTimeMillis();
-        System.out.println("EJML " + ((double) (timeend - timestart)) / 1000);
+       // timeend=System.currentTimeMillis();
+       // System.out.println("EJML " + ((double) (timeend - timestart)) / 1000);
 
 
         for (int i = 0; i < matC.rows(); i++) {

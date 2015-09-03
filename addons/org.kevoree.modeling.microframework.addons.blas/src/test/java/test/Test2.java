@@ -6,8 +6,8 @@ package test;
 public class Test2 {
     public static void main(String[] arg){
 
-        double paramDouble2 =2;
-        if ((paramDouble2 == 1.0D ? 0 : 1) != 0){
+        double paramDouble2 =-5;
+        if ((paramDouble2 == 0.0D ? 0 : 1) != 0){
             System.out.println("A");
         }
         else{

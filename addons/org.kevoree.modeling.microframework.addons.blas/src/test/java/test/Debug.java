@@ -18,7 +18,7 @@ import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
  */
 public class Debug {
     public static void main(String[] arg){
-        int r=2000;
+        int r=3000;
         int[] dimA = {r, r};
 
         KBlas java = new JavaBlas();

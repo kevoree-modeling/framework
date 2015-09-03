@@ -16,13 +16,15 @@ import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 public class MatrixInvertTest {
     @Test
     public void invertMatrix() {
-        int r = 3000;
+        int r = 2000;
+        int times=10;
         int[] dimA = {r, r};
         boolean rand = true;
         double eps=1e-7;
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
         MatrixOperations.initMatrice(matA, rand);
+
         JavaBlas javablas = new JavaBlas();
         NetlibBlas nativeblas = new NetlibBlas();
         NetlibJavaBlas netlibJavaBlas = new NetlibJavaBlas();
@@ -32,26 +34,39 @@ public class MatrixInvertTest {
 
 
         long timestart, timeend;
+        KArray2D res,resJ,resnJ;
+        res=new NativeArray2D(1,1);
+        resJ=new NativeArray2D(1,1);
+        resnJ=new NativeArray2D(1,1);
+        SimpleMatrix resEjml =new SimpleMatrix(1,1);
 
         timestart=System.currentTimeMillis();
-        KArray2D res= MatrixOperations.invert(matA,nativeblas);
+        for(int k=0;k<times;k++) {
+            res = MatrixOperations.invert(matA, nativeblas);
+        }
         timeend=System.currentTimeMillis();
-        System.out.println("Netlib blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+        System.out.println("Netlib blas invert " + ((double) (timeend - timestart)) / (1000*times)+" s");
 
         timestart = System.currentTimeMillis();
-        KArray2D resJ = MatrixOperations.invert(matA, javablas);
+        for(int k=0;k<times;k++) {
+            resJ = MatrixOperations.invert(matA, javablas);
+        }
         timeend = System.currentTimeMillis();
-        System.out.println("Java Src blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+        System.out.println("Java Src blas invert " + ((double) (timeend - timestart)) / (1000*times)+" s");
 
         timestart = System.currentTimeMillis();
-        KArray2D resnJ = MatrixOperations.invert(matA, netlibJavaBlas);
+        for(int k=0;k<times;k++) {
+            resnJ = MatrixOperations.invert(matA, netlibJavaBlas);
+        }
         timeend = System.currentTimeMillis();
-        System.out.println("Netlib JavaClass blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+        System.out.println("Netlib JavaClass blas invert " + ((double) (timeend - timestart)) / (1000*times)+" s");
 
         timestart=System.currentTimeMillis();
-        SimpleMatrix resEjml= ejmlmatA.invert();
+        for(int k=0;k<times;k++) {
+            resEjml = ejmlmatA.invert();
+        }
         timeend=System.currentTimeMillis();
-        System.out.println("Ejml invert " + ((double) (timeend - timestart)) / 1000+" s");
+        System.out.println("Ejml invert " + ((double) (timeend - timestart)) / (1000*times)+" s");
 
         assert res != null;
         assert resJ != null;

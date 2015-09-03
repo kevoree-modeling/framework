@@ -210,9 +210,9 @@ public class NetlibBlasDebug implements KBlas {
     public void dgemm(KBlasTransposeType paramString1, KBlasTransposeType paramString2, int paramInt1, int paramInt2, int paramInt3, double paramDouble1, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, double paramDouble2, double[] paramArrayOfDouble3, int paramInt8, int paramInt9) {
        // dgemmj(paramString1,paramString2,paramInt1,paramInt2,paramInt3,paramDouble1,paramArrayOfDouble1,paramInt4,paramInt5,paramArrayOfDouble2,paramInt6,paramInt7,paramDouble2,paramArrayOfDouble3,paramInt8,paramInt9);
 
-        blas.dgemm(transTypeToChar(paramString1),transTypeToChar(paramString2), paramInt1,  paramInt2,  paramInt3,  paramDouble1, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, paramDouble2, paramArrayOfDouble3, paramInt8, paramInt9);
+       blas.dgemm(transTypeToChar(paramString1),transTypeToChar(paramString2), paramInt1,  paramInt2,  paramInt3,  paramDouble1, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, paramDouble2, paramArrayOfDouble3, paramInt8, paramInt9);
 
-//        blasJava.dgemm(transTypeToChar(paramString1),transTypeToChar(paramString2), paramInt1,  paramInt2,  paramInt3,  paramDouble1, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, paramDouble2, paramArrayOfDouble3, paramInt8, paramInt9);
+        //blasJava.dgemm(transTypeToChar(paramString1),transTypeToChar(paramString2), paramInt1,  paramInt2,  paramInt3,  paramDouble1, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, paramDouble2, paramArrayOfDouble3, paramInt8, paramInt9);
 
 
     }
@@ -473,7 +473,7 @@ public class NetlibBlasDebug implements KBlas {
         if ((paramintW[0] <= 0 ? 0 : 1) != 0) {
             return;
         }
-        i6 = 2;
+       // i6 = 2;
         i3 = paramInt1;
         if (((i5 >= paramInt1 ? 0 : 1) != 0 ? 1 : 0) != 0)
         {
@@ -482,7 +482,7 @@ public class NetlibBlasDebug implements KBlas {
             {
                 i5 = paramInt6 / i3;
                 int f=lapack.ilaenv(2, "DGETRI", " ", paramInt1, -1, -1, -1);
-                i6 = Math.max(2, f);
+               // i6 = Math.max(2, f);
             }
         }
         else
