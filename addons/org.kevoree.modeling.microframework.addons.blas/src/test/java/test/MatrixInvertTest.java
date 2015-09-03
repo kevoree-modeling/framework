@@ -27,6 +27,9 @@ public class MatrixInvertTest {
         NetlibBlas nativeblas = new NetlibBlas();
         NetlibJavaBlas netlibJavaBlas = new NetlibJavaBlas();
 
+        SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0],dimA[1]);
+        MatrixOperations.copyMatrix(matA, ejmlmatA);
+
 
         long timestart, timeend;
 
@@ -38,12 +41,17 @@ public class MatrixInvertTest {
         timestart = System.currentTimeMillis();
         KArray2D resJ = MatrixOperations.invert(matA, javablas);
         timeend = System.currentTimeMillis();
-        System.out.println("Java blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+        System.out.println("Java Src blas invert " + ((double) (timeend - timestart)) / 1000+" s");
 
         timestart = System.currentTimeMillis();
         KArray2D resnJ = MatrixOperations.invert(matA, netlibJavaBlas);
         timeend = System.currentTimeMillis();
-        System.out.println("Netlib Java blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+        System.out.println("Netlib JavaClass blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+
+        timestart=System.currentTimeMillis();
+        SimpleMatrix resEjml= ejmlmatA.invert();
+        timeend=System.currentTimeMillis();
+        System.out.println("Ejml invert " + ((double) (timeend - timestart)) / 1000+" s");
 
         assert res != null;
         assert resJ != null;
