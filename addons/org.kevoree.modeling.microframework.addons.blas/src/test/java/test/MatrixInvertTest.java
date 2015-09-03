@@ -1,6 +1,8 @@
 package test;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
@@ -13,24 +15,36 @@ import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 public class MatrixInvertTest {
     @Test
     public void invertMatrix() {
-        int r = 1000;
+        int r = 3000;
         int[] dimA = {r, r};
         boolean rand = true;
-        double eps = 1e-7;
+        double eps=1e-7;
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
         MatrixOperations.initMatrice(matA, rand);
-        JavaBlas java = new JavaBlas();
-        JavaBlas java = new JavaBlas();
+        JavaBlas javablas = new JavaBlas();
+        NetlibBlas nativeblas = new NetlibBlas();
 
-        SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0], dimA[1]);
-        MatrixOperations.copyMatrix(matA, ejmlmatA);
 
         long timestart, timeend;
 
+        timestart=System.currentTimeMillis();
+        KArray2D res= MatrixOperations.invert(matA,nativeblas);
+        timeend=System.currentTimeMillis();
+        System.out.println("Netlib blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+
         timestart = System.currentTimeMillis();
-        KArray2D res = MatrixOperations.invert(matA, java);
+        KArray2D resJ = MatrixOperations.invert(matA, javablas);
         timeend = System.currentTimeMillis();
-        System.out.println("java blas invert " + ((double) (timeend - timestart)) / 1000);
+        System.out.println("Java blas invert " + ((double) (timeend - timestart)) / 1000+" s");
+
+        assert res != null;
+        assert resJ != null;
+        for (int i = 0; i < matA.rows(); i++) {
+            for (int j = 0; j < matA.columns(); j++) {
+                Assert.assertEquals(res.get(i, j), resJ.get(i, j), eps);
+            }
+        }
+
     }
 }
