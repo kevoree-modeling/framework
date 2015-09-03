@@ -189,7 +189,7 @@ public class HeapObjectChunk implements KObjectChunk {
                     previousValStart = i + 1;
                 } else if (payload.charAt(i) == KConfig.CHUNK_VAL_SEP) {
                     if (previousMeta == null) {
-                        previousMeta = metaClass.metaByName(Base64.decodeToStringWithBounds(payload,previousValStart, i));
+                        previousMeta = metaClass.metaByName(Base64.decodeToStringWithBounds(payload, previousValStart, i));
                     } else {
                         if (previousMeta.metaType().equals(MetaType.RELATION)) {
                             if (longArray == null) {

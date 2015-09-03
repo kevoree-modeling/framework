@@ -612,7 +612,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     public String serialize(KMetaModel p_metaModel) {
         KMetaClass metaClass = p_metaModel.metaClass(metaClassIndex());
         StringBuilder builder = new StringBuilder();
-        builder.append("{");
         boolean isFirst = true;
         KMeta[] metaElements = metaClass.metaElements();
         if (_start_address != 0 && metaElements != null) {
@@ -623,33 +622,23 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     Object o = getPrimitiveType(meta.index(), metaClass);
                     if (o != null) {
                         if (isFirst) {
-                            builder.append("\"");
                             isFirst = false;
                         } else {
-                            builder.append(",\"");
+                            builder.append(KConfig.CHUNK_ELEM_SEP);
                         }
-                        builder.append(metaElements[i].metaName());
-                        builder.append("\":");
+                        Base64.encodeStringToBuffer(metaElements[i].metaName(), builder);
+                        builder.append(KConfig.CHUNK_VAL_SEP);
                         if (metaAttribute.attributeTypeId() == KPrimitiveTypes.STRING_ID) {
-                            builder.append("\"");
-                            builder.append(JsonString.encode((String) o));
-                            builder.append("\"");
+                            Base64.encodeStringToBuffer((String) o, builder);
                         } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.LONG_ID) {
-                            builder.append("\"");
                             Base64.encodeLongToBuffer((long) o, builder);
-                            builder.append("\"");
                         } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
-                            builder.append("[");
                             double[] castedArr = (double[]) o;
+                            Base64.encodeIntToBuffer(castedArr.length, builder);
                             for (int j = 0; j < castedArr.length; j++) {
-                                if (j != 0) {
-                                    builder.append(",");
-                                }
-                                builder.append("\"");
+                                builder.append(KConfig.CHUNK_VAL_SEP);
                                 Base64.encodeDoubleToBuffer(castedArr[j], builder);
-                                builder.append("\"");
                             }
-                            builder.append("]");
                         } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.BOOL_ID) {
                             if ((boolean) o) {
                                 builder.append("1");
@@ -657,13 +646,9 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                                 builder.append("0");
                             }
                         } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.DOUBLE_ID) {
-                            builder.append("\"");
                             Base64.encodeDoubleToBuffer((double) o, builder);
-                            builder.append("\"");
                         } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.INT_ID) {
-                            builder.append("\"");
                             Base64.encodeIntToBuffer((int) o, builder);
-                            builder.append("\"");
                         } else if (KPrimitiveTypes.isEnum(metaAttribute.attributeTypeId())) {
                             Base64.encodeIntToBuffer((int) o, builder);
                         }
@@ -672,51 +657,60 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     long[] o = getLongArray(meta.index(), metaClass);
                     if (o != null) {
                         if (isFirst) {
-                            builder.append("\"");
                             isFirst = false;
                         } else {
-                            builder.append(",\"");
+                            builder.append(KConfig.CHUNK_ELEM_SEP);
                         }
-                        builder.append(metaElements[i].metaName());
-                        builder.append("\":");
-                        builder.append("[");
+                        Base64.encodeStringToBuffer(metaElements[i].metaName(), builder);
+                        builder.append(KConfig.CHUNK_VAL_SEP);
+                        Base64.encodeIntToBuffer(o.length, builder);
                         for (int j = 0; j < o.length; j++) {
-                            if (j != 0) {
-                                builder.append(",");
-                            }
-                            builder.append("\"");
+                            builder.append(KConfig.CHUNK_VAL_SEP);
                             Base64.encodeLongToBuffer(o[j], builder);
-                            builder.append("\"");
                         }
-                        builder.append("]");
                     }
                 } else if (metaElements[i].metaType() == MetaType.DEPENDENCIES || metaElements[i].metaType() == MetaType.INPUT || metaElements[i].metaType() == MetaType.OUTPUT) {
                     double[] o = getDoubleArray(meta.index(), metaClass);
                     if (o != null) {
                         if (isFirst) {
-                            builder.append("\"");
                             isFirst = false;
                         } else {
-                            builder.append(",\"");
+                            builder.append(KConfig.CHUNK_ELEM_SEP);
                         }
-                        builder.append(metaElements[i].metaName());
-                        builder.append("\":");
-                        builder.append("[");
+                        Base64.encodeStringToBuffer(metaElements[i].metaName(), builder);
+                        builder.append(KConfig.CHUNK_VAL_SEP);
+                        Base64.encodeIntToBuffer(o.length, builder);
                         for (int j = 0; j < o.length; j++) {
-                            if (j != 0) {
-                                builder.append(",");
-                            }
-                            builder.append("\"");
+                            builder.append(KConfig.CHUNK_VAL_SEP);
                             Base64.encodeDoubleToBuffer(o[j], builder);
-                            builder.append("\"");
                         }
-                        builder.append("]");
                     }
                 }
             }
         }
-        builder.append("}");
         return builder.toString();
+    }
+
+    private final Object loadObject(KMetaAttribute metaAttribute, String p_payload, int p_start, int p_end) {
+        int metaAttId = metaAttribute.attributeTypeId();
+        switch (metaAttId) {
+            case KPrimitiveTypes.STRING_ID:
+                return Base64.decodeToStringWithBounds(p_payload, p_start, p_end);
+            case KPrimitiveTypes.LONG_ID:
+                return Base64.decodeToLongWithBounds(p_payload, p_start, p_end);
+            case KPrimitiveTypes.INT_ID:
+                return Base64.decodeToIntWithBounds(p_payload, p_start, p_end);
+            case KPrimitiveTypes.BOOL_ID:
+                if (p_payload.charAt(p_start) == '1') {
+                    return true;
+                } else {
+                    return false;
+                }
+            case KPrimitiveTypes.DOUBLE_ID:
+                return Base64.decodeToDoubleWithBounds(p_payload, p_start, p_end);
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -725,93 +719,85 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         if (this._start_address != 0 && p_metaClassIndex == -1) {
             p_metaClassIndex = UNSAFE.getInt(this._start_address + OFFSET_META_CLASS_INDEX);
         }
+
         KMetaClass metaClass = p_metaModel.metaClass(p_metaClassIndex);
         initMetaClass(metaClass);
         UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, p_metaClassIndex);
 
         if (p_payload != null) {
-            JsonObjectReader objectReader = new JsonObjectReader();
-            objectReader.parseObject(p_payload);
-
-            String[] metaKeys = objectReader.keys();
-            for (int i = 0; i < metaKeys.length; i++) {
-                KMeta metaElement = metaClass.metaByName(metaKeys[i]);
-                Object insideContent = objectReader.get(metaKeys[i]);
-
-                if (insideContent != null) {
-                    if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
-                        KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
-                        Object converted = null;
-                        if (metaAttribute.attributeTypeId() == KPrimitiveTypes.STRING_ID) {
-                            converted = JsonString.unescape((String) insideContent);
-                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.LONG_ID) {
-                            converted = Base64.decodeToLong((String) insideContent);
-                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.INT_ID) {
-                            converted = Base64.decodeToInt((String) insideContent);
-                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.BOOL_ID) {
-                            converted = PrimitiveHelper.parseBoolean((String) insideContent);
-                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.DOUBLE_ID) {
-                            converted = Base64.decodeToDouble((String) insideContent);
-                        } else if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
-                            String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
-                            double[] convertedRaw = new double[plainRawSet.length];
-                            for (int l = 0; l < plainRawSet.length; l++) {
-                                try {
-                                    convertedRaw[l] = Base64.decodeToDouble(plainRawSet[l]);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+            int i = 0;
+            final int payloadSize = p_payload.length();
+            KMeta previousMeta = null;
+            int previousValStart = 0;
+            double[] doubleArray = null;
+            long[] longArray = null;
+            int currentArrayIndex = -1;
+            while (i < payloadSize) {
+                if (p_payload.charAt(i) == KConfig.CHUNK_ELEM_SEP) {
+                    if (previousMeta != null) {
+                        if (previousMeta.metaType().equals(MetaType.ATTRIBUTE) && ((KMetaAttribute) previousMeta).attributeTypeId() != KPrimitiveTypes.CONTINUOUS_ID) {
+                            internal_setPrimitiveType(previousMeta.index(), loadObject((KMetaAttribute) previousMeta, p_payload, previousValStart, i), metaClass, false);
+                        } else if (previousMeta.metaType().equals(MetaType.RELATION) && longArray != null) {
+                            longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(p_payload, previousValStart, i);
+                            internal_extendDoubleArray(previousMeta.index(), longArray.length, metaClass, false);
+                            for (int k = 0; k < longArray.length; k++) {
+                                internal_setDoubleArrayElem(previousMeta.index(), k, longArray[k], metaClass, false);
                             }
-                            converted = convertedRaw;
-                        }
-
-                        if (metaAttribute.attributeTypeId() == KPrimitiveTypes.CONTINUOUS_ID) {
-                            double[] infer = (double[]) converted;
-                            internal_extendDoubleArray(metaAttribute.index(), infer.length, metaClass, false);
-                            for (int k = 0; k < infer.length; k++) {
-                                internal_setDoubleArrayElem(metaAttribute.index(), k, infer[k], metaClass, false);
+                            longArray = null;
+                        } else if (doubleArray != null) {
+                            doubleArray[currentArrayIndex] = Base64.decodeToDoubleWithBounds(p_payload, previousValStart, i);
+                            internal_extendDoubleArray(previousMeta.index(), doubleArray.length, metaClass, false);
+                            for (int k = 0; k < doubleArray.length; k++) {
+                                internal_setDoubleArrayElem(previousMeta.index(), k, doubleArray[k], metaClass, false);
                             }
-                        } else {
-                            internal_setPrimitiveType(metaAttribute.index(), converted, metaClass, false);
-                        }
-
-                    } else if (metaElement != null && metaElement instanceof KMetaRelation) {
-                        try {
-                            String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
-                            long[] convertedRaw = new long[plainRawSet.length];
-                            for (int l = 0; l < plainRawSet.length; l++) {
-                                try {
-                                    convertedRaw[l] = Base64.decodeToLong(plainRawSet[l]);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            for (int k = 0; k < convertedRaw.length; k++) {
-                                internal_addLongToArray(metaElement.index(), convertedRaw[k], metaClass, false);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else if (metaElement != null && (metaElement.metaType().equals(MetaType.DEPENDENCIES) || metaElement.metaType().equals(MetaType.INPUT) || metaElement.metaType().equals(MetaType.OUTPUT))) {
-                        try {
-                            String[] plainRawSet = objectReader.getAsStringArray(metaKeys[i]);
-                            double[] convertedRaw = new double[plainRawSet.length];
-                            for (int l = 0; l < plainRawSet.length; l++) {
-                                try {
-                                    convertedRaw[l] = Base64.decodeToDouble(plainRawSet[l]);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            for (int k = 0; k < convertedRaw.length; k++) {
-                                internal_setDoubleArrayElem(metaElement.index(), k, convertedRaw[k], metaClass, false);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                            doubleArray = null;
                         }
                     }
+                    previousMeta = null;
+                    previousValStart = i + 1;
+                } else if (p_payload.charAt(i) == KConfig.CHUNK_VAL_SEP) {
+                    if (previousMeta == null) {
+                        previousMeta = metaClass.metaByName(Base64.decodeToStringWithBounds(p_payload, previousValStart, i));
+                    } else {
+                        if (previousMeta.metaType().equals(MetaType.RELATION)) {
+                            if (longArray == null) {
+                                longArray = new long[Base64.decodeToIntWithBounds(p_payload, previousValStart, i)];
+                                currentArrayIndex = 0;
+                            } else {
+                                longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(p_payload, previousValStart, i);
+                                currentArrayIndex++;
+                            }
+                        } else {
+                            //DEPENDENCY, INPUT or OUTPUT, or ATT CONTINUOUS , => double[]
+                            if (doubleArray == null) {
+                                doubleArray = new double[Base64.decodeToIntWithBounds(p_payload, previousValStart, i)];
+                                currentArrayIndex = 0;
+                            } else {
+                                doubleArray[currentArrayIndex] = Base64.decodeToDoubleWithBounds(p_payload, previousValStart, i);
+                                currentArrayIndex++;
+                            }
+                        }
+                    }
+                    previousValStart = i + 1;
                 }
-
+                i++;
+            }
+            if (previousMeta != null) {
+                if (previousMeta.metaType().equals(MetaType.ATTRIBUTE) && ((KMetaAttribute) previousMeta).attributeTypeId() != KPrimitiveTypes.CONTINUOUS_ID) {
+                    internal_setPrimitiveType(previousMeta.index(), loadObject((KMetaAttribute) previousMeta, p_payload, previousValStart, i), metaClass, false);
+                } else if (previousMeta.metaType().equals(MetaType.RELATION) && longArray != null) {
+                    longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(p_payload, previousValStart, i);
+                    internal_extendDoubleArray(previousMeta.index(), longArray.length, metaClass, false);
+                    for (int k = 0; k < longArray.length; k++) {
+                        internal_setDoubleArrayElem(previousMeta.index(), k, longArray[k], metaClass, false);
+                    }
+                } else if (doubleArray != null) {
+                    doubleArray[currentArrayIndex] = Base64.decodeToDoubleWithBounds(p_payload, previousValStart, i);
+                    internal_extendDoubleArray(previousMeta.index(), doubleArray.length, metaClass, false);
+                    for (int k = 0; k < doubleArray.length; k++) {
+                        internal_setDoubleArrayElem(previousMeta.index(), k, doubleArray[k], metaClass, false);
+                    }
+                }
             }
         }
 
