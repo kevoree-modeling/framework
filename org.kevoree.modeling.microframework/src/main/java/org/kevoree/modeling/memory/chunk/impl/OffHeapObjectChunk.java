@@ -739,9 +739,8 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                             internal_setPrimitiveType(previousMeta.index(), loadObject((KMetaAttribute) previousMeta, p_payload, previousValStart, i), metaClass, false);
                         } else if (previousMeta.metaType().equals(MetaType.RELATION) && longArray != null) {
                             longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(p_payload, previousValStart, i);
-                            internal_extendDoubleArray(previousMeta.index(), longArray.length, metaClass, false);
                             for (int k = 0; k < longArray.length; k++) {
-                                internal_setDoubleArrayElem(previousMeta.index(), k, longArray[k], metaClass, false);
+                                internal_addLongToArray(previousMeta.index(), longArray[k], metaClass, false);
                             }
                             longArray = null;
                         } else if (doubleArray != null) {
@@ -787,9 +786,8 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     internal_setPrimitiveType(previousMeta.index(), loadObject((KMetaAttribute) previousMeta, p_payload, previousValStart, i), metaClass, false);
                 } else if (previousMeta.metaType().equals(MetaType.RELATION) && longArray != null) {
                     longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(p_payload, previousValStart, i);
-                    internal_extendDoubleArray(previousMeta.index(), longArray.length, metaClass, false);
                     for (int k = 0; k < longArray.length; k++) {
-                        internal_setDoubleArrayElem(previousMeta.index(), k, longArray[k], metaClass, false);
+                        internal_addLongToArray(previousMeta.index(), longArray[k], metaClass, false);
                     }
                 } else if (doubleArray != null) {
                     doubleArray[currentArrayIndex] = Base64.decodeToDoubleWithBounds(p_payload, previousValStart, i);

@@ -481,7 +481,6 @@ public abstract class BaseKObjectChunkTest {
                 // free object chunk
                 objectChunk.free(dynamicMetaModel);
                 newObjectChunk.free(dynamicMetaModel);
-
             }
         });
     }
