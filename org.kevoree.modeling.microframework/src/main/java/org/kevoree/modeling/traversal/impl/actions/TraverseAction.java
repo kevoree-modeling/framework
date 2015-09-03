@@ -47,7 +47,7 @@ public class TraverseAction implements KTraversalAction {
                         if (_reference == null) {
                             KMeta[] metaElements = loopObj.metaClass().metaElements();
                             for (int j = 0; j < metaElements.length; j++) {
-                                if (metaElements[j] != null && metaElements[j].metaType() == MetaType.REFERENCE) {
+                                if (metaElements[j] != null && metaElements[j].metaType() == MetaType.RELATION) {
                                     KMetaRelation ref = (KMetaRelation) metaElements[j];
                                     long[] resolved = raw.getLongArray(ref.index(), currentObject.metaClass());
                                     if (resolved != null) {

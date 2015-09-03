@@ -52,7 +52,7 @@ public class JsonRaw {
                         builder.append("\"");
                     }
                 }
-            } else if (loopMeta != null && loopMeta.metaType().equals(MetaType.REFERENCE)) {
+            } else if (loopMeta != null && loopMeta.metaType().equals(MetaType.RELATION)) {
                 long[] refPayload = raw.getLongArray(loopMeta.index(), p_metaClass);
                 if (refPayload != null) {
                     builder.append(",\"");

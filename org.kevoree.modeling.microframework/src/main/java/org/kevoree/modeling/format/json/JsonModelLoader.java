@@ -174,7 +174,7 @@ public class JsonModelLoader {
                                     raw.setPrimitiveType(metaElement.index(), converted, current.metaClass());
                                     break;
                             }
-                        } else if (metaElement != null && metaElement.metaType() == MetaType.REFERENCE) {
+                        } else if (metaElement != null && metaElement.metaType() == MetaType.RELATION) {
                             try {
                                 raw.setPrimitiveType(metaElement.index(), transposeArr((ArrayList<String>) payload_content, p_mappedKeys), current.metaClass());
                             } catch (Exception e) {

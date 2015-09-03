@@ -1,7 +1,6 @@
 package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.*;
-import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
@@ -87,7 +86,7 @@ public abstract class AbstractKObject implements KObject {
             ArrayLongLongMap collector = new ArrayLongLongMap(-1, -1, -1, null);
             KMeta[] metaElements = _metaClass.metaElements();
             for (int i = 0; i < metaElements.length; i++) {
-                if (metaElements[i] != null && metaElements[i].metaType() == MetaType.REFERENCE) {
+                if (metaElements[i] != null && metaElements[i].metaType() == MetaType.RELATION) {
                     long[] inboundsKeys = rawPayload.getLongArray(metaElements[i].index(), _metaClass);
                     for (int j = 0; j < inboundsKeys.length; j++) {
                         collector.put(inboundsKeys[j], inboundsKeys[j]);
@@ -420,7 +419,7 @@ public abstract class AbstractKObject implements KObject {
         final ArrayLongLongMap toResolveIds = new ArrayLongLongMap(-1, -1, -1, null);
         KMeta[] metaElements = metaClass().metaElements();
         for (int i = 0; i < metaElements.length; i++) {
-            if (metaElements[i] != null && metaElements[i].metaType() == MetaType.REFERENCE) {
+            if (metaElements[i] != null && metaElements[i].metaType() == MetaType.RELATION) {
                 final KMetaRelation reference = (KMetaRelation) metaElements[i];
                 KObjectChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
                 if (raw != null) {
@@ -595,7 +594,7 @@ public abstract class AbstractKObject implements KObject {
                 KMeta[] metaElements = metaClass().metaElements();
                 List<KMetaRelation> selected = new ArrayList<KMetaRelation>();
                 for (int i = 0; i < metaElements.length; i++) {
-                    if (metaElements[i] != null && metaElements[i].metaType() == MetaType.REFERENCE) {
+                    if (metaElements[i] != null && metaElements[i].metaType() == MetaType.RELATION) {
                         long[] rawI = raw.getLongArray((metaElements[i].index()), _metaClass);
                         if (rawI != null) {
                             long oUUID = o.uuid();

@@ -26,7 +26,11 @@ public class KConfig {
     public static final char ELEM_SEP = ';';
 
     public static final char VAL_SEP = ',';
-    
+
+    public static final char CHUNK_ELEM_SEP = '%';
+
+    public static final char CHUNK_VAL_SEP = '$';
+
     public static final int CACHE_INIT_SIZE = 16;
 
     public static final float CACHE_LOAD_FACTOR = ((float) 75 / (float) 100);

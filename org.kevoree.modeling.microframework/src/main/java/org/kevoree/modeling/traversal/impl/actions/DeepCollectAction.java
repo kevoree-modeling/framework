@@ -109,7 +109,7 @@ public class DeepCollectAction implements KTraversalAction {
                         if (_reference == null) {
                             KMeta[] metaElements = loopObj.metaClass().metaElements();
                             for (int j = 0; j < metaElements.length; j++) {
-                                if (metaElements[j] != null && metaElements[j].metaType() == MetaType.REFERENCE) {
+                                if (metaElements[j] != null && metaElements[j].metaType() == MetaType.RELATION) {
                                     long[] resolved = raw.getLongArray(metaElements[j].index(), loopObj.metaClass());
                                     if (resolved != null) {
                                         for (int k = 0; k < resolved.length; k++) {

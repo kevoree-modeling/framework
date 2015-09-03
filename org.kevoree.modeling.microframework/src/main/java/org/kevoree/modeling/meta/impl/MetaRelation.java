@@ -44,7 +44,7 @@ public class MetaRelation implements KMetaRelation {
 
     @Override
     public MetaType metaType() {
-        return MetaType.REFERENCE;
+        return MetaType.RELATION;
     }
 
     @Override

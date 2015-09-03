@@ -98,7 +98,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     size = 4;
                     break;
             }
-        } else if (meta.metaType().equals(MetaType.REFERENCE)) {
+        } else if (meta.metaType().equals(MetaType.RELATION)) {
             size = 8;
         }
 
@@ -111,7 +111,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             KMeta meta = p_metaClass.metaElements()[i];
 
             if (meta.index() < p_index) {
-                if (meta.metaType().equals(MetaType.ATTRIBUTE) || meta.metaType().equals(MetaType.REFERENCE)) {
+                if (meta.metaType().equals(MetaType.ATTRIBUTE) || meta.metaType().equals(MetaType.RELATION)) {
                     offset += sizeOf(p_index, p_metaClass);
                 }
             }
@@ -172,7 +172,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     }
                 }
 
-            } else if (meta.metaType().equals(MetaType.REFERENCE)) {
+            } else if (meta.metaType().equals(MetaType.RELATION)) {
                 KMetaRelation metaReference = (KMetaRelation) meta;
                 long clone_ptr = clonedEntry.rawPointerForIndex(metaReference.index(), metaClass);
                 if (UNSAFE.getLong(clone_ptr) != 0) {
@@ -270,7 +270,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         KMeta meta = p_metaClass.meta(p_index);
         long ptr = rawPointerForIndex(p_index, p_metaClass);
 
-        if (meta.metaType().equals(MetaType.REFERENCE)) {
+        if (meta.metaType().equals(MetaType.RELATION)) {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
             if (ptr_ref_segment != 0) {
                 int size = UNSAFE.getInt(ptr_ref_segment);
@@ -295,7 +295,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         KMeta meta = p_metaClass.meta(p_index);
         long ptr = rawPointerForIndex(p_index, p_metaClass);
 
-        if (meta.metaType().equals(MetaType.REFERENCE)) {
+        if (meta.metaType().equals(MetaType.RELATION)) {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
             long new_ref_ptr;
             if (ptr_ref_segment != 0) {
@@ -328,7 +328,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         KMeta meta = p_metaClass.meta(p_index);
         long ptr = rawPointerForIndex(p_index, p_metaClass);
 
-        if (meta.metaType().equals(MetaType.REFERENCE)) {
+        if (meta.metaType().equals(MetaType.RELATION)) {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
             if (ptr_ref_segment != 0) {
                 int size = UNSAFE.getInt(ptr_ref_segment);
@@ -366,7 +366,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         KMeta meta = p_metaClass.meta(p_index);
         long ptr = rawPointerForIndex(p_index, p_metaClass);
 
-        if (meta.metaType().equals(MetaType.REFERENCE)) {
+        if (meta.metaType().equals(MetaType.RELATION)) {
             long ptr_ref_segment = UNSAFE.getLong(ptr);
             if (ptr_ref_segment != 0) {
                 UNSAFE.freeMemory(ptr_ref_segment);
@@ -583,7 +583,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                         }
                     }
 
-                } else if (meta.metaType().equals(MetaType.REFERENCE)) {
+                } else if (meta.metaType().equals(MetaType.RELATION)) {
                     MetaRelation metaReference = (MetaRelation) meta;
                     long[] o = getLongArray(metaReference.index(), metaClass);
                     if (o != null) {
@@ -668,7 +668,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                             Base64.encodeIntToBuffer((int) o, builder);
                         }
                     }
-                } else if (metaElements[i].metaType() == MetaType.REFERENCE) {
+                } else if (metaElements[i].metaType() == MetaType.RELATION) {
                     long[] o = getLongArray(meta.index(), metaClass);
                     if (o != null) {
                         if (isFirst) {
@@ -861,7 +861,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 //                        _allocated_segments--;
                         }
                     }
-                } else if (meta.metaType().equals(MetaType.REFERENCE)) {
+                } else if (meta.metaType().equals(MetaType.RELATION)) {
                     KMetaRelation metaReference = (KMetaRelation) meta;
                     long ptr = rawPointerForIndex(metaReference.index(), metaClass);
                     long ptr_str_segment = UNSAFE.getLong(ptr);

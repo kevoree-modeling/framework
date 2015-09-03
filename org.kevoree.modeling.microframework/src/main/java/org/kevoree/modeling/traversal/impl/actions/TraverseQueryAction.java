@@ -50,7 +50,7 @@ public class TraverseQueryAction implements KTraversalAction {
                     if (raw != null) {
                         if (_referenceQuery == null) {
                             for (int j = 0; j < metaElements.length; j++) {
-                                if (metaElements[j] != null && metaElements[j].metaType() == MetaType.REFERENCE) {
+                                if (metaElements[j] != null && metaElements[j].metaType() == MetaType.RELATION) {
                                     long[] resolved = raw.getLongArray(metaElements[j].index(), loopObj.metaClass());
                                     if (resolved != null) {
                                         for (int k = 0; k < resolved.length; k++) {
@@ -66,7 +66,7 @@ public class TraverseQueryAction implements KTraversalAction {
                                 queries[k] = queries[k].replace("*", ".*");
                             }
                             for (int h = 0; h < metaElements.length; h++) {
-                                if (metaElements[h] != null && metaElements[h].metaType() == MetaType.REFERENCE) {
+                                if (metaElements[h] != null && metaElements[h].metaType() == MetaType.RELATION) {
                                     KMetaRelation metaReference = (KMetaRelation) metaElements[h];
                                     boolean selected = false;
                                     for (int k = 0; k < queries.length; k++) {

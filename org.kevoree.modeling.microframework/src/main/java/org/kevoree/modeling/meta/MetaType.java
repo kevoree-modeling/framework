@@ -2,7 +2,7 @@ package org.kevoree.modeling.meta;
 
 public enum MetaType {
     ATTRIBUTE,
-    REFERENCE,
+    RELATION,
     DEPENDENCY,
     DEPENDENCIES,
     INPUT,

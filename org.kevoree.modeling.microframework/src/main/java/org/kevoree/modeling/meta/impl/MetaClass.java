@@ -80,7 +80,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaRelation reference(String name) {
         KMeta resolved = metaByName(name);
-        if (resolved != null && resolved.metaType() == MetaType.REFERENCE) {
+        if (resolved != null && resolved.metaType() == MetaType.RELATION) {
             return (KMetaRelation) resolved;
         }
         return null;

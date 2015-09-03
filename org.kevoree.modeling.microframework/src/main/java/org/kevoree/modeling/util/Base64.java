@@ -420,8 +420,8 @@ public class Base64 {
     public static double decodeToDoubleWithBounds(String s, int offsetBegin, int offsetEnd) {
         long result = 0;
         //sign + exponent
-        result += ((long) Base64.decodeArray[s.charAt(0)] & 0xFF) << 58;
-        result += ((long) Base64.decodeArray[s.charAt(1)] & 0xFF) << 52;
+        result += ((long) Base64.decodeArray[s.charAt(offsetBegin)] & 0xFF) << 58;
+        result += ((long) Base64.decodeArray[s.charAt(offsetBegin+1)] & 0xFF) << 52;
         //Mantisse
         for (int i = 2; i < (offsetEnd - offsetBegin); i++) {
             result += ((long) Base64.decodeArray[s.charAt(offsetBegin + i)] & 0xFF) << (48 - (6 * (i - 2)));

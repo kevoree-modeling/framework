@@ -181,20 +181,21 @@ public class Message implements KMessage {
         long[] longArray = null;
         String[] stringArray = null;
         int currentArrayIndex = -1;
-        while (i < payload.length()) {
+        final int payloadSize = payload.length();
+        while (i < payloadSize) {
             if (payload.charAt(i) == KConfig.ELEM_SEP) {
                 if (readElemIndex != -1) {
                     //VAL DETECTED, CONVERT AND INSERT IT
                     if (readElemIndex < 2) {
                         //int val
-                        msg.internal[readElemIndex] = Base64.decodeToIntWithBounds(payload,previousValStart, i);
+                        msg.internal[readElemIndex] = Base64.decodeToIntWithBounds(payload, previousValStart, i);
                     } else if (readElemIndex < 5) {
                         //String val
                         msg.internal[readElemIndex] = Base64.decodeToStringWithBounds(payload, previousValStart, i);
                     } else {
                         if (readElemIndex == 5 && longArray != null) {
                             //long[] val
-                            longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(payload,previousValStart, i);
+                            longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(payload, previousValStart, i);
                             msg.internal[readElemIndex] = longArray;
                             longArray = null;
                         } else if (stringArray != null) {
@@ -227,10 +228,10 @@ public class Message implements KMessage {
                         }
                     } else {
                         if (longArray == null) {
-                            longArray = new long[Base64.decodeToIntWithBounds(payload,previousValStart, i)];
+                            longArray = new long[Base64.decodeToIntWithBounds(payload, previousValStart, i)];
                             currentArrayIndex = 0;
                         } else {
-                            longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(payload,previousValStart, i);
+                            longArray[currentArrayIndex] = Base64.decodeToLongWithBounds(payload, previousValStart, i);
                             currentArrayIndex++;
                         }
                     }

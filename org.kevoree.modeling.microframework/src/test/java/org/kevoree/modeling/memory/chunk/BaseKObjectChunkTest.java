@@ -450,7 +450,7 @@ public abstract class BaseKObjectChunkTest {
                 objectChunk.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 1, 1.1, homeMetaClass);
                 objectChunk.setDoubleArrayElem(homeMetaClass.attribute("value").index(), 2, 2.1, homeMetaClass);
 
-                Assert.assertEquals("{\"attr_long\":\"U\",\"sensors\":[\"E\",\"G\"],\"value\":[\"P7JmZmZmZma\",\"P/BmZmZmZma\",\"QAAzMzMzMzN\"]}", objectChunk.serialize(dynamicMetaModel));
+                Assert.assertEquals("YXR0cl9sb25n$U%c2Vuc29ycw$E$E$G%dmFsdWU$G$P7JmZmZmZma$P/BmZmZmZma$QAAzMzMzMzN", objectChunk.serialize(dynamicMetaModel));
 
                 KObjectChunk newObjectChunk = createKObjectChunk();
                 try {
