@@ -149,7 +149,7 @@ public class MatrixOperations {
         for (int j = 0; j < matA.columns(); j++) {
             for (int i = 0; i < matA.rows(); i++) {
                 if(random){
-                    matA.set(i, j, rand.nextDouble());
+                    matA.set(i, j, rand.nextDouble()*(rand.nextInt(100)-50));
                 }
                 else {
                     matA.set(i, j, k);

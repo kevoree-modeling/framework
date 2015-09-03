@@ -53,7 +53,7 @@ public class DenseLUTest {
 
     @Test
     public void invertMatrix(){
-        int r=4;
+        int r=1000;
         int[] dimA = {r, r};
         boolean rand=true;
         double eps=1e-7;

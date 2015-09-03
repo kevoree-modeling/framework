@@ -17,13 +17,13 @@ import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
  * Created by assaad on 02/09/15.
  */
 public class DenseLUTest {
+    public static int r=65;
+    public static KBlas java = new JavaBlas();
+    public static KBlas netlib = new NetlibBlas();
+
     @Test
     public void testLUFactorize(){
-        int r=2000;
         int[] dimA = {r, r};
-
-        KBlas java = new JavaBlas();
-        KBlas netlib = new NetlibBlas();
 
         boolean rand=true;
         double eps=1e-7;
@@ -62,15 +62,13 @@ public class DenseLUTest {
 
     @Test
     public void invertMatrix(){
-        int r=2000;
         int[] dimA = {r, r};
         boolean rand=true;
         double eps=1e-7;
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
         MatrixOperations.initMatrice(matA, rand);
-        JavaBlas java = new JavaBlas();
-        KBlas netlib = new NetlibBlas();
+        matA.set(0, 0, 5);
 
         SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0],dimA[1]);
         MatrixOperations.copyMatrix(matA, ejmlmatA);
@@ -84,14 +82,22 @@ public class DenseLUTest {
         System.out.println("Netlib invert " + ((double) (timeend - timestart)) / 1000+" s");
 
         timestart=System.currentTimeMillis();
+        KArray2D resJ= MatrixOperations.invert(matA,java);
+        timeend=System.currentTimeMillis();
+        System.out.println("Netlib invert " + ((double) (timeend - timestart)) / 1000+" s");
+
+        timestart=System.currentTimeMillis();
         SimpleMatrix resEjml= ejmlmatA.invert();
         timeend=System.currentTimeMillis();
         System.out.println("Ejml invert " + ((double) (timeend - timestart)) / 1000+" s");
+
+        System.out.println("done");
 
         assert res != null;
         for (int i = 0; i < matA.rows(); i++) {
             for (int j = 0; j < matA.columns(); j++) {
                 Assert.assertEquals(resEjml.getValue2D(i, j), res.get(i, j), eps);
+                Assert.assertEquals(resEjml.getValue2D(i, j), resJ.get(i, j), eps);
             }
         }
 
