@@ -301,7 +301,7 @@ public class JavaBlas implements KBlas {
             {
                 n = Math.min(i5, paramInt1 - m + 1);
                 i1 = m;
-                for (i9 = m + n - 1 - m + 1; i9 > 0; i9--)
+                for (i9 = n; i9 > 0; i9--)
                 {
                     j = i1 + 1;
                     for (int i10 = paramInt1 - (i1 + 1) + 1; i10 > 0; i10--)

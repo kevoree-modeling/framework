@@ -44,31 +44,31 @@ public class Debug {
             timeend = System.currentTimeMillis();
             System.out.println("Netlib invert " + ((double) (timeend - timestart)) / 1000 + " s");
 
-            timestart = System.currentTimeMillis();
+         /*   timestart = System.currentTimeMillis();
             KArray2D resJ = MatrixOperations.invert(matA, java);
             timeend = System.currentTimeMillis();
-            System.out.println("Java invert " + ((double) (timeend - timestart)) / 1000 + " s");
+            System.out.println("Java invert " + ((double) (timeend - timestart)) / 1000 + " s");*/
 
         timestart = System.currentTimeMillis();
         KArray2D resJdb = MatrixOperations.invert(matA, netlibdb);
         timeend = System.currentTimeMillis();
         System.out.println("Netlib debug invert " + ((double) (timeend - timestart)) / 1000 + " s");
 
-            timestart = System.currentTimeMillis();
+         /*   timestart = System.currentTimeMillis();
             SimpleMatrix resEjml = ejmlmatA.invert();
             timeend = System.currentTimeMillis();
             System.out.println("Ejml invert " + ((double) (timeend - timestart)) / 1000 + " s");
 
-            System.out.println("done");
+            System.out.println("done");*/
 
             assert res != null;
-            assert resJ != null;
+           // assert resJ != null;
         assert resJdb != null;
             for (int i = 0; i < matA.rows(); i++) {
                 for (int j = 0; j < matA.columns(); j++) {
-                    Assert.assertEquals(res.get(i, j), resJ.get(i, j), eps);
+                  //  Assert.assertEquals(res.get(i, j), resJ.get(i, j), eps);
                     Assert.assertEquals(res.get(i, j), resJdb.get(i, j), eps);
-                    Assert.assertEquals(res.get(i, j), resEjml.getValue2D(i, j), eps);
+                 //   Assert.assertEquals(res.get(i, j), resEjml.getValue2D(i, j), eps);
 
                 }
             }

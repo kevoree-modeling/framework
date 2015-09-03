@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-jblas</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.kevoree.modeling</groupId>
             <artifactId>org.kevoree.modeling.microframework</artifactId>
             <version>${project.version}</version>
