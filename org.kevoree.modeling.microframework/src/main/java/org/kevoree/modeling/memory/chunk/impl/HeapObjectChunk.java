@@ -407,9 +407,6 @@ public class HeapObjectChunk implements KObjectChunk {
     public void setDoubleArrayElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
         double[] res = getDoubleArray(index, metaClass);
         if (Checker.isDefined(res)) {
-            if(arrayIndex >= res.length){
-                System.err.println("Error");
-            }
             res[arrayIndex] = valueToInsert;
             internal_set_dirty();
         }

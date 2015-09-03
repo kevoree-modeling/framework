@@ -203,5 +203,4 @@ public class PolynomialExtrapolation implements Extrapolation {
         return INSTANCE;
     }
 
-
 }

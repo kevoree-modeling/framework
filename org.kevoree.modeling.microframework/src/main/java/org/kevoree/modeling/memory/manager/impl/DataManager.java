@@ -127,7 +127,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
             public void run() {
                 KChunkIterator dirtyIterator = selfPointer._space.detachDirties();
                 if (dirtyIterator.size() == 0) {
-                    callback.on(null);
+                    if(callback != null){
+                        callback.on(null);
+                    }
                     return;
                 }
                 long[] toSaveKeys = new long[(dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * KEY_SIZE];
@@ -137,13 +139,13 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 while (dirtyIterator.hasNext()) {
                     long[] loopChunkKeys = dirtyIterator.next();
                     KChunk loopChunk = selfPointer._spaceManager.getAndMark(loopChunkKeys[0], loopChunkKeys[1], loopChunkKeys[2]);
-                    if (loopChunk != null) {
-                        loopChunk.setFlags(0, KChunkFlags.DIRTY_BIT);
+                    if (loopChunk != null && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT && (loopChunk.getFlags() & KChunkFlags.REMOVED_BIT) != KChunkFlags.REMOVED_BIT) {
                         toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
                         toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
                         toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
                         try {
                             toSaveValues[i] = loopChunk.serialize(_mm);
+                            loopChunk.setFlags(0, KChunkFlags.DIRTY_BIT);
                             i++;
                         } catch (Exception e) {
                             e.printStackTrace();

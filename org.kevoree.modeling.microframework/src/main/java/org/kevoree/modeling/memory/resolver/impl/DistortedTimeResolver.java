@@ -78,7 +78,8 @@ public class DistortedTimeResolver implements KResolver {
                                                                     selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
                                                                     callback.on(null);
                                                                 } else {
-                                                                    KObject newProxy = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuid, selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunk).metaClassIndex()), closestUniverse, closestTime);
+                                                                    KMetaClass resolvedMetaClass = selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunk).metaClassIndex());
+                                                                    KObject newProxy = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuid, resolvedMetaClass, closestUniverse, closestTime);
                                                                     selfPointer._spaceManager.register(newProxy);
                                                                     callback.on(newProxy);
                                                                 }
@@ -477,11 +478,15 @@ public class DistortedTimeResolver implements KResolver {
                 } while (!previousResolution.compareAndSet(previous, current));
                 if (diff) {
                     KObjectChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
+
+/*
                     if (currentEntry.counter() > 1) { //test if we are alone on this chunk or not
                         //double marking strategy
                         currentEntry.addDependency(universe, time, uuid);
                         _spaceManager.markMemoryElement(clonedChunk);
                     }
+*/
+
                     if (!needUniverseCopy) {
                         timeTree.insert(time);
                     } else {
@@ -499,6 +504,9 @@ public class DistortedTimeResolver implements KResolver {
                     _spaceManager.unmarkMemoryElement(objectUniverseTree);
                     return clonedChunk;
                 } else {
+
+                    System.err.println("Should not be here !!!!");
+
                     _spaceManager.unmarkMemoryElement(timeTree);
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
                     _spaceManager.unmarkMemoryElement(objectUniverseTree);

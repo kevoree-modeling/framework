@@ -15,8 +15,13 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
+import org.kevoree.modeling.scheduler.impl.ExecutorServiceScheduler;
 
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public abstract class BaseKChunkSpaceCleanerTest {
 
@@ -75,50 +80,123 @@ public abstract class BaseKChunkSpaceCleanerTest {
         });
     }
 
+    /*
+    public static void main(String[] args) {
+        ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        CountDownLatch latch = new CountDownLatch(10000);
+        long counter = latch.getCount();
+        for(int i=0;i<counter;i++){
+            service.submit(new Runnable() {
+                @Override
+                public void run() {
+                    latch.countDown();
+                }
+            });
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.err.println("End");
+
+        service.shutdown();
+    }*/
+
+
 
     /**
      * @native ts
      */
     //@Test
     public void polyTest() {
-        final KDataManager manager = createDataManager();
+        //final KDataManager manager = createDataManager();
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
         final KMetaAttribute sensorMetaValue = sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
-
-        System.err.println(">"+sensorMetaValue.index());
-
-        final KModel model = dynamicMetaModel.createModel((KInternalDataManager) manager);
+        final KMetaAttribute sensorMetaValue2 = sensorMetaClass.addAttribute("value2", KPrimitiveTypes.DOUBLE);
+       // final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new ExecutorServiceScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
-                KObject sensor = model.universe(0).time(0).create(sensorMetaClass);
+                KObject sensor = model.create(sensorMetaClass, 0, 0);
+                long uuid = sensor.uuid();
+                sensor = null;
+
 
                 KDefer defer = model.defer();
                 Random random = new Random();
-                for (int i = 0; i < 1000000; i++) {
+
+
+                CountDownLatch latch = new CountDownLatch(1000);
+                long countDown = latch.getCount();
+                for (int i = 0; i < countDown; i++) {
                     final KCallback waiter = defer.waitResult();
-                    sensor.jump(i, new KCallback<KObject>() {
+                    model.lookup(0, i, uuid, new KCallback<KObject>() {
                         @Override
-                        public void on(KObject jumpedSensor) {
-                            jumpedSensor.setByName("value", random.nextDouble());
-                            waiter.on(null);
+                        public void on(final KObject jumpedSensor) {
+                            try {
+                                jumpedSensor.setByName("value2", random.nextDouble());
+                                //jumpedSensor.setByName("value", random.nextDouble());
+
+
+                                /*
+                                if (jumpedSensor.now() % 100 == 0) {
+                                    model.save(null);
+                                }*/
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                latch.countDown();
+                                waiter.on(null);
+                            }
                         }
                     });
-                    if (i % 1000 == 0) {
-                        model.save(null);
-                    }
                 }
+
+                System.err.println("I should wait....");
+
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                System.err.println("Hello");
+
                 defer.then(new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] objects) {
-                        System.err.println("Hello");
+
+                        System.err.println("WTF!!");
+                        ((KInternalDataManager) model.manager()).printDebug();
+
+/*
+                        model.save(new KCallback() {
+                            @Override
+                            public void on(Object o) {
+
+                                System.gc();
+
+                                try {
+                                    Thread.sleep(10);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+
+                                System.out.println("endSize>" + ((KInternalDataManager) model.manager()).spaceSize());
+                                ((KInternalDataManager) model.manager()).printDebug();
+                            }
+                        });*/
+
                     }
                 });
 
 
                 /*
-                Assert.assertEquals(4, ((KInternalDataManager) manager).spaceSize());
+                Assert.assertEquals(4, ((K InternalDataManager) manager).spaceSize());
 
                 long sensorID = sensor.uuid();
                 sensor = null;

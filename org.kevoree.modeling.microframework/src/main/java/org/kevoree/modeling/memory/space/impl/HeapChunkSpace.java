@@ -2,7 +2,6 @@
 package org.kevoree.modeling.memory.space.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.HeapObjectChunk;
@@ -191,6 +190,7 @@ public class HeapChunkSpace implements KChunkSpace {
             }
         } while (!_state.compareAndSet(currentState, nextState));
         return result;
+
     }
 
     private synchronized KChunk complex_insert(long universe, long time, long p_obj, KChunk payload, int prehash, int nextValueIndex) {
@@ -272,11 +272,6 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     @Override
-    public final int size() {
-        return this._state.get()._elementCount.get();
-    }
-
-    @Override
     public KChunkIterator detachDirties() {
         InternalDirtyState detachedState = _dirtyState.getAndSet(new InternalDirtyState());
         int maxIndex = detachedState._dirtyIndex.get();
@@ -334,7 +329,9 @@ public class HeapChunkSpace implements KChunkSpace {
             previousState.elementNext[m] = -1;//flag to dropped value
             KChunk previousValue = previousState.values[m];
             previousState.values[m] = null;
-            previousValue.free(p_metaModel);
+            if (previousValue != null) {
+                previousValue.free(p_metaModel);
+            }
             previousState._elementCount.decrementAndGet();
             nbTry++;
             if (nbTry == KConfig.CAS_MAX_TRY) {
@@ -386,12 +383,17 @@ public class HeapChunkSpace implements KChunkSpace {
                 KChunk loopChunk = state.values[i];
                 if (loopChunk != null) {
                     String content = loopChunk.serialize(p_metaModel);
-                    System.err.println(state.elementK3[i * 3] + "," + state.elementK3[i * 3 + 1] + "," + state.elementK3[i * 3 + 2] + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + content);
+                    System.out.println(state.elementK3[i * 3] + "," + state.elementK3[i * 3 + 1] + "," + state.elementK3[i * 3 + 2] + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + content);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public final int size() {
+        return this._state.get()._elementCount.get();
     }
 
 }

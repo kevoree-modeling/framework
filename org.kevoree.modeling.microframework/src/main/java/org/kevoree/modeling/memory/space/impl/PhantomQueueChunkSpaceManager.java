@@ -61,7 +61,7 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     @Override
     public void run() {
         while (true) {
-            KObjectPhantomReference kobj = null;
+            KObjectPhantomReference kobj;
             try {
                 kobj = (KObjectPhantomReference) referenceQueue.remove();
                 if (kobj.previous == null) {
@@ -84,19 +84,22 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     }
                     previousRef.next = nextRef;
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (kobj != null && _resolver != null) {
-                long[] relatedKeys = _resolver.getRelatedKeys(kobj.obj, kobj.previousResolved.get());
-                int nbKeys = relatedKeys.length / 3;
-                for (int i = 0; i < nbKeys; i++) {
-                    KChunk spaceChunk = _space.get(relatedKeys[i * 3], relatedKeys[i * 3 + 1], relatedKeys[i * 3 + 2]);
-                    if (spaceChunk != null) {
-                        unmarkMemoryElement(spaceChunk);
+
+                if (kobj != null && _resolver != null) {
+                    long[] relatedKeys = _resolver.getRelatedKeys(kobj.obj, kobj.previousResolved.get());
+                    int nbKeys = relatedKeys.length / 3;
+                    for (int i = 0; i < nbKeys; i++) {
+                        KChunk spaceChunk = _space.get(relatedKeys[i * 3], relatedKeys[i * 3 + 1], relatedKeys[i * 3 + 2]);
+                        if (spaceChunk != null) {
+                            unmarkMemoryElement(spaceChunk);
+                        }
                     }
                 }
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
         }
     }
 

@@ -33,7 +33,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         KChunk resolvedElement = _space.get(universe, time, obj);
         if (resolvedElement != null) {
             int newCount = resolvedElement.dec();
-            if (newCount == 0) {
+            if (newCount <= 0) {
                 cleanDependenciesAndPotentiallyRemoveChunk(resolvedElement);
             }
         }
@@ -51,7 +51,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     @Override
     public void unmarkMemoryElement(KChunk element) {
         int newCount = element.dec();
-        if (newCount == 0) {
+        if (newCount <= 0) {
             cleanDependenciesAndPotentiallyRemoveChunk(element);
         }
     }
@@ -67,7 +67,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         for (int i = 0; i < elements.length; i++) {
             KChunk loopChunk = elements[i];
             int newCount = elements[i].dec();
-            if (newCount == 0) {
+            if (newCount <= 0) {
                 cleanDependenciesAndPotentiallyRemoveChunk(loopChunk);
             }
         }
