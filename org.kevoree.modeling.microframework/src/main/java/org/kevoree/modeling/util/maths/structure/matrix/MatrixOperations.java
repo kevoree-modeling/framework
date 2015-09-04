@@ -296,15 +296,19 @@ public class MatrixOperations {
         }
     }
 
-    public static boolean compareMatrix(KArray2D matA, KArray2D matB, double eps){
+    public static double compareMatrix(KArray2D matA, KArray2D matB){
+        double err=0;
+
         for (int i = 0; i < matA.rows(); i++) {
             for (int j = 0; j < matA.columns(); j++) {
-                if(Math.abs(matA.get(i,j)-matB.get(i,j))>eps){
-                    return false;
+                if(err< Math.abs(matA.get(i,j)-matB.get(i,j))) {
+                    err = Math.abs(matA.get(i, j) - matB.get(i, j));
+                   // System.out.println(i+" , "+ j+" , "+ err);
                 }
+
             }
         }
-        return true;
+        return err;
     }
 
 }
