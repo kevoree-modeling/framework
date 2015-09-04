@@ -120,7 +120,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private static final int KEY_SIZE = 3;
 
     @Override
-    public synchronized void save(final KCallback<Throwable> callback) {
+    public void save(final KCallback<Throwable> callback) {
         final DataManager selfPointer = this;
         _scheduler.dispatch(new Runnable() {
             @Override
@@ -301,7 +301,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
             }
         }
     }
-    
+
     @Override
     public void deleteUniverse(KUniverse p_universe, KCallback<Throwable> callback) {
         throw new RuntimeException("Not implemented yet !");

@@ -15,6 +15,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
+import org.kevoree.modeling.scheduler.impl.TokenRingScheduler;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -129,14 +130,11 @@ public abstract class BaseKChunkSpaceCleanerTest {
                         @Override
                         public void on(final KObject jumpedSensor) {
                             try {
-                                jumpedSensor.setByName("value2", random.nextDouble());
-                                //jumpedSensor.setByName("value", random.nextDouble());
-
-
-                                /*
+                                //jumpedSensor.setByName("value2", random.nextDouble());
+                                jumpedSensor.setByName("value", random.nextDouble());
                                 if (jumpedSensor.now() % 100 == 0) {
                                     model.save(null);
-                                }*/
+                                }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             } finally {
@@ -146,21 +144,12 @@ public abstract class BaseKChunkSpaceCleanerTest {
                         }
                     });
                 }
-
-                System.err.println("I should wait....");
-
                 try {
                     latch.await();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
                 System.gc();
-
-
-                System.err.println("Hello");
-
-
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
