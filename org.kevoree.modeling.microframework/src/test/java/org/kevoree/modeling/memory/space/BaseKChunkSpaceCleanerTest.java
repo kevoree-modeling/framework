@@ -9,20 +9,15 @@ import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.memory.strategy.impl.OffHeapMemoryStrategy;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
-import org.kevoree.modeling.scheduler.impl.ExecutorServiceScheduler;
-import org.kevoree.modeling.scheduler.impl.TokenRingScheduler;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public abstract class BaseKChunkSpaceCleanerTest {
 

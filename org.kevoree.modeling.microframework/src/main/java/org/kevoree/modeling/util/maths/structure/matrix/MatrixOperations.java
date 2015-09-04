@@ -273,18 +273,24 @@ public class MatrixOperations {
             NativeArray2D A_temp = new NativeArray2D(matA.rows(), matA.columns());
             System.arraycopy(matA.data(), 0, A_temp.data(), 0, matA.columns() * matA.rows());
 
-            NativeArray2D B_temp = new NativeArray2D(matB.rows(), matB.columns());
-            System.arraycopy(matB.data(), 0, B_temp.data(), 0, matB.columns() * matB.rows());
-
             DenseLU dlu = new DenseLU(A_temp.rows(), A_temp.columns());
             dlu.factor(A_temp, blas);
+
+            if(dlu.isSingular()){
+                return null;
+            }
+            NativeArray2D B_temp = new NativeArray2D(matB.rows(), matB.columns());
+            System.arraycopy(matB.data(), 0, B_temp.data(), 0, matB.columns() * matB.rows());
             dlu.transSolve(B_temp,transB,blas);
             return B_temp;
         }
         else {
             DenseLU dlu = new DenseLU(matA.rows(), matA.columns());
             dlu.factor(matA, blas);
-            dlu.transSolve(matB,transB,blas);
+            if(dlu.isSingular()){
+                return null;
+            }
+            dlu.transSolve(matB, transB, blas);
             return matB;
         }
     }

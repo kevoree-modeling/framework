@@ -180,8 +180,10 @@ public class DenseLU {
         }
         System.out.println();*/
 
-        if (info[0] > 0)
+        if (info[0] > 0) {
             singular = true;
+            return false;
+        }
         else if (info[0] < 0)
             throw new RuntimeException();
 
@@ -191,7 +193,7 @@ public class DenseLU {
             work[i]=0;
         }
 
-        blas.dgetri(A.rows(),A.data(),0,A.rows(),piv,0,work,0,lwork,info);
+        blas.dgetri(A.rows(), A.data(), 0, A.rows(), piv, 0, work, 0, lwork, info);
 
         if(info[0]!=0){
             return false;
