@@ -11,7 +11,7 @@ public class TokenRingScheduler implements KScheduler, Runnable {
 
     LockFreeBoundedQueue tasks = new LockFreeBoundedQueue(10000);
     private Thread worker;
-    
+
     @Override
     public void dispatch(Runnable task) {
         boolean result = tasks.offer(task);
@@ -21,7 +21,7 @@ public class TokenRingScheduler implements KScheduler, Runnable {
     }
 
     @Override
-    public void start() {
+    public synchronized void start() {
         worker = new Thread(this);
         worker.setDaemon(false);
         isAlive = true;
@@ -29,7 +29,7 @@ public class TokenRingScheduler implements KScheduler, Runnable {
     }
 
     @Override
-    public void stop() {
+    public synchronized void stop() {
         isAlive = false;
     }
 
@@ -47,7 +47,6 @@ public class TokenRingScheduler implements KScheduler, Runnable {
                         e.printStackTrace();
                     }
                 } else {
-
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {

@@ -207,10 +207,10 @@ public class DataManager implements KDataManager, KInternalDataManager {
             }
         } else {
             DataManager selfPointer = this;
+            selfPointer._scheduler.start();
             selfPointer._scheduler.dispatch(new Runnable() {
                 @Override
                 public void run() {
-                    selfPointer._scheduler.start();
                     selfPointer._db.connect(new KCallback<Throwable>() {
                         @Override
                         public void on(Throwable throwable) {

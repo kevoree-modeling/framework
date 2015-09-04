@@ -107,6 +107,9 @@ public abstract class BaseKChunkSpaceCleanerTest {
      */
     @Test
     public void polyTest() {
+
+        CountDownLatch latch = new CountDownLatch(1);
+
         //final KDataManager manager = createDataManager();
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
@@ -115,6 +118,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
         //   final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler()).build());
         model.connect(new KCallback<Throwable>() {
+
             @Override
             public void on(Throwable throwable) {
                 KObject sensor = model.create(sensorMetaClass, 0, 0);
@@ -122,9 +126,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
                 sensor = null;
                 KDefer defer = model.defer();
                 Random random = new Random();
-                CountDownLatch latch = new CountDownLatch(1000);
-                long countDown = latch.getCount();
-                for (int i = 0; i < countDown; i++) {
+                for (int i = 0; i < 1000; i++) {
                     final KCallback waiter = defer.waitResult();
                     model.lookup(0, i, uuid, new KCallback<KObject>() {
                         @Override
@@ -138,26 +140,18 @@ public abstract class BaseKChunkSpaceCleanerTest {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             } finally {
-                                latch.countDown();
                                 waiter.on(null);
                             }
                         }
                     });
                 }
-                try {
-                    latch.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+
                 System.gc();
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-
-                CountDownLatch latch1 = new CountDownLatch(1);
 
                 defer.then(new KCallback<Object[]>() {
                     @Override
@@ -166,7 +160,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
                             @Override
                             public void run() {
                                 ((KInternalDataManager) model.manager()).printDebug();
-                                latch1.countDown();
+                                latch.countDown();
                             }
                         });
 
@@ -191,13 +185,6 @@ public abstract class BaseKChunkSpaceCleanerTest {
 
                     }
                 });
-
-                try {
-                    latch1.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
 
                 /*
                 Assert.assertEquals(4, ((K InternalDataManager) manager).spaceSize());
@@ -236,6 +223,13 @@ public abstract class BaseKChunkSpaceCleanerTest {
 
             }
         });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
