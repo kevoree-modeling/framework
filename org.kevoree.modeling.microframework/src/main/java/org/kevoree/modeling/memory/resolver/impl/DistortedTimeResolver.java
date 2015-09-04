@@ -478,13 +478,11 @@ public class DistortedTimeResolver implements KResolver {
                 } while (!previousResolution.compareAndSet(previous, current));
                 if (diff) {
                     KObjectChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
-                    /*
-                    if (currentEntry.counter() > 1) { //test if we are alone on this chunk or not
+                    if (currentEntry.counter() > 2) { //test if we are alone on this chunk or not
                         //double marking strategy
                         currentEntry.addDependency(universe, time, uuid);
                         _spaceManager.markMemoryElement(clonedChunk);
-                    }*/
-
+                    }
                     if (!needUniverseCopy) {
                         timeTree.insertKey(time);
                     } else {
@@ -731,7 +729,6 @@ public class DistortedTimeResolver implements KResolver {
         });
     }
 
-
     @Override
     public void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback) {
         long[] keys = new long[]{
@@ -871,13 +868,29 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
-    public long[] getRelatedKeys(long uuid, long[] previousResolution) {
-        return new long[]{
-                previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolution[AbstractKObject.TIME_PREVIOUS_INDEX], uuid,
-                previousResolution[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, uuid,
-                KConfig.NULL_LONG, KConfig.NULL_LONG, uuid,
-                KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG,
-        };
+    public final int getRelatedKeysResultSize() {
+        return 4;
+    }
+
+    @Override
+    public void getRelatedKeys(long universe, long time, long uuid, long[] result) {
+
+        result[0] = universe;
+        result[1] = time;
+        result[2] = uuid;
+
+        result[3] = universe;
+        result[4] = KConfig.NULL_LONG;
+        result[5] = uuid;
+
+        result[6] = KConfig.NULL_LONG;
+        result[7] = KConfig.NULL_LONG;
+        result[8] = uuid;
+
+        result[9] = KConfig.NULL_LONG;
+        result[10] = KConfig.NULL_LONG;
+        result[11] = KConfig.NULL_LONG;
+
     }
 
 }

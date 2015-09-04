@@ -64,12 +64,12 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KMemoryStrategy p_factory, KBlas p_blas) {
         this._space = p_factory.newSpace();
-        this._spaceManager = p_factory.newSpaceManager(_space);
+        this._scheduler = p_scheduler;
+        this._spaceManager = p_factory.newSpaceManager(this._space, this._scheduler);
         this._resolver = new DistortedTimeResolver(this._spaceManager, this);
         this._listenerManager = new ListenerManager();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);
         this._db = p_cdn;
-        this._scheduler = p_scheduler;
         attachContentDeliveryDriver(new MemoryContentDeliveryDriver());
         this._operationManager = new HashOperationManager(this);
         this._blas = p_blas;
@@ -127,7 +127,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
             public void run() {
                 KChunkIterator dirtyIterator = selfPointer._space.detachDirties();
                 if (dirtyIterator.size() == 0) {
-                    if(callback != null){
+                    if (callback != null) {
                         callback.on(null);
                     }
                     return;
@@ -301,8 +301,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
             }
         }
     }
-
-
+    
     @Override
     public void deleteUniverse(KUniverse p_universe, KCallback<Throwable> callback) {
         throw new RuntimeException("Not implemented yet !");
@@ -336,6 +335,11 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public KContentDeliveryDriver cdn() {
         return this._db;
+    }
+
+    @Override
+    public KScheduler scheduler() {
+        return this._scheduler;
     }
 
     private void attachContentDeliveryDriver(KContentDeliveryDriver p_dataBase) {

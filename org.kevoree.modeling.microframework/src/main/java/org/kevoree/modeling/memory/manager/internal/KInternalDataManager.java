@@ -7,6 +7,7 @@ import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.operation.KOperationManager;
+import org.kevoree.modeling.scheduler.KScheduler;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -15,6 +16,8 @@ public interface KInternalDataManager extends KDataManager {
     KListener createListener(long universe);
 
     KContentDeliveryDriver cdn();
+
+    KScheduler scheduler();
 
     KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, AtomicReference<long[]> previousResolution);
 

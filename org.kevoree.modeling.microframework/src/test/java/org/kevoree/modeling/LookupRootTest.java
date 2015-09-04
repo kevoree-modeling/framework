@@ -53,7 +53,6 @@ public class LookupRootTest {
         });
     }
 
-
     @Test
     public void reloadRootFromDbTest() {
         final MemoryContentDeliveryDriver db = new MemoryContentDeliveryDriver();
@@ -96,10 +95,8 @@ public class LookupRootTest {
                 });
 
 
-
             }
         });
-
 
 
     }

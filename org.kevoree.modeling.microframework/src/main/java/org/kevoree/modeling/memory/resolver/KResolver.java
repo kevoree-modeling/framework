@@ -32,6 +32,8 @@ public interface KResolver {
 
     void setRoot(KObject newRoot, KCallback<Throwable> callback);
 
-    long[] getRelatedKeys(long uuid, long[] previousResolution);
+    int getRelatedKeysResultSize();
+
+    void getRelatedKeys(long universe, long time, long uuid, long[] result);
 
 }

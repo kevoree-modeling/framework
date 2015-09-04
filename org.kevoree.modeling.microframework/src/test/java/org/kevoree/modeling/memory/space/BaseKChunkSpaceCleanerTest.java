@@ -111,8 +111,8 @@ public abstract class BaseKChunkSpaceCleanerTest {
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
         final KMetaAttribute sensorMetaValue = sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
         final KMetaAttribute sensorMetaValue2 = sensorMetaClass.addAttribute("value2", KPrimitiveTypes.DOUBLE);
-         final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
-        //final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler()).build());
+        //   final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -155,17 +155,32 @@ public abstract class BaseKChunkSpaceCleanerTest {
                     e.printStackTrace();
                 }
 
+                System.gc();
+
+
                 System.err.println("Hello");
+
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+                CountDownLatch latch1 = new CountDownLatch(1);
 
                 defer.then(new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] objects) {
+                        ((KInternalDataManager) model.manager()).scheduler().dispatch(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((KInternalDataManager) model.manager()).printDebug();
+                                latch1.countDown();
+                            }
+                        });
 
-                        System.gc();
-
-
-                        System.err.println("WTF!!");
-                        ((KInternalDataManager) model.manager()).printDebug();
 
 /*
                         model.save(new KCallback() {
@@ -187,6 +202,12 @@ public abstract class BaseKChunkSpaceCleanerTest {
 
                     }
                 });
+
+                try {
+                    latch1.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
 
                 /*

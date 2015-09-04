@@ -2,9 +2,9 @@ package org.kevoree.modeling.memory.space.impl;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
-import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.space.KChunkSpace;
+import org.kevoree.modeling.scheduler.KScheduler;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
@@ -19,10 +19,12 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
 
     private final ReferenceQueue<KObject> referenceQueue;
     private final AtomicReference<KObjectPhantomReference> headPhantom;
+    private final KScheduler _scheduler;
     private KResolver _resolver;
 
-    public PhantomQueueChunkSpaceManager(KChunkSpace p_storage) {
+    public PhantomQueueChunkSpaceManager(KChunkSpace p_storage, KScheduler p_scheduler) {
         super(p_storage);
+        this._scheduler = p_scheduler;
         headPhantom = new AtomicReference<KObjectPhantomReference>();
         referenceQueue = new ReferenceQueue<KObject>();
         Thread cleanupThread = new Thread(this);
@@ -58,6 +60,11 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
         this._resolver = p_resolver;
     }
 
+    //unProtected and unVolatile because of the mono-thread access
+    private int capacity = 1;
+    private long[] collected_dereference = new long[3 * capacity];
+    private int counter = 0;
+
     @Override
     public void run() {
         while (true) {
@@ -85,14 +92,22 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     previousRef.next = nextRef;
                 }
                 if (_resolver != null) {
-                    long[] relatedKeys = _resolver.getRelatedKeys(kobj.obj, kobj.previousResolved.get());
-                    int nbKeys = relatedKeys.length / 3;
-                    for (int i = 0; i < nbKeys; i++) {
-                        KChunk spaceChunk = _space.get(relatedKeys[i * 3], relatedKeys[i * 3 + 1], relatedKeys[i * 3 + 2]);
-                        if (spaceChunk != null) {
-                            unmarkMemoryElement(spaceChunk);
-                        }
+
+                    long[] previousResolved = kobj.previousResolved.get();
+                    long previousUuid = kobj.obj;
+
+                    collected_dereference[counter * 3] = previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX];
+                    collected_dereference[counter * 3 + 1] = previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX];
+                    collected_dereference[counter * 3 + 2] = previousUuid;
+                    counter++;
+
+                    if (counter == capacity) {
+                        final long[] previousCollected = collected_dereference;
+                        collected_dereference = new long[3 * capacity];
+                        counter = 0;
+                        _scheduler.dispatch(new SpaceUnmarkTask(this, previousCollected, _resolver));
                     }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();

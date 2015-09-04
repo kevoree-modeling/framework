@@ -9,6 +9,7 @@ import org.kevoree.modeling.memory.strategy.impl.HeapMemoryStrategy;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 import org.kevoree.modeling.scheduler.impl.ExecutorServiceScheduler;
+import org.kevoree.modeling.scheduler.impl.TokenRingScheduler;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 
@@ -44,7 +45,8 @@ public class DataManagerBuilder {
     public KScheduler scheduler() {
         if (this._scheduler == null) {
             //this._scheduler = new DirectScheduler();
-            this._scheduler = new ExecutorServiceScheduler();
+            //this._scheduler = new ExecutorServiceScheduler();
+            this._scheduler = new TokenRingScheduler();
         }
         return _scheduler;
     }
