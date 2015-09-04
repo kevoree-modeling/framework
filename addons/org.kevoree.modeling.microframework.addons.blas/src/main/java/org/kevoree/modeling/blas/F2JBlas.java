@@ -1,18 +1,33 @@
 package org.kevoree.modeling.blas;
 
-import com.github.fommil.netlib.LAPACK;
-import org.kevoree.modeling.util.maths.structure.blas.*;
 import com.github.fommil.netlib.BLAS;
+import com.github.fommil.netlib.LAPACK;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
+import org.kevoree.modeling.util.maths.structure.blas.KBlas;
+import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
+import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 import org.netlib.util.intW;
 
-public class NetlibBlas implements KBlas {
+import java.util.Objects;
+
+public class F2JBlas implements KBlas {
     private BLAS blas;
     private LAPACK lapack;
 
 
-    public NetlibBlas() {
-        blas = BLAS.getInstance();
-        lapack=LAPACK.getInstance();
+    public F2JBlas(){
+        try{
+            blas=(BLAS) load("com.github.fommil.netlib.F2jBLAS");
+            lapack=(LAPACK) load("com.github.fommil.netlib.F2jLAPACK");
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    private static Object load(String className) throws Exception {
+        Class klass = Class.forName(className);
+        return klass.newInstance();
     }
 
     @Override
@@ -43,10 +58,12 @@ public class NetlibBlas implements KBlas {
         paramintW[0] = newint.val;
     }
 
+
     @Override
     public void shutdown() {
         blas = null;
     }
+
 
     private static final String TRANSPOSE_TYPE_CONJUCATE = "c";
 

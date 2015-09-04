@@ -6,8 +6,6 @@ import org.kevoree.modeling.util.maths.structure.blas.*;
 import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 
 public class JavaBlas implements KBlas {
-    public static int BLOCK_WIDTH = 60;
-    public static int TRANSPOSE_SWITCH = 375;
 
 
     @Override
@@ -411,7 +409,6 @@ public class JavaBlas implements KBlas {
                 return;
             }*/
         if (bool) {
-
             dlaswp(nrhs, matB, offsetB, ldB, 1, nOrder, ipiv, offsetIpiV, 1);
             dtrsm(KBlasSideType.LEFT, KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, KBlasUnitType.UNIT, nOrder, nrhs, 1.0D, matA, offsetA, ldA, matB, offsetB, ldB);
             dtrsm(KBlasSideType.LEFT, KBlasOrientationType.UPPER, KBlasTransposeType.NOTRANSPOSE, KBlasUnitType.NONUNIT, nOrder, nrhs, 1.0D, matA, offsetA, ldA, matB, offsetB, ldB);
@@ -422,32 +419,13 @@ public class JavaBlas implements KBlas {
         }
         }
 
-    @Override
-    public void trans(KArray2D matA, KArray2D result) {
-        if (matA.columns() == matA.rows()) {
-            transposeSquare(matA, result);
-        } else if (matA.columns() > TRANSPOSE_SWITCH && matA.rows() > TRANSPOSE_SWITCH) {
-            transposeBlock(matA, result);
-        } else {
-            transposeStandard(matA, result);
-        }
-    }
+
 
     @Override
     public void shutdown() {
 
     }
 
-    @Override
-    public void dscale(double alpha, KArray2D matA) {
-        if (alpha == 0) {
-            matA.setAll(0);
-            return;
-        }
-        for (int i = 0; i < matA.rows() * matA.columns(); i++) {
-            matA.setAtIndex(i, alpha * matA.getAtIndex(i));
-        }
-    }
 
 
     public static void dtrti2(KBlasOrientationType paramString1, KBlasUnitType paramString2, int paramInt1, double[] paramArrayOfDouble, int paramInt2, int paramInt3, int[] paramintW)
@@ -1165,58 +1143,7 @@ public class JavaBlas implements KBlas {
 
 
 
-    private static void transposeSquare(KArray2D matA, KArray2D result) {
-        int index = 1;
-        int indexEnd = matA.columns();
-        for (int i = 0; i < matA.rows(); i++) {
-            int indexOther = (i + 1) * matA.columns() + i;
-            int n = i * (matA.columns() + 1);
-            result.setAtIndex(n, matA.getAtIndex(n));
-            for (; index < indexEnd; index++) {
-                result.setAtIndex(index, matA.getAtIndex(indexOther));
-                result.setAtIndex(indexOther, matA.getAtIndex(index));
-                indexOther += matA.columns();
-            }
-            index += i + 2;
-            indexEnd += matA.columns();
-        }
-    }
 
-    private static void transposeStandard(KArray2D matA, KArray2D result) {
-        int index = 0;
-        for (int i = 0; i < result.columns(); i++) {
-            int index2 = i;
-            int end = index + result.rows();
-            while (index < end) {
-                result.setAtIndex(index++, matA.getAtIndex(index2));
-                index2 += matA.rows();
-            }
-        }
-    }
-
-    private static void transposeBlock(KArray2D matA, KArray2D result) {
-        for (int j = 0; j < matA.columns(); j += BLOCK_WIDTH) {
-            int blockWidth = Math.min(BLOCK_WIDTH, matA.columns() - j);
-            int indexSrc = j * matA.rows();
-            int indexDst = j;
-
-            for (int i = 0; i < matA.rows(); i += BLOCK_WIDTH) {
-                int blockHeight = Math.min(BLOCK_WIDTH, matA.rows() - i);
-                int indexSrcEnd = indexSrc + blockHeight;
-
-                for (; indexSrc < indexSrcEnd; indexSrc++) {
-                    int colSrc = indexSrc;
-                    int colDst = indexDst;
-                    int end = colDst + blockWidth;
-                    for (; colDst < end; colDst ++) {
-                        result.setAtIndex(colDst, matA.getAtIndex(colSrc));
-                        colSrc+=matA.rows();
-                    }
-                    indexDst += result.rows();
-                }
-            }
-        }
-    }
 
     public static void dgemv(KBlasTransposeType paramString, int paramInt1, int paramInt2, double paramDouble1, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, double[] paramArrayOfDouble2, int paramInt5, int paramInt6, double paramDouble2, double[] paramArrayOfDouble3, int paramInt7, int paramInt8)
     {

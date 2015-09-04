@@ -2,19 +2,13 @@ package org.kevoree.modeling.blas;
 
 import com.github.fommil.netlib.BLAS;
 import com.github.fommil.netlib.LAPACK;
-import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.*;
-import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
-import org.nd4j.linalg.api.blas.impl.BaseLevel3;
-import org.netlib.blas.Lsame;
 import org.netlib.util.intW;
 
 public class NetlibBlasDebug implements KBlas {
     private static BLAS blas;
     private static LAPACK lapack;
     private static BLAS blasJava;
-    public static int BLOCK_WIDTH = 60;
-    public static int TRANSPOSE_SWITCH = 375;
 
 
     public NetlibBlasDebug(){
@@ -33,57 +27,6 @@ public class NetlibBlasDebug implements KBlas {
         return (BLAS) klass.newInstance();
     }
 
-
-    private static void transposeSquare(KArray2D matA, KArray2D result) {
-        int index = 1;
-        int indexEnd = matA.columns();
-        for (int i = 0; i < matA.rows();
-             i++, index += i + 1, indexEnd += matA.columns()) {
-            int indexOther = (i + 1) * matA.columns() + i;
-            int n = i * (matA.columns() + 1);
-            result.setAtIndex(n, matA.getAtIndex(n));
-            for (; index < indexEnd; index++, indexOther += matA.columns()) {
-                result.setAtIndex(index, matA.getAtIndex(indexOther));
-                result.setAtIndex(indexOther, matA.getAtIndex(index));
-            }
-        }
-    }
-
-    private static void transposeStandard(KArray2D matA, KArray2D result) {
-        int index = 0;
-        for (int i = 0; i < result.columns(); i++) {
-            int index2 = i;
-            int end = index + result.rows();
-            while (index < end) {
-                result.setAtIndex(index++, matA.getAtIndex(index2));
-                index2 += matA.rows();
-            }
-        }
-    }
-
-    private static void transposeBlock(KArray2D matA, KArray2D result) {
-        for (int j = 0; j < matA.columns(); j += BLOCK_WIDTH) {
-            int blockWidth = Math.min(BLOCK_WIDTH, matA.columns() - j);
-            int indexSrc = j * matA.rows();
-            int indexDst = j;
-
-            for (int i = 0; i < matA.rows(); i += BLOCK_WIDTH) {
-                int blockHeight = Math.min(BLOCK_WIDTH, matA.rows() - i);
-                int indexSrcEnd = indexSrc + blockHeight;
-
-                for (; indexSrc < indexSrcEnd; indexSrc++) {
-                    int colSrc = indexSrc;
-                    int colDst = indexDst;
-                    int end = colDst + blockWidth;
-                    for (; colDst < end; colDst ++) {
-                        result.setAtIndex(colDst, matA.getAtIndex(colSrc));
-                        colSrc+=matA.rows();
-                    }
-                    indexDst += result.rows();
-                }
-            }
-        }
-    }
 
     @Override
     public void dgetrf(int paramInt1, int paramInt2, double[] paramArrayOfDouble, int paramInt3, int paramInt4, int[] paramArrayOfInt, int paramInt5, int[] info) {
@@ -176,33 +119,12 @@ public class NetlibBlasDebug implements KBlas {
         }
     }
 
-    @Override
-    public void trans(KArray2D matA, KArray2D result) {
-        if (matA.columns() == matA.rows()) {
-            transposeSquare(matA, result);
-        } else if (matA.columns() > TRANSPOSE_SWITCH && matA.rows() > TRANSPOSE_SWITCH) {
-            transposeBlock(matA, result);
-        } else {
-            transposeStandard(matA, result);
-        }
-    }
+
 
     @Override
     public void shutdown() {
 
     }
-
-    @Override
-    public void dscale(double alpha, KArray2D matA) {
-        if (alpha == 0) {
-            matA.setAll(0);
-            return;
-        }
-        for (int i = 0; i < matA.rows() * matA.columns(); i++) {
-            matA.setAtIndex(i, alpha * matA.getAtIndex(i));
-        }
-    }
-
 
 
 

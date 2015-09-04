@@ -34,7 +34,7 @@ public class MatrixMultTest {
             }
         }
 
-        KArray2D matB = MatrixOperations.transpose(matA, java);
+        KArray2D matB = MatrixOperations.transpose(matA);
 
         Assert.assertTrue(matA.columns() == matB.rows());
         Assert.assertTrue(matA.rows() == matB.columns());
@@ -63,7 +63,7 @@ public class MatrixMultTest {
 
         TransposeAlgs.square(test);
 
-        matB = MatrixOperations.transpose(matA, java);
+        matB = MatrixOperations.transpose(matA);
         Assert.assertTrue(matA.columns() == matB.rows());
         Assert.assertTrue(matA.rows() == matB.columns());
 
@@ -84,7 +84,7 @@ public class MatrixMultTest {
             }
         }
 
-        matB = MatrixOperations.transpose(matA, java);
+        matB = MatrixOperations.transpose(matA);
         Assert.assertTrue(matA.columns() == matB.rows());
         Assert.assertTrue(matA.rows() == matB.columns());
 

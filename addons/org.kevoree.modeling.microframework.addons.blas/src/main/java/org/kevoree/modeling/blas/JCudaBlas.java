@@ -20,10 +20,6 @@ public class JCudaBlas implements KBlas {
         JCublas.cublasShutdown();
     }
 
-    @Override
-    public void dscale(double alpha, KArray2D matA) {
-
-    }
 
 
 
@@ -73,10 +69,6 @@ public class JCudaBlas implements KBlas {
 
     }
 
-    @Override
-    public void trans(KArray2D matA, KArray2D result) {
-       new JavaBlas().trans(matA,result);
-    }
 
     private static final char TRANSPOSE_TYPE_CONJUCATE = 'c';
 

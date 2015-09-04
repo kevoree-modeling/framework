@@ -8,22 +8,13 @@ import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 import java.util.Random;
 
 public class MatrixOperations {
+    public static int BLOCK_WIDTH = 60;
+    public static int TRANSPOSE_SWITCH = 375;
 
     public static int leadingDimension(KArray2D matA){
         return Math.max(matA.columns(),matA.rows());
     }
 
-    public static KArray2D transpose(KArray2D matA, KBlas blas) {
-        KArray2D result = new NativeArray2D(matA.columns(), matA.rows());
-        blas.trans(matA, result);
-        return result;
-    }
-
-
-    public static KArray2D scaleInPlace(KArray2D matA, double alpha, KBlas blas) {
-        blas.dscale(alpha, matA);
-        return matA;
-    }
 
     public static KArray2D multiply(KArray2D matA, KArray2D matB, KBlas blas) {
         NativeArray2D matC = new NativeArray2D(matA.rows(), matB.columns());
@@ -171,7 +162,7 @@ public class MatrixOperations {
         System.arraycopy(mat.data(), 0, A_temp.data(), 0, mat.columns() * mat.rows());
 
         DenseLU dlu = new DenseLU(A_temp.rows(),A_temp.columns());
-        if (dlu.invert(A_temp,blas)){
+        if (dlu.invert(A_temp, blas)){
             result.setData(A_temp.data());
             return result;
         }
@@ -191,6 +182,82 @@ public class MatrixOperations {
         return dlu.invert(mat,blas);
     }
 
+
+    public static void scale(double alpha, KArray2D matA) {
+        if (alpha == 0) {
+            matA.setAll(0);
+            return;
+        }
+        for (int i = 0; i < matA.rows() * matA.columns(); i++) {
+            matA.setAtIndex(i, alpha * matA.getAtIndex(i));
+        }
+    }
+
+
+    public static KArray2D transpose(KArray2D matA) {
+        KArray2D result=new NativeArray2D(matA.columns(),matA.rows());
+        if (matA.columns() == matA.rows()) {
+            transposeSquare(matA, result);
+        } else if (matA.columns() > TRANSPOSE_SWITCH && matA.rows() > TRANSPOSE_SWITCH) {
+            transposeBlock(matA, result);
+        } else {
+            transposeStandard(matA, result);
+        }
+        return result;
+    }
+
+    private static void transposeSquare(KArray2D matA, KArray2D result) {
+        int index = 1;
+        int indexEnd = matA.columns();
+        for (int i = 0; i < matA.rows(); i++) {
+            int indexOther = (i + 1) * matA.columns() + i;
+            int n = i * (matA.columns() + 1);
+            result.setAtIndex(n, matA.getAtIndex(n));
+            for (; index < indexEnd; index++) {
+                result.setAtIndex(index, matA.getAtIndex(indexOther));
+                result.setAtIndex(indexOther, matA.getAtIndex(index));
+                indexOther += matA.columns();
+            }
+            index += i + 2;
+            indexEnd += matA.columns();
+        }
+    }
+
+    private static void transposeStandard(KArray2D matA, KArray2D result) {
+        int index = 0;
+        for (int i = 0; i < result.columns(); i++) {
+            int index2 = i;
+            int end = index + result.rows();
+            while (index < end) {
+                result.setAtIndex(index++, matA.getAtIndex(index2));
+                index2 += matA.rows();
+            }
+        }
+    }
+
+    private static void transposeBlock(KArray2D matA, KArray2D result) {
+        for (int j = 0; j < matA.columns(); j += BLOCK_WIDTH) {
+            int blockWidth = Math.min(BLOCK_WIDTH, matA.columns() - j);
+            int indexSrc = j * matA.rows();
+            int indexDst = j;
+
+            for (int i = 0; i < matA.rows(); i += BLOCK_WIDTH) {
+                int blockHeight = Math.min(BLOCK_WIDTH, matA.rows() - i);
+                int indexSrcEnd = indexSrc + blockHeight;
+
+                for (; indexSrc < indexSrcEnd; indexSrc++) {
+                    int colSrc = indexSrc;
+                    int colDst = indexDst;
+                    int end = colDst + blockWidth;
+                    for (; colDst < end; colDst ++) {
+                        result.setAtIndex(colDst, matA.getAtIndex(colSrc));
+                        colSrc+=matA.rows();
+                    }
+                    indexDst += result.rows();
+                }
+            }
+        }
+    }
 
     public static KArray2D createIdentity(int width) {
         KArray2D ret = new NativeArray2D(width, width);
