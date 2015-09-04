@@ -142,7 +142,7 @@ package org.kevoree.modeling.util;
  * return Base64.decodeToDoubleWithBounds(s, 0, s.length);
  * }
  * public static decodeToDoubleWithBounds(s : string, offsetBegin : number, offsetEnd : number) {
- * var signAndExp = ((Base64.decodeArray[s.charAt(0)] & 0xFF) * Math.pow(2, 6)) + (Base64.decodeArray[s.charAt(1)] & 0xFF);
+ * var signAndExp = ((Base64.decodeArray[s.charAt(offsetBegin)] & 0xFF) * Math.pow(2, 6)) + (Base64.decodeArray[s.charAt(offsetBegin + 1)] & 0xFF);
  * var sign = ((signAndExp & 0x800) != 0 ? -1 : 1);
  * var exp = signAndExp & 0x7FF;
  * //Mantisse
