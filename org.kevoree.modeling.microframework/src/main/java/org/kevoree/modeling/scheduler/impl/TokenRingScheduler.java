@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TokenRingScheduler implements KScheduler, Runnable {
 
     LockFreeBoundedQueue tasks = new LockFreeBoundedQueue(10000);
-    private Thread worker;
 
     @Override
     public void dispatch(Runnable task) {
@@ -22,7 +21,7 @@ public class TokenRingScheduler implements KScheduler, Runnable {
 
     @Override
     public synchronized void start() {
-        worker = new Thread(this);
+        Thread worker = new Thread(this);
         worker.setDaemon(false);
         isAlive = true;
         worker.start();
