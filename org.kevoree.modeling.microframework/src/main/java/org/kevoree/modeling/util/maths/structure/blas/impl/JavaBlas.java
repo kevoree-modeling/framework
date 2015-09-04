@@ -47,17 +47,17 @@ public class JavaBlas implements KBlas {
             }
             if (((!paramString2.equals(KBlasTransposeType.TRANSPOSE)) ? 1 : 0) != 0) {
                 j = 2;
-            } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+            } else if ((paramInt1 <0)) {
                 j = 3;
-            } else if ((paramInt2 >= 0 ? 0 : 1) != 0) {
+            } else if ((paramInt2 <0)) {
                 j = 4;
-            } else if ((paramInt3 >= 0 ? 0 : 1) != 0) {
+            } else if ((paramInt3 <0)) {
                 j = 5;
-            } else if ((paramInt5 >= Math.max(1, i1) ? 0 : 1) != 0) {
+            } else if ((paramInt5 >= Math.max(1, i1) ^ true)) {
                 j = 8;
-            } else if ((paramInt7 >= Math.max(1, i2) ? 0 : 1) != 0) {
+            } else if ((paramInt7 >= Math.max(1, i2) ^ true)) {
                 j = 10;
-            } else if ((paramInt9 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+            } else if ((paramInt9 >= Math.max(1, paramInt1) ^ true)) {
                 j = 13;
             }
         }*/
@@ -71,7 +71,7 @@ public class JavaBlas implements KBlas {
             if ((paramDouble1 != 0.0D ? 0 : 1) == 0) {}
             if (((paramInt3 != 0 ? 0 : 1) == 0 ? 0 : 1) == 0) {}
         }
-        if ((((paramDouble2 != 1.0D ? 0 : 1) != 0 ? 1 : 0) !=0)) {
+        if ((((paramDouble2 != 1.0D ^ true) ? 1 : 0) !=0)) {
             return;
         }*/
         int i3;
@@ -237,11 +237,11 @@ public class JavaBlas implements KBlas {
         i4 = paramInt1 * i5;
         paramArrayOfDouble2[paramInt5] = i4;
         i = paramInt6 != -1 ? 0 : 1;
-        if ((paramInt1 >= 0 ? 0 : 1) != 0)
+        if ((paramInt1 <0))
         {
             paramintW[0] = -1;
         }
-        else if ((paramInt3 >= Math.max(1, paramInt1) ? 0 : 1) != 0)
+        else if ((paramInt3 < Math.max(1, paramInt1)))
         {
             paramintW[0] = -3;
         }
@@ -254,19 +254,19 @@ public class JavaBlas implements KBlas {
         if (i != 0) {
             return;
         }
-        if ((paramInt1 != 0 ? 0 : 1) != 0) {
+        if ((paramInt1 == 0)) {
             return;
         }
         dtrtri(KBlasOrientationType.UPPER, KBlasUnitType.NONUNIT, paramInt1, paramArrayOfDouble1, paramInt2, paramInt3, paramintW);
-        if ((paramintW[0] <= 0 ? 0 : 1) != 0) {
+        if ((paramintW[0] >0)) {
             return;
         }
         i6 = 2;
         i3 = paramInt1;
-        if (((i5 >= paramInt1 ? 0 : 1) != 0 ? 1 : 0) != 0)
+        if (((i5 < paramInt1) ? 1 : 0) != 0)
         {
             k = Math.max(i3 * i5, 1);
-            if ((paramInt6 >= k ? 0 : 1) != 0)
+            if ((paramInt6 < k))
             {
                 i5 = floorDiv(paramInt6, i3);
                 i6 = Math.max(2, ilaenv(2, "DGETRI", " ", paramInt1, -1, -1, -1));
@@ -277,7 +277,7 @@ public class JavaBlas implements KBlas {
             k = paramInt1;
         }
         int i9;
-        if (((i5 < paramInt1 ? 0 : 1) !=0))
+        if (((i5 >= paramInt1)))
         {
             m = paramInt1;
             for (int i8 = paramInt1 ; i8 > 0; i8--)
@@ -289,7 +289,7 @@ public class JavaBlas implements KBlas {
                     paramArrayOfDouble1[(j - 1 + (m - 1) * paramInt3 + paramInt2)] = 0.0D;
                     j++;
                 }
-                if ((m >= paramInt1 ? 0 : 1) != 0) {
+                if ((m < paramInt1)) {
                     dgemv(KBlasTransposeType.NOTRANSPOSE, paramInt1, paramInt1 - m, -1.0D, paramArrayOfDouble1, (m ) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble2, m + paramInt5, 1, 1.0D, paramArrayOfDouble1, (m - 1) * paramInt3 + paramInt2, 1);
                 }
                 m += -1;
@@ -314,7 +314,7 @@ public class JavaBlas implements KBlas {
                     }
                     i1++;
                 }
-                if ((m + n > paramInt1 ? 0 : 1) != 0) {
+                if ((m + n <= paramInt1)) {
                     dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, paramInt1, n, paramInt1 - m - n + 1, -1.0D, paramArrayOfDouble1, (m + n - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble2, m + n - 1 + paramInt5, i3, 1.0D, paramArrayOfDouble1, (m - 1) * paramInt3 + paramInt2, paramInt3);
                 }
                 dtrsm(KBlasSideType.RIGHT, KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, KBlasUnitType.UNIT, paramInt1, n, 1.0D, paramArrayOfDouble2, m - 1 + paramInt5, i3, paramArrayOfDouble1, (m - 1) * paramInt3 + paramInt2, paramInt3);
@@ -325,7 +325,7 @@ public class JavaBlas implements KBlas {
         for (int i8 = -1 + paramInt1; i8 > 0; i8--)
         {
             i2 = paramArrayOfInt[(m - 1 + paramInt4)];
-            if ((i2 == m ? 0 : 1) != 0) {
+            if ((i2 != m)) {
                 dswap(paramInt1, paramArrayOfDouble1, (m - 1) * paramInt3 + paramInt2, 1, paramArrayOfDouble1, (i2 - 1) * paramInt3 + paramInt2, 1);
             }
             m += -1;
@@ -344,11 +344,11 @@ public class JavaBlas implements KBlas {
         int[] localintW = new int[1];
         localintW[0] = 0;
 
-        if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+        if ((paramInt1 <0)) {
             info[0] = -1;
-        } else if ((paramInt2 >= 0 ? 0 : 1) != 0) {
+        } else if ((paramInt2 <0)) {
             info[0] = -2;
-        } else if ((paramInt4 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+        } else if ((paramInt4 < Math.max(1, paramInt1))) {
             info[0] = -4;
         }
         if ((info[0] !=0)) {
@@ -356,11 +356,11 @@ public class JavaBlas implements KBlas {
             return;
         }
 
-        if (((paramInt2 != 0 ? 0 : 1) !=0)) {
+        if (((paramInt2 == 0))) {
             return;
         }
         m = ilaenv(1, "DGETRF", " ", paramInt1, paramInt2, -1, -1);
-        if (((m < Math.min(paramInt1, paramInt2) ? 0 : 1) !=0)) {
+        if (((m >= Math.min(paramInt1, paramInt2)))) {
             dgetf2(paramInt1, paramInt2, paramArrayOfDouble, paramInt3, paramInt4, paramArrayOfInt, paramInt5, info);
         } else {
             j = 1;
@@ -373,10 +373,10 @@ public class JavaBlas implements KBlas {
                     i++;
                 }
                 dlaswp(j - 1, paramArrayOfDouble, paramInt3, paramInt4, j, j + k - 1, paramArrayOfInt, paramInt5, 1);
-                if ((j + k > paramInt2 ? 0 : 1) != 0) {
+                if ((j + k <= paramInt2)) {
                     dlaswp(paramInt2 - j - k + 1, paramArrayOfDouble, (j + k - 1) * paramInt4 + paramInt3, paramInt4, j, j + k - 1, paramArrayOfInt, paramInt5, 1);
                     dtrsm(KBlasSideType.LEFT, KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, KBlasUnitType.UNIT, k, paramInt2 - j - k + 1, 1.0D, paramArrayOfDouble, j - 1 + (j - 1) * paramInt4 + paramInt3, paramInt4, paramArrayOfDouble, j - 1 + (j + k - 1) * paramInt4 + paramInt3, paramInt4);
-                    if ((j + k > paramInt1 ? 0 : 1) != 0) {
+                    if ((j + k <= paramInt1)) {
                         dgemm(KBlasTransposeType.NOTRANSPOSE, KBlasTransposeType.NOTRANSPOSE, paramInt1 - j - k + 1, paramInt2 - j - k + 1, k, -1.0D, paramArrayOfDouble, j + k - 1 + (j - 1) * paramInt4 + paramInt3, paramInt4, paramArrayOfDouble, j - 1 + (j + k - 1) * paramInt4 + paramInt3, paramInt4, 1.0D, paramArrayOfDouble, j + k - 1 + (j + k - 1) * paramInt4 + paramInt3, paramInt4);
                     }
                 }
@@ -393,13 +393,13 @@ public class JavaBlas implements KBlas {
 
         if (((!trans.equals(KBlasTransposeType.CONJUGATE)) ? 1 : 0) != 0) {
             info[0] = -1;
-        } else if ((nOrder >= 0 ? 0 : 1) != 0) {
+        } else if ((nOrder <0)) {
             info[0] = -2;
-        } else if ((nrhs >= 0 ? 0 : 1) != 0) {
+        } else if ((nrhs <0)) {
             info[0] = -3;
-        } else if ((ldA >= Math.max(1, nOrder) ? 0 : 1) != 0) {
+        } else if ((ldA < Math.max(1, nOrder))) {
             info[0] = -5;
-        } else if ((ldB >= Math.max(1, nOrder) ? 0 : 1) != 0) {
+        } else if ((ldB < Math.max(1, nOrder))) {
             info[0] = -8;
         }
         if ((info[0] !=0)) {
@@ -407,7 +407,7 @@ public class JavaBlas implements KBlas {
             return;
         }
 
-            if (((nrhs != 0 ? 0 : 1) !=0)) {
+            if (((nrhs == 0))) {
                 return;
             }
         if (bool) {
@@ -464,9 +464,9 @@ public class JavaBlas implements KBlas {
             paramintW[0] = -1;
         } else if ((((!bool1)) && ((!paramString2.equals(KBlasUnitType.UNIT))) ? 1 : 0) != 0) {
             paramintW[0] = -2;
-        } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+        } else if ((paramInt1 <0)) {
             paramintW[0] = -3;
-        } else if ((paramInt3 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+        } else if ((paramInt3 < Math.max(1, paramInt1))) {
             paramintW[0] = -5;
         }
         if ((paramintW[0] !=0))
@@ -510,7 +510,7 @@ public class JavaBlas implements KBlas {
                 {
                     d = -1.0D;
                 }
-                if ((i >= paramInt1 ? 0 : 1) != 0)
+                if ((i < paramInt1))
                 {
                     dtrmv(KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, paramString2, paramInt1 - i, paramArrayOfDouble, i + (i + 1 - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble, i + (i - 1) * paramInt3 + paramInt2, 1);
                     dscal(paramInt1 - i, d, paramArrayOfDouble, i + (i - 1) * paramInt3 + paramInt2, 1);
@@ -551,11 +551,11 @@ public class JavaBlas implements KBlas {
                 j = 2;
             } else if ((((!paramString3.equals(KBlasUnitType.UNIT))) && ((!paramString3.equals(KBlasUnitType.NONUNIT))) ? 1 : 0) != 0) {
                 j = 3;
-            } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+            } else if ((paramInt1 <0)) {
                 j = 4;
-            } else if ((paramInt3 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+            } else if ((paramInt3 >= Math.max(1, paramInt1) ^ true)) {
                 j = 6;
-            } else if ((paramInt5 != 0 ? 0 : 1) != 0) {
+            } else if ((paramInt5 != 0 ^ true)) {
                 j = 8;
             }
         }
@@ -564,13 +564,13 @@ public class JavaBlas implements KBlas {
             //Xerbla.xerbla("DTRMV ", j);
             return;
         }
-        if ((paramInt1 != 0 ? 0 : 1) != 0) {
+        if ((paramInt1 != 0 ^ true)) {
             return;
         }*/
         bool = paramString3.equals(KBlasUnitType.NONUNIT);
-        if ((paramInt5 > 0 ? 0 : 1) != 0) {
+        if ((paramInt5 <= 0)) {
             i1 = 1 - (paramInt1 - 1) * paramInt5;
-        } else if ((paramInt5 == 1 ? 0 : 1) != 0) {
+        } else if ((paramInt5 != 1)) {
             i1 = 1;
         }
         int i2;
@@ -579,7 +579,7 @@ public class JavaBlas implements KBlas {
         {
             if (paramString1.equals(KBlasOrientationType.UPPER))
             {
-                if ((paramInt5 != 1 ? 0 : 1) != 0)
+                if ((paramInt5 ==1))
                 {
                     m = 1;
                     for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
@@ -626,7 +626,7 @@ public class JavaBlas implements KBlas {
                     }
                 }
             }
-            else if ((paramInt5 != 1 ? 0 : 1) != 0)
+            else if ((paramInt5 ==1))
             {
                 m = paramInt1;
                 for (i2 = paramInt1; i2 > 0; i2--)
@@ -676,7 +676,7 @@ public class JavaBlas implements KBlas {
         }
         else if (paramString1.equals(KBlasOrientationType.UPPER))
         {
-            if ((paramInt5 != 1 ? 0 : 1) != 0)
+            if ((paramInt5 ==1))
             {
                 m = paramInt1;
                 for (i2 =  paramInt1; i2 > 0; i2--)
@@ -719,7 +719,7 @@ public class JavaBlas implements KBlas {
                 }
             }
         }
-        else if ((paramInt5 != 1 ? 0 : 1) != 0)
+        else if ((paramInt5 ==1))
         {
             m = 1;
             for (i2 = paramInt1 - 1 + 1; i2 > 0; i2--)
@@ -798,13 +798,13 @@ public class JavaBlas implements KBlas {
                 j = 3;
             } else if ((((!paramString4.equals(KBlasUnitType.UNIT))) && ((!paramString4.equals(KBlasUnitType.NONUNIT))) ? 1 : 0) != 0) {
                 j = 4;
-            } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+            } else if ((paramInt1 <0)) {
                 j = 5;
-            } else if ((paramInt2 >= 0 ? 0 : 1) != 0) {
+            } else if ((paramInt2 <0)) {
                 j = 6;
-            } else if ((paramInt4 >= Math.max(1, n) ? 0 : 1) != 0) {
+            } else if ((paramInt4 >= Math.max(1, n) ^ true)) {
                 j = 9;
-            } else if ((paramInt6 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+            } else if ((paramInt6 >= Math.max(1, paramInt1) ^ true)) {
                 j = 11;
             }
         }
@@ -813,7 +813,7 @@ public class JavaBlas implements KBlas {
             //Xerbla.xerbla("DTRMM ", j);
             return;
         }
-        if ((paramInt2 != 0 ? 0 : 1) != 0) {
+        if ((paramInt2 != 0 ^ true)) {
             return;
         }*/
         int i1;
@@ -1100,9 +1100,9 @@ public class JavaBlas implements KBlas {
             paramintW[0] = -1;
         } else if ((((!bool1)) && ((!paramString2.equals(KBlasUnitType.UNIT))) ? 1 : 0) != 0) {
             paramintW[0] = -2;
-        } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+        } else if ((paramInt1 <0)) {
             paramintW[0] = -3;
-        } else if ((paramInt3 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+        } else if ((paramInt3 < Math.max(1, paramInt1))) {
             paramintW[0] = -5;
         }
         if (( paramintW[0] !=0))
@@ -1110,7 +1110,7 @@ public class JavaBlas implements KBlas {
             //Xerbla.xerbla("DTRTRI", - paramintW[0]);
             return;
         }
-        if ((paramInt1 != 0 ? 0 : 1) != 0) {
+        if ((paramInt1 == 0)) {
             return;
         }
         int n;
@@ -1127,7 +1127,7 @@ public class JavaBlas implements KBlas {
             paramintW[0] = 0;
         }
         k = ilaenv(1, "DTRTRI","", paramInt1, -1, -1, -1); //64
-        if (((k < paramInt1 ? 0 : 1) !=0))
+        if (((k >= paramInt1)))
         {
             dtrti2(paramString1, paramString2, paramInt1, paramArrayOfDouble, paramInt2, paramInt3, paramintW);
 
@@ -1152,7 +1152,7 @@ public class JavaBlas implements KBlas {
             for (n = floorDiv((1 - m + -k), -k); n > 0; n--)
             {
                 j = Math.min(k, paramInt1 - i + 1);
-                if ((i + j > paramInt1 ? 0 : 1) != 0)
+                if ((i + j <= paramInt1))
                 {
                     dtrmm(KBlasSideType.LEFT, KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, paramString2, paramInt1 - i - j + 1, j, 1.0D, paramArrayOfDouble, i + j - 1 + (i + j - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble, i + j - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3);
                     dtrsm(KBlasSideType.RIGHT, KBlasOrientationType.LOWER, KBlasTransposeType.NOTRANSPOSE, paramString2, paramInt1 - i - j + 1, j, -1.0D, paramArrayOfDouble, i - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3, paramArrayOfDouble, i + j - 1 + (i - 1) * paramInt3 + paramInt2, paramInt3);
@@ -1243,19 +1243,19 @@ public class JavaBlas implements KBlas {
             i5 = paramInt1;
             i6 = paramInt2;
         }
-        if ((paramInt6 <= 0 ? 0 : 1) != 0) {
+        if ((paramInt6 >0)) {
             i3 = 1;
         } else {
             i3 = 1 - (i5 - 1) * paramInt6;
         }
-        if ((paramInt8 <= 0 ? 0 : 1) != 0) {
+        if ((paramInt8 >0)) {
             i4 = 1;
         } else {
             i4 = 1 - (i6 - 1) * paramInt8;
         }
         int i7;
         if ((paramDouble2 !=1.0D)) {
-            if ((paramInt8 != 1 ? 0 : 1) != 0)
+            if ((paramInt8 ==1))
             {
                 if ((paramDouble2 ==0))
                 {
@@ -1308,7 +1308,7 @@ public class JavaBlas implements KBlas {
         if (paramString.equals(KBlasTransposeType.NOTRANSPOSE))
         {
             i1 = i3;
-            if ((paramInt8 != 1 ? 0 : 1) != 0)
+            if ((paramInt8 ==1))
             {
                 n = 1;
                 for (i7 = paramInt2 - 1 + 1; i7 > 0; i7--)
@@ -1352,7 +1352,7 @@ public class JavaBlas implements KBlas {
         else
         {
             i2 = i4;
-            if ((paramInt6 != 1 ? 0 : 1) != 0)
+            if ((paramInt6 ==1))
             {
                 n = 1;
                 for (i7 = paramInt2 - 1 + 1; i7 > 0; i7--)
@@ -1404,15 +1404,15 @@ public class JavaBlas implements KBlas {
         int n = 0;
         int i1 = 0;
       /*  j = 0;
-        if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+        if ((paramInt1 <0)) {
             j = 1;
-        } else if ((paramInt2 >= 0 ? 0 : 1) != 0) {
+        } else if ((paramInt2 <0)) {
             j = 2;
-        } else if ((paramInt4 != 0 ? 0 : 1) != 0) {
+        } else if ((paramInt4 != 0 ^ true)) {
             j = 5;
-        } else if ((paramInt6 != 0 ? 0 : 1) != 0) {
+        } else if ((paramInt6 != 0 ^ true)) {
             j = 7;
-        } else if ((paramInt8 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+        } else if ((paramInt8 >= Math.max(1, paramInt1) ^ true)) {
             j = 9;
         }
         if ((j !=0))
@@ -1422,18 +1422,18 @@ public class JavaBlas implements KBlas {
         }
         if ((paramInt1 != 0 ? 0 : 1) == 0) {}
         if (((paramInt2 != 0 ? 0 : 1) == 0 ? 0 : 1) == 0) {}
-        if (((paramDouble != 0.0D ? 0 : 1) !=0)) {
+        if (((paramDouble != 0.0D ^ true))) {
             return;
         }
         */
-        if ((paramInt6 <= 0 ? 0 : 1) != 0) {
+        if ((paramInt6 >0)) {
             n = 1;
         } else {
             n = 1 - (paramInt2 - 1) * paramInt6;
         }
         int i2;
         int i3;
-        if ((paramInt4 != 1 ? 0 : 1) != 0)
+        if ((paramInt4 ==1))
         {
             m = 1;
             for (i2 = paramInt2 ; i2 > 0; i2--)
@@ -1454,7 +1454,7 @@ public class JavaBlas implements KBlas {
         }
         else
         {
-            if ((paramInt4 <= 0 ? 0 : 1) != 0) {
+            if ((paramInt4 >0)) {
                 i1 = 1;
             } else {
                 i1 = 1 - (paramInt1 - 1) * paramInt4;
@@ -1486,22 +1486,21 @@ public class JavaBlas implements KBlas {
         int j = 0;
         int k = 0;
         k = 0;
-        if ((paramInt1 >= 1 ? 0 : 1) == 0) {}
-        if (((paramInt3 > 0 ? 0 : 1) !=0)) {
+        if (((paramInt3 <=0))) {
             return k;
         }
         k = 1;
-        if ((paramInt1 != 1 ? 0 : 1) != 0) {
+        if ((paramInt1 ==1)) {
             return k;
         }
         int m;
-        if ((paramInt3 != 1 ? 0 : 1) != 0)
+        if ((paramInt3 ==1))
         {
             d = Math.abs(paramArrayOfDouble[(paramInt2)]);
             i = 2;
-            for (m = paramInt1 - 2 + 1; m > 0; m--)
+            for (m = paramInt1 -1; m > 0; m--)
             {
-                if ((Math.abs(paramArrayOfDouble[(i - 1 + paramInt2)]) <= d ? 0 : 1) != 0)
+                if ((Math.abs(paramArrayOfDouble[(i - 1 + paramInt2)]) > d))
                 {
                     k = i;
                     d = Math.abs(paramArrayOfDouble[(i - 1 + paramInt2)]);
@@ -1515,9 +1514,9 @@ public class JavaBlas implements KBlas {
             d = Math.abs(paramArrayOfDouble[(paramInt2)]);
             j += paramInt3;
             i = 2;
-            for (m = paramInt1 - 2 + 1; m > 0; m--)
+            for (m = paramInt1 -1; m > 0; m--)
             {
-                if ((Math.abs(paramArrayOfDouble[(j - 1 + paramInt2)]) <= d ? 0 : 1) != 0)
+                if ((Math.abs(paramArrayOfDouble[(j - 1 + paramInt2)]) > d))
                 {
                     k = i;
                     d = Math.abs(paramArrayOfDouble[(j - 1 + paramInt2)]);
@@ -1536,11 +1535,11 @@ public class JavaBlas implements KBlas {
         int k = 0;
         int m = 0;
         int n = 0;
-        if ((paramInt1 > 0 ? 0 : 1) != 0) {
+        if ((paramInt1 <= 0)) {
             return;
         }
         int i1;
-        if (((paramInt5 != 1 ? 0 : 1) != 0 ? 1 : 0) != 0)
+        if (((paramInt5 ==1) ? 1 : 0) != 0)
         {
             m = paramInt1 % 3;
             if ((m !=0))
@@ -1553,7 +1552,7 @@ public class JavaBlas implements KBlas {
                     paramArrayOfDouble2[(i - 1 + paramInt4)] = d;
                     i++;
                 }
-                if ((paramInt1 >= 3 ? 0 : 1) != 0) {
+                if ((paramInt1 < 3)) {
                     return;
                 }
             }
@@ -1577,10 +1576,10 @@ public class JavaBlas implements KBlas {
         {
             j = 1;
             k = 1;
-            if ((paramInt3 >= 0 ? 0 : 1) != 0) {
+            if ((paramInt3 <0)) {
                 j = (-paramInt1 + 1) * paramInt3 + 1;
             }
-            if ((paramInt5 >= 0 ? 0 : 1) != 0) {
+            if ((paramInt5 <0)) {
                 k = (-paramInt1 + 1) * paramInt5 + 1;
             }
             i = 1;
@@ -1615,7 +1614,7 @@ public class JavaBlas implements KBlas {
                     paramArrayOfDouble[(i - 1 + paramInt2)] = (paramDouble * paramArrayOfDouble[(i - 1 + paramInt2)]);
                     i++;
                 }
-                if ((paramInt1 >= 5 ? 0 : 1) != 0) {
+                if ((paramInt1 < 5)) {
                     return;
                 }
             }
@@ -1648,11 +1647,11 @@ public class JavaBlas implements KBlas {
         int j = 0;
         int k = 0;
         info[0] = 0;
-        if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+        if ((paramInt1 <0)) {
             info[0] = -1;
-        } else if ((paramInt2 >= 0 ? 0 : 1) != 0) {
+        } else if ((paramInt2 <0)) {
             info[0] = -2;
-        } else if ((paramInt4 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+        } else if ((paramInt4 < Math.max(1, paramInt1))) {
             info[0] = -4;
         }
         if ((info[0] !=0))
@@ -1660,7 +1659,7 @@ public class JavaBlas implements KBlas {
             //Xerbla.xerbla("DGETF2", -info);
             return;
         }
-        if (((paramInt2 != 0 ? 0 : 1) !=0)) {
+        if (((paramInt2 == 0))) {
             return;
         }
         d = PrimitiveHelper.DOUBLE_MIN_VALUE(); //dlamch("S"); //toDo implement later
@@ -1670,11 +1669,11 @@ public class JavaBlas implements KBlas {
             paramArrayOfInt[(j - 1 + paramInt5)] = k;
             if ((paramArrayOfDouble[(k - 1 + (j - 1) * paramInt4 + paramInt3)] !=0.0D))
             {
-                if ((k == j ? 0 : 1) != 0) {
+                if ((k != j)) {
                     dswap(paramInt2, paramArrayOfDouble, j - 1 + paramInt3, paramInt4, paramArrayOfDouble, k - 1 + paramInt3, paramInt4);
                 }
-                if ((j >= paramInt1 ? 0 : 1) != 0) {
-                    if ((Math.abs(paramArrayOfDouble[(j - 1 + (j - 1) * paramInt4 + paramInt3)]) < d ? 0 : 1) != 0)
+                if ((j < paramInt1)) {
+                    if ((Math.abs(paramArrayOfDouble[(j - 1 + (j - 1) * paramInt4 + paramInt3)]) >= d))
                     {
                         dscal(paramInt1 - j, 1.0D / paramArrayOfDouble[(j - 1 + (j - 1) * paramInt4 + paramInt3)], paramArrayOfDouble, j + (j - 1) * paramInt4 + paramInt3, 1);
                     }
@@ -1689,11 +1688,11 @@ public class JavaBlas implements KBlas {
                     }
                 }
             }
-            else if ((info[0] != 0 ? 0 : 1) != 0)
+            else if ((info[0] == 0))
             {
                 info[0] = j;
             }
-            if ((j >= Math.min(paramInt1, paramInt2) ? 0 : 1) != 0) {
+            if ((j < Math.min(paramInt1, paramInt2))) {
                 dger(paramInt1 - j, paramInt2 - j, -1.0D, paramArrayOfDouble, j + (j - 1) * paramInt4 + paramInt3, 1, paramArrayOfDouble, j - 1 + (j + 1 - 1) * paramInt4 + paramInt3, paramInt4, paramArrayOfDouble, j + (j + 1 - 1) * paramInt4 + paramInt3, paramInt4);
             }
             j++;
@@ -1712,14 +1711,14 @@ public class JavaBlas implements KBlas {
         int i4 = 0;
         int i5 = 0;
         double d = 0.0D;
-        if ((paramInt7 <= 0 ? 0 : 1) != 0)
+        if ((paramInt7 >0))
         {
             i2 = paramInt4;
             j = paramInt4;
             k = paramInt5;
             m = 1;
         }
-        else if ((paramInt7 >= 0 ? 0 : 1) != 0)
+        else if ((paramInt7 <0))
         {
             i2 = 1 + (1 - paramInt5) * paramInt7;
             j = paramInt5;
@@ -1743,7 +1742,7 @@ public class JavaBlas implements KBlas {
                 for (i7 = floorDiv((k - j + m), m); i7 > 0; i7--)
                 {
                     n = paramArrayOfInt[(i1 - 1 + paramInt6)];
-                    if ((n == i ? 0 : 1) != 0)
+                    if ((n != i))
                     {
                         i4 = i3;
                         for (int i8 = i3 + 31 - i3 + 1; i8 > 0; i8--)
@@ -1760,7 +1759,7 @@ public class JavaBlas implements KBlas {
                 i3 += 32;
             }
         }
-        if ((i5 == paramInt1 ? 0 : 1) != 0)
+        if ((i5 != paramInt1))
         {
             i5++;
             i1 = i2;
@@ -1768,7 +1767,7 @@ public class JavaBlas implements KBlas {
             for (i6 = floorDiv((k - j + m), m); i6 > 0; i6--)
             {
                 n = paramArrayOfInt[(i1 - 1 + paramInt6)];
-                if ((n == i ? 0 : 1) != 0)
+                if ((n != i))
                 {
                     i4 = i5;
                     for (i7 = paramInt1 - i5 + 1; i7 > 0; i7--)
@@ -1818,13 +1817,13 @@ public class JavaBlas implements KBlas {
                 j = 3;
             } else if ((((!paramString4.equals(KBlasUnitType.UNIT))) && ((!paramString4.equals(KBlasUnitType.NONUNIT))) ? 1 : 0) != 0) {
                 j = 4;
-            } else if ((paramInt1 >= 0 ? 0 : 1) != 0) {
+            } else if ((paramInt1 <0)) {
                 j = 5;
-            } else if ((paramInt2 >= 0 ? 0 : 1) != 0) {
+            } else if ((paramInt2 <0)) {
                 j = 6;
-            } else if ((paramInt4 >= Math.max(1, n) ? 0 : 1) != 0) {
+            } else if ((paramInt4 >= Math.max(1, n) ^ true)) {
                 j = 9;
-            } else if ((paramInt6 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
+            } else if ((paramInt6 >= Math.max(1, paramInt1) ^ true)) {
                 j = 11;
             }
         }
@@ -1833,7 +1832,7 @@ public class JavaBlas implements KBlas {
             //Xerbla.xerbla("DTRSM ", j);
             return;
         }
-        if (((paramInt2 != 0 ? 0 : 1) !=0)) {
+        if (((paramInt2 != 0 ^ true))) {
             return;
         }*/
         int i1;
