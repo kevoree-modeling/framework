@@ -93,19 +93,19 @@ package org.kevoree.modeling.util;
  * var floatArr = new Float64Array(1);
  * var bytes = new Uint8Array(floatArr.buffer);
  * floatArr[0] = d;
- * var exponent = ((bytes[7] & 0x7f) << 4 | bytes[6] >> 4) - 0x3ff;
- * var signAndExp = (((bytes[7] >> 7)&0x1) << 11) + (exponent + 1023);
+ * var exponent = (((bytes[7] & 0x7f) * 16) | (bytes[6] / 16)) - 0x3ff;
+ * var signAndExp = (((bytes[7] / 128) & 0x1) * 2048) + (exponent + 1023);
  * //encode sign + exp
- * result += Base64.encodeArray[(signAndExp >> 6) & 0x3F];
+ * result += Base64.encodeArray[(signAndExp / 64) & 0x3F];
  * result += Base64.encodeArray[signAndExp & 0x3F];
  * result += Base64.encodeArray[bytes[6] & 0x0F];
- * result += Base64.encodeArray[(bytes[5] >> 2) & 0x3F];
- * result += Base64.encodeArray[(bytes[5] & 0x3)<<4 | bytes[4] >> 4];
- * result += Base64.encodeArray[(bytes[4] & 0x0F)<<2 | bytes[3] >> 6];
+ * result += Base64.encodeArray[(bytes[5] / 4) & 0x3F];
+ * result += Base64.encodeArray[((bytes[5] & 0x3) * 16) | (bytes[4] / 16)];
+ * result += Base64.encodeArray[((bytes[4] & 0x0F) * 4) | (bytes[3] / 64)];
  * result += Base64.encodeArray[(bytes[3] & 0x3F)];
- * result += Base64.encodeArray[(bytes[2] >> 2) & 0x3F];
- * result += Base64.encodeArray[(bytes[2] & 0x3)<<4 | bytes[1] >> 4];
- * result += Base64.encodeArray[(bytes[1] & 0x0F)<<2 | bytes[0] >> 6];
+ * result += Base64.encodeArray[(bytes[2] / 4) & 0x3F];
+ * result += Base64.encodeArray[((bytes[2] & 0x3) * 16) | (bytes[1] / 16)];
+ * result += Base64.encodeArray[((bytes[1] & 0x0F) * 4) | (bytes[0] / 64)];
  * result += Base64.encodeArray[(bytes[0] & 0x3F)];
  * var i = result.length-1;
  * while(i >= 3 && result.charAt(i) == 'A') {
@@ -118,25 +118,25 @@ package org.kevoree.modeling.util;
  * var floatArr = new Float64Array(1);
  * var bytes = new Uint8Array(floatArr.buffer);
  * floatArr[0] = d;
- * var exponent = ((bytes[7] & 0x7f) << 4 | bytes[6] >> 4) - 0x3ff;
- * var signAndExp = (((bytes[7] >> 7)&0x1) << 11) + (exponent + 1023);
+ * var exponent = (((bytes[7] & 0x7f) * 16) | bytes[6] / 16) - 0x3ff;
+ * var signAndExp = (((bytes[7] / 128 ) & 0x1) * 2048) + (exponent + 1023);
  * //encode sign + exp
- * result += Base64.encodeArray[(signAndExp >> 6) & 0x3F];
+ * result += Base64.encodeArray[(signAndExp / 64) & 0x3F];
  * result += Base64.encodeArray[signAndExp & 0x3F];
  * result += Base64.encodeArray[bytes[6] & 0x0F];
- * result += Base64.encodeArray[(bytes[5] >> 2) & 0x3F];
- * result += Base64.encodeArray[(bytes[5] & 0x3)<<4 | bytes[4] >> 4];
- * result += Base64.encodeArray[(bytes[4] & 0x0F)<<2 | bytes[3] >> 6];
+ * result += Base64.encodeArray[(bytes[5] / 4) & 0x3F];
+ * result += Base64.encodeArray[((bytes[5] & 0x3) * 16) | (bytes[4] / 16)];
+ * result += Base64.encodeArray[((bytes[4] & 0x0F) * 4) | (bytes[3] / 64)];
  * result += Base64.encodeArray[(bytes[3] & 0x3F)];
- * result += Base64.encodeArray[(bytes[2] >> 2) & 0x3F];
- * result += Base64.encodeArray[(bytes[2] & 0x3)<<4 | bytes[1] >> 4];
- * result += Base64.encodeArray[(bytes[1] & 0x0F)<<2 | bytes[0] >> 6];
+ * result += Base64.encodeArray[(bytes[2] / 4) & 0x3F];
+ * result += Base64.encodeArray[((bytes[2] & 0x3) * 16) | (bytes[1] / 16)];
+ * result += Base64.encodeArray[((bytes[1] & 0x0F) * 4) | (bytes[0] / 64)];
  * result += Base64.encodeArray[(bytes[0] & 0x3F)];
  * var i = result.length-1;
  * while(i >= 3 && result.charAt(i) == 'A') {
  * i--;
  * }
- * buffer.append(result);
+ * buffer.append(result.substr(0,i+1));
  * }
  * public static decodeToDouble(s:string) {
  * return Base64.decodeToDoubleWithBounds(s, 0, s.length);
@@ -191,6 +191,93 @@ package org.kevoree.modeling.util;
  * }
  * return resultTmp;
  * }
+ *
+ *
+ * public static encodeString(s : string) {
+ * var result = "";
+ * var sLength = s.length;
+ * var currentSourceChar;
+ * var currentEncodedChar = 0;
+ * var freeBitsInCurrentChar = 6;
+ *
+ * for(var charIdx = 0; charIdx < sLength; charIdx++) {
+ *   currentSourceChar = s.charCodeAt(charIdx);
+ *   if(freeBitsInCurrentChar == 6) {
+ *     result += Base64.encodeArray[(currentSourceChar / 4) & 0x3F];
+ *     currentEncodedChar = (currentSourceChar & 0x3) * 16;
+ *     freeBitsInCurrentChar = 4;
+ *   } else if(freeBitsInCurrentChar == 4) {
+ *     result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 16) & 0xF)) & 0x3F];
+ *     currentEncodedChar = (currentSourceChar & 0xF) * 4;
+ *     freeBitsInCurrentChar = 2;
+ *   } else if(freeBitsInCurrentChar == 2) {
+ *     result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 64) & 0x3)) & 0x3F];
+ *     result += Base64.encodeArray[currentSourceChar & 0x3F];
+ *     freeBitsInCurrentChar = 6;
+ *   }
+ * }
+ *
+ * if(freeBitsInCurrentChar != 6) {
+ *   result += Base64.encodeArray[currentEncodedChar];
+ * }
+ * return result;
+ * }
+ * public static encodeStringToBuffer(s : string, buffer : java.lang.StringBuilder) {
+ * var sLength = s.length;
+ * var currentSourceChar;
+ * var currentEncodedChar = 0;
+ * var freeBitsInCurrentChar = 6;
+ *
+ * for(var charIdx = 0; charIdx < sLength; charIdx++) {
+ *   currentSourceChar = s.charCodeAt(charIdx);
+ *   if(freeBitsInCurrentChar == 6) {
+ *     buffer.append(Base64.encodeArray[(currentSourceChar / 4) & 0x3F]);
+ *     currentEncodedChar = (currentSourceChar & 0x3) * 16;
+ *     freeBitsInCurrentChar = 4;
+ *   } else if(freeBitsInCurrentChar == 4) {
+ *     buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 16) & 0xF)) & 0x3F]);
+ *     currentEncodedChar = (currentSourceChar & 0xF) * 4;
+ *     freeBitsInCurrentChar = 2;
+ *   } else if(freeBitsInCurrentChar == 2) {
+ *     buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 64) & 0x3)) & 0x3F]);
+ *     buffer.append(Base64.encodeArray[currentSourceChar & 0x3F]);
+ *     freeBitsInCurrentChar = 6;
+ *   }
+ * }
+ *
+ * if(freeBitsInCurrentChar != 6) {
+ *   buffer.append(Base64.encodeArray[currentEncodedChar]);
+ * }
+ * }
+ * public static decodeString(s : string) {
+ * return Base64.decodeToStringWithBounds(s, 0, s.length);
+ * }
+ * public static decodeToStringWithBounds(s : string, offsetBegin : number, offsetEnd : number) {
+ * var result = "";
+ * var currentSourceChar;
+ * var currentDecodedChar = 0;
+ * var freeBitsInCurrentChar = 8;
+ *
+ * for(var charIdx = offsetBegin; charIdx < offsetEnd; charIdx++) {
+ *  currentSourceChar = Base64.decodeArray[s.charAt(charIdx)];
+ *  if(freeBitsInCurrentChar == 8) {
+ *    currentDecodedChar = currentSourceChar * 4;
+ *    freeBitsInCurrentChar = 2;
+ *  } else if(freeBitsInCurrentChar == 2) {
+ *    result += String.fromCharCode(currentDecodedChar | (currentSourceChar / 16));
+ *    currentDecodedChar = (currentSourceChar & 0xF) * 16;
+ *    freeBitsInCurrentChar = 4;
+ *  } else if(freeBitsInCurrentChar == 4) {
+ *    result += String.fromCharCode(currentDecodedChar | (currentSourceChar / 4));
+ *    currentDecodedChar = (currentSourceChar & 0x3) * 64;
+ *    freeBitsInCurrentChar = 6;
+ *  } else if(freeBitsInCurrentChar == 6) {
+ *    result += String.fromCharCode(currentDecodedChar | currentSourceChar);
+ *    freeBitsInCurrentChar = 8;
+ *  }
+ * }
+ * return result;
+ *}
  */
 public class Base64 {
 
@@ -436,12 +523,11 @@ public class Base64 {
         String result = "";
 
         int sLength = s.length();
-        int charIdx = 0;
         char currentSourceChar;
         int currentEncodedChar = 0;
         int freeBitsInCurrentChar = 6;
 
-        while(charIdx < sLength) {
+        for(int charIdx = 0; charIdx < sLength; charIdx++) {
             currentSourceChar = s.charAt(charIdx);
             if(freeBitsInCurrentChar == 6) {
                 result += Base64.encodeArray[currentSourceChar >> 2 & 0x3F];
@@ -456,13 +542,11 @@ public class Base64 {
                 result += Base64.encodeArray[currentSourceChar & 0x3F];
                 freeBitsInCurrentChar = 6;
             }
-            charIdx++;
         }
 
         if(freeBitsInCurrentChar != 6) {
             result += Base64.encodeArray[currentEncodedChar];
         }
-
         return result;
     }
 

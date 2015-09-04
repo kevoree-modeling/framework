@@ -123,9 +123,12 @@ public class Base64Test {
     @Test
     public void zeroDoubleEncodingTest() {
         testDouble(0);
+        testDouble(0.1);
+        testDouble(0.25);
         testDouble(0.5);
         testDouble(0.75);
-        testDouble(0.25);
+        testDouble(1.1);
+        testDouble(2.1);
         testDouble(0.000000000000002);
     }
 
