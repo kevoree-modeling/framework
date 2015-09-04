@@ -84,8 +84,7 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     }
                     previousRef.next = nextRef;
                 }
-
-                if (kobj != null && _resolver != null) {
+                if (_resolver != null) {
                     long[] relatedKeys = _resolver.getRelatedKeys(kobj.obj, kobj.previousResolved.get());
                     int nbKeys = relatedKeys.length / 3;
                     for (int i = 0; i < nbKeys; i++) {
@@ -95,11 +94,9 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                         }
                     }
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
     }
 

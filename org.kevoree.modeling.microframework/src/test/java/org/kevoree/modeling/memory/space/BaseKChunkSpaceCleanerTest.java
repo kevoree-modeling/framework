@@ -17,6 +17,7 @@ import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 import org.kevoree.modeling.scheduler.impl.ExecutorServiceScheduler;
+import org.kevoree.modeling.scheduler.impl.TokenRingScheduler;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -105,31 +106,26 @@ public abstract class BaseKChunkSpaceCleanerTest {
     }*/
 
 
-
     /**
      * @native ts
      */
-    //@Test
+    @Test
     public void polyTest() {
         //final KDataManager manager = createDataManager();
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
         final KMetaAttribute sensorMetaValue = sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
         final KMetaAttribute sensorMetaValue2 = sensorMetaClass.addAttribute("value2", KPrimitiveTypes.DOUBLE);
-       // final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new ExecutorServiceScheduler()).build());
+         final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        //final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
                 KObject sensor = model.create(sensorMetaClass, 0, 0);
                 long uuid = sensor.uuid();
                 sensor = null;
-
-
                 KDefer defer = model.defer();
                 Random random = new Random();
-
-
                 CountDownLatch latch = new CountDownLatch(1000);
                 long countDown = latch.getCount();
                 for (int i = 0; i < countDown; i++) {
@@ -169,6 +165,9 @@ public abstract class BaseKChunkSpaceCleanerTest {
                 defer.then(new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] objects) {
+
+                        System.gc();
+
 
                         System.err.println("WTF!!");
                         ((KInternalDataManager) model.manager()).printDebug();
