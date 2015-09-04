@@ -12,6 +12,7 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 import java.util.ArrayList;
 
@@ -99,7 +100,7 @@ public abstract class BaseKObjectChunkTest {
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
 
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
         model.connect(new KCallback<Throwable>() {
             @Override
@@ -168,7 +169,7 @@ public abstract class BaseKObjectChunkTest {
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
 
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
         model.connect(new KCallback<Throwable>() {
             @Override
@@ -231,7 +232,7 @@ public abstract class BaseKObjectChunkTest {
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
 
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
         model.connect(new KCallback<Throwable>() {
             @Override
@@ -289,7 +290,7 @@ public abstract class BaseKObjectChunkTest {
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
 
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
         model.connect(new KCallback<Throwable>() {
             @Override
@@ -337,7 +338,7 @@ public abstract class BaseKObjectChunkTest {
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
         model.connect(new KCallback<Throwable>() {
             @Override
@@ -412,7 +413,7 @@ public abstract class BaseKObjectChunkTest {
         homeMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
 
 
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
         model.connect(new KCallback<Throwable>() {
             @Override

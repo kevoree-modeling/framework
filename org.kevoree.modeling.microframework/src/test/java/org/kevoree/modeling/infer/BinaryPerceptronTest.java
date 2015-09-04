@@ -14,6 +14,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 import java.util.Random;
 
@@ -84,7 +85,7 @@ public class BinaryPerceptronTest {
     public int test() {
 
         KMetaModel mm = createMetaModel();
-        KModel model = mm.createModel(DataManagerBuilder.buildDefault());
+        KModel model = mm.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         final int[] correct = new int[1];
         correct[0] = 0;
 

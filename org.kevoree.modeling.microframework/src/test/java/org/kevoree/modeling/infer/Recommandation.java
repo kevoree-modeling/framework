@@ -11,6 +11,7 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 /**
  * Created by assaad on 16/07/15.
@@ -49,7 +50,7 @@ public class Recommandation {
     @Test
     public void recTest(){
         KMetaModel mm = createMetaModel();
-        KModel model = mm.createModel(DataManagerBuilder.buildDefault());
+        KModel model = mm.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {

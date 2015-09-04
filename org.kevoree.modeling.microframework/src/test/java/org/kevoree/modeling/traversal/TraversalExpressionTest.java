@@ -9,6 +9,7 @@ import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class TraversalExpressionTest {
 
@@ -20,7 +21,7 @@ public class TraversalExpressionTest {
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
-        final KModel universe = metaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel universe = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         universe.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

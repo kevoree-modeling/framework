@@ -206,77 +206,81 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 connectCallback.on(new Exception("Please attach a KDataBase AND a KBroker first !"));
             }
         } else {
-            _scheduler.start();
-            _db.connect(new KCallback<Throwable>() {
+            DataManager selfPointer = this;
+            selfPointer._scheduler.dispatch(new Runnable() {
                 @Override
-                public void on(Throwable throwable) {
-                    if (throwable == null) {
-
-                        KMessage operationMapping = new Message();
-                        operationMapping.setType(Message.OPERATION_MAPPING);
-                        operationMapping.setValues(_operationManager.mappings());
-                        _db.sendToPeer(null, operationMapping, null);
-
-                        _db.atomicGetIncrement(new long[]{KConfig.END_OF_TIME, KConfig.NULL_LONG, KConfig.NULL_LONG},
-                                new KCallback<Short>() {
-                                    @Override
-                                    public void on(Short newPrefix) {
-                                        prefix = newPrefix;
-                                        long[] connectionKeys = new long[]{
-                                                KConfig.BEGINNING_OF_TIME, KConfig.NULL_LONG, newPrefix, //LastUniverseIndexFromPrefix
-                                                KConfig.END_OF_TIME, KConfig.NULL_LONG, newPrefix, //LastObjectIndexFromPrefix
-                                                KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG //GlobalUniverseTree
-                                        };
-                                        _db.get(connectionKeys, new KCallback<String[]>() {
+                public void run() {
+                    selfPointer._scheduler.start();
+                    selfPointer._db.connect(new KCallback<Throwable>() {
+                        @Override
+                        public void on(Throwable throwable) {
+                            if (throwable == null) {
+                                KMessage operationMapping = new Message();
+                                operationMapping.setType(Message.OPERATION_MAPPING);
+                                operationMapping.setValues(_operationManager.mappings());
+                                selfPointer._db.sendToPeer(null, operationMapping, null);
+                                selfPointer._db.atomicGetIncrement(new long[]{KConfig.END_OF_TIME, KConfig.NULL_LONG, KConfig.NULL_LONG},
+                                        new KCallback<Short>() {
                                             @Override
-                                            public void on(String[] strings) {
-                                                if (strings.length == 3) {
-                                                    Exception detected = null;
-                                                    try {
-                                                        String uniIndexPayload = strings[UNIVERSE_INDEX];
-                                                        if (uniIndexPayload == null || PrimitiveHelper.equals(uniIndexPayload, "")) {
-                                                            uniIndexPayload = "0";
-                                                        }
-                                                        String objIndexPayload = strings[OBJ_INDEX];
-                                                        if (objIndexPayload == null || PrimitiveHelper.equals(objIndexPayload, "")) {
-                                                            objIndexPayload = "0";
-                                                        }
-                                                        String globalUniverseTreePayload = strings[GLO_TREE_INDEX];
-                                                        KLongLongMap globalUniverseTree = (KLongLongMap) _spaceManager.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
-                                                        if (globalUniverseTreePayload != null) {
+                                            public void on(Short newPrefix) {
+                                                selfPointer.prefix = newPrefix;
+                                                long[] connectionKeys = new long[]{
+                                                        KConfig.BEGINNING_OF_TIME, KConfig.NULL_LONG, newPrefix, //LastUniverseIndexFromPrefix
+                                                        KConfig.END_OF_TIME, KConfig.NULL_LONG, newPrefix, //LastObjectIndexFromPrefix
+                                                        KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG //GlobalUniverseTree
+                                                };
+                                                selfPointer._db.get(connectionKeys, new KCallback<String[]>() {
+                                                    @Override
+                                                    public void on(String[] strings) {
+                                                        if (strings.length == 3) {
+                                                            Exception detected = null;
                                                             try {
-                                                                globalUniverseTree.init(globalUniverseTreePayload, model().metaModel(), -1);
+                                                                String uniIndexPayload = strings[UNIVERSE_INDEX];
+                                                                if (uniIndexPayload == null || PrimitiveHelper.equals(uniIndexPayload, "")) {
+                                                                    uniIndexPayload = "0";
+                                                                }
+                                                                String objIndexPayload = strings[OBJ_INDEX];
+                                                                if (objIndexPayload == null || PrimitiveHelper.equals(objIndexPayload, "")) {
+                                                                    objIndexPayload = "0";
+                                                                }
+                                                                String globalUniverseTreePayload = strings[GLO_TREE_INDEX];
+                                                                KLongLongMap globalUniverseTree = (KLongLongMap) _spaceManager.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
+                                                                if (globalUniverseTreePayload != null) {
+                                                                    try {
+                                                                        globalUniverseTree.init(globalUniverseTreePayload, model().metaModel(), -1);
+                                                                    } catch (Exception e) {
+                                                                        e.printStackTrace();
+                                                                    }
+                                                                }
+                                                                long newUniIndex = PrimitiveHelper.parseLong(uniIndexPayload);
+                                                                long newObjIndex = PrimitiveHelper.parseLong(objIndexPayload);
+                                                                selfPointer._universeKeyCalculator = new KeyCalculator(prefix, newUniIndex);
+                                                                selfPointer._objectKeyCalculator = new KeyCalculator(prefix, newObjIndex);
+                                                                selfPointer.isConnected = true;
                                                             } catch (Exception e) {
-                                                                e.printStackTrace();
+                                                                detected = e;
+                                                            }
+                                                            if (connectCallback != null) {
+                                                                connectCallback.on(detected);
+                                                            }
+                                                        } else {
+                                                            if (connectCallback != null) {
+                                                                connectCallback.on(new Exception("Error while connecting the KDataStore..."));
                                                             }
                                                         }
-                                                        long newUniIndex = PrimitiveHelper.parseLong(uniIndexPayload);
-                                                        long newObjIndex = PrimitiveHelper.parseLong(objIndexPayload);
-                                                        _universeKeyCalculator = new KeyCalculator(prefix, newUniIndex);
-                                                        _objectKeyCalculator = new KeyCalculator(prefix, newObjIndex);
-                                                        isConnected = true;
-                                                    } catch (Exception e) {
-                                                        detected = e;
+
                                                     }
-                                                    if (connectCallback != null) {
-                                                        connectCallback.on(detected);
-                                                    }
-                                                } else {
-                                                    if (connectCallback != null) {
-                                                        connectCallback.on(new Exception("Error while connecting the KDataStore..."));
-                                                    }
-                                                }
+                                                });
 
                                             }
                                         });
-
-                                    }
-                                });
-                    } else {
-                        if (connectCallback != null) {
-                            connectCallback.on(throwable);
+                            } else {
+                                if (connectCallback != null) {
+                                    connectCallback.on(throwable);
+                                }
+                            }
                         }
-                    }
+                    });
                 }
             });
         }

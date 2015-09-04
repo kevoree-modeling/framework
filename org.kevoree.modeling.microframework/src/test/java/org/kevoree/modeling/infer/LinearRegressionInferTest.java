@@ -12,6 +12,7 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.Random;
@@ -77,7 +78,7 @@ public class LinearRegressionInferTest {
     @Test
     public void test() {
         mm = createMetaModel();
-        model = mm.createModel(DataManagerBuilder.buildDefault());
+        model = mm.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {

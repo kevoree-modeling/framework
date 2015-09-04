@@ -11,21 +11,7 @@ public class TokenRingScheduler implements KScheduler, Runnable {
 
     LockFreeBoundedQueue tasks = new LockFreeBoundedQueue(10000);
     private Thread worker;
-
-    public static void main(String[] args) {
-        TokenRingScheduler scheduler = new TokenRingScheduler();
-        scheduler.start();
-        /*
-        scheduler.dispatch(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Hello");
-                scheduler.dispatch(this);
-                scheduler.dispatch(this);
-            }
-        });*/
-    }
-
+    
     @Override
     public void dispatch(Runnable task) {
         boolean result = tasks.offer(task);

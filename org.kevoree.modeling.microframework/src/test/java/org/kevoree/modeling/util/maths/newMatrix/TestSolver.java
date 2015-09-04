@@ -34,7 +34,6 @@ public class TestSolver {
                 }
             }
         }
-        System.out.println("Error counts: "+count);
         Assert.assertTrue(test);
     }
 }

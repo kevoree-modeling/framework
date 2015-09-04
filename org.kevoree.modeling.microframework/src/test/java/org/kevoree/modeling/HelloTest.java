@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.cloudmodel.*;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 import org.kevoree.modeling.traversal.visitor.KModelVisitor;
 import org.kevoree.modeling.traversal.visitor.KVisitResult;
 
@@ -11,7 +12,7 @@ public class HelloTest {
 
     @Test
     public void badLookupTest() {
-        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
+        final CloudModel model = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -46,7 +47,7 @@ public class HelloTest {
 
     @Test
     public void simpleTest() {
-        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
+        final CloudModel model = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {
@@ -79,82 +80,87 @@ public class HelloTest {
 
     @Test
     public void helloTest() {
-        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
-        universe.connect(null);
+        CloudModel universe = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        universe.connect(new KCallback() {
+            @Override
+            public void on(Object o) {
 
-        CloudUniverse dimension0 = universe.newUniverse();
 
-        Assert.assertNotNull(dimension0);
-        CloudView t0 = dimension0.time(0l);
+                CloudUniverse dimension0 = universe.newUniverse();
 
-        Assert.assertNotNull(t0);
-        Assert.assertEquals(t0.now(), 0l);
-        Node nodeT0 = t0.createNode();
-        Assert.assertNotNull(nodeT0);
-        Assert.assertNotNull(nodeT0.uuid());
-        // assertNotNull(nodeT0.path());
-        Assert.assertNull(nodeT0.getName());
-        //Assert.assertEquals("name=", nodeT0.domainKey());
-        nodeT0.setName("node0");
-        Assert.assertEquals("node0", nodeT0.getName());
-        //Assert.assertEquals("name=node0", nodeT0.domainKey());
-        Assert.assertEquals(0l, nodeT0.now());
+                Assert.assertNotNull(dimension0);
+                CloudView t0 = dimension0.time(0l);
+
+                Assert.assertNotNull(t0);
+                Assert.assertEquals(t0.now(), 0l);
+                Node nodeT0 = t0.createNode();
+                Assert.assertNotNull(nodeT0);
+                Assert.assertNotNull(nodeT0.uuid());
+                // assertNotNull(nodeT0.path());
+                Assert.assertNull(nodeT0.getName());
+                //Assert.assertEquals("name=", nodeT0.domainKey());
+                nodeT0.setName("node0");
+                Assert.assertEquals("node0", nodeT0.getName());
+                //Assert.assertEquals("name=node0", nodeT0.domainKey());
+                Assert.assertEquals(0l, nodeT0.now());
 //        assertNull(nodeT0.parentPath());
-        Element child0 = t0.createElement();
-        //TODO reInsert following test
-        //Assert.assertNotNull(child0.timeTree());
-        //Assert.assertTrue(child0.timeTree().last().equals(0l));
-        //Assert.assertTrue(child0.timeTree().first().equals(0l));
+                Element child0 = t0.createElement();
+                //TODO reInsert following test
+                //Assert.assertNotNull(child0.timeTree());
+                //Assert.assertTrue(child0.timeTree().last().equals(0l));
+                //Assert.assertTrue(child0.timeTree().first().equals(0l));
 
-        Node nodeT1 = t0.createNode();
-        nodeT1.setName("n1");
+                Node nodeT1 = t0.createNode();
+                nodeT1.setName("n1");
 
-        nodeT0.addChildren(nodeT1);
+                nodeT0.addChildren(nodeT1);
 
 //        assertTrue(nodeT1.path().endsWith("/children[name=n1]"));
 
-        final int[] i = {0};
-        final int[] j = {0};
-        nodeT0.getChildren(new KCallback<Node[]>() {
-            @Override
-            public void on(Node[] n) {
-                for (int k = 0; k < n.length; k++) {
-                    i[0]++;
-                }
-            }
-        });
+                final int[] i = {0};
+                final int[] j = {0};
+                nodeT0.getChildren(new KCallback<Node[]>() {
+                    @Override
+                    public void on(Node[] n) {
+                        for (int k = 0; k < n.length; k++) {
+                            i[0]++;
+                        }
+                    }
+                });
 
 
 //        Assert.assertEquals(1, i[0]);
-        Node nodeT3 = t0.createNode();
-        nodeT3.setName("n3");
-        nodeT1.addChildren(nodeT3);
+                Node nodeT3 = t0.createNode();
+                nodeT3.setName("n3");
+                nodeT1.addChildren(nodeT3);
 
 
-        i[0] = 0;
-        j[0] = 0;
-        nodeT0.visit(new KModelVisitor() {
-            @Override
-            public KVisitResult visit(KObject elem) {
-                i[0]++;
-                return KVisitResult.CONTINUE;
-            }
-        }, new KCallback<Throwable>() {
-            @Override
-            public void on(Throwable t) {
-                j[0]++;
+                i[0] = 0;
+                j[0] = 0;
+                nodeT0.visit(new KModelVisitor() {
+                    @Override
+                    public KVisitResult visit(KObject elem) {
+                        i[0]++;
+                        return KVisitResult.CONTINUE;
+                    }
+                }, new KCallback<Throwable>() {
+                    @Override
+                    public void on(Throwable t) {
+                        j[0]++;
+                    }
+                });
+                //      Assert.assertEquals(2, i[0]);
+                //      Assert.assertEquals(1, j[0]);
+
+                Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toJSON());
+                Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toString());
             }
         });
-  //      Assert.assertEquals(2, i[0]);
-  //      Assert.assertEquals(1, j[0]);
-
-        Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toJSON());
-        Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toString());
     }
 
     @Test
     public void contextTest() {
-        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
+        final CloudModel model = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

@@ -10,7 +10,6 @@ import org.kevoree.modeling.scheduler.KScheduler;
 /** @ignore ts */
 public class SchedulerTest extends BaseKSchedulerTest {
 
-
     @Override
     public KScheduler createScheduler() {
         return new ExecutorServiceScheduler();

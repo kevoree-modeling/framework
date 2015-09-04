@@ -15,7 +15,7 @@ public class XMISaveTest {
 
     @Test
     public void xmiSaveTest() throws InterruptedException {
-        CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
+        CloudModel universe = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build()rel);
         universe.connect(null);
         CloudUniverse dimension0 = universe.newUniverse();
         final CloudView t0 = dimension0.time(0l);

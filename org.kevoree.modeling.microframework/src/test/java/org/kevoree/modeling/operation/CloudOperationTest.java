@@ -9,11 +9,12 @@ import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.meta.MetaNode;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class CloudOperationTest {
 
     public static void main(String[] args) {
-        final CloudModel model = new CloudModel(DataManagerBuilder.buildDefault());
+        final CloudModel model = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

@@ -10,6 +10,7 @@ import org.kevoree.modeling.infer.impl.StatInferAlg;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class BasicEnumInferTest {
 
@@ -34,7 +35,7 @@ public class BasicEnumInferTest {
     @Test
     public void test() {
         KMetaModel mm = createMetaModel();
-        KModel model = mm.createModel(DataManagerBuilder.buildDefault());
+        KModel model = mm.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {

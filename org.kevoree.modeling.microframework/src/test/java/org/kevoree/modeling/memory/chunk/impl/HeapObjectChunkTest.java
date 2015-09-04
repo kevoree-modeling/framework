@@ -4,6 +4,7 @@ import org.kevoree.modeling.memory.chunk.BaseKObjectChunkTest;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class HeapObjectChunkTest extends BaseKObjectChunkTest {
 
@@ -14,6 +15,6 @@ public class HeapObjectChunkTest extends BaseKObjectChunkTest {
 
     @Override
     public KInternalDataManager createKInternalDataManger() {
-        return DataManagerBuilder.buildDefault();
+        return DataManagerBuilder.create().withScheduler(new DirectScheduler()).build();
     }
 }

@@ -21,7 +21,7 @@ public class KolyfillTest {
 
         ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        KModel model = metaModel.createModel(DataManagerBuilder.buildDefault());
+        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build()rel);
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {

@@ -5,10 +5,13 @@ import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 import java.util.concurrent.CountDownLatch;
 
-/** @ignore ts */
+/**
+ * @ignore ts
+ */
 public class MultiUniverseTest {
 
     private MetaModel dynamicMetaModel;
@@ -27,88 +30,90 @@ public class MultiUniverseTest {
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
         sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
 
-        model = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
-        model.connect(null);
-
-        object = model.universe(0).time(timeOrigine).create(sensorMetaClass);
-
-
-        long unit = 1000;
-
-        insert(0, timeOrigine, 1);
-        insert(0, timeOrigine + unit, 5);
-        insert(0, timeOrigine + 4 * unit, 8);
-        assert (get(0, timeOrigine + 5 * unit) == 8);
-
-        split(0, timeOrigine + 2 * unit);
-        assert (get(0, timeOrigine + unit) == 5);
-        assert (get(1, timeOrigine + unit) == 5);
-
-        assert (get(0, timeOrigine + 5 * unit) == 8);
-        //  assert(getPrimitiveType(1,timeOrigine+5*unit)==5);
-        assert (get(1, timeOrigine + 5 * unit) == 8);
-
-        insert(0, timeOrigine + 3 * unit, -2);
-        assert (get(0, timeOrigine + 3 * unit) == -2);
-        assert (get(1, timeOrigine + 3 * unit) == -2);
-        //assert(getPrimitiveType(1,timeOrigine+3*unit)==5);
-
-        insert(1, timeOrigine + 3 * unit, 7);
-        assert (get(0, timeOrigine + 3 * unit) == -2);
-        assert (get(1, timeOrigine + 3 * unit) == 7);
-
-        split(1, timeOrigine + 20 * unit);
-        split(2, timeOrigine + 30 * unit);
-
-        assert (get(2, timeOrigine + 40 * unit) == 7);
-        insert(0, timeOrigine + 10 * unit, -20);
-        insert(1, timeOrigine + 4 * unit, -15);
-
-        assert (get(1, timeOrigine + 4 * unit) == -15);
-        assert (get(2, timeOrigine + 4 * unit) == -15);
-        assert (get(3, timeOrigine + 4 * unit) == -15);
-
-        insert(3, timeOrigine + 17 * unit, 80);
-
-        assert (get(0, timeOrigine + 17 * unit) == -20);
-        assert (get(1, timeOrigine + 17 * unit) == -15);
-        assert (get(2, timeOrigine + 17 * unit) == -15);
-        assert (get(3, timeOrigine + 17 * unit) == 80);
+        model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        model.connect(new KCallback() {
+            @Override
+            public void on(Object o) {
+                object = model.universe(0).time(timeOrigine).create(sensorMetaClass);
 
 
-        insert(1, timeOrigine + 18 * unit, 100);
+                long unit = 1000;
 
-        assert (get(0, timeOrigine + 18 * unit) == -20);
-        assert (get(1, timeOrigine + 18 * unit) == 100);
-        assert (get(2, timeOrigine + 18 * unit) == 100);
-        assert (get(3, timeOrigine + 18 * unit) == 80);
+                insert(0, timeOrigine, 1);
+                insert(0, timeOrigine + unit, 5);
+                insert(0, timeOrigine + 4 * unit, 8);
+                assert (get(0, timeOrigine + 5 * unit) == 8);
 
-        insert(3, timeOrigine + 40 * unit, 78);
+                split(0, timeOrigine + 2 * unit);
+                assert (get(0, timeOrigine + unit) == 5);
+                assert (get(1, timeOrigine + unit) == 5);
 
-        assert (get(0, timeOrigine + 40 * unit) == -20);
-        assert (get(1, timeOrigine + 40 * unit) == 100);
-        assert (get(2, timeOrigine + 40 * unit) == 100);
-        //assert(getPrimitiveType(2,timeOrigine+40*unit)==7);
-        assert (get(3, timeOrigine + 40 * unit) == 78);
+                assert (get(0, timeOrigine + 5 * unit) == 8);
+                //  assert(getPrimitiveType(1,timeOrigine+5*unit)==5);
+                assert (get(1, timeOrigine + 5 * unit) == 8);
+
+                insert(0, timeOrigine + 3 * unit, -2);
+                assert (get(0, timeOrigine + 3 * unit) == -2);
+                assert (get(1, timeOrigine + 3 * unit) == -2);
+                //assert(getPrimitiveType(1,timeOrigine+3*unit)==5);
+
+                insert(1, timeOrigine + 3 * unit, 7);
+                assert (get(0, timeOrigine + 3 * unit) == -2);
+                assert (get(1, timeOrigine + 3 * unit) == 7);
+
+                split(1, timeOrigine + 20 * unit);
+                split(2, timeOrigine + 30 * unit);
+
+                assert (get(2, timeOrigine + 40 * unit) == 7);
+                insert(0, timeOrigine + 10 * unit, -20);
+                insert(1, timeOrigine + 4 * unit, -15);
+
+                assert (get(1, timeOrigine + 4 * unit) == -15);
+                assert (get(2, timeOrigine + 4 * unit) == -15);
+                assert (get(3, timeOrigine + 4 * unit) == -15);
+
+                insert(3, timeOrigine + 17 * unit, 80);
+
+                assert (get(0, timeOrigine + 17 * unit) == -20);
+                assert (get(1, timeOrigine + 17 * unit) == -15);
+                assert (get(2, timeOrigine + 17 * unit) == -15);
+                assert (get(3, timeOrigine + 17 * unit) == 80);
 
 
-        insert(2, timeOrigine + 25 * unit, -11);
+                insert(1, timeOrigine + 18 * unit, 100);
 
-        assert (get(0, timeOrigine + 25 * unit) == -20);
-        assert (get(1, timeOrigine + 25 * unit) == 100);
-        assert (get(2, timeOrigine + 25 * unit) == -11);
-        assert (get(3, timeOrigine + 25 * unit) == 80);
+                assert (get(0, timeOrigine + 18 * unit) == -20);
+                assert (get(1, timeOrigine + 18 * unit) == 100);
+                assert (get(2, timeOrigine + 18 * unit) == 100);
+                assert (get(3, timeOrigine + 18 * unit) == 80);
+
+                insert(3, timeOrigine + 40 * unit, 78);
+
+                assert (get(0, timeOrigine + 40 * unit) == -20);
+                assert (get(1, timeOrigine + 40 * unit) == 100);
+                assert (get(2, timeOrigine + 40 * unit) == 100);
+                //assert(getPrimitiveType(2,timeOrigine+40*unit)==7);
+                assert (get(3, timeOrigine + 40 * unit) == 78);
 
 
-        insert(2, timeOrigine + 45 * unit, 35);
+                insert(2, timeOrigine + 25 * unit, -11);
 
-        assert (get(0, timeOrigine + 45 * unit) == -20);
-        assert (get(1, timeOrigine + 45 * unit) == 100);
-        assert (get(2, timeOrigine + 45 * unit) == 35);
-        assert (get(3, timeOrigine + 45 * unit) == 78);
+                assert (get(0, timeOrigine + 25 * unit) == -20);
+                assert (get(1, timeOrigine + 25 * unit) == 100);
+                assert (get(2, timeOrigine + 25 * unit) == -11);
+                assert (get(3, timeOrigine + 25 * unit) == 80);
 
-        assert (get(3, timeOrigine + 1 * unit) == 5);
 
+                insert(2, timeOrigine + 45 * unit, 35);
+
+                assert (get(0, timeOrigine + 45 * unit) == -20);
+                assert (get(1, timeOrigine + 45 * unit) == 100);
+                assert (get(2, timeOrigine + 45 * unit) == 35);
+                assert (get(3, timeOrigine + 45 * unit) == 78);
+
+                assert (get(3, timeOrigine + 1 * unit) == 5);
+            }
+        });
     }
 
     private void split(int parent, long splitTime) {

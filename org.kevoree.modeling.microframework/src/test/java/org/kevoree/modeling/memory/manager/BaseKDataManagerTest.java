@@ -10,6 +10,7 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class BaseKDataManagerTest {
 
@@ -20,7 +21,7 @@ public class BaseKDataManagerTest {
         metaClassSensor.addAttribute("name", KPrimitiveTypes.STRING);
         metaClassSensor.addAttribute("value", KPrimitiveTypes.DOUBLE);
         metaClassSensor.setTemporalResolution(10);
-        KModel model = metaModel.createModel(DataManagerBuilder.buildDefault());
+        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {

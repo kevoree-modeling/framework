@@ -8,6 +8,7 @@ import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 /**
  * Created by duke on 29/04/15.
@@ -82,7 +83,7 @@ public class SpeedTest {
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
-        final KModel universe = dynamicMetaModel.createModel(DataManagerBuilder.buildDefault());
+        final KModel universe = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
         universe.connect(new KCallback<Throwable>() {
             @Override

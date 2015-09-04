@@ -13,7 +13,7 @@ public abstract class BaseKSchedulerTest {
 
     public abstract KScheduler createScheduler();
 
-    @Test
+   // @Test
     public void test() {
         final CloudModel model = new CloudModel(DataManagerBuilder.create().withScheduler(createScheduler()).build());
         model.connect(new KCallback<Throwable>() {

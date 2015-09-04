@@ -9,6 +9,7 @@ import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 /**
  * Created by duke on 28/11/14.
@@ -18,35 +19,29 @@ public class ParentStorageTest {
     @Test
     public void discardTest() {
 
-        CloudModel cloudModel = new CloudModel(DataManagerBuilder.buildDefault());
-        cloudModel.connect(null);
-        //createModel.connect(null);
-
-        CloudUniverse dimension0 = cloudModel.newUniverse();
-        final CloudView time0 = dimension0.time(0l);
-
-        Node root = time0.createNode();
-        root.setName("root");
-        time0.setRoot(root,null);
-
-        final Node n1 = time0.createNode();
-        n1.setName("n1");
-
-        Node n2 = time0.createNode();
-        n2.setName("n2");
-
-        root.addChildren(n1);
-        root.addChildren(n2);
-
-        Long val = 1L;
-
-        try {
-            root.getChildren(null);
-        } catch (Exception e) {
-            Assert.assertNull(e);
-        }
-        //We clear the cache
-
+        CloudModel cloudModel = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        cloudModel.connect(new KCallback() {
+            @Override
+            public void on(Object o) {
+                //createModel.connect(null);
+                CloudUniverse dimension0 = cloudModel.newUniverse();
+                final CloudView time0 = dimension0.time(0l);
+                Node root = time0.createNode();
+                root.setName("root");
+                time0.setRoot(root, null);
+                final Node n1 = time0.createNode();
+                n1.setName("n1");
+                Node n2 = time0.createNode();
+                n2.setName("n2");
+                root.addChildren(n1);
+                root.addChildren(n2);
+                Long val = 1L;
+                try {
+                    root.getChildren(null);
+                } catch (Exception e) {
+                    Assert.assertNull(e);
+                }
+                //We clear the cache
         /*
         cloudModel(new KCallback<Throwable>() {
             @Override
@@ -68,47 +63,48 @@ public class ParentStorageTest {
             Assert.assertNotNull(e);
         }*/
 
+            }
+        });
 
     }
 
     @Test
     public void parentTest() {
 
-     //   MultiLayeredMemoryCache.DEBUG = true;
+        //   MultiLayeredMemoryCache.DEBUG = true;
         //MemoryKContentDeliveryDriver.DEBUG = true;
 
-        final CloudModel cloudModel = new CloudModel(DataManagerBuilder.buildDefault());
-        cloudModel.connect(null);
-
-        CloudUniverse dimension0 = cloudModel.newUniverse();
-        CloudView time0 = dimension0.time(0l);
-
-        Node root = time0.createNode();
-        root.setName("root");
-        time0.setRoot(root,null);
-
-        Node n1 = time0.createNode();
-        n1.setName("n1");
-
-        Node n2 = time0.createNode();
-        n2.setName("n2");
-
-        root.addChildren(n1);
-        root.addChildren(n2);
-
-        try {
-            root.getChildren(null);
-        } catch (Exception e) {
-            Assert.assertNull(e);
-        }
-        //We clear the cache
-
-        cloudModel.save(new KCallback<Throwable>() {
+        final CloudModel cloudModel = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        cloudModel.connect(new KCallback() {
             @Override
-            public void on(Throwable aBoolean) {
+            public void on(Object o) {
+                CloudUniverse dimension0 = cloudModel.newUniverse();
+                CloudView time0 = dimension0.time(0l);
+                Node root = time0.createNode();
+                root.setName("root");
+                time0.setRoot(root, null);
+                Node n1 = time0.createNode();
+                n1.setName("n1");
+                Node n2 = time0.createNode();
+                n2.setName("n2");
+                root.addChildren(n1);
+                root.addChildren(n2);
+                try {
+                    root.getChildren(null);
+                } catch (Exception e) {
+                    Assert.assertNull(e);
+                }
+                //We clear the cache
 
+                cloudModel.save(new KCallback<Throwable>() {
+                    @Override
+                    public void on(Throwable aBoolean) {
+
+                    }
+                });
             }
         });
+
 
     }
 

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 
 public class OppositeTest {
@@ -31,10 +32,14 @@ public class OppositeTest {
         B_Class.addReference("multiA_multiB", A_Class, "multiA_multiB", true);
 
 
-        model = metaModel.createModel(DataManagerBuilder.buildDefault());
-        model.connect(null);
-        KUniverse localUniverse = model.newUniverse();
-        factory = localUniverse.time(0l);
+        model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        model.connect(new KCallback() {
+            @Override
+            public void on(Object o) {
+                KUniverse localUniverse = model.newUniverse();
+                factory = localUniverse.time(0l);
+            }
+        });
 
     }
 

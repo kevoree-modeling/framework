@@ -7,6 +7,7 @@ import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 /**
  * Created by duke on 04/02/15.
@@ -15,7 +16,7 @@ public class ParentAndReverseTest {
 
     @Test
     public void reverseQueryTest() {
-        final CloudModel universe = new CloudModel(DataManagerBuilder.buildDefault());
+        final CloudModel universe = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         universe.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

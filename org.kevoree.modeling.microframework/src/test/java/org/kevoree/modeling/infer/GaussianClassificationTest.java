@@ -16,6 +16,7 @@ import org.kevoree.modeling.meta.KMetaEnum;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class GaussianClassificationTest {
     private KMetaModel createMetaModel() {
@@ -206,7 +207,7 @@ public class GaussianClassificationTest {
 
 
         KMetaModel mm = createMetaModel();
-        KModel model = mm.createModel(DataManagerBuilder.buildDefault());
+        KModel model = mm.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
