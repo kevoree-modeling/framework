@@ -19,12 +19,21 @@ public class TokenRingScheduler implements KScheduler, Runnable {
         }
     }
 
+    private Thread[] workers;
+    private ThreadGroup tg;
+
     @Override
     public synchronized void start() {
-        Thread worker = new Thread(this);
-        worker.setDaemon(false);
+
+        tg = new ThreadGroup("KMF_TokenRing");
+
         isAlive = true;
-        worker.start();
+        workers = new Thread[_nbWorker];
+        for(int i=0;i<_nbWorker;i++){
+            workers[i] = new Thread(tg, this, "KMF_TokenRing_Thread_"+i);
+            workers[i].setDaemon(false);
+            workers[i].start();
+        }
     }
 
     @Override
@@ -32,7 +41,14 @@ public class TokenRingScheduler implements KScheduler, Runnable {
         isAlive = false;
     }
 
-    private boolean isAlive = false;
+    private volatile boolean isAlive = false;
+
+    private int _nbWorker = 1;
+
+    public TokenRingScheduler workers(int p_w){
+        this._nbWorker = p_w;
+        return this;
+    }
 
     @Override
     public void run() {
@@ -47,7 +63,7 @@ public class TokenRingScheduler implements KScheduler, Runnable {
                     }
                 } else {
                     try {
-                        Thread.sleep(50);
+                        Thread.sleep(10*_nbWorker);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

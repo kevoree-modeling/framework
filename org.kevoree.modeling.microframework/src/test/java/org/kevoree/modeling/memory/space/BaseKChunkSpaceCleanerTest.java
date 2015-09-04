@@ -116,7 +116,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
         final KMetaAttribute sensorMetaValue = sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
         final KMetaAttribute sensorMetaValue2 = sensorMetaClass.addAttribute("value2", KPrimitiveTypes.DOUBLE);
         //   final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler()).build());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler().workers(3)).build());
         model.connect(new KCallback<Throwable>() {
 
             @Override
@@ -131,9 +131,12 @@ public abstract class BaseKChunkSpaceCleanerTest {
                     model.lookup(0, i, uuid, new KCallback<KObject>() {
                         @Override
                         public void on(final KObject jumpedSensor) {
+
+                            System.err.println(Thread.currentThread().toString());
+
                             try {
-                                //jumpedSensor.setByName("value2", random.nextDouble());
-                                jumpedSensor.setByName("value", random.nextDouble());
+                                jumpedSensor.setByName("value2", random.nextDouble());
+                                //jumpedSensor.setByName("value", random.nextDouble());
                                 if (jumpedSensor.now() % 100 == 0) {
                                     model.save(null);
                                 }
