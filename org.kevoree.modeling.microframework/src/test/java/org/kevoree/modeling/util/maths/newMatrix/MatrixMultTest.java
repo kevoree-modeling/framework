@@ -13,7 +13,6 @@ import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 
-import java.util.Random;
 
 /**
  * @ignore ts
@@ -180,9 +179,9 @@ public class MatrixMultTest {
         SimpleMatrix ejmlmatB= new SimpleMatrix(dimB[0], dimB[1]);
         SimpleMatrix ejmlmatC= new SimpleMatrix(dimC[0], dimC[1]);
 
-        MatrixOperations.copyMatrix(matA, ejmlmatA);
-        MatrixOperations.copyMatrix(matB, ejmlmatB);
-        MatrixOperations.copyMatrix(matC, ejmlmatC);
+        CommonOps.copyMatrix(matA, ejmlmatA);
+        CommonOps.copyMatrix(matB, ejmlmatB);
+        CommonOps.copyMatrix(matC, ejmlmatC);
 
       //  System.out.println("Init done");
 

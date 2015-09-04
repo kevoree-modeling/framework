@@ -391,7 +391,7 @@ public class JavaBlas implements KBlas {
         info[0] = 0;
         bool = trans.equals(KBlasTransposeType.NOTRANSPOSE);
 
-        if (((!trans.equals(KBlasTransposeType.CONJUGATE)) ? 1 : 0) != 0) {
+  /*      if (((!trans.equals(KBlasTransposeType.CONJUGATE)) ? 1 : 0) != 0) {
             info[0] = -1;
         } else if ((nOrder <0)) {
             info[0] = -2;
@@ -409,7 +409,7 @@ public class JavaBlas implements KBlas {
 
             if (((nrhs == 0))) {
                 return;
-            }
+            }*/
         if (bool) {
 
             dlaswp(nrhs, matB, offsetB, ldB, 1, nOrder, ipiv, offsetIpiV, 1);

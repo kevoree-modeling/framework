@@ -3,6 +3,7 @@ package test;
 import org.junit.Assert;
 import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.blas.NetlibBlasDebug;
+import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.matrix.solvers.LUDecompositionAlt_D64;
@@ -34,7 +35,7 @@ public class Debug {
             matA.set(0, 0, 5);
 
             SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0], dimA[1]);
-            MatrixOperations.copyMatrix(matA, ejmlmatA);
+        CommonOps.copyMatrix(matA, ejmlmatA);
 
             long timestart, timeend;
             System.out.println("Init done");

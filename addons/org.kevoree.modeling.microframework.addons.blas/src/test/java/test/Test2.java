@@ -6,9 +6,9 @@ package test;
 public class Test2 {
     public static void main(String[] arg){
 
-        double j =10;
-        System.out.println(Math.floorDiv(12,4));
-        if ((j == 0 ? 0 : 1) != 0){
+        boolean b =false;
+
+        if ((b ? 0 : 1) != 0){
             System.out.println("A");
         }
         else{

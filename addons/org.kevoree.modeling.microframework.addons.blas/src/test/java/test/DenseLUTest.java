@@ -3,6 +3,7 @@ package test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.blas.NetlibBlas;
+import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.matrix.solvers.LUDecompositionAlt_D64;
@@ -32,7 +33,7 @@ public class DenseLUTest {
         MatrixOperations.initMatrice(matA, rand);
 
         DenseMatrix64F ejmlmatA = new DenseMatrix64F(dimA[0],dimA[1]);
-        MatrixOperations.copyMatrixDense(matA, ejmlmatA);
+        CommonOps.copyMatrixDense(matA, ejmlmatA);
 
 
 
@@ -71,7 +72,7 @@ public class DenseLUTest {
         matA.set(0, 0, 5);
 
         SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0],dimA[1]);
-        MatrixOperations.copyMatrix(matA, ejmlmatA);
+        CommonOps.copyMatrix(matA, ejmlmatA);
 
         long timestart,timeend;
         System.out.println("Init done");

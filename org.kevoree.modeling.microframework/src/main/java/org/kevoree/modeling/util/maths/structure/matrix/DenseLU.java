@@ -139,13 +139,13 @@ public class DenseLU {
      * Computes <code>A\B</code>, overwriting <code>B</code>
      */
     public KArray2D solve(KArray2D B, KBlas blas) {
-        return transsolve(B, KBlasTransposeType.NOTRANSPOSE, blas);
+        return transSolve(B, KBlasTransposeType.NOTRANSPOSE, blas);
     }
 
 
 
 
-    private KArray2D transsolve(KArray2D B, KBlasTransposeType trans, KBlas blas) {
+    public KArray2D transSolve(KArray2D B, KBlasTransposeType trans, KBlas blas) {
         if (singular) {
          //   throw new MatrixSingularException();
         }

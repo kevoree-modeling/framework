@@ -3,6 +3,8 @@ package org.kevoree.modeling.util.maths.matrix;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.matrix.solvers.LUDecompositionAlt_D64;
 import org.kevoree.modeling.util.maths.matrix.solvers.LinearSolverLu_D64;
+import org.kevoree.modeling.util.maths.structure.KArray2D;
+import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 import java.util.Arrays;
 
@@ -483,6 +485,20 @@ public class CommonOps {
         return true;
     }*/
 
+    public static void copyMatrix(KArray2D matA, SimpleMatrix ejmlmatA) {
+        for(int i=0;i<matA.rows();i++){
+            for(int j=0;j<matA.columns();j++){
+                ejmlmatA.setValue2D(i,j,matA.get(i,j));
+            }
+        }
+    }
+    public static void copyMatrixDense(NativeArray2D matA, DenseMatrix64F ejmlmatA) {
+        for(int i=0;i<matA.rows();i++){
+            for(int j=0;j<matA.columns();j++){
+                ejmlmatA.set(i, j, matA.get(i, j));
+            }
+        }
+    }
 
     public static void extractImpl(DenseMatrix64F src,
                                int srcY0, int srcX0,

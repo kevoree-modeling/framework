@@ -1,7 +1,5 @@
 package org.kevoree.modeling.util.maths.structure.matrix;
 
-import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
-import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
@@ -34,13 +32,7 @@ public class MatrixOperations {
         return matC;
     }
 
-    public static void copyMatrix(KArray2D matA, SimpleMatrix ejmlmatA) {
-        for(int i=0;i<matA.rows();i++){
-            for(int j=0;j<matA.columns();j++){
-                ejmlmatA.setValue2D(i,j,matA.get(i,j));
-            }
-        }
-    }
+
 
     public static KArray2D multiplyTransposeAlpha(KBlasTransposeType transA, KBlasTransposeType transB,KArray2D matA, KArray2D matB, double alpha, KBlas blas) {
         if (testDimensionsAB(transA, transB, matA, matB)) {
@@ -149,7 +141,7 @@ public class MatrixOperations {
         for (int j = 0; j < matA.columns(); j++) {
             for (int i = 0; i < matA.rows(); i++) {
                 if(random){
-                    matA.set(i, j, rand.nextDouble()*(rand.nextInt(100)-50));
+                    matA.set(i, j, rand.nextDouble()*100-50);
                 }
                 else {
                     matA.set(i, j, k);
@@ -157,6 +149,15 @@ public class MatrixOperations {
                 k++;
             }
         }
+    }
+
+    public static KArray2D random(int rows, int columns){
+        KArray2D res= new NativeArray2D(rows,columns);
+        Random rand = new Random();
+        for(int i=0;i<rows*columns;i++){
+            res.setAtIndex(i,rand.nextDouble()*100-50);
+        }
+        return res;
     }
 
     public static KArray2D invert( KArray2D mat, KBlas blas ) {
@@ -167,7 +168,7 @@ public class MatrixOperations {
         DenseLU alg = new DenseLU(mat.rows(),mat.columns());
         KArray2D result = new NativeArray2D(mat.rows(),mat.columns());
         NativeArray2D A_temp=new NativeArray2D(mat.rows(),mat.columns());
-        System.arraycopy(mat.data(),0,A_temp.data(),0,mat.columns()*mat.rows());
+        System.arraycopy(mat.data(), 0, A_temp.data(), 0, mat.columns() * mat.rows());
 
         DenseLU dlu = new DenseLU(A_temp.rows(),A_temp.columns());
         if (dlu.invert(A_temp,blas)){
@@ -179,6 +180,18 @@ public class MatrixOperations {
         }
     }
 
+    public static boolean invertInPlace( KArray2D mat, KBlas blas ) {
+        if(mat.rows()!=mat.columns()){
+            return false;
+        }
+
+        DenseLU alg = new DenseLU(mat.rows(),mat.columns());
+        KArray2D result = new NativeArray2D(mat.rows(),mat.columns());
+        DenseLU dlu = new DenseLU(mat.rows(),mat.columns());
+        return dlu.invert(mat,blas);
+    }
+
+
     public static KArray2D createIdentity(int width) {
         KArray2D ret = new NativeArray2D(width, width);
         ret.setAll(0);
@@ -188,11 +201,25 @@ public class MatrixOperations {
         return ret;
     }
 
-    public static void copyMatrixDense(NativeArray2D matA, DenseMatrix64F ejmlmatA) {
-        for(int i=0;i<matA.rows();i++){
-            for(int j=0;j<matA.columns();j++){
-                ejmlmatA.set(i,j,matA.get(i,j));
-            }
+    public static KArray2D solve(KArray2D matA, KArray2D matB, boolean workInPlace, KBlasTransposeType transB, KBlas blas){
+        if(!workInPlace) {
+            NativeArray2D A_temp = new NativeArray2D(matA.rows(), matA.columns());
+            System.arraycopy(matA.data(), 0, A_temp.data(), 0, matA.columns() * matA.rows());
+
+            NativeArray2D B_temp = new NativeArray2D(matB.rows(), matB.columns());
+            System.arraycopy(matB.data(), 0, B_temp.data(), 0, matB.columns() * matB.rows());
+
+            DenseLU dlu = new DenseLU(A_temp.rows(), A_temp.columns());
+            dlu.factor(A_temp, blas);
+            dlu.transSolve(B_temp,transB,blas);
+            return B_temp;
+        }
+        else {
+            DenseLU dlu = new DenseLU(matA.rows(), matA.columns());
+            dlu.factor(matA, blas);
+            dlu.transSolve(matB,transB,blas);
+            return matB;
         }
     }
+
 }

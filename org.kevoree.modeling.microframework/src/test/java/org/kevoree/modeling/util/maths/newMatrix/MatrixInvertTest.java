@@ -2,6 +2,7 @@ package org.kevoree.modeling.util.maths.newMatrix;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.util.maths.matrix.CommonOps;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
@@ -31,7 +32,7 @@ public class MatrixInvertTest {
 
         JavaBlas java = new JavaBlas();
         SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0],dimA[1]);
-        MatrixOperations.copyMatrix(matA, ejmlmatA);
+        CommonOps.copyMatrix(matA, ejmlmatA);
 
         // long timestart,timeend;
 
