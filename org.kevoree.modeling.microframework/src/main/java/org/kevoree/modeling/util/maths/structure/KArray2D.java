@@ -31,4 +31,6 @@ public interface KArray2D {
 
     void setData(double[] data);
 
+
+
 }

@@ -11,13 +11,13 @@ import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
-import org.kevoree.modeling.util.maths.structure.matrix.DenseLU;
+import org.kevoree.modeling.util.maths.structure.matrix.solver.LU;
 import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 
 /**
  * Created by assaad on 02/09/15.
  */
-public class DenseLUTest {
+public class LUTest {
     public static int r=65;
     public static KBlas java = new JavaBlas();
     public static KBlas netlib = new NetlibBlas();
@@ -37,7 +37,7 @@ public class DenseLUTest {
 
 
 
-        DenseLU dlu = new DenseLU(dimA[0],dimA[1]);
+        LU dlu = new LU(dimA[0],dimA[1]);
 
         System.out.println("Init done");
 

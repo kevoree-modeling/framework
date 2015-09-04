@@ -69,6 +69,16 @@ public class JCudaBlas implements KBlas {
 
     }
 
+    @Override
+    public void dorgqr(int paramInt1, int paramInt2, int paramInt3, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, double[] paramArrayOfDouble3, int paramInt7, int paramInt8, int[] paramintW) {
+
+    }
+
+    @Override
+    public void dgeqrf(int paramInt1, int paramInt2, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, double[] paramArrayOfDouble2, int paramInt5, double[] paramArrayOfDouble3, int paramInt6, int paramInt7, int[] paramintW) {
+
+    }
+
 
     private static final char TRANSPOSE_TYPE_CONJUCATE = 'c';
 

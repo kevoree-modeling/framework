@@ -1,11 +1,11 @@
-package org.kevoree.modeling.util.maths.structure.matrix;
+package org.kevoree.modeling.util.maths.structure.matrix.solver;
 
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
-public class DenseLU {
+public class LU {
 
     /**
      * Holds the LU factors
@@ -34,7 +34,7 @@ public class DenseLU {
      * @param n
      *            Number of columns
      */
-    public DenseLU(int m, int n) {
+    public LU(int m, int n) {
         LU = new NativeArray2D(m, n);
         piv = new int[Math.min(m, n)];
     }
@@ -46,8 +46,8 @@ public class DenseLU {
      *            Matrix to decompose. Not modified
      * @return The current decomposition
      */
-    public static DenseLU factorize(KArray2D A, KBlas blas) {
-        return new DenseLU(A.rows(), A.columns()).factor(A,blas);
+    public static org.kevoree.modeling.util.maths.structure.matrix.solver.LU factorize(KArray2D A, KBlas blas) {
+        return new LU(A.rows(), A.columns()).factor(A,blas);
     }
 
     /**
@@ -57,7 +57,7 @@ public class DenseLU {
      *            Matrix to decompose. Overwritten with the decomposition
      * @return The current decomposition
      */
-    public DenseLU factor(KArray2D A, KBlas blas) {
+    public org.kevoree.modeling.util.maths.structure.matrix.solver.LU factor(KArray2D A, KBlas blas) {
         singular = false;
 
         int[] info = new int[1];

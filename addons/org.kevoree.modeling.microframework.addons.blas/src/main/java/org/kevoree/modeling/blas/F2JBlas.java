@@ -50,7 +50,6 @@ public class F2JBlas implements KBlas {
 
     }
 
-
     @Override
     public void dgetrf(int paramInt1, int paramInt2, double[] paramArrayOfDouble, int paramInt3, int paramInt4, int[] paramArrayOfInt, int paramInt5, int[] paramintW) {
         intW newint = new intW(paramintW[0]);
@@ -58,7 +57,19 @@ public class F2JBlas implements KBlas {
         paramintW[0] = newint.val;
     }
 
+    @Override
+    public void dorgqr(int paramInt1, int paramInt2, int paramInt3, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, double[] paramArrayOfDouble3, int paramInt7, int paramInt8, int[] paramintW) {
+        intW newint = new intW(paramintW[0]);
+        lapack.dorgqr(paramInt1, paramInt2, paramInt3, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramArrayOfDouble2, paramInt6, paramInt7, newint);
+        paramintW[0]=newint.val;
+    }
 
+    @Override
+    public void dgeqrf(int paramInt1, int paramInt2, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, double[] paramArrayOfDouble2, int paramInt5, double[] paramArrayOfDouble3, int paramInt6, int paramInt7, int[] paramintW) {
+        intW newint = new intW(paramintW[0]);
+        lapack.dgeqrf(paramInt1, paramInt2, paramArrayOfDouble1, paramInt3, paramInt4, paramArrayOfDouble2, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, newint);
+        paramintW[0]=newint.val;
+    }
     @Override
     public void shutdown() {
         blas = null;

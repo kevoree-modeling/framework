@@ -4,6 +4,7 @@ import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
+import org.kevoree.modeling.util.maths.structure.matrix.solver.LU;
 
 import java.util.Random;
 
@@ -156,12 +157,12 @@ public class MatrixOperations {
             return null;
         }
 
-        DenseLU alg = new DenseLU(mat.rows(),mat.columns());
+        LU alg = new LU(mat.rows(),mat.columns());
         KArray2D result = new NativeArray2D(mat.rows(),mat.columns());
         NativeArray2D A_temp=new NativeArray2D(mat.rows(),mat.columns());
         System.arraycopy(mat.data(), 0, A_temp.data(), 0, mat.columns() * mat.rows());
 
-        DenseLU dlu = new DenseLU(A_temp.rows(),A_temp.columns());
+        LU dlu = new LU(A_temp.rows(),A_temp.columns());
         if (dlu.invert(A_temp, blas)){
             result.setData(A_temp.data());
             return result;
@@ -176,9 +177,9 @@ public class MatrixOperations {
             return false;
         }
 
-        DenseLU alg = new DenseLU(mat.rows(),mat.columns());
+        LU alg = new LU(mat.rows(),mat.columns());
         KArray2D result = new NativeArray2D(mat.rows(),mat.columns());
-        DenseLU dlu = new DenseLU(mat.rows(),mat.columns());
+        LU dlu = new LU(mat.rows(),mat.columns());
         return dlu.invert(mat,blas);
     }
 
@@ -273,7 +274,7 @@ public class MatrixOperations {
             NativeArray2D A_temp = new NativeArray2D(matA.rows(), matA.columns());
             System.arraycopy(matA.data(), 0, A_temp.data(), 0, matA.columns() * matA.rows());
 
-            DenseLU dlu = new DenseLU(A_temp.rows(), A_temp.columns());
+            LU dlu = new LU(A_temp.rows(), A_temp.columns());
             dlu.factor(A_temp, blas);
 
             if(dlu.isSingular()){
@@ -285,7 +286,7 @@ public class MatrixOperations {
             return B_temp;
         }
         else {
-            DenseLU dlu = new DenseLU(matA.rows(), matA.columns());
+            LU dlu = new LU(matA.rows(), matA.columns());
             dlu.factor(matA, blas);
             if(dlu.isSingular()){
                 return null;
@@ -293,6 +294,17 @@ public class MatrixOperations {
             dlu.transSolve(matB, transB, blas);
             return matB;
         }
+    }
+
+    public static boolean compareMatrix(KArray2D matA, KArray2D matB, double eps){
+        for (int i = 0; i < matA.rows(); i++) {
+            for (int j = 0; j < matA.columns(); j++) {
+                if(Math.abs(matA.get(i,j)-matB.get(i,j))>eps){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 }

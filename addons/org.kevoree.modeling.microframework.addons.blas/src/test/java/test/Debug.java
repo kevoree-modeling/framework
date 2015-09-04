@@ -4,14 +4,11 @@ import org.junit.Assert;
 import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.blas.NetlibBlasDebug;
 import org.kevoree.modeling.util.maths.matrix.CommonOps;
-import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
 import org.kevoree.modeling.util.maths.matrix.SimpleMatrix;
-import org.kevoree.modeling.util.maths.matrix.solvers.LUDecompositionAlt_D64;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
-import org.kevoree.modeling.util.maths.structure.matrix.DenseLU;
 import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 
 /**

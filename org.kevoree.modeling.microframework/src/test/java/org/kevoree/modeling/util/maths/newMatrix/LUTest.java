@@ -1,18 +1,16 @@
 package org.kevoree.modeling.util.maths.newMatrix;
 
 import org.junit.Test;
-import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;
-import org.kevoree.modeling.util.maths.matrix.solvers.LUDecompositionAlt_D64;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
-import org.kevoree.modeling.util.maths.structure.matrix.DenseLU;
+import org.kevoree.modeling.util.maths.structure.matrix.solver.LU;
 
 /**
  * Created by assaad on 02/09/15.
  */
-public class DenseLUTest {
+public class LUTest {
     @Test
     public void testLUFactorize(){
         int r=2;
@@ -26,7 +24,7 @@ public class DenseLUTest {
         A.set(1, 0, -6);
         A.set(1, 1, -4);
 
-        DenseLU dlu = new DenseLU(dimA[0],dimA[1]);
+        LU dlu = new LU(dimA[0],dimA[1]);
         dlu.factor(A, java);
 
         KArray2D res= dlu.getLU();
