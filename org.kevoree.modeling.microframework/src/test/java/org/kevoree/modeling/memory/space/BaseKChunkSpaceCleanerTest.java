@@ -131,9 +131,6 @@ public abstract class BaseKChunkSpaceCleanerTest {
                     model.lookup(0, i, uuid, new KCallback<KObject>() {
                         @Override
                         public void on(final KObject jumpedSensor) {
-
-                            System.err.println(Thread.currentThread().toString());
-
                             try {
                                 jumpedSensor.setByName("value2", random.nextDouble());
                                 //jumpedSensor.setByName("value", random.nextDouble());
