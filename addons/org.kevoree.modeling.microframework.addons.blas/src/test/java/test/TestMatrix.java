@@ -51,7 +51,7 @@ public class TestMatrix {
         KBlas jcuda = new JCudaBlas();
    //     KBlas jCudaBlas = new JCudaBlas();
 
-        int r = 100;
+        int r = 4000;
         int[] dimA = {r, r + 1};
         int[] dimB = {r + 1, r};
         boolean rand = true;
@@ -69,7 +69,7 @@ public class TestMatrix {
         NativeArray2D matOriginal = new NativeArray2D(matA.rows(), matB.columns());
         initMatrice(matOriginal, rand);
 
-        KArray2D matTrad = matOriginal.clone();
+       // KArray2D matTrad = matOriginal.clone();
         KArray2D matNetlib = matOriginal.clone();
         KArray2D matJava = matOriginal.clone();
         KArray2D matCuda = matOriginal.clone();
@@ -78,10 +78,10 @@ public class TestMatrix {
         System.out.println("Data generated");
         long timestart, timeend;
 
-        timestart=System.currentTimeMillis();
+     /*   timestart=System.currentTimeMillis();
         traditional(matA, matB, matTrad, alpha, beta);
         timeend=System.currentTimeMillis();
-        System.out.println("For loop " + ((double) (timeend - timestart)) / 1000);
+        System.out.println("For loop " + ((double) (timeend - timestart)) / 1000);*/
 
         timestart=System.currentTimeMillis();
         MatrixOperations.multiplyAlphaBetaResult(alpha, matA, matB, beta, matJava, javaBlas);
@@ -102,9 +102,9 @@ public class TestMatrix {
 
         for (int i = 0; i < matOriginal.rows(); i++) {
             for (int j = 0; j < matOriginal.columns(); j++) {
-                Assert.assertEquals(matTrad.get(i, j), matJava.get(i, j), eps);
-                Assert.assertEquals(matTrad.get(i, j), matNetlib.get(i, j), eps);
-                Assert.assertEquals(matTrad.get(i, j), matCuda.get(i, j), eps);
+                Assert.assertEquals(matNetlib.get(i, j), matJava.get(i, j), eps);
+                //Assert.assertEquals(matTrad.get(i, j), matNetlib.get(i, j), eps);
+                Assert.assertEquals(matNetlib.get(i, j), matCuda.get(i, j), eps);
             }
         }
 
