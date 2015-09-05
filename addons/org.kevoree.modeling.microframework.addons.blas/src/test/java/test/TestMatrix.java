@@ -2,6 +2,7 @@ package test;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.blas.JCudaBlas;
 import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
@@ -47,6 +48,7 @@ public class TestMatrix {
 
         KBlas javaBlas = new JavaBlas();
         KBlas netlibBlas = new NetlibBlas();
+        KBlas jcuda = new JCudaBlas();
    //     KBlas jCudaBlas = new JCudaBlas();
 
         int r = 100;
@@ -70,6 +72,7 @@ public class TestMatrix {
         KArray2D matTrad = matOriginal.clone();
         KArray2D matNetlib = matOriginal.clone();
         KArray2D matJava = matOriginal.clone();
+        KArray2D matCuda = matOriginal.clone();
      //   KArray2D matCuda = matOriginal.clone();
 
         System.out.println("Data generated");
@@ -90,10 +93,10 @@ public class TestMatrix {
         timeend=System.currentTimeMillis();
         System.out.println("Netlib Blas " + ((double) (timeend - timestart)) / 1000);
 
-       // timestart=System.currentTimeMillis();
-    //    MatrixOperations.multiplyAlphaBetaResult(alpha, matA, matB, beta, matCuda, jCudaBlas);
-    //    timeend=System.currentTimeMillis();
-     //   System.out.println("Cuda Blas " + ((double) (timeend - timestart)) / 1000);
+        timestart=System.currentTimeMillis();
+        MatrixOperations.multiplyAlphaBetaResult(alpha, matA, matB, beta, matCuda, jcuda);
+        timeend=System.currentTimeMillis();
+        System.out.println("Cuda Blas " + ((double) (timeend - timestart)) / 1000);
 
 
 
@@ -101,13 +104,13 @@ public class TestMatrix {
             for (int j = 0; j < matOriginal.columns(); j++) {
                 Assert.assertEquals(matTrad.get(i, j), matJava.get(i, j), eps);
                 Assert.assertEquals(matTrad.get(i, j), matNetlib.get(i, j), eps);
-     //           Assert.assertEquals(matTrad.get(i, j), matCuda.get(i, j), eps);
+                Assert.assertEquals(matTrad.get(i, j), matCuda.get(i, j), eps);
             }
         }
 
         javaBlas.shutdown();
         netlibBlas.shutdown();
-     //   jCudaBlas.shutdown();
+        jcuda.shutdown();
         System.out.println("Test succeeded");
     }
 }

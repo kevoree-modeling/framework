@@ -71,9 +71,43 @@ public interface KBlas {
     void dgetrf(int rows, int columns, double[] matA, int offsetA, int ldA, int[] ipiv, int offsetIpiv, int[] info);
 
 
-    void dorgqr(int paramInt1, int paramInt2, int paramInt3, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, double[] paramArrayOfDouble3, int paramInt7, int paramInt8, int[] paramintW);
+    /**
+     ** DORGQR generates an M-by-N real matrix Q with orthonormal columns,
+     *  which is defined as the first N columns of a product of K elementary
+     *  reflectors of order M
+     * @param m  The number of rows of the matrix Q. M >= 0.
+     * @param n  The number of columns of the matrix Q. M >= N >= 0.
+     * @param k  The number of elementary reflectors whose product defines the matrix Q. N >= K >= 0.
+     * @param matA (input/output) DOUBLE PRECISION array
+     * @param offsetA offset in the array of matrix A
+     * @param ldA  number of rows in matA to jump to reach the second column
+     * @param taw (input) DOUBLE PRECISION array, dimension (K)
+     *          TAU(i) must contain the scalar factor of the elementary
+     *          reflector H(i), as returned by DGEQRF.
+     * @param offsetTaw offset in the array of matrix Taw
+     * @param work  (workspace/output) DOUBLE PRECISION array,
+     * @param offsetWork offset in the array of matrix Work
+     * @param lWork Size of matrix work
+     * @param info info return
+     */
+    void dorgqr(int m, int n, int k, double[] matA, int offsetA, int ldA, double[] taw, int offsetTaw, double[] work, int offsetWork, int lWork, int[] info);
 
-    void dgeqrf(int paramInt1, int paramInt2, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, double[] paramArrayOfDouble2, int paramInt5, double[] paramArrayOfDouble3, int paramInt6, int paramInt7, int[] paramintW);
+    /**
+     * DGEQRF computes a QR factorization of a real M-by-N matrix A:  A = Q * R.
+     * @param m  The number of rows of the matrix Q. M >= 0.
+     * @param n  The number of columns of the matrix Q. M >= N >= 0.
+     * @param matA (input/output) DOUBLE PRECISION array
+     * @param offsetA offset in the array of matrix A
+     * @param ldA  number of rows in matA to jump to reach the second column
+     * @param taw (input) DOUBLE PRECISION array, dimension (K)
+     *          TAU(i) must contain the scalar factor of the elementary
+     *          reflector H(i), as returned by DGEQRF.
+     * @param offsetTaw offset in the array of matrix Taw
+     * @param work  (workspace/output) DOUBLE PRECISION array,
+     * @param lWork Size of matrix work
+     * @param info info return
+     */
+    void dgeqrf(int m, int n, double[] matA, int offsetA, int ldA, double[] taw, int offsetTaw, double[] work, int offsetwork, int lWork, int[] info);
 
     /**
      * To shutdown the blas library

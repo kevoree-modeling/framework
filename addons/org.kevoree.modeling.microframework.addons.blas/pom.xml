@@ -13,13 +13,18 @@
     </parent>
 
     <properties>
-        <nd4j.version>0.4-rc0</nd4j.version>
+        <nd4j.version>0.4-rc1.1</nd4j.version>
    </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-jblas</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-jcublas-7.0</artifactId>
             <version>${nd4j.version}</version>
         </dependency>
         <dependency>
