@@ -2,6 +2,7 @@ package test;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.blas.JCudaBlas;
 import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.blas.F2JBlas;
 import org.kevoree.modeling.util.maths.matrix.CommonOps;
@@ -17,8 +18,8 @@ import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 public class MatrixInvertTest {
     @Test
     public void invertMatrix() {
-        int r = 100;
-        int times=2;
+        int r = 2000;
+        int times=1;
         int[] dimA = {r, r};
         boolean rand = true;
         double eps=1e-7;
@@ -29,16 +30,19 @@ public class MatrixInvertTest {
         JavaBlas javablas = new JavaBlas();
         NetlibBlas nativeblas = new NetlibBlas();
         F2JBlas f2JBlas = new F2JBlas();
+        JCudaBlas jCudaBlas = new JCudaBlas();
+
 
         SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0],dimA[1]);
         CommonOps.copyMatrix(matA, ejmlmatA);
 
 
         long timestart, timeend;
-        KArray2D res,resJ,resnJ;
+        KArray2D res,resJ,resnJ,rescu;
         res=new NativeArray2D(1,1);
         resJ=new NativeArray2D(1,1);
         resnJ=new NativeArray2D(1,1);
+        rescu=new NativeArray2D(1,1);
         SimpleMatrix resEjml =new SimpleMatrix(1,1);
 
         timestart=System.currentTimeMillis();
@@ -62,6 +66,13 @@ public class MatrixInvertTest {
         timeend = System.currentTimeMillis();
         System.out.println("Netlib JavaClass blas invert " + ((double) (timeend - timestart)) / (1000*times)+" s");
 
+        timestart = System.currentTimeMillis();
+        for(int k=0;k<times;k++) {
+            rescu = MatrixOperations.invert(matA, jCudaBlas);
+        }
+        timeend = System.currentTimeMillis();
+        System.out.println("Cuda blas invert " + ((double) (timeend - timestart)) / (1000*times)+" s");
+
         timestart=System.currentTimeMillis();
         for(int k=0;k<times;k++) {
             resEjml = ejmlmatA.invert();
@@ -77,6 +88,7 @@ public class MatrixInvertTest {
                 Assert.assertEquals(res.get(i, j), resJ.get(i, j), eps);
                 Assert.assertEquals(res.get(i, j), resnJ.get(i, j), eps);
                 Assert.assertEquals(res.get(i, j), resEjml.getValue2D(i, j), eps);
+                Assert.assertEquals(res.get(i, j), rescu.get(i, j), eps);
             }
         }
 
