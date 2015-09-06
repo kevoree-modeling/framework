@@ -3,6 +3,7 @@ package org.kevoree.modeling.blas;
 import static jcuda.jcublas.JCublas.*;
 import static jcuda.jcublas.JCublas2.*;
 import static jcuda.jcublas.JCublas2.cublasGetVector;
+import static jcuda.jcusolver.JCusolverDn.cusolverDnCreate;
 import static jcuda.runtime.JCuda.*;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToDevice;
 
@@ -12,6 +13,8 @@ import jcuda.Sizeof;
 import jcuda.jcublas.*;
 import jcuda.Pointer;
 import jcuda.jcublas.cublasHandle;
+import jcuda.jcusolver.JCusolverDn;
+import jcuda.jcusolver.cusolverDnHandle;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
 import org.netlib.util.intW;
@@ -22,6 +25,7 @@ import java.util.Random;
 public class JCudaBlas implements KBlas {
 
     private cublasHandle handle;
+   // private jcuda.jcusolver.cusolverDnHandle cuHandle;
 
     public JCudaBlas() {
         JCublas.initialize();
@@ -30,12 +34,13 @@ public class JCudaBlas implements KBlas {
         JCublas2.setExceptionsEnabled(true);
         handle = new cublasHandle();
         cublasCreate(handle);
+        jcuda.jcusolver.JCusolver.initialize();
+
+      // cuHandle = new cusolverDnHandle();
+        //cusolverDnCreate(cuHandle);
 
     }
 
-    private static void cublasDestroy(cublasHandle handle) {
-
-    }
 
 
     @Override
@@ -67,17 +72,43 @@ public class JCudaBlas implements KBlas {
         cudaFree(d_A);
         cudaFree(d_B);
         cudaFree(d_C);
+        cudaFree(pAlpha);
+        cudaFree(pBeta);
     }
 
     @Override
     public void dgetrs(KBlasTransposeType transA, int dim, int nrhs, double[] matA, int offsetA, int ldA, int[] ipiv, int offsetIpiv, double[] matB, int offsetB, int ldB, int[] info) {
         Pointer d_A = new Pointer();
         Pointer d_B = new Pointer();
-        Pointer d_ipiv = new Pointer();
+        Pointer d_C = new Pointer();
+
+        cudaMalloc(d_A, matA.length * Sizeof.DOUBLE);
+        cudaMalloc(d_B, matB.length * Sizeof.DOUBLE);
+        cudaMalloc(d_C, matB.length * Sizeof.DOUBLE);
+
+        Pointer pAlpha = Pointer.to(new double[]{1.0});
+        Pointer pBeta = Pointer.to(new double[]{0.0});
+
+        invertMatrix(dim, d_A);
+        cublasDgemm(handle, transTypeToInt(transA), transTypeToInt(KBlasTransposeType.NOTRANSPOSE), dim, matB.length / dim, dim,
+                pAlpha, d_A, ldA, d_B, ldB, pBeta, d_C, ldB);
+
+        JCublas2.cublasGetVector(matB.length, Sizeof.DOUBLE, d_C, 1, Pointer.to(matB), 1);
+
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        cudaFree(pAlpha);
+        cudaFree(pBeta);
+
+
+
+     /*   Pointer d_ipiv = new Pointer();
         Pointer infow = new Pointer();
 
         cudaMalloc(d_A, matA.length * Sizeof.DOUBLE);
         cudaMalloc(d_B, matB.length * Sizeof.DOUBLE);
+
         cudaMalloc(d_ipiv, ipiv.length * Sizeof.INT);
         cudaMalloc(infow, Sizeof.INT);
         // Copy the memory from the host to the device
@@ -85,16 +116,19 @@ public class JCudaBlas implements KBlas {
         JCublas2.cublasSetVector(matB.length, Sizeof.DOUBLE, Pointer.to(matB), 1, d_B, 1);
         JCublas2.cublasSetVector(ipiv.length, Sizeof.INT, Pointer.to(ipiv), 1, d_ipiv, 1);
         JCublas2.cublasSetVector(1, Sizeof.INT, Pointer.to(new int[1]), 1, infow, 1);
-        JCublas2. cublasDgetrsBatched(handle, transTypeToInt(transA), dim, nrhs, d_A, ldA, d_ipiv, d_B, ldB, infow, 1);
+
+
+      //  JCusolverDn.cusolverDnDgetrs(cuHandle, transTypeToInt(transA), dim, nrhs, d_A, ldA, d_ipiv, d_B, ldB, infow);
 
         // Copy the result from the device to the host
         cublasGetVector(matB.length, Sizeof.DOUBLE, d_B, 1, Pointer.to(matB), 1);
 
-        // Clean up
-        cudaFree(d_A);
-        cudaFree(d_B);
+
         cudaFree(d_ipiv);
-        cudaFree(infow);
+        cudaFree(infow);*/
+        // Clean up
+
+
 
 
     }
@@ -108,7 +142,7 @@ public class JCudaBlas implements KBlas {
         JCublas.cublasSetMatrix(n, n, Sizeof.DOUBLE, Pointer.to(A), n, dA, n);
 
         // Perform inv(U)
-        cudaDtrtri(n, dA);
+  /*      cudaDtrtri(n, dA);
 
         // Solve inv(A)*L = inv(U)
         Pointer dWork = new Pointer();
@@ -133,9 +167,9 @@ public class JCudaBlas implements KBlas {
             {
                 cublasDswap(n, at(dA, i * n), 1, at(dA, pivots[i] * n), 1);
             }
-        }
+        }*/
 
-        //invertMatrix(n, dA);
+        invertMatrix(n, dA);
         JCublas.cublasGetMatrix(n, n, Sizeof.DOUBLE, dA, n, Pointer.to(A), n);
         cublasFree(dA);
     }
@@ -143,7 +177,7 @@ public class JCudaBlas implements KBlas {
 
     @Override
     public void dgetrf(int m, int n, double[] A, int offsetA, int ldA, int[] pivots, int offsetIpiv, int[] info) {
-        Pointer dA = new Pointer();
+   /*     Pointer dA = new Pointer();
         cublasAlloc(n * n, Sizeof.DOUBLE, dA);
         JCublas.cublasSetMatrix(n, n, Sizeof.DOUBLE, Pointer.to(A), n, dA, n);
 
@@ -174,7 +208,7 @@ public class JCudaBlas implements KBlas {
         JCublas.cublasGetMatrix(n, n, Sizeof.DOUBLE, dA, n, Pointer.to(A), n);
         cublasFree(dA);
 
-
+*/
     }
 
     @Override
@@ -190,6 +224,7 @@ public class JCudaBlas implements KBlas {
 
     @Override
       public void shutdown() {
+
         cublasDestroy(handle);
     }
 

@@ -2,6 +2,7 @@ package test;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kevoree.modeling.blas.JCudaBlas;
 import org.kevoree.modeling.blas.NetlibBlas;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
@@ -22,7 +23,8 @@ public class TestSolver {
         KArray2D matB= MatrixOperations.random(dim,dim2);
         long timestart, timeend;
         KBlas netblas=new NetlibBlas();
-        KBlas javaBlas = new JavaBlas();
+        KBlas javaBlas = new JCudaBlas();
+        KBlas jcuda = new JCudaBlas();
 
         timestart=System.currentTimeMillis();
         KArray2D matXnetlib=MatrixOperations.solve(matA,matB,false, KBlasTransposeType.NOTRANSPOSE,netblas);
@@ -34,10 +36,16 @@ public class TestSolver {
         timeend=System.currentTimeMillis();
         System.out.println("Java invert " + ((double) (timeend - timestart)) / 1000+" s");
 
+        timestart=System.currentTimeMillis();
+        KArray2D matXCuda=MatrixOperations.solve(matA,matB,false, KBlasTransposeType.NOTRANSPOSE,jcuda);
+        timeend=System.currentTimeMillis();
+        System.out.println("Cuda invert " + ((double) (timeend - timestart)) / 1000+" s");
+
 
 
         KArray2D matCnetlib= MatrixOperations.multiply(matA, matXnetlib, netblas);
         KArray2D matCjava= MatrixOperations.multiply(matA,matXjava,javaBlas);
+        KArray2D matCcuda =  MatrixOperations.multiply(matA,matXCuda,jcuda);
 
         boolean test=true;
         int count=0;
@@ -49,6 +57,11 @@ public class TestSolver {
                 }
 
                 if(Math.abs(matCnetlib.get(i, j)-matB.get(i, j))> eps){
+                    test =false;
+                    count++;
+                }
+
+                if(Math.abs(matCcuda.get(i, j)-matB.get(i, j))> eps){
                     test =false;
                     count++;
                 }

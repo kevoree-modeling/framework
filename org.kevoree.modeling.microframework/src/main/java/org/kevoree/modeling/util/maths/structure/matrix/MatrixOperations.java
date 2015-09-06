@@ -157,6 +157,7 @@ public class MatrixOperations {
             return null;
         }
 
+
         LU alg = new LU(mat.rows(),mat.columns());
         KArray2D result = new NativeArray2D(mat.rows(),mat.columns());
         NativeArray2D A_temp=new NativeArray2D(mat.rows(),mat.columns());

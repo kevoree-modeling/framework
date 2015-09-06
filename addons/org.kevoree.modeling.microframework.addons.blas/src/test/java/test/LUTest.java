@@ -95,6 +95,7 @@ public class LUTest {
         System.out.println("done");
 
         assert res != null;
+        assert resJ != null;
         for (int i = 0; i < matA.rows(); i++) {
             for (int j = 0; j < matA.columns(); j++) {
                 Assert.assertEquals(resEjml.getValue2D(i, j), res.get(i, j), eps);
