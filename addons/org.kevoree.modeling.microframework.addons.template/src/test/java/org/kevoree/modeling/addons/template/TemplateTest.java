@@ -4,6 +4,7 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,7 +23,7 @@ public class TemplateTest {
         ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 
 
-        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build()rel);
+        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
