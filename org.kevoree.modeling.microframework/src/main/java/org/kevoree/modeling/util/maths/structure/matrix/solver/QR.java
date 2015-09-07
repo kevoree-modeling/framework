@@ -63,8 +63,7 @@ public class QR{
     public QR factor(KArray2D matA, boolean workInPlace, KBlas blas) {
         KArray2D A;
         if(!workInPlace){
-            A=new NativeArray2D(matA.rows(),matA.columns());
-            A.setData(matA.data().clone());
+            A=matA.clone();
         }
         else {
             A=matA;
