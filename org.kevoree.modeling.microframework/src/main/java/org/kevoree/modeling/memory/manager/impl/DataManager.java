@@ -215,10 +215,15 @@ public class DataManager implements KDataManager, KInternalDataManager {
                         @Override
                         public void on(Throwable throwable) {
                             if (throwable == null) {
-                                KMessage operationMapping = new Message();
-                                operationMapping.setType(Message.OPERATION_MAPPING);
-                                operationMapping.setValues(selfPointer._operationManager.mappings());
-                                selfPointer._db.sendToPeer(null, operationMapping, null);
+                                String[] mappings = selfPointer._operationManager.mappings();
+                                if(mappings != null && mappings.length >= 1) {
+                                    KMessage operationMapping = new Message();
+                                    operationMapping.setType(Message.OPERATION_MAPPING);
+                                    operationMapping.setValues(mappings);
+                                    selfPointer._db.sendToPeer(null, operationMapping, null);
+
+                                }
+
                                 selfPointer._db.atomicGetIncrement(new long[]{KConfig.END_OF_TIME, KConfig.NULL_LONG, KConfig.NULL_LONG},
                                         new KCallback<Short>() {
                                             @Override

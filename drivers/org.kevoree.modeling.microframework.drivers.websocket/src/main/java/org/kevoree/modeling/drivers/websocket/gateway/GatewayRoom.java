@@ -145,12 +145,14 @@ public class GatewayRoom extends AbstractReceiveListener {
             break;
             case Message.OPERATION_MAPPING: {
                 String[] values = msg.values();
-                String[] concats = new String[values.length / 2];
-                for (int i = 0; i < values.length; i = i + 2) {
-                    concats[i / 2] = values[i] + "," + values[i + 1];
+                if(values != null) {
+                    String[] concats = new String[values.length / 2];
+                    for (int i = 0; i < values.length; i = i + 2) {
+                        concats[i / 2] = values[i] + "," + values[i + 1];
+                    }
+                    String peerId = _channelHash_to_peerId.get(currentChannel.hashCode());
+                    declareMapping(concats, peerId);
                 }
-                String peerId = _channelHash_to_peerId.get(currentChannel.hashCode());
-                declareMapping(concats, peerId);
             }
             break;
             default: {
