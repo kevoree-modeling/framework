@@ -17,14 +17,14 @@ public class TestSolver {
     @Test
     public void solve(){
         double eps=1e-5;
-        int dim=2000;
+        int dim=200;
         int dim2=100;
         KArray2D matA= MatrixOperations.random(dim,dim);
         KArray2D matB= MatrixOperations.random(dim,dim2);
         long timestart, timeend;
         KBlas netblas=new NetlibBlas();
-        KBlas javaBlas = new JCudaBlas();
-        KBlas jcuda = new JCudaBlas();
+        KBlas javaBlas = new JavaBlas();
+      //  KBlas jcuda = new JCudaBlas();
 
         timestart=System.currentTimeMillis();
         KArray2D matXnetlib=MatrixOperations.solve(matA,matB,false, KBlasTransposeType.NOTRANSPOSE,netblas);
@@ -36,16 +36,16 @@ public class TestSolver {
         timeend=System.currentTimeMillis();
         System.out.println("Java invert " + ((double) (timeend - timestart)) / 1000+" s");
 
-        timestart=System.currentTimeMillis();
+    /*    timestart=System.currentTimeMillis();
         KArray2D matXCuda=MatrixOperations.solve(matA,matB,false, KBlasTransposeType.NOTRANSPOSE,jcuda);
         timeend=System.currentTimeMillis();
-        System.out.println("Cuda invert " + ((double) (timeend - timestart)) / 1000+" s");
+        System.out.println("Cuda invert " + ((double) (timeend - timestart)) / 1000+" s");*/
 
 
 
         KArray2D matCnetlib= MatrixOperations.multiply(matA, matXnetlib, netblas);
         KArray2D matCjava= MatrixOperations.multiply(matA,matXjava,javaBlas);
-        KArray2D matCcuda =  MatrixOperations.multiply(matA,matXCuda,jcuda);
+     //   KArray2D matCcuda =  MatrixOperations.multiply(matA,matXCuda,jcuda);
 
         boolean test=true;
         int count=0;
@@ -61,10 +61,10 @@ public class TestSolver {
                     count++;
                 }
 
-                if(Math.abs(matCcuda.get(i, j)-matB.get(i, j))> eps){
+         /*       if(Math.abs(matCcuda.get(i, j)-matB.get(i, j))> eps){
                     test =false;
                     count++;
-                }
+                }*/
             }
         }
         System.out.println("Error counts: "+count);
