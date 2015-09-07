@@ -47,28 +47,45 @@
 
 <!-- Global Model Handler -->
 
+<!-- SearchBar -->
+<div id="searchBar">
+    <button class="uk-button" data-uk-offcanvas="{target:'#configAndSearch'}">More...</button>
+    <button class="uk-button" data-uk-offcanvas="{target:'#selectNodeDetail'}">More2...</button>
+</div>
 
-<div class="tm-middle">
-    <!-- SearchBar -->
-    <div id="searchBar">
-        <button class="uk-button" data-uk-offcanvas="{target:'#offcanvas-6'}">More...</button>
-    </div>
-    <div id="offcanvas-6" class="uk-offcanvas">
-        <div class="uk-offcanvas-bar">
+<div id="configAndSearch" class="uk-offcanvas">
+    <div class="uk-offcanvas-bar">
 
-            <form class="uk-form">
-                <input type="text" placeholder="ws://localhost:8080" onchange="kdispatch('ModelURLChange',this.value);">
-            </form>
-            <form class="uk-search">
-                <input class="uk-search-field" type="search" placeholder="search...">
-            </form>
-        </div>
+        <form class="uk-form">
+            <input type="text" placeholder="ws://localhost:8080" onchange="kdispatch('modelURLChange',this.value);">
+        </form>
+        <form class="uk-search">
+            <input class="uk-search-field" type="search" placeholder="search...">
+        </form>
     </div>
 </div>
+
+<div id="selectNodeDetail" class="uk-offcanvas">
+    <div class="uk-offcanvas-bar uk-offcanvas-bar-flip">
+
+        <form class="uk-form">
+            <input type="text" placeholder="ws://localhost:8080" onchange="kdispatch('ModelURLChange',this.value);">
+        </form>
+        <form class="uk-search">
+            <input class="uk-search-field" type="search" placeholder="search...">
+        </form>
+    </div>
+</div>
+
+
 <script>
-    klisten("ModelURLChange", function (e) {
+    klisten("modelURLChange", function (e) {
         console.log(e);
-    })
+    });
+    klisten("nodeSelected", function (e) {
+        UIkit.offcanvas.show("#selectNodeDetail");
+    });
+
 </script>
 <script src="bundle.js"></script>
 </body>

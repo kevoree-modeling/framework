@@ -15,22 +15,15 @@ var renderGraph = require('ngraph.pixel');
 //console.log(renderGraph);
 
 
-
-
 var renderer = renderGraph(graph);
-renderer.on("nodedblclick", function(node){
-   renderer.showNode(node.id);
+renderer.on("nodedblclick", function (node) {
+    renderer.showNode(node.id);
 
- console.log("DoubleClick ",node);
- });
-renderer.on("nodeclick", function(node){
-    console.log("Click ",node);
+    console.log("DoubleClick ", node);
 });
-
-
-//console.log(renderer);
-
-
+renderer.on("nodeclick", function (node) {
+    kdispatch("nodeSelected",node.id)
+});
 
 function generate() {
     var graphGenerators = require('ngraph.generators');

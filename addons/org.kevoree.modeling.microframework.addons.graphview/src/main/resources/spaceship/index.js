@@ -21,7 +21,7 @@ renderer.on("nodedblclick", function (node) {
     console.log("DoubleClick ", node);
 });
 renderer.on("nodeclick", function (node) {
-    console.log("Click ", node);
+    kdispatch("nodeSelected",node.id)
 });
 
 function generate() {
