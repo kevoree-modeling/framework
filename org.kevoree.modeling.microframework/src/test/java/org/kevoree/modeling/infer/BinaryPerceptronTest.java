@@ -71,8 +71,8 @@ public class BinaryPerceptronTest {
 
     }
 
-    @Test
-    public void test2() {
+
+/*    public void test2() {
         double result = 0;
         for (int i = 0; i < 10; i++) {
             result = result + test();
@@ -80,9 +80,10 @@ public class BinaryPerceptronTest {
         result = result / 10;
         // System.out.println(result);
         Assert.assertTrue(result > 50);
-    }
+    }*/
 
-    public int test() {
+    @Test
+    public void test() {
 
         KMetaModel mm = createMetaModel();
         KModel model = mm.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
@@ -94,7 +95,7 @@ public class BinaryPerceptronTest {
             public void on(Object o) {
 
                 KObjectInfer perceptronProfile = (KObjectInfer) model.createByName("PerceptronProfile", 0, 0);
-                int size = 3000;
+                int size = 10000;
 
                 for (int i = 0; i < size; i++) {
                     KObject[] person = new KObject[1];
@@ -119,9 +120,9 @@ public class BinaryPerceptronTest {
                     });
                 }
                 //System.out.println(correct[0]);
-                //Assert.assertTrue(correct[0]>50);
+                Assert.assertTrue(correct[0]>50);
             }
         });
-        return correct[0];
+        //Assert.assertTrue(result > 50);
     }
 }
