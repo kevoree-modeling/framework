@@ -340,6 +340,7 @@ public abstract class AbstractArrayTree implements KChunk {
         return -1;
     }
 
+    /* TODO manage with compare and swap here */
     private void rotateLeft(int n) {
         int r = right(n);
         replaceNode(n, r);
