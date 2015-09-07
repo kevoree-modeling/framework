@@ -116,7 +116,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
         final KMetaAttribute sensorMetaValue = sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
         final KMetaAttribute sensorMetaValue2 = sensorMetaClass.addAttribute("value2", KPrimitiveTypes.DOUBLE);
         //   final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler().workers(3)).build());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler()).build());
         model.connect(new KCallback<Throwable>() {
 
             @Override
@@ -159,7 +159,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
                         ((KInternalDataManager) model.manager()).scheduler().dispatch(new Runnable() {
                             @Override
                             public void run() {
-                                ((KInternalDataManager) model.manager()).printDebug();
+                                //((KInternalDataManager) model.manager()).printDebug();
                                 latch.countDown();
                             }
                         });
