@@ -79,10 +79,10 @@ public class SpeedTest {
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
+        homeMetaClass.addRelation("sensors", sensorMetaClass, null);
         final KModel universe = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
         universe.connect(new KCallback<Throwable>() {

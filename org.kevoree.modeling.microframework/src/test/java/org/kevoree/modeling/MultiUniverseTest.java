@@ -28,7 +28,7 @@ public class MultiUniverseTest {
         sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
 
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback() {

@@ -21,7 +21,7 @@ public interface KMetaClass extends KMeta {
 
     KMetaAttribute addAttribute(String attributeName, KType p_type);
 
-    KMetaRelation addReference(String referenceName, KMetaClass metaClass, String oppositeName, boolean toMany);
+    KMetaRelation addRelation(String relationName, KMetaClass metaClass, String oppositeName);
 
     KMetaDependency addDependency(String dependencyName, int referredMetaClassIndex);
 

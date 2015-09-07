@@ -28,11 +28,11 @@ public class Recommandation {
         metaClassProduct.addAttribute("name", KPrimitiveTypes.STRING);
 
         KMetaClass metaClassRating = metaModel.addMetaClass("Rating");
-        metaClassRating.addReference("ownerUser",metaClassUser,"userRatings",false);
-        metaClassUser.addReference("userRatings", metaClassRating, "ownerUser", true);
+        metaClassRating.addRelation("ownerUser", metaClassUser, "userRatings");
+        metaClassUser.addRelation("userRatings", metaClassRating, "ownerUser");
 
-        metaClassRating.addReference("ratedProduct",metaClassUser,"productRatings",false);
-        metaClassProduct.addReference("productRatings", metaClassRating, "ratedProduct", true);
+        metaClassRating.addRelation("ratedProduct", metaClassUser, "productRatings");
+        metaClassProduct.addRelation("productRatings", metaClassRating, "ratedProduct");
 
         metaClassRating.addAttribute("ratingValue", KPrimitiveTypes.DOUBLE);
 

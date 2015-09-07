@@ -29,12 +29,12 @@ public abstract class BaseKObjectChunkTest {
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("attr_long", KPrimitiveTypes.LONG);
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
+        homeMetaClass.addRelation("sensors", sensorMetaClass, null);
 
         final KModel model = dynamicMetaModel.createModel(createKInternalDataManger());
 
@@ -93,12 +93,12 @@ public abstract class BaseKObjectChunkTest {
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("attr_long", KPrimitiveTypes.LONG);
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
+        homeMetaClass.addRelation("sensors", sensorMetaClass, null);
 
         final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
@@ -162,12 +162,12 @@ public abstract class BaseKObjectChunkTest {
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("attr_long", KPrimitiveTypes.LONG);
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
+        homeMetaClass.addRelation("sensors", sensorMetaClass, null);
 
         final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
@@ -225,12 +225,12 @@ public abstract class BaseKObjectChunkTest {
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("attr_long", KPrimitiveTypes.LONG);
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
+        homeMetaClass.addRelation("sensors", sensorMetaClass, null);
 
         final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
@@ -283,12 +283,12 @@ public abstract class BaseKObjectChunkTest {
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("attr_long", KPrimitiveTypes.LONG);
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
+        homeMetaClass.addRelation("sensors", sensorMetaClass, null);
 
         final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
@@ -336,7 +336,7 @@ public abstract class BaseKObjectChunkTest {
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
 
@@ -404,12 +404,12 @@ public abstract class BaseKObjectChunkTest {
 
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         KMetaClass homeMetaClass = dynamicMetaModel.addMetaClass("Home");
         homeMetaClass.addAttribute("attr_long", KPrimitiveTypes.LONG);
         homeMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
-        homeMetaClass.addReference("sensors", sensorMetaClass, null, true);
+        homeMetaClass.addRelation("sensors", sensorMetaClass, null);
         homeMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
 
 

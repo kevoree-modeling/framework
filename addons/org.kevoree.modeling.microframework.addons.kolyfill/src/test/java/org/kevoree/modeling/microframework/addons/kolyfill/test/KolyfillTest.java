@@ -18,7 +18,7 @@ public class KolyfillTest {
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
-        KMetaRelation sensorsRef = sensorClass.addReference("sensors", sensorClass, null, true);
+        KMetaRelation sensorsRef = sensorClass.addRelation("sensors", sensorClass, null, true);
 
         ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 

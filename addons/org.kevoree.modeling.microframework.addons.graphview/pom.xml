@@ -18,6 +18,11 @@
             <artifactId>org.kevoree.modeling.microframework.browser</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.kevoree.modeling</groupId>
+            <artifactId>org.kevoree.modeling.microframework.drivers.websocket</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -35,6 +40,24 @@
                         <configuration>
                             <target>${project.basedir}/target/classes</target>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <configuration>
+                            <tasks>
+                                <exec executable="/usr/local/bin/browserify" resultproperty="bundlejs" failonerror="true" dir="${basedir}" output="src/main/resources/spaceship/bundle.js">
+                                    <arg value="src/main/resources/spaceship/index.js" />
+                                </exec>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

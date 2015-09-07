@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
+import org.kevoree.modeling.meta.KMetaRelation;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
@@ -21,15 +22,23 @@ public class OppositeTest {
         A_Class = metaModel.addMetaClass("A");
         B_Class = metaModel.addMetaClass("B");
 
-        A_Class.addReference("singleRef", B_Class, null, false);
-        A_Class.addReference("multiRef", B_Class, null, true);
-        A_Class.addReference("singleA_singleB", B_Class, "singleA_singleB", false);
-        A_Class.addReference("singleA_multiB", B_Class, "singleA_multiB", false);
-        A_Class.addReference("multiA_multiB", B_Class, "multiA_multiB", true);
+        KMetaRelation singleRef = A_Class.addRelation("singleRef", B_Class, null);
+        singleRef.setMaxBound(1);
 
-        B_Class.addReference("singleA_singleB", A_Class, "singleA_singleB", false);
-        B_Class.addReference("singleA_multiB", A_Class, "singleA_multiB", true);
-        B_Class.addReference("multiA_multiB", A_Class, "multiA_multiB", true);
+        A_Class.addRelation("multiRef", B_Class, null);
+        KMetaRelation singleA_singleB = A_Class.addRelation("singleA_singleB", B_Class, "singleA_singleB");
+        singleA_singleB.setMaxBound(1);
+
+        KMetaRelation singleA_multiB = A_Class.addRelation("singleA_multiB", B_Class, "singleA_multiB");
+        singleA_multiB.setMaxBound(1);
+
+        A_Class.addRelation("multiA_multiB", B_Class, "multiA_multiB");
+
+        KMetaRelation singleA_singleB_2 = B_Class.addRelation("singleA_singleB", A_Class, "singleA_singleB");
+        singleA_singleB_2.setMaxBound(1);
+
+        B_Class.addRelation("singleA_multiB", A_Class, "singleA_multiB");
+        B_Class.addRelation("multiA_multiB", A_Class, "multiA_multiB");
 
 
         model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());

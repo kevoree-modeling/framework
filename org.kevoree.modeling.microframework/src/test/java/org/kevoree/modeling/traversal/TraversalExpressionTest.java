@@ -19,7 +19,7 @@ public class TraversalExpressionTest {
         final KMetaClass sensorMetaClass = metaModel.addMetaClass("Sensor");
         sensorMetaClass.addAttribute("name", KPrimitiveTypes.STRING);
         sensorMetaClass.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        sensorMetaClass.addReference("siblings", sensorMetaClass, null, true);
+        sensorMetaClass.addRelation("siblings", sensorMetaClass, null);
 
         final KModel universe = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
         universe.connect(new KCallback<Throwable>() {

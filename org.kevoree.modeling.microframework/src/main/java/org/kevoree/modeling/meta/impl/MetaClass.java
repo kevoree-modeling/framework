@@ -142,11 +142,11 @@ public class MetaClass implements KMetaClass {
     }
 
     @Override
-    public KMetaRelation addReference(String referenceName, KMetaClass p_metaClass, String oppositeName, boolean toMany) {
-        return internal_addref(referenceName, p_metaClass, oppositeName, toMany);
+    public KMetaRelation addRelation(String relationName, KMetaClass p_metaClass, String oppositeName) {
+        return internal_addref(relationName, p_metaClass, oppositeName);
     }
 
-    private KMetaRelation internal_addref(String referenceName, KMetaClass p_metaClass, String oppositeName, boolean toMany) {
+    private KMetaRelation internal_addref(String referenceName, KMetaClass p_metaClass, String oppositeName) {
         final KMetaClass tempOrigin = this;
         String opName = oppositeName;
         if (opName == null) {
@@ -155,7 +155,7 @@ public class MetaClass implements KMetaClass {
         } else {
             ((MetaClass) p_metaClass).getOrCreate(opName, referenceName, this, true);
         }
-        MetaRelation tempReference = new MetaRelation(referenceName, _meta.length, !toMany, p_metaClass.index(), opName, tempOrigin.index(),-1);
+        MetaRelation tempReference = new MetaRelation(referenceName, _meta.length, true, p_metaClass.index(), opName, tempOrigin.index(), -1);
         internal_add_meta(tempReference);
         return tempReference;
     }

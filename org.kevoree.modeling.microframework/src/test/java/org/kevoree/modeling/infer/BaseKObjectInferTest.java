@@ -22,7 +22,7 @@ public class BaseKObjectInferTest {
         KMetaClass metaClassSensor = metaModel.addMetaClass("Sensor");
         metaClassSensor.addAttribute("name", KPrimitiveTypes.STRING);
         metaClassSensor.addAttribute("value", KPrimitiveTypes.DOUBLE);
-        metaClassSensor.addReference("siblings", metaClassSensor, null, true);
+        metaClassSensor.addRelation("siblings", metaClassSensor, null);
 
         KMetaEnum metaEnumState = metaModel.addMetaEnum("State");
         metaEnumState.addLiteral("OK");

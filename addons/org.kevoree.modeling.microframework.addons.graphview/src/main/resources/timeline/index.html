@@ -1,0 +1,131 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>TweenTime: Basic example</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles/editor.css">
+    <link rel="stylesheet" href="fonts/icomoon/style.css">
+    <link rel="stylesheet" href="bower_components/font-source-sans-pro/source-sans-pro.css">
+    <style>
+        body {
+            background: #efefef;
+        }
+
+        .box {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-left: 50px;
+            margin-top: 50px;
+            background: #33b5e5;
+        }
+    </style>
+</head>
+<body>
+<div class="content-wrapper">
+
+    <div class="box"></div>
+
+</div>
+
+<!-- TweenTime dependencies -->
+<script src="bower_components/gsap/src/uncompressed/TweenMax.js"></script>
+<script src="bower_components/gsap/src/uncompressed/TimelineMax.js"></script>
+<script src="bower_components/js-signals/dist/signals.js"></script>
+
+<!-- Editor dependencies -->
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/spectrum/spectrum.js"></script>
+<script src="bower_components/d3/d3.js"></script>
+<script src="bower_components/lodash/lodash.js"></script>
+<script src="bower_components/draggable-number.js/dist/draggable-number.js"></script>
+
+<!-- TweenTime & Editor -->
+<script src="scripts/TweenTime.Core.min.js"></script>
+<script src="scripts/TweenTime.Editor.min.js"></script>
+
+<!-- Example script -->
+<script>
+    var data = [
+        {
+            "id": "box",
+            "type": "box",
+            "label": "Box 1",
+            "properties": [
+                {
+                    "name": "x",
+                    "keys": [
+                        {
+                            "time": 0,
+                            "val": 0
+                        },
+                        {
+                            "time": 2,
+                            "val": 100,
+                            "ease": "Quart.easeInOut"
+                        }
+                    ],
+                    "val": 42
+                },
+                {
+                    "name": "y",
+                    "keys": [
+                        {
+                            "time": 0,
+                            "val": 0,
+                            "ease": "Quad.easeOut"
+                        },
+                        {
+                            "time": 0.9870000000000003,
+                            "val": 50,
+                            "ease": "Cubic.easeInOut"
+                        },
+                        {
+                            "time": 2.006,
+                            "val": 0,
+                            "ease": "Quad.easeInOut"
+                        }
+                    ],
+                    "val": 0
+                },
+                {
+                    "name": "opacity",
+                    "keys": [
+                        {
+                            "time": 1.214,
+                            "val": 1
+                        },
+                        {
+                            "time": 3.98,
+                            "val": 0,
+                            "ease": "Quad.easeOut"
+                        }
+                    ],
+                    "val": 1,
+                    "min": 0,
+                    "max": 1
+                }
+            ]
+        }
+    ];
+
+    var tweenTime = new TweenTime.Core(data);
+    var editor = new TweenTime.Editor(tweenTime);
+
+    var box_values = tweenTime.getValues('box');
+
+    function animate() {
+        $('.box').css({
+            'opacity': box_values.opacity,
+            'transform': 'translate(' + box_values.x + 'px, ' + box_values.y + 'px)'
+        });
+        window.requestAnimationFrame(animate);
+    }
+
+    animate();
+</script>
+</body>
+</html>

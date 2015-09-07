@@ -109,7 +109,7 @@ public class Generator {
                         op_ref.setOpposite(ref);
 
                         //add the relation on  the other side
-                        ref.getType().addReference(op_ref);
+                        ref.getType().addRelation(op_ref);
                         ref.setOpposite(op_ref);
 
                     }
