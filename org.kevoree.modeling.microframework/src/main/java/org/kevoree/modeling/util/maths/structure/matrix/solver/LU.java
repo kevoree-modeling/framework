@@ -146,9 +146,11 @@ public class LU {
 
 
     public KArray2D transSolve(KArray2D B, KBlasTransposeType trans, KBlas blas) {
+        /*
         if (singular) {
          //   throw new MatrixSingularException();
         }
+        */
         if (B.rows() != LU.rows())
             throw new RuntimeException("B.numRows() != LU.numRows()");
 

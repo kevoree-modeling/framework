@@ -657,14 +657,12 @@ public class JavaBlas implements KBlas {
         }
         else
         {
-            if ((paramInt2 >= 0 ? 0 : 1) == 0) {}
             if (((paramInt2 <= paramInt1 ? 0 : 1) == 0 ? 0 : 1) != 0)
             {
                 paramintW[0] = -2;
             }
             else
             {
-                if ((paramInt3 >= 0 ? 0 : 1) == 0) {}
                 if (((paramInt3 <= paramInt2 ? 0 : 1) == 0 ? 0 : 1) != 0) {
                     paramintW[0] = -3;
                 } else if ((paramInt5 >= Math.max(1, paramInt1) ? 0 : 1) != 0) {
