@@ -1,0 +1,17 @@
+{
+  "name": "font-source-sans-pro",
+  "version": "0.1.0",
+  "main": "source-sans-pro.css",
+  "homepage": "https://github.com/adobe/source-sans-pro",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryzy/bower-font-source-sans-pro"
+  },
+  "keywords": ["font", "SourceSans", "SourceSansPro"],
+  "authors": [
+    { "name": "Marcin ryży Ryżycki" }
+  ],
+  "description": "Source Sans Pro font family by Adobe",
+  "license": "SIL OFL 1.1",
+  "ignore": ["**/.*"]
+}
