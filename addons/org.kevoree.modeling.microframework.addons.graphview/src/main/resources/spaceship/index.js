@@ -24,9 +24,6 @@ renderer.on("nodeclick", function (node) {
     console.log("Click ", node);
 });
 
-
-//console.log(renderer);
-
 function generate() {
     var graphGenerators = require('ngraph.generators');
     return graphGenerators.wattsStrogatz(1000, 5, 0.5);
