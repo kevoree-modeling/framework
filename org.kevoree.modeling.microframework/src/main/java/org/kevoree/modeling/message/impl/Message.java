@@ -153,7 +153,9 @@ public class Message implements KMessage {
                         Base64.encodeIntToBuffer(lvalues.length, buffer);
                         for (int j = 0; j < lvalues.length; j++) {
                             buffer.append(KConfig.VAL_SEP);
-                            Base64.encodeStringToBuffer(lvalues[j], buffer);
+                            if(lvalues[j] != null) {
+                                Base64.encodeStringToBuffer(lvalues[j], buffer);
+                            }
                         }
                         break;
                     case 7:
@@ -161,7 +163,9 @@ public class Message implements KMessage {
                         Base64.encodeIntToBuffer(lvalues2.length, buffer);
                         for (int j = 0; j < lvalues2.length; j++) {
                             buffer.append(KConfig.VAL_SEP);
-                            Base64.encodeStringToBuffer(lvalues2[j], buffer);
+                            if(lvalues2[j] != null) {
+                                Base64.encodeStringToBuffer(lvalues2[j], buffer);
+                            }
                         }
                         break;
                 }

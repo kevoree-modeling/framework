@@ -584,6 +584,9 @@ public class Base64 {
     }
 
     public static String decodeToStringWithBounds(String s, int offsetBegin, int offsetEnd) {
+        if(offsetBegin == offsetEnd) {
+            return null;
+        }
         String result = "";
 
         int currentSourceChar;
