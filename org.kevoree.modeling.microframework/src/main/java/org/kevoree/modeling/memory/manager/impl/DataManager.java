@@ -47,7 +47,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private KeyCalculator _universeKeyCalculator = null;
     private volatile boolean isConnected = false;
 
-    private Short prefix;
+    private Short _prefix;
     private KModel _model;
 
     private static final int UNIVERSE_INDEX = 0;
@@ -217,13 +217,13 @@ public class DataManager implements KDataManager, KInternalDataManager {
                             if (throwable == null) {
                                 KMessage operationMapping = new Message();
                                 operationMapping.setType(Message.OPERATION_MAPPING);
-                                operationMapping.setValues(_operationManager.mappings());
+                                operationMapping.setValues(selfPointer._operationManager.mappings());
                                 selfPointer._db.sendToPeer(null, operationMapping, null);
                                 selfPointer._db.atomicGetIncrement(new long[]{KConfig.END_OF_TIME, KConfig.NULL_LONG, KConfig.NULL_LONG},
                                         new KCallback<Short>() {
                                             @Override
                                             public void on(Short newPrefix) {
-                                                selfPointer.prefix = newPrefix;
+                                                selfPointer._prefix = newPrefix;
                                                 long[] connectionKeys = new long[]{
                                                         KConfig.BEGINNING_OF_TIME, KConfig.NULL_LONG, newPrefix, //LastUniverseIndexFromPrefix
                                                         KConfig.END_OF_TIME, KConfig.NULL_LONG, newPrefix, //LastObjectIndexFromPrefix
@@ -244,7 +244,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                                     objIndexPayload = "0";
                                                                 }
                                                                 String globalUniverseTreePayload = strings[GLO_TREE_INDEX];
-                                                                KLongLongMap globalUniverseTree = (KLongLongMap) _spaceManager.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
+                                                                KLongLongMap globalUniverseTree = (KLongLongMap) selfPointer._spaceManager.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
                                                                 if (globalUniverseTreePayload != null) {
                                                                     try {
                                                                         globalUniverseTree.init(globalUniverseTreePayload, model().metaModel(), -1);
@@ -254,8 +254,8 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                                 }
                                                                 long newUniIndex = PrimitiveHelper.parseLong(uniIndexPayload);
                                                                 long newObjIndex = PrimitiveHelper.parseLong(objIndexPayload);
-                                                                selfPointer._universeKeyCalculator = new KeyCalculator(prefix, newUniIndex);
-                                                                selfPointer._objectKeyCalculator = new KeyCalculator(prefix, newObjIndex);
+                                                                selfPointer._universeKeyCalculator = new KeyCalculator(selfPointer._prefix, newUniIndex);
+                                                                selfPointer._objectKeyCalculator = new KeyCalculator(selfPointer._prefix, newObjIndex);
                                                                 selfPointer.isConnected = true;
                                                             } catch (Exception e) {
                                                                 detected = e;
@@ -347,7 +347,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     private void attachContentDeliveryDriver(KContentDeliveryDriver p_dataBase) {
-        currentCdnListener = this._db.addUpdateListener(new KContentUpdateListener() {
+
+        DataManager selfPointer = this;
+        currentCdnListener = selfPointer._db.addUpdateListener(new KContentUpdateListener() {
             @Override
             public void onKeysUpdate(long[] updatedKeys) {
                 long[] toLoadKeys = new long[updatedKeys.length];
@@ -356,7 +358,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 int nbElements = updatedKeys.length / KEY_SIZE;
                 int toInsertKey = 0;
                 for (int i = 0; i < nbElements; i++) {
-                    KChunk currentChunk = _spaceManager.getAndMark(updatedKeys[i * 3], updatedKeys[i * 3 + 1], updatedKeys[i * 3 + 2]);
+                    KChunk currentChunk = selfPointer._spaceManager.getAndMark(updatedKeys[i * 3], updatedKeys[i * 3 + 1], updatedKeys[i * 3 + 2]);
                     //reload object if necessary
                     if (currentChunk != null) {
                         if ((currentChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
@@ -365,10 +367,10 @@ public class DataManager implements KDataManager, KInternalDataManager {
                             toLoadKeys[toInsertKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
                             toInsertKey++;
                         }
-                        _spaceManager.unmarkMemoryElement(currentChunk);
+                        selfPointer._spaceManager.unmarkMemoryElement(currentChunk);
                     }
                     //check if this is an object chunk
-                    if (_listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2]) && updatedKeys[i * KEY_SIZE] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 1] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 2] != KConfig.NULL_LONG) {
+                    if (selfPointer._listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2]) && updatedKeys[i * KEY_SIZE] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 1] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 2] != KConfig.NULL_LONG) {
                         //check if the object is listened anyway
                         toNotifyKeys[toInsertNotifyKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
                         toNotifyKeys[toInsertNotifyKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
@@ -384,24 +386,24 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 final long[] trimmedToNotify = new long[toInsertNotifyKey * 3];
                 System.arraycopy(toNotifyKeys, 0, trimmedToNotify, 0, toInsertNotifyKey * 3);
 
-                KMetaModel mm = _model.metaModel();
-                _db.get(trimmedToLoad, new KCallback<String[]>() {
+                KMetaModel mm = selfPointer._model.metaModel();
+                selfPointer._db.get(trimmedToLoad, new KCallback<String[]>() {
                     @Override
                     public void on(String[] payloads) {
                         for (int i = 0; i < payloads.length; i++) {
                             if (payloads[i] != null) {
-                                KChunk currentChunk = _spaceManager.getAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2]);
+                                KChunk currentChunk = selfPointer._spaceManager.getAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2]);
                                 if (currentChunk != null) {
                                     currentChunk.init(payloads[i], mm, -1);
-                                    _spaceManager.unmarkMemoryElement(currentChunk);
+                                    selfPointer._spaceManager.unmarkMemoryElement(currentChunk);
                                 }
                             }
                         }
                         //now call a lookup on all elements that have to be notify
-                        _resolver.lookupPreciseKeys(trimmedToNotify, new KCallback<KObject[]>() {
+                        selfPointer._resolver.lookupPreciseKeys(trimmedToNotify, new KCallback<KObject[]>() {
                             @Override
                             public void on(KObject[] updatedObjects) {
-                                _listenerManager.dispatch(updatedObjects);
+                                selfPointer._listenerManager.dispatch(updatedObjects);
                             }
                         }).run();
                     }
@@ -410,7 +412,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
             @Override
             public void onOperationCall(KMessage operationCallMessage) {
-                _operationManager.dispatch(operationCallMessage);
+                selfPointer._operationManager.dispatch(operationCallMessage);
             }
         });
     }
