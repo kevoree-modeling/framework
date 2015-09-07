@@ -252,7 +252,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                                 KLongLongMap globalUniverseTree = (KLongLongMap) selfPointer._spaceManager.createAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
                                                                 if (globalUniverseTreePayload != null) {
                                                                     try {
-                                                                        globalUniverseTree.init(globalUniverseTreePayload, model().metaModel(), -1);
+                                                                        globalUniverseTree.init(globalUniverseTreePayload, selfPointer.model().metaModel(), -1);
                                                                     } catch (Exception e) {
                                                                         e.printStackTrace();
                                                                     }
