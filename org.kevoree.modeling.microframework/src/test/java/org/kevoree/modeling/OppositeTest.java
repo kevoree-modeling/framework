@@ -38,13 +38,17 @@ public class OppositeTest {
             public void on(Object o) {
                 KUniverse localUniverse = model.newUniverse();
                 factory = localUniverse.time(0l);
+
+                A_singleRef();
+                A_multiRef();
+                singleA_singleB_Test();
+                singleA_multiB_Test();
+                multiA_multiB_Test();
             }
         });
 
     }
 
-
-    @Test
     public void A_singleRef() { // single ref, not contained, no apposite
         final KObject a = factory.createByName("A");
         final KObject b = factory.createByName("B");
@@ -90,8 +94,6 @@ public class OppositeTest {
 
     }
 
-
-    @Test
     public void A_multiRef() { // multi ref, not contained, no apposite
         KObject a = factory.createByName("A");
         KObject b = factory.createByName("B");
@@ -185,9 +187,8 @@ public class OppositeTest {
 
     }
 
-
-    @Test
-    public void singleA_singleB_Test() {  // single ref, contained, opposite
+    public void singleA_singleB_Test() {
+        // single ref, contained, opposite
         //val container = TestFactory.createContainer
         KObject a = factory.createByName("A");
         KObject b = factory.createByName("B");
@@ -263,7 +264,6 @@ public class OppositeTest {
         });
     }
 
-    @Test
     public void singleA_multiB_Test() {
         //val container = TestFactory.createContainer
 
@@ -421,8 +421,6 @@ public class OppositeTest {
 
     }
 
-
-    @Test
     public void multiA_multiB_Test() {
 
         KObject a = factory.createByName("A");
