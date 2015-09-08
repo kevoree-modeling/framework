@@ -62,7 +62,7 @@
                                             var onClickTag = onClicks[i];
                                             var fctName = onClickTag.getAttribute("on-click");
                                             if (m.hasOwnProperty(fctName) && (typeof m[fctName] == "function")) {
-                                                onClickTag.onclick = m[fctName].bind(m.root);
+                                                onClickTag.onclick = m[fctName].bind(root);
                                             }
                                         }
                                     });
