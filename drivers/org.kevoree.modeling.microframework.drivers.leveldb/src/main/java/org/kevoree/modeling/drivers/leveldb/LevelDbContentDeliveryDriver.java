@@ -109,7 +109,11 @@ public class LevelDbContentDeliveryDriver implements KContentDeliveryDriver {
         WriteBatch batch = db.createWriteBatch();
         int nbKeys = p_keys.length / 3;
         for (int i = 0; i < nbKeys; i++) {
-            batch.put(JniDBFactory.bytes(KContentKey.toString(p_keys, i)), JniDBFactory.bytes(p_values[i]));
+            if (p_values[i] == null) {
+                batch.put(JniDBFactory.bytes(KContentKey.toString(p_keys, i)), JniDBFactory.bytes(""));
+            } else {
+                batch.put(JniDBFactory.bytes(KContentKey.toString(p_keys, i)), JniDBFactory.bytes(p_values[i]));
+            }
         }
         db.write(batch);
         if (additionalInterceptors != null) {
