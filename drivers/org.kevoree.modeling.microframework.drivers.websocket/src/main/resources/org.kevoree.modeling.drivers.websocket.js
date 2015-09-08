@@ -67,15 +67,26 @@ var org;
                                         }
                                         break;
                                     case org.kevoree.modeling.message.impl.Message.OPERATION_CALL_TYPE:
+                                        {
+                                            for (var id in self.listeners) {
+                                                var listener = self.listeners[id];
+                                                listener.onOperationCall(msg.keys());
+                                            }
+                                        }
+                                        break;
                                     case org.kevoree.modeling.message.impl.Message.OPERATION_RESULT_TYPE:
                                         {
+                                            var foundCB = self._callbacks[msg.id()];
+                                            if (foundCB != null) {
+                                                foundCB.on(msg);
+                                            }
                                         }
                                         break;
                                     case org.kevoree.modeling.message.impl.Message.EVENTS_TYPE:
                                         {
                                             for (var id in self.listeners) {
                                                 var listener = self.listeners[id];
-                                                listener(msg.keys());
+                                                listener.onKeysUpdate(msg.keys());
                                             }
                                         }
                                         break;
