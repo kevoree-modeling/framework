@@ -1372,7 +1372,7 @@ BaseView.extend(PaperclipView, {
              if (metaType == org.kevoree.modeling.meta.MetaType.ATTRIBUTE) {
                  return ct.getByName(getElemName);
              }
-             if (metaType == org.kevoree.modeling.meta.MetaType.REFERENCE) {
+             if (metaType == org.kevoree.modeling.meta.MetaType.RELATION) {
                  var kref = {};
                  kref._kmf_src = ct;
                  kref._kmf_elems = ct.getRelationValuesByName(getElemName);
