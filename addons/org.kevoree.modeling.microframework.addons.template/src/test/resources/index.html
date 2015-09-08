@@ -62,7 +62,7 @@
     sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
     sensorClass.addReference("sensors", sensorClass, null, true);
 
-    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://" + window.location.hostname + ":8080/cdn");
+    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketPeer("ws://" + window.location.hostname + ":8083/cdn");
     var dataManager = org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
     var model = metaModel.createModel(dataManager);
     var modelContext = model.createModelContext();

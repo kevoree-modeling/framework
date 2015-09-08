@@ -1,7 +1,13 @@
 package org.kevoree.modeling.addons.template;
 
+import io.undertow.Handlers;
+import io.undertow.Undertow;
+import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.drivers.websocket.gateway.WebSocketGateway;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.memory.manager.KDataManager;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
@@ -22,8 +28,8 @@ public class TemplateTest {
 
         ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 
-
-        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        KInternalDataManager dataManager = DataManagerBuilder.create().withScheduler(new DirectScheduler()).build();
+        KModel model = metaModel.createModel(dataManager);
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -77,8 +83,10 @@ public class TemplateTest {
             }
         });
 
-        //WebSocketGateway gateway = WebSocketGateway.exposeModelAndResources(model, 8080, TemplateTest.class.getClassLoader());
-        //gateway.start();
+        WebSocketGateway gateway = WebSocketGateway.expose(dataManager.cdn(), 8083);
+        gateway.start();
+
+        Undertow.builder().addHttpListener(8084,"0.0.0.0", Handlers.resource(new ClassPathResourceManager(TemplateTest.class.getClassLoader()))).build().start();
 
         try {
             Thread.sleep(100000);
