@@ -46,19 +46,18 @@
                                 value: function () {
                                     var m = _getModule(this.localName);
                                     var root = this.createShadowRoot();
-                                    m.root = root;
                                     if (m.css) {
                                         var style = document.createElement("style");
                                         style.innerHTML = m.css.import.body.innerHTML;
-                                        m.root.appendChild(style);
+                                        root.appendChild(style);
                                     } else {
-                                        console.error("Css not loaded !",m);
+                                        console.error("Css not loaded !", m);
                                     }
                                     m.baseElement = this;
                                     _fillProperties(m, this);
                                     m.generate(m.template.innerHTML, this, function (result) {
-                                        m.root.appendChild(result);
-                                        var onClicks = m.root.querySelectorAll("[on-click]");
+                                        root.appendChild(result);
+                                        var onClicks = root.querySelectorAll("[on-click]");
                                         for (var i = 0; i < onClicks.length; i++) {
                                             var onClickTag = onClicks[i];
                                             var fctName = onClickTag.getAttribute("on-click");
