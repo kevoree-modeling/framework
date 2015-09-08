@@ -79,7 +79,7 @@ module org {
                                     {
                                         for (var id in self.listeners) {
                                             var listener = self.listeners[id];
-                                            listener(msg.keys());
+                                            listener.onKeysUpdate(msg.keys());
                                         }
                                     }
                                         break;
