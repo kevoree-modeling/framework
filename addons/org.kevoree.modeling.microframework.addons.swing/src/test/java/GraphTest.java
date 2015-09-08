@@ -23,8 +23,8 @@ public class GraphTest {
         KMetaModel metaModel = new MetaModel("TestModel");
         KMetaClass nodeClazz = metaModel.addMetaClass("Node");
         nodeClazz.addAttribute("name", KPrimitiveTypes.STRING);
-        nodeClazz.addRelation("children", nodeClazz, "op_children", true);
-        nodeClazz.addRelation("neighbor", nodeClazz, "op_neighbor", true);
+        nodeClazz.addRelation("children", nodeClazz, "op_children");
+        nodeClazz.addRelation("neighbor", nodeClazz, "op_neighbor");
         KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new ExecutorServiceScheduler()).build());
 
         model.connect(new KCallback() {

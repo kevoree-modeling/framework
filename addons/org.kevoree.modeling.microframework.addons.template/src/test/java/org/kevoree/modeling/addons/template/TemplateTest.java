@@ -24,7 +24,7 @@ public class TemplateTest {
         KMetaModel metaModel = new MetaModel("IoTModel");
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
-        KMetaRelation sensorsRef = sensorClass.addRelation("sensors", sensorClass, null, true);
+        KMetaRelation sensorsRef = sensorClass.addRelation("sensors", sensorClass, null);
 
         ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 
