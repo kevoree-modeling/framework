@@ -10,11 +10,14 @@
                                 _registerUserModule(this);
                                 var m = _getModule(this.getAttribute("id"));
                                 if (!m.initialized) {
+                                    m.content = this;
+                                    m.initialized = true;
+                                    /*
                                     m.template = this.querySelector('template');
                                     var importCss = this.querySelector('link[rel=import][type=css]');
                                     m.css = importCss;
                                     //console.error("Css loaded", m.css);
-                                    m.initialized = true;
+                                    */
                                 }
                             }
                         }

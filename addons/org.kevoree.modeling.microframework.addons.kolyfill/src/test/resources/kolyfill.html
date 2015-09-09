@@ -1,0 +1,141 @@
+<script>
+    var KmfModules = KmfModules || (function () {
+                var modules = [];
+                var KmfModulePrototype = Object.create(HTMLElement.prototype);
+                KmfModulePrototype.createdCallback = function(){
+                    var id = this.getAttribute("id");
+                    var resolvedModel = modules[id];
+                    if(resolvedModel === undefined){
+                        var KmfNewModulePrototype = Object.create(HTMLElement.prototype);
+                        KmfNewModulePrototype.attachedCallback = function(){
+                            console.log("Attached,",id,this);
+                        };
+                        KmfNewModulePrototype.detachedCallback = function(){
+                            console.log("Dettached,",id,this);
+                        };
+                        KmfNewModulePrototype.attributeChangedCallback = function(){
+                            console.log("AttChanged",id,this);
+                        };
+                        var KmfNewModule =  document.registerElement(id, {
+                            prototype: KmfNewModulePrototype
+                        });
+                        KmfNewModule.content = this;
+
+                        console.log(this);
+
+                        console.log(document);
+
+                    }
+                };
+                KmfModulePrototype.attachedCallback = function(){
+                    console.log("KMF-MODULE TAG is not supposed to be attached to the DOM! ");
+                };
+                KmfModulePrototype.detachedCallback = function(){
+                    console.log("KMF-MODULE TAG is not supposed to be attached to the DOM!");
+                };
+                KmfModulePrototype.attributeChangedCallback = function(){
+                    console.log("KMF-MODULE TAG is not supposed to be attached to the DOM!");
+                };
+                var KmfModule = document.registerElement('kmf-module', {
+                    prototype: KmfModulePrototype
+                });
+
+
+             /*   document.registerElement('kmf-module', {
+                    prototype: Object.create(HTMLElement.prototype, {
+                        createdCallback: {
+                            value: function () {
+                                var m = _getModule(this.getAttribute("id"));
+                                if (!m.initialized) {
+                                    //m.content = this;
+                                    m.initialized = true;
+                                    console.log(this.querySelectorAll("span"));
+                                    var scripts = this.querySelectorAll("script");
+                                    console.log(scripts);
+*/
+
+                                    /*
+                                     document.registerElement(elt.getAttribute("id"), {
+                                     prototype: Object.create(HTMLElement.prototype, {
+                                     attachedCallback: {
+                                     value: function () {
+                                     var m = _getModule(this.localName);
+                                     console.log(m.content);
+                                     var root = this.createShadowRoot();
+                                     root.appendChild(m.content.cloneNode(true));
+
+                                     /*if (m.css) {
+                                     var style = document.createElement("style");
+                                     style.innerHTML = m.css.import.body.innerHTML;
+                                     root.appendChild(style);
+                                     } else {
+                                     console.error("Css not loaded !", m);
+                                     }*/
+                                    //m.baseElement = this;
+
+                                    /*
+                                     _fillProperties(m, this);
+                                     m.generate(m.template.innerHTML, this, function (result) {
+                                     root.appendChild(result);
+                                     var onClicks = root.querySelectorAll("[on-click]");
+                                     for (var i = 0; i < onClicks.length; i++) {
+                                     var onClickTag = onClicks[i];
+                                     var fctName = onClickTag.getAttribute("on-click");
+                                     if (m.hasOwnProperty(fctName) && (typeof m[fctName] == "function")) {
+                                     onClickTag.onclick = m[fctName].bind(root);
+                                     }
+                                     }
+                                     });*/
+                                    /*
+                                     }
+                                     },
+                                     detachedCallback: function(){
+                                     console.log("Detached");
+                                     }
+                                     })
+                                     });
+                                     */
+
+
+                                    //var scripts = this.querySelectorAll('script');
+                                    //console.log(scripts);
+
+
+                                    //_registerUserModule(this);
+
+                                    /*
+                                     m.template = this.querySelector('template');
+                                     var importCss = this.querySelector('link[rel=import][type=css]');
+                                     m.css = importCss;
+                                     //console.error("Css loaded", m.css);
+                                     */
+                    /*
+                                }
+                            }
+                        }
+                    })
+                });*/
+
+                /*
+                function _fillProperties(m, elt) {
+                    var properties;
+                    if (elt.properties) {
+                        properties = elt.properties;
+                    } else {
+                        properties = {};
+                    }
+                    for (var idx = 0; idx < elt.attributes.length; idx++) {
+                        if (elt.attributes[idx]) {
+                            var att = elt.attributes[idx];
+                            properties[att.nodeName] = att.nodeValue;
+                        }
+                    }
+                    elt.properties = properties;
+                };*/
+
+                /*
+                return {
+                    register: _register
+                };*/
+            })();
+</script>

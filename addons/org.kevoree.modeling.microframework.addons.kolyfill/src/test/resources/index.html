@@ -2,47 +2,70 @@
 <html lang="en">
 <head>
 
+
+    <!--
     <script type="text/javascript" src="org.kevoree.modeling.microframework.browser.js"></script>
     <script type="text/javascript" src="org.kevoree.modeling.drivers.websocket.js"></script>
 
     <script type="text/javascript" src="paperclip_old.js"></script>
-
-    <link rel="import" href="test-module/test-module.html"/>
+    -->
 
 </head>
 <body>
-
-
+<script>
+    window.addEventListener('HTMLImportsLoaded', function (e) {
+        console.log("Hello Before");
+    });
+    console.log("Register");
+    /*
+    var link = document.querySelector('link[rel="import"]');
+    link.addEventListener('load', function (e) {
+        var importedDoc = link.import;
+        // importedDoc points to the document under component.html
+        console.log("Loadè!!!");
+    });*/
+</script>
+<link rel="import" href="test-module/test-module.html"/>
 
 
 <script>
-    var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
-    var sensorClass = metaModel.addMetaClass("Sensor");
-    sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
-    sensorClass.addReference("sensors", sensorClass, null, true);
 
-    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://"+window.location.hostname+":8081/cdn");
-    var dataManager =  org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
-    var KmfModel = metaModel.createModel(dataManager);
-    KmfModel.connect(function () {
+    /*
+     var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
+     var sensorClass = metaModel.addMetaClass("Sensor");
+     sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
+     sensorClass.addReference("sensors", sensorClass, null, true);
 
-        var newElement = document.createElement("test-module");
-        newElement.setAttribute("name", "John !");
+     var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://"+window.location.hostname+":8081/cdn");
+     var dataManager =  org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
+     var KmfModel = metaModel.createModel(dataManager);
+     KmfModel.connect(function () {
 
-        var span = document.createElement("span");
-        span.style["color"] ="blue";
-        span.textContent = "This is some instance content";
-        newElement.appendChild(span);
+     var newElement = document.createElement("test-module");
+     newElement.setAttribute("name", "John !");
 
-        document.body.appendChild(newElement);
+     var span = document.createElement("span");
+     span.style["color"] ="blue";
+     span.textContent = "This is some instance content";
+     newElement.appendChild(span);
 
-    });
+     document.body.appendChild(newElement);
 
+     });
+     */
 
+    var newElement = document.createElement("test-module");
+    newElement.setAttribute("name", "John");
+    document.body.appendChild(newElement);
+
+    var newElement2 = document.createElement("test-module");
+    newElement2.setAttribute("name", "John2");
+    document.body.appendChild(newElement2);
 
 
 </script>
 
+<test-module name="John3"></test-module>
 
 </body>
 </html>

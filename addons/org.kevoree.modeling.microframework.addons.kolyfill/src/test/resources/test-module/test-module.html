@@ -1,74 +1,79 @@
-<link rel="import" href="/kolyfill.html" />
-
-
+<link rel="import" href="../kolyfill.html"/>
 <kmf-module id="test-module">
 
     <!-- Specific CSS for module -->
-    <link rel="import" href="test-module.css" type="css">
+    <link rel="stylesheet" href="test-module.css">
+    <script>
+        function myMethod(event) {
+            event.srcElement.textContent = event.srcElement.textContent + " -> Clicked";
+        }
+    </script>
+    <script>
+        console.log("onReadyIsDefined");
+        function onReady(){
+            console.log("SayHello");
+        }
+    </script>
 
-    <template>
+
+    <script type="text/x-paperclip" id="myTemplateId">
         Hello <br/>
         This is a <span class="bold">kmf-module</span> example with <span class="bold">Kolyfill</span>. <br/>
-
         <!-- Access to attributes values from module instance -->
         This is an access to a property of the parent: {{properties.name}}. <br/>
-
         <content></content>
         <br/>
-
         <!-- Use of template engine to access KMF elements -->
         <repeat each="{{firstSensor.sensors}}" as="sensor">
-
             <!-- Use of two way bindings -->
             <input type="text" value="{{<~>sensor.value}}"/><br/>
             Sensor({{sensor.uuid}}): {{sensor.value}}<br/>
-
             <!-- Method binding on model -->
             <span>Value+1: {{sensor.value | myOtherMethod}}</span><br/>
         </repeat>
         <br/>
-
         <!-- Method binding on-click -->
         <button on-click="myMethod">Click me !</button>
-
-
-    </template>
-
-    <script>
-        KmfModules.register("test-module", {
-            //templateSrc: Raw Template text; instance: the current HTML element instance; targetRoot: the final DOM element
-            generate: function (templateSrc, instance, callback) {
-
-                //KMF lookup
-                KmfModel.lookup(0, 0, 1, function (obj) {
-
-                    //Template prep.
-                    var template = paperclip.template(templateSrc, {
-
-                        //Adding modifiers to update values in template
-                        modifiers: {
-                            myOtherMethod: function (value) {
-                                return value + 1;
-                            }
-                        }
-                    });
-                    var view = template.view({
-                        firstSensor: obj,
-                        properties: instance.properties
-                    });
-                    var rendered = view.render();
-                    callback(rendered);
-                });
-
-
-            },
-            myMethod: function (event) {
-                event.srcElement.textContent = event.srcElement.textContent + " -> Clicked";
-            }
-
-        });
-
     </script>
+
+
+
+    <span>Hello</span>
+
+
 </kmf-module>
 
+
+<!--
+<script>
+    KmfModules.register("test-module", {
+        //templateSrc: Raw Template text; instance: the current HTML element instance; targetRoot: the final DOM element
+        ready: function (tempDom, params, readyCallback) {
+
+            console.log("SayHello");
+            return document.createElement("span");
+
+            /*
+            //KMF lookup
+            KmfModel.lookup(0, 0, 1, function (obj) {
+                //Template prep.
+                var template = paperclip.template(tempDom.getBydId("myTemplateId"), {
+                    //Adding modifiers to update values in template
+                    modifiers: {
+                        myOtherMethod: function (value) {
+                            return value + 1;
+                        }
+                    }
+                });
+                var view = template.view({firstSensor: obj, properties: instance.properties});
+                var rendered = view.render();
+                readyCallback(rendered);
+            });
+*/
+
+        }
+    });
+
+</script>
+-->
 
