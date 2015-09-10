@@ -57,7 +57,7 @@
                                         console.error("Css not loaded !", m);
                                     }
                                     m.baseElement = this;
-                                    _fillProperties(m, this);
+                                    _fillProperties(m, this, root);
                                     m.generate(m.template.innerHTML, this, function (result) {
                                         root.appendChild(result);
                                         var onClicks = root.querySelectorAll("[on-click]");
@@ -75,7 +75,7 @@
                     });
                 };
 
-                function _fillProperties(m, elt) {
+                function _fillProperties(m, elt, shadow) {
                     var properties;
                     if (elt.properties) {
                         properties = elt.properties;
@@ -89,6 +89,15 @@
                         }
                     }
                     elt.properties = properties;
+
+                    for(var obj in m) {
+                        if((typeof m[obj] == "function")) {
+                            shadow[obj] = m[obj];
+                            elt[obj] = m[obj].bind(shadow);
+                        }
+                    }
+
+
                 };
 
                 return {
