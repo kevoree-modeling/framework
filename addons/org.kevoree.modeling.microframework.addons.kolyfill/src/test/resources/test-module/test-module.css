@@ -9,3 +9,7 @@
 :host span.bold {
     font-weight: bold;
 }
+
+:host .blue {
+    color: blue
+}

@@ -1,0 +1,80 @@
+<script>
+    var KmfModules = KmfModules || (function () {
+                var modules = [];
+                var KmfModulePrototype = Object.create(HTMLElement.prototype);
+                KmfModulePrototype.createdCallback = function(){
+                    var id = this.getAttribute("id");
+                    var resolvedModel = modules[id];
+                    if(resolvedModel === undefined){
+                        var KmfNewModulePrototype = Object.create(HTMLElement.prototype);
+                        KmfNewModulePrototype.createdCallback = function(){
+                            console.log("Created,",id,this);
+                            var module = modules[id];
+
+                            var shadow = this.createShadowRoot();
+                            shadow.innerHTML =  module.content.innerHTML;
+
+                            var scripts = shadow.querySelectorAll("script");
+                            for(var scp in scripts) {
+                                var evalRes = eval("("+scripts[scp].innerText+")");
+                                if(evalRes !== undefined) {
+                                    for(var elt in evalRes) {
+                                        shadow[elt] = evalRes[elt].bind(shadow);
+                                    }
+                                }
+                            }
+
+                        };
+                        KmfNewModulePrototype.attachedCallback = function(){
+                            console.log("Attached,",id,this);
+                            if(this.shadowRoot.hasOwnProperty("onReady")) {
+                                var attr = {};
+                                for(var i = 0; i< this.attributes.length; i++) {
+                                    attr[this.attributes[i].nodeName] = this.attributes[i].nodeValue;
+                                }
+                                this.shadowRoot.onReady(attr);
+                            }
+                        };
+                        KmfNewModulePrototype.detachedCallback = function(){
+                            console.log("Detached,",id,this);
+                            if(this.shadowRoot.hasOwnProperty("onDelete")) {
+                                this.shadowRoot.onDelete();
+                            }
+                        };
+                        KmfNewModulePrototype.attributeChangedCallback = function(attributeName, oldValue, newValue){
+                            console.log("AttChanged",id,this, attributeName, oldValue, newValue);
+                        };
+                        var KmfNewModule =  document.registerElement(id, {
+                            prototype: KmfNewModulePrototype
+                        });
+
+                        KmfNewModule.content = this;
+                        modules[id] = KmfNewModule;
+                        var importCss = KmfNewModule.content.querySelectorAll('link[rel=import][type=css]');
+                        for(var i = 0; i < importCss.length; i++) {
+                            var importLink = importCss[i];
+                            importLink.addEventListener("load", function(){
+                                var style = document.createElement("style");
+                                style.innerHTML = importLink.import.body.innerHTML;
+                                KmfNewModule.content.appendChild(style);
+                                KmfNewModule.content.removeChild(importLink);
+
+                            });
+                        }
+
+                    }
+                };
+                KmfModulePrototype.attachedCallback = function(){
+                    console.log("KMF-MODULE TAG is not supposed to be attached to the DOM! ");
+                };
+                KmfModulePrototype.detachedCallback = function(){
+                    console.log("KMF-MODULE TAG is not supposed to be attached to the DOM!");
+                };
+                KmfModulePrototype.attributeChangedCallback = function(){
+                    console.log("KMF-MODULE TAG is not supposed to be attached to the DOM!");
+                };
+                var KmfModule = document.registerElement('kmf-module', {
+                    prototype: KmfModulePrototype
+                });
+            })();
+</script>
