@@ -73,36 +73,36 @@ public class GaussianProfiler implements KInferAlg {
             for (int j = 1; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
                 if (state.get(getCounter(output, origin.metaClass().dependencies())) == 0) {
-                    state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
-                    state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
-                    state.set(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
-                    state.set(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
+                    state.set(getIndex(j-1, output, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j-1, output, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j-1, output, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j-1, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
 
                 } else {
-                    if (trainingSet.get(i,j) < state.get(getIndex(j, output, MIN, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, output, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    if (trainingSet.get(i,j) < state.get(getIndex(j-1, output, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j-1, output, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    if (trainingSet.get(i,j) > state.get(getIndex(j, output, MAX, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, output, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    if (trainingSet.get(i,j) > state.get(getIndex(j-1, output, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j-1, output, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    state.add(getIndex(j, output, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
-                    state.add(getIndex(j, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
+                    state.add(getIndex(j-1, output, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.add(getIndex(j-1, output, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 }
                 //update global stat
                 if (state.get(getCounter(maxTimeSlots, origin.metaClass().dependencies())) == 0) {
-                    state.set(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
-                    state.set(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
-                    state.set(getIndex(j, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
-                    state.set(getIndex(j, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
+                    state.set(getIndex(j-1, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j-1, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j-1, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.set(getIndex(j-1, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 } else {
-                    if (trainingSet.get(i,j) < state.get(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    if (trainingSet.get(i,j) < state.get(getIndex(j-1, maxTimeSlots, MIN, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j-1, maxTimeSlots, MIN, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    if (trainingSet.get(i,j) > state.get(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()))) {
-                        state.set(getIndex(j, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    if (trainingSet.get(i,j) > state.get(getIndex(j-1, maxTimeSlots, MAX, origin.metaClass().dependencies()))) {
+                        state.set(getIndex(j-1, maxTimeSlots, MAX, origin.metaClass().dependencies()), trainingSet.get(i,j));
                     }
-                    state.add(getIndex(j, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
-                    state.add(getIndex(j, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
+                    state.add(getIndex(j-1, maxTimeSlots, SUM, origin.metaClass().dependencies()), trainingSet.get(i,j));
+                    state.add(getIndex(j-1, maxTimeSlots, SUMSQUARE, origin.metaClass().dependencies()), trainingSet.get(i,j) * trainingSet.get(i,j));
                 }
             }
             //Update Global counters
