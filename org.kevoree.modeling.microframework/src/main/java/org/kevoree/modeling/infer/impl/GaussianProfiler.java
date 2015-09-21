@@ -134,7 +134,20 @@ public class GaussianProfiler implements KInferAlg {
             for (int i = 0; i < features.columns() - 1; i++) {
                 values[i] = features.get(j,i + 1);
             }
-            result.set(j,0,getProba(values, output, state, origin.metaClass().dependencies()));
+            if(values[0]>=0) {
+                result.set(j, 0, getProba(values, output, state, origin.metaClass().dependencies()));
+            }
+            else{
+                if(values[0]==-1){
+                    result.set(j, 0, getAvg(output,state,origin.metaClass().dependencies())[0]);
+                }
+                else if(values[0]==-2){
+                    result.set(j, 0, state.get(getIndex(0,output,MIN,origin.metaClass().dependencies())));
+                }
+                else if(values[0]==-3){
+                    result.set(j, 0, state.get(getIndex(0,output,MAX,origin.metaClass().dependencies())));
+                }
+            }
         }
         return result;
     }
