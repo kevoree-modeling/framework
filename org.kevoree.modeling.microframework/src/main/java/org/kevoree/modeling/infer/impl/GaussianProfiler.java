@@ -23,11 +23,11 @@ public class GaussianProfiler implements KInferAlg {
     int maxTimeSlots = 24; // divide time into 24 hours, 1 gaussian profile every hour
 
     private int getIndex(int input, int output, int field, KMetaDependencies meta) {
-        return output * (NUMOFFIELDS * meta.origin().inputs().length + 1) + NUMOFFIELDS * input + field;
+        return output * (NUMOFFIELDS * (meta.origin().inputs().length-1) + 1) + NUMOFFIELDS * input + field;
     }
 
     private int getCounter(int output, KMetaDependencies meta) {
-        return output * (NUMOFFIELDS * meta.origin().inputs().length + 1) + NUMOFFIELDS * meta.origin().inputs().length;
+        return output * (NUMOFFIELDS * (meta.origin().inputs().length-1) + 1) + NUMOFFIELDS * (meta.origin().inputs().length-1);
     }
 
 
