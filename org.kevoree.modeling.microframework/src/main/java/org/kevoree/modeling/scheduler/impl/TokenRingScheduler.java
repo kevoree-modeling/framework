@@ -2,6 +2,8 @@ package org.kevoree.modeling.scheduler.impl;
 
 import org.kevoree.modeling.scheduler.KScheduler;
 
+import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -9,13 +11,16 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class TokenRingScheduler implements KScheduler, Runnable {
 
-    LockFreeBoundedQueue tasks = new LockFreeBoundedQueue(10000);
+    final LockFreeBoundedQueue tasks = new LockFreeBoundedQueue(10000);
+    final ConcurrentLinkedQueue<Runnable> slow_tasks = new ConcurrentLinkedQueue<Runnable>();
+    final double slow_priority = 0.25;
+
 
     @Override
     public void dispatch(Runnable task) {
         boolean result = tasks.offer(task);
         if (!result) {
-            System.err.println("SchedulerError loosing task...");
+            slow_tasks.add(task);
         }
     }
 
@@ -24,13 +29,11 @@ public class TokenRingScheduler implements KScheduler, Runnable {
 
     @Override
     public synchronized void start() {
-
         tg = new ThreadGroup("KMF_TokenRing");
-
         isAlive = true;
         workers = new Thread[_nbWorker];
-        for(int i=0;i<_nbWorker;i++){
-            workers[i] = new Thread(tg, this, "KMF_TokenRing_Thread_"+i);
+        for (int i = 0; i < _nbWorker; i++) {
+            workers[i] = new Thread(tg, this, "KMF_TokenRing_Thread_" + i);
             workers[i].setDaemon(false);
             workers[i].start();
         }
@@ -45,7 +48,9 @@ public class TokenRingScheduler implements KScheduler, Runnable {
 
     private int _nbWorker = 1;
 
-    public TokenRingScheduler workers(int p_w){
+    private Random random = new Random();
+
+    public TokenRingScheduler workers(int p_w) {
         this._nbWorker = p_w;
         return this;
     }
@@ -54,7 +59,15 @@ public class TokenRingScheduler implements KScheduler, Runnable {
     public void run() {
         while (isAlive) {
             try {
-                Runnable toExecuteTask = tasks.poll();
+                Runnable toExecuteTask = null;
+                if (!slow_tasks.isEmpty()) {
+                    if (random.nextDouble() <= slow_priority) {
+                        toExecuteTask = slow_tasks.poll();
+                    }
+                }
+                if (toExecuteTask == null) {
+                    toExecuteTask = tasks.poll();
+                }
                 if (toExecuteTask != null) {
                     try {
                         toExecuteTask.run();
@@ -63,7 +76,7 @@ public class TokenRingScheduler implements KScheduler, Runnable {
                     }
                 } else {
                     try {
-                        Thread.sleep(10*_nbWorker);
+                        Thread.sleep(10 * _nbWorker);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -71,8 +84,6 @@ public class TokenRingScheduler implements KScheduler, Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
         }
     }
 
