@@ -2,8 +2,7 @@ package org.kevoree.modeling.util.maths.expression.impl;
 
 import org.kevoree.modeling.util.PrimitiveHelper;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 /**
  * Abstract definition of a supported expression function. A function is
@@ -19,6 +18,12 @@ public class MathFunction implements MathToken {
      * Number of parameters expected for this function.
      */
     private int numParams;
+
+    /** @ignore ts */
+    private TimeZone timeZone=TimeZone.getDefault();
+
+    /** @ignore ts */
+    private Locale locale=Locale.getDefault(Locale.Category.FORMAT);
 
     /**
      * Creates a new function with given name and parameter count.
@@ -103,7 +108,7 @@ public class MathFunction implements MathToken {
      * return date.getSeconds();
      */
     private double date_to_seconds(double value) {
-        Calendar calendar = Calendar.getInstance();
+        GregorianCalendar calendar = new GregorianCalendar(timeZone,locale);
         calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.SECOND);
     }
@@ -114,7 +119,7 @@ public class MathFunction implements MathToken {
      * return date.getMinutes();
      */
     private double date_to_minutes(double value) {
-        Calendar calendar = Calendar.getInstance();
+        GregorianCalendar calendar = new GregorianCalendar(timeZone,locale);
         calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.MINUTE);
     }
@@ -125,7 +130,7 @@ public class MathFunction implements MathToken {
      * return date.getHours();
      */
     private double date_to_hours(double value) {
-        Calendar calendar = Calendar.getInstance();
+        GregorianCalendar calendar = new GregorianCalendar(timeZone,locale);
         calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.HOUR_OF_DAY);
     }
@@ -137,7 +142,7 @@ public class MathFunction implements MathToken {
      * return date.getDate();
      */
     private double date_to_days(double value) {
-        Calendar calendar = Calendar.getInstance();
+        GregorianCalendar calendar = new GregorianCalendar(timeZone,locale);
         calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
@@ -150,7 +155,7 @@ public class MathFunction implements MathToken {
      * return date.getMonth();
      */
     private double date_to_months(double value) {
-        Calendar calendar = Calendar.getInstance();
+        GregorianCalendar calendar = new GregorianCalendar(timeZone,locale);
         calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.MONTH);
     }
@@ -161,7 +166,7 @@ public class MathFunction implements MathToken {
      * return date.getFullYear();
      */
     private double date_to_year(double value) {
-        Calendar calendar = Calendar.getInstance();
+        GregorianCalendar calendar = new GregorianCalendar(timeZone,locale);
         calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.YEAR);
     }
@@ -174,7 +179,7 @@ public class MathFunction implements MathToken {
      * return date.getDay();
      */
     private double date_to_dayofweek(double value) {
-        Calendar calendar = Calendar.getInstance();
+        GregorianCalendar calendar = new GregorianCalendar(timeZone,locale);
         calendar.setTime(new Date((long) value));
         return calendar.get(Calendar.DAY_OF_WEEK) - 1;
 
