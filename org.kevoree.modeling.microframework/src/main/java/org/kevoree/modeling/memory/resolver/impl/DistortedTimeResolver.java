@@ -17,6 +17,7 @@ import org.kevoree.modeling.memory.chunk.KLongLongTree;
 import org.kevoree.modeling.memory.chunk.KLongTree;
 import org.kevoree.modeling.memory.chunk.KTreeWalker;
 import org.kevoree.modeling.meta.KMetaClass;
+import org.kevoree.modeling.scheduler.KTask;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,9 +36,9 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
-    public final Runnable lookup(final long universe, final long time, final long uuid, final KCallback<KObject> callback) {
+    public final KTask lookup(final long universe, final long time, final long uuid, final KCallback<KObject> callback) {
         final DistortedTimeResolver selfPointer = this;
-        return new Runnable() {
+        return new KTask() {
             @Override
             public void run() {
                 try {
@@ -102,9 +103,9 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
-    public final Runnable lookupAllObjects(long universe, long time, long[] uuids, KCallback<KObject[]> callback) {
+    public final KTask lookupAllObjects(long universe, long time, long[] uuids, KCallback<KObject[]> callback) {
         final DistortedTimeResolver selfPointer = this;
-        return new Runnable() {
+        return new KTask() {
             @Override
             public void run() {
                 try {
@@ -190,9 +191,9 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
-    public final Runnable lookupPreciseKeys(long[] keys, KCallback<KObject[]> callback) {
+    public final KTask lookupPreciseKeys(long[] keys, KCallback<KObject[]> callback) {
         final DistortedTimeResolver selfPointer = this;
-        return new Runnable() {
+        return new KTask() {
             @Override
             public void run() {
                 try {
@@ -263,11 +264,11 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
-    public Runnable lookupPrepared(final KPreparedLookup preparedLookup, final KCallback<KObject[]> callback) {
+    public KTask lookupPrepared(final KPreparedLookup preparedLookup, final KCallback<KObject[]> callback) {
         final DistortedTimeResolver selfPointer = this;
         final int nbObjs = preparedLookup.flatLookup().length / 3;
         final long[] flat = preparedLookup.flatLookup();
-        return new Runnable() {
+        return new KTask() {
             @Override
             public void run() {
                 try {
@@ -353,9 +354,9 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     @Override
-    public final Runnable lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
+    public final KTask lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         final DistortedTimeResolver selfPointer = this;
-        return new Runnable() {
+        return new KTask() {
             @Override
             public void run() {
                 try {

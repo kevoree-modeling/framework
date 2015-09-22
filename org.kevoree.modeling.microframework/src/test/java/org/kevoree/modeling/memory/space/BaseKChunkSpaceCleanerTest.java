@@ -14,8 +14,8 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
-import org.kevoree.modeling.scheduler.impl.DirectScheduler;
-import org.kevoree.modeling.scheduler.impl.TokenRingScheduler;
+import org.kevoree.modeling.scheduler.KTask;
+import org.kevoree.modeling.scheduler.impl.LockFreeScheduler;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -116,7 +116,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
         final KMetaAttribute sensorMetaValue = sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
         final KMetaAttribute sensorMetaValue2 = sensorMetaClass.addAttribute("value2", KPrimitiveTypes.DOUBLE);
         //   final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new TokenRingScheduler()).build());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new LockFreeScheduler()).build());
         model.connect(new KCallback<Throwable>() {
 
             @Override
@@ -156,7 +156,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
                 defer.then(new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] objects) {
-                        ((KInternalDataManager) model.manager()).scheduler().dispatch(new Runnable() {
+                        ((KInternalDataManager) model.manager()).scheduler().dispatch(new KTask() {
                             @Override
                             public void run() {
                                 //((KInternalDataManager) model.manager()).printDebug();

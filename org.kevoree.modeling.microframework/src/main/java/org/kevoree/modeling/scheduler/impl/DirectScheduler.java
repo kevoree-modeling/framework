@@ -1,6 +1,7 @@
 package org.kevoree.modeling.scheduler.impl;
 
 import org.kevoree.modeling.scheduler.KScheduler;
+import org.kevoree.modeling.scheduler.KTask;
 
 public class DirectScheduler implements KScheduler {
 
@@ -9,8 +10,8 @@ public class DirectScheduler implements KScheduler {
      * if(runnable['run'] === undefined){setTimeout(runnable,0);} else {setTimeout(runnable.run,0);}
      */
     @Override
-    public void dispatch(Runnable runnable) {
-        runnable.run();
+    public void dispatch(KTask task) {
+        task.run();
     }
 
     @Override

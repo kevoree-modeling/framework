@@ -25,6 +25,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
+import org.kevoree.modeling.scheduler.KTask;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 
@@ -123,7 +124,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public void save(final KCallback<Throwable> callback) {
         final DataManager selfPointer = this;
-        _scheduler.dispatch(new Runnable() {
+        _scheduler.dispatch(new KTask() {
             @Override
             public void run() {
                 KChunkIterator dirtyIterator = selfPointer._space.detachDirties();
@@ -209,7 +210,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
         } else {
             DataManager selfPointer = this;
             selfPointer._scheduler.start();
-            selfPointer._scheduler.dispatch(new Runnable() {
+            selfPointer._scheduler.dispatch(new KTask() {
                 @Override
                 public void run() {
                     selfPointer._db.connect(new KCallback<Throwable>() {

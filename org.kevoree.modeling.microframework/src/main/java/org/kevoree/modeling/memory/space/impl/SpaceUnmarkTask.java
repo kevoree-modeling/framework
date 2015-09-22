@@ -2,11 +2,12 @@ package org.kevoree.modeling.memory.space.impl;
 
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
+import org.kevoree.modeling.scheduler.KTask;
 
 /**
  * @ignore ts
  */
-public class SpaceUnmarkTask implements Runnable {
+public class SpaceUnmarkTask extends KTask {
 
     private final KChunkSpaceManager spaceManager;
 
