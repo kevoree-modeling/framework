@@ -339,19 +339,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public void lookupPrepared(KPreparedLookup prepared, KCallback<KObject[]> callback) {
-        KDefer defer = _model.defer();
-        int statementSize = prepared.flatLookup().length / 3;
-        for (int i = 0; i < statementSize; i++) {
-            _resolver.lookup(i * 3, i * 3 + 1, i * 3 + 2, defer.waitResult());
-        }
-        defer.then(new KCallback<Object[]>() {
-            @Override
-            public void on(Object[] objects) {
-                KObject[] result = new KObject[statementSize];
-                System.arraycopy(objects, 0, result, 0, objects.length);
-                callback.on(result);
-            }
-        });
+        this._scheduler.dispatch(this._resolver.lookupPrepared(prepared, callback));
     }
 
     @Override
@@ -375,7 +363,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     private void attachContentDeliveryDriver(KContentDeliveryDriver p_dataBase) {
-
         DataManager selfPointer = this;
         currentCdnListener = selfPointer._db.addUpdateListener(new KContentUpdateListener() {
             @Override

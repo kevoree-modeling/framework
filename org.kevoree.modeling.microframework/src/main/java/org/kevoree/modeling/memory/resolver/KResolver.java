@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.resolver;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.KPreparedLookup;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -17,6 +18,8 @@ public interface KResolver {
     Runnable lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback);
 
     Runnable lookupPreciseKeys(long[] keys, KCallback<KObject[]> callback);
+
+    Runnable lookupPrepared(KPreparedLookup preparedLookup, KCallback<KObject[]> callback);
 
     KObjectChunk preciseChunk(long universe, long time, long uuid, KMetaClass metaClass, AtomicReference<long[]> previousResolution);
 
