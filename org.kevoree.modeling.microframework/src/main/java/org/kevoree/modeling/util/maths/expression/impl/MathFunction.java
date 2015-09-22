@@ -10,7 +10,7 @@ import java.util.Date;
  * defined by a name, the number of parameters and the actual processing
  * implementation.
  */
-public class MathFunction {
+public class MathFunction implements MathToken {
     /**
      * Name of this function.
      */
@@ -180,5 +180,9 @@ public class MathFunction {
 
     }
 
+    @Override
+    public int type() {
+        return 1;
+    }
 
 }

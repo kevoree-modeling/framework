@@ -1,10 +1,13 @@
 package org.kevoree.modeling.util.maths.expression.impl;
 
+import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
 import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -17,19 +20,16 @@ public class MathExpressionEngine implements KMathExpressionEngine {
     public static final char minusSign = '-';
 
     public MathExpressionEngine() {
+
+        HashMap<String, Double> vars = new HashMap<String, Double>();
+        vars.put("PI", Math.PI);
+        vars.put("TRUE", 1.0);
+        vars.put("FALSE", 0.0);
+
         varResolver = new KMathVariableResolver() {
             @Override
             public Double resolve(String potentialVarName) {
-                if (PrimitiveHelper.equals(potentialVarName,"PI")) {
-                    return Math.PI;
-                }
-                if (PrimitiveHelper.equals(potentialVarName,"TRUE")) {
-                    return 1.0;
-                }
-                if (PrimitiveHelper.equals(potentialVarName,"FALSE")) {
-                    return 0.0;
-                }
-                return null;
+                return vars.get(potentialVarName);
             }
         };
     }
@@ -112,8 +112,8 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                 lastFunction = token;
             } else if (isLetter(token.charAt(0))) {
                 stack.push(token);
-            } else if (PrimitiveHelper.equals(",",token)) {
-                while (!stack.isEmpty() && !PrimitiveHelper.equals("(",stack.peek())) {
+            } else if (PrimitiveHelper.equals(",", token)) {
+                while (!stack.isEmpty() && !PrimitiveHelper.equals("(", stack.peek())) {
                     outputQueue.add(stack.pop());
                 }
                 if (stack.isEmpty()) {
@@ -132,7 +132,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                     token2 = stack.isEmpty() ? null : stack.peek();
                 }
                 stack.push(token);
-            } else if (PrimitiveHelper.equals("(",token)) {
+            } else if (PrimitiveHelper.equals("(", token)) {
                 if (previousToken != null) {
                     if (isNumber(previousToken)) {
                         throw new RuntimeException("Missing operator at character position " + tokenizer.getPos());
@@ -140,7 +140,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                 }
                 stack.push(token);
             } else if (PrimitiveHelper.equals(")", token)) {
-                while (!stack.isEmpty() && !PrimitiveHelper.equals("(",stack.peek())) {
+                while (!stack.isEmpty() && !PrimitiveHelper.equals("(", stack.peek())) {
                     outputQueue.add(stack.pop());
                 }
                 if (stack.isEmpty()) {
@@ -156,47 +156,115 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         }
         while (!stack.isEmpty()) {
             String element = stack.pop();
-            if (PrimitiveHelper.equals("(",element) || PrimitiveHelper.equals(")",element)) {
+            if (PrimitiveHelper.equals("(", element) || PrimitiveHelper.equals(")", element)) {
                 throw new RuntimeException("Mismatched parentheses");
-            }
-            if (!MathEntities.getINSTANCE().operators.contains(element)) {
-                throw new RuntimeException("Unknown operator or function: "
-                        + element);
             }
             outputQueue.add(element);
         }
         return outputQueue;
     }
 
-    /**
-     * Evaluates the expression.
-     *
-     * @return The result of the expression.
-     */
-    public double eval(String p_expression) {
-        List<String> rpn = shuntingYard(p_expression);
+
+    @Override
+    public double eval(KObject context) {
+        if (this._cacheAST == null) {
+            throw new RuntimeException("Call parse before");
+        }
         Stack<Double> stack = new Stack<Double>();
+        for (int ii = 0; ii < _cacheAST.length; ii++) {
+            MathToken mathToken = _cacheAST[ii];
+            switch (mathToken.type()) {
+                case 0:
+                    double v1 = stack.pop();
+                    double v2 = stack.pop();
+                    MathOperation castedOp = (MathOperation) mathToken;
+                    stack.push(castedOp.eval(v2, v1));
+                    break;
+                case 1:
+                    MathFunction castedFunction = (MathFunction) mathToken;
+                    double[] p = new double[castedFunction.getNumParams()];
+                    for (int i = castedFunction.getNumParams() - 1; i >= 0; i--) {
+                        p[i] = stack.pop();
+                    }
+                    stack.push(castedFunction.eval(p));
+                    break;
+                case 2:
+                    MathDoubleToken castedDouble = (MathDoubleToken) mathToken;
+                    stack.push(castedDouble.content());
+                    break;
+                case 3:
+                    MathFreeToken castedFreeToken = (MathFreeToken) mathToken;
+                    if (varResolver.resolve(castedFreeToken.content()) != null) {
+                        stack.push(varResolver.resolve(castedFreeToken.content()));
+                    } else {
+                        if (context != null) {
+                            if ("TIME".equals(castedFreeToken.content())) {
+                                stack.push((double) context.now());
+                            } else {
+                                Object resolved = context.getByName(castedFreeToken.content());
+                                if (resolved != null) {
+                                    if (resolved instanceof MetaLiteral) {
+                                        stack.push((double) ((MetaLiteral) resolved).index());
+                                    } else {
+                                        String valueString = resolved.toString();
+                                        if (PrimitiveHelper.equals(valueString, "true")) {
+                                            stack.push(1.0);
+                                        } else if (PrimitiveHelper.equals(valueString, "false")) {
+                                            stack.push(0.0);
+                                        } else {
+                                            try {
+                                                stack.push(PrimitiveHelper.parseDouble(resolved.toString()));
+                                            } catch (Exception e) {
+                                                //noop
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    throw new RuntimeException("Unknow variable for name " + castedFreeToken.content());
+                                }
+                            }
+                        } else {
+                            throw new RuntimeException("Unknow variable for name " + castedFreeToken.content());
+                        }
+                    }
+                    break;
+            }
+        }
+        Double result = stack.pop();
+        if (result == null) {
+            return 0;
+        } else {
+            return result;
+        }
+    }
+
+    private MathToken[] _cacheAST = null;
+
+    public MathToken[] buildAST(List<String> rpn) {
+        MathToken[] result = new MathToken[rpn.size()];
         for (int ii = 0; ii < rpn.size(); ii++) {
             String token = rpn.get(ii);
             if (MathEntities.getINSTANCE().operators.contains(token)) {
-                double v1 = stack.pop();
-                double v2 = stack.pop();
-                stack.push(MathEntities.getINSTANCE().operators.get(token).eval(v2, v1));
-            } else if (varResolver.resolve(token) != null ) {
-                stack.push(varResolver.resolve(token));
+                result[ii] = MathEntities.getINSTANCE().operators.get(token);
             } else if (MathEntities.getINSTANCE().functions.contains(token.toUpperCase())) {
-                MathFunction f = MathEntities.getINSTANCE().functions.get(token.toUpperCase());
-                double[] p = new double[f.getNumParams()];
-                for (int i = f.getNumParams() - 1; i >= 0; i--) {
-                    p[i] = stack.pop();
-                }
-                double fResult = f.eval(p);
-                stack.push(fResult);
+                result[ii] = MathEntities.getINSTANCE().functions.get(token.toUpperCase());
             } else {
-                stack.push(PrimitiveHelper.parseDouble(token));
+                try {
+                    double parsed = PrimitiveHelper.parseDouble(token);
+                    result[ii] = new MathDoubleToken(parsed);
+                } catch (Exception e) {
+                    result[ii] = new MathFreeToken(token);
+                }
             }
         }
-        return stack.pop();
+        return result;
+    }
+
+    @Override
+    public KMathExpressionEngine parse(String p_expression) {
+        List<String> rpn = shuntingYard(p_expression);
+        _cacheAST = buildAST(rpn);
+        return this;
     }
 
     @Override

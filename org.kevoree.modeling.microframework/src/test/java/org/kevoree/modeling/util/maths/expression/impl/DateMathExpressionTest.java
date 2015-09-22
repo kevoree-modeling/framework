@@ -9,7 +9,7 @@ import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 import java.util.Calendar;
 
 public class DateMathExpressionTest {
-    
+
     protected KMathExpressionEngine createEngine() {
         return new MathExpressionEngine();
     }
@@ -31,19 +31,19 @@ public class DateMathExpressionTest {
         ex.setVarResolver(new KMathVariableResolver() {
             @Override
             public Double resolve(String potentialVarName) {
-                if (PrimitiveHelper.equals(potentialVarName,"time")) {
+                if (PrimitiveHelper.equals(potentialVarName, "time")) {
                     return getDate();
                 }
                 return null;
             }
         });
-        Assert.assertTrue(ex.eval("SECONDS(time)") == 47);
-        Assert.assertTrue(ex.eval("MINUTES(time)") == 53);
-        Assert.assertTrue(ex.eval("HOURS(time)") == 20);
-        Assert.assertTrue(ex.eval("DAY(time)") == 11);
-        Assert.assertTrue(ex.eval("MONTH(time)") == 2);
-        Assert.assertTrue(ex.eval("YEAR(time)") == 2015);
-        Assert.assertTrue(ex.eval("DAYOFWEEK(time)") == 3);
+        Assert.assertTrue(ex.parse("SECONDS(time)").eval(null) == 47);
+        Assert.assertTrue(ex.parse("MINUTES(time)").eval(null) == 53);
+        Assert.assertTrue(ex.parse("HOURS(time)").eval(null) == 20);
+        Assert.assertTrue(ex.parse("DAY(time)").eval(null) == 11);
+        Assert.assertTrue(ex.parse("MONTH(time)").eval(null) == 2);
+        Assert.assertTrue(ex.parse("YEAR(time)").eval(null) == 2015);
+        Assert.assertTrue(ex.parse("DAYOFWEEK(time)").eval(null) == 3);
 
 
     }

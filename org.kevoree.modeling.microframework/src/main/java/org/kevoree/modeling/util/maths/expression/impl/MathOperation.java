@@ -6,7 +6,7 @@ import org.kevoree.modeling.util.PrimitiveHelper;
  * Abstract definition of a supported operator. An operator is defined by
  * its name (pattern), precedence and if it is left- or right associative.
  */
-public class MathOperation {
+public class MathOperation implements MathToken {
 
     private String oper;
     private int precedence;
@@ -65,6 +65,11 @@ public class MathOperation {
         } else if (PrimitiveHelper.equals(oper, "!=")) {
             return v1 != v2 ? 1 : 0;
         }
+        return 0;
+    }
+
+    @Override
+    public int type() {
         return 0;
     }
 }

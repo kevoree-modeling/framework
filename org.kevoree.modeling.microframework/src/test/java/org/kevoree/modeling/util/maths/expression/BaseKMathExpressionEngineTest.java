@@ -28,7 +28,7 @@ public abstract class BaseKMathExpressionEngineTest {
                 return null;
             }
         });
-        Assert.assertTrue(ex.eval("(3.5+price*8-14/7)%4") == 1.5);
+        Assert.assertTrue(ex.parse("(3.5+price*8-14/7)%4").eval(null) == 1.5);
     }
 
 }
