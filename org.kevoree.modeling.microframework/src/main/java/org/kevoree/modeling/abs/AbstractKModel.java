@@ -67,8 +67,8 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public void save(KCallback cb) {
-        _manager.save(cb);
+    public void save(KCallback callback) {
+        _manager.save(callback);
     }
 
     @Override
@@ -119,13 +119,28 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public void lookup(long p_universe, long p_time, long p_uuid, KCallback<KObject> cb) {
-        _manager.lookup(p_universe, p_time, p_uuid, cb);
+    public void lookup(long p_universe, long p_time, long p_uuid, KCallback<KObject> callback) {
+        _manager.lookup(p_universe, p_time, p_uuid, callback);
     }
 
     @Override
-    public void lookupAll(long p_universe, long p_time, long[] p_uuids, KCallback<KObject[]> cb) {
-        _manager.lookupAllObjects(p_universe, p_time, p_uuids, cb);
+    public void lookupAllObjects(long p_universe, long p_time, long[] p_uuids, KCallback<KObject[]> callback) {
+        _manager.lookupAllObjects(p_universe, p_time, p_uuids, callback);
+    }
+
+    @Override
+    public void lookupAllTimes(long p_universe, long[] p_times, long p_uuids, KCallback<KObject[]> callback) {
+        _manager.lookupAllTimes(p_universe, p_times, p_uuids, callback);
+    }
+
+    @Override
+    public KPreparedLookup createPreparedLookup(int p_size){
+        return _manager.createPreparedLookup(p_size);
+    }
+
+    @Override
+    public void lookupPrepared(KPreparedLookup p_prepared, KCallback<KObject[]> p_callback) {
+        _manager.lookupPrepared(p_prepared,p_callback);
     }
 
     @Override

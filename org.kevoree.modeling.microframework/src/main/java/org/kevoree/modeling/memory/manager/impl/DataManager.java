@@ -4,6 +4,7 @@ import org.kevoree.modeling.*;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
+import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.space.KChunkIterator;
@@ -216,7 +217,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                         public void on(Throwable throwable) {
                             if (throwable == null) {
                                 String[] mappings = selfPointer._operationManager.mappings();
-                                if(mappings != null && mappings.length >= 1) {
+                                if (mappings != null && mappings.length >= 1) {
                                     KMessage operationMapping = new Message();
                                     operationMapping.setType(Message.OPERATION_MAPPING);
                                     operationMapping.setValues(mappings);
@@ -329,6 +330,28 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         this._scheduler.dispatch(this._resolver.lookupAllTimes(universe, times, uuid, callback));
+    }
+
+    @Override
+    public KPreparedLookup createPreparedLookup(int p_size) {
+        return new PreparedLookup(p_size);
+    }
+
+    @Override
+    public void lookupPrepared(KPreparedLookup prepared, KCallback<KObject[]> callback) {
+        KDefer defer = _model.defer();
+        int statementSize = prepared.flatLookup().length / 3;
+        for (int i = 0; i < statementSize; i++) {
+            _resolver.lookup(i * 3, i * 3 + 1, i * 3 + 2, defer.waitResult());
+        }
+        defer.then(new KCallback<Object[]>() {
+            @Override
+            public void on(Object[] objects) {
+                KObject[] result = new KObject[statementSize];
+                System.arraycopy(objects, 0, result, 0, objects.length);
+                callback.on(result);
+            }
+        });
     }
 
     @Override

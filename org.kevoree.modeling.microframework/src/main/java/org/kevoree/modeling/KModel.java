@@ -9,7 +9,9 @@ import org.kevoree.modeling.traversal.KTraversal;
 
 public interface KModel<A extends KUniverse> {
 
-    /** Current Model state variables accessor */
+    /**
+     * Current Model state variables accessor
+     */
     long key();
 
     A newUniverse();
@@ -20,27 +22,43 @@ public interface KModel<A extends KUniverse> {
 
     KMetaModel metaModel();
 
-    /** Create a new KDefer */
+    /**
+     * Create a new KDefer
+     */
     KDefer defer();
 
-    /** Operation Management */
+    /**
+     * Operation Management
+     */
     void setOperation(KMetaOperation metaOperation, KOperation operation);
 
     void setOperationByName(String metaClassName, String metaOperationName, KOperation operation);
 
-    /** Life cycle management */
+    /**
+     * Life cycle management
+     */
     void save(KCallback callback);
 
     void connect(KCallback callback);
 
     void disconnect(KCallback callback);
 
-    /** Lookup primitives */
-    void lookup(long universe, long time, long uuid, KCallback<KObject> cb);
+    /**
+     * Lookup primitives
+     */
+    void lookup(long universe, long time, long uuid, KCallback<KObject> callback);
 
-    void lookupAll(long universe, long time, long[] uuids, KCallback<KObject[]> cb);
+    void lookupAllObjects(long universe, long time, long[] uuids, KCallback<KObject[]> callback);
 
-    /** Creation methods */
+    void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback);
+
+    KPreparedLookup createPreparedLookup(int size);
+
+    void lookupPrepared(KPreparedLookup prepared, KCallback<KObject[]> callback);
+
+    /**
+     * Creation methods
+     */
     KObject createByName(String metaClassName, long universe, long time);
 
     KObject create(KMetaClass clazz, long universe, long time);
@@ -52,5 +70,5 @@ public interface KModel<A extends KUniverse> {
     KTraversal createTraversal(KObject[] startingElements);
 
     KTraversal createReusableTraversal();
-    
+
 }

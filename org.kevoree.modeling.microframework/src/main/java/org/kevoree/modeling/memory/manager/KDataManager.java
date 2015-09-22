@@ -11,6 +11,10 @@ public interface KDataManager {
 
     void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback);
 
+    KPreparedLookup createPreparedLookup(int size);
+
+    void lookupPrepared(KPreparedLookup prepared, KCallback<KObject[]> callback);
+
     void save(KCallback<Throwable> callback);
 
     void getRoot(long universe, long time, KCallback<KObject> callback);
