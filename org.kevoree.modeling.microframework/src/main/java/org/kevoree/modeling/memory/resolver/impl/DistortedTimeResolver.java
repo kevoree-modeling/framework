@@ -265,7 +265,7 @@ public class DistortedTimeResolver implements KResolver {
     @Override
     public Runnable lookupPrepared(final KPreparedLookup preparedLookup, final KCallback<KObject[]> callback) {
         final DistortedTimeResolver selfPointer = this;
-        final int nbObjs = preparedLookup.flatLookup().length /3;
+        final int nbObjs = preparedLookup.flatLookup().length / 3;
         final long[] flat = preparedLookup.flatLookup();
         return new Runnable() {
             @Override
