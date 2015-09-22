@@ -9,23 +9,26 @@ public class KInferAlgFactory {
         if (PrimitiveHelper.equals(name, "BinaryPerceptron")) {
             return new BinaryPerceptronAlg();
         }
-        if (PrimitiveHelper.equals(name, "LinearRegression")) {
+        else if (PrimitiveHelper.equals(name, "LinearRegression")) {
             return new LinearRegressionAlg();
         }
-        if (PrimitiveHelper.equals(name, "KMeanCluster")) {
+        else if (PrimitiveHelper.equals(name, "KMeanCluster")) {
             return new KMeanClusterAlg();
         }
-        if (PrimitiveHelper.equals(name, "GaussianProfiler")) {
+        else if (PrimitiveHelper.equals(name, "GaussianProfiler")) {
             return new GaussianProfiler();
         }
-        if (PrimitiveHelper.equals(name, "GaussianClassifier")) {
+        else if (PrimitiveHelper.equals(name, "GaussianClassifier")) {
             return new GaussianClassifierAlg();
         }
-        if (PrimitiveHelper.equals(name, "GaussianAnomalyDetection")) {
+        else if (PrimitiveHelper.equals(name, "GaussianAnomalyDetection")) {
             return new GaussianAnomalyDetectionAlg();
         }
-        if (PrimitiveHelper.equals(name, "Winnow")) {
+        else if (PrimitiveHelper.equals(name, "Winnow")) {
             return new WinnowAlg();
+        }
+        else if (PrimitiveHelper.equals(name, "EmptyInfer")) {
+            return new EmptyInfer();
         }
         return null;
     }
