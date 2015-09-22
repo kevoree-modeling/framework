@@ -103,15 +103,9 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         String previousToken = null;
         while (tokenizer.hasNext()) {
             String token = tokenizer.next();
-            if (isNumber(token)) {
-                outputQueue.add(token);
-            } else if (varResolver.resolve(token) != null) {
-                outputQueue.add(token);
-            } else if (MathEntities.getINSTANCE().functions.contains(token.toUpperCase())) {
+            if (MathEntities.getINSTANCE().functions.contains(token.toUpperCase())) {
                 stack.push(token);
                 lastFunction = token;
-            } else if (isLetter(token.charAt(0))) {
-                stack.push(token);
             } else if (PrimitiveHelper.equals(",", token)) {
                 while (!stack.isEmpty() && !PrimitiveHelper.equals("(", stack.peek())) {
                     outputQueue.add(stack.pop());
@@ -151,6 +145,8 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                         && MathEntities.getINSTANCE().functions.contains(stack.peek().toUpperCase())) {
                     outputQueue.add(stack.pop());
                 }
+            } else {
+                outputQueue.add(token);
             }
             previousToken = token;
         }

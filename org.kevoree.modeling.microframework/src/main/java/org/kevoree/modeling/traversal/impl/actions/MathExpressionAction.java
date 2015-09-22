@@ -1,12 +1,8 @@
 package org.kevoree.modeling.traversal.impl.actions;
 
-import org.kevoree.modeling.KObject;
-import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
-import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
-import org.kevoree.modeling.util.maths.expression.KMathVariableResolver;
 import org.kevoree.modeling.util.maths.expression.impl.MathExpressionEngine;
 
 public class MathExpressionAction implements KTraversalAction {
