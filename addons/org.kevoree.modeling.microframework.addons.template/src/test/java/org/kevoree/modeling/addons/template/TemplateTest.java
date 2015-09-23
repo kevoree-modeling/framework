@@ -30,6 +30,7 @@ public class TemplateTest {
 
         KInternalDataManager dataManager = DataManagerBuilder.create().withScheduler(new DirectScheduler()).build();
         KModel model = metaModel.createModel(dataManager);
+
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -64,12 +65,20 @@ public class TemplateTest {
                 long[] uuids = new long[]{sensor.uuid(), sensor2.uuid(), sensor3.uuid()};
 
 
-                KCallback<KObject[]> jumped = new KCallback<KObject[]>(){
+                KCallback<KObject[]> jumped = new KCallback<KObject[]>() {
                     public void on(KObject[] kObjects) {
                         for (int i = 0; i < kObjects.length; i++) {
                             kObjects[i].setByName("value", System.currentTimeMillis());
+
+                            System.err.println(kObjects[i]);
+
                         }
-                        model.save(null);
+                        model.save(new KCallback() {
+                            @Override
+                            public void on(Object o) {
+                                System.out.println("Saved");
+                            }
+                        });
                     }
                 };
 
@@ -82,12 +91,9 @@ public class TemplateTest {
 
             }
         });
-
         WebSocketGateway gateway = WebSocketGateway.expose(dataManager.cdn(), 8083);
         gateway.start();
-
-        Undertow.builder().addHttpListener(8084,"0.0.0.0", Handlers.resource(new ClassPathResourceManager(TemplateTest.class.getClassLoader()))).build().start();
-
+        Undertow.builder().addHttpListener(8084, "0.0.0.0", Handlers.resource(new ClassPathResourceManager(TemplateTest.class.getClassLoader()))).build().start();
         try {
             Thread.sleep(100000);
         } catch (InterruptedException e) {

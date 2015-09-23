@@ -60,7 +60,7 @@
     var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
     var sensorClass = metaModel.addMetaClass("Sensor");
     sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
-    sensorClass.addReference("sensors", sensorClass, null, true);
+    sensorClass.addRelation("sensors", sensorClass, null);
 
     var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketPeer("ws://" + window.location.hostname + ":8083/cdn");
     var dataManager = org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();

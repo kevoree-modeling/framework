@@ -1,8 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
-var template       = require(28);
-var extend         = require(51);
-var RunLoop        = require(27);
+var template       = require(29);
+var extend         = require(52);
+var RunLoop        = require(28);
 
 /**
  */
@@ -10,12 +10,12 @@ var RunLoop        = require(27);
 module.exports = {
   Attribute      : require(2),
   Component      : require(17),
-  viewClass      : require(31),
+  viewClass      : require(32),
   components     : require(18),
   attributes     : require(13),
-  modifiers      : require(26),
+  modifiers      : require(27),
   runloop        : new RunLoop(),
-  vnode          : require(43),
+  vnode          : require(44),
   document       : global.document,
   noConflict: function() {
     delete global.paperclip;
@@ -30,8 +30,8 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"13":13,"17":17,"18":18,"2":2,"26":26,"27":27,"28":28,"31":31,"43":43,"51":51}],2:[function(require,module,exports){
-var protoclass = require(50);
+},{"13":13,"17":17,"18":18,"2":2,"27":27,"28":28,"29":29,"32":32,"44":44,"52":52}],2:[function(require,module,exports){
+var protoclass = require(51);
 
 /**
  */
@@ -62,7 +62,7 @@ protoclass(Base, {
 
 module.exports = Base;
 
-},{"50":50}],3:[function(require,module,exports){
+},{"51":51}],3:[function(require,module,exports){
 var Base = require(2);
 
 /**
@@ -250,8 +250,8 @@ module.exports = Base.extend({
   }
 });
 
-}).call(this,require(49))
-},{"2":2,"49":49}],13:[function(require,module,exports){
+}).call(this,require(50))
+},{"2":2,"50":50}],13:[function(require,module,exports){
 
 module.exports = {
   onenter       : require(9),
@@ -351,7 +351,7 @@ module.exports.test = function(vnode, key, value) {
 
 },{"2":2}],16:[function(require,module,exports){
 var Base = require(2);
-var _bind         = require(30);
+var _bind         = require(31);
 
 /**
  */
@@ -498,10 +498,10 @@ module.exports.test = function(vnode, key, value) {
   return typeof value !== "string";
 };
 
-},{"2":2,"30":30}],17:[function(require,module,exports){
-var protoclass = require(50);
-var template   = require(28);
-var fragment   = require(42);
+},{"2":2,"31":31}],17:[function(require,module,exports){
+var protoclass = require(51);
+var template   = require(29);
+var fragment   = require(43);
 
 /**
  */
@@ -546,17 +546,78 @@ module.exports = protoclass(Component, {
   }
 });
 
-},{"28":28,"42":42,"50":50}],18:[function(require,module,exports){
+},{"29":29,"43":43,"51":51}],18:[function(require,module,exports){
 module.exports = {
-  repeat : require(19),
-  show   : require(20),
-  stack  : require(21),
-  switch : require(22),
-  unsafe : require(24),
-  traverse : require(23)
+  repeat : require(20),
+  show   : require(21),
+  stack  : require(22),
+  switch : require(23),
+  unsafe : require(25),
+  traverse : require(24),
+  infer : require(19)
 };
 
-},{"19":19,"20":20,"21":21,"22":22,"23":23,"24":24}],19:[function(require,module,exports){
+},{"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25}],19:[function(require,module,exports){
+var Base   = require(17);
+
+function InferComponent() {
+  Base.apply(this, arguments);
+  this._children   = [];
+}
+
+module.exports = Base.extend(InferComponent, {
+  initialize: function() {},
+  setAttribute: function(k, v) { this[k] = v; },
+  update: function() {
+    var as       = this.as;
+    var dependencies    = this.dependencies;
+    var src      = this.src;
+    var self     = this;
+    var parent   = this.view;
+    var properties;
+
+    if(query != undefined && src != undefined){
+      this._children.forEach(function(child) {
+        child.remove();
+      });
+      this._children = [];
+      console.log(src,dependencies);
+
+      var resolveResult = src
+
+      var child;
+      if (as) {
+        properties     = { };
+        properties[as] = resolveResult;
+      } else {
+        properties = resolveResult;
+      }
+      child = self.childTemplate.view(properties, {parent: parent });
+      self._children.push(child);
+      self.section.appendChild(child.render());
+
+      /*
+      src.select(query,function(objs){
+        for(var i=0;i<objs.length;i++){
+          var loopElem = objs[i];
+          var child;
+          if (as) {
+            properties     = { };
+            properties[as] = loopElem;
+          } else {
+            properties = loopElem;
+          }
+          child = self.childTemplate.view(properties, {parent: parent });
+          self._children.push(child);
+          self.section.appendChild(child.render());
+          n++;
+        }
+      });*/
+    }
+  }
+});
+
+},{"17":17}],20:[function(require,module,exports){
 var Base   = require(17);
 
 /**
@@ -693,7 +754,7 @@ module.exports = Base.extend(RepeatComponent, {
   }
 });
 
-},{"17":17}],20:[function(require,module,exports){
+},{"17":17}],21:[function(require,module,exports){
 var Base   = require(17);
 
 /**
@@ -732,9 +793,9 @@ module.exports = Base.extend(ShowComponent, {
   }
 });
 
-},{"17":17}],21:[function(require,module,exports){
+},{"17":17}],22:[function(require,module,exports){
 var Base     = require(17);
-var template = require(28);
+var template = require(29);
 
 /**
  */
@@ -795,11 +856,11 @@ module.exports = Base.extend(StackComponent, {
   }
 });
 
-},{"17":17,"28":28}],22:[function(require,module,exports){
+},{"17":17,"29":29}],23:[function(require,module,exports){
 var Base       = require(17);
-var _bind      = require(30);
-var template   = require(28);
-var fragment   = require(42);
+var _bind      = require(31);
+var template   = require(29);
+var fragment   = require(43);
 
 /**
  */
@@ -879,7 +940,7 @@ module.exports = Base.extend(SwitchComponent, {
   }
 });
 
-},{"17":17,"28":28,"30":30,"42":42}],23:[function(require,module,exports){
+},{"17":17,"29":29,"31":31,"43":43}],24:[function(require,module,exports){
 var Base   = require(17);
 
 function TraverseComponent() {
@@ -930,7 +991,7 @@ module.exports = Base.extend(TraverseComponent, {
   }
 });
 
-},{"17":17}],24:[function(require,module,exports){
+},{"17":17}],25:[function(require,module,exports){
 (function (global){
 var Base   = require(17);
 
@@ -1003,8 +1064,8 @@ module.exports = Base.extend(UnsafeComponent, {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"17":17}],25:[function(require,module,exports){
-var protoclass = require(50);
+},{"17":17}],26:[function(require,module,exports){
+var protoclass = require(51);
 
 module.exports = function(initialize, update) {
 
@@ -1097,7 +1158,7 @@ module.exports = function(initialize, update) {
   return Binding;
 };
 
-},{"50":50}],26:[function(require,module,exports){
+},{"51":51}],27:[function(require,module,exports){
 module.exports = {
   uppercase: function(value) {
     return String(value).toUpperCase();
@@ -1120,9 +1181,9 @@ module.exports = {
   round: Math.round
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (process,global){
-var protoclass = require(50);
+var protoclass = require(51);
 
 var rAF = (global.requestAnimationFrame      ||
           global.webkitRequestAnimationFrame ||
@@ -1224,11 +1285,11 @@ protoclass(RunLoop, {
 
 module.exports = RunLoop;
 
-}).call(this,require(49),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"49":49,"50":50}],28:[function(require,module,exports){
-var ivd                = require(43);
-var extend             = require(51);
-var createBindingClass = require(25);
+}).call(this,require(50),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"50":50,"51":51}],29:[function(require,module,exports){
+var ivd                = require(44);
+var extend             = require(52);
+var createBindingClass = require(26);
 
 /**
  */
@@ -1256,7 +1317,7 @@ module.exports = function(source, options) {
   return ivd.template(vnode, options);
 };
 
-},{"25":25,"43":43,"51":51}],29:[function(require,module,exports){
+},{"26":26,"44":44,"52":52}],30:[function(require,module,exports){
 module.exports = {
 
   /**
@@ -1278,7 +1339,7 @@ module.exports = {
   }
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports = function(callback, context) {
   if (callback.bind) return callback.bind.apply(callback, [context].concat(Array.prototype.slice.call(arguments, 2)));
   return function() {
@@ -1286,13 +1347,13 @@ module.exports = function(callback, context) {
   };
 };
 
-},{}],31:[function(require,module,exports){
-var ivd            = require(43);
+},{}],32:[function(require,module,exports){
+var ivd            = require(44);
 var BaseView       = ivd.View;
-var _stringifyNode = require(34);
-var Transitions    = require(33);
-var Reference      = require(32);
-var extend         = require(51);
+var _stringifyNode = require(35);
+var Transitions    = require(34);
+var Reference      = require(33);
+var extend         = require(52);
 
 /**
  */
@@ -1531,8 +1592,8 @@ BaseView.extend(PaperclipView, {
 
 module.exports = PaperclipView;
 
-},{"32":32,"33":33,"34":34,"43":43,"51":51}],32:[function(require,module,exports){
-var protoclass = require(50);
+},{"33":33,"34":34,"35":35,"44":44,"52":52}],33:[function(require,module,exports){
+var protoclass = require(51);
 
 /**
  */
@@ -1574,10 +1635,10 @@ protoclass(Reference, {
 
 module.exports = Reference;
 
-},{"50":50}],33:[function(require,module,exports){
+},{"51":51}],34:[function(require,module,exports){
 (function (process){
-var protoclass = require(50);
-var async      = require(29);
+var protoclass = require(51);
+var async      = require(30);
 
 /**
  */
@@ -1626,8 +1687,8 @@ module.exports = protoclass(Transitions, {
   }
 });
 
-}).call(this,require(49))
-},{"29":29,"49":49,"50":50}],34:[function(require,module,exports){
+}).call(this,require(50))
+},{"30":30,"50":50,"51":51}],35:[function(require,module,exports){
 /* istanbul ignore next */
 function _stringifyNode(node) {
 
@@ -1651,10 +1712,10 @@ function _stringifyNode(node) {
 
 module.exports = _stringifyNode;
 
-},{}],35:[function(require,module,exports){
-var protoclass    = require(50);
-var getNodeByPath = require(36);
-var getNodePath   = require(37);
+},{}],36:[function(require,module,exports){
+var protoclass    = require(51);
+var getNodeByPath = require(37);
+var getNodePath   = require(38);
 
 /**
  */
@@ -1789,7 +1850,7 @@ protoclass(Marker, {
 
 module.exports = FragmentSection;
 
-},{"36":36,"37":37,"50":50}],36:[function(require,module,exports){
+},{"37":37,"38":38,"51":51}],37:[function(require,module,exports){
 module.exports = function(root, path) {
 
   var c = root;
@@ -1801,7 +1862,7 @@ module.exports = function(root, path) {
   return c;
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports = function(node) {
 
   var path = [];
@@ -1822,10 +1883,10 @@ module.exports = function(node) {
   return path;
 };
 
-},{}],38:[function(require,module,exports){
-var protoclass    = require(50);
-var getNodeByPath = require(36);
-var getNodePath   = require(37);
+},{}],39:[function(require,module,exports){
+var protoclass    = require(51);
+var getNodeByPath = require(37);
+var getNodePath   = require(38);
 
 /**
  */
@@ -1913,8 +1974,8 @@ protoclass(Marker, {
 
 module.exports = NodeSection;
 
-},{"36":36,"37":37,"50":50}],39:[function(require,module,exports){
-var protoclass = require(50);
+},{"37":37,"38":38,"51":51}],40:[function(require,module,exports){
+var protoclass = require(51);
 
 /**
  */
@@ -1939,10 +2000,10 @@ module.exports = function(nodeValue) {
   return new Comment(nodeValue);
 };
 
-},{"50":50}],40:[function(require,module,exports){
-var protoclass    = require(50);
-var getNodePath   = require(37);
-var getNodeByPath = require(36);
+},{"51":51}],41:[function(require,module,exports){
+var protoclass    = require(51);
+var getNodePath   = require(38);
+var getNodeByPath = require(37);
 
 /**
  */
@@ -2024,12 +2085,12 @@ module.exports = function(vnode, bindingClass) {
   return new DynamicNode(vnode, bindingClass);
 };
 
-},{"36":36,"37":37,"50":50}],41:[function(require,module,exports){
-var protoclass       = require(50);
-var createSection    = require(44);
-var fragment         = require(42);
-var FragmentSection  = require(35);
-var NodeSection      = require(38);
+},{"37":37,"38":38,"51":51}],42:[function(require,module,exports){
+var protoclass       = require(51);
+var createSection    = require(45);
+var fragment         = require(43);
+var FragmentSection  = require(36);
+var NodeSection      = require(39);
 
 /**
  */
@@ -2174,8 +2235,8 @@ function _hydrateDynamicAttributes(ref, options, dynamicAttributes, view) {
   }
 }
 
-},{"35":35,"38":38,"42":42,"44":44,"50":50}],42:[function(require,module,exports){
-var protoclass = require(50);
+},{"36":36,"39":39,"43":43,"45":45,"51":51}],43:[function(require,module,exports){
+var protoclass = require(51);
 
 /**
  */
@@ -2208,24 +2269,24 @@ module.exports = function(children) {
   return new Fragment(children);
 };
 
-},{"50":50}],43:[function(require,module,exports){
+},{"51":51}],44:[function(require,module,exports){
 /**
  */
 
 module.exports = {
-  element   : require(41),
-  fragment  : require(42),
-  text      : require(47),
-  dynamic   : require(40),
-  comment   : require(39),
-  template  : require(46),
-  View      : require(48)
+  element   : require(42),
+  fragment  : require(43),
+  text      : require(48),
+  dynamic   : require(41),
+  comment   : require(40),
+  template  : require(47),
+  View      : require(49)
 };
 
-},{"39":39,"40":40,"41":41,"42":42,"46":46,"47":47,"48":48}],44:[function(require,module,exports){
-var extend          = require(51);
-var FragmentSection = require(35);
-var NodeSection     = require(38);
+},{"40":40,"41":41,"42":42,"43":43,"47":47,"48":48,"49":49}],45:[function(require,module,exports){
+var extend          = require(52);
+var FragmentSection = require(36);
+var NodeSection     = require(39);
 
 module.exports = function(document, node) {
   if (node.nodeType === 11) {
@@ -2237,8 +2298,8 @@ module.exports = function(document, node) {
   }
 };
 
-},{"35":35,"38":38,"51":51}],45:[function(require,module,exports){
-var protoclass = require(50);
+},{"36":36,"39":39,"52":52}],46:[function(require,module,exports){
+var protoclass = require(51);
 
 module.exports = function(template) {
 
@@ -2265,13 +2326,13 @@ module.exports = function(template) {
   return Component;
 }
 
-},{"50":50}],46:[function(require,module,exports){
-var View              = require(48);
-var protoclass        = require(50);
-var extend            = require(51);
-var FragmentSection   = require(35);
-var NodeSection       = require(38);
-var templateComponent = require(45);
+},{"51":51}],47:[function(require,module,exports){
+var View              = require(49);
+var protoclass        = require(51);
+var extend            = require(52);
+var FragmentSection   = require(36);
+var NodeSection       = require(39);
+var templateComponent = require(46);
 
 function _cleanupComponents(hash) {
   var c1 = hash || {};
@@ -2390,8 +2451,8 @@ module.exports = function(vnode, options) {
   return new Template(vnode, options);
 };
 
-},{"35":35,"38":38,"45":45,"48":48,"50":50,"51":51}],47:[function(require,module,exports){
-var protoclass = require(50);
+},{"36":36,"39":39,"46":46,"49":49,"51":51,"52":52}],48:[function(require,module,exports){
+var protoclass = require(51);
 
 /**
  */
@@ -2417,8 +2478,8 @@ module.exports = function(nodeValue) {
   return new Text(nodeValue);
 };
 
-},{"50":50}],48:[function(require,module,exports){
-var protoclass = require(50);
+},{"51":51}],49:[function(require,module,exports){
+var protoclass = require(51);
 
 /**
  */
@@ -2451,7 +2512,7 @@ protoclass(View, {
 
 module.exports = View;
 
-},{"50":50}],49:[function(require,module,exports){
+},{"51":51}],50:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2511,7 +2572,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 function _copy (to, from) {
 
   for (var i = 0, n = from.length; i < n; i++) {
@@ -2587,7 +2648,7 @@ protoclass.setup = function (child) {
 
 
 module.exports = protoclass;
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports = extend
 
 function extend(target) {

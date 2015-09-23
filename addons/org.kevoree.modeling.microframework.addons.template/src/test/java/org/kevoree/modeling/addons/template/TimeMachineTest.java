@@ -1,7 +1,12 @@
 package org.kevoree.modeling.addons.template;
 
+import io.undertow.Handlers;
+import io.undertow.Undertow;
+import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.drivers.websocket.gateway.WebSocketGateway;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
+import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
@@ -19,11 +24,9 @@ public class TimeMachineTest {
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
         KMetaRelation sensorsRef = sensorClass.addRelation("sensors", sensorClass, null);
-
-        ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
-
-
-        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        
+        KInternalDataManager manager = DataManagerBuilder.create().withScheduler(new DirectScheduler()).build();
+        KModel model = metaModel.createModel(manager);
         model.connect(new KCallback() {
             @Override
             public void on(Object o) {
@@ -51,7 +54,7 @@ public class TimeMachineTest {
                 Random rand = new Random();
 
                 long[] uuids = new long[]{sensor.uuid(), sensor2.uuid(), sensor3.uuid()};
-                KCallback<KObject[]> jumped = new KCallback<KObject[]>(){
+                KCallback<KObject[]> jumped = new KCallback<KObject[]>() {
                     public void on(KObject[] kObjects) {
                         for (int i = 0; i < kObjects.length; i++) {
                             kObjects[i].setByName("value", rand.nextLong());
@@ -60,7 +63,7 @@ public class TimeMachineTest {
                     }
                 };
                 //create virtually 10 timePoints per objects
-                for(int i=0;i<10;i++){
+                for (int i = 0; i < 10; i++) {
                     model.manager().lookupAllObjects(0, i, uuids, jumped);
                 }
 
@@ -68,8 +71,9 @@ public class TimeMachineTest {
             }
         });
 
-       // WebSocketGateway gateway = WebSocketGateway.exposeModelAndResources(model, 8080, TimeMachineTest.class.getClassLoader());
-       // gateway.start();
+        WebSocketGateway gateway = WebSocketGateway.expose(manager.cdn(), 8083);
+        gateway.start();
+        Undertow.builder().addHttpListener(8084, "0.0.0.0", Handlers.resource(new ClassPathResourceManager(TemplateTest.class.getClassLoader()))).build().start();
 
         try {
             Thread.sleep(100000);

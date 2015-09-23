@@ -73,7 +73,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         }
     }
 
-    private final void cleanDependenciesAndPotentiallyRemoveChunk(KChunk toRemoveChunk) {
+    private void cleanDependenciesAndPotentiallyRemoveChunk(KChunk toRemoveChunk) {
         long[] dependencies = toRemoveChunk.dependencies();
         if (dependencies != null && dependencies.length > 0) {
             for (int i = 0; i < dependencies.length; i = i + 3) {

@@ -61,7 +61,7 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     }
 
     //unProtected and unVolatile because of the mono-thread access
-    private int capacity = 1;
+    private int capacity = 1000;
     private long[] collected_dereference = new long[3 * capacity];
     private int counter = 0;
 
