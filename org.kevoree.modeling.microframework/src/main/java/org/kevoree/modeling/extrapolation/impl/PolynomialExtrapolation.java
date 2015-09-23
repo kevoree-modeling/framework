@@ -12,7 +12,7 @@ import org.kevoree.modeling.util.maths.PolynomialFit;
 
 public class PolynomialExtrapolation implements Extrapolation {
 
-    private static int _maxDegree = 1;
+    private static int _maxDegree = 2;
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
@@ -68,7 +68,7 @@ public class PolynomialExtrapolation implements Extrapolation {
        /* } else if (_prioritization == Prioritization.SAMEPRIORITY) {
             tol = precision * degree * 2 / (2 * _maxDegree);
         }*/
-        return precision / Math.pow(2, degree + 8);
+        return precision / Math.pow(2, degree + 15);
     }
 
 
@@ -99,6 +99,7 @@ public class PolynomialExtrapolation implements Extrapolation {
 
         int deg = (int) raw.getDoubleArrayElem(index, DEGREE, metaClass);
         int num = (int) raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass);
+        double stp= raw.getDoubleArrayElem(index, STEP, metaClass);
         double maxError = maxErr(precision, deg);
         //If the current createModel fits well the new value, return
         if (Math.abs(extrapolateValue(raw, metaClass, index, time, timeOrigin) - value) <= maxError) {
@@ -114,12 +115,15 @@ public class PolynomialExtrapolation implements Extrapolation {
             int ss = Math.min(deg * 2, num);
             double[] times = new double[ss + 1];
             double[] values = new double[ss + 1];
-            double last = raw.getDoubleArrayElem(index, LASTTIME, metaClass);
+            double inc=0;
+            if(ss>1){
+                inc = raw.getDoubleArrayElem(index, LASTTIME, metaClass) / (stp * (ss-1));
+            }
             for (int i = 0; i < ss; i++) {
-                times[i] = ((double) i * (last + 1)) / ss;
+                times[i] = i * inc;
                 values[i] = internal_extrapolate(times[i], raw, index, metaClass);
             }
-            times[ss] = (time - timeOrigin) / raw.getDoubleArrayElem(index, STEP, metaClass);
+            times[ss] = (time - timeOrigin) / stp;
             values[ss] = value;
             PolynomialFit pf = new PolynomialFit(deg);
             pf.fit(times, values);
