@@ -1,9 +1,7 @@
 package org.kevoree.modeling.scheduler;
 
-import java.util.concurrent.atomic.AtomicReference;
+public interface KTask {
 
-public abstract class KTask implements Runnable {
+    void run();
 
-    public final AtomicReference<KTask> next = new AtomicReference<KTask>();
-    
 }

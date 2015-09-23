@@ -4,4 +4,6 @@ public interface MathToken {
 
     int type();
 
+    int type2();
+
 }

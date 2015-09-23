@@ -1,6 +1,7 @@
 package org.kevoree.modeling.util.maths.expression.impl;
 
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.expression.KMathExpressionEngine;
@@ -194,7 +195,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                         stack.push(varResolver.resolve(castedFreeToken.content()));
                     } else {
                         if (context != null) {
-                            if ("TIME".equals(castedFreeToken.content())) {
+                            if (PrimitiveHelper.equals("TIME", castedFreeToken.content())) {
                                 stack.push((double) context.now());
                             } else {
                                 Object resolved = context.getByName(castedFreeToken.content());
@@ -245,11 +246,16 @@ public class MathExpressionEngine implements KMathExpressionEngine {
             } else if (MathEntities.getINSTANCE().functions.contains(token.toUpperCase())) {
                 result[ii] = MathEntities.getINSTANCE().functions.get(token.toUpperCase());
             } else {
-                try {
-                    double parsed = PrimitiveHelper.parseDouble(token);
-                    result[ii] = new MathDoubleToken(parsed);
-                } catch (Exception e) {
+
+                if (token.length() > 0 && isLetter(token.charAt(0))) {
                     result[ii] = new MathFreeToken(token);
+                } else {
+                    try {
+                        double parsed = PrimitiveHelper.parseDouble(token);
+                        result[ii] = new MathDoubleToken(parsed);
+                    } catch (Exception e) {
+                        result[ii] = new MathFreeToken(token);
+                    }
                 }
             }
         }

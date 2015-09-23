@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class LockFreeScheduler implements KScheduler, Runnable {
 
     final LockFreeQueue tasks = new LockFreeQueue();
-    //final ConcurrentLinkedQueue<Runnable> slow_tasks = new ConcurrentLinkedQueue<Runnable>();
 
     @Override
     public void dispatch(KTask task) {
@@ -52,7 +51,7 @@ public class LockFreeScheduler implements KScheduler, Runnable {
     public void run() {
         while (isAlive) {
             try {
-                Runnable toExecuteTask = null;
+                KTask toExecuteTask = null;
                 if (toExecuteTask == null) {
                     toExecuteTask = tasks.poll();
                 }
@@ -77,17 +76,20 @@ public class LockFreeScheduler implements KScheduler, Runnable {
 
     class LockFreeQueue {
         private final AtomicLong length = new AtomicLong(1L);
-        private final KTask stub = new KTask() {
-            @Override
-            public void run() {
 
-            }
-        };
-        private final AtomicReference<KTask> head = new AtomicReference<KTask>(stub);
-        private final AtomicReference<KTask> tail = new AtomicReference<KTask>(stub);
+        private class Wrapper {
+            public KTask ref;
+            public AtomicReference<Wrapper> next = new AtomicReference<Wrapper>(null);
+        }
+
+        private final Wrapper stub = new Wrapper();
+        private final AtomicReference<Wrapper> head = new AtomicReference<Wrapper>(stub);
+        private final AtomicReference<Wrapper> tail = new AtomicReference<Wrapper>(stub);
 
         public void offer(KTask x) {
-            addNode(x);
+            Wrapper wrapper = new Wrapper();
+            wrapper.ref = x;
+            addNode(wrapper);
             length.incrementAndGet();
         }
 
@@ -102,7 +104,7 @@ public class LockFreeScheduler implements KScheduler, Runnable {
                 }
             }
             while (true) {
-                KTask r = head.get();
+                Wrapper r = head.get();
                 if (r == null) {
                     throw new IllegalStateException("null head");
                 }
@@ -115,14 +117,14 @@ public class LockFreeScheduler implements KScheduler, Runnable {
                         stub.next.set(null);
                         addNode(stub);
                     } else {
-                        return r;
+                        return r.ref;
                     }
                 }
             }
         }
 
-        private void addNode(KTask n) {
-            KTask t;
+        private void addNode(Wrapper n) {
+            Wrapper t;
             while (true) {
                 t = tail.get();
                 if (tail.compareAndSet(t, n)) {

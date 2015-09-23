@@ -7,7 +7,7 @@ import org.kevoree.modeling.scheduler.KTask;
 /**
  * @ignore ts
  */
-public class SpaceUnmarkTask extends KTask {
+public class SpaceUnmarkTask implements KTask {
 
     private final KChunkSpaceManager spaceManager;
 

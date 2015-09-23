@@ -10,6 +10,9 @@ import java.util.*;
  * implementation.
  */
 public class MathFunction implements MathToken {
+
+
+
     /**
      * Name of this function.
      */
@@ -188,6 +191,11 @@ public class MathFunction implements MathToken {
     @Override
     public int type() {
         return 1;
+    }
+
+    @Override
+    public int type2() {
+        return 0;
     }
 
 }
