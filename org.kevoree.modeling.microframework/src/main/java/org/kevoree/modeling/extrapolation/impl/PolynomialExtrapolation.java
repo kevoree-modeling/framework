@@ -14,6 +14,7 @@ import org.kevoree.modeling.meta.KPrimitiveTypes;
 public class PolynomialExtrapolation implements Extrapolation {
 
     private static int _maxDegree = 1;
+    private static long to=946684800000l;
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
@@ -37,9 +38,10 @@ public class PolynomialExtrapolation implements Extrapolation {
     //Encoded polynomial: Degree, Number of samples, step, last time, and list of weights
     private final static int DEGREE = 0;
     private final static int NUMSAMPLES = 1;
-    private final static int STEP = 2;
-    private final static int LASTTIME = 3;
-    private final static int WEIGHTS = 4;
+    private final static int TIMEORIGIN = 2;
+    private final static int STEP = 3;
+    private final static int LASTTIME = 4;
+    private final static int WEIGHTS = 5;
 
     private Double extrapolateValue(KObjectChunk segment, KMetaClass meta, int index, long time, long timeOrigin) {
         if (segment.getDoubleArraySize(index, meta) == 0) {
@@ -73,17 +75,17 @@ public class PolynomialExtrapolation implements Extrapolation {
     }
 
 
-    public boolean insert(final long time, final double value, final long timeOrigin, final KObjectChunk raw, final int index, final double precision, final KMetaClass metaClass) {
+    public boolean insert(final long time, final double value , final KObjectChunk raw, final int index, final double precision, final KMetaClass metaClass) {
         if (raw.getDoubleArraySize(index, metaClass) == 0) {
             initial_feed(time, value, raw, index, metaClass);
             return true;
         }
-
-
+        long timeOr = (long)(raw.getDoubleArrayElem(index,TIMEORIGIN,metaClass);
+        timeOr+=to;
 
         //Set the step
         if (raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass) == 1) {
-            long timeStep = time - timeOrigin;
+            long timeStep = time - timeOr;
             if (timeStep == 0) {
                 raw.setDoubleArrayElem(index, WEIGHTS, value, metaClass);
                 return true;
@@ -93,9 +95,9 @@ public class PolynomialExtrapolation implements Extrapolation {
         }
 
         //to comment
-        double x=timeOrigin+raw.getDoubleArrayElem(index,LASTTIME,metaClass);
+       /* double x=timeOrigin+raw.getDoubleArrayElem(index,LASTTIME,metaClass);
 
-        /*if(time<x){
+        if(time<x){
             System.out.println("posting in past");
             return true;
         }*/
@@ -104,10 +106,10 @@ public class PolynomialExtrapolation implements Extrapolation {
         int num = (int) raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass);
         double maxError = maxErr(precision, deg);
         //If the current createModel fits well the new value, return
-        if (Math.abs(extrapolateValue(raw, metaClass, index, time, timeOrigin) - value) <= maxError) {
+        if (Math.abs(extrapolateValue(raw, metaClass, index, time, timeOr) - value) <= maxError) {
             double nexNumSamples = raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass) + 1;
             raw.setDoubleArrayElem(index, NUMSAMPLES, nexNumSamples, metaClass);
-            raw.setDoubleArrayElem(index, LASTTIME, time - timeOrigin, metaClass);
+            raw.setDoubleArrayElem(index, LASTTIME, time - timeOr, metaClass);
             return true;
         }
         //If not, first check if we can increase the degree
@@ -122,7 +124,7 @@ public class PolynomialExtrapolation implements Extrapolation {
                 times[i] = ((double) i * (last + 1)) / ss;
                 values[i] = internal_extrapolate(times[i], raw, index, metaClass);
             }
-            times[ss] = (time - timeOrigin) / raw.getDoubleArrayElem(index, STEP, metaClass);
+            times[ss] = (time - timeOr) / raw.getDoubleArrayElem(index, STEP, metaClass);
             values[ss] = value;
             PolynomialFit pf = new PolynomialFit(deg);
             pf.fit(times, values);
@@ -133,7 +135,7 @@ public class PolynomialExtrapolation implements Extrapolation {
                 }
                 raw.setDoubleArrayElem(index, DEGREE, deg, metaClass);
                 raw.setDoubleArrayElem(index, NUMSAMPLES, num + 1, metaClass);
-                raw.setDoubleArrayElem(index, LASTTIME, time - timeOrigin, metaClass);
+                raw.setDoubleArrayElem(index, LASTTIME, time - timeOr, metaClass);
                 return true;
             }
         }
@@ -173,6 +175,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         raw.setDoubleArrayElem(index, DEGREE, 0, metaClass); //polynomial degree of 0
         raw.setDoubleArrayElem(index, NUMSAMPLES, 1, metaClass); //contains 1 sample
         raw.setDoubleArrayElem(index, LASTTIME, 0, metaClass); //the last point in time is 0 = time origin
+        raw.setDoubleArrayElem(index,TIMEORIGIN,((double)time-to),metaClass);
         raw.setDoubleArrayElem(index, STEP, 0, metaClass); //Number of step
         raw.setDoubleArrayElem(index, WEIGHTS, value, metaClass);
     }
@@ -184,13 +187,13 @@ public class PolynomialExtrapolation implements Extrapolation {
         if (raw.getDoubleArraySize(attribute.index(), current.metaClass()) == 0) {
             raw = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         }
-        if (!insert(current.now(), castNumber(payload), raw.time(), raw, attribute.index(), attribute.precision(), current.metaClass())) {
+        if (!insert(current.now(), castNumber(payload), raw, attribute.index(), attribute.precision(), current.metaClass())) {
             long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + raw.time();
             double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, raw.time());
             KObjectChunk newSegment = dataManager.preciseChunk(current.universe(), prevTime, current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
             newSegment.clearDoubleArray(attribute.index(), current.metaClass());
-            insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
-            insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
+            insert(prevTime, val, newSegment, attribute.index(), attribute.precision(), current.metaClass());
+            insert(current.now(), castNumber(payload), newSegment, attribute.index(), attribute.precision(), current.metaClass());
         }
     }
 
