@@ -7,8 +7,8 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
-import org.kevoree.modeling.scheduler.impl.ExecutorServiceScheduler;
 import org.kevoree.modeling.framework.addons.swing.GraphBuilder;
+import org.kevoree.modeling.scheduler.impl.AsyncScheduler;
 
 import java.util.Random;
 
@@ -18,14 +18,14 @@ public class GraphTest {
 
     private static int SECONDARY = 20;
 
-   // @Test
+    // @Test
     public void test() throws InterruptedException {
         KMetaModel metaModel = new MetaModel("TestModel");
         KMetaClass nodeClazz = metaModel.addMetaClass("Node");
         nodeClazz.addAttribute("name", KPrimitiveTypes.STRING);
         nodeClazz.addRelation("children", nodeClazz, "op_children");
         nodeClazz.addRelation("neighbor", nodeClazz, "op_neighbor");
-        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new ExecutorServiceScheduler()).build());
+        KModel model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new AsyncScheduler()).build());
 
         model.connect(new KCallback() {
             @Override

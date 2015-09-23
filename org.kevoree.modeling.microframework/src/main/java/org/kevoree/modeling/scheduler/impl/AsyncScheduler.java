@@ -7,9 +7,21 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * @ignore ts
+ * @native ts
+ * dispatch = function(task:org.kevoree.modeling.scheduler.KTask){
+ *      setTimeout(task,0);
+ * }
+ * start = function(){
+ *      //NNOP
+ * }
+ * stop = function(){
+ *      //NOOP
+ * }
+ * run = function(){
+ *     //NOOP
+ * }
  */
-public class LockFreeScheduler implements KScheduler, Runnable {
+public class AsyncScheduler implements KScheduler, Runnable {
 
     final LockFreeQueue tasks = new LockFreeQueue();
 
@@ -23,11 +35,11 @@ public class LockFreeScheduler implements KScheduler, Runnable {
 
     @Override
     public synchronized void start() {
-        tg = new ThreadGroup("KMF_TokenRing");
+        tg = new ThreadGroup("KMF_Worker");
         isAlive = true;
         workers = new Thread[_nbWorker];
         for (int i = 0; i < _nbWorker; i++) {
-            workers[i] = new Thread(tg, this, "KMF_TokenRing_Thread_" + i);
+            workers[i] = new Thread(tg, this, "KMF_Worker_Thread_" + i);
             workers[i].setDaemon(false);
             workers[i].start();
         }
@@ -42,7 +54,7 @@ public class LockFreeScheduler implements KScheduler, Runnable {
 
     private int _nbWorker = 1;
 
-    public LockFreeScheduler workers(int p_w) {
+    public AsyncScheduler workers(int p_w) {
         this._nbWorker = p_w;
         return this;
     }
@@ -74,6 +86,7 @@ public class LockFreeScheduler implements KScheduler, Runnable {
         }
     }
 
+    /** @ignore ts */
     class LockFreeQueue {
         private final AtomicLong length = new AtomicLong(1L);
 

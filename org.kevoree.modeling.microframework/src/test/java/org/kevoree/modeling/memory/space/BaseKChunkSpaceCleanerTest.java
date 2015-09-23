@@ -15,7 +15,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.meta.impl.MetaModel;
 import org.kevoree.modeling.scheduler.KTask;
-import org.kevoree.modeling.scheduler.impl.LockFreeScheduler;
+import org.kevoree.modeling.scheduler.impl.AsyncScheduler;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -116,7 +116,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
         final KMetaAttribute sensorMetaValue = sensorMetaClass.addAttribute("value", KPrimitiveTypes.CONTINUOUS);
         final KMetaAttribute sensorMetaValue2 = sensorMetaClass.addAttribute("value2", KPrimitiveTypes.DOUBLE);
         //   final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
-        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new LockFreeScheduler()).build());
+        final KModel model = dynamicMetaModel.createModel(DataManagerBuilder.create().withScheduler(new AsyncScheduler()).build());
         model.connect(new KCallback<Throwable>() {
 
             @Override

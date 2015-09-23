@@ -12,6 +12,6 @@ public class SchedulerTest extends BaseKSchedulerTest {
 
     @Override
     public KScheduler createScheduler() {
-        return new LockFreeScheduler();
+        return new AsyncScheduler();
     }
 }

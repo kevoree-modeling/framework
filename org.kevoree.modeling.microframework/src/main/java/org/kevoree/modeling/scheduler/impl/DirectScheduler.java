@@ -5,10 +5,6 @@ import org.kevoree.modeling.scheduler.KTask;
 
 public class DirectScheduler implements KScheduler {
 
-    /**
-     * @native ts
-     * setTimeout(task,0);
-     */
     @Override
     public void dispatch(KTask task) {
         task.run();
@@ -16,12 +12,12 @@ public class DirectScheduler implements KScheduler {
 
     @Override
     public void start() {
-
+        //NOOP
     }
 
     @Override
     public void stop() {
-
+        //NOOP
     }
 
 }

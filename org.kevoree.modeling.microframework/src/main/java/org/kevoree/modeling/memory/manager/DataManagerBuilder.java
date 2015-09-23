@@ -7,7 +7,7 @@ import org.kevoree.modeling.memory.manager.impl.DataManager;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.strategy.impl.HeapMemoryStrategy;
 import org.kevoree.modeling.scheduler.KScheduler;
-import org.kevoree.modeling.scheduler.impl.LockFreeScheduler;
+import org.kevoree.modeling.scheduler.impl.AsyncScheduler;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
 
@@ -44,7 +44,7 @@ public class DataManagerBuilder {
         if (this._scheduler == null) {
             //this._scheduler = new DirectScheduler();
             //this._scheduler = new ExecutorServiceScheduler();
-            this._scheduler = new LockFreeScheduler();
+            this._scheduler = new AsyncScheduler();
         }
         return _scheduler;
     }
