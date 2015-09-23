@@ -13,8 +13,8 @@ import org.kevoree.modeling.meta.KPrimitiveTypes;
 
 public class PolynomialExtrapolation implements Extrapolation {
 
-    private static int _maxDegree = 1;
-    private static long to=946684800000l;
+    private static int _maxDegree = 4;
+    private static long to=1388534400000l;
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
@@ -71,7 +71,7 @@ public class PolynomialExtrapolation implements Extrapolation {
        /* } else if (_prioritization == Prioritization.SAMEPRIORITY) {
             tol = precision * degree * 2 / (2 * _maxDegree);
         }*/
-        return precision / Math.pow(2, degree + 0.5);
+        return precision / Math.pow(2, degree + 8);
     }
 
 
@@ -80,7 +80,7 @@ public class PolynomialExtrapolation implements Extrapolation {
             initial_feed(time, value, raw, index, metaClass);
             return true;
         }
-        long timeOr = (long)(raw.getDoubleArrayElem(index,TIMEORIGIN,metaClass);
+        long timeOr = (long)(raw.getDoubleArrayElem(index,TIMEORIGIN,metaClass));
         timeOr+=to;
 
         //Set the step
@@ -175,7 +175,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         raw.setDoubleArrayElem(index, DEGREE, 0, metaClass); //polynomial degree of 0
         raw.setDoubleArrayElem(index, NUMSAMPLES, 1, metaClass); //contains 1 sample
         raw.setDoubleArrayElem(index, LASTTIME, 0, metaClass); //the last point in time is 0 = time origin
-        raw.setDoubleArrayElem(index,TIMEORIGIN,((double)time-to),metaClass);
+        raw.setDoubleArrayElem(index,TIMEORIGIN,((double)(time-to)),metaClass);
         raw.setDoubleArrayElem(index, STEP, 0, metaClass); //Number of step
         raw.setDoubleArrayElem(index, WEIGHTS, value, metaClass);
     }
