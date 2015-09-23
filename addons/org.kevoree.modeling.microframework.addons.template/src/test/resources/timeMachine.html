@@ -13,14 +13,14 @@
 </head>
 <body>
 
-<script type="text/x-paperclip" id="templateListSensor">
+<template id="templateListSensor">
     <strong>uuid:{{elem.uuid}},time:{{elem.now}},{{elem.value}}</strong>
     <ul>
-    <repeat each={{elem.sensors}} as="i">
-        <li>uuid:{{i.uuid}},time:{{i.now}}, value:<input class="form-control mdl-textfield__input" pattern="-?[0-9]*(\.[0-9]+)?" type="text" value="{{ <~>i.value }}" /></li>
-    </repeat>
+        <repeat each={{elem.sensors}} as="i">
+            <li>uuid:{{i.uuid}},time:{{i.now}}, value:<input type="text" value="{{ <~> i.value }}" /></li>
+        </repeat>
     </ul>
-</script>
+</template>
 
 <script>
     var metaModel = new org.kevoree.modeling.meta.impl.MetaModel("IoTModel");
@@ -28,7 +28,7 @@
     sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
     sensorClass.addRelation("sensors", sensorClass, null);
 
-    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketCDNClient("ws://" + window.location.hostname + ":8080/cdn");
+    var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketPeer("ws://" + window.location.hostname + ":8083/cdn");
     var dataManager = org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
     var model = metaModel.createModel(dataManager);
     var modelContext = model.createModelContext();
@@ -53,7 +53,7 @@
 
 <p style="width:300px">
     <input class="mdl-slider mdl-js-slider" type="range" id="s1" min="0" max="10" value="0" step="1"
-           onchange="document.getElementById('selectedTime').innerHTML = this.value;modelContext.set(this.value,this.value,0,0);"/>
+           onchange="document.getElementById('selectedTime').innerHTML = this.value;modelContext.set(this.value,this.value,0,0);model.save(null);"/>
     Selected Time:<strong id="selectedTime">0</strong>
 </p>
 

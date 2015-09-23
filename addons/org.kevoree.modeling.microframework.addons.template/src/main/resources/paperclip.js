@@ -2406,7 +2406,7 @@ protoclass(Template, {
         for(var uuidKey in flatCtxReload){
           toReloadKeys.push(+uuidKey);
         }
-        modelContext.model().lookupAll(modelContext.originUniverse(), modelContext.originTime(), toReloadKeys, function(objects){
+        modelContext.model().lookupAllObjects(modelContext.originUniverse(), modelContext.originTime(), toReloadKeys, function(objects){
           if(objects != undefined){
             for(var i=0;i<objects.length;i++){
               if(objects[i] != undefined){
