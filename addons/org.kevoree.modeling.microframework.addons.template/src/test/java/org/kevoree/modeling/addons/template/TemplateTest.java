@@ -5,6 +5,7 @@ import io.undertow.Undertow;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.drivers.websocket.gateway.WebSocketGateway;
+import org.kevoree.modeling.infer.KInferAlgFactory;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
@@ -25,6 +26,12 @@ public class TemplateTest {
         KMetaClass sensorClass = metaModel.addMetaClass("Sensor");
         KMetaAttribute sensorValueAtt = sensorClass.addAttribute("value", KPrimitiveTypes.LONG);
         KMetaRelation sensorsRef = sensorClass.addRelation("sensors", sensorClass, null);
+
+        KMetaClass profileClass = metaModel.addInferMetaClass("Profile", KInferAlgFactory.build("EmptyInfer"));
+        profileClass.addOutput("out", KPrimitiveTypes.DOUBLE);
+        profileClass.addDependency("in", sensorClass.index());
+        profileClass.addInput("in0", "@in|=value");
+        profileClass.addInput("in1","@in|=value");
 
         ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -55,6 +62,20 @@ public class TemplateTest {
                 sensor.add(sensorsRef, sensor2);
                 sensor.add(sensorsRef, sensor3);
 
+                KObjectInfer profile = (KObjectInfer) model.create(profileClass, 0, 0);
+                System.out.println(profile.uuid());
+                //TODO train
+                profile.genericInfer(new KObject[]{sensor}, new KCallback<Object[]>() {
+                    @Override
+                    public void on(Object[] objects) {
+                        System.out.print("inferred:");
+                        for (Object o : objects) {
+                            System.out.print(" " + o);
+                        }
+                        System.out.println();
+                    }
+                });
+
                 model.save(new KCallback() {
                     @Override
                     public void on(Object o) {
@@ -70,13 +91,13 @@ public class TemplateTest {
                         for (int i = 0; i < kObjects.length; i++) {
                             kObjects[i].setByName("value", System.currentTimeMillis());
 
-                            System.err.println(kObjects[i]);
+                           // System.err.println(kObjects[i]);
 
                         }
                         model.save(new KCallback() {
                             @Override
                             public void on(Object o) {
-                                System.out.println("Saved");
+                                //System.out.println("Saved");
                             }
                         });
                     }

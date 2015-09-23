@@ -20,7 +20,7 @@
 </head>
 <body>
 
-<script type="text/x-paperclip" id="temp2">
+<template type="text/x-paperclip" id="temp2">
     <strong>{{elem.uuid}}, {{elem.value}}</strong>
 
     <ul>
@@ -46,14 +46,18 @@
     </ul>
 
     <traverse src="{{elem}}" query="sensors |=value" as="i">
-        <b>{{i}}</b><br />
+        <b>Traversed : {{i}}</b><br />
     </traverse>
 
-    <input type="button" onclick={{elem | save}} value="ParamSaveModel"></input>
+    <infer src="{{profile}}" dependency_1={{elem}} as="profileResult">
+        <b>ProfileResult=>{{profileResult}}</b>
+    </infer>
+
+    <input type="button" onclick="{{elem | save}}" value="ParamSaveModel"></input>
 
     <input type="button" onclick={{save}} value="GlobalSaveModel"></input>
 
-</script>
+</template>
 
 
 <script>
@@ -62,6 +66,12 @@
     sensorClass.addAttribute("value", org.kevoree.modeling.meta.KPrimitiveTypes.LONG);
     sensorClass.addRelation("sensors", sensorClass, null);
 
+    var profileClass = metaModel.addInferMetaClass("Profile", org.kevoree.modeling.infer.KInferAlgFactory.build("EmptyInfer"));
+    profileClass.addOutput("out", org.kevoree.modeling.meta.KPrimitiveTypes.DOUBLE);
+    profileClass.addDependency("in", sensorClass.index());
+    profileClass.addInput("in0", "@in|=value");
+    profileClass.addInput("in1","@in|=value");
+
     var wsClient = new org.kevoree.modeling.drivers.websocket.WebSocketPeer("ws://" + window.location.hostname + ":8083/cdn");
     var dataManager = org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
     var model = metaModel.createModel(dataManager);
@@ -69,7 +79,11 @@
     modelContext.set(0,org.kevoree.modeling.KConfig.END_OF_TIME,0,0);
 
     model.connect(function () {
-        model.lookup(0, 0, 1, function (obj) {
+        model.lookupAllObjects(0, 0, [1,4], function (objs) {
+
+            var obj = objs[0];
+            var profile = objs[1];
+
             paperclip.modifiers.save = function (param) {
                 return function () {
                     console.log('ParamFunctionSave', param);
@@ -79,6 +93,7 @@
             var t = paperclip.template(html);
             var v = t.view({
                 elem: obj,
+                profile: profile,
                 model: model,
                 save: function () {
                     console.log("GlobalSave")

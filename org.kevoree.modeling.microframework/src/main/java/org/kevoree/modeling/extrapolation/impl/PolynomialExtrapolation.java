@@ -195,7 +195,7 @@ public class PolynomialExtrapolation implements Extrapolation {
                     KMetaAttribute att= (KMetaAttribute) metaElements[i];
                     if(att.strategy()==this){
                         newSegment.clearDoubleArray(att.index(), current.metaClass());
-                        if(!att.equals(attribute)) {
+                        if(att.index() != attribute.index()) {
                             double val = extrapolateValue(raw, current.metaClass(), att.index(), current.now(), raw.time());
                             insert(current.now(), val, current.now(), newSegment, att.index(), att.precision(), current.metaClass());
                         }
