@@ -13,7 +13,7 @@ import org.kevoree.modeling.meta.KPrimitiveTypes;
 
 public class PolynomialExtrapolation implements Extrapolation {
 
-    private static int _maxDegree = 20;
+    private static int _maxDegree = 1;
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
@@ -78,6 +78,9 @@ public class PolynomialExtrapolation implements Extrapolation {
             initial_feed(time, value, raw, index, metaClass);
             return true;
         }
+
+
+
         //Set the step
         if (raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass) == 1) {
             long timeStep = time - timeOrigin;
@@ -88,6 +91,15 @@ public class PolynomialExtrapolation implements Extrapolation {
                 raw.setDoubleArrayElem(index, STEP, (double) timeStep, metaClass);
             }
         }
+
+        //to comment
+        double x=timeOrigin+raw.getDoubleArrayElem(index,LASTTIME,metaClass);
+
+        /*if(time<x){
+            System.out.println("posting in past");
+            return true;
+        }*/
+
         int deg = (int) raw.getDoubleArrayElem(index, DEGREE, metaClass);
         int num = (int) raw.getDoubleArrayElem(index, NUMSAMPLES, metaClass);
         double maxError = maxErr(precision, deg);

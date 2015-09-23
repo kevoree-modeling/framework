@@ -18,7 +18,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class PolynomialKMFTest {
 
-    @Test
+   // @Test
     public void test() throws InterruptedException {
         final int[] nbAssert = new int[1];
         nbAssert[0] = 0;
@@ -88,7 +88,7 @@ public class PolynomialKMFTest {
     }
 
 
-    @Test
+   // @Test
     public void test2() {
         final int[] nbAssert = new int[1];
         nbAssert[0] = 0;
