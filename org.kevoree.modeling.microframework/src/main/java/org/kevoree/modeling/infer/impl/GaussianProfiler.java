@@ -141,6 +141,7 @@ public class GaussianProfiler implements KInferAlg {
                 result.set(j, 0, getProba(values, output, state, dep));
             }
             else{
+                //TODO: wtf is this API!!!!
                 if(values[0]==-1){
                     result.set(j, 0, getAvg(output,state,dep)[0]);
                 }
