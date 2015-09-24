@@ -12,7 +12,7 @@ import org.kevoree.modeling.util.maths.PolynomialFit;
 
 public class PolynomialExtrapolation implements Extrapolation {
 
-    private static int _maxDegree = 2;
+    private static int _maxDegree = 20;
 
     @Override
     public Object extrapolate(KObject current, KMetaAttribute attribute, KInternalDataManager dataManager) {
@@ -68,7 +68,7 @@ public class PolynomialExtrapolation implements Extrapolation {
        /* } else if (_prioritization == Prioritization.SAMEPRIORITY) {
             tol = precision * degree * 2 / (2 * _maxDegree);
         }*/
-        return precision / Math.pow(2, degree + 15);
+        return precision / Math.pow(2, degree + 3);
     }
 
 
@@ -112,7 +112,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         int newMaxDegree = Math.min(num, _maxDegree);
         if (deg < newMaxDegree) {
             deg++;
-            int ss = Math.min(deg * 2, num);
+            int ss = num*2;
             double[] times = new double[ss + 1];
             double[] values = new double[ss + 1];
             double inc=0;
@@ -187,7 +187,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         }
         if (!insert(current.now(), castNumber(payload), raw.time(), raw, attribute.index(), attribute.precision(), current.metaClass())) {
             long prevTime = (long) raw.getDoubleArrayElem(attribute.index(), LASTTIME, current.metaClass()) + raw.time();
-            KObjectChunk newSegment = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
+            KObjectChunk newSegment = dataManager.preciseChunk(current.universe(), prevTime, current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
 
             KMeta[] metaElements = current.metaClass().metaElements();
             for (int i=0;i< metaElements.length;i++){
@@ -196,13 +196,21 @@ public class PolynomialExtrapolation implements Extrapolation {
                     if(att.strategy()==this){
                         newSegment.clearDoubleArray(att.index(), current.metaClass());
                         if(att.index() != attribute.index()) {
-                            double val = extrapolateValue(raw, current.metaClass(), att.index(), current.now(), raw.time());
-                            insert(current.now(), val, current.now(), newSegment, att.index(), att.precision(), current.metaClass());
+                            double val = extrapolateValue(raw, current.metaClass(), att.index(), prevTime, raw.time());
+                            insert(prevTime, val, prevTime, newSegment, att.index(), att.precision(), current.metaClass());
+                            long newTime = (long) raw.getDoubleArrayElem(att.index(), LASTTIME, current.metaClass()) + raw.time();
+                            if(newTime>=current.now()){
+                                val = extrapolateValue(raw, current.metaClass(), att.index(), newTime, raw.time());
+                                insert(newTime, val, prevTime, newSegment, att.index(), att.precision(), current.metaClass());
+                            }
+
                         }
                     }
                 }
             }
-           insert(current.now(), castNumber(payload), current.now(), newSegment, attribute.index(), attribute.precision(), current.metaClass());
+            double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, raw.time());
+            insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
+            insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
         }
     }
 
