@@ -12,9 +12,6 @@ import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.impl.Array1D;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
-/**
- * Created by assaad on 27/08/15.
- */
 public class GaussianAnomalyDetectionAlg implements KInferAlg {
 
     private double _alpha = 0.5; //default learning rate

@@ -20,6 +20,7 @@ public class GaussianProfiler implements KInferAlg {
     //to keep updated
     private static int NUMOFFIELDS = 4;
 
+    //TODO change this magic number to a configuration
     int maxTimeSlots = 24; // divide time into 24 hours, 1 gaussian profile every hour
 
     private int getIndex(int input, int output, int field, KMetaDependencies meta) {
