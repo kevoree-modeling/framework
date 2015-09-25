@@ -69,7 +69,7 @@
     </developers>
 
     <properties>
-        <java2typescript.plugin.version>45</java2typescript.plugin.version>
+        <java2typescript.plugin.version>46</java2typescript.plugin.version>
     </properties>
 
     <modules>
@@ -91,10 +91,10 @@
         <module>drivers/org.kevoree.modeling.microframework.drivers.mongodb</module>
         <!--Addons -->
         <module>addons/org.kevoree.modeling.microframework.addons.blas</module>
+        <module>addons/org.kevoree.modeling.microframework.addons.kolyfill</module>
         <module>addons/org.kevoree.modeling.microframework.addons.template</module>
         <module>addons/org.kevoree.modeling.microframework.addons.swing</module>
         <module>addons/org.kevoree.modeling.microframework.addons.graphview</module>
-        <module>addons/org.kevoree.modeling.microframework.addons.kolyfill</module>
     </modules>
 
     <dependencies>
