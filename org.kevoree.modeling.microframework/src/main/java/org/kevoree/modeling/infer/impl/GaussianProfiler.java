@@ -24,11 +24,11 @@ public class GaussianProfiler implements KInferAlg {
     int maxTimeSlots = 24; // divide time into 24 hours, 1 gaussian profile every hour
 
     private int getIndex(int input, int output, int field, KMetaDependencies meta) {
-        return output * (NUMOFFIELDS * (meta.origin().inputs().length-1) + 1) + NUMOFFIELDS * input + field;
+        return output * (NUMOFFIELDS * (meta.origin().inputs().length - 1) + 1) + NUMOFFIELDS * input + field;
     }
 
     private int getCounter(int output, KMetaDependencies meta) {
-        return output * (NUMOFFIELDS * (meta.origin().inputs().length-1) + 1) + NUMOFFIELDS * (meta.origin().inputs().length-1);
+        return output * (NUMOFFIELDS * (meta.origin().inputs().length - 1) + 1) + NUMOFFIELDS * (meta.origin().inputs().length - 1);
     }
 
 
@@ -58,7 +58,7 @@ public class GaussianProfiler implements KInferAlg {
     @Override
     public void train(KArray2D trainingSet, KArray2D expectedResult, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.preciseChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
-        KMetaDependencies dep=origin.metaClass().dependencies();
+        KMetaDependencies dep = origin.metaClass().dependencies();
         int dependenciesIndex = dep.index();
         //Create initial chunk if empty
         int size = (maxTimeSlots + 1) * ((origin.metaClass().inputs().length - 1) * NUMOFFIELDS + 1);
@@ -71,40 +71,40 @@ public class GaussianProfiler implements KInferAlg {
         Array1D state = new Array1D(size, 0, dep.index(), ks, origin.metaClass());
         //update the state
         for (int i = 0; i < trainingSet.rows(); i++) {
-            int output = (int) trainingSet.get(i,0);
+            int output = (int) trainingSet.get(i, 0);
             for (int j = 1; j < origin.metaClass().inputs().length; j++) {
                 //If this is the first datapoint
                 if (state.get(getCounter(output, dep)) == 0) {
-                    state.set(getIndex(j-1, output, MIN, dep), trainingSet.get(i,j));
-                    state.set(getIndex(j-1, output, MAX, dep), trainingSet.get(i,j));
-                    state.set(getIndex(j-1, output, SUM, dep), trainingSet.get(i,j));
-                    state.set(getIndex(j-1, output, SUMSQUARE, dep), trainingSet.get(i,j) * trainingSet.get(i,j));
+                    state.set(getIndex(j - 1, output, MIN, dep), trainingSet.get(i, j));
+                    state.set(getIndex(j - 1, output, MAX, dep), trainingSet.get(i, j));
+                    state.set(getIndex(j - 1, output, SUM, dep), trainingSet.get(i, j));
+                    state.set(getIndex(j - 1, output, SUMSQUARE, dep), trainingSet.get(i, j) * trainingSet.get(i, j));
 
                 } else {
-                    if (trainingSet.get(i,j) < state.get(getIndex(j-1, output, MIN, dep))) {
-                        state.set(getIndex(j-1, output, MIN, dep), trainingSet.get(i,j));
+                    if (trainingSet.get(i, j) < state.get(getIndex(j - 1, output, MIN, dep))) {
+                        state.set(getIndex(j - 1, output, MIN, dep), trainingSet.get(i, j));
                     }
-                    if (trainingSet.get(i,j) > state.get(getIndex(j-1, output, MAX, dep))) {
-                        state.set(getIndex(j-1, output, MAX, dep), trainingSet.get(i,j));
+                    if (trainingSet.get(i, j) > state.get(getIndex(j - 1, output, MAX, dep))) {
+                        state.set(getIndex(j - 1, output, MAX, dep), trainingSet.get(i, j));
                     }
-                    state.add(getIndex(j-1, output, SUM, dep), trainingSet.get(i,j));
-                    state.add(getIndex(j-1, output, SUMSQUARE, dep), trainingSet.get(i,j) * trainingSet.get(i,j));
+                    state.add(getIndex(j - 1, output, SUM, dep), trainingSet.get(i, j));
+                    state.add(getIndex(j - 1, output, SUMSQUARE, dep), trainingSet.get(i, j) * trainingSet.get(i, j));
                 }
                 //update global stat
                 if (state.get(getCounter(maxTimeSlots, dep)) == 0) {
-                    state.set(getIndex(j-1, maxTimeSlots, MIN, dep), trainingSet.get(i,j));
-                    state.set(getIndex(j-1, maxTimeSlots, MAX, dep), trainingSet.get(i,j));
-                    state.set(getIndex(j-1, maxTimeSlots, SUM, dep), trainingSet.get(i,j));
-                    state.set(getIndex(j-1, maxTimeSlots, SUMSQUARE, dep), trainingSet.get(i,j) * trainingSet.get(i,j));
+                    state.set(getIndex(j - 1, maxTimeSlots, MIN, dep), trainingSet.get(i, j));
+                    state.set(getIndex(j - 1, maxTimeSlots, MAX, dep), trainingSet.get(i, j));
+                    state.set(getIndex(j - 1, maxTimeSlots, SUM, dep), trainingSet.get(i, j));
+                    state.set(getIndex(j - 1, maxTimeSlots, SUMSQUARE, dep), trainingSet.get(i, j) * trainingSet.get(i, j));
                 } else {
-                    if (trainingSet.get(i,j) < state.get(getIndex(j-1, maxTimeSlots, MIN, dep))) {
-                        state.set(getIndex(j-1, maxTimeSlots, MIN, dep), trainingSet.get(i,j));
+                    if (trainingSet.get(i, j) < state.get(getIndex(j - 1, maxTimeSlots, MIN, dep))) {
+                        state.set(getIndex(j - 1, maxTimeSlots, MIN, dep), trainingSet.get(i, j));
                     }
-                    if (trainingSet.get(i,j) > state.get(getIndex(j-1, maxTimeSlots, MAX, dep))) {
-                        state.set(getIndex(j-1, maxTimeSlots, MAX, dep), trainingSet.get(i,j));
+                    if (trainingSet.get(i, j) > state.get(getIndex(j - 1, maxTimeSlots, MAX, dep))) {
+                        state.set(getIndex(j - 1, maxTimeSlots, MAX, dep), trainingSet.get(i, j));
                     }
-                    state.add(getIndex(j-1, maxTimeSlots, SUM, dep), trainingSet.get(i,j));
-                    state.add(getIndex(j-1, maxTimeSlots, SUMSQUARE, dep), trainingSet.get(i,j) * trainingSet.get(i,j));
+                    state.add(getIndex(j - 1, maxTimeSlots, SUM, dep), trainingSet.get(i, j));
+                    state.add(getIndex(j - 1, maxTimeSlots, SUMSQUARE, dep), trainingSet.get(i, j) * trainingSet.get(i, j));
                 }
             }
             //Update Global counters
@@ -120,7 +120,7 @@ public class GaussianProfiler implements KInferAlg {
     @Override
     public KArray2D infer(KArray2D features, KObject origin, KInternalDataManager manager) {
         KObjectChunk ks = manager.closestChunk(origin.universe(), origin.now(), origin.uuid(), origin.metaClass(), ((AbstractKObject) origin).previousResolved());
-        KMetaDependencies dep=origin.metaClass().dependencies();
+        KMetaDependencies dep = origin.metaClass().dependencies();
         int dependenciesIndex = dep.index();
         //check if chunk is empty
         int size = (maxTimeSlots + 1) * ((origin.metaClass().inputs().length - 1) * NUMOFFIELDS + 1);
@@ -128,28 +128,25 @@ public class GaussianProfiler implements KInferAlg {
             return null;
         }
         Array1D state = new Array1D(size, 0, dep.index(), ks, origin.metaClass());
-        KArray2D result = new NativeArray2D(features.rows(),1);
+        KArray2D result = new NativeArray2D(features.rows(), 1);
 
         for (int j = 0; j < features.rows(); j++) {
-            int output = (int) features.get(j,0);
+            int output = (int) features.get(j, 0);
 
             double[] values = new double[features.columns() - 1];
             for (int i = 0; i < features.columns() - 1; i++) {
-                values[i] = features.get(j,i + 1);
+                values[i] = features.get(j, i + 1);
             }
-            if(values[0]>=0) {
+            if (values[0] >= 0) {
                 result.set(j, 0, getProba(values, output, state, dep));
-            }
-            else{
+            } else {
                 //TODO: wtf is this API!!!!
-                if(values[0]==-1){
-                    result.set(j, 0, getAvg(output,state,dep)[0]);
-                }
-                else if(values[0]==-2){
-                    result.set(j, 0, state.get(getIndex(0,output,MIN,dep)));
-                }
-                else if(values[0]==-3){
-                    result.set(j, 0, state.get(getIndex(0,output,MAX,dep)));
+                if (values[0] == -1) {
+                    result.set(j, 0, getAvg(output, state, dep)[0]);
+                } else if (values[0] == -2) {
+                    result.set(j, 0, state.get(getIndex(0, output, MIN, dep)));
+                } else if (values[0] == -3) {
+                    result.set(j, 0, state.get(getIndex(0, output, MAX, dep)));
                 }
             }
         }

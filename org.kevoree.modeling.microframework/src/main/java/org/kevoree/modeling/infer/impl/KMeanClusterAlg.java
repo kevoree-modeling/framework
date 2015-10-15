@@ -32,7 +32,7 @@ public class KMeanClusterAlg implements KInferAlg {
             //Start by selecting first K points as centroids
             for (int i = 0; i < k; i++) {
                 for (int j = 0; j < origin.metaClass().inputs().length; j++) {
-                    ks.setDoubleArrayElem(dependenciesIndex, j + i * origin.metaClass().inputs().length, trainingSet.get(i,j), origin.metaClass());
+                    ks.setDoubleArrayElem(dependenciesIndex, j + i * origin.metaClass().inputs().length, trainingSet.get(i, j), origin.metaClass());
                 }
             }
         }
@@ -40,13 +40,13 @@ public class KMeanClusterAlg implements KInferAlg {
 
         for (int iter = 0; iter < iterations; iter++) {
             int temporalClassification;
-            KArray2D centroids = new NativeArray2D(k,origin.metaClass().inputs().length);
+            KArray2D centroids = new NativeArray2D(k, origin.metaClass().inputs().length);
             int[] counters = new int[k];
 
 
             for (int i = 0; i < trainingSet.rows(); i++) {
                 //Step 1, classify according to current centroids
-                temporalClassification = classify(trainingSet,i, state);
+                temporalClassification = classify(trainingSet, i, state);
 
                 //Step 2 update the centroids in live
                 for (int j = 0; j < origin.metaClass().inputs().length; j++) {
@@ -59,13 +59,13 @@ public class KMeanClusterAlg implements KInferAlg {
             for (int i = 0; i < k; i++) {
                 if (counters[i] != 0) {
                     for (int j = 0; j < origin.metaClass().inputs().length; j++) {
-                        state.set(j + i * origin.metaClass().inputs().length, centroids.get(i,j) / counters[i]);
+                        state.set(j + i * origin.metaClass().inputs().length, centroids.get(i, j) / counters[i]);
                     }
                 } else {
                     Random rand = new Random();
                     int pos = rand.nextInt(trainingSet.rows());
                     for (int j = 0; j < origin.metaClass().inputs().length; j++) {
-                        state.set(j + i * origin.metaClass().inputs().length, trainingSet.get(pos,j));
+                        state.set(j + i * origin.metaClass().inputs().length, trainingSet.get(pos, j));
                     }
                 }
             }
@@ -78,7 +78,7 @@ public class KMeanClusterAlg implements KInferAlg {
         for (int i = 0; i < k; i++) {
             double currentdist = 0;
             for (int j = 0; j < features.columns(); j++) {
-                currentdist += (features.get(row,j)- state.get(i * features.columns() + j)) * (features.get(row,j) - state.get(i * features.columns() + j));
+                currentdist += (features.get(row, j) - state.get(i * features.columns() + j)) * (features.get(row, j) - state.get(i * features.columns() + j));
             }
             if (maxdistance < 0) {
                 maxdistance = currentdist;
@@ -103,10 +103,10 @@ public class KMeanClusterAlg implements KInferAlg {
         }
         Array1D state = new Array1D(size, 0, origin.metaClass().dependencies().index(), ks, origin.metaClass());
 
-        KArray2D result = new NativeArray2D(features.rows(),1);
+        KArray2D result = new NativeArray2D(features.rows(), 1);
 
         for (int inst = 0; inst < features.rows(); inst++) {
-            result.set(inst,0, classify(features,inst, state));
+            result.set(inst, 0, classify(features, inst, state));
         }
         return result;
     }
