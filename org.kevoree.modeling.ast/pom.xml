@@ -3,13 +3,13 @@
     <parent>
         <artifactId>org.kevoree.modeling.root</artifactId>
         <groupId>org.kevoree.modeling</groupId>
-        <version>4.25.1-SNAPSHOT</version>
+        <version>4.26.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>Kevoree :: Modeling :: AST</name>
     <artifactId>org.kevoree.modeling.ast</artifactId>
-    <version>4.25.1-SNAPSHOT</version>
+    <version>4.26.0</version>
 
     <properties>
         <antlr.version>4.5.1</antlr.version>
