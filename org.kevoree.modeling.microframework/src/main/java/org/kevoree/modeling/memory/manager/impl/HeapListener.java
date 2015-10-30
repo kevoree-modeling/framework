@@ -45,7 +45,7 @@ public class HeapListener implements KListener {
     }
 
     @Override
-    public void then(KCallback<KObject> p_cb) {
+    public void then(KCallback p_cb) {
         this.cb = p_cb;
     }
 }

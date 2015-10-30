@@ -18,22 +18,23 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     private Options options;
 
-    private RocksDB db;
+    private RocksDB _db;
+
+    private static final String _connectedError = "PLEASE CONNECT YOUR DATABASE FIRST";
+
+    private boolean _isConnected = false;
+
+    private final String _storagePath;
 
     public RocksDbContentDeliveryDriver(String storagePath) throws IOException, RocksDBException {
-        options = new Options();
-        options.setCreateIfMissing(true);
-        File location = new File(storagePath);
-        if (!location.exists()) {
-            location.mkdirs();
-        }
-        File targetDB = new File(location, "data");
-        targetDB.mkdirs();
-        db = RocksDB.open(options, targetDB.getAbsolutePath());
+        this._storagePath = storagePath;
     }
 
     @Override
     public void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+        if (!_isConnected) {
+            throw new RuntimeException(_connectedError);
+        }
         int nbKeys = p_keys.length / 3;
         WriteBatch batch = new WriteBatch();
         for (int i = 0; i < nbKeys; i++) {
@@ -42,7 +43,7 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
         WriteOptions options = new WriteOptions();
         options.setSync(true);
         try {
-            db.write(options, batch);
+            _db.write(options, batch);
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
@@ -65,7 +66,7 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
     @Override
     public void atomicGetIncrement(long[] key, KCallback<Short> cb) {
         try {
-            byte[] bulkResult = db.get(KContentKey.toString(key, 0).getBytes());
+            byte[] bulkResult = _db.get(KContentKey.toString(key, 0).getBytes());
             String result = null;
             if (bulkResult != null) {
                 result = new String(bulkResult);
@@ -89,7 +90,7 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
             }
             WriteBatch batch = new WriteBatch();
             batch.put(KContentKey.toString(key, 0).getBytes(), (nextV + "").getBytes());
-            db.write(new WriteOptions().setSync(true), batch);
+            _db.write(new WriteOptions().setSync(true), batch);
             cb.on(previousV);
         } catch (RocksDBException e) {
             e.printStackTrace();
@@ -99,26 +100,39 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void get(long[] keys, KCallback<String[]> callback) {
+        if (!_isConnected) {
+            throw new RuntimeException(_connectedError);
+        }
         int nbKeys = keys.length / 3;
         String[] result = new String[nbKeys];
         for (int i = 0; i < nbKeys; i++) {
             try {
-                result[i] = new String(db.get(KContentKey.toString(keys, i).getBytes()));
+                byte[] res = _db.get(KContentKey.toString(keys, i).getBytes());
+                String casted = null;
+                if(res != null){
+                    casted = new String(res);
+                } else {
+                    casted = new String(new byte[0]);
+                }
+                result[i] = casted;
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if (callback != null) {
-                callback.on(result);
-            }
+        }
+        if (callback != null) {
+            callback.on(result);
         }
     }
 
     @Override
     public void remove(long[] keys, KCallback<Throwable> error) {
+        if (!_isConnected) {
+            throw new RuntimeException(_connectedError);
+        }
         int nbKeys = keys.length / 3;
         try {
             for (int i = 0; i < nbKeys; i++) {
-                db.remove(KContentKey.toString(keys, i).getBytes());
+                _db.remove(KContentKey.toString(keys, i).getBytes());
             }
             if (error != null) {
                 error.on(null);
@@ -135,8 +149,8 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
         try {
             WriteOptions options = new WriteOptions();
             options.sync();
-            db.write(options, new WriteBatch());
-            db.close();
+            _db.write(options, new WriteBatch());
+            _db.close();
             if (error != null) {
                 error.on(null);
             }
@@ -149,9 +163,30 @@ public class RocksDbContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void connect(KCallback<Throwable> callback) {
-        //noop
-        if (callback != null) {
-            callback.on(null);
+        if (_isConnected) {
+            if (callback != null) {
+                callback.on(null);
+            }
+            return;
+        }
+        options = new Options();
+        options.setCreateIfMissing(true);
+        File location = new File(_storagePath);
+        if (!location.exists()) {
+            location.mkdirs();
+        }
+        File targetDB = new File(location, "data");
+        targetDB.mkdirs();
+        try {
+            _db = RocksDB.open(options, targetDB.getAbsolutePath());
+            _isConnected = true;
+            if (callback != null) {
+                callback.on(null);
+            }
+        } catch (RocksDBException e) {
+            if (callback != null) {
+                callback.on(e);
+            }
         }
     }
 
