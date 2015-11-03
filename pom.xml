@@ -148,7 +148,7 @@
                         <configuration>
                             <licenseName>lgpl_v3</licenseName>
                             <organizationName>org.kevoree</organizationName>
-                            <inceptionYear>2014</inceptionYear>
+                            <inceptionYear>2015</inceptionYear>
                             <includes>
                                 <include>*.java</include>
                             </includes>
