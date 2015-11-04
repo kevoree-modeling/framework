@@ -5,6 +5,8 @@ public class MModelAttribute {
     private String name;
     private String type;
     private double precision = -1;
+    private boolean indexed = false;
+
     protected int index = -1;
     public int typeId = 0;
 
@@ -25,7 +27,7 @@ public class MModelAttribute {
         return type;
     }
 
-    public int getTypeId(){
+    public int getTypeId() {
         return typeId;
     }
 
@@ -35,6 +37,14 @@ public class MModelAttribute {
 
     public void setPrecision(double precision) {
         this.precision = precision;
+    }
+
+    public void setIndexed() {
+        this.indexed = true;
+    }
+
+    public boolean getIndexed() {
+        return this.indexed;
     }
 
     public void setIndex(int index) {

@@ -13,8 +13,7 @@ public class MModelClass extends MModelClassifier {
 
     private Map<String, MModelInput> inputs = new HashMap<String, MModelInput>();
     private Map<String, MModelOutput> outputs = new HashMap<String, MModelOutput>();
-
-
+    
     private MModelDependencies dependencies = null;
 
     public MModelClass(String name) {

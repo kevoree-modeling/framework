@@ -134,13 +134,13 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public KPreparedLookup createPreparedLookup(int p_size){
+    public KPreparedLookup createPreparedLookup(int p_size) {
         return _manager.createPreparedLookup(p_size);
     }
 
     @Override
     public void lookupPrepared(KPreparedLookup p_prepared, KCallback<KObject[]> p_callback) {
-        _manager.lookupPrepared(p_prepared,p_callback);
+        _manager.lookupPrepared(p_prepared, p_callback);
     }
 
     @Override
@@ -163,5 +163,14 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         return new Traversal(null);
     }
 
+    @Override
+    public void find(KMetaClass metaClass, long universe, long time, Object[] attributes, KCallback<KObject> callback) {
+        //TODO
+    }
+
+    @Override
+    public void findByName(String metaClassName, long universe, long time, Object[] attributes, KCallback<KObject> callback) {
+        //TODO
+    }
 }
 

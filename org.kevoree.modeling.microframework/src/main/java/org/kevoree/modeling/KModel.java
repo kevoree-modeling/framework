@@ -71,4 +71,11 @@ public interface KModel<A extends KUniverse> {
 
     KTraversal createReusableTraversal();
 
+    /**
+     * Index management method
+     */
+    void find(KMetaClass metaClass, long universe, long time, Object[] attributes, KCallback<KObject> callback);
+
+    void findByName(String metaClassName, long universe, long time, Object[] attributes, KCallback<KObject> callback);
+
 }

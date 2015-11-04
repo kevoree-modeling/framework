@@ -196,6 +196,9 @@ public class MModel {
                         if (annotDecl.IDENT().getText().toLowerCase().equals("precision") && annotDecl.NUMBER() != null) {
                             attribute.setPrecision(Double.parseDouble(annotDecl.NUMBER().getText()));
                         }
+                        if (annotDecl.IDENT().getText().toLowerCase().equals("index")) {
+                            attribute.setIndexed();
+                        }
                     }
                     newClass.addAttribute(attribute);
                 }

@@ -7,8 +7,7 @@ public class KContentKey {
     public static final long[] NULL_KEY = new long[]{KConfig.END_OF_TIME, KConfig.END_OF_TIME, KConfig.END_OF_TIME};
 
     public static final long[] GLOBAL_UNIVERSE_KEY = new long[]{KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG};
-
-
+    
     public static String toString(long[] keys, int keyIndex) {
         StringBuilder buffer = new StringBuilder();
         int offset = keyIndex * 3;

@@ -730,7 +730,46 @@ public class DistortedTimeResolver implements KResolver {
         }
     }
 
+    public void getIndex(String metaClassName, long universe, long time, Object[] attrs, KCallback<KObject> callback) {
+        final long rootFixedKey = KConfig.END_OF_TIME;
+        getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
+            @Override
+            public void on(KChunk theGlobalUniverseOrderElement) {
+                if (theGlobalUniverseOrderElement == null) {
+                    callback.on(null);
+                    return;
+                }
+                getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, rootFixedKey, new KCallback<KChunk>() {
+                    @Override
+                    public void on(KChunk rootGlobalUniverseOrderElement) {
+                        if (rootGlobalUniverseOrderElement == null) {
+                            _spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                            callback.on(null);
+                            return;
+                        }
+                        long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) rootGlobalUniverseOrderElement, time, universe);
+                        getOrLoadAndMark(closestUniverse, KConfig.NULL_LONG, rootFixedKey, new KCallback<KChunk>() {
+                            @Override
+                            public void on(KChunk theRootTimeTree) {
+                                long resolvedCurrentRootUUID = ((KLongLongTree) theRootTimeTree).previousOrEqualValue(time);
+                                _spaceManager.unmarkMemoryElement(theRootTimeTree);
+                                _spaceManager.unmarkMemoryElement(rootGlobalUniverseOrderElement);
+                                _spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
+                                if (resolvedCurrentRootUUID == KConfig.NULL_LONG) {
+                                    callback.on(null);
+                                } else {
+                                    _manager.lookup(universe, time, resolvedCurrentRootUUID, callback);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
     //TODO, ROOT TREE is NEVER UNLOAD
+    @Override
     public void getRoot(long universe, long time, final KCallback<KObject> callback) {
         final long rootFixedKey = KConfig.END_OF_TIME;
         getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {
@@ -769,6 +808,7 @@ public class DistortedTimeResolver implements KResolver {
         });
     }
 
+    @Override
     public void setRoot(final KObject newRoot, final KCallback<Throwable> callback) {
         final long rootFixedKey = KConfig.END_OF_TIME;
         getOrLoadAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, new KCallback<KChunk>() {

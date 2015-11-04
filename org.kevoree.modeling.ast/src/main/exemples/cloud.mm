@@ -53,7 +53,7 @@ class org.kubi.ActionParameter extends org.kubi.StateParameter {
 }
 
 class org.kubi.Technology {
-    att name: String
+    att name: String with index
     rel devices: org.kubi.Device with opposite "technology"
     rel catalog: org.kubi.Catalog
 }

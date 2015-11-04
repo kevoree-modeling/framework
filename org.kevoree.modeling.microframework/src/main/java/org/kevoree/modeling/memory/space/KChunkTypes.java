@@ -10,4 +10,6 @@ public class KChunkTypes {
 
     public static final short LONG_LONG_MAP = 3;
 
+    public static final short STRING_LONG_MAP = 4;
+
 }
