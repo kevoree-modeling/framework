@@ -1,10 +1,7 @@
 package org.kevoree.modeling;
 
 import org.kevoree.modeling.memory.manager.KDataManager;
-import org.kevoree.modeling.meta.KMetaAttribute;
-import org.kevoree.modeling.meta.KMetaClass;
-import org.kevoree.modeling.meta.KMetaOperation;
-import org.kevoree.modeling.meta.KMetaRelation;
+import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.operation.KOperationStrategy;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.visitor.KModelAttributeVisitor;
@@ -109,5 +106,7 @@ public interface KObject {
     void invokeOperationByName(String operationName, Object[] params, KOperationStrategy strategy, KCallback cb);
 
     KDataManager manager();
+
+    KMeta[] compare(KObject target);
 
 }

@@ -9,6 +9,7 @@ import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -122,7 +123,7 @@ public class ArrayStringLongMap implements KStringLongMap {
         //rehashEveryThing
         for (int i = 0; i < state.elementNext.length; i++) {
             if (state.elementNext[i] != -1) { //there is a real value
-                int index = (state.elementK[i].hashCode() & 0x7FFFFFFF) % length;
+                int index = (PrimitiveHelper.stringHash(state.elementK[i]) & 0x7FFFFFFF) % length;
                 int currentHashedIndex = newElementHash[index];
                 if (currentHashedIndex != -1) {
                     newElementNext[i] = currentHashedIndex;
@@ -153,7 +154,7 @@ public class ArrayStringLongMap implements KStringLongMap {
         if (state.elementDataSize == 0) {
             return false;
         }
-        int hash = key.hashCode();
+        int hash = PrimitiveHelper.stringHash(key);
         int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
         while (m >= 0) {
@@ -171,10 +172,10 @@ public class ArrayStringLongMap implements KStringLongMap {
         if (state.elementDataSize == 0) {
             return KConfig.NULL_LONG;
         }
-        int index = (key.hashCode() & 0x7FFFFFFF) % internalState.elementDataSize;
+        int index = (PrimitiveHelper.stringHash(key) & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
         while (m >= 0) {
-            if (key.equals(internalState.elementK[m] /* getKey */)) {
+            if (PrimitiveHelper.equals(key,internalState.elementK[m] /* getKey */)) {
                 return internalState.elementV[m]; /* getValue */
             } else {
                 m = internalState.elementNext[m];
@@ -187,7 +188,7 @@ public class ArrayStringLongMap implements KStringLongMap {
     public final synchronized void put(String key, long value) {
         int entry = -1;
         int index = -1;
-        int hash = key.hashCode();
+        int hash = PrimitiveHelper.stringHash(key);
         if (state.elementDataSize != 0) {
             index = (hash & 0x7FFFFFFF) % state.elementDataSize;
             entry = findNonNullKeyEntry(key, index);
@@ -217,7 +218,7 @@ public class ArrayStringLongMap implements KStringLongMap {
     final int findNonNullKeyEntry(String key, int index) {
         int m = state.elementHash[index];
         while (m >= 0) {
-            if (key.equals(state.elementK[m] /* getKey */)) {
+            if (PrimitiveHelper.equals(key,state.elementK[m] /* getKey */)) {
                 return m;
             }
             m = state.elementNext[m];
@@ -232,11 +233,11 @@ public class ArrayStringLongMap implements KStringLongMap {
         if (state.elementDataSize == 0) {
             return;
         }
-        int index = (key.hashCode() & 0x7FFFFFFF) % internalState.elementDataSize;
+        int index = (PrimitiveHelper.stringHash(key) & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = state.elementHash[index];
         int last = -1;
         while (m >= 0) {
-            if (key.equals(state.elementK[m] /* getKey */)) {
+            if (PrimitiveHelper.equals(key,state.elementK[m] /* getKey */)) {
                 break;
             }
             last = m;
@@ -299,7 +300,7 @@ public class ArrayStringLongMap implements KStringLongMap {
             }
             String loopKey = Base64.decodeToStringWithBounds(payload, beginChunk, middleChunk);
             long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
-            int index = (loopKey.hashCode() & 0x7FFFFFFF) % temp_state.elementDataSize;
+            int index = (PrimitiveHelper.stringHash(loopKey) & 0x7FFFFFFF) % temp_state.elementDataSize;
             //insert K/V
             int newIndex = this.elementCount;
             temp_state.elementK[newIndex] = loopKey;

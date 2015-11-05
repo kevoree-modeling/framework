@@ -659,4 +659,20 @@ public abstract class AbstractKObject implements KObject {
         internal_times(beginningOfSearch, endOfSearch, cb);
     }
 
+    @Override
+    public KMeta[] compare(KObject target) {
+        if (target.metaClass().index() != metaClass().index()) {
+            throw new RuntimeException("Bad API usage, the object should be compare to a similar one (" + metaClass().metaName() + "/" + target.metaClass().metaName() + ")");
+        }
+        KObjectChunk currentRaw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
+        AbstractKObject targetCasted = (AbstractKObject) target;
+        KObjectChunk targetRaw = _manager.closestChunk(targetCasted._universe, targetCasted._time, targetCasted._uuid, _metaClass, targetCasted._previousResolveds);
+        KMeta[] elems = metaClass().metaElements();
+        for (int i = 0; i < elems.length; i++) {
+            //TODO compare attribute
+        }
+
+        //TODO
+        return new KMeta[0];
+    }
 }
