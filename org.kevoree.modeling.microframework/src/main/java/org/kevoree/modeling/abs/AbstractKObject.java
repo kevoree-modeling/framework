@@ -16,6 +16,7 @@ import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.util.Checker;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -664,15 +665,88 @@ public abstract class AbstractKObject implements KObject {
         if (target.metaClass().index() != metaClass().index()) {
             throw new RuntimeException("Bad API usage, the object should be compare to a similar one (" + metaClass().metaName() + "/" + target.metaClass().metaName() + ")");
         }
-        KObjectChunk currentRaw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
-        AbstractKObject targetCasted = (AbstractKObject) target;
-        KObjectChunk targetRaw = _manager.closestChunk(targetCasted._universe, targetCasted._time, targetCasted._uuid, _metaClass, targetCasted._previousResolveds);
         KMeta[] elems = metaClass().metaElements();
+        KMeta[] result = new KMeta[elems.length];
+        int current = 0;
         for (int i = 0; i < elems.length; i++) {
-            //TODO compare attribute
-        }
+            KMeta meta = elems[i];
+            if (meta.metaType().equals(MetaType.ATTRIBUTE)) {
+                KMetaAttribute attribute = (KMetaAttribute) meta;
+                Object currentAttV = get(attribute);
+                Object targetAttV = target.get(attribute);
 
-        //TODO
-        return new KMeta[0];
+                if (currentAttV == null && targetAttV != null) {
+                    result[current] = attribute;
+                    current++;
+                } else if (currentAttV != null && targetAttV == null) {
+                    result[current] = attribute;
+                    current++;
+                } else if (currentAttV != null && targetAttV != null) {
+                    switch (attribute.attributeTypeId()) {
+                        case KPrimitiveTypes.BOOL_ID:
+                            boolean castedCurrentBool = (boolean) currentAttV;
+                            boolean castedTargetBool = (boolean) targetAttV;
+                            if (castedCurrentBool != castedTargetBool) {
+                                result[current] = attribute;
+                                current++;
+                            }
+                            break;
+                        case KPrimitiveTypes.CONTINUOUS_ID:
+                            double castedCurrentDouble = (double) currentAttV;
+                            double castedTargetDouble = (double) targetAttV;
+                            if (castedCurrentDouble != castedTargetDouble) {
+                                result[current] = attribute;
+                                current++;
+                            }
+                            break;
+                        case KPrimitiveTypes.DOUBLE_ID:
+                            double castedCurrentDoubleZ = (double) currentAttV;
+                            double castedTargetDoubleZ = (double) targetAttV;
+                            if (castedCurrentDoubleZ != castedTargetDoubleZ) {
+                                result[current] = attribute;
+                                current++;
+                            }
+                            break;
+                        case KPrimitiveTypes.INT_ID:
+                            int castedCurrentInt = (int) currentAttV;
+                            int castedTargetInt = (int) targetAttV;
+                            if (castedCurrentInt != castedTargetInt) {
+                                result[current] = attribute;
+                                current++;
+                            }
+                            break;
+                        case KPrimitiveTypes.LONG_ID:
+                            long castedCurrentLong = (long) currentAttV;
+                            long castedTargetLong = (long) targetAttV;
+                            if (castedCurrentLong != castedTargetLong) {
+                                result[current] = attribute;
+                                current++;
+                            }
+                            break;
+                        case KPrimitiveTypes.STRING_ID:
+                            String castedCurrentString = (String) currentAttV;
+                            String castedTargetString = (String) targetAttV;
+                            if (!PrimitiveHelper.equals(castedCurrentString, castedTargetString)) {
+                                result[current] = attribute;
+                                current++;
+                            }
+                            break;
+                        default:
+                            if (KPrimitiveTypes.isEnum(attribute.attributeTypeId())) {
+                                KLiteral castedCurrentEnum = (KLiteral) currentAttV;
+                                KLiteral castedTargetEnum = (KLiteral) targetAttV;
+                                if (castedCurrentEnum.index() != castedTargetEnum.index()) {
+                                    result[current] = attribute;
+                                    current++;
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+        KMeta[] trimmed = new KMeta[current];
+        System.arraycopy(result, 0, trimmed, 0, current);
+        return trimmed;
     }
 }

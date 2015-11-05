@@ -17,7 +17,7 @@ public class AbstractDataType implements KType {
     public String name() {
         return _name;
     }
-    
+
     @Override
     public int id() {
         return _id;
