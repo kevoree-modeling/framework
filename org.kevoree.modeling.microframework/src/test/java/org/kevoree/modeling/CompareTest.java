@@ -43,7 +43,7 @@ public class CompareTest {
                 KMeta[] diffTwo = sensor.compare(sensor3);
                 Assert.assertEquals(diffTwo.length, 2);
 
-                
+
             }
         });
 
