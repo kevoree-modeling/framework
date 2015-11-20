@@ -32,7 +32,7 @@ public class PolynomialKMFTest {
                 CloudView t0 = dimension0.time(0l);
                 Node node = t0.createNode();
                 node.setName("n0");
-                t0.setRoot(node, null);
+                //t0.setRoot(node, null);
                 final Element element = t0.createElement();
                 element.setName("e0");
                 node.addElement(element);
@@ -104,7 +104,7 @@ public class PolynomialKMFTest {
                 CloudView t0 = dimension0.time(0l);
                 Node node = t0.createNode();
                 node.setName("n0");
-                t0.setRoot(node, null);
+                //t0.setRoot(node, null);
                 final Element element = t0.createElement();
                 element.setName("e0");
                 node.addElement(element);

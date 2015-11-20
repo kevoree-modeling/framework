@@ -58,7 +58,7 @@ public class TimeTest {
                 //creates an object at time 3
                 CloudView view3 = universe.time(3);
                 Node n = view3.createNode();
-                view3.setRoot(n, null);
+                // view3.setRoot(n, null);
                 cloud.save(null);
 
                 //resolves the object from time 5
@@ -253,7 +253,7 @@ public class TimeTest {
                 CloudView t0 = universe.time(0L);
                 Node node0 = t0.createNode();
                 node0.setName("Node0");
-                t0.setRoot(node0, null);
+                // t0.setRoot(node0, null);
 
                 model.save(new KCallback<Throwable>() {
                     @Override
@@ -305,7 +305,7 @@ public class TimeTest {
                 CloudView t0 = universe.time(0L);
                 Node node0 = t0.createNode();
                 node0.setName("Node0");
-                t0.setRoot(node0, null);
+                // t0.setRoot(node0, null);
 
                 model.save(new KCallback<Throwable>() {
                     @Override

@@ -28,6 +28,7 @@ public class BasicSelectTest {
                 CloudView t0 = dimension0.time(0l);
                 final Node node = t0.createNode();
                 node.setName("n0");
+                /*
                 t0.setRoot(node, new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
@@ -42,7 +43,7 @@ public class BasicSelectTest {
                         Assert.assertEquals(kObject.uuid(), node.uuid());
                         Assert.assertEquals(kObject, node);
                     }
-                });
+                });*/
                 t0.select("@root", new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] kObjects) {
@@ -50,13 +51,14 @@ public class BasicSelectTest {
                     }
                 });
                 final CloudView t1 = dimension0.time(1l);
+                /*
                 t1.getRoot(new KCallback<KObject>() {
                     @Override
                     public void on(KObject kObject) {
                         Assert.assertEquals(node.uuid(), kObject.uuid());
                         Assert.assertEquals(t1.now(), kObject.now());
                     }
-                });
+                });*/
                 t1.select("@root", new KCallback<Object[]>() {
                     @Override
                     public void on(Object[] kObjects) {
@@ -82,7 +84,7 @@ public class BasicSelectTest {
                 CloudView t0 = dimension0.time(0l);
                 Node node = t0.createNode();
                 node.setName("n0");
-                t0.setRoot(node, null);
+                //t0.setRoot(node, null);
                 final Node node2 = t0.createNode();
                 node2.setName("n1");
                 node.addChildren(node2);
@@ -187,7 +189,7 @@ public class BasicSelectTest {
                 Node n0 = t0.createNode();
                 n0.setName("n0");
                 n0.setValue("v0");
-                t0.setRoot(n0, null);
+                //t0.setRoot(n0, null);
 
                 final Node n1 = t0.createNode();
                 n1.setName("n1");

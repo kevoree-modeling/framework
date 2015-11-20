@@ -24,7 +24,7 @@ public class ParentAndReverseTest {
                 CloudView t0 = dimension0.time(0l);
                 final Node root = t0.createNode();
                 root.setName("root");
-                t0.setRoot(root,null);
+                //t0.setRoot(root,null);
 
                 final Node n1 = t0.createNode();
                 n1.setName("n1");

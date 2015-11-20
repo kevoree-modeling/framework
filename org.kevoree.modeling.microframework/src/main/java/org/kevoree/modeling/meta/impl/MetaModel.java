@@ -78,6 +78,9 @@ public class MetaModel implements KMetaModel {
 
     @Override
     public KMetaClass metaClass(int index) {
+        if(index == MetaClassIndex.INSTANCE.index()){
+            return MetaClassIndex.INSTANCE;
+        }
         if (index >= 0 && index < _metaClasses.length) {
             return _metaClasses[index];
         }

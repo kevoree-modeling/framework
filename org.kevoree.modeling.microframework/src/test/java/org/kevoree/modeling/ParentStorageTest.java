@@ -28,7 +28,7 @@ public class ParentStorageTest {
                 final CloudView time0 = dimension0.time(0l);
                 Node root = time0.createNode();
                 root.setName("root");
-                time0.setRoot(root, null);
+                //time0.setRoot(root, null);
                 final Node n1 = time0.createNode();
                 n1.setName("n1");
                 Node n2 = time0.createNode();
@@ -82,7 +82,7 @@ public class ParentStorageTest {
                 CloudView time0 = dimension0.time(0l);
                 Node root = time0.createNode();
                 root.setName("root");
-                time0.setRoot(root, null);
+                //time0.setRoot(root, null);
                 Node n1 = time0.createNode();
                 n1.setName("n1");
                 Node n2 = time0.createNode();

@@ -23,5 +23,4 @@ public class KPrimitiveTypes {
         return attributeTypeId >= 0;
     }
 
-
 }

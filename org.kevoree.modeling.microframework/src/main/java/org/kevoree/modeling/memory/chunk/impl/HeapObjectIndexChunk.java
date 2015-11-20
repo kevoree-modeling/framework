@@ -3,18 +3,21 @@ package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KChunkFlags;
-import org.kevoree.modeling.memory.chunk.KStringLongMap;
+import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.memory.chunk.KObjectIndexChunk;
 import org.kevoree.modeling.memory.chunk.KStringLongMapCallBack;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
+import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class ArrayStringLongMap implements KStringLongMap {
+public class HeapObjectIndexChunk implements KObjectIndexChunk {
 
     protected volatile int elementCount;
 
@@ -40,23 +43,9 @@ public class ArrayStringLongMap implements KStringLongMap {
 
     private final long _obj;
 
-    public ArrayStringLongMap(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
-        this._universe = p_universe;
-        this._time = p_time;
-        this._obj = p_obj;
-        this._flags = new AtomicLong(0);
-        this._counter = new AtomicInteger(0);
-        this._space = p_space;
-        this.elementCount = 0;
-        this.droppedCount = 0;
-        InternalState newstate = new InternalState(initialCapacity, new String[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity]);
-        for (int i = 0; i < initialCapacity; i++) {
-            newstate.elementNext[i] = -1;
-            newstate.elementHash[i] = -1;
-        }
-        this.state = newstate;
-        this.threshold = (int) (newstate.elementDataSize * loadFactor);
-    }
+    private int _metaClassIndex = -1;
+
+    private AtomicReference<long[]> _dependencies;
 
     final class InternalState {
 
@@ -77,6 +66,129 @@ public class ArrayStringLongMap implements KStringLongMap {
             this.elementNext = elementNext;
             this.elementHash = elementHash;
         }
+
+        public InternalState clone() {
+            String[] clonedElementK = new String[elementK.length];
+            System.arraycopy(elementK, 0, clonedElementK, 0, elementK.length);
+            long[] clonedElementV = new long[elementV.length];
+            System.arraycopy(elementV, 0, clonedElementV, 0, elementV.length);
+            int[] clonedElementNext = new int[elementNext.length];
+            System.arraycopy(elementNext, 0, clonedElementNext, 0, elementNext.length);
+            int[] clonedElementHash = new int[elementHash.length];
+            System.arraycopy(elementHash, 0, clonedElementHash, 0, elementHash.length);
+            return new InternalState(elementDataSize, clonedElementK, clonedElementV, clonedElementNext, clonedElementHash);
+        }
+    }
+
+    public HeapObjectIndexChunk(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
+        this._universe = p_universe;
+        this._time = p_time;
+        this._obj = p_obj;
+        this._flags = new AtomicLong(0);
+        this._counter = new AtomicInteger(0);
+        this._space = p_space;
+        this.elementCount = 0;
+        this.droppedCount = 0;
+        InternalState newstate = new InternalState(initialCapacity, new String[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity]);
+        for (int i = 0; i < initialCapacity; i++) {
+            newstate.elementNext[i] = -1;
+            newstate.elementHash[i] = -1;
+        }
+        this.state = newstate;
+        this.threshold = (int) (newstate.elementDataSize * loadFactor);
+        this._dependencies = new AtomicReference<long[]>();
+    }
+
+    @Override
+    public KObjectChunk clone(long p_universe, long p_time, long p_obj, KMetaModel p_metaClass) {
+        HeapObjectIndexChunk cloned = new HeapObjectIndexChunk(p_universe, p_time, p_obj, _space);
+        cloned._metaClassIndex = this._metaClassIndex;
+        cloned.state = this.state.clone();
+        cloned.elementCount = this.elementCount;
+        cloned.droppedCount = this.droppedCount;
+        cloned.threshold = this.threshold;
+        cloned.internal_set_dirty();
+        return cloned;
+    }
+
+    @Override
+    public int metaClassIndex() {
+        return this._metaClassIndex;
+    }
+
+    @Override
+    public String toJSON(KMetaModel metaModel) {
+        return null;
+    }
+
+    @Override
+    public void setPrimitiveType(int index, Object content, KMetaClass metaClass) {
+
+    }
+
+    @Override
+    public Object getPrimitiveType(int index, KMetaClass metaClass) {
+        return null;
+    }
+
+    @Override
+    public long[] getLongArray(int index, KMetaClass metaClass) {
+        return new long[0];
+    }
+
+    @Override
+    public int getLongArraySize(int index, KMetaClass metaClass) {
+        return 0;
+    }
+
+    @Override
+    public long getLongArrayElem(int index, int refIndex, KMetaClass metaClass) {
+        return 0;
+    }
+
+    @Override
+    public boolean addLongToArray(int index, long newRef, KMetaClass metaClass) {
+        return false;
+    }
+
+    @Override
+    public boolean removeLongToArray(int index, long previousRef, KMetaClass metaClass) {
+        return false;
+    }
+
+    @Override
+    public void clearLongArray(int index, KMetaClass metaClass) {
+
+    }
+
+    @Override
+    public double[] getDoubleArray(int index, KMetaClass metaClass) {
+        return new double[0];
+    }
+
+    @Override
+    public int getDoubleArraySize(int index, KMetaClass metaClass) {
+        return 0;
+    }
+
+    @Override
+    public double getDoubleArrayElem(int index, int arrayIndex, KMetaClass metaClass) {
+        return 0;
+    }
+
+    @Override
+    public void setDoubleArrayElem(int index, int arrayIndex, double valueToInsert, KMetaClass metaClass) {
+
+    }
+
+    @Override
+    public void extendDoubleArray(int index, int newSize, KMetaClass metaClass) {
+
+    }
+
+    @Override
+    public void clearDoubleArray(int index, KMetaClass metaClass) {
+
     }
 
     @Override
@@ -175,7 +287,7 @@ public class ArrayStringLongMap implements KStringLongMap {
         int index = (PrimitiveHelper.stringHash(key) & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
         while (m >= 0) {
-            if (PrimitiveHelper.equals(key,internalState.elementK[m] /* getKey */)) {
+            if (PrimitiveHelper.equals(key, internalState.elementK[m] /* getKey */)) {
                 return internalState.elementV[m]; /* getValue */
             } else {
                 m = internalState.elementNext[m];
@@ -218,7 +330,7 @@ public class ArrayStringLongMap implements KStringLongMap {
     final int findNonNullKeyEntry(String key, int index) {
         int m = state.elementHash[index];
         while (m >= 0) {
-            if (PrimitiveHelper.equals(key,state.elementK[m] /* getKey */)) {
+            if (PrimitiveHelper.equals(key, state.elementK[m] /* getKey */)) {
                 return m;
             }
             m = state.elementNext[m];
@@ -237,7 +349,7 @@ public class ArrayStringLongMap implements KStringLongMap {
         int m = state.elementHash[index];
         int last = -1;
         while (m >= 0) {
-            if (PrimitiveHelper.equals(key,state.elementK[m] /* getKey */)) {
+            if (PrimitiveHelper.equals(key, state.elementK[m] /* getKey */)) {
                 break;
             }
             last = m;
@@ -267,10 +379,13 @@ public class ArrayStringLongMap implements KStringLongMap {
     /* warning: this method is not thread safe */
     @Override
     public void init(String payload, KMetaModel metaModel, int metaClassIndex) {
+        if (this._metaClassIndex == -1) {
+            this._metaClassIndex = metaClassIndex;
+        }
         if (payload == null || payload.length() == 0) {
             return;
         }
-        int initPos = 0;
+        int initPos = 1;
         int cursor = 0;
         while (cursor < payload.length() && payload.charAt(cursor) != '/') {
             cursor++;
@@ -323,11 +438,12 @@ public class ArrayStringLongMap implements KStringLongMap {
 
     @Override
     public String serialize(KMetaModel metaModel) {
-        final StringBuilder buffer = new StringBuilder();//roughly approximate init size
+        final StringBuilder buffer = new StringBuilder();
+        buffer.append("#");
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.append('/');
         boolean isFirst = true;
-        ArrayStringLongMap.InternalState internalState = state;
+        HeapObjectIndexChunk.InternalState internalState = state;
         for (int i = 0; i < internalState.elementNext.length; i++) {
             if (internalState.elementNext[i] != -1) { //there is a real value
                 String loopKey = internalState.elementK[i];
@@ -403,13 +519,26 @@ public class ArrayStringLongMap implements KStringLongMap {
 
     @Override
     public long[] dependencies() {
-        //TODO
-        return null;
+        return this._dependencies.get();
     }
 
     @Override
     public void addDependency(long universe, long time, long uuid) {
-        throw new RuntimeException("Not implemented yet");
+        long[] previousVal;
+        long[] newVal;
+        do {
+            previousVal = _dependencies.get();
+            if (previousVal == null) {
+                newVal = new long[]{universe, time, uuid};
+            } else {
+                newVal = new long[previousVal.length + 3];
+                int previousLength = previousVal.length;
+                System.arraycopy(previousVal, 0, newVal, 0, previousLength);
+                newVal[previousLength] = universe;
+                newVal[previousLength + 1] = time;
+                newVal[previousLength + 2] = uuid;
+            }
+        } while (!_dependencies.compareAndSet(previousVal, newVal));
     }
 }
 

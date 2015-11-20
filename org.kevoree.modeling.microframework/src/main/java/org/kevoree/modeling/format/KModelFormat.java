@@ -8,8 +8,6 @@ public interface KModelFormat {
 
     void save(KObject model, KCallback<String> cb);
 
-    void saveRoot(KCallback<String> cb);
-
     void load(String payload, KCallback cb);
 
 }

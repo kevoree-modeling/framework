@@ -9,15 +9,12 @@ import org.kevoree.modeling.meta.KPrimitiveTypes;
 
 public class JsonRaw {
 
-    public static String encode(KObjectChunk raw, long uuid, KMetaClass p_metaClass, boolean isRoot) {
+    public static String encode(KObjectChunk raw, long uuid, KMetaClass p_metaClass) {
         StringBuilder builder = new StringBuilder();
         builder.append("{\"@class\":\"");
         builder.append(p_metaClass.metaName());
         builder.append("\",\"@uuid\":");
         builder.append(uuid);
-        if (isRoot) {
-            builder.append(",\"" + JsonFormat.KEY_ROOT + "\":true");
-        }
         KMeta[] metaElements = p_metaClass.metaElements();
         for (int i = 0; i < metaElements.length; i++) {
             KMeta loopMeta = metaElements[i];

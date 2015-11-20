@@ -4,9 +4,7 @@ import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKModel;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.KMetaEnum;
-import org.kevoree.modeling.meta.impl.GenericObject;
-import org.kevoree.modeling.meta.impl.GenericObjectInfer;
-import org.kevoree.modeling.meta.impl.MetaModel;
+import org.kevoree.modeling.meta.impl.*;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.cloudmodel.impl.ElementImpl;
@@ -43,7 +41,9 @@ public class CloudModel extends AbstractKModel<CloudUniverse> {
             case 1:
                 return new ElementImpl(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
             default:
-                if (clazz.inferAlg() != null) {
+                if (clazz.index() == MetaClassIndex.INSTANCE.index()) {
+                    return new GenericObjectIndex(universe, time, uuid, _manager, previousUniverse, previousTime);
+                } else if (clazz.inferAlg() != null) {
                     return new GenericObjectInfer(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
                 } else {
                     return new GenericObject(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);

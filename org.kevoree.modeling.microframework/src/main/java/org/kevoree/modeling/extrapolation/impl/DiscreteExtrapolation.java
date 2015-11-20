@@ -1,14 +1,14 @@
 package org.kevoree.modeling.extrapolation.impl;
 
+import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.KObjectIndex;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.extrapolation.Extrapolation;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.meta.KLiteral;
-import org.kevoree.modeling.meta.KMetaAttribute;
-import org.kevoree.modeling.meta.KMetaEnum;
-import org.kevoree.modeling.meta.KPrimitiveTypes;
+import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
@@ -40,25 +40,141 @@ public class DiscreteExtrapolation implements Extrapolation {
 
     @Override
     public void mutate(KObject current, KMetaAttribute attribute, Object payload, KInternalDataManager dataManager) {
-        //By requiring a raw on the current object, we automatically create and copy the previous object
-        KObjectChunk internalPayload = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
-        //The object is also automatically cset to Dirty
-        if (internalPayload != null) {
+        KObjectChunk internalPreviousPayload = dataManager.closestChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
+        if (internalPreviousPayload != null) {
+            Object toSetValue;
             if (KPrimitiveTypes.isEnum(attribute.attributeTypeId())) {
                 if (payload instanceof MetaLiteral) {
-                    internalPayload.setPrimitiveType(attribute.index(), ((KLiteral) payload).index(), current.metaClass());
+                    toSetValue = ((KLiteral) payload).index();
                 } else {
                     KMetaEnum metaEnum = ((AbstractKObject) current)._manager.model().metaModel().metaTypes()[attribute.attributeTypeId()];
                     KLiteral foundLiteral = metaEnum.literalByName(payload.toString());
                     if (foundLiteral != null) {
-                        internalPayload.setPrimitiveType(attribute.index(), foundLiteral.index(), current.metaClass());
+                        toSetValue = foundLiteral.index();
+                    } else {
+                        toSetValue = null;
                     }
                 }
             } else {
                 if (payload == null) {
-                    internalPayload.setPrimitiveType(attribute.index(), null, current.metaClass());
+                    toSetValue = null;
                 } else {
-                    internalPayload.setPrimitiveType(attribute.index(), convert(attribute, payload), current.metaClass());
+                    toSetValue = convert(attribute, payload);
+                }
+            }
+            Object previousValue = internalPreviousPayload.getPrimitiveType(attribute.index(), current.metaClass());
+            //if both value are null then we go out
+            if (previousValue == null && toSetValue == null) {
+                return;
+            }
+            //if both are null then check potential equality
+            if (previousValue != null && toSetValue != null) {
+                switch (attribute.attributeTypeId()) {
+                    case KPrimitiveTypes.BOOL_ID:
+                        boolean previousBoolOrdinal = (boolean) previousValue;
+                        boolean nextBoolOrdinal = (boolean) toSetValue;
+                        if (previousBoolOrdinal == nextBoolOrdinal) {
+                            return;
+                        }
+                        break;
+                    case KPrimitiveTypes.CONTINUOUS_ID:
+                        double previousContinuousOrdinal = (double) previousValue;
+                        double nextContinuousOrdinal = (double) toSetValue;
+                        if (previousContinuousOrdinal == nextContinuousOrdinal) {
+                            return;
+                        }
+                        break;
+                    case KPrimitiveTypes.DOUBLE_ID:
+                        double previousDoubleOrdinal = (double) previousValue;
+                        double nextDoubleOrdinal = (double) toSetValue;
+                        if (previousDoubleOrdinal == nextDoubleOrdinal) {
+                            return;
+                        }
+                        break;
+                    case KPrimitiveTypes.INT_ID:
+                        int previousIntOrdinal = (int) previousValue;
+                        int nextIntOrdinal = (int) toSetValue;
+                        if (previousIntOrdinal == nextIntOrdinal) {
+                            return;
+                        }
+                        break;
+                    case KPrimitiveTypes.LONG_ID:
+                        long previousLongOrdinal = (long) previousValue;
+                        long nextLongOrdinal = (long) toSetValue;
+                        if (previousLongOrdinal == nextLongOrdinal) {
+                            return;
+                        }
+                        break;
+                    case KPrimitiveTypes.STRING_ID:
+                        String previousString = (String) previousValue;
+                        String nextString = (String) toSetValue;
+                        if (PrimitiveHelper.equals(previousString, nextString)) {
+                            return;
+                        }
+                        break;
+                    default:
+                        if (KPrimitiveTypes.isEnum(attribute.attributeTypeId())) {
+                            int previousEnumOrdinal = (int) previousValue;
+                            int nextEnumOrdinal = (int) toSetValue;
+                            if (previousEnumOrdinal == nextEnumOrdinal) {
+                                return;
+                            }
+                        }
+                        break;
+                }
+            }
+            //no equality detected, let's insert the value
+            String previousHash = null;
+            if (attribute.key()) {
+                //the attribute if part of the key, let's compute the previous hash
+                KMeta[] metas = current.metaClass().metaElements();
+                for (int i = 0; i < metas.length; i++) {
+                    if (metas[i].metaType().equals(MetaType.ATTRIBUTE) && ((KMetaAttribute) metas[i]).key()) {
+                        Object loopElem = internalPreviousPayload.getPrimitiveType(metas[i].index(), current.metaClass());
+                        if (loopElem != null) {
+                            if (previousHash == null) {
+                                previousHash = loopElem.toString();
+                            } else {
+                                previousHash += loopElem.toString();
+                            }
+                        }
+                    }
+                }
+            }
+            //By requiring a raw on the current object, we automatically create and copy the previous object
+            KObjectChunk internalPayload = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
+            //The object is also automatically cset to Dirty
+            if (internalPayload != null) {
+                internalPayload.setPrimitiveType(attribute.index(), toSetValue, current.metaClass());
+                String newHash = null;
+                if (attribute.key()) {
+                    KMeta[] metas = current.metaClass().metaElements();
+                    for (int i = 0; i < metas.length; i++) {
+                        if (metas[i].metaType().equals(MetaType.ATTRIBUTE) && ((KMetaAttribute) metas[i]).key()) {
+                            Object loopElem = internalPayload.getPrimitiveType(metas[i].index(), current.metaClass());
+                            if (loopElem != null) {
+                                if (newHash == null) {
+                                    newHash = loopElem.toString();
+                                } else {
+                                    newHash += loopElem.toString();
+                                }
+                            }
+                        }
+                    }
+                    //update index
+                    final String finalPreviousHash = previousHash;
+                    final String finalNewHash = newHash;
+                    dataManager.index(current.universe(), current.now(), current.metaClass().metaName(), new KCallback<KObjectIndex>() {
+                        @Override
+                        public void on(KObjectIndex classIndex) {
+                            if (finalPreviousHash != null) {
+                                classIndex.set(finalPreviousHash, KConfig.NULL_LONG);
+                            }
+                            if (finalNewHash != null) {
+                                classIndex.set(finalNewHash, current.uuid());
+                            }
+                        }
+                    });
                 }
             }
         }

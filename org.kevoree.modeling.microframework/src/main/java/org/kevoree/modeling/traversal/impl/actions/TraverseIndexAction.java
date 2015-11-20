@@ -26,6 +26,9 @@ public class TraverseIndexAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         //TODO enhance this to general index usages
+
+
+        /*
         if (PrimitiveHelper.equals(_indexName, "root")) {
             if (context.inputObjects().length > 0) {
                 context.inputObjects()[0].manager().getRoot(context.inputObjects()[0].universe(), context.inputObjects()[0].now(), new KCallback<KObject>() {
@@ -64,6 +67,6 @@ public class TraverseIndexAction implements KTraversalAction {
                     _next.execute(context);
                 }
             }
-        }
+        }*/
     }
 }

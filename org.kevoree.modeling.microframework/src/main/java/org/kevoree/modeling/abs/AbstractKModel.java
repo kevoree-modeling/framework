@@ -9,9 +9,11 @@ import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.meta.KMetaOperation;
 import org.kevoree.modeling.defer.impl.Defer;
+import org.kevoree.modeling.meta.impl.MetaClassIndex;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.util.Checker;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
@@ -165,12 +167,36 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     @Override
     public void find(KMetaClass metaClass, long universe, long time, Object[] attributes, KCallback<KObject> callback) {
-        //TODO
+        findByName(metaClass.metaName(), universe, time, attributes, callback);
     }
 
     @Override
-    public void findByName(String metaClassName, long universe, long time, Object[] attributes, KCallback<KObject> callback) {
-        //TODO
+    public void findByName(String indexName, long universe, long time, Object[] attributes, KCallback<KObject> callback) {
+        _manager.index(universe, time, indexName, new KCallback<KObjectIndex>() {
+            @Override
+            public void on(KObjectIndex kObjectIndex) {
+                //TODO more flexible strategy
+                String concat = "";
+                for (int i = 0; i < attributes.length; i++) {
+                    if (attributes[i] != null) {
+                        concat += attributes[i].toString();
+                    }
+                }
+                long objectUUID = kObjectIndex.get(concat);
+                if (objectUUID == KConfig.NULL_LONG) {
+                    if (Checker.isDefined(callback)) {
+                        callback.on(null);
+                    }
+                } else {
+                    _manager.lookup(universe, time, objectUUID, callback);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void indexByName(long universe, long time, String indexName, KCallback<KObjectIndex> callback) {
+        _manager.index(universe, time, indexName, callback);
     }
 }
 

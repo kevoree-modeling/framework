@@ -44,7 +44,7 @@ public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLon
 
     @Override
     public short type() {
-        return KChunkTypes.LONG_LONG_TREE;
+        return -1;
     }
 
 

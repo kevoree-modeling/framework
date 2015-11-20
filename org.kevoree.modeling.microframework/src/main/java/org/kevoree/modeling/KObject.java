@@ -82,6 +82,8 @@ public interface KObject {
     /**
      * Time related naviguation
      */
+    void enforceTimepoint();
+
     long timeDephasing();
 
     void allTimes(KCallback<long[]> cb);

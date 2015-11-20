@@ -21,6 +21,7 @@ public class LookupRootTest {
                 final Node node0 = t0.createNode();
                 final Element element0 = t0.createElement();
                 node0.addElement(element0);
+                /*
                 t0.setRoot(node0, new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
@@ -43,7 +44,7 @@ public class LookupRootTest {
                             }
                         });
                     }
-                });
+                });*/
             }
         });
     }
@@ -61,6 +62,7 @@ public class LookupRootTest {
                 final Node node0 = t0.createNode();
                 final Element element0 = t0.createElement();
                 node0.addElement(element0);
+                /*
                 t0.setRoot(node0, new KCallback<Throwable>() {
                     @Override
                     public void on(Throwable throwable) {
@@ -87,6 +89,7 @@ public class LookupRootTest {
                         });
                     }
                 });
+                */
             }
         });
     }

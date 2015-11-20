@@ -5,6 +5,8 @@ import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 
 public interface KDataManager {
 
+    void index(long universe, long time, String indexName, KCallback<KObjectIndex> callback);
+
     void lookup(long universe, long time, long uuid, KCallback<KObject> callback);
 
     void lookupAllObjects(long universe, long time, long[] uuids, KCallback<KObject[]> callback);
@@ -16,11 +18,7 @@ public interface KDataManager {
     void lookupPrepared(KPreparedLookup prepared, KCallback<KObject[]> callback);
 
     void save(KCallback<Throwable> callback);
-
-    void getRoot(long universe, long time, KCallback<KObject> callback);
-
-    void setRoot(KObject newRoot, KCallback<Throwable> callback);
-
+    
     KModel model();
 
     void connect(KCallback<Throwable> callback);

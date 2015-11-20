@@ -35,21 +35,13 @@ public abstract class AbstractKView implements KView {
     }
 
     @Override
-    public void setRoot(KObject elem, KCallback cb) {
-        _manager.setRoot(elem, cb);
-    }
-
-    @Override
-    public void getRoot(KCallback cb) {
-        _manager.getRoot(_universe, _time, cb);
-    }
-
-    @Override
     public void select(final String query, KCallback<Object[]> cb) {
         if (Checker.isDefined(cb)) {
             if (query == null || query.length() == 0) {
                 cb.on(new KObject[0]);
             } else {
+                throw new RuntimeException("Not implemented yet !");
+                /*
                 _manager.getRoot(_universe, _time, new KCallback<KObject>() {
                     @Override
                     public void on(KObject rootObj) {
@@ -62,6 +54,7 @@ public abstract class AbstractKView implements KView {
                         }
                     }
                 });
+                */
             }
         }
     }

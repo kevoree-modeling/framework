@@ -22,7 +22,7 @@ public abstract class BaseKSchedulerTest {
                 CloudUniverse dimension0 = model.newUniverse();
                 CloudView time0 = dimension0.time(0l);
                 final Node root = time0.createNode();
-                time0.setRoot(root, null);
+              //  time0.setRoot(root, null);
                 root.setName("root");
                 Node n1 = time0.createNode();
                 n1.setName("n1");

@@ -6,6 +6,7 @@ import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
+import org.kevoree.modeling.memory.chunk.KObjectIndexChunk;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
@@ -21,10 +22,12 @@ import org.kevoree.modeling.message.KMessage;
 import org.kevoree.modeling.message.impl.Message;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.meta.impl.GenericObjectIndex;
 import org.kevoree.modeling.scheduler.KScheduler;
 import org.kevoree.modeling.operation.impl.HashOperationManager;
 import org.kevoree.modeling.operation.KOperationManager;
 import org.kevoree.modeling.scheduler.KTask;
+import org.kevoree.modeling.util.Checker;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 
@@ -75,7 +78,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
         this._operationManager = new HashOperationManager(this);
         this._blas = p_blas;
     }
-
 
     @Override
     public final KModel model() {
@@ -343,16 +345,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
     }
 
     @Override
-    public void getRoot(long universe, long time, KCallback<KObject> callback) {
-        _resolver.getRoot(universe, time, callback);
-    }
-
-    @Override
-    public void setRoot(KObject newRoot, KCallback<Throwable> callback) {
-        _resolver.setRoot(newRoot, callback);
-    }
-
-    @Override
     public KContentDeliveryDriver cdn() {
         return this._db;
     }
@@ -456,4 +448,39 @@ public class DataManager implements KDataManager, KInternalDataManager {
     public void printDebug() {
         this._space.printDebug(_model.metaModel());
     }
+
+    @Override
+    public void index(long universe, long time, String indexName, KCallback<KObjectIndex> callback) {
+        DataManager selfPointer = this;
+        selfPointer._scheduler.dispatch(selfPointer._resolver.lookup(universe, time, KConfig.END_OF_TIME, new KCallback<KObject>() {
+            @Override
+            public void on(KObject kObject) {
+                KObjectIndex globalIndex = (KObjectIndex) kObject;
+                if (globalIndex == null) {
+                    globalIndex = new GenericObjectIndex(universe, time, KConfig.END_OF_TIME, selfPointer, universe, time);
+                    initKObject(globalIndex);
+                }
+                long indexUUID = globalIndex.get(indexName);
+                if (indexUUID == KConfig.NULL_LONG) {
+                    long nextKey = nextObjectKey();
+                    KObjectIndex namedIndex = new GenericObjectIndex(universe, time, nextKey, selfPointer, universe, time);
+                    initKObject(namedIndex);
+                    globalIndex.set(indexName, nextKey);
+                    if (Checker.isDefined(callback)) {
+                        callback.on(namedIndex);
+                    }
+                } else {
+                    selfPointer._scheduler.dispatch(selfPointer._resolver.lookup(universe, time, indexUUID, new KCallback<KObject>() {
+                        @Override
+                        public void on(KObject namedIndex) {
+                            if (Checker.isDefined(callback)) {
+                                callback.on((KObjectIndex) namedIndex);
+                            }
+                        }
+                    }));
+                }
+            }
+        }));
+    }
+
 }

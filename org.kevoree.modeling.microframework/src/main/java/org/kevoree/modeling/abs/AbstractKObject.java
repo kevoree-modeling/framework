@@ -31,7 +31,7 @@ public abstract class AbstractKObject implements KObject {
     final public KInternalDataManager _manager;
     final private static String OUT_OF_CACHE_MSG = "Out of cache Error";
 
-    private final AtomicReference<long[]> _previousResolveds;
+    protected final AtomicReference<long[]> _previousResolveds;
     public static final int UNIVERSE_PREVIOUS_INDEX = 0;
     public static final int TIME_PREVIOUS_INDEX = 1;
 
@@ -208,6 +208,13 @@ public abstract class AbstractKObject implements KObject {
             }
         }
     }
+
+    @Override
+    public void enforceTimepoint() {
+        //this line create by force a new timePoint
+        _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
+    }
+
 
     @Override
     public void removeByName(String relationName, KObject objToAdd) {

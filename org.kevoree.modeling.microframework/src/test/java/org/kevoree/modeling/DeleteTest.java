@@ -24,9 +24,9 @@ public class DeleteTest {
                     final CloudUniverse universe = model.newUniverse();
                     CloudView factory = universe.time(0l);
                     Node n = factory.createNode();
-                    factory.setRoot(n, new KCallback<Throwable>() {
-                        @Override
-                        public void on(Throwable throwable) {
+                  //  factory.setRoot(n, new KCallback<Throwable>() {
+                     //   @Override
+                      //  public void on(Throwable throwable) {
                             model.save(new KCallback<Throwable>() {
                                 @Override
                                 public void on(Throwable aBoolean) {
@@ -91,8 +91,8 @@ public class DeleteTest {
                                     });
                                 }
                             });
-                        }
-                    });
+                     //   }
+                   // });
                 }
             }
         });
@@ -110,7 +110,7 @@ public class DeleteTest {
                 CloudView factory = universe.time(0l);
                 Node n = factory.createNode();
                 n.setName("n");
-                factory.setRoot(n, null);
+                //factory.setRoot(n, null);
                 Node n2 = factory.createNode();
                 n2.setName("n2");
                 n.addChildren(n2);

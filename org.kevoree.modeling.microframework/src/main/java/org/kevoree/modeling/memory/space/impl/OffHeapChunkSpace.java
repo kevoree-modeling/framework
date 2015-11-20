@@ -300,8 +300,8 @@ public class OffHeapChunkSpace implements KChunkSpace {
             case KChunkTypes.LONG_TREE:
                 return new OffHeapLongTree(this, p_universe, p_time, p_obj);
 
-            case KChunkTypes.LONG_LONG_TREE:
-                return new OffHeapLongLongTree(this, p_universe, p_time, p_obj);
+        //    case KChunkTypes.LONG_LONG_TREE:
+        //        return new OffHeapLongLongTree(this, p_universe, p_time, p_obj);
 
             case KChunkTypes.LONG_LONG_MAP:
                 return new OffHeapLongLongMap(this, p_universe, p_time, p_obj);

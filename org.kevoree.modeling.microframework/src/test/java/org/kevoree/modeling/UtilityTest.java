@@ -25,7 +25,7 @@ public class UtilityTest {
                 CloudView factory = universe.time(0l);
                 Node n = factory.createNode();
                 n.setName("n");
-                factory.setRoot(n,null);
+               // factory.setRoot(n,null);
                 Node n2 = factory.createNode();
                 n2.setName("n2");
                 n.addChildren(n2);

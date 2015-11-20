@@ -1,8 +1,6 @@
 package org.kevoree.modeling.memory.chunk;
 
-import org.kevoree.modeling.memory.KChunk;
-
-public interface KStringLongMap extends KChunk {
+public interface KStringLongMap {
 
     boolean contains(String key);
 

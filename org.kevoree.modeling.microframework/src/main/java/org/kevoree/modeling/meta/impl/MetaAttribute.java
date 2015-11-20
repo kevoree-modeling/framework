@@ -64,6 +64,11 @@ public class MetaAttribute implements KMetaAttribute {
         this._precision = p_precision;
     }
 
+    @Override
+    public void setKey(boolean p_key) {
+        this._key = p_key;
+    }
+
     public MetaAttribute(String p_name, int p_index, double p_precision, boolean p_key, int p_attributeTypeId, Extrapolation p_extrapolation) {
         this._name = p_name;
         this._index = p_index;

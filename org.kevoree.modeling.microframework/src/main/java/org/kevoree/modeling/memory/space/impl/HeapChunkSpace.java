@@ -4,13 +4,10 @@ package org.kevoree.modeling.memory.space.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
-import org.kevoree.modeling.memory.chunk.impl.HeapObjectChunk;
-import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongMap;
+import org.kevoree.modeling.memory.chunk.impl.*;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.space.KChunkSpace;
-import org.kevoree.modeling.memory.chunk.impl.ArrayLongLongTree;
-import org.kevoree.modeling.memory.chunk.impl.ArrayLongTree;
 import org.kevoree.modeling.meta.KMetaModel;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -143,8 +140,8 @@ public class HeapChunkSpace implements KChunkSpace {
                 return new ArrayLongLongMap(p_universe, p_time, p_obj, this);
             case KChunkTypes.LONG_TREE:
                 return new ArrayLongTree(p_universe, p_time, p_obj, this);
-            case KChunkTypes.LONG_LONG_TREE:
-                return new ArrayLongLongTree(p_universe, p_time, p_obj, this);
+            case KChunkTypes.OBJECT_CHUNK_INDEX:
+                return new HeapObjectIndexChunk(p_universe, p_time, p_obj, this);
             default:
                 return null;
         }

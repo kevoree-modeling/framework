@@ -12,9 +12,7 @@ public class JsonFormat implements KModelFormat {
     public static final String KEY_META = "@class";
 
     public static final String KEY_UUID = "@uuid";
-
-    public static final String KEY_ROOT = "@root";
-
+    
     private KInternalDataManager _manager;
 
     private long _universe;
@@ -35,22 +33,6 @@ public class JsonFormat implements KModelFormat {
             JsonModelSerializer.serialize(model, cb);
         } else {
             throw new RuntimeException(NULL_PARAM_MSG);
-        }
-    }
-
-    @Override
-    public void saveRoot(KCallback<String> cb) {
-        if (Checker.isDefined(cb)) {
-            _manager.getRoot(_universe, _time, new KCallback<KObject>() {
-                @Override
-                public void on(KObject root) {
-                    if (root == null) {
-                        cb.on(null);
-                    } else {
-                        JsonModelSerializer.serialize(root, cb);
-                    }
-                }
-            });
         }
     }
 

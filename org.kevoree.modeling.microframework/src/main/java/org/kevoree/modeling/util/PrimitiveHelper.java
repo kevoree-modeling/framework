@@ -121,9 +121,8 @@ public class PrimitiveHelper {
      * }
      * return hash;
      */
-    public static int stringHash(String target){
+    public static int stringHash(String target) {
         return target.hashCode();
     }
-
 
 }

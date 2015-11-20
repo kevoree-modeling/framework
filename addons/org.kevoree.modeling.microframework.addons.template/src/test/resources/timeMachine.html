@@ -17,7 +17,7 @@
     <strong>uuid:{{elem.uuid}},time:{{elem.now}},{{elem.value}}</strong>
     <ul>
         <repeat each={{elem.sensors}} as="i">
-            <li>uuid:{{i.uuid}},time:{{i.now}}, value:<input type="text" value="{{ <~> i.value }}" /></li>
+            <li>uuid:{{i.uuid}},time:{{i.now}}, value:<input type="text" value="{{ <~> i.value }}"/></li>
         </repeat>
     </ul>
 </template>
@@ -32,7 +32,7 @@
     var dataManager = org.kevoree.modeling.memory.manager.DataManagerBuilder.create().withContentDeliveryDriver(wsClient).build();
     var model = metaModel.createModel(dataManager);
     var modelContext = model.createModelContext();
-    modelContext.set(0,0,0,0);
+    modelContext.set(0, 0, 0, 0);
 
     model.connect(function () {
         model.lookup(0, modelContext.originTime(), 1, function (obj) {

@@ -71,6 +71,8 @@ public class JSONLoadTest {
                         }
 
                         Assert.assertEquals(passed[0], 3);
+
+                        /*
                         time0.select("@root", new KCallback<Object[]>() {
                             @Override
                             public void on(Object[] kObjects) {
@@ -86,7 +88,7 @@ public class JSONLoadTest {
                                     }
                                 });
                             }
-                        });
+                        });*/
                     }
                 });
             }

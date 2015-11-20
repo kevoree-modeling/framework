@@ -34,6 +34,7 @@ public class ArrayLongLongTree extends AbstractArrayTree implements KLongLongTre
 
     @Override
     public short type() {
-        return KChunkTypes.LONG_LONG_TREE;
+        return -1;
+        //return KChunkTypes.LONG_LONG_TREE;
     }
 }

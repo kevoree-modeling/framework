@@ -16,4 +16,6 @@ public interface KMetaAttribute extends KMeta {
 
     void setPrecision(double precision);
 
+    void setKey(boolean key);
+
 }

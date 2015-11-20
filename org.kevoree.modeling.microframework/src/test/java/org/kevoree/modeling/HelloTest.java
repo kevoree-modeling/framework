@@ -23,7 +23,7 @@ public class HelloTest {
                     CloudView time0 = universe.time(0l);
                     Node root = time0.createNode();
 
-                    time0.setRoot(root, null);
+                 //   time0.setRoot(root, null);
                     root.setName("root");
                     Assert.assertEquals("root", root.getName());
                     Node n1 = time0.createNode();
@@ -171,7 +171,7 @@ public class HelloTest {
                     CloudView time0 = universe.time(0l);
                     Node root = time0.createNode();
 
-                    time0.setRoot(root, null);
+                    //time0.setRoot(root, null);
                     root.setName("root");
                     Assert.assertEquals("root", root.getName());
                     Node n1 = time0.createNode();

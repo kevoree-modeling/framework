@@ -29,6 +29,7 @@ public abstract class BaseKChunkSpaceTest {
         Assert.assertEquals(map.counter(), retrievedMap.counter());
 
         // KLongLongTree
+        /*
         KLongLongTree longLongTree = (KLongLongTree) chunkSpace.create(0, KConfig.NULL_LONG, KConfig.END_OF_TIME, KChunkTypes.LONG_LONG_TREE);
         longLongTree.init(null, null, -1);
         longLongTree.insert(0, 0);
@@ -41,6 +42,7 @@ public abstract class BaseKChunkSpaceTest {
         Assert.assertEquals((longLongTree.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT, (retrievedLongLongTree.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT);
 
         Assert.assertEquals(longLongTree.counter(), retrievedLongLongTree.counter());
+        */
 
         // KLongTree
         KLongTree longTree = (KLongTree) chunkSpace.create(0, KConfig.NULL_LONG, 0, KChunkTypes.LONG_TREE);

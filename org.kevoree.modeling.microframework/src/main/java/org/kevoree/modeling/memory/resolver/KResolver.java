@@ -28,14 +28,8 @@ public interface KResolver {
 
     void indexObject(KObject obj);
 
-    short typeFromKey(long universe, long time, long uuid);
-
     void resolveTimes(final long currentUniverse, final long currentUuid, final long startTime, final long endTime, KCallback<long[]> callback);
-
-    void getRoot(long universe, long time, KCallback<KObject> callback);
-
-    void setRoot(KObject newRoot, KCallback<Throwable> callback);
-
+    
     int getRelatedKeysResultSize();
 
     void getRelatedKeys(long universe, long time, long uuid, long[] result);

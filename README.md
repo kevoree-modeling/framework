@@ -1,3 +1,15 @@
+What's new?
+===========
+
+#### V27
+
+Introducing indexes!
+
+#### V26
+
+TODO
+
+
 The Kevoree Modeling Framework
 ==========================
 
@@ -20,7 +32,6 @@ Code can be generated in different programming languages, currently we support J
 By using isomorphic models (models in different languages which use the same API) the same model can be used for example in a backend server and browser front-end. 
 
 For a more light-weight approach KMF also supports the definition of dynamic meta models, which can be defined and instantiated with a simple API - no formal definition and code generation step is necessary.
-
 
 Design Principles and Features
 -------------

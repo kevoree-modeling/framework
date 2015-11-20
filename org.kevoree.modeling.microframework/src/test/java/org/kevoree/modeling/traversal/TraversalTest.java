@@ -31,9 +31,9 @@ public class TraversalTest {
                 final Element elem0_0 = t0.createElement();
                 node0.addElement(elem0_0);
 
-                t0.setRoot(node0, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
+                //t0.setRoot(node0, new KCallback<Throwable>() {
+                    //@Override
+                   // public void on(Throwable throwable) {
 
                         final Node node1 = t0.createNode();
                         node1.setName("child1");
@@ -107,8 +107,8 @@ public class TraversalTest {
                             }
                         });
 
-                    }
-                });
+                    //}
+                //});
             }
         });
     }
@@ -126,9 +126,9 @@ public class TraversalTest {
                 final Element elem0_0 = t0.createElement();
                 node0.addElement(elem0_0);
 
-                t0.setRoot(node0, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
+             //   t0.setRoot(node0, new KCallback<Throwable>() {
+             //       @Override
+              //      public void on(Throwable throwable) {
 
                         final Node node1 = t0.createNode();
                         node1.setName("child1");
@@ -153,8 +153,8 @@ public class TraversalTest {
                             }
                         });
 
-                    }
-                });
+                //    }
+             //   });
             }
         });
 
@@ -173,9 +173,9 @@ public class TraversalTest {
                 final Element elem0_0 = t0.createElement();
                 node0.addElement(elem0_0);
 
-                t0.setRoot(node0, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
+              //  t0.setRoot(node0, new KCallback<Throwable>() {
+                 //   @Override
+                //    public void on(Throwable throwable) {
 
                         final Node node1 = t0.createNode();
                         node1.setName("child1");
@@ -206,8 +206,8 @@ public class TraversalTest {
                             }
                         });
 
-                    }
-                });
+                 //   }
+               // });
             }
         });
     }
@@ -223,9 +223,9 @@ public class TraversalTest {
                 final Node node0 = t0.createNode();
                 final Element elem0_0 = t0.createElement();
                 node0.addElement(elem0_0);
-                t0.setRoot(node0, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
+             //   t0.setRoot(node0, new KCallback<Throwable>() {
+                  //  @Override
+                  //  public void on(Throwable throwable) {
                         final Node node1 = t0.createNode();
                         node1.setName("child1");
                         final Element elem1_0 = t0.createElement();
@@ -238,8 +238,8 @@ public class TraversalTest {
                         node2.addElement(elem2_0);
                         node0.addChildren(node1);
                         node0.addChildren(node2);
-                    }
-                });
+                 //   }
+               // });
             }
         });
     }
@@ -257,9 +257,9 @@ public class TraversalTest {
                 final Element elem0_0 = t0.createElement();
                 node0.addElement(elem0_0);
 
-                t0.setRoot(node0, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
+               // t0.setRoot(node0, new KCallback<Throwable>() {
+                //    @Override
+                //    public void on(Throwable throwable) {
 
                         final Node node1 = t0.createNode();
                         node1.setName("child1");
@@ -333,8 +333,8 @@ public class TraversalTest {
                             }
                         });
 
-                    }
-                });
+                //    }
+              //  });
             }
         });
     }
@@ -354,9 +354,9 @@ public class TraversalTest {
                 final Element elem0_0 = t0.createElement();
                 node0.addElement(elem0_0);
 
-                t0.setRoot(node0, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
+             //   t0.setRoot(node0, new KCallback<Throwable>() {
+                //    @Override
+                 //   public void on(Throwable throwable) {
 
                         final Node node1 = t0.createNode();
                         node1.setName("child1");
@@ -439,8 +439,8 @@ public class TraversalTest {
                         });
 
 
-                    }
-                });
+                 //   }
+              //  });
 
             }
         });
@@ -462,9 +462,9 @@ public class TraversalTest {
                 elem0_0.setName("c0_e1");
                 node0.addElement(elem0_0);
 
-                t0.setRoot(node0, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
+               // t0.setRoot(node0, new KCallback<Throwable>() {
+                 //   @Override
+                 //   public void on(Throwable throwable) {
 
                         final Node node1 = t0.createNode();
                         node1.setName("c1");
@@ -546,8 +546,8 @@ public class TraversalTest {
                                 Assert.assertEquals(2, collectedObjs.length);
                             }
                         });
-                    }
-                });
+                 //   }
+              //  });
             }
         });
     }

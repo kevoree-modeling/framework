@@ -21,7 +21,7 @@ public class JSONSaveTest {
                 CloudUniverse dimension0 = universe.newUniverse();
                 CloudView time0 = dimension0.time(0l);
                 Node root = time0.createNode();
-                time0.setRoot(root, null);
+                //.setRoot(root, null);
                 root.setName("root\nhello");
                 final String[] result = new String[1];
                 time0.json().save(root, new KCallback<String>() {
@@ -82,7 +82,7 @@ public class JSONSaveTest {
 
                 CloudView time0 = dimension0.time(0l);
                 Node root = time0.createNode();
-                time0.setRoot(root, null);
+                //time0.setRoot(root, null);
                 root.setName("root");
                 Node n1 = time0.createNode();
                 n1.setName("n1");

@@ -40,7 +40,7 @@ public class JsonModelLoader {
      * org.kevoree.modeling.format.json.JsonModelLoader.loadObj(elem2, manager, universe, time, mappedKeys, rootElem);
      * } catch(e){ console.error(e); }
      * }
-     * if (rootElem[0] != null) { manager.setRoot(rootElem[0], (throwable : Error) => { if (callback != null) { callback(throwable); }}); } else { if (callback != null) { callback(null); } }
+     * if (callback != null) { callback(null); }
      * }
      */
     public static void load(KInternalDataManager manager, long universe, long time, String payload, final KCallback<Throwable> callback) {
@@ -102,19 +102,8 @@ public class JsonModelLoader {
                         e.printStackTrace();
                     }
                 }
-                if (rootElem[0] != null) {
-                    manager.setRoot(rootElem[0], new KCallback<Throwable>() {
-                        @Override
-                        public void on(Throwable throwable) {
-                            if (callback != null) {
-                                callback.on(throwable);
-                            }
-                        }
-                    });
-                } else {
-                    if (callback != null) {
-                        callback.on(null);
-                    }
+                if (callback != null) {
+                    callback.on(null);
                 }
             }
         }
@@ -130,59 +119,56 @@ public class JsonModelLoader {
         p_param.each(new KStringMapCallBack<Object>() {
             @Override
             public void on(String metaKey, Object payload_content) {
-                if (PrimitiveHelper.equals(metaKey, JsonFormat.KEY_ROOT)) {
-                    p_rootElem[0] = current;
-                } else {
-                    KMeta metaElement = metaClass.metaByName(metaKey);
-                    if (payload_content != null) {
-                        if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
-                            KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
-                            int metaAttId = metaAttribute.attributeTypeId();
-                            switch (metaAttId) {
-                                case KPrimitiveTypes.CONTINUOUS_ID:
-                                    String[] plainRawSet = (String[]) p_param.get(metaAttribute.metaName());
-                                    double[] convertedRaw = new double[plainRawSet.length];
-                                    for (int l = 0; l < plainRawSet.length; l++) {
-                                        try {
-                                            convertedRaw[l] = PrimitiveHelper.parseDouble(plainRawSet[l]);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
+                KMeta metaElement = metaClass.metaByName(metaKey);
+                if (payload_content != null) {
+                    if (metaElement != null && metaElement.metaType().equals(MetaType.ATTRIBUTE)) {
+                        KMetaAttribute metaAttribute = (KMetaAttribute) metaElement;
+                        int metaAttId = metaAttribute.attributeTypeId();
+                        switch (metaAttId) {
+                            case KPrimitiveTypes.CONTINUOUS_ID:
+                                String[] plainRawSet = (String[]) p_param.get(metaAttribute.metaName());
+                                double[] convertedRaw = new double[plainRawSet.length];
+                                for (int l = 0; l < plainRawSet.length; l++) {
+                                    try {
+                                        convertedRaw[l] = PrimitiveHelper.parseDouble(plainRawSet[l]);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
-                                    raw.setPrimitiveType(metaElement.index(), convertedRaw, current.metaClass());
-                                    break;
-                                default:
-                                    Object converted = null;
-                                    String rawPayload = p_param.get(metaElement.metaName()).toString();
-                                    switch (metaAttId) {
-                                        case KPrimitiveTypes.STRING_ID:
-                                            converted = JsonString.unescape(rawPayload);
-                                            break;
-                                        case KPrimitiveTypes.LONG_ID:
-                                            converted = PrimitiveHelper.parseLong(rawPayload);
-                                            break;
-                                        case KPrimitiveTypes.INT_ID:
-                                            converted = PrimitiveHelper.parseInt(rawPayload);
-                                            break;
-                                        case KPrimitiveTypes.BOOL_ID:
-                                            converted = PrimitiveHelper.parseBoolean(rawPayload);
-                                            break;
-                                        case KPrimitiveTypes.DOUBLE_ID:
-                                            converted = PrimitiveHelper.parseDouble(rawPayload);
-                                            break;
-                                    }
-                                    raw.setPrimitiveType(metaElement.index(), converted, current.metaClass());
-                                    break;
-                            }
-                        } else if (metaElement != null && metaElement.metaType() == MetaType.RELATION) {
-                            try {
-                                raw.setPrimitiveType(metaElement.index(), transposeArr((ArrayList<String>) payload_content, p_mappedKeys), current.metaClass());
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                                }
+                                raw.setPrimitiveType(metaElement.index(), convertedRaw, current.metaClass());
+                                break;
+                            default:
+                                Object converted = null;
+                                String rawPayload = p_param.get(metaElement.metaName()).toString();
+                                switch (metaAttId) {
+                                    case KPrimitiveTypes.STRING_ID:
+                                        converted = JsonString.unescape(rawPayload);
+                                        break;
+                                    case KPrimitiveTypes.LONG_ID:
+                                        converted = PrimitiveHelper.parseLong(rawPayload);
+                                        break;
+                                    case KPrimitiveTypes.INT_ID:
+                                        converted = PrimitiveHelper.parseInt(rawPayload);
+                                        break;
+                                    case KPrimitiveTypes.BOOL_ID:
+                                        converted = PrimitiveHelper.parseBoolean(rawPayload);
+                                        break;
+                                    case KPrimitiveTypes.DOUBLE_ID:
+                                        converted = PrimitiveHelper.parseDouble(rawPayload);
+                                        break;
+                                }
+                                raw.setPrimitiveType(metaElement.index(), converted, current.metaClass());
+                                break;
+                        }
+                    } else if (metaElement != null && metaElement.metaType() == MetaType.RELATION) {
+                        try {
+                            raw.setPrimitiveType(metaElement.index(), transposeArr((ArrayList<String>) payload_content, p_mappedKeys), current.metaClass());
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 }
+
             }
         });
     }
