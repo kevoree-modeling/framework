@@ -59,14 +59,14 @@ public class IndexTest {
                     node0.setName("node0");
                     node0.setName("node0");
 
-                    model.find(MetaNode.getInstance(), 0, 0, new Object[]{"node0"}, new KCallback<KObject>() {
+                    model.find(MetaNode.getInstance(), 0, 0, "name=node0", new KCallback<KObject>() {
                         @Override
                         public void on(KObject resolvedObject) {
                             Assert.assertEquals(resolvedObject.uuid(), node0.uuid());
                         }
                     });
 
-                    model.find(MetaNode.getInstance(), 0, 10, new Object[]{"node0"}, new KCallback<KObject>() {
+                    model.find(MetaNode.getInstance(), 0, 10, "name=node0", new KCallback<KObject>() {
                         @Override
                         public void on(KObject resolvedObject) {
                             Assert.assertEquals(resolvedObject.uuid(), node0.uuid());
@@ -77,34 +77,32 @@ public class IndexTest {
                         @Override
                         public void on(KObject t10elem) {
                             Node t10node0 = (Node) t10elem;
-                            Assert.assertEquals(t10node0.getName(),"node0");
+                            Assert.assertEquals(t10node0.getName(), "node0");
                             t10node0.setName("n0");
-                            Assert.assertEquals(t10node0.getName(),"n0");
+                            Assert.assertEquals(t10node0.getName(), "n0");
                             //the old name is not indexed anymore
-                            model.find(MetaNode.getInstance(), 0, 10, new Object[]{"node0"}, new KCallback<KObject>() {
+                            model.find(MetaNode.getInstance(), 0, 10, "name=node0", new KCallback<KObject>() {
                                 @Override
                                 public void on(KObject resolvedObject) {
-                                    Assert.assertEquals(resolvedObject,null);
+                                    Assert.assertEquals(resolvedObject, null);
                                 }
                             });
                             //the new name is now indexed
-                            model.find(MetaNode.getInstance(), 0, 10, new Object[]{"n0"}, new KCallback<KObject>() {
+                            model.find(MetaNode.getInstance(), 0, 10, "name=n0", new KCallback<KObject>() {
                                 @Override
                                 public void on(KObject resolvedObject) {
                                     Assert.assertEquals(resolvedObject.uuid(), node0.uuid());
                                 }
                             });
                             //the old name is still available in the past
-                            model.find(MetaNode.getInstance(), 0, 5, new Object[]{"node0"}, new KCallback<KObject>() {
+                            model.find(MetaNode.getInstance(), 0, 5, "name=node0", new KCallback<KObject>() {
                                 @Override
                                 public void on(KObject resolvedObject) {
                                     Assert.assertEquals(resolvedObject.uuid(), node0.uuid());
                                 }
                             });
 
-
-                            //TODO change this hash default strategy by somehting close the query engine!
-
+                            
                         }
                     });
 

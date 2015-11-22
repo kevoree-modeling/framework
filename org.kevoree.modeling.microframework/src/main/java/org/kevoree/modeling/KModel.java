@@ -75,10 +75,10 @@ public interface KModel<A extends KUniverse> {
      * Index management method
      */
 
-    void indexByName(long universe, long time,String indexName, KCallback<KObjectIndex> callback);
+    void indexByName(long universe, long time, String indexName, KCallback<KObjectIndex> callback);
 
-    void find(KMetaClass metaClass, long universe, long time, Object[] attributes, KCallback<KObject> callback);
+    void find(KMetaClass metaClass, long universe, long time, String attributes, KCallback<KObject> callback);
 
-    void findByName(String metaClassName, long universe, long time, Object[] attributes, KCallback<KObject> callback);
+    void findByName(String metaClassName, long universe, long time, String attributes, KCallback<KObject> callback);
 
 }

@@ -2,12 +2,13 @@ package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.defer.KDefer;
+import org.kevoree.modeling.memory.chunk.KStringMap;
+import org.kevoree.modeling.memory.chunk.KStringMapCallBack;
+import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.KOperation;
 import org.kevoree.modeling.memory.manager.KDataManager;
-import org.kevoree.modeling.meta.KMetaClass;
-import org.kevoree.modeling.meta.KMetaModel;
-import org.kevoree.modeling.meta.KMetaOperation;
+import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.defer.impl.Defer;
 import org.kevoree.modeling.meta.impl.MetaClassIndex;
 import org.kevoree.modeling.traversal.KTraversal;
@@ -166,20 +167,33 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     }
 
     @Override
-    public void find(KMetaClass metaClass, long universe, long time, Object[] attributes, KCallback<KObject> callback) {
+    public void find(KMetaClass metaClass, long universe, long time, String attributes, KCallback<KObject> callback) {
         findByName(metaClass.metaName(), universe, time, attributes, callback);
     }
 
     @Override
-    public void findByName(String indexName, long universe, long time, Object[] attributes, KCallback<KObject> callback) {
+    public void findByName(String indexName, long universe, long time, String attributes, KCallback<KObject> callback) {
         _manager.index(universe, time, indexName, new KCallback<KObjectIndex>() {
             @Override
             public void on(KObjectIndex kObjectIndex) {
-                //TODO more flexible strategy
                 String concat = "";
-                for (int i = 0; i < attributes.length; i++) {
-                    if (attributes[i] != null) {
-                        concat += attributes[i].toString();
+                KStringMap<String> params = buildParams(attributes);
+                if (params.size() == 0) {
+                    concat = attributes;
+                } else {
+                    KMetaClass currentClass = metaModel().metaClassByName(indexName);
+                    if (currentClass == null) {
+                        concat = attributes;
+                    } else {
+                        KMeta[] elems = currentClass.metaElements();
+                        for (int i = 0; i < elems.length; i++) {
+                            if (elems[i] != null && elems[i].metaType().equals(MetaType.ATTRIBUTE) && ((KMetaAttribute) elems[i]).key()) {
+                                String lvalue = params.get(elems[i].metaName());
+                                if (lvalue != null) {
+                                    concat += lvalue;
+                                }
+                            }
+                        }
                     }
                 }
                 long objectUUID = kObjectIndex.get(concat);
@@ -193,6 +207,34 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
             }
         });
     }
+
+    private KStringMap<String> buildParams(String p_paramString) {
+        KStringMap<String> params = new ArrayStringMap<String>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+        int iParam = 0;
+        int lastStart = iParam;
+        while (iParam < p_paramString.length()) {
+            if (p_paramString.charAt(iParam) == ',') {
+                String p = p_paramString.substring(lastStart, iParam).trim();
+                if (!PrimitiveHelper.equals(p, "")) {
+                    String[] pArray = p.split("=");
+                    if (pArray.length > 1) {
+                        params.put(pArray[0].trim(), pArray[1].trim());
+                    }
+                }
+                lastStart = iParam + 1;
+            }
+            iParam = iParam + 1;
+        }
+        String lastParam = p_paramString.substring(lastStart, iParam).trim();
+        if (!PrimitiveHelper.equals(lastParam, "")) {
+            String[] pArray = lastParam.split("=");
+            if (pArray.length > 1) {
+                params.put(pArray[0].trim(), pArray[1].trim());
+            }
+        }
+        return params;
+    }
+
 
     @Override
     public void indexByName(long universe, long time, String indexName, KCallback<KObjectIndex> callback) {
