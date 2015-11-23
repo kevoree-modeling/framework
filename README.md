@@ -96,7 +96,7 @@ In the following we will describe the meta model language step by step.
 
 Reserved keywords of the language are: *class, att, rel, extends, with, func, dependency, input, output*.    
 
-**class**: Classes are the main structural concept of meta models. 
+**Classes**: are the main structural concept of meta models. 
 Following the object-oriented programming paradigm a class contains attributes and functions and represents a domain concept. 
 The example below shows a simple class declaration of a class *smartgrid.SmartMeter*: 
 
@@ -109,7 +109,7 @@ class smartgrid.SmartMeter {
 
 In order to avoid naming conflicts, class names should be fully qualified.  
 
-**enum**: Enumeration values are like classes first level concepts. 
+**Enumeration values**: are like classes first level concepts. 
 They are specified in a similar way than classes. 
 An example for a typical enum type are the days of a week:
 
@@ -119,8 +119,8 @@ enum smartgrid.WeekDay {
 }    
 ```	    
 
-**att**: Attributes are specified using the *att* keyword followed by a unique (within the scope of the class) *name* and a *type*. 
-Valid types for attributes are the primitive types *String, Long, Bool, Int, Double*, *enum* values, and *continuous* types.
+**attributes**: are specified using the *att* keyword followed by a unique (within the scope of the class) *name* and a *type*. 
+Valid types for attributes are the primitive types *String, Long, Bool, Int, Double*, *enum* values, *continuous* types, and arrays of all of these types.
 Attributes must be always defined within the scope of a *class*.
 Following example defines an attributes with name *serialNumber* of type *String* and another attribute with name *modelType* of type *SmartMeterModel*.
 
@@ -132,7 +132,7 @@ Following example defines an attributes with name *serialNumber* of type *String
 
 ```	   
 
-**rel**: Relations can be specified between classes.
+**Relationships**: can be specified between classes.
 A relation is defined by its name (must be unique within the scope of a class) and a type (the class to which the relation points to).
 By default, every specified relation is an unbounded to-many relation.
 Relationships can be refined by defining a maximum bound by adding a *with maxBound* to the relation specification.
@@ -157,7 +157,29 @@ In this example, the *smartgrid.Meter* class defines a (bidirectional) relations
 The relationship is refined as a to-one relation using the *with maxBound 1* restriction.
 To make the relationship bidirectional (navigable from both sides) we declare a relationship *meter* from *smartgrid.Customer* to *smartgrid.Meter* and define it as the opposite of the relation *customer* from *smartgrid.Meter* to **smartgrid.Customer*.   
 
+**extends**: Like in many object-oriented programming languages, classes in KMF meta models can *extend* (inheritance) other classes. 
+In this case, the child class inherits all attributes, relationships, and functions from the parent class:
+ 
+```java
+    class smartgrid.Meter extends smartgrid.Entity {
+    }
+```
+	 
+In this example the class *smartgrid.Meter* inherits all attributes, relationships, and functions of *smartgrid.Entity*. 	  
 
+**Functions**: define, like in object-oriented programming, the possible behaviour of classes. 
+Functions are defined using the keyword *func* followed by a *name*, a list of *parameters*, and *return type*. 
+Parameters and return types can be primitive types (*String, Long, Bool, Int, Double*), *enumeration values*, *classes*, as well as arrays of all of these types.
+The following example shows a class *smartgrid.SmartMeter* with three functions. 
+The first one, *register* takes no parameters and doesn't return anything.
+
+
+```java
+    class smartgrid.SmartMeter extends smartgrid.Entity, smartgrid.Meter {
+        func register
+        func searchConcentrator : smartgrid.Concentrator
+    }
+``` 
 
 Annotations
 ==============
