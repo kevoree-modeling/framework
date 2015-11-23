@@ -1,5 +1,7 @@
 package org.kevoree.modeling.drivers.websocket;
 
+import io.undertow.connector.ByteBufferPool;
+import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.core.AbstractReceiveListener;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.WebSocketChannel;
@@ -196,7 +198,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
     }
 
     class UndertowWSClient {
-        private ByteBufferSlicePool _buffer;
+        private ByteBufferPool _buffer;
         private XnioWorker _worker;
         private WebSocketChannel _webSocketChannel = null;
         private String _url;
@@ -214,7 +216,7 @@ public class WebSocketPeer extends AbstractReceiveListener implements KContentDe
                         .set(Options.TCP_NODELAY, true)
                         .set(Options.CORK, true)
                         .getMap());
-                _buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
+                _buffer = new DefaultByteBufferPool(true, 1024 * 1024);
             } catch (IOException e) {
                 e.printStackTrace();
             }
