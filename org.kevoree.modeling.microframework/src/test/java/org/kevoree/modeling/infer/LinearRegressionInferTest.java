@@ -38,10 +38,10 @@ public class LinearRegressionInferTest {
         regressionProfile.addDependency("House", metaClassHouse.index());
 
 
-        regressionProfile.addInput("length", "@House | =length");
-        regressionProfile.addInput("width", "@House | =width");
-        regressionProfile.addInput("height", "@House | =height");
-        regressionProfile.addInput("numOfRooms", "@House | =numOfRooms");
+        regressionProfile.addInput("House", "=length");
+        regressionProfile.addInput("House", "=width");
+        regressionProfile.addInput("House", "=height");
+        regressionProfile.addInput("House", "=numOfRooms");
 
         regressionProfile.addOutput("price", KPrimitiveTypes.DOUBLE);
 

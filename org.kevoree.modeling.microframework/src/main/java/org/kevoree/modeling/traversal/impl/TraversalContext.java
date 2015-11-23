@@ -2,18 +2,18 @@ package org.kevoree.modeling.traversal.impl;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.KView;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
-import org.kevoree.modeling.traversal.KTraversalIndexResolver;
 
 public class TraversalContext implements KTraversalActionContext {
 
     private KObject[] _inputs;
-    private KTraversalIndexResolver _resolver;
+    private KView _view;
     private KCallback<Object[]> _finalCallback;
 
-    public TraversalContext(KObject[] _inputs, KTraversalIndexResolver _resolver, KCallback<Object[]> p_finalCallback) {
-        this._inputs = _inputs;
-        this._resolver = _resolver;
+    public TraversalContext(KObject[] p_inputs, KView p_view, KCallback<Object[]> p_finalCallback) {
+        this._inputs = p_inputs;
+        this._view = p_view;
         this._finalCallback = p_finalCallback;
     }
 
@@ -28,8 +28,8 @@ public class TraversalContext implements KTraversalActionContext {
     }
 
     @Override
-    public KTraversalIndexResolver indexResolver() {
-        return this._resolver;
+    public KView baseView() {
+        return this._view;
     }
 
     @Override

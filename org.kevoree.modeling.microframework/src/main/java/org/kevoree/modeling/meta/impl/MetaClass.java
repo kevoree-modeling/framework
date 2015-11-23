@@ -196,7 +196,7 @@ public class MetaClass implements KMetaClass {
     @Override
     public KMetaInferInput addInput(String p_name, String p_extractor) {
         KMetaInferInput newInput = new MetaInferInput(p_name, _meta.length, p_extractor);
-        internal_add_meta(newInput);
+        internal_add_meta_noindex(newInput);
         return newInput;
     }
 
@@ -291,6 +291,19 @@ public class MetaClass implements KMetaClass {
         incArray[_meta.length] = p_new_meta;
         _meta = incArray;
         _indexes.put(p_new_meta.metaName(), p_new_meta.index());
+    }
+
+    /**
+     * @native ts
+     * this.clearCached();
+     * this._meta[p_new_meta.index()] = p_new_meta;
+     */
+    private void internal_add_meta_noindex(KMeta p_new_meta) {
+        clearCached();
+        KMeta[] incArray = new KMeta[_meta.length + 1];
+        System.arraycopy(_meta, 0, incArray, 0, _meta.length);
+        incArray[_meta.length] = p_new_meta;
+        _meta = incArray;
     }
 
     @Override

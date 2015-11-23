@@ -3,11 +3,12 @@ package org.kevoree.modeling.abs;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KObjectInfer;
+import org.kevoree.modeling.KView;
 import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaLiteral;
-import org.kevoree.modeling.traversal.KTraversalIndexResolver;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
@@ -15,21 +16,6 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
 
     public AbstractKObjectInfer(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long currentUniverse, long currentTime) {
         super(p_universe, p_time, p_uuid, p_metaClass, p_manager, currentUniverse, currentTime);
-    }
-
-    private KTraversalIndexResolver dependenciesResolver(KObject[] dependencies) {
-        return new KTraversalIndexResolver() {
-            @Override
-            public KObject[] resolve(String indexName) {
-                KMetaDependency dependency = _metaClass.dependencies().dependencyByName(indexName);
-                if (dependency != null) {
-                    KObject[] single = new KObject[1];
-                    single[0] = dependencies[dependency.index()];
-                    return single;
-                }
-                return null;
-            }
-        };
     }
 
     @Override
@@ -53,14 +39,25 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             throw new RuntimeException("Dependencies are mandatory for KObjectInfer");
         }
         final KObjectInfer selfObject = this;
+        final KView selfView = selfObject.manager().model().universe(_universe).time(_time);
         KDefer waiter = this.manager().model().defer();
         for (int i = 0; i < p_dependencies.length; i++) {
             if (p_dependencies[i].length != _metaClass.dependencies().allDependencies().length) {
                 throw new RuntimeException("Bad number of arguments for allDependencies");
             }
-            KTraversalIndexResolver resolver = dependenciesResolver(p_dependencies[i]);
+            KObject[] loopDependencies = p_dependencies[i];
             for (int j = 0; j < _metaClass.inputs().length; j++) {
-                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.waitResult());
+                KMetaInferInput loopInput = _metaClass.inputs()[j];
+                if (PrimitiveHelper.equals(loopInput.metaName(), "this") || PrimitiveHelper.equals(loopInput.metaName(), "self")) {
+                    loopInput.extractor().exec(new KObject[]{selfObject}, selfView, waiter.waitResult());
+                } else {
+                    KMetaDependency dependency = _metaClass.dependencies().dependencyByName(loopInput.metaName());
+                    if (dependency != null) {
+                        loopInput.extractor().exec(new KObject[]{loopDependencies[dependency.index()]}, selfView, waiter.waitResult());
+                    } else {
+                        throw new RuntimeException("Bad API definition, " + loopInput.metaName() + " isn't defined as a dependency");
+                    }
+                }
             }
         }
         waiter.then(new KCallback<Object[]>() {
@@ -121,14 +118,25 @@ public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfe
             throw new RuntimeException("Bad number of arguments for allDependencies");
         }
         final KObjectInfer selfObject = this;
+        final KView selfView = selfObject.manager().model().universe(_universe).time(_time);
         KDefer waiter = this.manager().model().defer();
         for (int i = 0; i < p_dependencies.length; i++) {
             if (p_dependencies[i].length != _metaClass.dependencies().allDependencies().length) {
                 throw new RuntimeException("Bad number of arguments for allDependencies");
             }
-            KTraversalIndexResolver resolver = dependenciesResolver(p_dependencies[i]);
+            KObject[] loopDependencies = p_dependencies[i];
             for (int j = 0; j < _metaClass.inputs().length; j++) {
-                _metaClass.inputs()[j].extractor().exec(null, resolver, waiter.waitResult());
+                KMetaInferInput loopInput = _metaClass.inputs()[j];
+                if (PrimitiveHelper.equals(loopInput.metaName(), "this") || PrimitiveHelper.equals(loopInput.metaName(), "self")) {
+                    loopInput.extractor().exec(new KObject[]{selfObject}, selfView, waiter.waitResult());
+                } else {
+                    KMetaDependency dependency = _metaClass.dependencies().dependencyByName(loopInput.metaName());
+                    if (dependency != null) {
+                        loopInput.extractor().exec(new KObject[]{loopDependencies[dependency.index()]}, selfView, waiter.waitResult());
+                    } else {
+                        throw new RuntimeException("Bad API definition, " + loopInput.metaName() + " isn't defined as a dependency");
+                    }
+                }
             }
         }
         waiter.then(new KCallback<Object[]>() {

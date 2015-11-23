@@ -2,9 +2,9 @@ package org.kevoree.modeling.traversal.impl;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KView;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaRelation;
-import org.kevoree.modeling.traversal.KTraversalIndexResolver;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalFilter;
@@ -77,8 +77,8 @@ public class Traversal implements KTraversal {
     }
 
     @Override
-    public KTraversal traverseIndex(String p_indexName) {
-        return internal_chain_action(new TraverseIndexAction(p_indexName));
+    public KTraversal traverseIndex(String p_indexName, String p_attributes) {
+        return internal_chain_action(new TraverseIndexAction(p_indexName, p_attributes));
     }
 
     @Override
@@ -129,9 +129,9 @@ public class Traversal implements KTraversal {
     }
 
     @Override
-    public void exec(KObject[] origins, KTraversalIndexResolver resolver, KCallback<Object[]> callback) {
+    public void exec(KObject[] origins, KView review, KCallback<Object[]> callback) {
         if (this._initObjs == null) {
-            _initAction.execute(new TraversalContext(origins, resolver, callback));
+            _initAction.execute(new TraversalContext(origins, review, callback));
         }
     }
 

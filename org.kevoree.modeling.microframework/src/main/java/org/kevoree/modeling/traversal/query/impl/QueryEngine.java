@@ -2,6 +2,7 @@ package org.kevoree.modeling.traversal.query.impl;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.KView;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.traversal.query.KQueryEngine;
@@ -22,11 +23,13 @@ public class QueryEngine implements KQueryEngine {
     public static final char CLOSE_BRACKET = ']';
     public static final char PIPE_SEP = '|';
 
+    public static final String VAL_SEP = "=";
+    public static final char VALS_SEP = ',';
 
     @Override
-    public void eval(String query, KObject[] origins, KCallback<Object[]> callback) {
+    public void eval(String query, KObject[] origins, KView p_view, KCallback<Object[]> callback) {
         if (callback != null) {
-            buildTraversal(query).exec(origins, null,callback);
+            buildTraversal(query).exec(origins, p_view, callback);
         }
     }
 
@@ -81,17 +84,17 @@ public class QueryEngine implements KQueryEngine {
                             }
                         }
                         relationName = query.substring(previousKQueryStart, previousKQueryNameEnd).trim();
-                        if (PrimitiveHelper.startsWith(relationName,"@")) {
-                            traversal = traversal.traverseIndex(relationName.substring(1));
-                        } else if (PrimitiveHelper.startsWith(relationName,"=")) {
+                        if (PrimitiveHelper.startsWith(relationName, "@")) {
+                            traversal = traversal.traverseIndex(relationName.substring(1), atts);
+                        } else if (PrimitiveHelper.startsWith(relationName, "=")) {
                             traversal.eval(relationName.substring(1), null);
                             endEval = true;
-                        } else if (PrimitiveHelper.startsWith(relationName,">>")) {
+                        } else if (PrimitiveHelper.startsWith(relationName, ">>")) {
                             traversal = traversal.traverseQuery(relationName.substring(2));
                             if (atts != null) {
                                 traversal = traversal.attributeQuery(atts);
                             }
-                        } else if (PrimitiveHelper.startsWith(relationName,"<<")) {
+                        } else if (PrimitiveHelper.startsWith(relationName, "<<")) {
                             traversal = traversal.traverseQuery(relationName);
                             if (atts != null) {
                                 traversal = traversal.attributeQuery(atts);

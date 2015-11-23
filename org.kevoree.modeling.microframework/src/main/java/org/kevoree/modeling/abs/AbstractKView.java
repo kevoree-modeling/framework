@@ -1,6 +1,7 @@
 package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.format.KModelFormat;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KView;
@@ -35,26 +36,17 @@ public abstract class AbstractKView implements KView {
     }
 
     @Override
+    public KModel model() {
+        return _manager.model();
+    }
+
+    @Override
     public void select(final String query, KCallback<Object[]> cb) {
         if (Checker.isDefined(cb)) {
             if (query == null || query.length() == 0) {
                 cb.on(new KObject[0]);
             } else {
-                throw new RuntimeException("Not implemented yet !");
-                /*
-                _manager.getRoot(_universe, _time, new KCallback<KObject>() {
-                    @Override
-                    public void on(KObject rootObj) {
-                        if (rootObj == null) {
-                            cb.on(new KObject[0]);
-                        } else {
-                            KObject[] singleRoot = new KObject[1];
-                            singleRoot[0] = rootObj;
-                            QueryEngine.getINSTANCE().eval(query, singleRoot, cb);
-                        }
-                    }
-                });
-                */
+                QueryEngine.getINSTANCE().eval(query, new KObject[0], this, cb);
             }
         }
     }

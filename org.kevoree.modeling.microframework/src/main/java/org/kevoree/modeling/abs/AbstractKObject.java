@@ -131,7 +131,7 @@ public abstract class AbstractKObject implements KObject {
         } else {
             KObject[] singleRoot = new KObject[1];
             singleRoot[0] = this;
-            QueryEngine.getINSTANCE().eval(query, singleRoot, cb);
+            QueryEngine.getINSTANCE().eval(query, singleRoot, _manager.model().universe(_universe).time(_time), cb);
         }
     }
 

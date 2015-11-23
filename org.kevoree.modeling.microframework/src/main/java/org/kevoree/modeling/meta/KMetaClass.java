@@ -25,7 +25,7 @@ public interface KMetaClass extends KMeta {
 
     KMetaDependency addDependency(String dependencyName, int referredMetaClassIndex);
 
-    KMetaInferInput addInput(String name, String extractor);
+    KMetaInferInput addInput(String dependencyName, String extractor);
 
     KMetaInferOutput addOutput(String name, KType metaClass);
 

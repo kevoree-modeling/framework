@@ -1,11 +1,7 @@
 package org.kevoree.modeling.traversal.impl.actions;
 
-import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
-import org.kevoree.modeling.traversal.KTraversalIndexResolver;
-import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class TraverseIndexAction implements KTraversalAction {
 
@@ -13,9 +9,11 @@ public class TraverseIndexAction implements KTraversalAction {
 
     private String _indexName;
 
+    private String _attributes;
 
-    public TraverseIndexAction(String p_indexName) {
+    public TraverseIndexAction(String p_indexName, String p_attributes) {
         this._indexName = p_indexName;
+        this._attributes = p_attributes;
     }
 
     @Override
@@ -25,6 +23,10 @@ public class TraverseIndexAction implements KTraversalAction {
 
     @Override
     public void execute(KTraversalActionContext context) {
+
+
+
+
         //TODO enhance this to general index usages
 
 

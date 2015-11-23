@@ -2,6 +2,7 @@ package org.kevoree.modeling.traversal;
 
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KView;
 import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaRelation;
 
@@ -31,9 +32,9 @@ public interface KTraversal {
 
     KTraversal traverseUniverse(long universeOffset, KTraversalFilter continueCondition);
 
-    KTraversal traverseIndex(String indexName);
+    KTraversal traverseIndex(String indexName, String attributes);
 
-    void exec(KObject[] origins, KTraversalIndexResolver resolver, KCallback<Object[]> callback);
+    void exec(KObject[] origins, KView view, KCallback<Object[]> callback);
 
 }
 

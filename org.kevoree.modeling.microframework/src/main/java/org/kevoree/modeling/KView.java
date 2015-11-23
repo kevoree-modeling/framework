@@ -19,6 +19,8 @@ public interface KView {
 
     long now();
 
+    KModel model();
+
     KModelFormat json();
 
     boolean equals(Object other);

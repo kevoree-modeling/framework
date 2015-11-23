@@ -102,7 +102,14 @@ public class IndexTest {
                                 }
                             });
 
-                            
+                            model.universe(0).time(10).select("@org.kevoree.modeling.microframework.test.cloud.Node[name=n0]", new KCallback<Object[]>() {
+                                @Override
+                                public void on(Object[] resolvedObject) {
+                                    Assert.assertEquals(resolvedObject.length, 1);
+                                    Assert.assertEquals(((KObject) resolvedObject[0]).uuid(), node0.uuid());
+                                }
+                            });
+
                         }
                     });
 

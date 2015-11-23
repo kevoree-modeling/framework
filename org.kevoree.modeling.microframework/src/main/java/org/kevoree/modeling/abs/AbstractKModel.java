@@ -13,6 +13,7 @@ import org.kevoree.modeling.defer.impl.Defer;
 import org.kevoree.modeling.meta.impl.MetaClassIndex;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.impl.Traversal;
+import org.kevoree.modeling.traversal.query.impl.QueryEngine;
 import org.kevoree.modeling.util.Checker;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
@@ -213,10 +214,10 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         int iParam = 0;
         int lastStart = iParam;
         while (iParam < p_paramString.length()) {
-            if (p_paramString.charAt(iParam) == ',') {
+            if (p_paramString.charAt(iParam) == QueryEngine.VALS_SEP) {
                 String p = p_paramString.substring(lastStart, iParam).trim();
                 if (!PrimitiveHelper.equals(p, "")) {
-                    String[] pArray = p.split("=");
+                    String[] pArray = p.split(QueryEngine.VAL_SEP);
                     if (pArray.length > 1) {
                         params.put(pArray[0].trim(), pArray[1].trim());
                     }
@@ -227,7 +228,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         }
         String lastParam = p_paramString.substring(lastStart, iParam).trim();
         if (!PrimitiveHelper.equals(lastParam, "")) {
-            String[] pArray = lastParam.split("=");
+            String[] pArray = lastParam.split(QueryEngine.VAL_SEP);
             if (pArray.length > 1) {
                 params.put(pArray[0].trim(), pArray[1].trim());
             }

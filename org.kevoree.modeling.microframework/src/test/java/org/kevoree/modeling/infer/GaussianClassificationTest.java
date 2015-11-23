@@ -40,10 +40,10 @@ public class GaussianClassificationTest {
         KMetaClass inferGaussian = metaModel.addInferMetaClass("GaussianProfile", new GaussianClassifierAlg());
         inferGaussian.addDependency("Iris", metaClassIris.index());
 
-        inferGaussian.addInput("sepalLength", "@Iris | =sepalLength");
-        inferGaussian.addInput("sepalWidth", "@Iris | =sepalWidth");
-        inferGaussian.addInput("petalLength", "@Iris | =petalLength");
-        inferGaussian.addInput("petalWidth", "@Iris | =petalWidth");
+        inferGaussian.addInput("Iris", "=sepalLength");
+        inferGaussian.addInput("Iris", "=sepalWidth");
+        inferGaussian.addInput("Iris", "=petalLength");
+        inferGaussian.addInput("Iris", "=petalWidth");
 
         inferGaussian.addOutput("type", metaEnumIrisType);
 
