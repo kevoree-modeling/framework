@@ -43,9 +43,8 @@ public class RestGateway implements HttpHandler {
                 public void on(Object[] objects) {
 
 
-
                     System.err.println(objects.length);
-                    for(int i=0;i<objects.length;i++){
+                    for (int i = 0; i < objects.length; i++) {
                         System.err.println(objects[i]);
                     }
 

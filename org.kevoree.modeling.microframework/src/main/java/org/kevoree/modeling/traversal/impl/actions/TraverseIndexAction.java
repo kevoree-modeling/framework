@@ -2,6 +2,7 @@ package org.kevoree.modeling.traversal.impl.actions;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.KObjectIndex;
 import org.kevoree.modeling.KView;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
@@ -27,24 +28,56 @@ public class TraverseIndexAction implements KTraversalAction {
     @Override
     public void execute(KTraversalActionContext context) {
         KView originView = context.baseView();
-        if(originView != null){
-            originView.model().findByName(this._indexName, originView.universe(), originView.now(), this._attributes, new KCallback<KObject>() {
-                @Override
-                public void on(KObject indexedObject) {
-                    KObject[] selectedElems = new KObject[1];
-                    selectedElems[0] = indexedObject;
-                    if (_next == null) {
-                        context.finalCallback().on(selectedElems);
-                    } else {
-                        context.setInputObjects(selectedElems);
-                        _next.execute(context);
+        if (originView != null) {
+            if(this._attributes == null && this._indexName != null){
+                originView.model().indexByName(originView.universe(), originView.now(), this._indexName, new KCallback<KObjectIndex>() {
+                    @Override
+                    public void on(KObjectIndex index) {
+                        if(index == null){
+                            if (_next == null) {
+                                context.finalCallback().on(new KObject[0]);
+                            } else {
+                                context.setInputObjects(new KObject[0]);
+                                _next.execute(context);
+                            }
+                        } else {
+                            originView.model().lookupAllObjects(originView.universe(), originView.now(), index.values(), new KCallback<KObject[]>() {
+                                @Override
+                                public void on(KObject[] selectedElems) {
+                                    if (_next == null) {
+                                        context.finalCallback().on(selectedElems);
+                                    } else {
+                                        context.setInputObjects(selectedElems);
+                                        _next.execute(context);
+                                    }
+                                }
+                            });
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                originView.model().findByName(this._indexName, originView.universe(), originView.now(), this._attributes, new KCallback<KObject>() {
+                    @Override
+                    public void on(KObject indexedObject) {
+                        KObject[] selectedElems;
+                        if (indexedObject == null) {
+                            selectedElems = new KObject[0];
+                        } else {
+                            selectedElems = new KObject[1];
+                            selectedElems[0] = indexedObject;
+                        }
+                        if (_next == null) {
+                            context.finalCallback().on(selectedElems);
+                        } else {
+                            context.setInputObjects(selectedElems);
+                            _next.execute(context);
+                        }
+                    }
+                });
+            }
         } else {
             throw new RuntimeException("Not implemented yet!");
         }
-
 
 
         //TODO enhance this to general index usages
