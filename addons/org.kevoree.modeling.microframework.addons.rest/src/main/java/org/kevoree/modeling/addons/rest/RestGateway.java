@@ -1,11 +1,13 @@
 package org.kevoree.modeling.addons.rest;
 
 import io.undertow.Undertow;
+import io.undertow.io.Sender;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
+import org.kevoree.modeling.KObject;
 
 public class RestGateway implements HttpHandler {
 
@@ -41,13 +43,18 @@ public class RestGateway implements HttpHandler {
             _model.universe(universe).time(time).select(concatQuery.toString(), new KCallback<Object[]>() {
                 @Override
                 public void on(Object[] objects) {
-
-
-                    System.err.println(objects.length);
+                    httpServerExchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
+                    Sender sender = httpServerExchange.getResponseSender();
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("[\n");
                     for (int i = 0; i < objects.length; i++) {
-                        System.err.println(objects[i]);
+                        if (i != 0) {
+                            builder.append(",\n");
+                        }
+                        builder.append(((KObject) objects[i]).toJSON());
                     }
-
+                    builder.append("\n]\n");
+                    sender.send(builder.toString());
                     httpServerExchange.endExchange();
                 }
             });

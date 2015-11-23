@@ -1,7 +1,9 @@
 package org.kevoree.modeling.addons.rest;
 
 import org.junit.Test;
+import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KModel;
+import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
@@ -12,9 +14,21 @@ public class DemoTest {
     //@Test
     public void test() {
         KModel cloudModel = buildMiniModel();
-        RestGateway gateway = RestGateway.expose(cloudModel, 8050);
-        gateway.start();
+        cloudModel.connect(new KCallback() {
+            @Override
+            public void on(Object o) {
 
+                for (int i = 0; i < 5000; i++) {
+                    KObject nodeLoop = cloudModel.createByName("Node", 0, i);
+                    nodeLoop.setByName("name", "node" + i);
+                }
+
+                System.err.println("Finished");
+
+                RestGateway gateway = RestGateway.expose(cloudModel, 8050);
+                gateway.start();
+            }
+        });
     }
 
     private KModel buildMiniModel() {
@@ -28,6 +42,7 @@ public class DemoTest {
         node_class.addAttribute("load", KPrimitiveTypes.CONTINUOUS);
 
         return mm.createModel(DataManagerBuilder.buildDefault());
+
     }
 
     public static void main(String[] args) {

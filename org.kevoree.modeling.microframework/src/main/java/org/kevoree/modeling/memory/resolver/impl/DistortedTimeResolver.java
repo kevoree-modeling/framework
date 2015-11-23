@@ -95,6 +95,8 @@ public class DistortedTimeResolver implements KResolver {
                                         }
                                     }
                                 });
+                            } else {
+                                callback.on(null);
                             }
                         }
                     });

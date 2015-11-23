@@ -29,11 +29,11 @@ public class TraverseIndexAction implements KTraversalAction {
     public void execute(KTraversalActionContext context) {
         KView originView = context.baseView();
         if (originView != null) {
-            if(this._attributes == null && this._indexName != null){
+            if (this._attributes == null && this._indexName != null) {
                 originView.model().indexByName(originView.universe(), originView.now(), this._indexName, new KCallback<KObjectIndex>() {
                     @Override
                     public void on(KObjectIndex index) {
-                        if(index == null){
+                        if (index == null) {
                             if (_next == null) {
                                 context.finalCallback().on(new KObject[0]);
                             } else {
