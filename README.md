@@ -88,13 +88,79 @@ TODO
 
 
 
-MetaModel DSL
+Meta Model DSL
 ==============
+KMF comes with a simple, yet powerful textual domain-specific language for defining meta models.
+The language allows to define concepts like classes, enums, attributes, relationships between classes, functions, and machine learning strategies.
+In the following we will describe the meta model language step by step.      
 
-TODO
+Reserved keywords of the language are: *class, att, rel, extends, with, func, dependency, input, output*.    
+
+**class**: Classes are the main structural concept of meta models. 
+Following the object-oriented programming paradigm a class contains attributes and functions and represents a domain concept. 
+The example below shows a simple class declaration of a class *smartgrid.SmartMeter*: 
+
+```java
+class smartgrid.SmartMeter {
+    // attributes 
+    // functions
+}    
+```	
+
+In order to avoid naming conflicts, class names should be fully qualified.  
+
+**enum**: Enumeration values are like classes first level concepts. 
+They are specified in a similar way than classes. 
+An example for a typical enum type are the days of a week:
+
+```java
+enum smartgrid.WeekDay {
+    monday, tuesday, wednesday, thursday, friday    
+}    
+```	    
+
+**att**: Attributes are specified using the *att* keyword followed by a unique (within the scope of the class) *name* and a *type*. 
+Valid types for attributes are the primitive types *String, Long, Bool, Int, Double*, *enum* values, and *continuous* types.
+Attributes must be always defined within the scope of a *class*.
+Following example defines an attributes with name *serialNumber* of type *String* and another attribute with name *modelType* of type *SmartMeterModel*.
+
+```java
+     class smartgrid.Meter extends smartgrid.Entity {
+         att serialNumber: String
+         att modelType: smartmeter.SmartMeterModel 
+     }    
+
+```	   
+
+**rel**: Relations can be specified between classes.
+A relation is defined by its name (must be unique within the scope of a class) and a type (the class to which the relation points to).
+By default, every specified relation is an unbounded to-many relation.
+Relationships can be refined by defining a maximum bound by adding a *with maxBound* to the relation specification.
+In case a relationship should be navigable in both directions (source and target class), a relation must be specified in both classes where one side needs to defined as the *opposite* of the relation.  
+This is shown in the next example:
+
+```java
+     class smartgrid.Meter extends smartgrid.Entity {
+         att serialNumber: String
+         att modelType: smartmeter.SmartMeterModel
+          
+         rel customer: smartgrid.Customer with maxBound 1 with opposite "meter"
+     }    
+
+    class smartgrid.Customer {
+        rel meter: smartgrid.Meter with opposite "customer"
+    }
+
+```	   
+
+In this example, the *smartgrid.Meter* class defines a (bidirectional) relationship to the class *smartgrid.Customer*. 
+The relationship is refined as a to-one relation using the *with maxBound 1* restriction.
+To make the relationship bidirectional (navigable from both sides) we declare a relationship *meter* from *smartgrid.Customer* to *smartgrid.Meter* and define it as the opposite of the relation *customer* from *smartgrid.Meter* to **smartgrid.Customer*.   
+
+
 
 Annotations
------
+==============
 
 TODO
 
