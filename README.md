@@ -119,7 +119,7 @@ enum smartgrid.WeekDay {
 }    
 ```	    
 
-**attributes**: are specified using the *att* keyword followed by a unique (within the scope of the class) *name* and a *type*. 
+**Attributes**: are specified using the *att* keyword followed by a unique (within the scope of the class) *name* and a *type*. 
 Valid types for attributes are the primitive types *String, Long, Bool, Int, Double*, *enum* values, *continuous* types, and arrays of all of these types.
 Attributes must be always defined within the scope of a *class*.
 Following example defines an attributes with name *serialNumber* of type *String* and another attribute with name *modelType* of type *SmartMeterModel*.
@@ -171,15 +171,35 @@ In this example the class *smartgrid.Meter* inherits all attributes, relationshi
 Functions are defined using the keyword *func* followed by a *name*, a list of *parameters*, and *return type*. 
 Parameters and return types can be primitive types (*String, Long, Bool, Int, Double*), *enumeration values*, *classes*, as well as arrays of all of these types.
 The following example shows a class *smartgrid.SmartMeter* with three functions. 
-The first one, *register* takes no parameters and doesn't return anything.
-
+The first one, *register*, takes no parameters and doesn't return anything.
+The second function, *searchConcentrator*, takes no parameter but returns a *smartgrid.Concentrator*. 
+Finally, the third function, *myFunc*, takes two parameters, an array of *Strings* and a *smartgrid.Concentrator* object. 
+The function returns a *smartgrid.SmartMeter* object. 
 
 ```java
     class smartgrid.SmartMeter extends smartgrid.Entity, smartgrid.Meter {
         func register
         func searchConcentrator : smartgrid.Concentrator
+        func myFunc(s: String[], c: smartgrid.Concentrator) : smartgrid.SmartMeter 
     }
 ``` 
+
+**Continuous attributes**: by nature, some values like temperature or time are not discrete but continuous.
+Usually, these values are artificially 'discretized', e.g., by taking regular samples and store them together with a timestamp. 
+This, however, means that there will be a gap between two samples. 
+Moreover, when sampling at a very high rate this requires lots of storage capacity. 
+Therefore, attributes in KMF can be declared as *continuous*. 
+Continuous attributes are stored as a function instead of single values. 
+An accepted error rate, which must be specified together with the attribute, decides the function which is used to represent the values.
+The following example shows the *smartgrid.Consumption* class specifying a *continuous attribute* named *activeEnergyConsumed* with a *precision of 0.9*.  
+This means that the value defined by the function can maximal derive from the discrete value by *0.9*.
+
+```java
+    class smartgrid.Consumption {
+        att activeEnergyConsumed: Continuous with precision 0.9
+    }
+``` 
+
 
 Annotations
 ==============
