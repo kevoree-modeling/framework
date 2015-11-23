@@ -4,8 +4,6 @@ package org.kevoree.modeling;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.cloudmodel.CloudModel;
-import org.kevoree.modeling.cloudmodel.CloudUniverse;
-import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.cloudmodel.meta.MetaNode;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
@@ -26,10 +24,10 @@ public class IndexTest {
                     model.indexByName(0, 0, "root", new KCallback<KObjectIndex>() {
                         @Override
                         public void on(KObjectIndex index) {
-                            long empty = index.get("root");
+                            long empty = index.getIndex("root");
                             Assert.assertEquals(empty, KConfig.NULL_LONG);
-                            index.set("root", 42);
-                            long nonEmpty = index.get("root");
+                            index.setIndex("root", 42);
+                            long nonEmpty = index.getIndex("root");
                             Assert.assertEquals(nonEmpty, 42);
                             model.lookup(0, 0, index.uuid(), new KCallback<KObject>() {
                                 @Override
@@ -40,7 +38,7 @@ public class IndexTest {
                             model.indexByName(0, 100, "root", new KCallback<KObjectIndex>() {
                                 @Override
                                 public void on(KObjectIndex index2) {
-                                    Assert.assertEquals(index2.get("root"), 42);
+                                    Assert.assertEquals(index2.getIndex("root"), 42);
                                 }
                             });
 
@@ -103,6 +101,13 @@ public class IndexTest {
                             });
 
                             model.universe(0).time(10).select("@org.kevoree.modeling.microframework.test.cloud.Node[name=n0]", new KCallback<Object[]>() {
+                                @Override
+                                public void on(Object[] resolvedObject) {
+                                    Assert.assertEquals(resolvedObject.length, 1);
+                                    Assert.assertEquals(((KObject) resolvedObject[0]).uuid(), node0.uuid());
+                                }
+                            });
+                            model.universe(0).time(5).select("@org.kevoree.modeling.microframework.test.cloud.Node[name=node0]", new KCallback<Object[]>() {
                                 @Override
                                 public void on(Object[] resolvedObject) {
                                     Assert.assertEquals(resolvedObject.length, 1);

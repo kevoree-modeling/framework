@@ -152,8 +152,8 @@ public class HelloTest {
                 //      Assert.assertEquals(2, i[0]);
                 //      Assert.assertEquals(1, j[0]);
 
-                Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toJSON());
-                Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[3]}}", nodeT0.toString());
+                Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[4]}}", nodeT0.toJSON());
+                Assert.assertEquals("{\"universe\":1,\"time\":0,\"uuid\":1,\"data\":{\"name\":\"node0\",\"children\":[4]}}", nodeT0.toString());
             }
         });
     }

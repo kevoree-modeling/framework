@@ -1,5 +1,8 @@
 package org.kevoree.modeling.traversal.impl.actions;
 
+import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KObject;
+import org.kevoree.modeling.KView;
 import org.kevoree.modeling.traversal.KTraversalAction;
 import org.kevoree.modeling.traversal.KTraversalActionContext;
 
@@ -23,7 +26,24 @@ public class TraverseIndexAction implements KTraversalAction {
 
     @Override
     public void execute(KTraversalActionContext context) {
-
+        KView originView = context.baseView();
+        if(originView != null){
+            originView.model().findByName(this._indexName, originView.universe(), originView.now(), this._attributes, new KCallback<KObject>() {
+                @Override
+                public void on(KObject indexedObject) {
+                    KObject[] selectedElems = new KObject[1];
+                    selectedElems[0] = indexedObject;
+                    if (_next == null) {
+                        context.finalCallback().on(selectedElems);
+                    } else {
+                        context.setInputObjects(selectedElems);
+                        _next.execute(context);
+                    }
+                }
+            });
+        } else {
+            throw new RuntimeException("Not implemented yet!");
+        }
 
 
 

@@ -3,14 +3,12 @@ package org.kevoree.modeling.abs;
 import org.kevoree.modeling.*;
 import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.chunk.KStringMap;
-import org.kevoree.modeling.memory.chunk.KStringMapCallBack;
 import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.KOperation;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.defer.impl.Defer;
-import org.kevoree.modeling.meta.impl.MetaClassIndex;
 import org.kevoree.modeling.traversal.KTraversal;
 import org.kevoree.modeling.traversal.impl.Traversal;
 import org.kevoree.modeling.traversal.query.impl.QueryEngine;
@@ -174,39 +172,45 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     @Override
     public void findByName(String indexName, long universe, long time, String attributes, KCallback<KObject> callback) {
-        _manager.index(universe, time, indexName, new KCallback<KObjectIndex>() {
-            @Override
-            public void on(KObjectIndex kObjectIndex) {
-                String concat = "";
-                KStringMap<String> params = buildParams(attributes);
-                if (params.size() == 0) {
-                    concat = attributes;
-                } else {
-                    KMetaClass currentClass = metaModel().metaClassByName(indexName);
-                    if (currentClass == null) {
+        if (!Checker.isDefined(attributes)) {
+            if(Checker.isDefined(callback)){
+                callback.on(null);
+            }
+        } else {
+            _manager.index(universe, time, indexName, new KCallback<KObjectIndex>() {
+                @Override
+                public void on(KObjectIndex kObjectIndex) {
+                    String concat = "";
+                    KStringMap<String> params = buildParams(attributes);
+                    if (params.size() == 0) {
                         concat = attributes;
                     } else {
-                        KMeta[] elems = currentClass.metaElements();
-                        for (int i = 0; i < elems.length; i++) {
-                            if (elems[i] != null && elems[i].metaType().equals(MetaType.ATTRIBUTE) && ((KMetaAttribute) elems[i]).key()) {
-                                String lvalue = params.get(elems[i].metaName());
-                                if (lvalue != null) {
-                                    concat += lvalue;
+                        KMetaClass currentClass = metaModel().metaClassByName(indexName);
+                        if (currentClass == null) {
+                            concat = attributes;
+                        } else {
+                            KMeta[] elems = currentClass.metaElements();
+                            for (int i = 0; i < elems.length; i++) {
+                                if (elems[i] != null && elems[i].metaType().equals(MetaType.ATTRIBUTE) && ((KMetaAttribute) elems[i]).key()) {
+                                    String lvalue = params.get(elems[i].metaName());
+                                    if (lvalue != null) {
+                                        concat += lvalue;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                long objectUUID = kObjectIndex.get(concat);
-                if (objectUUID == KConfig.NULL_LONG) {
-                    if (Checker.isDefined(callback)) {
-                        callback.on(null);
+                    long objectUUID = kObjectIndex.getIndex(concat);
+                    if (objectUUID == KConfig.NULL_LONG) {
+                        if (Checker.isDefined(callback)) {
+                            callback.on(null);
+                        }
+                    } else {
+                        _manager.lookup(universe, time, objectUUID, callback);
                     }
-                } else {
-                    _manager.lookup(universe, time, objectUUID, callback);
                 }
-            }
-        });
+            });
+        }
     }
 
     private KStringMap<String> buildParams(String p_paramString) {

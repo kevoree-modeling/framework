@@ -30,7 +30,7 @@ public class JSONSaveTest {
                         result[0] = model;
 
                         Assert.assertEquals(result[0], "[\n" +
-                                "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"@root\":true,\"name\":\"root\\nhello\"}\n" +
+                                "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"name\":\"root\\nhello\"}\n" +
                                 "]\n");
 
                         CloudUniverse dimension1 = universe.newUniverse();
@@ -56,7 +56,7 @@ public class JSONSaveTest {
                                     }
                                 });
                                 Assert.assertEquals(result[0], "[\n" +
-                                        "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"@root\":true,\"name\":\"root\\nhello\"}\n" +
+                                        "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"name\":\"root\\nhello\"}\n" +
                                         "]\n");
 
                             }
@@ -99,9 +99,9 @@ public class JSONSaveTest {
                         result[0] = model;
 
                         String payloadResult = "[\n" +
-                                "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"@root\":true,\"name\":\"root\",\"children\":[2,3]},\n" +
-                                "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":2,\"name\":\"n1\",\"op_children\":[1]},\n" +
-                                "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":3,\"name\":\"n2\",\"op_children\":[1]}\n" +
+                                "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"name\":\"root\",\"children\":[3,4]},\n" +
+                                "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":3,\"name\":\"n1\",\"op_children\":[1]},\n" +
+                                "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":4,\"name\":\"n2\",\"op_children\":[1]}\n" +
                                 "]\n";
 
 

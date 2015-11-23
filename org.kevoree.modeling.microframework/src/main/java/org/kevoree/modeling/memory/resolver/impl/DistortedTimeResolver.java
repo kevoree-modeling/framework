@@ -847,8 +847,6 @@ public class DistortedTimeResolver implements KResolver {
                             } else {
                                 char flag = payloads[i].charAt(0);
                                 if (flag == '#') {
-                                    elemType = KChunkTypes.OBJECT_CHUNK;
-                                } else if (flag == 1) {
                                     elemType = KChunkTypes.OBJECT_CHUNK_INDEX;
                                 } else {
                                     elemType = KChunkTypes.OBJECT_CHUNK;

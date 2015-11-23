@@ -168,10 +168,10 @@ public class DiscreteExtrapolation implements Extrapolation {
                         @Override
                         public void on(KObjectIndex classIndex) {
                             if (finalPreviousHash != null) {
-                                classIndex.set(finalPreviousHash, KConfig.NULL_LONG);
+                                classIndex.setIndex(finalPreviousHash, KConfig.NULL_LONG);
                             }
                             if (finalNewHash != null) {
-                                classIndex.set(finalNewHash, current.uuid());
+                                classIndex.setIndex(finalNewHash, current.uuid());
                             }
                         }
                     });

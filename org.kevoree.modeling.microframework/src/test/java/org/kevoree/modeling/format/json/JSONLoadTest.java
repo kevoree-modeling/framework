@@ -28,7 +28,7 @@ public class JSONLoadTest {
                 passed[0] = 0;
                 final CloudView time0 = dimension0.time(0l);
                 time0.json().load("[\n" +
-                        "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"@root\":true,\"name\":\"root\",\"children\":[2,3]},\n" +
+                        "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":1,\"name\":\"root\",\"children\":[2,3]},\n" +
                         "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":2,\"name\":\"n1\"},\n" +
                         "{\"@class\":\"org.kevoree.modeling.microframework.test.cloud.Node\",\"@uuid\":3,\"name\":\"n2\"}\n" +
                         "]\n", new KCallback<Throwable>() {

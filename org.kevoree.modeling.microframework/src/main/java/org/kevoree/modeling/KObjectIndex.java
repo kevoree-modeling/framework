@@ -2,9 +2,9 @@ package org.kevoree.modeling;
 
 public interface KObjectIndex extends KObject {
 
-    long get(String key);
+    long getIndex(String key);
 
-    void set(String key, long value);
+    void setIndex(String key, long value);
 
     long[] values();
 

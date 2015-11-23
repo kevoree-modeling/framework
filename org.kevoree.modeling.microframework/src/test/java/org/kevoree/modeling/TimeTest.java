@@ -63,12 +63,12 @@ public class TimeTest {
 
                 //resolves the object from time 5
                 CloudView view5 = universe.time(5);
-                view5.select("@root", new KCallback<Object[]>() {
-                    public void on(Object[] kObjects) {
-                        Node n = (Node) kObjects[0];
+                //view5.select("@root", new KCallback<Object[]>() {
+                   // public void on(Object[] kObjects) {
+                       // Node n = (Node) kObjects[0];
                         n.jump(jumpCounter[0], jumpCallback);
-                    }
-                });
+                   // }
+                //});
             }
         });
 
@@ -294,6 +294,7 @@ public class TimeTest {
     }
 
 
+    /*
     @Test
     public void timeUpdateWithSelectTest() {
 
@@ -347,5 +348,5 @@ public class TimeTest {
             }
         });
     }
-
+*/
 }

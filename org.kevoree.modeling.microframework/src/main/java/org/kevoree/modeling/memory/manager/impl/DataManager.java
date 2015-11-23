@@ -6,7 +6,6 @@ import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
-import org.kevoree.modeling.memory.chunk.KObjectIndexChunk;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
@@ -460,12 +459,12 @@ public class DataManager implements KDataManager, KInternalDataManager {
                     globalIndex = new GenericObjectIndex(universe, time, KConfig.END_OF_TIME, selfPointer, universe, time);
                     initKObject(globalIndex);
                 }
-                long indexUUID = globalIndex.get(indexName);
+                long indexUUID = globalIndex.getIndex(indexName);
                 if (indexUUID == KConfig.NULL_LONG) {
                     long nextKey = nextObjectKey();
                     KObjectIndex namedIndex = new GenericObjectIndex(universe, time, nextKey, selfPointer, universe, time);
                     initKObject(namedIndex);
-                    globalIndex.set(indexName, nextKey);
+                    globalIndex.setIndex(indexName, nextKey);
                     if (Checker.isDefined(callback)) {
                         callback.on(namedIndex);
                     }

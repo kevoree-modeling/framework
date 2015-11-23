@@ -14,13 +14,13 @@ public class AbstractKObjectIndex extends AbstractKObject implements KObjectInde
     }
 
     @Override
-    public long get(String key) {
+    public long getIndex(String key) {
         KObjectIndexChunk chunk = (KObjectIndexChunk) _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
         return chunk.get(key);
     }
 
     @Override
-    public void set(String key, long value) {
+    public void setIndex(String key, long value) {
         KObjectIndexChunk chunk = (KObjectIndexChunk) _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
         chunk.put(key, value);
     }
