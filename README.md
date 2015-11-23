@@ -200,6 +200,47 @@ This means that the value defined by the function can maximal derive from the di
     }
 ``` 
 
+**Machine learning strategies**: KMF allows to describe important dependencies between meta class concepts and to specify different learning strategies based on these dependencies.
+Let's consider a concrete example. 
+The idea is, that the default consumption behaviour of a customer (its smart meter) can be learned based on his consumption values.
+Therefore, we first define a relationship from *smartgrid.SmartMeter* to its profiler class *smartgrid.ConsumptionProfiler*. 
+This enables us to monitor the consumption on a per *smartgrid.SmartMeter* object. 
+ 
+```java
+    class smartgrid.SmartMeter extends smartgrid.Entity, smartgrid.Meter {
+        rel profiler: smartgrid.ConsumptionProfiler with maxBound 1
+    }
+``` 
+
+Next, we define the *smartgrid.ConsumptionProfiler* class.
+
+```java
+    class smartgrid.ConsumptionProfiler {
+        with inference "GaussianProfiler" with temporalResolution 2592000000
+    
+        dependency consumption: smartgrid.Consumption
+    
+        input timeValue "@consumption | =HOURS(TIME)"
+        input activeEnergyConsumedValue "@consumption | =activeEnergyConsumed"
+    
+        output probability: Double
+    }
+``` 
+
+The algorithm used for the machine learning has to be specified with the key word *with inference* followed by the name of the machine learning algorithm, in this case *GaussianProfiler*.
+Currently, the following algorithms are supported in KMF: *BinaryPerceptron, LinearRegression, KMeanCluster, GaussianProfiler, GaussianClassifier, GaussianAnomalyDetection, Winnow, EmptyInfer*.
+Depending on the algorithm a time resolution can be specified using the keyword *with temporalResolution* followed by a number giving the time in milliseconds.
+In this example, this specifies the time over which the Gaussian profiler learns. 
+In addition, we need to specify the *dependency*, meaning on what values the profiler should work on.
+This is done in the example by specifying the name and type of the dependency: *dependency consumption: smartgrid.Consumption*.
+The profiling in our example is time based and depends on the *activeEnergyConsumedValue* attribute of the *smartgrid.Consumption* class.
+Therefore, we first specify a *timeValue* input, which is available for all objects in KMF.
+The *@consumption* declares that the time value should be taken from the *consumption* class. 
+*|* can be interpreted as pipe. 
+*HOURS(TIME)* is a convenient function provided by KMF, which extracts the hours from the time attribute (which is by default in milliseconds). 
+Next, we specify the attribute *activeEnergyConsumed* from class *consumption* as second input for the learning algorithm and define *activeEnergyConsumedValue* as name for the input.
+Last but not least, we define the output of the profiler, a *Double* value with name *probability*.
+
 
 Annotations
 ==============
