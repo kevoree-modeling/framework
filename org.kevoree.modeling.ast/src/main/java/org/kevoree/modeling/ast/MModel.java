@@ -8,7 +8,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -248,7 +247,6 @@ public class MModel {
                     }
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : classDeclrContext.annotationDeclr()) {
-                    System.out.println(newClass.getFqn() + " : " + Arrays.toString(classDeclrContext.annotationDeclr().toArray()));
                     if (annotDecl.IDENT().getText().toLowerCase().equals("temporalLimit") && annotDecl.NUMBER() != null) {
                         newClass.setTemporalLimit(Long.parseLong(annotDecl.NUMBER().getText()));
                     }
