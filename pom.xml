@@ -96,7 +96,6 @@
         <module>addons/org.kevoree.modeling.microframework.addons.template</module>
         <module>addons/org.kevoree.modeling.microframework.addons.swing</module>
         <module>addons/org.kevoree.modeling.microframework.addons.graphview</module>
-        <module>addons/org.kevoree.modeling.microframework.addons.rest</module>
     </modules>
 
     <dependencies>
