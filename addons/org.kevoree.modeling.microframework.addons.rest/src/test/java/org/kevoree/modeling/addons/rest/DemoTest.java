@@ -17,14 +17,11 @@ public class DemoTest {
         cloudModel.connect(new KCallback() {
             @Override
             public void on(Object o) {
-
-                for (int i = 0; i < 5000; i++) {
+                for (int i = 0; i < 1000; i++) {
                     KObject nodeLoop = cloudModel.createByName("Node", 0, i);
                     nodeLoop.setByName("name", "node" + i);
+                    nodeLoop.setByName("load", i);
                 }
-
-                System.err.println("Finished");
-
                 RestGateway gateway = RestGateway.expose(cloudModel, 8050);
                 gateway.start();
             }

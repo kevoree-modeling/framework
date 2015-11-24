@@ -51,7 +51,7 @@ public class RestGateway implements HttpHandler {
                         if (i != 0) {
                             builder.append(",\n");
                         }
-                        builder.append(((KObject) objects[i]).toJSON());
+                        builder.append(((KObject) objects[i]).toString());
                     }
                     builder.append("\n]\n");
                     sender.send(builder.toString());

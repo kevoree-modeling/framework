@@ -170,6 +170,8 @@ public abstract class AbstractKObject implements KObject {
         KMetaAttribute transposed = _metaClass.attribute(attributeName);
         if (transposed != null) {
             transposed.strategy().mutate(this, transposed, payload, _manager);
+        } else {
+            throw new RuntimeException("Bad API usage, "+attributeName+" not found on object");
         }
     }
 
