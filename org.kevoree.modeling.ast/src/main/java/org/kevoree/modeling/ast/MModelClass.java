@@ -26,6 +26,15 @@ public class MModelClass extends MModelClassifier {
 
     private String inference = null;
     private Long temporalResolution = null;
+    private Boolean canHaveInstance = true;
+
+    public Boolean getCanHaveInstance() {
+        return canHaveInstance;
+    }
+
+    public void setCanHaveInstance(Boolean instance) {
+        this.canHaveInstance = instance;
+    }
 
     public Long getTemporalLimit() {
         return temporalLimit;
@@ -256,5 +265,4 @@ public class MModelClass extends MModelClassifier {
     public boolean containsDependencies() {
         return this.dependencies != null && this.dependencies.dependencies.size() > 0;
     }
-
 }

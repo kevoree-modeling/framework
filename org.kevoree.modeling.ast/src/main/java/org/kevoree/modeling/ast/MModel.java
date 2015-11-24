@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -247,6 +248,7 @@ public class MModel {
                     }
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.AnnotationDeclrContext annotDecl : classDeclrContext.annotationDeclr()) {
+                    System.out.println(newClass.getFqn() + " : " + Arrays.toString(classDeclrContext.annotationDeclr().toArray()));
                     if (annotDecl.IDENT().getText().toLowerCase().equals("temporalLimit") && annotDecl.NUMBER() != null) {
                         newClass.setTemporalLimit(Long.parseLong(annotDecl.NUMBER().getText()));
                     }
@@ -255,6 +257,14 @@ public class MModel {
                     }
                     if (annotDecl.IDENT().getText().toLowerCase().equals("inference") && annotDecl.STRING() != null) {
                         newClass.setInference(cleanString(annotDecl.STRING().getText()));
+                    }
+                    if(annotDecl.IDENT().getText().toLowerCase().equals("instantiation") && annotDecl.STRING() != null){
+                        String value = cleanString(annotDecl.STRING().getText().toLowerCase());
+                        if(value.equals("true") || value.equals("false")) {
+                            newClass.setCanHaveInstance(Boolean.valueOf(value));
+                        } else {
+                            throw new RuntimeException("The instantiation value must be a boolean : \"true\" or \"false\". " + value);
+                        }
                     }
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.FunctionDeclarationContext functionDeclarationContext : classDeclrContext.functionDeclaration()) {

@@ -7,11 +7,13 @@ public class ${context.metaModelName}ViewImpl extends org.kevoree.modeling.abs.A
     }
 
 #foreach($class in $context.model.getClasses())
-#set($lastIdx = $class.fqn.lastIndexOf(".")+1)
+    #if($class.canHaveInstance)
+    #set($lastIdx = $class.fqn.lastIndexOf(".")+1)
     @Override
     public $class.fqn create$class.fqn.substring($lastIdx)() {
         return ($class.fqn) this.create(${class.pack}.meta.Meta${class.name}.getInstance());
     }
+    #end
 #end
 
 }

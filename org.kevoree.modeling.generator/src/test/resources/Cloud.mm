@@ -1,5 +1,12 @@
+class org.kevoree.cloud.AbsCloud  {
+    with instantiation "false"
+
+}
+
 class org.kevoree.cloud.Cloud {
-ref nodes: org.kevoree.cloud.Node ref elements: org.kevoree.cloud.Element
+    with instantiation "true"
+    rel nodes: org.kevoree.cloud.Node
+    rel elements: org.kevoree.cloud.Element
 }
 
 class org.kevoree.cloud.Node {
@@ -18,7 +25,6 @@ enum org.kevoree.cloud.CloudEnumTester {
 
 class org.kevoree.cloud.SubElem extends org.kevoree.cloud.Element {
     with inference "GaussianCluster"
-    with isAbstract "true"
     dependency myCloud: org.kevoree.cloud.Cloud
     dependency myCloud2: org.kevoree.cloud.Node
     output outputName: org.kevoree.cloud.CloudEnumTester
