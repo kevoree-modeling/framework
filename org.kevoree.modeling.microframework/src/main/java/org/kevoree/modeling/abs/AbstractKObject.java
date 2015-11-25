@@ -171,7 +171,7 @@ public abstract class AbstractKObject implements KObject {
         if (transposed != null) {
             transposed.strategy().mutate(this, transposed, payload, _manager);
         } else {
-            throw new RuntimeException("Bad API usage, "+attributeName+" not found on object");
+            throw new RuntimeException("Bad API usage, " + attributeName + " not found on object");
         }
     }
 
@@ -199,7 +199,7 @@ public abstract class AbstractKObject implements KObject {
         }
         KObjectChunk raw = _manager.preciseChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
         if (raw != null) {
-            if (p_metaReference.maxBound() < 0 || (p_metaReference.maxBound() <= raw.getLongArraySize(p_metaReference.index(), _metaClass) + 1)) {
+            if (p_metaReference.maxBound() < 0 || (p_metaReference.maxBound() > raw.getLongArraySize(p_metaReference.index(), _metaClass))) {
                 if (raw.addLongToArray(p_metaReference.index(), p_param.uuid(), _metaClass)) {
                     if (p_setOpposite) {
                         ((AbstractKObject) p_param).internal_add(p_param.metaClass().reference(p_metaReference.oppositeName()), this, false);
