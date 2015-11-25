@@ -3,8 +3,10 @@ package $context.metaModelPackage;
 public interface ${context.metaModelName}View extends org.kevoree.modeling.KView {
 
 #foreach($class in $context.model.getClasses())
-#set($lastIdx = $class.fqn.lastIndexOf(".")+1)
+    #if($class.canHaveInstance)
+    #set($lastIdx = $class.fqn.lastIndexOf(".")+1)
     public $class.fqn create$class.fqn.substring($lastIdx)();
+    #end
 #end
 
 }

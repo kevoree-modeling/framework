@@ -38,20 +38,26 @@ public class ${context.metaModelName}Model extends org.kevoree.modeling.abs.Abst
     }
     switch (p_clazz.index()) {
     #foreach($class in $context.model.getClasses())
+        #if($class.canHaveInstance)
             #set($lastIdx = $class.fqn.lastIndexOf(".")+1)
             case ${class.index} : return new ${class.fqn.substring(0,$class.fqn.lastIndexOf("."))}.impl.${class.fqn.substring($lastIdx)}Impl(universe, time, uuid, p_clazz, _manager,previousUniverse,previousTime);
         #end
+    #end
+
     default : return new org.kevoree.modeling.meta.impl.GenericObject(universe, time, uuid, p_clazz, _manager,previousUniverse,previousTime);
     }
     }
 
     #foreach($class in $context.model.getClasses())
+        #if($class.canHaveInstance)
             #set($lastIdx = $class.fqn.lastIndexOf(".")+1)
 
         public $class.fqn create$class.fqn.substring($lastIdx)(long universe,long time) {
             return ($class.fqn) this.create(${class.pack}.meta.Meta${class.name}.getInstance(), universe, time);
         }
         #end
+    #end
+
 
     }
 

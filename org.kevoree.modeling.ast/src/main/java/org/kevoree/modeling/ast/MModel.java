@@ -256,6 +256,14 @@ public class MModel {
                     if (annotDecl.IDENT().getText().toLowerCase().equals("inference") && annotDecl.STRING() != null) {
                         newClass.setInference(cleanString(annotDecl.STRING().getText()));
                     }
+                    if(annotDecl.IDENT().getText().toLowerCase().equals("instantiation") && annotDecl.STRING() != null){
+                        String value = cleanString(annotDecl.STRING().getText().toLowerCase());
+                        if(value.equals("true") || value.equals("false")) {
+                            newClass.setCanHaveInstance(Boolean.valueOf(value));
+                        } else {
+                            throw new RuntimeException("The instantiation value must be a boolean : \"true\" or \"false\". " + value);
+                        }
+                    }
                 }
                 for (org.kevoree.modeling.ast.MetaModelParser.FunctionDeclarationContext functionDeclarationContext : classDeclrContext.functionDeclaration()) {
                     MModelOperation operation = new MModelOperation(functionDeclarationContext.IDENT().getText());
