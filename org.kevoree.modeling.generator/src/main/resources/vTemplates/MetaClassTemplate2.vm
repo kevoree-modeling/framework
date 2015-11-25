@@ -15,7 +15,7 @@ return INSTANCE;
 #foreach($attribute in $classDeclaration.attributes)
 
     #if($attribute.type == "Continuous")
-    public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, #if($context.generationContext.helper.isNull(${attribute.precision}))0#{else}$attribute.precision#end, #if($attribute.id)true#{else}false#end, ${attribute.typeId}, org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation.instance());
+    public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, #if($context.generationContext.helper.isNull(${attribute.precision}))0#{else}$attribute.precision#end, #if($attribute.indexed)true#{else}false#end, ${attribute.typeId}, org.kevoree.modeling.extrapolation.impl.PolynomialExtrapolation.instance());
     #else
     public static final org.kevoree.modeling.meta.KMetaAttribute ATT_${attribute.name.toUpperCase()} = new org.kevoree.modeling.meta.impl.MetaAttribute("${attribute.name}", ${attribute.index}, 0, #if($attribute.id)true#{else}false#end, ${attribute.typeId}, org.kevoree.modeling.extrapolation.impl.DiscreteExtrapolation.instance());
     #end
