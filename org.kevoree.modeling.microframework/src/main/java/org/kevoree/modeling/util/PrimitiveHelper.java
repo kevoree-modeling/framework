@@ -115,8 +115,8 @@ public class PrimitiveHelper {
      * var hash = 0;
      * if (target.length == 0) return hash;
      * for (var i = 0; i < target.length; i++) {
-     * var char = target.charCodeAt(i);
-     * hash = ((hash << 5) - hash) + char;
+     * var charC = target.charCodeAt(i);
+     * hash = ((hash << 5) - hash) + charC;
      * hash = hash & hash; // Convert to 32bit integer
      * }
      * return hash;
