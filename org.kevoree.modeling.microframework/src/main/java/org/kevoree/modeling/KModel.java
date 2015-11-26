@@ -81,4 +81,8 @@ public interface KModel<A extends KUniverse> {
 
     void findByName(String indexName, long universe, long time, String attributes, KCallback<KObject> callback);
 
+    void findAll(KMetaClass metaClass, long universe, long time, KCallback<KObject[]> callback);
+
+    void findAllByName(String indexName, long universe, long time, KCallback<KObject[]> callback);
+
 }

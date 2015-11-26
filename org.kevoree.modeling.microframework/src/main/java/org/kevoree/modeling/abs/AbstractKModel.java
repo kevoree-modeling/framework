@@ -173,7 +173,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     @Override
     public void findByName(String indexName, long universe, long time, String attributes, KCallback<KObject> callback) {
         if (!Checker.isDefined(attributes)) {
-            if(Checker.isDefined(callback)){
+            if (Checker.isDefined(callback)) {
                 callback.on(null);
             }
         } else {
@@ -245,5 +245,27 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     public void indexByName(long universe, long time, String indexName, KCallback<KObjectIndex> callback) {
         _manager.index(universe, time, indexName, callback);
     }
+
+    @Override
+    public void findAll(KMetaClass metaClass, long universe, long time, KCallback<KObject[]> callback) {
+        findAllByName(metaClass.metaName(), universe, time, callback);
+    }
+
+    @Override
+    public void findAllByName(String indexName, long universe, long time, KCallback<KObject[]> callback) {
+        _manager.index(universe, time, indexName, new KCallback<KObjectIndex>() {
+            @Override
+            public void on(KObjectIndex index) {
+                if (index == null) {
+                    if (callback != null) {
+                        callback.on(new KObject[0]);
+                    }
+                } else {
+                    _manager.lookupAllObjects(universe, time, index.values(), callback);
+                }
+            }
+        });
+    }
+
 }
 
