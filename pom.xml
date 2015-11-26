@@ -92,7 +92,6 @@
         <module>drivers/org.kevoree.modeling.microframework.drivers.mongodb</module>
         <!--Addons -->
         <module>addons/org.kevoree.modeling.microframework.addons.kolyfill</module>
-        <module>addons/org.kevoree.modeling.microframework.addons.template</module>
         <module>addons/org.kevoree.modeling.microframework.addons.swing</module>
         <module>addons/org.kevoree.modeling.microframework.addons.graphview</module>
     </modules>
