@@ -3,7 +3,9 @@ What's new?
 
 ## Versions:
 
-The versioning strategy of KMF is lead by the version of the runtime.
+The versioning strategy of KMF is lead by the version of the runtime. 
+It means that the runtime version will have a version 4.<RUNTIME_VERSION>.<BUGFIX_VERSION>, like 4.26.4.
+According to that, all compatible addons with this runtime version will have a version 4.26.x according to corresponding addons version.
 
 ### 27.x
 
