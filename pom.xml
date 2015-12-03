@@ -89,9 +89,7 @@
         <module>org.kevoree.modeling.generator.standalone</module>
         <module>org.kevoree.modeling.generator.mavenplugin</module>
         <!-- ContentDelivery drivers -->
-        <module>drivers/org.kevoree.modeling.microframework.drivers.leveldb</module>
         <module>drivers/org.kevoree.modeling.microframework.drivers.rocksdb</module>
-        <module>drivers/org.kevoree.modeling.microframework.drivers.websocket</module>
         <module>drivers/org.kevoree.modeling.microframework.drivers.mapdb</module>
         <module>drivers/org.kevoree.modeling.microframework.drivers.redis</module>
         <module>drivers/org.kevoree.modeling.microframework.drivers.mongodb</module>
