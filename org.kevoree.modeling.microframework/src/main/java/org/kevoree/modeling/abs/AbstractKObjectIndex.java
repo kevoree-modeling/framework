@@ -1,5 +1,6 @@
 package org.kevoree.modeling.abs;
 
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObjectIndex;
 import org.kevoree.modeling.memory.chunk.KObjectIndexChunk;
 import org.kevoree.modeling.memory.chunk.KStringLongMapCallBack;
@@ -33,10 +34,19 @@ public class AbstractKObjectIndex extends AbstractKObject implements KObjectInde
         chunk.each(new KStringLongMapCallBack() {
             @Override
             public void on(String key, long value) {
-                result[i[0]] = value;
-                i[0]++;
+                if (value != KConfig.NULL_LONG) {
+                    result[i[0]] = value;
+                    i[0]++;
+                }
+
             }
         });
-        return result;
+        if (result.length == i[0]) {
+            return result;
+        } else {
+            long[] trimmedResult = new long[i[0]];
+            System.arraycopy(result,0,trimmedResult,0,i[0]);
+            return trimmedResult;
+        }
     }
 }

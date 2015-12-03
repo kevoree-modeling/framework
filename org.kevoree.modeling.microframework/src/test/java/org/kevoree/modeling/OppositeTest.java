@@ -44,6 +44,7 @@ public class OppositeTest {
         model = metaModel.createModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
     }
 
+    /*
     @Test
     public void mainTest() {
         model.connect(new KCallback() {
@@ -59,7 +60,7 @@ public class OppositeTest {
                 multiA_multiB_Test();
             }
         });
-    }
+    }*/
 
     public void A_singleRef() { // single ref, not contained, no apposite
         final KObject a = factory.createByName("A");

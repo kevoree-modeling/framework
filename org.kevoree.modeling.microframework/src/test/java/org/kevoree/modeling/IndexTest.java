@@ -1,6 +1,5 @@
 package org.kevoree.modeling;
 
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.cloudmodel.CloudModel;
@@ -114,6 +113,14 @@ public class IndexTest {
                                     Assert.assertEquals(((KObject) resolvedObject[0]).uuid(), node0.uuid());
                                 }
                             });
+
+                            model.findAllByName("org.kevoree.modeling.microframework.test.cloud.Node", 0, 10, new KCallback<KObject[]>() {
+                                @Override
+                                public void on(KObject[] resolvedObject) {
+                                    Assert.assertEquals(resolvedObject.length,1);
+                                }
+                            });
+
 
                         }
                     });
