@@ -1,17 +1,23 @@
 What's new?
 ===========
 
-#### V27
+## Versions:
 
-Introducing indexes!
+The versioning strategy of KMF is lead by the version of the runtime.
 
-#### V26
+### 27.x
 
-TODO
+* introducing indexes!
+* introducing with instanciation = "true" annotation
+* various fixes in the runtime such as bounds management
+
+### 26.x
+
+* stable isomorphic compilation
 
 
-The Kevoree Modeling Framework
-==========================
+The Kevoree Modeling Framework presentation
+===========================================
 
 The Kevoree Modeling Framework (KMF) started as a research project to create an alternative to the [Eclipse Modeling Framework](https://eclipse.org/modeling/emf/) (EMF).
 Like EMF, KMF is a modeling framework and code generation facility for building complex object-oriented applications based on structured data models.
@@ -34,7 +40,7 @@ By using isomorphic models (models in different languages which use the same API
 For a more light-weight approach KMF also supports the definition of dynamic meta models, which can be defined and instantiated with a simple API - no formal definition and code generation step is necessary.
 
 Design Principles and Features
--------------
+------------------------------
 As a main design principle KMF was from the beginning designed with strict memory usage, runtime performance, and thread safety requirements in mind.
 KMF takes efficiency seriously. 
 This includes implementing custom versions of internal core data structures, like hash maps and red-black trees backed by primitive arrays, to improve performance and memory usage.   
@@ -54,6 +60,31 @@ Features:
 * native mechanisms for distribution 
 * native versioning of models on a per-object basis
 * ...
+
+Core Modules:
+=============
+
+* Domain Specific Language Aka .mm **(https://github.com/kevoree-modeling/dsl)**
+
+Storage Addons:
+===============
+
+* LevelDB **(https://github.com/kevoree-modeling/plugin_leveldb)**
+* RocksDB **(https://github.com/kevoree-modeling/plugin_rocksdb)**
+* WebSocket **(https://github.com/kevoree-modeling/plugin_websocket)**
+* Redis **(https://github.com/kevoree-modeling/plugin_redis)**
+* MongoDB **(https://github.com/kevoree-modeling/plugin_mongodb)**
+
+Presentation Addons:
+====================
+
+* HTML DOM Template **(https://github.com/kevoree-modeling/plugin_template)**
+
+Advanced Computation Addons:
+============================
+
+* Advanced Linear Algebra **(https://github.com/kevoree-modeling/plugin_blas)**
+
 
 Publications:
 -------------
