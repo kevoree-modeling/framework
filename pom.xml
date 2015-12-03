@@ -9,6 +9,11 @@
     <url>https://github.com/kevoree-modeling/kevoree-modeling-framework</url>
     <description>Kevoree Modeling Framework</description>
 
+    <properties>
+        <java2typescript.plugin.version>46</java2typescript.plugin.version>
+        <kmf.ast.version>1.0.0</kmf.ast.version>
+    </properties>
+
     <licenses>
         <license>
             <name>GNU GENERAL PUBLIC LICENSE</name>
@@ -69,17 +74,17 @@
         </developer>
     </developers>
 
-    <properties>
-        <java2typescript.plugin.version>46</java2typescript.plugin.version>
-    </properties>
-
     <modules>
         <!-- MicroFramework -->
         <module>org.kevoree.modeling.microframework</module>
         <module>org.kevoree.modeling.microframework.browser</module>
         <module>org.kevoree.modeling.microframework.umd</module>
         <!-- CodeGenerator and associated tools -->
+
+        <!--
         <module>org.kevoree.modeling.ast</module>
+      -->
+
         <module>org.kevoree.modeling.generator</module>
         <module>org.kevoree.modeling.generator.standalone</module>
         <module>org.kevoree.modeling.generator.mavenplugin</module>

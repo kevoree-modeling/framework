@@ -15,8 +15,8 @@
     <dependencies>
         <dependency>
             <groupId>org.kevoree.modeling</groupId>
-            <artifactId>org.kevoree.modeling.ast</artifactId>
-            <version>${project.version}</version>
+            <artifactId>dsl</artifactId>
+            <version>${kmf.ast.version}</version>
         </dependency>
         <dependency>
             <groupId>org.kevoree.modeling</groupId>
