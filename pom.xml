@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kevoree.modeling</groupId>
-    <artifactId>org.kevoree.modeling.root</artifactId>
+    <artifactId>root</artifactId>
     <packaging>pom</packaging>
     <version>4.26.1-SNAPSHOT</version>
-    <name>Kevoree :: Modeling :: Root</name>
+    <name>KMF :: Root</name>
     <url>https://github.com/kevoree-modeling/kevoree-modeling-framework</url>
     <description>Kevoree Modeling Framework</description>
 
@@ -76,27 +76,13 @@
 
     <modules>
         <!-- MicroFramework -->
-        <module>org.kevoree.modeling.microframework</module>
-        <module>org.kevoree.modeling.microframework.browser</module>
-        <module>org.kevoree.modeling.microframework.umd</module>
+        <module>microframework</module>
+        <module>microframework.browser</module>
+        <module>microframework.umd</module>
         <!-- CodeGenerator and associated tools -->
-
-        <!--
-        <module>org.kevoree.modeling.ast</module>
-      -->
-
-        <module>org.kevoree.modeling.generator</module>
-        <module>org.kevoree.modeling.generator.standalone</module>
-        <module>org.kevoree.modeling.generator.mavenplugin</module>
-        <!-- ContentDelivery drivers -->
-        <module>drivers/org.kevoree.modeling.microframework.drivers.rocksdb</module>
-        <module>drivers/org.kevoree.modeling.microframework.drivers.mapdb</module>
-        <module>drivers/org.kevoree.modeling.microframework.drivers.redis</module>
-        <module>drivers/org.kevoree.modeling.microframework.drivers.mongodb</module>
-        <!--Addons -->
-        <module>addons/org.kevoree.modeling.microframework.addons.kolyfill</module>
-        <module>addons/org.kevoree.modeling.microframework.addons.swing</module>
-        <module>addons/org.kevoree.modeling.microframework.addons.graphview</module>
+        <module>generator</module>
+        <module>generator.standalone</module>
+        <module>generator.mavenplugin</module>
     </modules>
 
     <dependencies>
