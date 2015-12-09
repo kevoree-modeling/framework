@@ -117,7 +117,7 @@ public class IndexTest {
                             model.findAllByName("org.kevoree.modeling.microframework.test.cloud.Node", 0, 10, new KCallback<KObject[]>() {
                                 @Override
                                 public void on(KObject[] resolvedObject) {
-                                    Assert.assertEquals(resolvedObject.length,1);
+                                    Assert.assertEquals(resolvedObject.length, 1);
                                 }
                             });
 
