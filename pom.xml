@@ -3,7 +3,7 @@
     <groupId>org.kevoree.modeling</groupId>
     <artifactId>framework</artifactId>
     <packaging>pom</packaging>
-    <version>4.27.0</version>
+    <version>4.27.1-SNAPSHOT</version>
     <name>KMF :: Root</name>
     <url>https://github.com/kevoree-modeling/kevoree-modeling-framework</url>
     <description>Kevoree Modeling Framework</description>
