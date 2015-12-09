@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.kevoree.modeling</groupId>
-        <artifactId>root</artifactId>
-        <version>4.26.1-SNAPSHOT</version>
+        <artifactId>framework</artifactId>
+        <version>4.27.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>generator.mavenplugin</artifactId>
-    <version>4.26.1-SNAPSHOT</version>
+    <version>4.27.0</version>
     <name>KMF :: Generator :: MavenPlugin</name>
     <packaging>maven-plugin</packaging>
 
@@ -83,8 +82,7 @@
                         </goals>
                         <configuration>
                             <target name="copy microframework ts">
-                                <copy file="../microframework.browser/target/generated-sources/microframework.browser.ts"
-                                      tofile="${project.build.directory}/classes/microframework.browser.ts"/>
+                                <copy file="../microframework.browser/target/generated-sources/microframework.browser.ts" tofile="${project.build.directory}/classes/microframework.browser.ts" />
                             </target>
                         </configuration>
                     </execution>

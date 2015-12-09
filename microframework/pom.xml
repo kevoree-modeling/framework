@@ -6,8 +6,8 @@
 
     <parent>
         <groupId>org.kevoree.modeling</groupId>
-        <artifactId>root</artifactId>
-        <version>4.26.1-SNAPSHOT</version>
+        <artifactId>framework</artifactId>
+        <version>4.27.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
