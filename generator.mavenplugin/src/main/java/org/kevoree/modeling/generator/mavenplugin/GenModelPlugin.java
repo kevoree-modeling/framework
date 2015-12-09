@@ -93,7 +93,7 @@ public class GenModelPlugin extends AbstractMojo {
                 Path tscPath = Paths.get(jsWorkingDir.toPath().toString(), TSC_JS);
                 Files.copy(getClass().getClassLoader().getResourceAsStream(TSC_JS), tscPath, StandardCopyOption.REPLACE_EXISTING);
                 SourceTranslator sourceTranslator = new SourceTranslator();
-                sourceTranslator.additionalAppend = "org.kevoree.modeling.microframework.browser.ts";
+                sourceTranslator.additionalAppend = "microframework.browser.ts";
                 sourceTranslator.exportPackage = new String[]{"org"};
                 for (Artifact a : project.getDependencyArtifacts()) {
                     File file = a.getFile();
