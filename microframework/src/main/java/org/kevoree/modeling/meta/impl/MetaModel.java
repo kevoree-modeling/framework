@@ -71,7 +71,7 @@ public class MetaModel implements KMetaModel {
         }
         Integer resolved = _metaClasses_indexes.get(name);
         if (resolved == null) {
-            if(PrimitiveHelper.equals(name,MetaClassIndex.INSTANCE.metaName())){
+            if (PrimitiveHelper.equals(name, MetaClassIndex.INSTANCE.metaName())) {
                 return MetaClassIndex.INSTANCE;
             } else {
                 return null;
@@ -83,7 +83,7 @@ public class MetaModel implements KMetaModel {
 
     @Override
     public KMetaClass metaClass(int index) {
-        if(index == MetaClassIndex.INSTANCE.index()){
+        if (index == MetaClassIndex.INSTANCE.index()) {
             return MetaClassIndex.INSTANCE;
         }
         if (index >= 0 && index < _metaClasses.length) {

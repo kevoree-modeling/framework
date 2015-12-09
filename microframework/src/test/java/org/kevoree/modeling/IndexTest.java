@@ -124,32 +124,55 @@ public class IndexTest {
 
                         }
                     });
+                }
+            }
+        });
+    }
 
+    @Test
+    public void testDoubleIndex() {
+        final CloudModel model = new CloudModel(DataManagerBuilder.create().withScheduler(new DirectScheduler()).build());
+        model.connect(new KCallback<Throwable>() {
+            @Override
+            public void on(Throwable throwable) {
+                if (throwable != null) {
+                    throwable.printStackTrace();
+                } else {
 
-                    /*
-                    CloudUniverse universe = model.newUniverse();
-                    CloudView time0 = universe.time(0);
-                    final Node root = time0.createNode();
-//                    time0.setRoot(root, null);
-                    root.setName("root");
-                    Assert.assertEquals("root", root.getName());
-                    Node n1 = time0.createNode();
-                    n1.setName("n1");
-                    Node n2 = time0.createNode();
-                    n2.setName("n2");
-                    root.addChildren(n1);
-                    root.addChildren(n2);
-                    time0.lookup(root.uuid(), new KCallback<KObject>() {
+                    MetaNode.ATT_NAME.setKey(true);
+                    MetaNode.ATT_VALUE.setKey(true);
+
+                    Node node0 = (Node) model.create(MetaNode.getInstance(), 0, 0);
+                    node0.setName("node0");
+
+                    model.find(MetaNode.getInstance(), 0, 0, "name=node0", new KCallback<KObject>() {
                         @Override
-                        public void on(KObject kObject) {
-                            Assert.assertNotNull(kObject);
-                            Assert.assertEquals(kObject, root);
+                        public void on(KObject resolvedObject) {
+                            Assert.assertEquals(resolvedObject.uuid(), node0.uuid());
+                        }
+                    });
+                    node0.setValue("version0");
+
+                    model.find(MetaNode.getInstance(), 0, 0, "name=node0", new KCallback<KObject>() {
+                        @Override
+                        public void on(KObject resolvedObject) {
+                            Assert.assertEquals(resolvedObject, null);
                         }
                     });
 
-                    //System.err.println("Yop");
+                    model.find(MetaNode.getInstance(), 0, 0, "name=node0,value=version0", new KCallback<KObject>() {
+                        @Override
+                        public void on(KObject resolvedObject) {
+                            Assert.assertEquals(resolvedObject.uuid(), node0.uuid());
+                        }
+                    });
 
-*/
+                    model.find(MetaNode.getInstance(), 0, 0, "value=version0,name=node0", new KCallback<KObject>() {
+                        @Override
+                        public void on(KObject resolvedObject) {
+                            Assert.assertEquals(resolvedObject.uuid(), node0.uuid());
+                        }
+                    });
 
                 }
             }
