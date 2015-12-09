@@ -6,6 +6,7 @@ import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.chunk.KStringMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 import org.kevoree.modeling.meta.*;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 public class MetaModel implements KMetaModel {
 
@@ -70,7 +71,11 @@ public class MetaModel implements KMetaModel {
         }
         Integer resolved = _metaClasses_indexes.get(name);
         if (resolved == null) {
-            return null;
+            if(PrimitiveHelper.equals(name,MetaClassIndex.INSTANCE.metaName())){
+                return MetaClassIndex.INSTANCE;
+            } else {
+                return null;
+            }
         } else {
             return _metaClasses[resolved];
         }
