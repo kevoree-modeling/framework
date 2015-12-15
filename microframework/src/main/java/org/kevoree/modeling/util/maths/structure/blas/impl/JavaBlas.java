@@ -464,7 +464,7 @@ public class JavaBlas implements KBlas {
                 }
                 dorg2r(paramInt1 - j + 1, k, k, paramArrayOfDouble1, j - 1 + (j - 1) * paramInt5 + paramInt4, paramInt5, paramArrayOfDouble2, j - 1 + paramInt6, paramArrayOfDouble3, paramInt7, localintW);
                 n = j;
-                for (i10 = j + k - 1 - j + 1; i10 > 0; i10--)
+                for (i10 = k  ; i10 > 0; i10--)
                 {
                     i3 = 1;
                     for (int i11 = j - 1; i11 > 0; i11--)

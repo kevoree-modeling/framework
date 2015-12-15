@@ -17,23 +17,36 @@ public class MatrixSingularInvert {
     @Test
     public void invert(){
 
-        int r=5;
+        int r=25;
         int[] dimA = {r, r};
         boolean rand = true;
         double eps = 1e-5;
 
         NativeArray2D matA = new NativeArray2D(dimA[0], dimA[1]);
         MatrixOperations.initMatrice(matA, rand);
-        for(int i=0;i<r;i++){
-            matA.set(1,i,matA.get(0,i)*2); //creating a singular non-invertible matrix
-        }
+   //     for(int i=0;i<r;i++){
+   //         matA.set(1,i,matA.get(0,i)*2); //creating a singular non-invertible matrix
+   //     }
 
         JavaBlas java = new JavaBlas();
         SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0], dimA[1]);
+
         CommonOps.copyMatrix(matA, ejmlmatA);
 
         KArray2D res = MatrixOperations.invert(matA, java);
         SimpleMatrix resEjml = ejmlmatA.invert();
+
+     /*   assert res != null;
+
+        for(int i=0;i<dimA[0];i++){
+            for(int j=0;j<dimA[0];j++){
+                if((res.get(i,j)-resEjml.getValue2D(i,j))>eps){
+                    System.out.println("err");
+                }
+            }
+        }*/
+
+
 
         NativeArray2D matB=new NativeArray2D(r,2);
 

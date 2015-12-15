@@ -16,7 +16,7 @@ public class MatrixInvertTest {
     @Test
     public void invertMatrix(){
         invert(5);
-        invert(100);
+
 
 
     }
@@ -34,17 +34,17 @@ public class MatrixInvertTest {
         SimpleMatrix ejmlmatA = new SimpleMatrix(dimA[0],dimA[1]);
         CommonOps.copyMatrix(matA, ejmlmatA);
 
-        // long timestart,timeend;
+      //  long timestart,timeend;
 
-        //   timestart=System.currentTimeMillis();
+       // timestart=System.currentTimeMillis();
         KArray2D res= MatrixOperations.invert(matA,java);
-        //   timeend=System.currentTimeMillis();
-        //   System.out.println("java blas invert " + ((double) (timeend - timestart)) / 1000);
+        //timeend=System.currentTimeMillis();
+       // System.out.println("java blas invert " + ((double) (timeend - timestart)) / 1000);
 
-        //   timestart=System.currentTimeMillis();
+       // timestart=System.currentTimeMillis();
         SimpleMatrix resEjml= ejmlmatA.invert();
-        //   timeend=System.currentTimeMillis();
-        //   System.out.println("java ejml invert " + ((double) (timeend - timestart)) / 1000);
+       // timeend=System.currentTimeMillis();
+       // System.out.println("java ejml invert " + ((double) (timeend - timestart)) / 1000);
 
 
       /*  System.out.println("java blas:");
