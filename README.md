@@ -110,6 +110,10 @@ Within the scope of the KMF project several research papers have been published:
 Getting started
 ==============
 
+Requirements
+-------------
+* [NodeJS](https://nodejs.org)
+
 For impatient: the reflexive Quick and Dirty way
 -------------
 
