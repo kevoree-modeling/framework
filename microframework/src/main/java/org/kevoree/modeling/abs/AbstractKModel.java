@@ -177,7 +177,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
                 callback.on(null);
             }
         } else {
-            _manager.index(universe, time, indexName, new KCallback<KObjectIndex>() {
+            _manager.index(universe, time, indexName, false, new KCallback<KObjectIndex>() {
                 @Override
                 public void on(KObjectIndex kObjectIndex) {
                     String concat = "";
@@ -240,10 +240,9 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         return params;
     }
 
-
     @Override
     public void indexByName(long universe, long time, String indexName, KCallback<KObjectIndex> callback) {
-        _manager.index(universe, time, indexName, callback);
+        _manager.index(universe, time, indexName, true, callback);
     }
 
     @Override
@@ -253,7 +252,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     @Override
     public void findAllByName(String indexName, long universe, long time, KCallback<KObject[]> callback) {
-        _manager.index(universe, time, indexName, new KCallback<KObjectIndex>() {
+        _manager.index(universe, time, indexName, false, new KCallback<KObjectIndex>() {
             @Override
             public void on(KObjectIndex index) {
                 if (index == null) {

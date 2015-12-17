@@ -5,7 +5,7 @@ import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 
 public interface KDataManager {
 
-    void index(long universe, long time, String indexName, KCallback<KObjectIndex> callback);
+    void index(long universe, long time, String indexName,boolean createIfAbsent, KCallback<KObjectIndex> callback);
 
     void lookup(long universe, long time, long uuid, KCallback<KObject> callback);
 

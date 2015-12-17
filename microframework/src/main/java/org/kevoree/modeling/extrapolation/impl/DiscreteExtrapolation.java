@@ -164,7 +164,7 @@ public class DiscreteExtrapolation implements Extrapolation {
                     //update index
                     final String finalPreviousHash = previousHash;
                     final String finalNewHash = newHash;
-                    dataManager.index(current.universe(), current.now(), current.metaClass().metaName(), new KCallback<KObjectIndex>() {
+                    dataManager.index(current.universe(), current.now(), current.metaClass().metaName(), true, new KCallback<KObjectIndex>() {
                         @Override
                         public void on(KObjectIndex classIndex) {
                             if (finalPreviousHash != null) {
