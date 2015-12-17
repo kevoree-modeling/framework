@@ -4,6 +4,7 @@ import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
+import org.kevoree.modeling.util.maths.structure.matrix.solver.QR;
 
 /**
  * Created by assaad on 16/12/15.
@@ -42,8 +43,9 @@ public class PolynomialFitBlas {
             }
         }
         // processValues the A matrix and see if it failed
-
-        coef= MatrixOperations.solve(A,y,false, KBlasTransposeType.NOTRANSPOSE, blas);
+        QR solver = QR.factorize(A,true,blas);
+        coef = new NativeArray2D(degree + 1, 1);
+        solver.solve(y,coef,blas);
     }
 
     public static double extrapolate(double time, double[] weights) {

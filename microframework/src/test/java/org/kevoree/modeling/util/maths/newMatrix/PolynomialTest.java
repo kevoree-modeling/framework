@@ -17,7 +17,7 @@ public class PolynomialTest {
     public void polytest(){
         double eps=1e-7;
         double[] coef={5,-4,1,7};
-        double[] t={0,1,2,3};
+        double[] t={0,1,2,3,4,5,6,7,8,9};
         double[] res=new double[t.length];
         KBlas java = new JavaBlas();
 

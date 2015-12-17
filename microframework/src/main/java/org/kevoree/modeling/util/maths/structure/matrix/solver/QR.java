@@ -2,7 +2,9 @@ package org.kevoree.modeling.util.maths.structure.matrix.solver;
 
 import org.kevoree.modeling.util.maths.structure.KArray2D;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
+import org.kevoree.modeling.util.maths.structure.blas.KBlasTransposeType;
 import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
+import org.kevoree.modeling.util.maths.structure.matrix.MatrixOperations;
 
 public class QR{
 
@@ -131,6 +133,42 @@ public class QR{
 
         return this;
     }
+
+
+    public void solve(KArray2D B, KArray2D X, KBlas blas) {
+        int BnumCols = B.columns();
+        KArray2D Y = new NativeArray2D(m,1);
+        KArray2D Z;
+
+        // solve each column one by one
+        for (int colB = 0; colB < BnumCols; colB++) {
+            // make a copy of this column in the vector
+            for (int i = 0; i < m; i++) {
+                Y.setAtIndex(i, B.get(i, colB));
+            }
+            // Solve Qa=b
+            // a = Q'b
+            Z=MatrixOperations.multiplyTransposeAlpha(KBlasTransposeType.TRANSPOSE,KBlasTransposeType.NOTRANSPOSE,Q,Y,1.0,blas);
+
+            // solve for Rx = b using the standard upper triangular solver
+            solveU(R, Z.data(), n, m);
+            // save the results
+            for (int i = 0; i < n; i++) {
+                X.set(i, colB, Z.getAtIndex(i));
+            }
+        }
+    }
+
+    private void solveU(KArray2D U, double[] b, int n, int m) {
+        for (int i = n - 1; i >= 0; i--) {
+            double sum = b[i];
+            for (int j = i + 1; j < n; j++) {
+                sum -= U.get(i,j) * b[j];
+            }
+            b[i] = sum / U.get(i,i);
+        }
+    }
+
 
     /**
      * Returns the upper triangular factor
