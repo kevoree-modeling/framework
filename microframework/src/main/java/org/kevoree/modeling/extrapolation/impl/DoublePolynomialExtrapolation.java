@@ -9,7 +9,7 @@ import org.kevoree.modeling.meta.KMetaAttribute;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.KPrimitiveTypes;
 import org.kevoree.modeling.util.PrimitiveHelper;
-import org.kevoree.modeling.util.maths.PolynomialFit;
+import org.kevoree.modeling.util.maths.structure.matrix.PolynomialFitBlas;
 
 public class DoublePolynomialExtrapolation implements Extrapolation {
     private static final double _TIMERR = 0.001;
@@ -106,7 +106,7 @@ public class DoublePolynomialExtrapolation implements Extrapolation {
     }
 
 
-    public boolean insert(long time, double value, long timeOrigin, KObjectChunk raw, int index, double precision, KMetaClass metaClass) {
+    public boolean insert(long time, double value, long timeOrigin, KObjectChunk raw, int index, double precision, KMetaClass metaClass,KInternalDataManager dataManager) {
         if (raw.getDoubleArraySize(index, metaClass) == 0) {
             initial_feed(time, value, raw, index, metaClass);
             return true;
@@ -136,7 +136,7 @@ public class DoublePolynomialExtrapolation implements Extrapolation {
                 }
                 times[ss] = num;
                 values[ss] = normTime;
-                PolynomialFit pf = new PolynomialFit(timedeg);
+                PolynomialFitBlas pf = new PolynomialFitBlas(timedeg,dataManager.blas());
                 pf.fit(times, values);
 
                 //add one weight to time polynomial and shift all other weights
@@ -179,7 +179,7 @@ public class DoublePolynomialExtrapolation implements Extrapolation {
             }
             times[ss] = normTime;
             values[ss] = value;
-            PolynomialFit pf = new PolynomialFit(deg);
+            PolynomialFitBlas pf = new PolynomialFitBlas(deg,dataManager.blas());
             pf.fit(times, values);
             if (tempError(pf.getCoef(), times, values) <= maxError) {
                 int pWeight=getPolyWeightIndex(raw,metaClass,index);
@@ -202,7 +202,7 @@ public class DoublePolynomialExtrapolation implements Extrapolation {
         double maxErr = 0;
         double temp;
         for (int i = 0; i < times.length; i++) {
-            temp = Math.abs(values[i] - PolynomialFit.extrapolate(times[i], computedWeights));
+            temp = Math.abs(values[i] - PolynomialFitBlas.extrapolate(times[i], computedWeights));
             if (temp > maxErr) {
                 maxErr = temp;
             }
@@ -244,13 +244,13 @@ public class DoublePolynomialExtrapolation implements Extrapolation {
         if (raw.getDoubleArraySize(attribute.index(), current.metaClass()) == 0) {
             raw = dataManager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         }
-        if (!insert(current.now(), castNumber(payload), raw.time(), raw, attribute.index(), attribute.precision(), current.metaClass())) {
+        if (!insert(current.now(), castNumber(payload), raw.time(), raw, attribute.index(), attribute.precision(), current.metaClass(), dataManager)) {
             long prevTime = getLastTimeLong(raw,current.metaClass(),attribute.index())+ raw.time();
             double val = extrapolateValue(raw, current.metaClass(), attribute.index(), prevTime, raw.time());
             KObjectChunk newSegment = dataManager.preciseChunk(current.universe(), prevTime, current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
             newSegment.clearDoubleArray(attribute.index(),current.metaClass());
-            insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
-            insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass());
+            insert(prevTime, val, prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass(),dataManager);
+            insert(current.now(), castNumber(payload), prevTime, newSegment, attribute.index(), attribute.precision(), current.metaClass(),dataManager);
         }
     }
 

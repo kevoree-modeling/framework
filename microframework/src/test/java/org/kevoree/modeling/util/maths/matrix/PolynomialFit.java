@@ -1,4 +1,4 @@
-package org.kevoree.modeling.util.maths;
+package org.kevoree.modeling.util.maths.matrix;
 
 import org.kevoree.modeling.util.maths.matrix.solvers.AdjLinearSolverQr;
 import org.kevoree.modeling.util.maths.matrix.DenseMatrix64F;

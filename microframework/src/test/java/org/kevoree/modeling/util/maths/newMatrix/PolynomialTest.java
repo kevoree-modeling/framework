@@ -2,10 +2,9 @@ package org.kevoree.modeling.util.maths.newMatrix;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kevoree.modeling.util.maths.PolynomialFit;
+import org.kevoree.modeling.util.maths.matrix.PolynomialFit;
 import org.kevoree.modeling.util.maths.structure.blas.KBlas;
 import org.kevoree.modeling.util.maths.structure.blas.impl.JavaBlas;
-import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 import org.kevoree.modeling.util.maths.structure.matrix.PolynomialFitBlas;
 
 /**
