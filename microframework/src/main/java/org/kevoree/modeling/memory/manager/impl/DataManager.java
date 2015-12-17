@@ -208,6 +208,12 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 connectCallback.on(new Exception("Please attach a KDataBase AND a KBroker first !"));
             }
         } else {
+            //connect the blas
+            KBlas localBlas = _blas;
+            if (localBlas != null) {
+                localBlas.connect();
+            }
+
             DataManager selfPointer = this;
             selfPointer._scheduler.start();
             selfPointer._scheduler.dispatch(new KTask() {
@@ -298,6 +304,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
     public synchronized final void close(KCallback<Throwable> callback) {
         if (isConnected) {
             _scheduler.stop();
+            _blas.disconnect();
             isConnected = false;
             if (_db != null) {
                 _db.close(callback);
