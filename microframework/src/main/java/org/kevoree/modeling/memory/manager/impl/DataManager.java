@@ -472,7 +472,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                     }
                 } else {
                     long indexUUID = globalIndex.getIndex(indexName);
-                    if (indexUUID == KConfig.NULL_LONG) {
+                    if (indexUUID == KConfig.NULL_LONG && createIfAbsent) {
                         long nextKey = nextObjectKey();
                         KObjectIndex namedIndex = new GenericObjectIndex(universe, time, nextKey, selfPointer, universe, time);
                         initKObject(namedIndex);
@@ -481,14 +481,20 @@ public class DataManager implements KDataManager, KInternalDataManager {
                             callback.on(namedIndex);
                         }
                     } else {
-                        selfPointer._scheduler.dispatch(selfPointer._resolver.lookup(universe, time, indexUUID, new KCallback<KObject>() {
-                            @Override
-                            public void on(KObject namedIndex) {
-                                if (Checker.isDefined(callback)) {
-                                    callback.on((KObjectIndex) namedIndex);
-                                }
+                        if (indexUUID == KConfig.NULL_LONG) {
+                            if (Checker.isDefined(callback)) {
+                                callback.on(null);
                             }
-                        }));
+                        } else {
+                            selfPointer._scheduler.dispatch(selfPointer._resolver.lookup(universe, time, indexUUID, new KCallback<KObject>() {
+                                @Override
+                                public void on(KObject namedIndex) {
+                                    if (Checker.isDefined(callback)) {
+                                        callback.on((KObjectIndex) namedIndex);
+                                    }
+                                }
+                            }));
+                        }
                     }
                 }
             }
