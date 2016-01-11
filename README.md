@@ -105,7 +105,7 @@ Within the scope of the KMF project several research papers have been published:
 
 * Thomas Hartmann, Francois Fouquet, Jacques Klein, Gregory Nain, and Yves Le Traon. **Reactive Security for Smart Grids Using Models@run.time-Based Simulation and Reasoning**. In Second Open EIT ICT Labs Workshop on Smart Grid Security (SmartGridSec'14), 2014. [Get the paper here](http://orbilu.uni.lu/handle/10993/16762)
 * Thomas Hartmann, Francois Fouquet, Jacques Klein, and Yves Le Traon, Alexander Pelov, Laurent Toutain, and Tanguy Ropitault. **Generating Realistic Smart Grid Communication Topologies Based on Real-Data**. In IEEE 5th International Conference on Smart Grid Communications (SmartGridComm'14), 2014. [Get the paper here](http://orbilu.uni.lu/handle/10993/19009) 	
-* Thomas Hartmann, Assaad Moawad, Francois Fouquet, Yves Reckinger, Tejeddine Mouelhi, Jacques Klein, and Yves Le Traon. **Suspicious Electric Consumption Detection Based on Multi-Profiling Using Live Machine Learning**. [Get the paper here](http://orbilu.uni.lu/handle/10993/22781). 
+* Thomas Hartmann, Assaad Moawad, Francois Fouquet, Yves Reckinger, Tejeddine Mouelhi, Jacques Klein, and Yves Le Traon. **Suspicious Electric Consumption Detection Based on Multi-Profiling Using Live Machine Learning**. In IEEE 6th International Conference on Smart Grid Communications (SmartGridComm'15), 2015. [Get the paper here](http://orbilu.uni.lu/handle/10993/22781). 
 * Thomas Hartmann, Assaad Moawad, Francois Fouquet, Yves Reckinger, Jacques Klein, Yves Le Traon. **Near Real-Time Electric Load Approximation in Low Voltage Cables of Smart Grids with Models@run.time**. (will appear soon)
 
 Getting started
