@@ -111,7 +111,7 @@ public class PolynomialExtrapolation implements Extrapolation {
         int newMaxDegree = Math.min(num, _maxDegree);
         if (deg < newMaxDegree) {
             deg++;
-            int ss = num*2;
+            int ss = num;
             double[] times = new double[ss + 1];
             double[] values = new double[ss + 1];
             double inc=0;
