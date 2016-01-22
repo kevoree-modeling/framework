@@ -67,9 +67,12 @@ public interface KModel<A extends KUniverse> {
 
     KModelContext createModelContext();
 
+    /** Traversal management */
     KTraversal createTraversal(KObject[] startingElements);
 
     KTraversal createReusableTraversal();
+
+    KTraversal traversal(long universe, long time);
 
     /**
      * Index management method
@@ -84,5 +87,6 @@ public interface KModel<A extends KUniverse> {
     void findAll(KMetaClass metaClass, long universe, long time, KCallback<KObject[]> callback);
 
     void findAllByName(String indexName, long universe, long time, KCallback<KObject[]> callback);
+
 
 }

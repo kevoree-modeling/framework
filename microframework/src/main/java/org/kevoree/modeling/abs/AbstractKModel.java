@@ -157,12 +157,17 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     @Override
     public KTraversal createTraversal(KObject[] startingElements) {
-        return new Traversal(startingElements);
+        return new Traversal(startingElements, null);
     }
 
     @Override
     public KTraversal createReusableTraversal() {
-        return new Traversal(null);
+        return new Traversal(null, null);
+    }
+
+    @Override
+    public KTraversal traversal(long p_universe, long p_time) {
+        return new Traversal(new KObject[0], universe(p_universe).time(p_time));
     }
 
     @Override

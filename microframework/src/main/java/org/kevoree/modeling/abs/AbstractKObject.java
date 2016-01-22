@@ -593,7 +593,7 @@ public abstract class AbstractKObject implements KObject {
     public KTraversal traversal() {
         KObject[] singleRoot = new KObject[1];
         singleRoot[0] = this;
-        return new Traversal(singleRoot);
+        return new Traversal(singleRoot, null);
     }
 
     @Override

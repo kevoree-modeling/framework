@@ -16,14 +16,17 @@ public class Traversal implements KTraversal {
 
     private KObject[] _initObjs;
 
+    private KView _baseView;
+
     private KTraversalAction _initAction;
 
     private KTraversalAction _lastAction;
 
     private boolean _terminated = false;
 
-    public Traversal(KObject[] p_roots) {
+    public Traversal(KObject[] p_roots, KView p_baseView) {
         this._initObjs = p_roots;
+        this._baseView = p_baseView;
     }
 
     private KTraversal internal_chain_action(KTraversalAction p_action) {
@@ -97,7 +100,7 @@ public class Traversal implements KTraversal {
     public void then(KCallback<KObject[]> cb) {
         //execute the first element of the chain of actions
         if (_initObjs != null) {
-            _initAction.execute(new TraversalContext(_initObjs, null, new KCallback<Object[]>() {
+            _initAction.execute(new TraversalContext(_initObjs, _baseView, new KCallback<Object[]>() {
                 @Override
                 public void on(Object[] objects) {
                     cb.on((KObject[]) objects);
@@ -113,7 +116,7 @@ public class Traversal implements KTraversal {
         _terminated = true;
         //execute the first element of the chain of actions
         if (_initObjs != null) {
-            _initAction.execute(new TraversalContext(_initObjs, null, callback));
+            _initAction.execute(new TraversalContext(_initObjs, _baseView, callback));
         }
     }
 

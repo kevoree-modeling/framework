@@ -38,7 +38,7 @@ public class QueryEngine implements KQueryEngine {
         if (query == null || query.length() == 0) {
             return null;
         } else {
-            KTraversal traversal = new Traversal(null);
+            KTraversal traversal = new Traversal(null, null);
             int i = 0;
             boolean escaped = false;
             int previousKQueryStart = 0;
