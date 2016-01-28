@@ -205,13 +205,19 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
                             }
                         }
                     }
-                    long objectUUID = kObjectIndex.getIndex(concat);
-                    if (objectUUID == KConfig.NULL_LONG) {
+                    if(kObjectIndex == null){
                         if (Checker.isDefined(callback)) {
                             callback.on(null);
                         }
                     } else {
-                        _manager.lookup(universe, time, objectUUID, callback);
+                        long objectUUID = kObjectIndex.getIndex(concat);
+                        if (objectUUID == KConfig.NULL_LONG) {
+                            if (Checker.isDefined(callback)) {
+                                callback.on(null);
+                            }
+                        } else {
+                            _manager.lookup(universe, time, objectUUID, callback);
+                        }
                     }
                 }
             });
