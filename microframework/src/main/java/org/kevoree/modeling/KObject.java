@@ -69,6 +69,13 @@ public interface KObject {
     long[] getRelationValues(KMetaRelation metaRelation);
 
     /**
+     * synchronous wrapper
+     */
+    KObject[] syncGetRelation(KMetaRelation metaRelation);
+
+    KObject[] syncGetRelationByName(String metaRelationName);
+
+    /**
      * Reflexive Attributes API
      */
     Object get(KMetaAttribute metaAttribute);

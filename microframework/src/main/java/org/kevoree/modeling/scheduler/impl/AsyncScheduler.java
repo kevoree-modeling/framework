@@ -9,16 +9,19 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @native ts
  * dispatch = function(task:org.kevoree.modeling.scheduler.KTask){
- *      setTimeout(task,0);
+ * setTimeout(task,0);
  * }
  * start = function(){
- *      //NNOP
+ * //NNOP
  * }
  * stop = function(){
- *      //NOOP
+ * //NOOP
  * }
  * run = function(){
- *     //NOOP
+ * //NOOP
+ * }
+ * detach(){
+ * console.log('sync operation not implemented in JS yet !!!!');
  * }
  */
 public class AsyncScheduler implements KScheduler, Runnable {
@@ -31,14 +34,16 @@ public class AsyncScheduler implements KScheduler, Runnable {
     }
 
     private Thread[] workers;
+    private AsyncScheduler[] workersObj;
     private ThreadGroup tg;
 
     @Override
     public synchronized void start() {
         tg = new ThreadGroup("KMF_Worker");
-        isAlive = true;
         workers = new Thread[_nbWorker];
+        workersObj = new AsyncScheduler[_nbWorker];
         for (int i = 0; i < _nbWorker; i++) {
+            workersObj[i] = this;
             workers[i] = new Thread(tg, this, "KMF_Worker_Thread_" + i);
             workers[i].setDaemon(false);
             workers[i].start();
@@ -47,10 +52,32 @@ public class AsyncScheduler implements KScheduler, Runnable {
 
     @Override
     public synchronized void stop() {
-        isAlive = false;
+        tg.destroy();
     }
 
-    private volatile boolean isAlive = false;
+    @Override
+    public void detach() {
+        Thread current = Thread.currentThread();
+        for (int i = 0; i < _nbWorker; i++) {
+            if (workers[i].getId() == current.getId()) {
+                //inform the previous thread to die at the end of the blocking task
+                isAlive.set(false);
+                //replace the current current by a fresh one
+                workers[i] = new Thread(tg, this, "KMF_Worker_Thread_" + i);
+                workers[i].setDaemon(false);
+                workers[i].start();
+                //exit the function
+                return;
+            }
+        }
+    }
+
+    private ThreadLocal<Boolean> isAlive = new ThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return true;
+        }
+    };
 
     private int _nbWorker = 1;
 
@@ -61,7 +88,7 @@ public class AsyncScheduler implements KScheduler, Runnable {
 
     @Override
     public void run() {
-        while (isAlive) {
+        while (isAlive.get()) {
             try {
                 KTask toExecuteTask = null;
                 if (toExecuteTask == null) {
@@ -86,7 +113,9 @@ public class AsyncScheduler implements KScheduler, Runnable {
         }
     }
 
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     class LockFreeQueue {
         private final AtomicLong length = new AtomicLong(1L);
 

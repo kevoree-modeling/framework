@@ -758,4 +758,42 @@ public abstract class AbstractKObject implements KObject {
         System.arraycopy(result, 0, trimmed, 0, current);
         return trimmed;
     }
+
+    /**
+     * Synchronous API
+     */
+    @Override
+    public KObject[] syncGetRelation(KMetaRelation p_metaRelation) {
+        KMetaRelation transposed = internal_transpose_ref(p_metaRelation);
+        if (transposed == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaRelation.metaName() + " is not part of " + metaClass().metaName());
+        } else {
+            return internal_syncGetRelation(transposed);
+        }
+    }
+
+    @Override
+    public KObject[] syncGetRelationByName(String p_metaRelationName) {
+        KMetaRelation transposed = internal_transpose_ref(_metaClass.reference(p_metaRelationName));
+        if (transposed == null) {
+            throw new RuntimeException("Bad KMF usage, the reference named " + p_metaRelationName + " is not part of " + metaClass().metaName());
+        } else {
+            return internal_syncGetRelation(transposed);
+        }
+    }
+
+    private KObject[] internal_syncGetRelation(KMetaRelation p_transposedRelation) {
+        KObjectChunk raw = _manager.closestChunk(_universe, _time, _uuid, _metaClass, _previousResolveds);
+        if (raw == null) {
+            return new KObject[0];
+        } else {
+            long[] o = raw.getLongArray(p_transposedRelation.index(), _metaClass);
+            if (o == null) {
+                return new KObject[0];
+            } else {
+                return _manager.syncLookupAllObjects(_universe, _time, o);
+            }
+        }
+    }
+
 }

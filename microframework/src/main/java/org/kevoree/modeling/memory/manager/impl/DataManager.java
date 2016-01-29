@@ -335,6 +335,32 @@ public class DataManager implements KDataManager, KInternalDataManager {
         this._scheduler.dispatch(this._resolver.lookupAllObjects(universe, time, uuids, callback));
     }
 
+    /**
+     * @native ts
+     * return null;
+     */
+    @Override
+    public KObject[] syncLookupAllObjects(long universe, long time, long[] uuids) {
+        //important!!!
+        this._scheduler.detach();
+        final KObject[][] result = new KObject[1][];
+        java.util.concurrent.CountDownLatch counter = new java.util.concurrent.CountDownLatch(1);
+        this._scheduler.dispatch(this._resolver.lookupAllObjects(universe, time, uuids, new KCallback<KObject[]>() {
+            @Override
+            public void on(KObject[] returnedResult) {
+                result[0] = returnedResult;
+                counter.countDown();
+            }
+        }));
+        try {
+            //TODO inform the scheduler of the blocking operation
+            counter.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result[0];
+    }
+
     @Override
     public void lookupAllTimes(long universe, long[] times, long uuid, KCallback<KObject[]> callback) {
         this._scheduler.dispatch(this._resolver.lookupAllTimes(universe, times, uuid, callback));

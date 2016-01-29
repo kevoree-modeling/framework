@@ -8,4 +8,6 @@ public interface KScheduler {
 
     void stop();
 
+    void detach();
+
 }

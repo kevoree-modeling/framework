@@ -20,4 +20,9 @@ public class DirectScheduler implements KScheduler {
         //NOOP
     }
 
+    @Override
+    public void detach() {
+        //NOOP
+    }
+
 }

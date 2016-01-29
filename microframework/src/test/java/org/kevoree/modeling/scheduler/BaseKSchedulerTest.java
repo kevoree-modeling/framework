@@ -1,19 +1,24 @@
 package org.kevoree.modeling.scheduler;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.kevoree.modeling.KCallback;
+import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.cloudmodel.CloudModel;
 import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
+import org.kevoree.modeling.cloudmodel.meta.MetaNode;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 
-/** @ignore ts */
+/**
+ * @ignore ts
+ */
 public abstract class BaseKSchedulerTest {
 
     public abstract KScheduler createScheduler();
 
-   // @Test
+    @Test
     public void test() {
         final CloudModel model = new CloudModel(DataManagerBuilder.create().withScheduler(createScheduler()).build());
         model.connect(new KCallback<Throwable>() {
@@ -22,7 +27,6 @@ public abstract class BaseKSchedulerTest {
                 CloudUniverse dimension0 = model.newUniverse();
                 CloudView time0 = dimension0.time(0l);
                 final Node root = time0.createNode();
-              //  time0.setRoot(root, null);
                 root.setName("root");
                 Node n1 = time0.createNode();
                 n1.setName("n1");
@@ -30,22 +34,22 @@ public abstract class BaseKSchedulerTest {
                 n2.setName("n2");
                 root.addChildren(n1);
                 root.addChildren(n2);
-/*
-                n1.inbounds().then(new Callback<KObject[]>() {
+                root.getRelation(MetaNode.REF_CHILDREN, new KCallback<KObject[]>() {
                     @Override
                     public void on(KObject[] kObjects) {
-                        Assert.assertEquals(kObjects[0].uuid(), root.uuid());
+                        Assert.assertEquals(kObjects.length, 2);
                     }
                 });
-                n2.inbounds().then(new Callback<KObject[]>() {
-                    @Override
-                    public void on(KObject[] kObjects) {
-                        Assert.assertEquals(kObjects[0].uuid(), root.uuid());
-                    }
-                });
-                */
+                KObject[] syncResult = root.syncGetRelation(MetaNode.REF_CHILDREN);
+                Assert.assertEquals(syncResult.length, 2);
             }
         });
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
 
     }
