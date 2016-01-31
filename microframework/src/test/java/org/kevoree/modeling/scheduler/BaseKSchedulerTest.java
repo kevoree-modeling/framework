@@ -51,6 +51,5 @@ public abstract class BaseKSchedulerTest {
             e.printStackTrace();
         }
 
-
     }
 }
