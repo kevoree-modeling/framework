@@ -113,7 +113,7 @@ public class JsonModelLoader {
         long kid = PrimitiveHelper.parseLong(p_param.get(JsonFormat.KEY_UUID).toString());
         String meta = p_param.get(JsonFormat.KEY_META).toString();
         KMetaClass metaClass = manager.model().metaModel().metaClassByName(meta);
-        KObject current = ((AbstractKModel) manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass, universe, time);
+        KObject current = ((AbstractKModel) manager.model()).createProxy(universe, time, p_mappedKeys.get(kid), metaClass, universe, time, KConfig.NULL_LONG,KConfig.NULL_LONG);
         manager.initKObject(current);
         KObjectChunk raw = manager.preciseChunk(current.universe(), current.now(), current.uuid(), current.metaClass(), ((AbstractKObject) current).previousResolved());
         p_param.each(new KStringMapCallBack<Object>() {

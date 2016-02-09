@@ -34,7 +34,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         if (resolvedElement != null) {
             int newCount = resolvedElement.dec();
             if (newCount <= 0) {
-                cleanDependenciesAndPotentiallyRemoveChunk(resolvedElement);
+                cleanPotentiallyRemoveChunk(resolvedElement);
             }
         }
     }
@@ -52,7 +52,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     public void unmarkMemoryElement(KChunk element) {
         int newCount = element.dec();
         if (newCount <= 0) {
-            cleanDependenciesAndPotentiallyRemoveChunk(element);
+            cleanPotentiallyRemoveChunk(element);
         }
     }
 
@@ -61,25 +61,18 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
         element.inc();
     }
 
-
     @Override
     public void unmarkAllMemoryElements(KChunk[] elements) {
         for (int i = 0; i < elements.length; i++) {
             KChunk loopChunk = elements[i];
             int newCount = elements[i].dec();
             if (newCount <= 0) {
-                cleanDependenciesAndPotentiallyRemoveChunk(loopChunk);
+                cleanPotentiallyRemoveChunk(loopChunk);
             }
         }
     }
 
-    private void cleanDependenciesAndPotentiallyRemoveChunk(KChunk toRemoveChunk) {
-        long[] dependencies = toRemoveChunk.dependencies();
-        if (dependencies != null && dependencies.length > 0) {
-            for (int i = 0; i < dependencies.length; i = i + 3) {
-                unmark(dependencies[i], dependencies[i + 1], dependencies[i + 2]);
-            }
-        }
+    private void cleanPotentiallyRemoveChunk(KChunk toRemoveChunk) {
         if ((toRemoveChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
             toRemoveChunk.setFlags(KChunkFlags.REMOVED_BIT, 0);
             _space.remove(toRemoveChunk.universe(), toRemoveChunk.time(), toRemoveChunk.obj(), _metaModel);

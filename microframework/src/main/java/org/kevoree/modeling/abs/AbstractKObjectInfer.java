@@ -14,8 +14,8 @@ import org.kevoree.modeling.util.maths.structure.impl.NativeArray2D;
 
 public class AbstractKObjectInfer extends AbstractKObject implements KObjectInfer {
 
-    public AbstractKObjectInfer(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long currentUniverse, long currentTime) {
-        super(p_universe, p_time, p_uuid, p_metaClass, p_manager, currentUniverse, currentTime);
+    public AbstractKObjectInfer(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long currentUniverse, long currentTime, long currentUniverseMagic, long currentTimeMagic) {
+        super(p_universe, p_time, p_uuid, p_metaClass, p_manager, currentUniverse, currentTime, currentUniverseMagic, currentTimeMagic);
     }
 
     @Override

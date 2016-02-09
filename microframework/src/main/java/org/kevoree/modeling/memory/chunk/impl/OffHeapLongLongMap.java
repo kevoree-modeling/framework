@@ -14,7 +14,7 @@ import sun.misc.Unsafe;
 
 /**
  * @ignore ts
- * <p/>
+ * <p>
  * OffHeap implementation of KLongLongMap
  * - memory structure:  | initial capacity (4) | threshold (4) | meta class idx (4) | elem count (4) | dropped count (4) |
  * -                    | flags (8) | elem data size (4) | counter (4) | back (elem data size * 28) |
@@ -172,6 +172,11 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
                 }
             }
         }
+    }
+
+    @Override
+    public long magic() {
+        throw new RuntimeException("Not implemented yet!");
     }
 
     protected void rehashCapacity(int p_capacity) {
@@ -568,18 +573,4 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         }
     }
 
-    @Override
-    public long[] dependencies() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public void addDependency(long universe, long time, long uuid) {
-        throw new RuntimeException("Not implemented yet");
-    }
-
 }
-
-
-

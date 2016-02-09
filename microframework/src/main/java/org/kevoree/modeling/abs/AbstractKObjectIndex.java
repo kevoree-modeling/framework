@@ -5,13 +5,12 @@ import org.kevoree.modeling.KObjectIndex;
 import org.kevoree.modeling.memory.chunk.KObjectIndexChunk;
 import org.kevoree.modeling.memory.chunk.KStringLongMapCallBack;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
-import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.meta.impl.MetaClassIndex;
 
 public class AbstractKObjectIndex extends AbstractKObject implements KObjectIndex {
 
-    public AbstractKObjectIndex(long p_universe, long p_time, long p_uuid, KInternalDataManager p_manager, long p_actualUniverse, long p_actualTime) {
-        super(p_universe, p_time, p_uuid, MetaClassIndex.INSTANCE, p_manager, p_actualUniverse, p_actualTime);
+    public AbstractKObjectIndex(long p_universe, long p_time, long p_uuid, KInternalDataManager p_manager, long p_actualUniverse, long p_actualTime, long p_currentUniverseMagic, long p_currentTimeMagic) {
+        super(p_universe, p_time, p_uuid, MetaClassIndex.INSTANCE, p_manager, p_actualUniverse, p_actualTime, p_currentUniverseMagic, p_currentTimeMagic);
     }
 
     @Override
@@ -45,7 +44,7 @@ public class AbstractKObjectIndex extends AbstractKObject implements KObjectInde
             return result;
         } else {
             long[] trimmedResult = new long[i[0]];
-            System.arraycopy(result,0,trimmedResult,0,i[0]);
+            System.arraycopy(result, 0, trimmedResult, 0, i[0]);
             return trimmedResult;
         }
     }

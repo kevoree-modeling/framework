@@ -7,6 +7,7 @@ import org.kevoree.modeling.memory.chunk.KTreeWalker;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,6 +31,7 @@ public abstract class AbstractArrayTree implements KChunk {
     private final KChunkSpace _space;
     private final AtomicLong _flags;
     private final AtomicInteger _counter;
+    protected volatile long _magic;
 
     public AbstractArrayTree(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
         this._universe = p_universe;
@@ -38,6 +40,7 @@ public abstract class AbstractArrayTree implements KChunk {
         this._flags = new AtomicLong(0);
         this._counter = new AtomicInteger(0);
         this._space = p_space;
+        this._magic = PrimitiveHelper.rand();
     }
 
     class InternalState {
@@ -745,14 +748,4 @@ public abstract class AbstractArrayTree implements KChunk {
 
     public abstract short type();
 
-    @Override
-    public long[] dependencies() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public void addDependency(long universe, long time, long uuid) {
-        throw new RuntimeException("Not implemented yet");
-    }
 }

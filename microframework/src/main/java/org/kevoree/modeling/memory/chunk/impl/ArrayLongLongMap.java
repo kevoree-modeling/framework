@@ -9,6 +9,7 @@ import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -41,6 +42,8 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     private int _metaClassIndex = -1;
 
+    private volatile long _magic;
+
     public ArrayLongLongMap(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
         this._universe = p_universe;
         this._time = p_time;
@@ -57,6 +60,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
         this.state = newstate;
         this.threshold = (int) (newstate.elementDataSize * loadFactor);
+        this._magic = PrimitiveHelper.rand();
     }
 
     final class InternalState {
@@ -104,6 +108,11 @@ public class ArrayLongLongMap implements KLongLongMap {
             this.state = newstate;
             this.threshold = (int) (newstate.elementDataSize * loadFactor);
         }
+    }
+
+    @Override
+    public long magic() {
+        return this._magic;
     }
 
     protected final void rehashCapacity(int capacity) {
@@ -210,10 +219,14 @@ public class ArrayLongLongMap implements KLongLongMap {
             }
             //now the object is reachable to other thread everything should be ready
             state.elementHash[index] = newIndex;
+            internal_set_dirty();
         } else {
-            state.elementKV[entry + 1] = value;/*setValue*/
+            if (state.elementKV[entry + 1] != value) {
+                //setValue
+                state.elementKV[entry + 1] = value;
+                internal_set_dirty();
+            }
         }
-        internal_set_dirty();
     }
 
     final int findNonNullKeyEntry(long key, int index) {
@@ -376,6 +389,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     private void internal_set_dirty() {
+        this._magic = PrimitiveHelper.rand();
         if (_space != null) {
             if ((_flags.get() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
                 _space.declareDirty(this);
@@ -415,17 +429,6 @@ public class ArrayLongLongMap implements KLongLongMap {
     @Override
     public long obj() {
         return this._obj;
-    }
-
-    @Override
-    public long[] dependencies() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public void addDependency(long universe, long time, long uuid) {
-        throw new RuntimeException("Not implemented yet");
     }
 
 }

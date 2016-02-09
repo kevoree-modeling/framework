@@ -31,22 +31,22 @@ public class CloudModel extends AbstractKModel<CloudUniverse> {
     }
 
     @Override
-    protected KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime) {
+    protected KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime, long currentUniverseMagic, long currentTimeMagic) {
         if (clazz == null) {
             return null;
         }
         switch (clazz.index()) {
             case 0:
-                return new NodeImpl(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
+                return new NodeImpl(universe, time, uuid, clazz, _manager, previousUniverse, previousTime,currentUniverseMagic,currentTimeMagic);
             case 1:
-                return new ElementImpl(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
+                return new ElementImpl(universe, time, uuid, clazz, _manager, previousUniverse, previousTime,currentUniverseMagic,currentTimeMagic);
             default:
                 if (clazz.index() == MetaClassIndex.INSTANCE.index()) {
-                    return new GenericObjectIndex(universe, time, uuid, _manager, previousUniverse, previousTime);
+                    return new GenericObjectIndex(universe, time, uuid, _manager, previousUniverse, previousTime,currentUniverseMagic,currentTimeMagic);
                 } else if (clazz.inferAlg() != null) {
-                    return new GenericObjectInfer(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
+                    return new GenericObjectInfer(universe, time, uuid, clazz, _manager, previousUniverse, previousTime,currentUniverseMagic,currentTimeMagic);
                 } else {
-                    return new GenericObject(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
+                    return new GenericObject(universe, time, uuid, clazz, _manager, previousUniverse, previousTime,currentUniverseMagic,currentTimeMagic);
                 }
         }
     }

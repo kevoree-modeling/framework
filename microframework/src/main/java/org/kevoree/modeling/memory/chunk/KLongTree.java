@@ -9,5 +9,7 @@ public interface KLongTree extends KTree {
     long lookup(long key);
 
     void range(long startKey, long endKey, KTreeWalker walker);
-    
+
+    long magic();
+
 }

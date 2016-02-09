@@ -29,13 +29,13 @@ class GenericModel extends AbstractKModel {
     }
 
     @Override
-    protected KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime) {
+    protected KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime, long universeMagic, long timeMagic) {
         if(clazz.index() == MetaClassIndex.INSTANCE.index()){
-            return new GenericObjectIndex(universe, time, uuid, _manager, previousUniverse, previousTime);
+            return new GenericObjectIndex(universe, time, uuid, _manager, previousUniverse, previousTime,universeMagic,timeMagic);
         } else if (clazz.inferAlg() != null) {
-            return new GenericObjectInfer(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
+            return new GenericObjectInfer(universe, time, uuid, clazz, _manager, previousUniverse, previousTime,universeMagic,timeMagic);
         } else {
-            return new GenericObject(universe, time, uuid, clazz, _manager, previousUniverse, previousTime);
+            return new GenericObject(universe, time, uuid, clazz, _manager, previousUniverse, previousTime,universeMagic,timeMagic);
         }
     }
 }

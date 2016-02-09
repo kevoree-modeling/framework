@@ -13,7 +13,6 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
 
     public OffHeapLongTree(OffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
         super();
-
         NODE_SIZE = 5;
         this._space = p_space;
         this._universe = p_universe;
@@ -36,6 +35,11 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
         } else {
             return KConfig.NULL_LONG;
         }
+    }
+
+    @Override
+    public long magic() {
+        throw new RuntimeException("Not implemented yet!");
     }
 
     @Override

@@ -79,10 +79,10 @@ public class DistortedTimeResolver implements KResolver {
                                                                     int metaClassIndex = ((KObjectChunk) theObjectChunk).metaClassIndex();
                                                                     KObject newProxy;
                                                                     if (metaClassIndex == MetaClassIndex.INSTANCE.index()) {
-                                                                        newProxy = new GenericObjectIndex(universe, time, uuid, selfPointer._manager, closestUniverse, closestTime);
+                                                                        newProxy = new GenericObjectIndex(universe, time, uuid, selfPointer._manager, closestUniverse, closestTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
                                                                     } else {
                                                                         KMetaClass resolvedMetaClass = selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunk).metaClassIndex());
-                                                                        newProxy = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuid, resolvedMetaClass, closestUniverse, closestTime);
+                                                                        newProxy = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuid, resolvedMetaClass, closestUniverse, closestTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
                                                                     }
                                                                     selfPointer._spaceManager.register(newProxy);
                                                                     callback.on(newProxy);
@@ -171,7 +171,7 @@ public class DistortedTimeResolver implements KResolver {
                                                             KObject[] finalResult = new KObject[uuids.length];
                                                             for (int h = 0; h < theObjectChunks.length; h++) {
                                                                 if (theObjectChunks[h] != null) {
-                                                                    finalResult[h] = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuids[h], selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1]);
+                                                                    finalResult[h] = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuids[h], selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1], ((KLongLongMap) objectUniverseOrderElements[h]).magic(), ((KLongTree) objectTimeTreeElements[h]).magic());
                                                                 } else {
                                                                     finalResult[h] = null;
                                                                 }
@@ -233,20 +233,18 @@ public class DistortedTimeResolver implements KResolver {
                                     insertIndex++;
                                 }
                                 selfPointer.getOrLoadAndMarkAll(allOrderedKeys, new KCallback<KChunk[]>() {
-
                                     @Override
                                     public void on(KChunk[] kChunks) {
                                         if (kChunks == null || kChunks.length == 0) {
                                             selfPointer._spaceManager.unmarkMemoryElement(theGlobalUniverseOrderElement);
                                             callback.on(new KObject[0]);
-                                            return;
                                         } else {
                                             KObject[] finalResult = new KObject[nbKeys];
                                             int insertIndex = 0;
                                             int previousClassIndex = -1;
                                             for (int h = 0; h < kChunks.length; h++) {
                                                 if (kChunks[h] != null && kChunks[h].type() == KChunkTypes.OBJECT_CHUNK) {
-                                                    finalResult[insertIndex] = ((AbstractKModel) selfPointer._manager.model()).createProxy(kChunks[h].universe(), kChunks[h].time(), kChunks[h].obj(), selfPointer._manager.model().metaModel().metaClass(previousClassIndex), kChunks[h].universe(), kChunks[h].time());
+                                                    finalResult[insertIndex] = ((AbstractKModel) selfPointer._manager.model()).createProxy(kChunks[h].universe(), kChunks[h].time(), kChunks[h].obj(), selfPointer._manager.model().metaModel().metaClass(previousClassIndex), kChunks[h].universe(), kChunks[h].time(), KConfig.NULL_LONG, KConfig.NULL_LONG);
                                                     insertIndex++;
                                                 } else if (kChunks[h] != null && kChunks[h].type() == KChunkTypes.LONG_LONG_MAP) {
                                                     KLongLongMap casted = (KLongLongMap) kChunks[h];
@@ -334,7 +332,7 @@ public class DistortedTimeResolver implements KResolver {
                                                             KObject[] finalResult = new KObject[nbObjs];
                                                             for (int h = 0; h < theObjectChunks.length; h++) {
                                                                 if (theObjectChunks[h] != null) {
-                                                                    finalResult[h] = ((AbstractKModel) selfPointer._manager.model()).createProxy(flat[h * 3], flat[h * 3 + 1], flat[h * 3 + 2], selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1]);
+                                                                    finalResult[h] = ((AbstractKModel) selfPointer._manager.model()).createProxy(flat[h * 3], flat[h * 3 + 1], flat[h * 3 + 2], selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunks[h]).metaClassIndex()), tempObjectTimeTreeKeys[h * 3], tempObjectChunkKeys[h * 3 + 1], ((KLongLongMap) objectUniverseOrderElements[h]).magic(), ((KLongTree) objectTimeTreeElements[h]).magic());
                                                                 } else {
                                                                     finalResult[h] = null;
                                                                 }
@@ -377,10 +375,12 @@ public class DistortedTimeResolver implements KResolver {
                                             callback.on(null);
                                         } else {
                                             final long[] closestUniverses = new long[times.length];
+                                            //   final long[] closestUniverseMagics = new long[times.length];
                                             ArrayLongLongMap closestUnikUniverse = new ArrayLongLongMap(-1, -1, -1, null);
                                             int nbUniverseToload = 0;
                                             for (int i = 0; i < times.length; i++) {
                                                 closestUniverses[i] = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, times[i], universe);
+                                                //  closestUniverseMagics[i] = ((KLongLongMap) theObjectUniverseOrderElement).magic();
                                                 if (!closestUnikUniverse.contains(closestUniverses[i])) {
                                                     closestUnikUniverse.put(closestUniverses[i], nbUniverseToload);
                                                     nbUniverseToload++;
@@ -405,12 +405,14 @@ public class DistortedTimeResolver implements KResolver {
                                                         callback.on(null);
                                                     } else {
                                                         final long[] closestTimes = new long[times.length];
+                                                        final long[] closestTimesMagic = new long[times.length];
                                                         final ArrayLongLongMap closestUnikTimes = new ArrayLongLongMap(-1, -1, -1, null);
                                                         ArrayLongLongMap reverseTimeUniverse = new ArrayLongLongMap(-1, -1, -1, null);
                                                         int nbTimesToload = 0;
                                                         for (int i = 0; i < times.length; i++) {
                                                             int alignedIndexOfUniverse = (int) closestUnikUniverse.get(closestUniverses[i]);
                                                             closestTimes[i] = ((KLongTree) objectTimeTreeElements[alignedIndexOfUniverse]).previousOrEqual(times[i]);
+                                                            closestTimesMagic[i] = ((KLongTree) objectTimeTreeElements[alignedIndexOfUniverse]).magic();
                                                             if (!closestUnikTimes.contains(closestTimes[i])) {
                                                                 closestUnikTimes.put(closestTimes[i], nbTimesToload);
                                                                 reverseTimeUniverse.put(closestTimes[i], closestUniverses[i]);
@@ -440,9 +442,11 @@ public class DistortedTimeResolver implements KResolver {
                                                                     for (int i = 0; i < times.length; i++) {
                                                                         long resolvedUniverse = closestUniverses[i];
                                                                         long resolvedTime = closestTimes[i];
+                                                                        long timeMagic = closestTimesMagic[i];
+                                                                        // long resolvedUniverseMagic = closestUniverseMagics[i];
                                                                         int indexChunks = (int) closestUnikTimes.get(closestTimes[i]);
                                                                         if (indexChunks != -1 && resolvedUniverse != KConfig.NULL_LONG && resolvedTime != KConfig.NULL_LONG) {
-                                                                            result[i] = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, times[i], uuid, selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) objectChunks[indexChunks]).metaClassIndex()), resolvedUniverse, resolvedTime);
+                                                                            result[i] = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, times[i], uuid, selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) objectChunks[indexChunks]).metaClassIndex()), resolvedUniverse, resolvedTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), timeMagic);
                                                                         } else {
                                                                             result[i] = null;
                                                                         }
@@ -478,149 +482,166 @@ public class DistortedTimeResolver implements KResolver {
         return internal_chunk(universe, time, uuid, true, metaClass, previousResolution);
     }
 
-    //TODO optimize the worst case by reusing, by using previous universe cache information, maybe optimize
-    //FIXME
     private KObjectChunk internal_chunk(long universe, long requestedTime, long uuid, boolean useClosest, KMetaClass metaClass, AtomicReference<long[]> previousResolution) {
         long time = requestedTime;
         if (metaClass.temporalResolution() != 1) {
             time = time - (time % metaClass.temporalResolution());
         }
+        //OPTIMIZATION #1, object without any dephasing
         KObjectChunk currentEntry = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
         if (currentEntry != null) {
+            //OPTIMIZATION #1.1, object without any dephasing from scratch
             long[] previous;
             long[] current;
             boolean diff = false;
             do {
                 previous = previousResolution.get();
                 if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != universe || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != time) {
-                    current = new long[]{universe, time};
+                    //the two magic numbers are set to NULL because will not be used anymore
+                    //object is aligned now, optimization #1 will always win
+                    current = new long[]{universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG};
                     diff = true;
                 } else {
                     current = previous;
                 }
             } while (!previousResolution.compareAndSet(previous, current));
             if (diff) {
-                //we obtains the token, and we have to free the previous one, the new one stay marked
+                //we obtains the token, and we have to free the previous one
                 _spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+                //the current one stay marked once and is return without any modifications
             } else {
                 _spaceManager.unmarkMemoryElement(currentEntry);
             }
             return currentEntry;
         }
-        KLongLongMap objectUniverseTree = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
-        if (objectUniverseTree == null) {
+        //OPTIMIZATION #2, previous dephasing is still valid
+        long[] previousResolved = previousResolution.get();
+        KLongLongMap objectUniverseMap = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
+        if (objectUniverseMap == null) {
             return null;
         }
-        KLongLongMap globalUniverseTree = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
-        if (globalUniverseTree == null) {
-            _spaceManager.unmarkMemoryElement(objectUniverseTree);
+        KLongTree objectTimeTree = (KLongTree) _spaceManager.getAndMark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, uuid);
+        if (objectTimeTree == null) {
+            _spaceManager.unmarkMemoryElement(objectUniverseMap);
             return null;
         }
-        long resolvedUniverse = resolve_universe(globalUniverseTree, objectUniverseTree, time, universe);
-        KLongTree timeTree = (KLongTree) _spaceManager.getAndMark(resolvedUniverse, KConfig.NULL_LONG, uuid);
-        if (timeTree == null) {
-            _spaceManager.unmarkMemoryElement(globalUniverseTree);
-            _spaceManager.unmarkMemoryElement(objectUniverseTree);
-            return null;
-        }
-        long resolvedTime = timeTree.previousOrEqual(time);
-        if (resolvedTime != KConfig.NULL_LONG) {
-            boolean needTimeCopy = !useClosest && (resolvedTime != time);
-            boolean needUniverseCopy = !useClosest && (resolvedUniverse != universe);
-            currentEntry = (KObjectChunk) _spaceManager.getAndMark(resolvedUniverse, resolvedTime, uuid);
-            if (currentEntry == null) {
-                //TODO cache miss here, we unMark everything used Chunk and go out
-                System.err.println("DePhasing problem, null chunk unexpected");
-                _spaceManager.unmarkMemoryElement(timeTree);
-                _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                _spaceManager.unmarkMemoryElement(objectUniverseTree);
+        long objectUniverseMapMagic = objectUniverseMap.magic();
+        long objectTimeTreeMagic = objectTimeTree.magic();
+        if (useClosest && previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_MAGIC] == objectUniverseMapMagic && previousResolved[AbstractKObject.TIME_PREVIOUS_MAGIC] == objectTimeTreeMagic) {
+            currentEntry = (KObjectChunk) _spaceManager.getAndMark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+            _spaceManager.unmarkMemoryElement(objectUniverseMap);
+            _spaceManager.unmarkMemoryElement(objectTimeTree);
+            if (currentEntry != null) {
+                //ERROR case, chunk has been removed from cache
+                _spaceManager.unmarkMemoryElement(currentEntry);
+            }
+            return currentEntry;
+        } else {
+            //NOMINAL CASE, MAGIC NUMBER ARE NOT VALID ANYMORE
+            KLongLongMap globalUniverseTree = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+            if (globalUniverseTree == null) {
+                _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                _spaceManager.unmarkMemoryElement(objectTimeTree);
                 return null;
             }
-            if (!needTimeCopy && !needUniverseCopy) {
-                long[] previous;
-                long[] current;
-                boolean diff = false;
-                do {
-                    previous = previousResolution.get();
-                    if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != resolvedUniverse || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != resolvedTime) {
-                        current = new long[]{resolvedUniverse, resolvedTime};
-                        diff = true;
-                    } else {
-                        current = previous;
-                    }
-                } while (!previousResolution.compareAndSet(previous, current));
-                if (diff) {
-                    //we obtains the token, and we have to free the previous one
-                    _spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
-                } else {
-                    _spaceManager.unmarkMemoryElement(currentEntry);
+            long resolvedUniverse = resolve_universe(globalUniverseTree, objectUniverseMap, time, universe);
+            long resolvedTime = objectTimeTree.previousOrEqual(time);
+            if (resolvedTime != KConfig.NULL_LONG) {
+                boolean needTimeCopy = !useClosest && (resolvedTime != time);
+                boolean needUniverseCopy = !useClosest && (resolvedUniverse != universe);
+                currentEntry = (KObjectChunk) _spaceManager.getAndMark(resolvedUniverse, resolvedTime, uuid);
+                if (currentEntry == null) {
+                    _spaceManager.unmarkMemoryElement(objectTimeTree);
+                    _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                    _spaceManager.unmarkMemoryElement(globalUniverseTree);
+                    return null;
                 }
-                _spaceManager.unmarkMemoryElement(timeTree);
-                _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                _spaceManager.unmarkMemoryElement(objectUniverseTree);
-                return currentEntry;
-            } else {
-                long[] previous;
-                long[] current;
-                boolean diff = false;
-                do {
-                    previous = previousResolution.get();
-                    if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != universe || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != time) {
-                        current = new long[]{universe, time};
-                        diff = true;
-                    } else {
-                        current = previous;
-                    }
-                } while (!previousResolution.compareAndSet(previous, current));
-                if (diff) {
-                    KObjectChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
-                    if (currentEntry.counter() > 2) { //test if we are alone on this chunk or not
-                        //double marking strategy
-                        currentEntry.addDependency(universe, time, uuid);
-                        _spaceManager.markMemoryElement(clonedChunk);
-                    }
-                    if (!needUniverseCopy) {
-                        timeTree.insertKey(time);
-                    } else {
-                        KLongTree newTemporalTree = (KLongTree) _spaceManager.createAndMark(universe, KConfig.NULL_LONG, uuid, KChunkTypes.LONG_TREE);
-                        newTemporalTree.insertKey(time);
-                        _spaceManager.unmarkMemoryElement(timeTree);
-                        objectUniverseTree.put(universe, time);
-                    }
-                    //double unmarking, because, we should not use anymore this object
-                    _spaceManager.unmarkMemoryElement(currentEntry);
-                    _spaceManager.unmarkMemoryElement(currentEntry);
-                    //free the rest of used object
-                    _spaceManager.unmarkMemoryElement(timeTree);
-                    _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                    _spaceManager.unmarkMemoryElement(objectUniverseTree);
-                    return clonedChunk;
-                } else {
-
-                    System.err.println("Should not be here !!!!");
-
-                    _spaceManager.unmarkMemoryElement(timeTree);
-                    _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                    _spaceManager.unmarkMemoryElement(objectUniverseTree);
-                    KObjectChunk waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
-                    int i = 0;
-                    while (waitingChunk == null && i < KConfig.CAS_MAX_TRY) {
-                        waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
-                        i++;
-                    }
-                    if (waitingChunk == null) {
-                        throw new RuntimeException("CAS synchronisation problem!");
+                if (!needTimeCopy && !needUniverseCopy) {
+                    long[] previous;
+                    long[] current;
+                    boolean diff = false;
+                    do {
+                        previous = previousResolution.get();
+                        if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != resolvedUniverse || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != resolvedTime) {
+                            current = new long[]{resolvedUniverse, resolvedTime, objectUniverseMapMagic, objectTimeTreeMagic};
+                            diff = true;
+                        } else {
+                            current = previous;
+                        }
+                    } while (!previousResolution.compareAndSet(previous, current));
+                    if (diff) {
+                        //we obtains the token, and we have to free the previous one
+                        _spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
                     } else {
                         _spaceManager.unmarkMemoryElement(currentEntry);
-                        return waitingChunk;
+                    }
+                    _spaceManager.unmarkMemoryElement(objectTimeTree);
+                    _spaceManager.unmarkMemoryElement(globalUniverseTree);
+                    _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                    return currentEntry;
+                } else {
+                    long[] previous;
+                    long[] current;
+                    boolean diff = false;
+                    do {
+                        previous = previousResolution.get();
+                        if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != universe || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != time) {
+                            //universeMap and objectTree magic numbers are set to null
+                            current = new long[]{universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG};
+                            diff = true;
+                        } else {
+                            current = previous;
+                        }
+                    } while (!previousResolution.compareAndSet(previous, current));
+                    if (diff) {
+                        KObjectChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
+                        if (!needUniverseCopy) {
+                            objectTimeTree.insertKey(time);
+                        } else {
+                            KLongTree newTemporalTree = (KLongTree) _spaceManager.createAndMark(universe, KConfig.NULL_LONG, uuid, KChunkTypes.LONG_TREE);
+                            newTemporalTree.insertKey(time);
+                            _spaceManager.unmarkMemoryElement(objectTimeTree);
+                            objectUniverseMap.put(universe, time);
+                        }
+                        //double unmarking, because, we should not use anymore this object
+                        _spaceManager.unmarkMemoryElement(currentEntry);
+                        _spaceManager.unmarkMemoryElement(currentEntry);
+                        //free the rest of used object
+                        _spaceManager.unmarkMemoryElement(objectTimeTree);
+                        _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                        _spaceManager.unmarkMemoryElement(globalUniverseTree);
+                        return clonedChunk;
+                    } else {
+                        /*
+                        _spaceManager.unmarkMemoryElement(objectTimeTree);
+                        _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                        _spaceManager.unmarkMemoryElement(globalUniverseTree);
+                        KObjectChunk waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
+                        int i = 0;
+                        while (waitingChunk == null && i < KConfig.CAS_MAX_TRY) {
+                            waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
+                            i++;
+                        }
+                        if (waitingChunk == null) {
+                            throw new RuntimeException("CAS synchronisation problem!");
+                        } else {
+                            _spaceManager.unmarkMemoryElement(currentEntry);
+                            _spaceManager.unmarkMemoryElement(currentEntry);
+                            return waitingChunk;
+                        }
+                        */
+                        _spaceManager.unmarkMemoryElement(objectTimeTree);
+                        _spaceManager.unmarkMemoryElement(globalUniverseTree);
+                        _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                        return null;
                     }
                 }
+            } else {
+                _spaceManager.unmarkMemoryElement(objectTimeTree);
+                _spaceManager.unmarkMemoryElement(globalUniverseTree);
+                _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                return null;
             }
-        } else {
-            _spaceManager.unmarkMemoryElement(timeTree);
-            _spaceManager.unmarkMemoryElement(globalUniverseTree);
-            _spaceManager.unmarkMemoryElement(objectUniverseTree);
-            return null;
         }
     }
 

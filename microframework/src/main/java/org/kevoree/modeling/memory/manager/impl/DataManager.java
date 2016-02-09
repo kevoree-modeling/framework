@@ -489,7 +489,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
             public void on(KObject kObject) {
                 KObjectIndex globalIndex = (KObjectIndex) kObject;
                 if (globalIndex == null && createIfAbsent) {
-                    globalIndex = new GenericObjectIndex(universe, time, KConfig.END_OF_TIME, selfPointer, universe, time);
+                    globalIndex = new GenericObjectIndex(universe, time, KConfig.END_OF_TIME, selfPointer, universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG);
                     initKObject(globalIndex);
                 }
                 if (globalIndex == null) {
@@ -500,7 +500,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                     long indexUUID = globalIndex.getIndex(indexName);
                     if (indexUUID == KConfig.NULL_LONG && createIfAbsent) {
                         long nextKey = nextObjectKey();
-                        KObjectIndex namedIndex = new GenericObjectIndex(universe, time, nextKey, selfPointer, universe, time);
+                        KObjectIndex namedIndex = new GenericObjectIndex(universe, time, nextKey, selfPointer, universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG);
                         initKObject(namedIndex);
                         globalIndex.setIndex(indexName, nextKey);
                         if (Checker.isDefined(callback)) {

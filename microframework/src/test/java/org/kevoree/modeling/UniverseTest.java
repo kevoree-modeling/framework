@@ -9,6 +9,7 @@ import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.List;
 
@@ -67,6 +68,10 @@ public class UniverseTest {
                             }
                         });
                         forkedNode.setName("n0bias");
+
+                        Assert.assertTrue(PrimitiveHelper.equals(forkedNode.getName(), "n0bias"));
+                        Assert.assertTrue(PrimitiveHelper.equals(n0.getName(), "n0"));
+
                         forkedNode.allTimes(new KCallback<long[]>() {
                             @Override
                             public void on(long[] longs) {

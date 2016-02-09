@@ -12,8 +12,8 @@ import org.kevoree.modeling.cloudmodel.meta.MetaNode;
 
 public class NodeImpl extends AbstractKObject implements Node {
 
-    public NodeImpl(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long previousUniverse, long previousTime) {
-        super(p_universe, p_time, p_uuid, p_metaClass, p_manager, previousUniverse, previousTime);
+    public NodeImpl(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long previousUniverse, long previousTime, long currentUniverseMagic, long currentTimeMagic) {
+        super(p_universe, p_time, p_uuid, p_metaClass, p_manager, previousUniverse, previousTime, currentUniverseMagic, currentTimeMagic);
     }
 
     @Override

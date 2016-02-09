@@ -1,6 +1,16 @@
 package org.kevoree.modeling.util;
 
+import org.kevoree.modeling.KConfig;
+
 public class PrimitiveHelper {
+
+    /**
+     * @native ts
+     * return Math.random() * 1000000
+     */
+    public static long rand() {
+        return (long) (Math.random() * KConfig.END_OF_TIME);
+    }
 
     /**
      * @native ts

@@ -20,6 +20,11 @@ public class ArrayLongTree extends AbstractArrayTree implements KLongTree {
         }
     }
 
+    @Override
+    public long magic() {
+        return this._magic;
+    }
+
     public void insertKey(long p_key) {
         internal_insert(p_key, p_key);
     }

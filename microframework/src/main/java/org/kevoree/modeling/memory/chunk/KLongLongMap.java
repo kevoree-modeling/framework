@@ -20,4 +20,6 @@ public interface KLongLongMap extends KChunk {
 
     void clear();
 
+    long magic();
+
 }

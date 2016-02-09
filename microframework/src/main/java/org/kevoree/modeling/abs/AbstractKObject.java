@@ -34,15 +34,17 @@ public abstract class AbstractKObject implements KObject {
     protected final AtomicReference<long[]> _previousResolveds;
     public static final int UNIVERSE_PREVIOUS_INDEX = 0;
     public static final int TIME_PREVIOUS_INDEX = 1;
+    public static final int UNIVERSE_PREVIOUS_MAGIC = 2;
+    public static final int TIME_PREVIOUS_MAGIC = 3;
 
-    public AbstractKObject(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long p_actualUniverse, long p_actualTime) {
+    public AbstractKObject(long p_universe, long p_time, long p_uuid, KMetaClass p_metaClass, KInternalDataManager p_manager, long p_actualUniverse, long p_actualTime, long currentUniverseMagic, long currentTimeMagic) {
         this._universe = p_universe;
         this._time = p_time;
         this._uuid = p_uuid;
         this._metaClass = p_metaClass;
         this._manager = p_manager;
         this._previousResolveds = new AtomicReference<long[]>();
-        long[] initResolved = new long[]{p_actualUniverse, p_actualTime};
+        long[] initResolved = new long[]{p_actualUniverse, p_actualTime, currentUniverseMagic, currentTimeMagic};
         this._previousResolveds.set(initResolved);
     }
 

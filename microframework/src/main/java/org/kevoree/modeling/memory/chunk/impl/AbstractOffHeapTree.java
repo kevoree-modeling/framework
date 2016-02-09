@@ -11,7 +11,7 @@ import sun.misc.Unsafe;
 
 /**
  * @ignore ts
- * <p/>
+ * <p>
  * OffHeap implementation of AbstractOffHeapTree
  * - memory structure:  | threshold (4) | root index (8) | size (4) | flags (8) | counter (4) | back (size * node size * 8) |
  * -
@@ -710,17 +710,6 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     @Override
     public long obj() {
         return this._obj;
-    }
-
-    @Override
-    public long[] dependencies() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public void addDependency(long universe, long time, long uuid) {
-        throw new RuntimeException("Not implemented yet");
     }
 
 }

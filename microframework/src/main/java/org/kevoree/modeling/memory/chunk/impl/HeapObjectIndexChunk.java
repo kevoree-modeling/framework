@@ -45,8 +45,6 @@ public class HeapObjectIndexChunk implements KObjectIndexChunk {
 
     private int _metaClassIndex = -1;
 
-    private AtomicReference<long[]> _dependencies;
-
     final class InternalState {
 
         public final int elementDataSize;
@@ -96,7 +94,6 @@ public class HeapObjectIndexChunk implements KObjectIndexChunk {
         }
         this.state = newstate;
         this.threshold = (int) (newstate.elementDataSize * loadFactor);
-        this._dependencies = new AtomicReference<long[]>();
     }
 
     @Override
@@ -517,29 +514,6 @@ public class HeapObjectIndexChunk implements KObjectIndexChunk {
         return this._obj;
     }
 
-    @Override
-    public long[] dependencies() {
-        return this._dependencies.get();
-    }
-
-    @Override
-    public void addDependency(long universe, long time, long uuid) {
-        long[] previousVal;
-        long[] newVal;
-        do {
-            previousVal = _dependencies.get();
-            if (previousVal == null) {
-                newVal = new long[]{universe, time, uuid};
-            } else {
-                newVal = new long[previousVal.length + 3];
-                int previousLength = previousVal.length;
-                System.arraycopy(previousVal, 0, newVal, 0, previousLength);
-                newVal[previousLength] = universe;
-                newVal[previousLength + 1] = time;
-                newVal[previousLength + 2] = uuid;
-            }
-        } while (!_dependencies.compareAndSet(previousVal, newVal));
-    }
 }
 
 

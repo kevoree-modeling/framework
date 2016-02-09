@@ -38,9 +38,5 @@ public interface KChunk {
     long time();
 
     long obj();
-
-    long[] dependencies();
-
-    void addDependency(long universe, long time, long uuid);
-
+    
 }

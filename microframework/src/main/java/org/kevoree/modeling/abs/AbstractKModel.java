@@ -54,11 +54,11 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
 
     protected abstract A internalCreateUniverse(long universe);
 
-    protected abstract KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime);
+    protected abstract KObject internalCreateObject(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime, long universeMagic, long timeMagic);
 
     //TODO drop the metaClass param, replace by index
-    public KObject createProxy(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime) {
-        return internalCreateObject(universe, time, uuid, clazz, previousUniverse, previousTime);
+    public KObject createProxy(long universe, long time, long uuid, KMetaClass clazz, long previousUniverse, long previousTime, long universeMagic, long timeMagic) {
+        return internalCreateObject(universe, time, uuid, clazz, previousUniverse, previousTime, universeMagic, timeMagic);
     }
 
     @Override
@@ -108,7 +108,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
         if (!Checker.isDefined(clazz)) {
             return null;
         }
-        KObject newObj = internalCreateObject(universe, time, _manager.nextObjectKey(), clazz, universe, time);
+        KObject newObj = internalCreateObject(universe, time, _manager.nextObjectKey(), clazz, universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG);
         if (newObj != null) {
             _manager.initKObject(newObj);
         }
@@ -205,7 +205,7 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
                             }
                         }
                     }
-                    if(kObjectIndex == null){
+                    if (kObjectIndex == null) {
                         if (Checker.isDefined(callback)) {
                             callback.on(null);
                         }
