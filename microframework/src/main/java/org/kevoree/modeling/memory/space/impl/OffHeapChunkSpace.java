@@ -5,6 +5,7 @@ import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.*;
+import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
@@ -254,6 +255,11 @@ public class OffHeapChunkSpace implements KChunkSpace {
             }
         }
         return -1;
+    }
+
+    @Override
+    public void setManager(KDataManager dataManager) {
+
     }
 
     @Override

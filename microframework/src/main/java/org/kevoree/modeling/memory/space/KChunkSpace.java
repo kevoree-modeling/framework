@@ -2,9 +2,12 @@ package org.kevoree.modeling.memory.space;
 
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
+import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaModel;
 
 public interface KChunkSpace {
+
+    void setManager(KDataManager dataManager);
 
     KChunk get(long universe, long time, long obj);
 

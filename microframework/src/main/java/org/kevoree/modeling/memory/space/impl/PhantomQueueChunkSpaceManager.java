@@ -60,13 +60,6 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
         this._resolver = p_resolver;
     }
 
-    //unProtected and unVolatile because of the mono-thread access
-    /*
-    private int capacity = 1000;
-    private long[] collected_dereference = new long[3 * capacity];
-    private int counter = 0;
-    */
-
     @Override
     public void run() {
         while (true) {
@@ -94,27 +87,9 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     previousRef.next = nextRef;
                 }
                 if (_resolver != null) {
-
                     long[] previousResolved = kobj.previousResolved.get();
                     long previousUuid = kobj.obj;
-
                     unmark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], previousUuid);
-
-
-                    /*
-                    collected_dereference[counter * 3] = previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX];
-                    collected_dereference[counter * 3 + 1] = previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX];
-                    collected_dereference[counter * 3 + 2] = previousUuid;
-                    counter++;
-
-                    if (counter == capacity) {
-                        final long[] previousCollected = collected_dereference;
-                        collected_dereference = new long[3 * capacity];
-                        counter = 0;
-                        _scheduler.dispatch(new SpaceUnmarkTask(this, previousCollected, _resolver));
-                    }
-                    */
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();

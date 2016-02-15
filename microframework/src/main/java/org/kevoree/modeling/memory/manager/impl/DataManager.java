@@ -67,6 +67,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KMemoryStrategy p_factory, KBlas p_blas) {
         this._space = p_factory.newSpace();
+        this._space.setManager(this);
         this._scheduler = p_scheduler;
         this._spaceManager = p_factory.newSpaceManager(this._space, this._scheduler);
         this._resolver = new DistortedTimeResolver(this._spaceManager, this);
@@ -139,8 +140,8 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 int i = 0;
                 KMetaModel _mm = selfPointer._model.metaModel();
                 while (dirtyIterator.hasNext()) {
-                    long[] loopChunkKeys = dirtyIterator.next();
-                    KChunk loopChunk = selfPointer._spaceManager.getAndMark(loopChunkKeys[0], loopChunkKeys[1], loopChunkKeys[2]);
+                    KChunk loopChunk = dirtyIterator.next();
+                    //KChunk loopChunk = selfPointer._spaceManager.getAndMark(loopChunkKeys[0], loopChunkKeys[1], loopChunkKeys[2]);
                     if (loopChunk != null && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT && (loopChunk.getFlags() & KChunkFlags.REMOVED_BIT) != KChunkFlags.REMOVED_BIT) {
                         toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
                         toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
@@ -152,7 +153,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        selfPointer._spaceManager.unmarkMemoryElement(loopChunk);
+                        //selfPointer._spaceManager.unmarkMemoryElement(loopChunk);
                     }
                 }
                 toSaveKeys[i * KEY_SIZE] = KConfig.BEGINNING_OF_TIME;

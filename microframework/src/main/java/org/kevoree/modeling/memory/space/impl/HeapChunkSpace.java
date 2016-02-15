@@ -5,6 +5,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.*;
+import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.space.KChunkSpace;
@@ -43,6 +44,7 @@ public class HeapChunkSpace implements KChunkSpace {
         int _threshold;
 
         public InternalState(int p_elementDataSize, long[] p_elementKE, int[] p_elementNext, int[] p_elementHash, KChunk[] p_values) {
+            //init std variables
             this.elementDataSize = p_elementDataSize;
             this.elementK3 = p_elementKE;
             this.elementNext = p_elementNext;
@@ -101,6 +103,11 @@ public class HeapChunkSpace implements KChunkSpace {
         }
         newstate._threshold = (int) (newstate.elementDataSize * LOAD_FACTOR);
         this._state.set(newstate);
+    }
+
+    @Override
+    public void setManager(KDataManager dataManager) {
+
     }
 
     @Override
