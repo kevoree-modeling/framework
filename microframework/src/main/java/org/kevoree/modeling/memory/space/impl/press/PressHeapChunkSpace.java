@@ -1,5 +1,5 @@
 
-package org.kevoree.modeling.memory.space.impl;
+package org.kevoree.modeling.memory.space.impl.press;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class LRUHeapChunkSpace implements KChunkSpace {
+public class PressHeapChunkSpace implements KChunkSpace {
 
     /**
      * Global
@@ -47,7 +47,11 @@ public class LRUHeapChunkSpace implements KChunkSpace {
 
     private final AtomicIntegerArray elementHashLock;
 
-    private final KChunk[] values;
+    private final KChunk[] _values;
+
+    public KChunk[] values(){
+        return this._values;
+    }
 
     final class InternalDirtyState implements KChunkIterator {
 
@@ -57,8 +61,11 @@ public class LRUHeapChunkSpace implements KChunkSpace {
 
         private int[] dirtyNext;
 
-        public InternalDirtyState(int p_maxEntries) {
+        private PressHeapChunkSpace _parent;
+
+        public InternalDirtyState(int p_maxEntries, PressHeapChunkSpace p_parent) {
             dirtyNext = new int[p_maxEntries];
+            this._parent = p_parent;
         }
 
         public void declareDirty(int index) {
@@ -92,7 +99,7 @@ public class LRUHeapChunkSpace implements KChunkSpace {
             if (unpop == -1) {
                 return null;
             } else {
-                return values[unpop];
+                return this._parent.values()[unpop];
             }
         }
 
@@ -106,20 +113,20 @@ public class LRUHeapChunkSpace implements KChunkSpace {
 
     private Random random;
 
-    public LRUHeapChunkSpace(int maxEntries) {
+    public PressHeapChunkSpace(int maxEntries) {
         this._maxEntries = maxEntries;
         this._lru = new FixedSizeLinkedList(maxEntries);
         this.random = new Random();
 
         this._dirtyState = new AtomicReference<InternalDirtyState>();
-        this._dirtyState.set(new InternalDirtyState(this._maxEntries));
+        this._dirtyState.set(new InternalDirtyState(this._maxEntries, this));
 
         //init std variables
         this.elementK3 = new long[maxEntries * 3];
         this.elementNext = new int[maxEntries];
         this.elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
         this.elementHash = new int[maxEntries];
-        this.values = new KChunk[maxEntries];
+        this._values = new KChunk[maxEntries];
         this._elementCount = new AtomicInteger(0);
 
         //init
@@ -148,7 +155,7 @@ public class LRUHeapChunkSpace implements KChunkSpace {
                 //LRU update
                 this._lru.promoteToHead(m);
                 //GET VALUE
-                return this.values[m];
+                return this._values[m];
             } else {
                 m = this.elementNext[m];
             }
@@ -192,13 +199,13 @@ public class LRUHeapChunkSpace implements KChunkSpace {
         if (entry == -1) {
             //we look for nextIndex
             int currentVictimIndex = this._lru.popTail();
-            while (this.values[currentVictimIndex] != null && this.values[currentVictimIndex].counter() != 0) {
+            while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() != 0) {
                 this._lru.pushHead(currentVictimIndex);
                 currentVictimIndex = this._lru.popTail();
             }
 
-            if (this.values[currentVictimIndex] != null) {
-                KChunk victim = this.values[currentVictimIndex];
+            if (this._values[currentVictimIndex] != null) {
+                KChunk victim = this._values[currentVictimIndex];
                 long victimUniverse = victim.universe();
                 long victimTime = victim.time();
                 long victimObj = victim.obj();
@@ -229,7 +236,7 @@ public class LRUHeapChunkSpace implements KChunkSpace {
                 elementNext[m] = -1;//flag to dropped value
 
                 //UNREF victim value object
-                values[currentVictimIndex] = null;
+                _values[currentVictimIndex] = null;
 
                 //free the lock
                 this.elementHashLock.set(indexVictim, -1);
@@ -252,7 +259,7 @@ public class LRUHeapChunkSpace implements KChunkSpace {
             elementK3[(currentVictimIndex * 3)] = universe;
             elementK3[((currentVictimIndex * 3) + 1)] = time;
             elementK3[((currentVictimIndex * 3) + 2)] = p_obj;
-            values[currentVictimIndex] = payload;
+            _values[currentVictimIndex] = payload;
 
             int previousMagic;
             do {
@@ -268,7 +275,7 @@ public class LRUHeapChunkSpace implements KChunkSpace {
             //reEnqueue
             this._lru.pushHead(currentVictimIndex);
         } else {
-            result = values[entry];
+            result = _values[entry];
         }
         return result;
     }
@@ -286,7 +293,7 @@ public class LRUHeapChunkSpace implements KChunkSpace {
 
     @Override
     public KChunkIterator detachDirties() {
-        return _dirtyState.getAndSet(new InternalDirtyState(this._maxEntries));
+        return _dirtyState.getAndSet(new InternalDirtyState(this._maxEntries, this));
     }
 
     @Override
@@ -351,8 +358,8 @@ public class LRUHeapChunkSpace implements KChunkSpace {
     private String internal_toString(KMetaModel p_metaModel) {
         StringBuilder buffer = new StringBuilder();
         try {
-            for (int i = 0; i < this.values.length; i++) {
-                KChunk loopChunk = this.values[i];
+            for (int i = 0; i < this._values.length; i++) {
+                KChunk loopChunk = this._values[i];
                 if (loopChunk != null) {
                     String content;
                     if (p_metaModel != null) {

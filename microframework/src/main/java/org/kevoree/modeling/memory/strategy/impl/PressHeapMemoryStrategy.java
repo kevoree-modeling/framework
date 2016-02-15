@@ -2,8 +2,7 @@ package org.kevoree.modeling.memory.strategy.impl;
 
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkSpaceManager;
-import org.kevoree.modeling.memory.space.impl.HeapChunkSpace;
-import org.kevoree.modeling.memory.space.impl.LRUHeapChunkSpace;
+import org.kevoree.modeling.memory.space.impl.press.PressHeapChunkSpace;
 import org.kevoree.modeling.memory.space.impl.PhantomQueueChunkSpaceManager;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.scheduler.KScheduler;
@@ -18,7 +17,7 @@ public class PressHeapMemoryStrategy implements KMemoryStrategy {
 
     @Override
     public KChunkSpace newSpace() {
-        return new LRUHeapChunkSpace(_maxEntries);
+        return new PressHeapChunkSpace(_maxEntries);
     }
 
     /**

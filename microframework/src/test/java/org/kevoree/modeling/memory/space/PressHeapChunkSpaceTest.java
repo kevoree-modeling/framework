@@ -3,15 +3,15 @@ package org.kevoree.modeling.memory.space;
 import org.junit.Test;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
-import org.kevoree.modeling.memory.space.impl.FixedSizeLinkedList;
-import org.kevoree.modeling.memory.space.impl.LRUHeapChunkSpace;
+import org.kevoree.modeling.memory.space.impl.press.FixedSizeLinkedList;
+import org.kevoree.modeling.memory.space.impl.press.PressHeapChunkSpace;
 
-public class LRUHeapChunkSpaceTest {
+public class PressHeapChunkSpaceTest {
 
     /*
     @Test
     public void monoThreadTest() {
-        LRUHeapChunkSpace space = new LRUHeapChunkSpace(100);
+        PressHeapChunkSpace space = new PressHeapChunkSpace(100);
         space.create(0, 0, 0, KChunkTypes.OBJECT_CHUNK);
         space.create(0, 0, 1, KChunkTypes.OBJECT_CHUNK);
         Assert.assertEquals(space.toString(), "0#:0,0,0=>0(count:0,flag:0)==>no model\n1#:0,0,1=>0(count:0,flag:0)==>no model\n");
@@ -29,7 +29,7 @@ public class LRUHeapChunkSpaceTest {
                 "3#:0,0,32=>0(count:0,flag:0)==>no model\n");
     }*/
 
-    @Test
+    //@Test
     public void mini() {
         FixedSizeLinkedList list = new FixedSizeLinkedList(3);
         list.pushHead(0);
@@ -40,10 +40,10 @@ public class LRUHeapChunkSpaceTest {
         System.err.println(list.popTail());
     }
 
-    @Test
+    //@Test
     public void monoThreadFullTest() {
 
-        LRUHeapChunkSpace space = new LRUHeapChunkSpace(10);
+        PressHeapChunkSpace space = new PressHeapChunkSpace(10);
         //Fill the entire cache
         for (int i = 0; i < 10; i++) {
             KChunk chunk = space.create(i, 0, 10, KChunkTypes.OBJECT_CHUNK);

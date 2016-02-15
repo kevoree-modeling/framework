@@ -43,7 +43,7 @@ public class PressHeapTest {
                             model.save(new KCallback() {
                                 @Override
                                 public void on(Object o) {
-                                    System.out.println();
+                                    System.out.println("Saved");
                                 }
                             });
 
