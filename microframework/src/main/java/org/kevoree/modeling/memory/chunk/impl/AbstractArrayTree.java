@@ -9,6 +9,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
 import org.kevoree.modeling.util.PrimitiveHelper;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -33,6 +34,10 @@ public abstract class AbstractArrayTree implements KChunk {
     private final AtomicInteger _counter;
     protected volatile long _magic;
 
+    //multi-thread sync
+    private Random _random;
+    private AtomicInteger _magicToken;
+
     public AbstractArrayTree(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
         this._universe = p_universe;
         this._time = p_time;
@@ -41,6 +46,8 @@ public abstract class AbstractArrayTree implements KChunk {
         this._counter = new AtomicInteger(0);
         this._space = p_space;
         this._magic = PrimitiveHelper.rand();
+        this._magicToken = new AtomicInteger(-1);
+        this._random = new Random();
     }
 
     class InternalState {
@@ -312,18 +319,31 @@ public abstract class AbstractArrayTree implements KChunk {
     }
 
     protected final int internal_previousOrEqual_index(long p_key) {
+
+        //negociate a magic
+        int newMagic;
+        do {
+            newMagic = _random.nextInt();
+        } while (!this._magicToken.compareAndSet(-1, newMagic));
+
         int p = _root_index;
         if (p == -1) {
+            //free magic
+            this._magicToken.compareAndSet(newMagic, -1);
             return p;
         }
         while (p != -1) {
             if (p_key == key(p)) {
+                //free magic
+                this._magicToken.compareAndSet(newMagic, -1);
                 return p;
             }
             if (p_key > key(p)) {
                 if (right(p) != -1) {
                     p = right(p);
                 } else {
+                    //free magic
+                    this._magicToken.compareAndSet(newMagic, -1);
                     return p;
                 }
             } else {
@@ -336,10 +356,16 @@ public abstract class AbstractArrayTree implements KChunk {
                         ch = parent;
                         parent = parent(parent);
                     }
+                    //free magic
+                    this._magicToken.compareAndSet(newMagic, -1);
                     return parent;
                 }
             }
         }
+
+        //free magic
+        this._magicToken.compareAndSet(newMagic, -1);
+
         return -1;
     }
 
@@ -431,9 +457,17 @@ public abstract class AbstractArrayTree implements KChunk {
     }
 
     public final String serialize(KMetaModel metaModel) {
+
         if (_root_index == -1) {
             return "0";
         }
+
+        //negociate a magic
+        int newMagic;
+        do {
+            newMagic = _random.nextInt();
+        } while (!this._magicToken.compareAndSet(-1, newMagic));
+
         int savedRoot = _root_index;
         InternalState internalState = state;
         StringBuilder builder = new StringBuilder();
@@ -470,7 +504,10 @@ public abstract class AbstractArrayTree implements KChunk {
                 treeSize++;
             }
         }
-        return Base64.encodeInt(treeSize) + "," + Base64.encodeInt(savedRoot) + builder.toString();
+        String result = Base64.encodeInt(treeSize) + "," + Base64.encodeInt(savedRoot) + builder.toString();
+        //free magic
+        this._magicToken.compareAndSet(newMagic, -1);
+        return result;
     }
 
     public final void init(String payload, KMetaModel metaModel, int metaClassIndex) {
@@ -557,7 +594,14 @@ public abstract class AbstractArrayTree implements KChunk {
         this._threshold = 0;
     }
 
-    protected final synchronized void internal_insert(long p_key, long p_value) {
+    protected final void internal_insert(long p_key, long p_value) {
+
+        //negociate a magic
+        int newMagic;
+        do {
+            newMagic = _random.nextInt();
+        } while (!this._magicToken.compareAndSet(-1, newMagic));
+
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             reallocate(length);
@@ -579,6 +623,10 @@ public abstract class AbstractArrayTree implements KChunk {
             while (true) {
                 if (p_key == key(n)) {
                     //nop _size
+
+                    //free magic
+                    this._magicToken.compareAndSet(newMagic, -1);
+
                     return;
                 } else if (p_key < key(n)) {
                     if (left(n) == -1) {
@@ -618,15 +666,30 @@ public abstract class AbstractArrayTree implements KChunk {
         }
         insertCase1(newIndex);
         internal_set_dirty();
+
+        //free magic
+        this._magicToken.compareAndSet(newMagic, -1);
+
     }
 
     protected final long internal_lookup_value(long p_key) {
+
+        //negociate a magic
+        int newMagic;
+        do {
+            newMagic = _random.nextInt();
+        } while (!this._magicToken.compareAndSet(-1, newMagic));
+
         int n = _root_index;
         if (n == -1) {
+            //free magic
+            this._magicToken.compareAndSet(newMagic, -1);
             return KConfig.NULL_LONG;
         }
         while (n != -1) {
             if (p_key == key(n)) {
+                //free magic
+                this._magicToken.compareAndSet(newMagic, -1);
                 return value(n);
             } else {
                 if (p_key < key(n)) {
@@ -636,6 +699,8 @@ public abstract class AbstractArrayTree implements KChunk {
                 }
             }
         }
+        //free magic
+        this._magicToken.compareAndSet(newMagic, -1);
         return n;
     }
 
