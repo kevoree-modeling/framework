@@ -49,7 +49,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     private final KChunk[] _values;
 
-    public KChunk[] values(){
+    public KChunk[] values() {
         return this._values;
     }
 
@@ -198,10 +198,16 @@ public class PressHeapChunkSpace implements KChunkSpace {
         entry = findNonNullKeyEntry(universe, time, p_obj, index);
         if (entry == -1) {
             //we look for nextIndex
+            int nbTry = 0;
             int currentVictimIndex = this._lru.popTail();
-            while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() != 0) {
+            while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() != 0 /*&& nbTry < this._maxEntries*/) {
                 this._lru.pushHead(currentVictimIndex);
                 currentVictimIndex = this._lru.popTail();
+                nbTry++;
+            }
+
+            if (nbTry == this._maxEntries) {
+                throw new RuntimeException("Cache Loop");
             }
 
             if (this._values[currentVictimIndex] != null) {
@@ -239,7 +245,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 _values[currentVictimIndex] = null;
 
                 //free the lock
-                this.elementHashLock.set(indexVictim, -1);
+                this.elementHashLock.compareAndSet(indexVictim, previousMagic, -1);
 
                 //TEST IF VICTIM IS DIRTY
                 if ((victim.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
@@ -270,7 +276,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
             elementHash[index] = currentVictimIndex;
             result = payload;
             //free the lock
-            this.elementHashLock.set(index, -1);
+            this.elementHashLock.compareAndSet(index, previousMagic, -1);
             this._elementCount.incrementAndGet();
             //reEnqueue
             this._lru.pushHead(currentVictimIndex);
