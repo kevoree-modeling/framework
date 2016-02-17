@@ -28,7 +28,7 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
     }
 
     @Override
-    public KChunk create(long universe, long time, long obj, short type) {
+    public KChunk create(long universe, long time, long obj, short type, KMetaModel metaModel) {
         return null;
     }
 

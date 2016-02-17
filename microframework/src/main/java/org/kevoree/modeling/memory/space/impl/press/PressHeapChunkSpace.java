@@ -204,6 +204,9 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 this._lru.pushHead(currentVictimIndex);
                 currentVictimIndex = this._lru.popTail();
                 nbTry++;
+                if(nbTry % 100 == 0){
+                    System.gc();
+                }
             }
 
             if (nbTry == this._maxEntries) {
