@@ -1,7 +1,6 @@
 package org.kevoree.modeling.memory.space;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.cloudmodel.CloudModel;
@@ -14,7 +13,7 @@ import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class PressHeapTest {
 
-    @Test
+//    @Test
     public void simpleTest() {
         final CloudModel model = new CloudModel(DataManagerBuilder.create().withMemoryStrategy(new PressHeapMemoryStrategy(100)).withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback<Throwable>() {
