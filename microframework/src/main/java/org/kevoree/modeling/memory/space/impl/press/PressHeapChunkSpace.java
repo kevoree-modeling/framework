@@ -33,7 +33,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     private KInternalDataManager _manager = null;
 
-    private FixedSizeLinkedList _lru;
+    private PressFIFO _lru;
 
     /**
      * HashMap variables
@@ -115,7 +115,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     public PressHeapChunkSpace(int maxEntries) {
         this._maxEntries = maxEntries;
-        this._lru = new FixedSizeLinkedList(maxEntries);
+        this._lru = new FixedHeapFIFO(maxEntries);
         this.random = new Random();
 
         this._dirtyState = new AtomicReference<InternalDirtyState>();
@@ -134,7 +134,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
             this.elementNext[i] = -1;
             this.elementHash[i] = -1;
             this.elementHashLock.set(i, -1);
-            _lru.pushHead(i);
+            //_lru.enqueue(i);
         }
     }
 
@@ -152,8 +152,6 @@ public class PressHeapChunkSpace implements KChunkSpace {
         int m = this.elementHash[index];
         while (m != -1) {
             if (universe == this.elementK3[(m * 3)] && time == this.elementK3[((m * 3) + 1)] && obj == elementK3[((m * 3) + 2)]) {
-                //LRU update
-                this._lru.promoteToHead(m);
                 //GET VALUE
                 return this._values[m];
             } else {
@@ -164,7 +162,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
     }
 
     @Override
-    public KChunk create(long universe, long time, long obj, short type,KMetaModel metaModel) {
+    public KChunk create(long universe, long time, long obj, short type, KMetaModel metaModel) {
         KChunk newElement = internal_createElement(universe, time, obj, type);
         return internal_put(universe, time, obj, newElement, metaModel);
     }
@@ -199,12 +197,12 @@ public class PressHeapChunkSpace implements KChunkSpace {
         if (entry == -1) {
             //we look for nextIndex
             int nbTry = 0;
-            int currentVictimIndex = this._lru.popTail();
+            int currentVictimIndex = this._lru.dequeue();
             while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() != 0 /*&& nbTry < this._maxEntries*/) {
-                this._lru.pushHead(currentVictimIndex);
-                currentVictimIndex = this._lru.popTail();
+                this._lru.enqueue(currentVictimIndex);
+                currentVictimIndex = this._lru.dequeue();
                 nbTry++;
-                if(nbTry % 100 == 0){
+                if (nbTry % (this._maxEntries / 10) == 0) {
                     System.gc();
                 }
             }
@@ -282,7 +280,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
             this.elementHashLock.compareAndSet(index, previousMagic, -1);
             this._elementCount.incrementAndGet();
             //reEnqueue
-            this._lru.pushHead(currentVictimIndex);
+            this._lru.enqueue(currentVictimIndex);
         } else {
             result = _values[entry];
         }

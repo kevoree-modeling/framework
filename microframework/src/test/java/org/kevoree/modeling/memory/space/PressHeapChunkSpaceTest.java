@@ -1,6 +1,5 @@
 package org.kevoree.modeling.memory.space;
 
-import org.junit.Test;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.space.impl.press.FixedSizeLinkedList;
@@ -32,12 +31,12 @@ public class PressHeapChunkSpaceTest {
     //@Test
     public void mini() {
         FixedSizeLinkedList list = new FixedSizeLinkedList(3);
-        list.pushHead(0);
-        list.pushHead(1);
-        list.pushHead(2);
+        list.enqueue(0);
+        list.enqueue(1);
+        list.enqueue(2);
 
-        System.err.println(list.popTail());
-        System.err.println(list.popTail());
+        System.err.println(list.dequeue());
+        System.err.println(list.dequeue());
     }
 
     //@Test

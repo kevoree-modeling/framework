@@ -47,7 +47,7 @@ public class OffHeapFixedSizeLinkedList implements PressFIFO {
     }
 
     @Override
-    public void pushHead(int index) {
+    public void enqueue(int index) {
         int localMagic;
         do {
             localMagic = _random.nextInt();
@@ -80,7 +80,7 @@ public class OffHeapFixedSizeLinkedList implements PressFIFO {
     }
 
     @Override
-    public int popTail() {
+    public int dequeue() {
         int localMagic;
         do {
             localMagic = _random.nextInt();
@@ -104,8 +104,4 @@ public class OffHeapFixedSizeLinkedList implements PressFIFO {
         }
     }
 
-    @Override
-    public void promoteToHead(int m) {
-
-    }
 }

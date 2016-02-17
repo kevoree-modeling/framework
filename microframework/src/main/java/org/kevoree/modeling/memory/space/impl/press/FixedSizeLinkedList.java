@@ -21,7 +21,7 @@ public class FixedSizeLinkedList implements PressFIFO {
     }
 
     @Override
-    public void pushHead(int index) {
+    public void enqueue(int index) {
 
         int localMagic;
         do {
@@ -49,7 +49,7 @@ public class FixedSizeLinkedList implements PressFIFO {
     }
 
     @Override
-    public int popTail() {
+    public int dequeue() {
 
         int localMagic;
         do {
@@ -69,37 +69,6 @@ public class FixedSizeLinkedList implements PressFIFO {
             _magic.compareAndSet(localMagic, -1);
             return -1;
         }
-    }
-
-    @Override
-    public void promoteToHead(int index) {
-        /*
-        if (index != _head) {
-
-            int localMagic;
-            do {
-                localMagic = _random.nextInt();
-            } while (!_magic.compareAndSet(-1, localMagic));
-
-            //first extract the key
-            int currentNext = this._next[index];
-            int currentPrevious = this._previous[index];
-            this._next[currentPrevious] = currentNext;
-            this._previous[currentNext] = currentPrevious;
-
-            int currentHead = this._head;
-            int currentPreviousHead = this._previous[currentHead];
-            _head = index;
-            //chain previous of head
-            this._previous[index] = currentPreviousHead;
-            this._next[currentPreviousHead] = index;
-            //chain head
-            this._previous[currentHead] = index;
-            this._next[index] = currentHead;
-
-            _magic.compareAndSet(localMagic, -1);
-
-        }*/
     }
 
 }
