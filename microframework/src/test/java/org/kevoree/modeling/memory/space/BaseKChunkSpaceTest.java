@@ -18,7 +18,7 @@ public abstract class BaseKChunkSpaceTest {
         KChunkSpace chunkSpace = createKChunkSpace();
 
         // KUniverseOrderMap
-        KLongLongMap map = (KLongLongMap) chunkSpace.create(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP);
+        KLongLongMap map = (KLongLongMap) chunkSpace.create(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG, KChunkTypes.LONG_LONG_MAP,null);
         map.put(0, 0);
         map.put(1, 1);
         KLongLongMap retrievedMap = (KLongLongMap) chunkSpace.get(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
@@ -45,7 +45,7 @@ public abstract class BaseKChunkSpaceTest {
         */
 
         // KLongTree
-        KLongTree longTree = (KLongTree) chunkSpace.create(0, KConfig.NULL_LONG, 0, KChunkTypes.LONG_TREE);
+        KLongTree longTree = (KLongTree) chunkSpace.create(0, KConfig.NULL_LONG, 0, KChunkTypes.LONG_TREE,null);
         longTree.init(null, null, -1);
         longTree.insertKey(0);
         longTree.insertKey(1);
@@ -59,7 +59,7 @@ public abstract class BaseKChunkSpaceTest {
         Assert.assertEquals(longTree.counter(), retrievedLongTree.counter());
 
         // KObjectChunk
-        KObjectChunk chunk = (KObjectChunk) chunkSpace.create(0, 0, 0, KChunkTypes.OBJECT_CHUNK);
+        KObjectChunk chunk = (KObjectChunk) chunkSpace.create(0, 0, 0, KChunkTypes.OBJECT_CHUNK,null);
         KObjectChunk retrievedChunk = (KObjectChunk) chunkSpace.get(0, 0, 0);
         Assert.assertNotNull(retrievedChunk);
     }

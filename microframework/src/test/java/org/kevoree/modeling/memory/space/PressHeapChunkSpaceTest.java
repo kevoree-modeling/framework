@@ -46,7 +46,7 @@ public class PressHeapChunkSpaceTest {
         PressHeapChunkSpace space = new PressHeapChunkSpace(10);
         //Fill the entire cache
         for (int i = 0; i < 10; i++) {
-            KChunk chunk = space.create(i, 0, 10, KChunkTypes.OBJECT_CHUNK);
+            KChunk chunk = space.create(i, 0, 10, KChunkTypes.OBJECT_CHUNK,null);
             chunk.setFlags(KChunkFlags.DIRTY_BIT, 0);
         }
         //space.create(1, 1, 1, KChunkTypes.OBJECT_CHUNK);
@@ -59,7 +59,7 @@ public class PressHeapChunkSpaceTest {
         }
 
         for (int i = 0; i < 8; i++) {
-            space.create(i, 1, 1, KChunkTypes.OBJECT_CHUNK);
+            space.create(i, 1, 1, KChunkTypes.OBJECT_CHUNK,null);
         }
 
         System.out.println(space);

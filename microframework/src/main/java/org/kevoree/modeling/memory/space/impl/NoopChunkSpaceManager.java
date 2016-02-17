@@ -28,7 +28,7 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
     
     @Override
     public KChunk createAndMark(long universe, long time, long obj, short type) {
-        return this._space.create(universe, time, obj, type);
+        return this._space.create(universe, time, obj, type, _metaModel);
     }
 
     @Override
@@ -56,9 +56,13 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
 
     }
 
-    @Override
-    public void register(KObject object) {
+    private KMetaModel _metaModel;
 
+    @Override
+    public void register(KObject kobj) {
+        if (_metaModel == null) {
+            _metaModel = kobj.manager().model().metaModel();
+        }
     }
 
     @Override

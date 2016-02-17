@@ -41,7 +41,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
 
     @Override
     public KChunk createAndMark(long universe, long time, long obj, short type) {
-        KChunk newCreatedElement = _space.create(universe, time, obj, type);
+        KChunk newCreatedElement = _space.create(universe, time, obj, type, _metaModel);
         if (newCreatedElement != null) {
             newCreatedElement.inc();
         }

@@ -287,7 +287,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
 
     @Override
-    public final KChunk create(long p_universe, long p_time, long p_obj, short p_type) {
+    public final KChunk create(long p_universe, long p_time, long p_obj, short p_type, KMetaModel metaModel) {
         KOffHeapChunk newElement = internal_createElement(p_universe, p_time, p_obj, p_type);
         return internal_put(p_universe, p_time, p_obj, newElement, p_type);
     }
