@@ -6,6 +6,7 @@ import sun.misc.Unsafe;
 import java.util.Random;
 
 /**
+ * @ignore ts
  * Created by thomas on 16/02/16.
  * <p/>
  * memory structure: | magic (4) | max (4) | head (4) | previous (size * 4) | next (size * 4) |

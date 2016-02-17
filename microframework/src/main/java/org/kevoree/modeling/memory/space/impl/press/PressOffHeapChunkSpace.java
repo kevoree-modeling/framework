@@ -8,6 +8,7 @@ import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 
 /**
+ * @ignore ts
  * Created by thomas on 16/02/16.
  *
  * memory structure: | max entries (4) | elem count (4) |
