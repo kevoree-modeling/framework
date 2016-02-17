@@ -2,7 +2,6 @@ package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.chunk.KLongLongTree;
-import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 
 /**
@@ -24,7 +23,7 @@ public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLon
 
     @Override
     public long previousOrEqualValue(long p_key) {
-        long result = previousOrEqualIndex(p_key);
+        long result = internal_previousOrEqual_index(p_key);
         if (result != -1) {
             return value(result);
         } else {
@@ -34,7 +33,7 @@ public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLon
 
     @Override
     public long lookupValue(long p_key) {
-        return internal_lookupValue(p_key);
+        return internal_lookup_value(p_key);
     }
 
     @Override

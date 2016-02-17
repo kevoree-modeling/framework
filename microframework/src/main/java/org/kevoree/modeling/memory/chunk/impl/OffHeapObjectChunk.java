@@ -1,7 +1,6 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.format.json.JsonObjectReader;
 import org.kevoree.modeling.format.json.JsonString;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.KOffHeapChunk;
@@ -12,7 +11,6 @@ import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaRelation;
-import org.kevoree.modeling.util.PrimitiveHelper;
 import org.kevoree.modeling.util.Base64;
 import sun.misc.Unsafe;
 

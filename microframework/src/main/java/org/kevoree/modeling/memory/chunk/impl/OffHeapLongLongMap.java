@@ -2,6 +2,7 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
@@ -10,13 +11,14 @@ import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import sun.misc.Unsafe;
 
 /**
  * @ignore ts
  * <p>
  * OffHeap implementation of KLongLongMap
- * - memory structure:  | initial capacity (4) | threshold (4) | meta class idx (4) | elem count (4) | dropped count (4) |
+ * - memory structure:  | magic (8) | initial capacity (4) | threshold (4) | meta class idx (4) | elem count (4) | dropped count (4) |
  * -                    | flags (8) | elem data size (4) | counter (4) | back (elem data size * 28) |
  * -
  * - back:              | key (8) | value (8) | next (4) | hash (4) |
@@ -31,6 +33,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private float loadFactor;
 
     // constants for off-heap memory layout
+    private static final int ATT_MAGIC_LEN = 8;
     private static final int ATT_INITIAL_CAPACITY_LEN = 4;
     private static final int ATT_THRESHOLD_LEN = 4;
     private static final int ATT_META_CLASS_INDEX_LEN = 4;
@@ -46,11 +49,12 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private static final int ATT_HASH_LEN = 4;
 
     private static final int BASE_SEGMENT_LEN =
-            ATT_INITIAL_CAPACITY_LEN + ATT_THRESHOLD_LEN + ATT_META_CLASS_INDEX_LEN + ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN +
+            ATT_MAGIC_LEN + ATT_INITIAL_CAPACITY_LEN + ATT_THRESHOLD_LEN + ATT_META_CLASS_INDEX_LEN + ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN +
                     ATT_FLAGS_LEN + ATT_ELEM_DATA_SIZE_LEN + ATT_COUNTER_LEN;
     private static final int BACK_ELEM_ENTRY_LEN = ATT_KEY_LEN + ATT_VALUE_LEN + ATT_NEXT_LEN + ATT_HASH_LEN;
 
-    private static final int OFFSET_STARTADDRESS_INITIAL_CAPACITY = 0;
+    private static final int OFFSET_STARTADDRESS_MAGIC = 0;
+    private static final int OFFSET_STARTADDRESS_INITIAL_CAPACITY = OFFSET_STARTADDRESS_MAGIC + ATT_MAGIC_LEN;
     private static final int OFFSET_STARTADDRESS_THRESHOLD = OFFSET_STARTADDRESS_INITIAL_CAPACITY + ATT_INITIAL_CAPACITY_LEN;
     private static final int OFFSET_STARTADDRESS_META_CLASS_INDEX = OFFSET_STARTADDRESS_THRESHOLD + ATT_THRESHOLD_LEN;
     private static final int OFFSET_STARTADDRESS_ELEM_COUNT = OFFSET_STARTADDRESS_META_CLASS_INDEX + ATT_META_CLASS_INDEX_LEN;
@@ -72,6 +76,9 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         this._obj = p_obj;
 
         allocate(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+
+        UNSAFE.putLong(this._start_address + OFFSET_STARTADDRESS_MAGIC, PrimitiveHelper.rand());
+
     }
 
     // TODO this methods are maybe a bottleneck if they are not inlined
@@ -174,9 +181,10 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         }
     }
 
+
     @Override
     public long magic() {
-        throw new RuntimeException("Not implemented yet!");
+        return UNSAFE.getLong(this._start_address + OFFSET_STARTADDRESS_MAGIC);
     }
 
     protected void rehashCapacity(int p_capacity) {
@@ -317,8 +325,10 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
                 setNext(this._start_address, newIndex, -2);//special char to tag used values
             }
             setHash(this._start_address, index, newIndex);
+            internal_set_dirty();
         } else {
             setValue(this._start_address, entry, p_value);
+            internal_set_dirty();
         }
     }
 
@@ -543,6 +553,20 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             val = UNSAFE.getLong(this._start_address + OFFSET_STARTADDRESS_FLAGS);
             nval = val & ~p_bitsToDisable | p_bitsToEnable;
         } while (!UNSAFE.compareAndSwapLong(null, _start_address + OFFSET_STARTADDRESS_FLAGS, val, nval));
+    }
+
+    private void internal_set_dirty() {
+        UNSAFE.putLong(this._start_address + OFFSET_STARTADDRESS_MAGIC, PrimitiveHelper.rand());
+
+        if (_space != null) {
+            if ((UNSAFE.getLong(this._start_address + OFFSET_STARTADDRESS_FLAGS) & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                _space.declareDirty(this);
+                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
+                setFlags(KChunkFlags.DIRTY_BIT, 0);
+            }
+        } else {
+            setFlags(KChunkFlags.DIRTY_BIT, 0);
+        }
     }
 
     @Override

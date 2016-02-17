@@ -1,20 +1,23 @@
 package org.kevoree.modeling.memory.chunk.impl;
 
 import org.kevoree.modeling.KConfig;
+import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KTreeWalker;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import sun.misc.Unsafe;
+
+import java.util.Random;
 
 /**
  * @ignore ts
- * <p>
- * OffHeap implementation of AbstractOffHeapTree
- * - memory structure:  | threshold (4) | root index (8) | size (4) | flags (8) | counter (4) | back (size * node size * 8) |
- * -
+ * <p/>
+ * Off-heap red-black base implementation
+ * - memory structure:  | magic token (4)| magic (8) | threshold (4) | root index (8) | size (4) | flags (8) | counter (4) | back (size * node size * 8) |
  * - back:              | key (8) | left (8) | right (8) | parent (8) | color (8) | value (8) |
  */
 public abstract class AbstractOffHeapTree implements KOffHeapChunk {
@@ -27,6 +30,9 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     protected float loadFactor;
 
     protected int NODE_SIZE;
+
+    //multi-thread sync
+    private Random _random;
 
     // constants for tree semantic
     private static final char BLACK_LEFT = '{';
@@ -45,13 +51,17 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     private static final int POS_COLOR = 4;
     private static final int POS_VALUE = 5;
 
+    private static final int ATT_MAGIC_TOKEN_LEN = 4;
+    private static final int ATT_MAGIC_LEN = 8;
     private static final int ATT_THRESHOLD_LEN = 4;
     private static final int ATT_ROOT_INDEX_LEN = 8;
     private static final int ATT_SIZE_LEN = 4;
     private static final int ATT_FLAGS_LEN = 8;
     private static final int ATT_COUNTER_LEN = 4;
 
-    private static final int OFFSET_THRESHOLD = 0;
+    private static final int OFFSET_MAGIC_TOKEN = 0;
+    private static final int OFFSET_MAGIC = OFFSET_MAGIC_TOKEN + ATT_MAGIC_TOKEN_LEN;
+    private static final int OFFSET_THRESHOLD = OFFSET_MAGIC + ATT_MAGIC_LEN;
     private static final int OFFSET_ROOT_INDEX = OFFSET_THRESHOLD + ATT_THRESHOLD_LEN;
     private static final int OFFSET_SIZE = OFFSET_ROOT_INDEX + ATT_ROOT_INDEX_LEN;
     private static final int OFFSET_FLAGS = OFFSET_SIZE + ATT_SIZE_LEN;
@@ -59,7 +69,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     private static final int OFFSET_BACK = OFFSET_COUNTER + ATT_COUNTER_LEN;
 
     private static final int BASE_SEGMENT_LEN =
-            ATT_THRESHOLD_LEN + ATT_ROOT_INDEX_LEN + ATT_SIZE_LEN + ATT_FLAGS_LEN + ATT_COUNTER_LEN;
+            ATT_MAGIC_TOKEN_LEN + ATT_MAGIC_LEN + ATT_THRESHOLD_LEN + ATT_ROOT_INDEX_LEN + ATT_SIZE_LEN + ATT_FLAGS_LEN + ATT_COUNTER_LEN;
 
     protected AbstractOffHeapTree() {
         NODE_SIZE = 0;
@@ -78,6 +88,10 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         int threshold = (int) (size() * this.loadFactor);
         UNSAFE.putInt(this._start_address + OFFSET_THRESHOLD, threshold);
 
+        UNSAFE.putLong(this._start_address + OFFSET_MAGIC, PrimitiveHelper.rand());
+        UNSAFE.putInt(this._start_address + OFFSET_MAGIC_TOKEN, -1);
+        this._random = new Random();
+
 //      don't notify for allocation, otherwise the pointer of space will point to the newly created objects for the get
 //        if (_space != null) {
 //            _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
@@ -95,6 +109,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
         int threshold = (int) (p_length * this.loadFactor);
         UNSAFE.putInt(this._start_address + OFFSET_THRESHOLD, threshold);
+
 
         if (_space != null) {
             _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
@@ -287,26 +302,39 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     public final void range(long p_startKey, long p_endKey, KTreeWalker p_walker) {
-        long indexEnd = previousOrEqualIndex(p_endKey);
+        long indexEnd = internal_previousOrEqual_index(p_endKey);
         while (indexEnd != UNDEFINED && key(indexEnd) >= p_startKey) {
             p_walker.elem(key(indexEnd));
             indexEnd = previous(indexEnd);
         }
     }
 
-    protected final long previousOrEqualIndex(long p_key) {
+    protected final long internal_previousOrEqual_index(long p_key) {
+        //negotiate a magic
+        int newMagic;
+        do {
+            newMagic = _random.nextInt();
+        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, -1, newMagic));
+
+
         long p = UNSAFE.getLong(this._start_address + OFFSET_ROOT_INDEX);
         if (p == UNDEFINED) {
+            //free magic
+            UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
             return p;
         }
         while (p != UNDEFINED) {
             if (p_key == key(p)) {
+                //free magic
+                UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
                 return p;
             }
             if (p_key > key(p)) {
                 if (right(p) != UNDEFINED) {
                     p = right(p);
                 } else {
+                    //free magic
+                    UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
                     return p;
                 }
             } else {
@@ -319,20 +347,35 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
                         ch = parent;
                         parent = parent(parent);
                     }
+                    //free magic
+                    UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
                     return parent;
                 }
             }
         }
+
+        //free magic
+        UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
         return UNDEFINED;
     }
 
-    protected final long internal_lookupValue(long p_key) {
+    protected final long internal_lookup_value(long p_key) {
+        //negociate a magic
+        int newMagic;
+        do {
+            newMagic = _random.nextInt();
+        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, -1, newMagic));
+
         long n = UNSAFE.getLong(this._start_address + OFFSET_ROOT_INDEX);
         if (n == UNDEFINED) {
+            //free magic
+            UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
             return KConfig.NULL_LONG;
         }
         while (n != UNDEFINED) {
             if (p_key == key(n)) {
+                //free magic
+                UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
                 return value(n);
             } else {
                 if (p_key < key(n)) {
@@ -342,6 +385,8 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
                 }
             }
         }
+        //free magic
+        UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
         return n;
     }
 
@@ -383,6 +428,12 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     protected synchronized void internal_insert(long p_key, long p_value) {
+        //negociate a magic
+        int newMagic;
+        do {
+            newMagic = _random.nextInt();
+        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, -1, newMagic));
+
         int threshold = UNSAFE.getInt(this._start_address + OFFSET_THRESHOLD);
         if ((size() + 1) > threshold) {
             int length = (size() == 0 ? 1 : size() << 1);
@@ -409,6 +460,9 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
             while (true) {
                 if (p_key == key(rootIndex)) {
                     //nop _size
+
+                    //free magic
+                    UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
                     return;
                 } else if (p_key < key(rootIndex)) {
                     if (left(rootIndex) == -1) {
@@ -453,6 +507,22 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
             setParent(insertedNodeIndex, rootIndex);
         }
         insertCase1(insertedNodeIndex);
+        internal_set_dirty();
+
+        UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
+
+    }
+
+    private void internal_set_dirty() {
+        if (_space != null) {
+            if ((UNSAFE.getLong(this._start_address + OFFSET_FLAGS) & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                _space.declareDirty(this);
+                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
+                setFlags(KChunkFlags.DIRTY_BIT, 0);
+            }
+        } else {
+            setFlags(KChunkFlags.DIRTY_BIT, 0);
+        }
     }
 
     private void insertCase1(long p_n) {
@@ -519,6 +589,13 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     }
 
     public final String serialize(KMetaModel p_metaModel) {
+        //negociate a magic
+        int newMagic;
+        do {
+            newMagic = _random.nextInt();
+        } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, -1, newMagic));
+
+
         StringBuilder builder = new StringBuilder();
         long rootIndex = UNSAFE.getLong(this._start_address + OFFSET_ROOT_INDEX);
         if (rootIndex == UNDEFINED) {
@@ -561,12 +638,19 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
                 }
             }
         }
+
+        //free magic
+        UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
         return builder.toString();
     }
 
     public final void init(String p_payload, KMetaModel p_metaModel, int p_metaClassIndex) {
         if (p_payload == null || p_payload.length() == 0) {
             allocate(0);
+            // an init changes the address, this must also affect the value pointer in the chunks space
+            if (_space != null) {
+                _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
+            }
             return;
         }
         int initPos = 0;
@@ -577,6 +661,10 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
         int s = Base64.decodeToIntWithBounds(p_payload, initPos, cursor);
         allocate(s);
+        // an init changes the address, this must also affect the value pointer in the chunks space
+        if (_space != null) {
+            _space.notifyRealloc(this._start_address, this._universe, this._time, this._obj);
+        }
 
         if (p_payload.charAt(cursor) == ',') {//className to parse
             UNSAFE.putInt(this._start_address + OFFSET_SIZE, s);
@@ -643,6 +731,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
                 _back_index++;
             }
         }
+
     }
 
     public final int counter() {
