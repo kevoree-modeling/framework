@@ -4,7 +4,10 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
-import org.kevoree.modeling.memory.chunk.impl.*;
+import org.kevoree.modeling.memory.chunk.impl.OffHeapLongLongMap;
+import org.kevoree.modeling.memory.chunk.impl.OffHeapLongTree;
+import org.kevoree.modeling.memory.chunk.impl.OffHeapObjectChunk;
+import org.kevoree.modeling.memory.chunk.impl.UnsafeUtil;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpace;
@@ -13,6 +16,7 @@ import org.kevoree.modeling.meta.KMetaModel;
 import sun.misc.Unsafe;
 
 import java.util.concurrent.atomic.AtomicLong;
+
 
 /**
  * @ignore ts
@@ -194,15 +198,12 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
 
     private KOffHeapChunk internal_getMemoryElement(long p_universe, long p_time, long p_obj, long p_baseAddress, int p_index) {
-        KChunk elem = internal_createElement(p_universe, p_time, p_obj, type(p_baseAddress, p_index));
+        KOffHeapChunk elem = internal_createElement(p_universe, p_time, p_obj, type(p_baseAddress, p_index));
 
-        if (!(elem instanceof KOffHeapChunk)) {
-            throw new RuntimeException("OffHeapMemoryCache only supports OffHeapMemoryElements");
-        }
-        KOffHeapChunk offheapElem = (KOffHeapChunk) elem;
-        offheapElem.setMemoryAddress(valuePointer(p_baseAddress, p_index));
+        elem.setMemoryAddress(valuePointer(p_baseAddress, p_index));
+//        setValuePointer(p_baseAddress, p_index, elem.memoryAddress());
 
-        return offheapElem;
+        return elem;
     }
 
     private void rehashCapacity(int p_capacity) {
@@ -273,17 +274,20 @@ public class OffHeapChunkSpace implements KChunkSpace {
         int m = hash(this._start_address.get(), index);
         while (m != -1) {
             if (p_universe == universe(this._start_address.get(), m) && p_time == time(this._start_address.get(), m) && p_obj == obj(this._start_address.get(), m)) {
-                return internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address.get(), m); /* getValue */
+                KOffHeapChunk c = internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address.get(), m); /* getValue */
+                System.out.println("#get " + c);
+                return c;
             } else {
                 m = next(this._start_address.get(), m);
             }
         }
+        System.out.println("#get " + null);
         return null;
     }
 
 
     @Override
-    public final KChunk create(long p_universe, long p_time, long p_obj, short p_type) {
+    public final KChunk create(long p_universe, long p_time, long p_obj, short p_type, KMetaModel metaModel) {
         KOffHeapChunk newElement = internal_createElement(p_universe, p_time, p_obj, p_type);
         return internal_put(p_universe, p_time, p_obj, newElement, p_type);
     }
@@ -305,9 +309,6 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
             case KChunkTypes.LONG_TREE:
                 return new OffHeapLongTree(this, p_universe, p_time, p_obj);
-
-        //    case KChunkTypes.LONG_LONG_TREE:
-        //        return new OffHeapLongLongTree(this, p_universe, p_time, p_obj);
 
             case KChunkTypes.LONG_LONG_MAP:
                 return new OffHeapLongLongMap(this, p_universe, p_time, p_obj);
@@ -344,7 +345,6 @@ public class OffHeapChunkSpace implements KChunkSpace {
                 entry = findNonNullKeyEntry(p_universe, p_time, p_obj, index);
             }
             if (entry == -1) {
-
                 int nextValueIndex = UNSAFE.getAndAddInt(null, this._start_address.get() + OFFSET_STARTADDRESS_VALUES_INDEX, +1);
                 int threshold = UNSAFE.getInt(this._start_address.get() + OFFSET_STARTADDRESS_THRESHOLD);
                 if (nextValueIndex > threshold) {
@@ -389,7 +389,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
 
             if (p_nextValueIndex > threshold) {
                 rehashCapacity(length);
-                nextState = this._start_address.get(); // start pointer pointer changed after rehash
+                nextState = this._start_address.get(); // start pointer changed after rehash
             } else {
                 nextState = currentState;
             }
@@ -400,7 +400,7 @@ public class OffHeapChunkSpace implements KChunkSpace {
             setTime(nextState, p_nextValueIndex, p_time);
             setObj(nextState, p_nextValueIndex, p_obj);
             setType(nextState, p_nextValueIndex, p_type);
-            setValuePointer(p_nextValueIndex, p_nextValueIndex, p_payload.memoryAddress());
+            setValuePointer(nextState, p_nextValueIndex, p_payload.memoryAddress());
 
             long hashPtr = nextState + OFFSET_STARTADDRESS_BACK + (index * BACK_ELEM_ENTRY_LEN + OFFSET_BACK_HASH);
             setNext(nextState, p_nextValueIndex, UNSAFE.getAndSetInt(null, hashPtr, p_nextValueIndex));
@@ -451,16 +451,20 @@ public class OffHeapChunkSpace implements KChunkSpace {
     public void declareDirty(KChunk p_dirtyChunk) {
         long currentDirtiesAddr;
         int nbTry = 0;
+
+        // the compare and swap here is probably unnecessary
+        long newDirtiesAddr;
         do {
             currentDirtiesAddr = UNSAFE.getLong(this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR);
-            internal_declareDirty(currentDirtiesAddr, p_dirtyChunk.universe(), p_dirtyChunk.time(), p_dirtyChunk.obj());
+            newDirtiesAddr = internal_declareDirty(currentDirtiesAddr, p_dirtyChunk.universe(), p_dirtyChunk.time(), p_dirtyChunk.obj());
 
             nbTry++;
             if (nbTry == KConfig.CAS_MAX_TRY) {
                 throw new RuntimeException("CompareAndSwap error, failed to converge");
             }
+
         } while (!UNSAFE.compareAndSwapLong(null,
-                this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, currentDirtiesAddr, currentDirtiesAddr));
+                this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, newDirtiesAddr, newDirtiesAddr));
     }
 
     @Override
@@ -468,7 +472,9 @@ public class OffHeapChunkSpace implements KChunkSpace {
         //TODO
     }
 
-    private void internal_declareDirty(long p_dirtiesAddr, long p_universe, long p_time, long p_obj) {
+    private long internal_declareDirty(long p_dirtiesAddr, long p_universe, long p_time, long p_obj) {
+        long newDirtiesAddr = p_dirtiesAddr;
+
         int nextIndex = UNSAFE.getAndAddInt(null, p_dirtiesAddr + OFFSET_DIRTYLIST_INDEX, 1);
         int length = UNSAFE.getInt(p_dirtiesAddr + OFFSET_DIRTYLIST_LENGTH);
         //simple case
@@ -478,17 +484,20 @@ public class OffHeapChunkSpace implements KChunkSpace {
         } else {
             synchronized (this) {
                 int newLength = nextIndex * 2;
-                long newDirtiesAddr = allocateDirties(newLength);
+                newDirtiesAddr = allocateDirties(newLength);
+
                 long bytes = DIRTY_LIST_BASE_LEN + length * DIRTY_LIST_ENTRY_LEN;
                 UNSAFE.copyMemory(p_dirtiesAddr, newDirtiesAddr, bytes);
 
                 long oldDirtiesAddr = UNSAFE.getLong(this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR);
+
                 UNSAFE.putLong(this._start_address.get() + OFFSET_STARTADDRESS_DIRTY_LIST_PTR, newDirtiesAddr);
                 UNSAFE.freeMemory(oldDirtiesAddr);
 
                 setDirtyListElem(newDirtiesAddr, nextIndex, p_universe, p_time, p_obj);
             }
         }
+        return newDirtiesAddr;
     }
 
     @Override

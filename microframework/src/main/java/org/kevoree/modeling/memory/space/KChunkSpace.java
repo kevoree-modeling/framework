@@ -11,7 +11,7 @@ public interface KChunkSpace {
 
     KChunk get(long universe, long time, long obj);
 
-    KChunk create(long universe, long time, long obj, short type);
+    KChunk create(long universe, long time, long obj, short type, KMetaModel metaModel);
 
     KObjectChunk clone(KObjectChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel);
 

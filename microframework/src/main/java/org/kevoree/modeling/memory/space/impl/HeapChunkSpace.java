@@ -153,7 +153,7 @@ public class HeapChunkSpace implements KChunkSpace {
     }
 
     @Override
-    public KChunk create(long universe, long time, long obj, short type) {
+    public KChunk create(long universe, long time, long obj, short type, KMetaModel metaModel) {
         KChunk newElement = internal_createElement(universe, time, obj, type);
         return internal_put(universe, time, obj, newElement);
     }

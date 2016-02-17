@@ -41,7 +41,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
 
     @Override
     public KChunk createAndMark(long universe, long time, long obj, short type) {
-        KChunk newCreatedElement = _space.create(universe, time, obj, type);
+        KChunk newCreatedElement = _space.create(universe, time, obj, type, _metaModel);
         if (newCreatedElement != null) {
             newCreatedElement.inc();
         }
@@ -82,6 +82,7 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     @Override
     public KObjectChunk cloneAndMark(KObjectChunk previous, long newUniverse, long newTime, long obj, KMetaModel metaModel) {
         KObjectChunk newCreatedElement = _space.clone(previous, newUniverse, newTime, obj, metaModel);
+        //todo move the mark to before the put in the cache
         newCreatedElement.inc();
         return newCreatedElement;
     }
