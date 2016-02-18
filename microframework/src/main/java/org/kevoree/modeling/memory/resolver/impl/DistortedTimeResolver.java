@@ -494,8 +494,10 @@ public class DistortedTimeResolver implements KResolver {
         if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] == universe && previous[AbstractKObject.TIME_PREVIOUS_INDEX] == time) {
             //OPTIMIZATION #1: DEPHASING
             KObjectChunk currentEntry = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
-            _spaceManager.unmarkMemoryElement(currentEntry);
-            return currentEntry;
+            if(currentEntry != null){
+                _spaceManager.unmarkMemoryElement(currentEntry);
+                return currentEntry;
+            }
         }
 
         KLongLongMap objectUniverseMap = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
