@@ -1,5 +1,6 @@
 package org.kevoree.modeling.memory.space.impl;
 
+import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.KObject;
 import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.memory.resolver.KResolver;
@@ -81,8 +82,16 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     previousRef.next = nextRef;
                 }
 
-                long[] previousResolved = kobj.previousResolved.get();
-                unmark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], kobj.obj);
+                long[] previousResolved;
+                do {
+                    previousResolved = kobj.previousResolved.get();
+                } while (!kobj.previousResolved.compareAndSet(previousResolved, null));
+                if (previousResolved != null) {
+                    unmark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], kobj.obj);
+                    unmark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, kobj.obj);
+                    unmark(KConfig.NULL_LONG, KConfig.NULL_LONG, kobj.obj);
+                    unmark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();

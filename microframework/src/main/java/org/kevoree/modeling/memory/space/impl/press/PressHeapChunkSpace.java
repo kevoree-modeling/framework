@@ -204,7 +204,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 nbTry++;
                 if (nbTry % (this._maxEntries / 10) == 0) {
                     System.gc();
-                    //System.err.println("GC "+nbTry);
+                    System.err.println("GC "+nbTry);
                 }
             }
 

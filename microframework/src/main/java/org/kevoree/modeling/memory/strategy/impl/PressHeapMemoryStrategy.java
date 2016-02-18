@@ -27,8 +27,8 @@ public class PressHeapMemoryStrategy implements KMemoryStrategy {
      */
     @Override
     public KChunkSpaceManager newSpaceManager(KChunkSpace p_space, KScheduler p_scheduler) {
-        //return new PhantomQueueChunkSpaceManager(p_space, p_scheduler);
-        return new ManualChunkSpaceManager(p_space);
+        return new PhantomQueueChunkSpaceManager(p_space, p_scheduler);
+        //return new ManualChunkSpaceManager(p_space);
     }
 
 }

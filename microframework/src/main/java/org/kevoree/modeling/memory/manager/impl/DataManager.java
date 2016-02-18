@@ -492,6 +492,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
         } while (!castedVictim.previousResolved().compareAndSet(previous, null));
         if (previous != null) {
             this._spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], victim.uuid());
+            this._spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, victim.uuid());
+            this._spaceManager.unmark(KConfig.NULL_LONG, KConfig.NULL_LONG, victim.uuid());
+            this._spaceManager.unmark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
         }
     }
 
