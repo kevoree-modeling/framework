@@ -43,7 +43,7 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
 
     @Override
     public long magic() {
-        return UNSAFE.getLong(this._start_address + OFFSET)
+        return UNSAFE.getLong(this._start_address + OFFSET_MAGIC);
     }
 
     @Override
