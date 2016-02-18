@@ -14,15 +14,12 @@ import org.kevoree.modeling.util.Base64;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import sun.misc.Unsafe;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * @ignore ts
- * <p>
+ * <p/>
  * OffHeap implementation of KLongLongMap
- * - memory structure:  | magic (8) | initial capacity (4) | threshold (4) | meta class idx (4) | elem count (4) | dropped count (4) |
- * -                    | flags (8) | elem data size (4) | counter (4) | back (elem data size * 28) |
- * -
+ * - memory structure:  | object token (4) | magic (8) | initial capacity (4) | threshold (4) | meta class idx (4) | elem count (4) |
+ * -                    | dropped count (4) | flags (8) | elem data size (4) | counter (4) | back (elem data size * 28) |
  * - back:              | key (8) | value (8) | next (4) | hash (4) |
  */
 public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
@@ -35,6 +32,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private float loadFactor;
 
     // constants for off-heap memory layout
+    private static final int ATT_OBJECT_TOKEN_LEN = 4;
     private static final int ATT_MAGIC_LEN = 8;
     private static final int ATT_INITIAL_CAPACITY_LEN = 4;
     private static final int ATT_THRESHOLD_LEN = 4;
@@ -51,11 +49,12 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private static final int ATT_HASH_LEN = 4;
 
     private static final int BASE_SEGMENT_LEN =
-            ATT_MAGIC_LEN + ATT_INITIAL_CAPACITY_LEN + ATT_THRESHOLD_LEN + ATT_META_CLASS_INDEX_LEN + ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN +
+            ATT_OBJECT_TOKEN_LEN + ATT_MAGIC_LEN + ATT_INITIAL_CAPACITY_LEN + ATT_THRESHOLD_LEN + ATT_META_CLASS_INDEX_LEN + ATT_ELEM_COUNT_LEN + ATT_DROPPED_COUNT_LEN +
                     ATT_FLAGS_LEN + ATT_ELEM_DATA_SIZE_LEN + ATT_COUNTER_LEN;
     private static final int BACK_ELEM_ENTRY_LEN = ATT_KEY_LEN + ATT_VALUE_LEN + ATT_NEXT_LEN + ATT_HASH_LEN;
 
-    private static final int OFFSET_STARTADDRESS_MAGIC = 0;
+    private static final int OFFSET_STARTADDRESS_OBJECT_TOKEN = 0;
+    private static final int OFFSET_STARTADDRESS_MAGIC = OFFSET_STARTADDRESS_OBJECT_TOKEN + ATT_OBJECT_TOKEN_LEN;
     private static final int OFFSET_STARTADDRESS_INITIAL_CAPACITY = OFFSET_STARTADDRESS_MAGIC + ATT_MAGIC_LEN;
     private static final int OFFSET_STARTADDRESS_THRESHOLD = OFFSET_STARTADDRESS_INITIAL_CAPACITY + ATT_INITIAL_CAPACITY_LEN;
     private static final int OFFSET_STARTADDRESS_META_CLASS_INDEX = OFFSET_STARTADDRESS_THRESHOLD + ATT_THRESHOLD_LEN;
@@ -248,11 +247,6 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     @Override
     public int metaClassIndex() {
         return UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX);
-    }
-
-    @Override
-    public AtomicInteger objectToken() {
-        return null;
     }
 
     @Override
@@ -606,5 +600,11 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
             _space.notifyRealloc(_start_address, this._universe, this._time, this._obj);
         }
     }
+
+    @Override
+    public boolean tokenCompareAndSwap(int previous, int next) {
+        return UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_STARTADDRESS_OBJECT_TOKEN, previous, next);
+    }
+
 
 }
