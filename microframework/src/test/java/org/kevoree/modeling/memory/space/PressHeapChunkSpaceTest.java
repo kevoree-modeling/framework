@@ -40,7 +40,7 @@ public class PressHeapChunkSpaceTest {
         System.err.println(list.dequeue());
     }
 
-    @Test
+    //@Test
     public void monoThreadFullTest() {
 
         PressHeapChunkSpace space = new PressHeapChunkSpace(10);
