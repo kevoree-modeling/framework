@@ -39,7 +39,10 @@ public class PressHeapChunkSpace implements KChunkSpace {
      * HashMap variables
      */
 
-    private final long[] elementK3;
+    private final long[] elementK3a;
+    private final long[] elementK3b;
+    private final long[] elementK3c;
+
 
     private final int[] elementNext;
 
@@ -122,7 +125,10 @@ public class PressHeapChunkSpace implements KChunkSpace {
         this._dirtyState.set(new InternalDirtyState(this._maxEntries, this));
 
         //init std variables
-        this.elementK3 = new long[maxEntries * 3];
+        this.elementK3a = new long[maxEntries];
+        this.elementK3b = new long[maxEntries];
+        this.elementK3c = new long[maxEntries];
+
         this.elementNext = new int[maxEntries];
         this.elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
         this.elementHash = new int[maxEntries];
@@ -151,7 +157,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
         int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % this._maxEntries;
         int m = this.elementHash[index];
         while (m != -1) {
-            if (universe == this.elementK3[(m * 3)] && time == this.elementK3[((m * 3) + 1)] && obj == elementK3[((m * 3) + 2)]) {
+            if (universe == this.elementK3a[m] && time == this.elementK3b[m] && obj == elementK3c[m]) {
                 //GET VALUE
                 return this._values[m];
             } else {
@@ -234,7 +240,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 int m = elementHash[indexVictim];
                 int last = -1;
                 while (m >= 0) {
-                    if (victimUniverse == elementK3[m * 3] && victimTime == elementK3[(m * 3) + 1] && victimObj == elementK3[(m * 3) + 2]) {
+                    if (victimUniverse == elementK3a[m] && victimTime == elementK3b[m] && victimObj == elementK3c[m]) {
                         break;
                     }
                     last = m;
@@ -271,9 +277,9 @@ public class PressHeapChunkSpace implements KChunkSpace {
                     victim.free(metaModel);
                 }
             }
-            elementK3[(currentVictimIndex * 3)] = universe;
-            elementK3[((currentVictimIndex * 3) + 1)] = time;
-            elementK3[((currentVictimIndex * 3) + 2)] = p_obj;
+            elementK3a[currentVictimIndex] = universe;
+            elementK3b[currentVictimIndex] = time;
+            elementK3c[currentVictimIndex] = p_obj;
             _values[currentVictimIndex] = payload;
 
             int previousMagic;
@@ -298,7 +304,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
     private int findNonNullKeyEntry(long universe, long time, long obj, int index) {
         int m = this.elementHash[index];
         while (m >= 0) {
-            if (universe == this.elementK3[m * 3] && time == this.elementK3[(m * 3) + 1] && obj == this.elementK3[(m * 3) + 2]) {
+            if (universe == this.elementK3a[m] && time == this.elementK3b[m] && obj == this.elementK3c[m]) {
                 return m;
             }
             m = this.elementNext[m];
@@ -382,7 +388,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                     } else {
                         content = "no model";
                     }
-                    buffer.append(i + "#:" + this.elementK3[i * 3] + "," + this.elementK3[i * 3 + 1] + "," + this.elementK3[i * 3 + 2] + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + content + "\n");
+                    buffer.append(i + "#:" + this.elementK3a[i] + "," + this.elementK3b[i] + "," + this.elementK3c[i] + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + content + "\n");
                 }
             }
         } catch (Exception e) {
