@@ -12,7 +12,7 @@ public class PressOffHeapChunkSpaceTest {
     @Test
     public void monoThreadFullTest() {
 
-        PressOffHeapChunkSpace space = new PressOffHeapChunkSpace(10);
+        PressOffHeapChunkSpace space = new PressOffHeapChunkSpace(100);
         //Fill the entire cache
         for (int i = 0; i < 10; i++) {
             KChunk chunk = space.create(i, 0, 10, KChunkTypes.OBJECT_CHUNK,null);
