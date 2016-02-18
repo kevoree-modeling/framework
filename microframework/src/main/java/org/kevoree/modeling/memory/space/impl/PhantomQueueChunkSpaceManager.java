@@ -20,11 +20,8 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
 
     private final ReferenceQueue<KObject> referenceQueue;
     private final AtomicReference<KObjectPhantomReference> headPhantom;
-    private final KScheduler _scheduler;
 
-    public PhantomQueueChunkSpaceManager(KChunkSpace p_storage, KScheduler p_scheduler) {
-        super(p_storage);
-        this._scheduler = p_scheduler;
+    public PhantomQueueChunkSpaceManager() {
         headPhantom = new AtomicReference<KObjectPhantomReference>();
         referenceQueue = new ReferenceQueue<KObject>();
         Thread cleanupThread = new Thread(this);

@@ -14,7 +14,6 @@ import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.resolver.KResolver;
 import org.kevoree.modeling.memory.resolver.impl.*;
 import org.kevoree.modeling.memory.space.KChunkTypes;
-import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.manager.KDataManager;
@@ -66,11 +65,13 @@ public class DataManager implements KDataManager, KInternalDataManager {
         this._model = p_model;
     }
 
-    public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KMemoryStrategy p_factory, KBlas p_blas) {
-        this._space = p_factory.newSpace();
+    public DataManager(KContentDeliveryDriver p_cdn, KScheduler p_scheduler, KChunkSpace p_space, KChunkSpaceManager p_spaceManager, KBlas p_blas) {
+        this._space = p_space;
         this._space.setManager(this);
+        this._spaceManager = p_spaceManager;
+        this._spaceManager.setSpace(this._space);
+
         this._scheduler = p_scheduler;
-        this._spaceManager = p_factory.newSpaceManager(this._space, this._scheduler);
         this._resolver = new DistortedTimeResolver(this._spaceManager, this);
         this._listenerManager = new ListenerManager();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);

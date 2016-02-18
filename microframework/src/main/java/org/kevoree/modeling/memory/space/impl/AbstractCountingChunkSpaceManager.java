@@ -15,8 +15,9 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
 
     protected KMetaModel _metaModel;
 
-    public AbstractCountingChunkSpaceManager(KChunkSpace p_storage) {
-        this._space = p_storage;
+    @Override
+    public void setSpace(KChunkSpace p_space) {
+        this._space = p_space;
     }
 
     @Override
@@ -95,5 +96,5 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     abstract public void register(KObject object);
 
     abstract public void registerAll(KObject[] objects);
-    
+
 }

@@ -8,14 +8,14 @@ import org.kevoree.modeling.cloudmodel.CloudUniverse;
 import org.kevoree.modeling.cloudmodel.CloudView;
 import org.kevoree.modeling.cloudmodel.Node;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
-import org.kevoree.modeling.memory.strategy.impl.PressHeapMemoryStrategy;
+import org.kevoree.modeling.memory.space.impl.press.PressHeapChunkSpace;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class PressHeapTest {
 
 //    @Test
     public void simpleTest() {
-        final CloudModel model = new CloudModel(DataManagerBuilder.create().withMemoryStrategy(new PressHeapMemoryStrategy(100)).withScheduler(new DirectScheduler()).build());
+        final CloudModel model = new CloudModel(DataManagerBuilder.create().withSpace(new PressHeapChunkSpace(100)).withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

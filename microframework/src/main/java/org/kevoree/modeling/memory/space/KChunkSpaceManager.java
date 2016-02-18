@@ -8,6 +8,8 @@ import org.kevoree.modeling.meta.KMetaModel;
 
 public interface KChunkSpaceManager {
 
+    void setSpace(KChunkSpace space);
+
     KChunk getAndMark(long universe, long time, long obj);
 
     void unmark(long universe, long time, long obj);

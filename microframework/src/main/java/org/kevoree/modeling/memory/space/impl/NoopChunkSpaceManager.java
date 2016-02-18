@@ -12,7 +12,8 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
 
     private KChunkSpace _space;
 
-    public NoopChunkSpaceManager(KChunkSpace p_space) {
+    @Override
+    public void setSpace(KChunkSpace p_space) {
         this._space = p_space;
     }
 
