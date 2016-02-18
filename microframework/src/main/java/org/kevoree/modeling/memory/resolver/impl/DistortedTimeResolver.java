@@ -531,11 +531,11 @@ public class DistortedTimeResolver implements KResolver {
         }
 
         //SOMETHING WILL MOVE HERE ANYWAY SO WE SYNC THE OBJECT
-        
+
         int magic;
         do {
             magic = random.nextInt();
-        } while (!globalUniverseTree.objectToken().compareAndSet(-1, magic));
+        } while (!globalUniverseTree.tokenCompareAndSwap(-1, magic));
 
         //OK NOW WE HAVE THE MAGIC FOR UUID
 
@@ -565,7 +565,7 @@ public class DistortedTimeResolver implements KResolver {
                 _spaceManager.unmarkMemoryElement(objectTimeTree);
                 _spaceManager.unmarkMemoryElement(globalUniverseTree);
                 _spaceManager.unmarkMemoryElement(objectUniverseMap);
-                globalUniverseTree.objectToken().compareAndSet(magic, -1);
+                globalUniverseTree.tokenCompareAndSwap(magic, -1);
                 return newObjectEntry;
             } else {
                 long[] current;
@@ -598,7 +598,7 @@ public class DistortedTimeResolver implements KResolver {
                     _spaceManager.unmarkMemoryElement(objectTimeTree);
                     _spaceManager.unmarkMemoryElement(objectUniverseMap);
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                    globalUniverseTree.objectToken().compareAndSet(magic, -1);
+                    globalUniverseTree.tokenCompareAndSwap(magic, -1);
                     return clonedChunk;
                 } else {
                     //somebody as clone for us, now waiting for the chunk to be available
@@ -607,12 +607,12 @@ public class DistortedTimeResolver implements KResolver {
                     _spaceManager.unmarkMemoryElement(globalUniverseTree);
                     KObjectChunk waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
                     _spaceManager.unmarkMemoryElement(waitingChunk);
-                    globalUniverseTree.objectToken().compareAndSet(magic, -1);
+                    globalUniverseTree.tokenCompareAndSwap(magic, -1);
                     return waitingChunk;
                 }
             }
         } else {
-            globalUniverseTree.objectToken().compareAndSet(magic, -1);
+            globalUniverseTree.tokenCompareAndSwap(magic, -1);
             _spaceManager.unmarkMemoryElement(objectTimeTree);
             _spaceManager.unmarkMemoryElement(globalUniverseTree);
             _spaceManager.unmarkMemoryElement(objectUniverseMap);

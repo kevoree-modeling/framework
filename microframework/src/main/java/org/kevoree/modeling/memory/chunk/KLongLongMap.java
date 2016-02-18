@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public interface KLongLongMap extends KChunk {
 
     int metaClassIndex();
-
-    AtomicInteger objectToken();
+    
+    boolean tokenCompareAndSwap(int previous, int next);
 
     boolean contains(long key);
 

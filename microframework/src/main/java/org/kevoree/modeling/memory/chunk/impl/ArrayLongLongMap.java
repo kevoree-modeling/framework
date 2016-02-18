@@ -162,8 +162,8 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public AtomicInteger objectToken() {
-        return _objectToken;
+    public boolean tokenCompareAndSwap(int previous, int next) {
+        return this._objectToken.compareAndSet(previous, next);
     }
 
     @Override
