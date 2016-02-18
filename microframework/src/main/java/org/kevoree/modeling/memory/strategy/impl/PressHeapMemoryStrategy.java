@@ -8,6 +8,9 @@ import org.kevoree.modeling.memory.space.impl.PhantomQueueChunkSpaceManager;
 import org.kevoree.modeling.memory.strategy.KMemoryStrategy;
 import org.kevoree.modeling.scheduler.KScheduler;
 
+/**
+ * @ignore ts
+ */
 public class PressHeapMemoryStrategy implements KMemoryStrategy {
 
     private int _maxEntries;
