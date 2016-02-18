@@ -666,6 +666,7 @@ public abstract class AbstractArrayTree implements KChunk {
         }
         insertCase1(newIndex);
         internal_set_dirty();
+        this._magic = PrimitiveHelper.rand();
 
         //free magic
         this._magicToken.compareAndSet(newMagic, -1);

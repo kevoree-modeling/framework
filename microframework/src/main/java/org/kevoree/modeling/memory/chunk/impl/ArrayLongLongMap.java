@@ -228,11 +228,13 @@ public class ArrayLongLongMap implements KLongLongMap {
             //now the object is reachable to other thread everything should be ready
             state.elementHash[index] = newIndex;
             internal_set_dirty();
+            this._magic = PrimitiveHelper.rand();
         } else {
             if (state.elementKV[entry + 1] != value) {
                 //setValue
                 state.elementKV[entry + 1] = value;
                 internal_set_dirty();
+                this._magic = PrimitiveHelper.rand();
             }
         }
     }

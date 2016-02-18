@@ -485,7 +485,6 @@ public class DistortedTimeResolver implements KResolver {
     private Random random = new Random();
 
     private KObjectChunk internal_chunk(long universe, long requestedTime, long uuid, boolean useClosest, KMetaClass metaClass, AtomicReference<long[]> previousResolution) {
-
         long time = requestedTime;
         if (metaClass.temporalResolution() != 1) {
             time = time - (time % metaClass.temporalResolution());
@@ -510,6 +509,8 @@ public class DistortedTimeResolver implements KResolver {
         }
         long objectUniverseMapMagic = objectUniverseMap.magic();
         long objectTimeTreeMagic = objectTimeTree.magic();
+
+
         if (useClosest && previous[AbstractKObject.UNIVERSE_PREVIOUS_MAGIC] == objectUniverseMapMagic && previous[AbstractKObject.TIME_PREVIOUS_MAGIC] == objectTimeTreeMagic) {
             //OPTIMIZATION #2: SAME DEPHASING
             KObjectChunk currentEntry = (KObjectChunk) _spaceManager.getAndMark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
