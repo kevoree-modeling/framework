@@ -25,7 +25,7 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
     public void unmark(long universe, long time, long obj) {
 
     }
-    
+
     @Override
     public KChunk createAndMark(long universe, long time, long obj, short type) {
         return this._space.create(universe, time, obj, type, _metaModel);
@@ -67,11 +67,6 @@ public class NoopChunkSpaceManager implements KChunkSpaceManager {
 
     @Override
     public void registerAll(KObject[] objects) {
-
-    }
-
-    @Override
-    public void setResolver(KResolver resolver) {
 
     }
 

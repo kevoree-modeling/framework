@@ -27,7 +27,5 @@ public interface KChunkSpaceManager {
     void register(KObject object);
 
     void registerAll(KObject[] objects);
-
-    void setResolver(KResolver resolver);
-
+    
 }

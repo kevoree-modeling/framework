@@ -1,6 +1,7 @@
 package org.kevoree.modeling.memory.manager.impl;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.abs.AbstractKObject;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
@@ -480,6 +481,23 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public void printDebug() {
         this._space.printDebug(_model.metaModel());
+    }
+
+    @Override
+    public void destroyObject(KObject victim) {
+        AbstractKObject castedVictim = (AbstractKObject) victim;
+        long[] previous;
+        do {
+            previous = castedVictim.previousResolved().get();
+        } while (!castedVictim.previousResolved().compareAndSet(previous, null));
+        if (previous != null) {
+            this._spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], victim.uuid());
+        }
+    }
+
+    @Override
+    public KChunkSpace space() {
+        return this._space;
     }
 
     @Override

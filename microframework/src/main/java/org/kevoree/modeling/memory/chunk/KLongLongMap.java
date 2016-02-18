@@ -2,9 +2,13 @@ package org.kevoree.modeling.memory.chunk;
 
 import org.kevoree.modeling.memory.KChunk;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public interface KLongLongMap extends KChunk {
 
     int metaClassIndex();
+
+    AtomicInteger objectToken();
 
     boolean contains(long key);
 

@@ -14,6 +14,8 @@ import org.kevoree.modeling.util.Base64;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import sun.misc.Unsafe;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @ignore ts
  * <p>
@@ -243,6 +245,11 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     @Override
     public int metaClassIndex() {
         return UNSAFE.getInt(this._start_address + OFFSET_STARTADDRESS_META_CLASS_INDEX);
+    }
+
+    @Override
+    public AtomicInteger objectToken() {
+        return null;
     }
 
     @Override

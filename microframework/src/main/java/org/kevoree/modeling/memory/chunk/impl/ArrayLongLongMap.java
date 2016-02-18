@@ -44,12 +44,15 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     private volatile long _magic;
 
+    private final AtomicInteger _objectToken;
+
     public ArrayLongLongMap(long p_universe, long p_time, long p_obj, KChunkSpace p_space) {
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
         this._flags = new AtomicLong(0);
         this._counter = new AtomicInteger(0);
+        this._objectToken = new AtomicInteger(-1);
         this._space = p_space;
         this.elementCount = 0;
         this.droppedCount = 0;
@@ -156,6 +159,11 @@ public class ArrayLongLongMap implements KLongLongMap {
     @Override
     public int metaClassIndex() {
         return this._metaClassIndex;
+    }
+
+    @Override
+    public AtomicInteger objectToken() {
+        return _objectToken;
     }
 
     @Override

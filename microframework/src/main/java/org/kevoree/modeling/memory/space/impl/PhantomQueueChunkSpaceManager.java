@@ -20,7 +20,6 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     private final ReferenceQueue<KObject> referenceQueue;
     private final AtomicReference<KObjectPhantomReference> headPhantom;
     private final KScheduler _scheduler;
-    private KResolver _resolver;
 
     public PhantomQueueChunkSpaceManager(KChunkSpace p_storage, KScheduler p_scheduler) {
         super(p_storage);
@@ -56,11 +55,6 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
     }
 
     @Override
-    public void setResolver(KResolver p_resolver) {
-        this._resolver = p_resolver;
-    }
-
-    @Override
     public void run() {
         while (true) {
             KObjectPhantomReference kobj;
@@ -86,11 +80,10 @@ public class PhantomQueueChunkSpaceManager extends AbstractCountingChunkSpaceMan
                     }
                     previousRef.next = nextRef;
                 }
-                if (_resolver != null) {
-                    long[] previousResolved = kobj.previousResolved.get();
-                    long previousUuid = kobj.obj;
-                    unmark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], previousUuid);
-                }
+
+                long[] previousResolved = kobj.previousResolved.get();
+                unmark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], kobj.obj);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

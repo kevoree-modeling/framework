@@ -16,6 +16,7 @@ import org.kevoree.modeling.meta.impl.GenericObjectIndex;
 import org.kevoree.modeling.meta.impl.MetaClassIndex;
 import org.kevoree.modeling.scheduler.KTask;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DistortedTimeResolver implements KResolver {
@@ -29,7 +30,6 @@ public class DistortedTimeResolver implements KResolver {
     public DistortedTimeResolver(KChunkSpaceManager p_cache, KInternalDataManager p_manager) {
         this._spaceManager = p_cache;
         this._manager = p_manager;
-        this._spaceManager.setResolver(this);
     }
 
     @Override
@@ -482,166 +482,141 @@ public class DistortedTimeResolver implements KResolver {
         return internal_chunk(universe, time, uuid, true, metaClass, previousResolution);
     }
 
+    private Random random = new Random();
+
     private KObjectChunk internal_chunk(long universe, long requestedTime, long uuid, boolean useClosest, KMetaClass metaClass, AtomicReference<long[]> previousResolution) {
+
         long time = requestedTime;
         if (metaClass.temporalResolution() != 1) {
             time = time - (time % metaClass.temporalResolution());
         }
-        //OPTIMIZATION #1, object without any dephasing
-        KObjectChunk currentEntry = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
-        if (currentEntry != null) {
-            //OPTIMIZATION #1.1, object without any dephasing from scratch
-            long[] previous;
-            long[] current;
-            boolean diff = false;
-            do {
-                previous = previousResolution.get();
-                if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != universe || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != time) {
-                    //the two magic numbers are set to NULL because will not be used anymore
-                    //object is aligned now, optimization #1 will always win
-                    current = new long[]{universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG};
-                    diff = true;
-                } else {
-                    current = previous;
-                }
-            } while (!previousResolution.compareAndSet(previous, current));
-            if (diff) {
-                //we obtains the token, and we have to free the previous one
-                _spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
-                //the current one stay marked once and is return without any modifications
-            } else {
-                _spaceManager.unmarkMemoryElement(currentEntry);
-            }
+
+        long[] previous = previousResolution.get();
+        if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] == universe && previous[AbstractKObject.TIME_PREVIOUS_INDEX] == time) {
+            //OPTIMIZATION #1: DEPHASING
+            KObjectChunk currentEntry = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
+            _spaceManager.unmarkMemoryElement(currentEntry);
             return currentEntry;
         }
-        //OPTIMIZATION #2, previous dephasing is still valid
-        long[] previousResolved = previousResolution.get();
+
         KLongLongMap objectUniverseMap = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, uuid);
         if (objectUniverseMap == null) {
             return null;
         }
-        KLongTree objectTimeTree = (KLongTree) _spaceManager.getAndMark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, uuid);
+        KLongTree objectTimeTree = (KLongTree) _spaceManager.getAndMark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], KConfig.NULL_LONG, uuid);
         if (objectTimeTree == null) {
             _spaceManager.unmarkMemoryElement(objectUniverseMap);
             return null;
         }
         long objectUniverseMapMagic = objectUniverseMap.magic();
         long objectTimeTreeMagic = objectTimeTree.magic();
-        if (useClosest && previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_MAGIC] == objectUniverseMapMagic && previousResolved[AbstractKObject.TIME_PREVIOUS_MAGIC] == objectTimeTreeMagic) {
-            currentEntry = (KObjectChunk) _spaceManager.getAndMark(previousResolved[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previousResolved[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+        if (useClosest && previous[AbstractKObject.UNIVERSE_PREVIOUS_MAGIC] == objectUniverseMapMagic && previous[AbstractKObject.TIME_PREVIOUS_MAGIC] == objectTimeTreeMagic) {
+            //OPTIMIZATION #2: SAME DEPHASING
+            KObjectChunk currentEntry = (KObjectChunk) _spaceManager.getAndMark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
             _spaceManager.unmarkMemoryElement(objectUniverseMap);
             _spaceManager.unmarkMemoryElement(objectTimeTree);
             if (currentEntry != null) {
-                //ERROR case, chunk has been removed from cache
+                //ERROR case protection, chunk has been removed from cache
                 _spaceManager.unmarkMemoryElement(currentEntry);
             }
             return currentEntry;
-        } else {
-            //NOMINAL CASE, MAGIC NUMBER ARE NOT VALID ANYMORE
-            KLongLongMap globalUniverseTree = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
-            if (globalUniverseTree == null) {
-                _spaceManager.unmarkMemoryElement(objectUniverseMap);
-                _spaceManager.unmarkMemoryElement(objectTimeTree);
-                return null;
-            }
-            long resolvedUniverse = resolve_universe(globalUniverseTree, objectUniverseMap, time, universe);
-            long resolvedTime = objectTimeTree.previousOrEqual(time);
-            if (resolvedTime != KConfig.NULL_LONG) {
-                boolean needTimeCopy = !useClosest && (resolvedTime != time);
-                boolean needUniverseCopy = !useClosest && (resolvedUniverse != universe);
-                currentEntry = (KObjectChunk) _spaceManager.getAndMark(resolvedUniverse, resolvedTime, uuid);
-                if (currentEntry == null) {
-                    _spaceManager.unmarkMemoryElement(objectTimeTree);
-                    _spaceManager.unmarkMemoryElement(objectUniverseMap);
-                    _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                    return null;
-                }
-                if (!needTimeCopy && !needUniverseCopy) {
-                    long[] previous;
-                    long[] current;
-                    boolean diff = false;
-                    do {
-                        previous = previousResolution.get();
-                        if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != resolvedUniverse || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != resolvedTime) {
-                            current = new long[]{resolvedUniverse, resolvedTime, objectUniverseMapMagic, objectTimeTreeMagic};
-                            diff = true;
-                        } else {
-                            current = previous;
-                        }
-                    } while (!previousResolution.compareAndSet(previous, current));
-                    if (diff) {
-                        //we obtains the token, and we have to free the previous one
-                        _spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+        }
+
+        //NOMINAL CASE, MAGIC NUMBER ARE NOT VALID ANYMORE
+        KLongLongMap globalUniverseTree = (KLongLongMap) _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
+        if (globalUniverseTree == null) {
+            _spaceManager.unmarkMemoryElement(objectUniverseMap);
+            _spaceManager.unmarkMemoryElement(objectTimeTree);
+            return null;
+        }
+
+        //SOMETHING WILL MOVE HERE ANYWAY SO WE SYNC THE OBJECT
+        
+        int magic;
+        do {
+            magic = random.nextInt();
+        } while (!globalUniverseTree.objectToken().compareAndSet(-1, magic));
+
+        //OK NOW WE HAVE THE MAGIC FOR UUID
+
+        long resolvedUniverse = resolve_universe(globalUniverseTree, objectUniverseMap, time, universe);
+        long resolvedTime = objectTimeTree.previousOrEqual(time);
+        if (resolvedUniverse != KConfig.NULL_LONG && resolvedTime != KConfig.NULL_LONG) {
+            if (useClosest) {
+                KObjectChunk newObjectEntry = (KObjectChunk) _spaceManager.getAndMark(resolvedUniverse, resolvedTime, uuid);
+                long[] current;
+                boolean diff = false;
+                do {
+                    previous = previousResolution.get();
+                    if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != resolvedUniverse || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != resolvedTime) {
+                        current = new long[]{resolvedUniverse, resolvedTime, objectUniverseMapMagic, objectTimeTreeMagic};
+                        diff = true;
                     } else {
-                        _spaceManager.unmarkMemoryElement(currentEntry);
+                        current = previous;
                     }
-                    _spaceManager.unmarkMemoryElement(objectTimeTree);
-                    _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                    _spaceManager.unmarkMemoryElement(objectUniverseMap);
-                    return currentEntry;
+                } while (!previousResolution.compareAndSet(previous, current));
+                if (diff) {
+                    //unmark previous
+                    _spaceManager.unmark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
                 } else {
-                    long[] previous;
-                    long[] current;
-                    boolean diff = false;
-                    do {
-                        previous = previousResolution.get();
-                        if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != universe || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != time) {
-                            //universeMap and objectTree magic numbers are set to null
-                            current = new long[]{universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG};
-                            diff = true;
-                        } else {
-                            current = previous;
-                        }
-                    } while (!previousResolution.compareAndSet(previous, current));
-                    if (diff) {
-                        KObjectChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
-                        if (!needUniverseCopy) {
-                            objectTimeTree.insertKey(time);
-                        } else {
-                            KLongTree newTemporalTree = (KLongTree) _spaceManager.createAndMark(universe, KConfig.NULL_LONG, uuid, KChunkTypes.LONG_TREE);
-                            newTemporalTree.insertKey(time);
-                            _spaceManager.unmarkMemoryElement(objectTimeTree);
-                            objectUniverseMap.put(universe, time);
-                        }
-                        //double unmarking, because, we should not use anymore this object
-                        _spaceManager.unmarkMemoryElement(currentEntry);
-                        _spaceManager.unmarkMemoryElement(currentEntry);
-                        //free the rest of used object
-                        _spaceManager.unmarkMemoryElement(objectTimeTree);
-                        _spaceManager.unmarkMemoryElement(objectUniverseMap);
-                        _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                        return clonedChunk;
-                    } else {
-                        /*
-                        _spaceManager.unmarkMemoryElement(objectTimeTree);
-                        _spaceManager.unmarkMemoryElement(objectUniverseMap);
-                        _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                        KObjectChunk waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
-                        int i = 0;
-                        while (waitingChunk == null && i < KConfig.CAS_MAX_TRY) {
-                            waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
-                            i++;
-                        }
-                        if (waitingChunk == null) {
-                            throw new RuntimeException("CAS synchronisation problem!");
-                        } else {
-                            _spaceManager.unmarkMemoryElement(currentEntry);
-                            _spaceManager.unmarkMemoryElement(currentEntry);
-                            return waitingChunk;
-                        }
-                        */
-                        _spaceManager.unmarkMemoryElement(objectTimeTree);
-                        _spaceManager.unmarkMemoryElement(globalUniverseTree);
-                        _spaceManager.unmarkMemoryElement(objectUniverseMap);
-                        return null;
-                    }
+                    _spaceManager.unmarkMemoryElement(newObjectEntry);
                 }
-            } else {
+                //in all the case free tree and map
                 _spaceManager.unmarkMemoryElement(objectTimeTree);
                 _spaceManager.unmarkMemoryElement(globalUniverseTree);
                 _spaceManager.unmarkMemoryElement(objectUniverseMap);
-                return null;
+                globalUniverseTree.objectToken().compareAndSet(magic, -1);
+                return newObjectEntry;
+            } else {
+                long[] current;
+                boolean diff = false;
+                do {
+                    previous = previousResolution.get();
+                    if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] != universe || previous[AbstractKObject.TIME_PREVIOUS_INDEX] != time) {
+                        //universeMap and objectTree magic numbers are set to null
+                        current = new long[]{universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG};
+                        diff = true;
+                    } else {
+                        current = previous;
+                    }
+                } while (!previousResolution.compareAndSet(previous, current));
+                if (diff) {
+                    KObjectChunk currentEntry = (KObjectChunk) _spaceManager.getAndMark(previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX], previous[AbstractKObject.TIME_PREVIOUS_INDEX], uuid);
+                    KObjectChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
+                    if (resolvedUniverse == universe) {
+                        objectTimeTree.insertKey(time);
+                    } else {
+                        KLongTree newTemporalTree = (KLongTree) _spaceManager.createAndMark(universe, KConfig.NULL_LONG, uuid, KChunkTypes.LONG_TREE);
+                        newTemporalTree.insertKey(time);
+                        _spaceManager.unmarkMemoryElement(objectTimeTree);
+                        objectUniverseMap.put(universe, time);
+                    }
+                    //double unMarking, because, we should not use anymore this object
+                    _spaceManager.unmarkMemoryElement(currentEntry);
+                    _spaceManager.unmarkMemoryElement(currentEntry);
+                    //free the rest of used object
+                    _spaceManager.unmarkMemoryElement(objectTimeTree);
+                    _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                    _spaceManager.unmarkMemoryElement(globalUniverseTree);
+                    globalUniverseTree.objectToken().compareAndSet(magic, -1);
+                    return clonedChunk;
+                } else {
+                    //somebody as clone for us, now waiting for the chunk to be available
+                    _spaceManager.unmarkMemoryElement(objectTimeTree);
+                    _spaceManager.unmarkMemoryElement(objectUniverseMap);
+                    _spaceManager.unmarkMemoryElement(globalUniverseTree);
+                    KObjectChunk waitingChunk = (KObjectChunk) _spaceManager.getAndMark(universe, time, uuid);
+                    _spaceManager.unmarkMemoryElement(waitingChunk);
+                    globalUniverseTree.objectToken().compareAndSet(magic, -1);
+                    return waitingChunk;
+                }
             }
+        } else {
+            globalUniverseTree.objectToken().compareAndSet(magic, -1);
+            _spaceManager.unmarkMemoryElement(objectTimeTree);
+            _spaceManager.unmarkMemoryElement(globalUniverseTree);
+            _spaceManager.unmarkMemoryElement(objectUniverseMap);
+            return null;
         }
     }
 

@@ -118,4 +118,6 @@ public interface KObject {
 
     KMeta[] compare(KObject target);
 
+    void destroy();
+
 }

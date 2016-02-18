@@ -5,6 +5,7 @@ import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.KDataManager;
+import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.operation.KOperationManager;
 import org.kevoree.modeling.scheduler.KScheduler;
@@ -44,5 +45,9 @@ public interface KInternalDataManager extends KDataManager {
     int spaceSize();
 
     void printDebug();
+
+    void destroyObject(KObject victim);
+
+    KChunkSpace space();
 
 }

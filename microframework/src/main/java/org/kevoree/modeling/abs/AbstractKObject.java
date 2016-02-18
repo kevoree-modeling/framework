@@ -798,4 +798,9 @@ public abstract class AbstractKObject implements KObject {
         }
     }
 
+    @Override
+    public void destroy() {
+        _manager.destroyObject(this);
+    }
+
 }

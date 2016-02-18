@@ -95,7 +95,5 @@ public abstract class AbstractCountingChunkSpaceManager implements KChunkSpaceMa
     abstract public void register(KObject object);
 
     abstract public void registerAll(KObject[] objects);
-
-    abstract public void setResolver(KResolver resolver);
-
+    
 }

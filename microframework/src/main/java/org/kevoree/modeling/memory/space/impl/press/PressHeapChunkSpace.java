@@ -198,24 +198,31 @@ public class PressHeapChunkSpace implements KChunkSpace {
             //we look for nextIndex
             int nbTry = 0;
             int currentVictimIndex = this._lru.dequeue();
-            while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() != 0 /*&& nbTry < this._maxEntries*/) {
+            while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() > 0 /*&& nbTry < this._maxEntries*/) {
                 this._lru.enqueue(currentVictimIndex);
                 currentVictimIndex = this._lru.dequeue();
                 nbTry++;
                 if (nbTry % (this._maxEntries / 10) == 0) {
                     System.gc();
+                    //System.err.println("GC "+nbTry);
                 }
             }
 
             if (nbTry == this._maxEntries) {
-                throw new RuntimeException("Cache Loop");
+                throw new RuntimeException("Press Cache is Full, too many object are reserved!");
             }
 
             if (this._values[currentVictimIndex] != null) {
+
                 KChunk victim = this._values[currentVictimIndex];
                 long victimUniverse = victim.universe();
                 long victimTime = victim.time();
                 long victimObj = victim.obj();
+
+                if (this._values[currentVictimIndex].counter() != 0) {
+                    System.err.println(victimUniverse + "," + victimTime + "," + victimObj + "=>" + this._values[currentVictimIndex].counter());
+                }
+
                 int hashVictim = (int) (victimUniverse ^ victimTime ^ victimObj);
                 //XOR three keys and hash according to maxEntries
                 int indexVictim = (hashVictim & 0x7FFFFFFF) % this._maxEntries;
@@ -247,6 +254,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
                 //free the lock
                 this.elementHashLock.compareAndSet(indexVictim, previousMagic, -1);
+                this._elementCount.decrementAndGet();
 
                 //TEST IF VICTIM IS DIRTY
                 if ((victim.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
