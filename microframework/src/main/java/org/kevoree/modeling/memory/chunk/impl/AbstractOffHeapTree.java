@@ -32,9 +32,6 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
     protected int NODE_SIZE;
 
-    //multi-thread sync
-    private Random _random;
-
     // constants for tree semantic
     private static final char BLACK_LEFT = '{';
     private static final char BLACK_RIGHT = '}';
@@ -91,7 +88,6 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
 
         UNSAFE.putLong(this._start_address + OFFSET_MAGIC, PrimitiveHelper.rand());
         UNSAFE.putInt(this._start_address + OFFSET_MAGIC_TOKEN, -1);
-        this._random = new Random();
 
 //      don't notify for allocation, otherwise the pointer of space will point to the newly created objects for the get
 //        if (_space != null) {
@@ -314,7 +310,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         //negotiate a magic
         int newMagic;
         do {
-            newMagic = _random.nextInt();
+            newMagic = RandomUtil.nextInt();
         } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, -1, newMagic));
 
 
@@ -364,7 +360,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         //negociate a magic
         int newMagic;
         do {
-            newMagic = _random.nextInt();
+            newMagic = RandomUtil.nextInt();
         } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, -1, newMagic));
 
         long n = UNSAFE.getLong(this._start_address + OFFSET_ROOT_INDEX);
@@ -432,7 +428,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         //negociate a magic
         int newMagic;
         do {
-            newMagic = _random.nextInt();
+            newMagic = RandomUtil.nextInt();
         } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, -1, newMagic));
 
         int threshold = UNSAFE.getInt(this._start_address + OFFSET_THRESHOLD);
@@ -593,7 +589,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         //negociate a magic
         int newMagic;
         do {
-            newMagic = _random.nextInt();
+            newMagic = RandomUtil.nextInt();
         } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, -1, newMagic));
 
 
