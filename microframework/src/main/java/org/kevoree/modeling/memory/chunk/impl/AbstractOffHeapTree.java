@@ -33,38 +33,38 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     protected int NODE_SIZE;
 
     // constants for tree semantic
-    private static final char BLACK_LEFT = '{';
-    private static final char BLACK_RIGHT = '}';
-    private static final char RED_LEFT = '[';
-    private static final char RED_RIGHT = ']';
+    protected static final char BLACK_LEFT = '{';
+    protected static final char BLACK_RIGHT = '}';
+    protected static final char RED_LEFT = '[';
+    protected static final char RED_RIGHT = ']';
 
     // constants for off-heap memory layout
-    private static final long UNDEFINED = -1;
-    private static final int BYTE = 8;
+    protected static final long UNDEFINED = -1;
+    protected static final int BYTE = 8;
 
-    private static final int POS_KEY = 0;
-    private static final int POS_LEFT = 1;
-    private static final int POS_RIGHT = 2;
-    private static final int POS_PARENT = 3;
-    private static final int POS_COLOR = 4;
-    private static final int POS_VALUE = 5;
+    protected static final int POS_KEY = 0;
+    protected static final int POS_LEFT = 1;
+    protected static final int POS_RIGHT = 2;
+    protected static final int POS_PARENT = 3;
+    protected static final int POS_COLOR = 4;
+    protected static final int POS_VALUE = 5;
 
-    private static final int ATT_MAGIC_TOKEN_LEN = 4;
-    private static final int ATT_MAGIC_LEN = 8;
-    private static final int ATT_THRESHOLD_LEN = 4;
-    private static final int ATT_ROOT_INDEX_LEN = 8;
-    private static final int ATT_SIZE_LEN = 4;
-    private static final int ATT_FLAGS_LEN = 8;
-    private static final int ATT_COUNTER_LEN = 4;
+    protected static final int ATT_MAGIC_TOKEN_LEN = 4;
+    protected static final int ATT_MAGIC_LEN = 8;
+    protected static final int ATT_THRESHOLD_LEN = 4;
+    protected static final int ATT_ROOT_INDEX_LEN = 8;
+    protected static final int ATT_SIZE_LEN = 4;
+    protected static final int ATT_FLAGS_LEN = 8;
+    protected static final int ATT_COUNTER_LEN = 4;
 
-    private static final int OFFSET_MAGIC_TOKEN = 0;
-    private static final int OFFSET_MAGIC = OFFSET_MAGIC_TOKEN + ATT_MAGIC_TOKEN_LEN;
-    private static final int OFFSET_THRESHOLD = OFFSET_MAGIC + ATT_MAGIC_LEN;
-    private static final int OFFSET_ROOT_INDEX = OFFSET_THRESHOLD + ATT_THRESHOLD_LEN;
-    private static final int OFFSET_SIZE = OFFSET_ROOT_INDEX + ATT_ROOT_INDEX_LEN;
-    private static final int OFFSET_FLAGS = OFFSET_SIZE + ATT_SIZE_LEN;
-    private static final int OFFSET_COUNTER = OFFSET_FLAGS + ATT_FLAGS_LEN;
-    private static final int OFFSET_BACK = OFFSET_COUNTER + ATT_COUNTER_LEN;
+    protected static final int OFFSET_MAGIC_TOKEN = 0;
+    protected static final int OFFSET_MAGIC = OFFSET_MAGIC_TOKEN + ATT_MAGIC_TOKEN_LEN;
+    protected static final int OFFSET_THRESHOLD = OFFSET_MAGIC + ATT_MAGIC_LEN;
+    protected static final int OFFSET_ROOT_INDEX = OFFSET_THRESHOLD + ATT_THRESHOLD_LEN;
+    protected static final int OFFSET_SIZE = OFFSET_ROOT_INDEX + ATT_ROOT_INDEX_LEN;
+    protected static final int OFFSET_FLAGS = OFFSET_SIZE + ATT_SIZE_LEN;
+    protected static final int OFFSET_COUNTER = OFFSET_FLAGS + ATT_FLAGS_LEN;
+    protected static final int OFFSET_BACK = OFFSET_COUNTER + ATT_COUNTER_LEN;
 
     private static final int BASE_SEGMENT_LEN =
             ATT_MAGIC_TOKEN_LEN + ATT_MAGIC_LEN + ATT_THRESHOLD_LEN + ATT_ROOT_INDEX_LEN + ATT_SIZE_LEN + ATT_FLAGS_LEN + ATT_COUNTER_LEN;

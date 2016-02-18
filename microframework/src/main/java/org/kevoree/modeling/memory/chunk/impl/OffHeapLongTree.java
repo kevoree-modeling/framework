@@ -43,7 +43,7 @@ public class OffHeapLongTree extends AbstractOffHeapTree implements KLongTree, K
 
     @Override
     public long magic() {
-        throw new RuntimeException("Not implemented yet!");
+        return UNSAFE.getLong(this._start_address + OFFSET)
     }
 
     @Override
