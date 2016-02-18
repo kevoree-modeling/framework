@@ -4,9 +4,6 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapLongLongMap;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapLongTree;
-import org.kevoree.modeling.memory.chunk.impl.OffHeapObjectChunk;
 import org.kevoree.modeling.memory.chunk.impl.UnsafeUtil;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.memory.space.KChunkIterator;
@@ -303,16 +300,16 @@ public class OffHeapChunkSpace implements KChunkSpace {
     }
 
     private KOffHeapChunk internal_createElement(long p_universe, long p_time, long p_obj, short p_type) {
-        switch (p_type) {
-            case KChunkTypes.OBJECT_CHUNK:
-                return new OffHeapObjectChunk(this, p_universe, p_time, p_obj);
-
-            case KChunkTypes.LONG_TREE:
-                return new OffHeapLongTree(this, p_universe, p_time, p_obj);
-
-            case KChunkTypes.LONG_LONG_MAP:
-                return new OffHeapLongLongMap(this, p_universe, p_time, p_obj);
-        }
+//        switch (p_type) {
+//            case KChunkTypes.OBJECT_CHUNK:
+//                return new OffHeapObjectChunk(this, p_universe, p_time, p_obj);
+//
+//            case KChunkTypes.LONG_TREE:
+//                return new OffHeapLongTree(this, p_universe, p_time, p_obj);
+//
+//            case KChunkTypes.LONG_LONG_MAP:
+//                return new OffHeapLongLongMap(this, p_universe, p_time, p_obj);
+//        }
         return null;
     }
 

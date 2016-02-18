@@ -1,5 +1,6 @@
 package org.kevoree.modeling.memory.space;
 
+import org.junit.Test;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.space.impl.press.FixedSizeLinkedList;
@@ -39,7 +40,7 @@ public class PressHeapChunkSpaceTest {
         System.err.println(list.dequeue());
     }
 
-    //@Test
+    @Test
     public void monoThreadFullTest() {
 
         PressHeapChunkSpace space = new PressHeapChunkSpace(10);

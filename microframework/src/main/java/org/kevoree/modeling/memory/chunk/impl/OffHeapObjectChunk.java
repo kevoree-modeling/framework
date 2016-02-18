@@ -7,7 +7,7 @@ import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
-import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
+import org.kevoree.modeling.memory.space.impl.press.PressOffHeapChunkSpace;
 import org.kevoree.modeling.meta.*;
 import org.kevoree.modeling.meta.impl.MetaAttribute;
 import org.kevoree.modeling.meta.impl.MetaRelation;
@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
 public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     private static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
-    private OffHeapChunkSpace _space;
+    private PressOffHeapChunkSpace _space;
     private long _universe, _time, _obj;
 
     // native pointer to the start of the memory chunk
@@ -46,14 +46,28 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     private static final int BYTE = 8;
 
-    public OffHeapObjectChunk(OffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
+    /**
+     * Creates a new OffHeapObjectChunk object.
+     *
+     * @param _mem_addr  memory address or -1 if a new memory space should be allocated
+     * @param p_universe
+     * @param p_time
+     * @param p_obj
+     * @param p_space
+     */
+    public OffHeapObjectChunk(long _mem_addr, long p_universe, long p_time, long p_obj, PressOffHeapChunkSpace p_space) {
         super();
         this._space = p_space;
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
 
-        this._start_address = UNSAFE.allocateMemory(BASE_SEGMENT_SIZE);
+        if (_mem_addr == -1) {
+            this._start_address = UNSAFE.allocateMemory(BASE_SEGMENT_SIZE);
+            UNSAFE.putInt(this._start_address + OFFSET_COUNTER, 0);
+        } else {
+            this._start_address = _mem_addr;
+        }
     }
 
     private int sizeOfRawSegment(KMetaClass p_metaClass) {
@@ -122,7 +136,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
         KMetaClass metaClass = p_metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
 
-        OffHeapObjectChunk clonedEntry = new OffHeapObjectChunk(this._space, p_universe, p_time, p_obj);
+        OffHeapObjectChunk clonedEntry = new OffHeapObjectChunk(this._start_address, p_universe, p_time, p_obj, this._space);
         int baseSegment = BASE_SEGMENT_SIZE;
         //int modifiedIndexSegment = metaClass.metaElements().length;
         int rawSegment = sizeOfRawSegment(metaClass);

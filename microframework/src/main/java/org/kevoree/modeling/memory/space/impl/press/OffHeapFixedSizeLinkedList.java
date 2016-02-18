@@ -1,14 +1,11 @@
 package org.kevoree.modeling.memory.space.impl.press;
 
+import org.kevoree.modeling.memory.chunk.impl.RandomUtil;
 import org.kevoree.modeling.memory.chunk.impl.UnsafeUtil;
 import sun.misc.Unsafe;
 
-import java.util.Random;
-
 /**
  * @ignore ts
- * Created by thomas on 16/02/16.
- * <p/>
  * memory structure: | magic (4) | max (4) | head (4) | previous (size * 4) | next (size * 4) |
  */
 public class OffHeapFixedSizeLinkedList implements PressFIFO {
@@ -25,17 +22,20 @@ public class OffHeapFixedSizeLinkedList implements PressFIFO {
     private static final int OFFSET_HEAD = OFFSET_MAX + ATT_MAX_LEN;
 
     private volatile long _start_address;
-    private Random _random;
 
-    public OffHeapFixedSizeLinkedList(int max) {
-        int mem = ATT_MAGIC_LEN + ATT_HEAD_LEN + max * ATT_PREVIOUS_ELEM_LEN + max * ATT_NEXT_ELEM_LEN;
-        // allocate memory
-        this._start_address = UNSAFE.allocateMemory(mem);
+    public OffHeapFixedSizeLinkedList(long mem_addr, int max) {
 
-        _random = new Random();
-        UNSAFE.putInt(this._start_address + OFFSET_MAX, max);
-        UNSAFE.putInt(this._start_address + OFFSET_HEAD, -1);
-        UNSAFE.putInt(this._start_address + OFFSET_MAGIC, -1);
+        if (mem_addr == -1) {
+            int mem = ATT_MAGIC_LEN + ATT_HEAD_LEN + max * ATT_PREVIOUS_ELEM_LEN + max * ATT_NEXT_ELEM_LEN;
+            // allocate memory
+            this._start_address = UNSAFE.allocateMemory(mem);
+
+            UNSAFE.putInt(this._start_address + OFFSET_MAX, max);
+            UNSAFE.putInt(this._start_address + OFFSET_HEAD, -1);
+            UNSAFE.putInt(this._start_address + OFFSET_MAGIC, -1);
+        } else {
+            this._start_address = mem_addr;
+        }
     }
 
     private long internal_get_offset_previous() {
@@ -51,7 +51,7 @@ public class OffHeapFixedSizeLinkedList implements PressFIFO {
     public void enqueue(int index) {
         int localMagic;
         do {
-            localMagic = _random.nextInt();
+            localMagic = RandomUtil.nextInt();
         } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC, -1, localMagic));
 
         if (UNSAFE.getInt(this._start_address + OFFSET_HEAD) == -1) {
@@ -84,7 +84,7 @@ public class OffHeapFixedSizeLinkedList implements PressFIFO {
     public int dequeue() {
         int localMagic;
         do {
-            localMagic = _random.nextInt();
+            localMagic = RandomUtil.nextInt();
         } while (!UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC, -1, localMagic));
 
         int currentHead = UNSAFE.getInt(this._start_address + OFFSET_HEAD);
@@ -103,6 +103,11 @@ public class OffHeapFixedSizeLinkedList implements PressFIFO {
             UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC, localMagic, -1);
             return -1;
         }
+    }
+
+
+    public long getMemoryAddress() {
+        return this._start_address;
     }
 
 }

@@ -3,13 +3,14 @@ package org.kevoree.modeling.memory.chunk.impl;
 import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.chunk.KLongLongTree;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
+import org.kevoree.modeling.memory.space.impl.press.PressOffHeapChunkSpace;
 
 /**
  * @ignore ts
  */
 public class OffHeapLongLongTree extends AbstractOffHeapTree implements KLongLongTree {
 
-    public OffHeapLongLongTree(OffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
+    public OffHeapLongLongTree(PressOffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
         super();
 
         NODE_SIZE = 6;

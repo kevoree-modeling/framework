@@ -6,6 +6,7 @@ import org.kevoree.modeling.memory.KOffHeapChunk;
 import org.kevoree.modeling.memory.chunk.KTreeWalker;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
+import org.kevoree.modeling.memory.space.impl.press.PressOffHeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
 import org.kevoree.modeling.util.PrimitiveHelper;
@@ -23,10 +24,10 @@ import java.util.Random;
 public abstract class AbstractOffHeapTree implements KOffHeapChunk {
     protected static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
-    protected OffHeapChunkSpace _space;
+    protected PressOffHeapChunkSpace _space;
     protected long _universe, _time, _obj;
 
-    private volatile long _start_address;
+    protected volatile long _start_address;
     protected float loadFactor;
 
     protected int NODE_SIZE;

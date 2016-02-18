@@ -8,7 +8,7 @@ import org.kevoree.modeling.memory.chunk.KLongLongMap;
 import org.kevoree.modeling.memory.chunk.KLongLongMapCallBack;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
-import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
+import org.kevoree.modeling.memory.space.impl.press.PressOffHeapChunkSpace;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.Base64;
 import org.kevoree.modeling.util.PrimitiveHelper;
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     protected static final Unsafe UNSAFE = UnsafeUtil.getUnsafe();
 
-    private OffHeapChunkSpace _space;
+    private PressOffHeapChunkSpace _space;
     private long _universe, _time, _obj;
 
     private volatile long _start_address;
@@ -71,15 +71,18 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
     private static final int OFFSET_BACK_NEXT = OFFSET_BACK_VALUE + ATT_VALUE_LEN;
     private static final int OFFSET_BACK_HASH = OFFSET_BACK_NEXT + ATT_NEXT_LEN;
 
-    public OffHeapLongLongMap(OffHeapChunkSpace p_space, long p_universe, long p_time, long p_obj) {
+    public OffHeapLongLongMap(long p_mem_addr, long p_universe, long p_time, long p_obj, PressOffHeapChunkSpace p_space) {
         this._space = p_space;
         this._universe = p_universe;
         this._time = p_time;
         this._obj = p_obj;
 
-        allocate(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
-
-        UNSAFE.putLong(this._start_address + OFFSET_STARTADDRESS_MAGIC, PrimitiveHelper.rand());
+        if (p_mem_addr == -1) {
+            allocate(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
+            UNSAFE.putLong(this._start_address + OFFSET_STARTADDRESS_MAGIC, PrimitiveHelper.rand());
+        } else {
+            this._start_address = p_mem_addr;
+        }
 
     }
 
