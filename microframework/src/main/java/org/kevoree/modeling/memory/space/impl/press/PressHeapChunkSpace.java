@@ -16,6 +16,7 @@ import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.util.PrimitiveHelper;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -159,7 +160,8 @@ public class PressHeapChunkSpace implements KChunkSpace {
         if (this._elementCount.get() == 0) {
             return null;
         }
-        int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % this._maxEntries;
+        // int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % this._maxEntries;
+        int index = (PrimitiveHelper.tripleHash(universe, time, obj) & 0x7FFFFFFF) % this._maxEntries;
         int m = this.elementHash[index];
         while (m != -1) {
             if (universe == this.elementK3a[m] && time == this.elementK3b[m] && obj == elementK3c[m]) {
@@ -202,7 +204,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
         KChunk result;
         int entry;
         int index;
-        int hash = (int) (universe ^ time ^ p_obj);
+        int hash = PrimitiveHelper.tripleHash(universe, time, p_obj);//  (int) (universe ^ time ^ p_obj);
         index = (hash & 0x7FFFFFFF) % this._maxEntries;
         entry = findNonNullKeyEntry(universe, time, p_obj, index);
         if (entry == -1) {
@@ -235,7 +237,9 @@ public class PressHeapChunkSpace implements KChunkSpace {
                     System.err.println(victimUniverse + "," + victimTime + "," + victimObj + "=>" + this._values[currentVictimIndex].counter());
                 }*/
 
-                int hashVictim = (int) (victimUniverse ^ victimTime ^ victimObj);
+                //int hashVictim = (int) (victimUniverse ^ victimTime ^ victimObj);
+                int hashVictim =PrimitiveHelper.tripleHash(victimUniverse, victimTime, victimObj);
+
                 //XOR three keys and hash according to maxEntries
                 int indexVictim = (hashVictim & 0x7FFFFFFF) % this._maxEntries;
                 int previousMagic;

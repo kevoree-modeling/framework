@@ -4,6 +4,13 @@ import org.kevoree.modeling.KConfig;
 
 public class PrimitiveHelper {
 
+    public static int tripleHash(long p1, long p2, long p3) {
+        int result = (int) (p1 ^ (p1 >>> 32));
+        result = 31 * result + (int) (p2 ^ (p2 >>> 32));
+        result = 31 * result + (int) (p3 ^ (p3 >>> 32));
+        return result;
+    }
+
     /**
      * @native ts
      * return Math.random() * 1000000
