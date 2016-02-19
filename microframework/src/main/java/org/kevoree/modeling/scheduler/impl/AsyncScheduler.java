@@ -59,7 +59,7 @@ public class AsyncScheduler implements KScheduler/*, Runnable*/ {
                         }
                     } else {
                         try {
-                            Thread.sleep(20 * _nbWorker);
+                            Thread.sleep(10);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -88,6 +88,7 @@ public class AsyncScheduler implements KScheduler/*, Runnable*/ {
                 workers[i].setDaemon(false);
                 workers[i].start();
             }
+            //System.err.println("ReNew Pool");
         }
     }
 

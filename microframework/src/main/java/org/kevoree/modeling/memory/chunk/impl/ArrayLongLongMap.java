@@ -92,14 +92,15 @@ public class ArrayLongLongMap implements KLongLongMap {
     @Override
     public final int inc() {
         int i = this._counter.incrementAndGet();
-        System.out.println("counter inc: " + i);
         return i;
     }
 
     @Override
     public final int dec() {
         int i = this._counter.decrementAndGet();
-        System.out.println("counter dec: " + i);
+        /*if(i < 0){
+            throw new RuntimeException("WTF");
+        }*/
         return i;
     }
 

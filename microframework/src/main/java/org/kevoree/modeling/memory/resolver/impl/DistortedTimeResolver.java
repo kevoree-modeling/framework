@@ -650,6 +650,8 @@ public class DistortedTimeResolver implements KResolver {
         universeTree.init(null, _manager.model().metaModel(), metaClassIndex);
         universeTree.put(obj.universe(), obj.now());
         _spaceManager.register(obj);
+        //mark the global
+        _spaceManager.getAndMark(KConfig.NULL_LONG, KConfig.NULL_LONG, KConfig.NULL_LONG);
     }
 
     public final void getOrLoadAndMark(long universe, long time, long uuid, final KCallback<KChunk> callback) {
