@@ -217,7 +217,7 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
             long victimObj = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(currentVictimIndex) + 2 * ATT_ELEM_KEY3_LEN);
             KOffHeapChunk victimChunk = internal_createElement(victimAddr, victimUniverse, victimTime, victimObj, vctimType);
 
-            while (victimAddr != -1 && victimChunk.counter() != 0 /*&& nbTry < this._maxEntries*/) {
+            while (victimAddr != -1 && victimChunk.counter() > 0 /*&& nbTry < this._maxEntries*/) {
                 lru.enqueue(currentVictimIndex);
                 currentVictimIndex = lru.dequeue();
                 nbTry++;
@@ -448,32 +448,33 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
     }
 
     private String internal_toString(KMetaModel p_metaModel) {
-        StringBuilder buffer = new StringBuilder();
-        try {
-            int elemCount = UNSAFE.getInt(this._start_address + OFFSET_ELEM_COUNT);
-            for (int i = 0; i < elemCount; i++) {
-                long addr = UNSAFE.getLong(this._start_address + internal_offset_chunk(i));
-                short type = UNSAFE.getShort(this._start_address + internal_offset_chunk_type(i));
-                long universe = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(i));
-                long time = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(i) + 1 * ATT_ELEM_KEY3_LEN);
-                long obj = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(i) + 2 * ATT_ELEM_KEY3_LEN);
-
-                if (addr != -1) {
-                    KChunk loopChunk = internal_createElement(addr, universe, time, obj, type);
-
-                    String content;
-                    if (p_metaModel != null) {
-                        content = loopChunk.serialize(p_metaModel);
-                    } else {
-                        content = "no model";
-                    }
-                    buffer.append(i + "#:" + universe + "," + time + "," + obj + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + content + "\n");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return buffer.toString();
+        return "asdf";
+//        StringBuilder buffer = new StringBuilder();
+//        try {
+//            int elemCount = UNSAFE.getInt(this._start_address + OFFSET_ELEM_COUNT);
+//            for (int i = 0; i < elemCount; i++) {
+//                long addr = UNSAFE.getLong(this._start_address + internal_offset_chunk(i));
+//                short type = UNSAFE.getShort(this._start_address + internal_offset_chunk_type(i));
+//                long universe = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(i));
+//                long time = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(i) + 1 * ATT_ELEM_KEY3_LEN);
+//                long obj = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(i) + 2 * ATT_ELEM_KEY3_LEN);
+//
+//                if (addr != -1) {
+//                    KChunk loopChunk = internal_createElement(addr, universe, time, obj, type);
+//
+//                    String content;
+//                    if (p_metaModel != null) {
+//                        content = loopChunk.serialize(p_metaModel);
+//                    } else {
+//                        content = "no model";
+//                    }
+//                    buffer.append(i + "#:" + universe + "," + time + "," + obj + "=>" + loopChunk.type() + "(count:" + loopChunk.counter() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + content + "\n");
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return buffer.toString();
     }
 
 

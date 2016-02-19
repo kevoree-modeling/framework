@@ -5,6 +5,7 @@ import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.DataManagerBuilder;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.space.impl.press.PressOffHeapChunkSpace;
+import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 /**
  * @ignore ts
@@ -18,6 +19,6 @@ public class OffHeapObjectChunkTest extends BaseKObjectChunkTest {
 
     @Override
     public KInternalDataManager createKInternalDataManger() {
-        return new DataManagerBuilder().withSpace(new PressOffHeapChunkSpace(100)).build();
+        return DataManagerBuilder.create().withSpace(new PressOffHeapChunkSpace(100000)).withScheduler(new DirectScheduler()).build();
     }
 }

@@ -64,6 +64,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
         if (_mem_addr == -1) {
             this._start_address = UNSAFE.allocateMemory(BASE_SEGMENT_SIZE);
+
             UNSAFE.putInt(this._start_address + OFFSET_COUNTER, 0);
         } else {
             this._start_address = _mem_addr;
@@ -732,11 +733,15 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             p_metaClassIndex = UNSAFE.getInt(this._start_address + OFFSET_META_CLASS_INDEX);
         }
 
-        KMetaClass metaClass = p_metaModel.metaClass(p_metaClassIndex);
-        initMetaClass(metaClass);
-        UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, p_metaClassIndex);
+        if (p_metaClassIndex == -1) {
+            return;
+        }
 
         if (p_payload != null) {
+            KMetaClass metaClass = p_metaModel.metaClass(p_metaClassIndex);
+            initMetaClass(metaClass);
+            UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, p_metaClassIndex);
+
             int i = 0;
             final int payloadSize = p_payload.length();
             KMeta previousMeta = null;

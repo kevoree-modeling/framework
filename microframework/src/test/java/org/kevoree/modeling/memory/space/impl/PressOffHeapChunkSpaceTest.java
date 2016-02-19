@@ -12,9 +12,11 @@ public class PressOffHeapChunkSpaceTest {
     @Test
     public void monoThreadFullTest() {
 
-        PressOffHeapChunkSpace space = new PressOffHeapChunkSpace(100);
+        int size = 100000;
+
+        PressOffHeapChunkSpace space = new PressOffHeapChunkSpace(200000);
         //Fill the entire cache
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < size; i++) {
             KChunk chunk = space.create(i, 0, 10, KChunkTypes.OBJECT_CHUNK,null);
             chunk.setFlags(KChunkFlags.DIRTY_BIT, 0);
         }
@@ -23,15 +25,15 @@ public class PressOffHeapChunkSpaceTest {
         //space.create(3, 1, 1, KChunkTypes.OBJECT_CHUNK);
         //space.create(4, 1, 1, KChunkTypes.OBJECT_CHUNK);
 
-        for (int i = 0; i < 3; i++) {
-            space.get(i, 0, 10).inc();
-        }
+//        for (int i = 0; i < 3; i++) {
+//            space.get(i, 0, 10).inc();
+//        }
+//
+//        for (int i = 0; i < 8; i++) {
+//            space.create(i, 1, 1, KChunkTypes.OBJECT_CHUNK,null);
+//        }
 
-        for (int i = 0; i < 8; i++) {
-            space.create(i, 1, 1, KChunkTypes.OBJECT_CHUNK,null);
-        }
-
-        System.out.println(space);
+//        System.out.println(space);
 
 
     }
