@@ -341,7 +341,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
         long universe = dirtyChunk.universe();
         long time = dirtyChunk.time();
         long obj = dirtyChunk.obj();
-        int hash = (int) (universe ^ time ^ obj);
+        int hash = PrimitiveHelper.tripleHash(universe , time , obj);
         int index = (hash & 0x7FFFFFFF) % this._maxEntries;
         int entry = findNonNullKeyEntry(universe, time, obj, index);
         if (entry != -1) {
