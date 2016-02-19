@@ -6,6 +6,9 @@ public class ManualChunkSpaceManager extends AbstractCountingChunkSpaceManager {
 
     @Override
     public void register(KObject object) {
+        if (_metaModel == null) {
+            _metaModel = object.manager().model().metaModel();
+        }
         //NOOP, objects are managed manually
     }
 
