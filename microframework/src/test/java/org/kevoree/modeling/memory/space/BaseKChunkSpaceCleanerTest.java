@@ -27,7 +27,7 @@ public abstract class BaseKChunkSpaceCleanerTest {
     /**
      * @native ts
      */
-    @Test
+   // @Test
     public void test() {
         KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");

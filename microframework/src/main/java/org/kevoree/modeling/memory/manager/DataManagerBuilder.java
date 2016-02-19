@@ -52,6 +52,11 @@ public class DataManagerBuilder {
         return _scheduler;
     }
 
+    /**
+     * @native ts
+     * if (this._space == null) { this._space = new org.kevoree.modeling.memory.space.impl.HeapChunkSpace(); }
+     * return this._space;
+     */
     public KChunkSpace space() {
         if (this._space == null) {
             this._space = new PressHeapChunkSpace(100000);
