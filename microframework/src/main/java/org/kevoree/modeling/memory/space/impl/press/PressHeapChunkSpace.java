@@ -57,6 +57,10 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     private AtomicInteger _collisions;
 
+    public int collisions() {
+        return this._collisions.get();
+    }
+
     final class InternalDirtyState implements KChunkIterator {
 
         private AtomicInteger dirtyHead = new AtomicInteger(-1);

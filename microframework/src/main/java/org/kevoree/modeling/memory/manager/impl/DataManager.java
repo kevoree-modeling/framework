@@ -195,6 +195,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
             return resolvedChunk;
         } else {
             long[] previous = previousResolution.get();
+            resolvedChunk = _resolver.closestChunk(universe, time, uuid, metaClass, previousResolution);
             throw new RuntimeException("Cache Miss / obj:" + universe + "," + time + "," + uuid + " / previous:" + previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] + "," + previous[AbstractKObject.TIME_PREVIOUS_INDEX]);
         }
     }
