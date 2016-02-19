@@ -43,7 +43,6 @@ public class PressHeapChunkSpace implements KChunkSpace {
     private final long[] elementK3b;
     private final long[] elementK3c;
 
-
     private final int[] elementNext;
 
     private final int[] elementHash;
@@ -55,6 +54,8 @@ public class PressHeapChunkSpace implements KChunkSpace {
     public KChunk[] values() {
         return this._values;
     }
+
+    private AtomicInteger _collisions;
 
     final class InternalDirtyState implements KChunkIterator {
 
@@ -120,6 +121,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
         this._maxEntries = maxEntries;
         this._lru = new FixedHeapFIFO(maxEntries);
         this.random = new Random();
+        this._collisions = new AtomicInteger(0);
 
         this._dirtyState = new AtomicReference<InternalDirtyState>();
         this._dirtyState.set(new InternalDirtyState(this._maxEntries, this));
@@ -135,12 +137,11 @@ public class PressHeapChunkSpace implements KChunkSpace {
         this._values = new KChunk[maxEntries];
         this._elementCount = new AtomicInteger(0);
 
-        //init
+        //init internal structures
         for (int i = 0; i < maxEntries; i++) {
             this.elementNext[i] = -1;
             this.elementHash[i] = -1;
             this.elementHashLock.set(i, -1);
-            //_lru.enqueue(i);
         }
     }
 
@@ -250,6 +251,9 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 //POP THE VALUE FROM THE NEXT LIST
                 if (last == -1) {
                     int previousNext = elementNext[m];
+                    if (elementHash[indexVictim] != -1) {
+                        this._collisions.incrementAndGet();
+                    }
                     elementHash[indexVictim] = previousNext;
                 } else {
                     elementNext[last] = elementNext[m];

@@ -486,16 +486,16 @@ public class DistortedTimeResolver implements KResolver {
     }
 
     private KObjectChunk internal_chunk(long universe, long requestedTime, long uuid, boolean useClosest, KMetaClass metaClass, AtomicReference<long[]> previousResolution) {
-
+        //protection against deleted KObjects
         if (previousResolution.get() == null) {
             throw new RuntimeException("This KObject has been tagged destroyed, please don't use it anymore!");
         }
-
+        //time alignment according to KObject meta parameter
         long time = requestedTime;
         if (metaClass.temporalResolution() != 1) {
             time = time - (time % metaClass.temporalResolution());
         }
-
+        //let's go for the resolution now
         long[] previous = previousResolution.get();
         if (previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] == universe && previous[AbstractKObject.TIME_PREVIOUS_INDEX] == time) {
             //OPTIMIZATION #1: DEPHASING
