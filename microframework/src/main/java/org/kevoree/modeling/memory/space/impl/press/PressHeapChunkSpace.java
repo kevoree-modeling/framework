@@ -255,9 +255,6 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 //POP THE VALUE FROM THE NEXT LIST
                 if (last == -1) {
                     int previousNext = elementNext[m];
-                    if (elementHash[indexVictim] != -1) {
-                        this._collisions.incrementAndGet();
-                    }
                     elementHash[indexVictim] = previousNext;
                 } else {
                     elementNext[last] = elementNext[m];
@@ -295,6 +292,10 @@ public class PressHeapChunkSpace implements KChunkSpace {
             do {
                 previousMagic = random.nextInt();
             } while (!this.elementHashLock.compareAndSet(index, -1, previousMagic));
+
+            if (elementHash[index] != -1) {
+                this._collisions.incrementAndGet();
+            }
 
             elementNext[currentVictimIndex] = elementHash[index];
             elementHash[index] = currentVictimIndex;
