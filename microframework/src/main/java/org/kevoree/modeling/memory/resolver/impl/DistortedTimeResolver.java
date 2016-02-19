@@ -27,9 +27,12 @@ public class DistortedTimeResolver implements KResolver {
 
     private final KInternalDataManager _manager;
 
+    private Random random;
+
     public DistortedTimeResolver(KChunkSpaceManager p_cache, KInternalDataManager p_manager) {
         this._spaceManager = p_cache;
         this._manager = p_manager;
+        this.random = new Random();
     }
 
     @Override
@@ -482,9 +485,12 @@ public class DistortedTimeResolver implements KResolver {
         return internal_chunk(universe, time, uuid, true, metaClass, previousResolution);
     }
 
-    private Random random = new Random();
-
     private KObjectChunk internal_chunk(long universe, long requestedTime, long uuid, boolean useClosest, KMetaClass metaClass, AtomicReference<long[]> previousResolution) {
+
+        if (previousResolution.get() == null) {
+            throw new RuntimeException("This KObject has been tagged destroyed, please don't use it anymore!");
+        }
+
         long time = requestedTime;
         if (metaClass.temporalResolution() != 1) {
             time = time - (time % metaClass.temporalResolution());
