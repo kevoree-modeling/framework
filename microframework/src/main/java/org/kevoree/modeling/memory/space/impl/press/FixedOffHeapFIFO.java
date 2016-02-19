@@ -29,7 +29,6 @@ public class FixedOffHeapFIFO implements PressFIFO {
     }
 
     public FixedOffHeapFIFO(long mem_addr, int maxElem) {
-
         if (mem_addr == -1) {
             long mem = ATT_MAX_ELEM_LEN + ATT_HEAD_LEN + ATT_TAIL_LEN + maxElem * ATT_NEXT_LEN;
             this._start_address = UNSAFE.allocateMemory(mem);
@@ -64,6 +63,7 @@ public class FixedOffHeapFIFO implements PressFIFO {
 
         //cleanup link to avoid pollution
         UNSAFE.putInt(this._start_address + internal_offset_next(currentHead), -1);
+
         return currentHead;
     }
 

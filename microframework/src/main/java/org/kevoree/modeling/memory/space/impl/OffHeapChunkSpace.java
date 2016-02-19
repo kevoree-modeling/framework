@@ -272,13 +272,11 @@ public class OffHeapChunkSpace implements KChunkSpace {
         while (m != -1) {
             if (p_universe == universe(this._start_address.get(), m) && p_time == time(this._start_address.get(), m) && p_obj == obj(this._start_address.get(), m)) {
                 KOffHeapChunk c = internal_getMemoryElement(p_universe, p_time, p_obj, this._start_address.get(), m); /* getValue */
-                System.out.println("#get " + c);
                 return c;
             } else {
                 m = next(this._start_address.get(), m);
             }
         }
-        System.out.println("#get " + null);
         return null;
     }
 

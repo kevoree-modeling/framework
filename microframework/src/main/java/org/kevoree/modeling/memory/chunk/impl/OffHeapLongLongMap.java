@@ -79,6 +79,7 @@ public class OffHeapLongLongMap implements KLongLongMap, KOffHeapChunk {
         if (p_mem_addr == -1) {
             allocate(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
             UNSAFE.putLong(this._start_address + OFFSET_STARTADDRESS_MAGIC, PrimitiveHelper.rand());
+            UNSAFE.putInt(this._start_address + OFFSET_STARTADDRESS_OBJECT_TOKEN, -1);
         } else {
             this._start_address = p_mem_addr;
         }

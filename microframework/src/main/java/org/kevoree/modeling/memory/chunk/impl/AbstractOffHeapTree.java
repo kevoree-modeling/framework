@@ -384,6 +384,7 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         }
         //free magic
         UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
+
         return n;
     }
 
@@ -507,7 +508,6 @@ public abstract class AbstractOffHeapTree implements KOffHeapChunk {
         internal_set_dirty();
 
         UNSAFE.compareAndSwapInt(null, this._start_address + OFFSET_MAGIC_TOKEN, newMagic, -1);
-
     }
 
     private void internal_set_dirty() {

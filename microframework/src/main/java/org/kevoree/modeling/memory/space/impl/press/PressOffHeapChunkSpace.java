@@ -104,7 +104,6 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
                 + ATT_DIRTY_HEAD_LEN + ATT_DIRTY_SIZE_LEN + (maxEntries * ATT_DIRTY_NEXT_LEN);
 
         this._start_address = UNSAFE.allocateMemory(mem);
-        System.out.println("start address: " + this._start_address);
 
         // init
         UNSAFE.putInt(this._start_address + OFFSET_MAX_ENTRIES, maxEntries);
@@ -141,11 +140,12 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
         int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % _maxEntries;
         int m = UNSAFE.getInt(this._start_address + internal_offset_elem_hash(index));
         while (m != -1) {
+
             long _universe = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m));
             long _time = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m) + 1 * ATT_ELEM_KEY3_LEN);
             long _obj = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m) + 2 * ATT_ELEM_KEY3_LEN);
-            if (universe == _universe && time == _time && obj == _obj) {
 
+            if (universe == _universe && time == _time && obj == _obj) {
                 //GET VALUE
                 long chunk_addr = UNSAFE.getLong(this._start_address + internal_offset_chunk(m));
                 short chunk_type = UNSAFE.getShort(this._start_address + internal_offset_chunk_type(m));
@@ -154,9 +154,10 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
                 return chunk;
 
             } else {
-                UNSAFE.putInt(this._start_address + internal_offset_elem_next(m), m);
+                m = UNSAFE.getInt(this._start_address + internal_offset_elem_next(m));
             }
         }
+
         return null;
     }
 
@@ -177,9 +178,10 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
             if (universe == _universe && time == _time && obj == _obj) {
                 return m;
             } else {
-                UNSAFE.putInt(this._start_address + internal_offset_elem_next(m), m);
+                m = UNSAFE.getInt(this._start_address + internal_offset_elem_next(m));
             }
         }
+
         return -1;
     }
 
@@ -314,6 +316,7 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
 
             result = internal_createElement(result_addr, universe, time, obj, result_type);
         }
+
         return result;
     }
 
