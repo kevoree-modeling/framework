@@ -42,51 +42,67 @@ public abstract class BaseKObjectChunkTest {
             @Override
             public void on(Throwable throwable) {
 
-                // setPrimitiveType and read attributes
-                KObject home = model.universe(0).time(0).create(model.metaModel().metaClassByName("Home"));
-                home.set(home.metaClass().attribute("name"), "MainHome");
+                long start = System.currentTimeMillis();
+                for (int i = 0; i < 33050; i++) {
+//                    if(i %1000 == 0){
+//                        System.out.println(i);
+//                    }
+                    if(i == 66666){
+                        System.out.println(i);
+                    }
+                    // setPrimitiveType and read attributes
+                    KObject home = model.universe(0).time(0).create(model.metaModel().metaClassByName("Home"));
 
-                KObject sensor = model.universe(0).time(0).create(sensorMetaClass);
-                sensor.set(sensor.metaClass().attribute("name"), "Sensor#1");
+//                    if(i == 66666){
+//                        System.out.println("still works");
+//                    }
 
-                KObject sensor2 = model.universe(0).time(0).create(sensorMetaClass);
-                sensor2.set(sensor.metaClass().attribute("name"), "Sensor#2");
+//                    home.set(home.metaClass().attribute("name"), "MainHome");
+//
+//                    KObject sensor = model.universe(0).time(0).create(sensorMetaClass);
+//                    sensor.set(sensor.metaClass().attribute("name"), "Sensor#1");
+//
+//                    KObject sensor2 = model.universe(0).time(0).create(sensorMetaClass);
+//                    sensor2.set(sensor.metaClass().attribute("name"), "Sensor#2");
+//
+//                    home.addByName("sensors", sensor);
+//
+//                    KObjectChunk objectChunk = createKObjectChunk();
+//                    objectChunk.init(null, dynamicMetaModel, homeMetaClass.index());
+//
+//                    objectChunk.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
+//                    long attr = (long) objectChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
+//                    Assert.assertEquals(10l, attr);
+//
+//                    objectChunk.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
+//                    String name = (String) objectChunk.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass);
+//                    Assert.assertEquals("test", name);
+//
+//                    // add and remove attributes
+//                    objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+//                    objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+//                    long[] ref = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+//                    Assert.assertArrayEquals(ref, new long[]{sensor.uuid(), sensor2.uuid()});
+//
+//                    objectChunk.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
+//                    long[] ref2 = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+//                    Assert.assertArrayEquals(ref2, new long[]{sensor2.uuid()});
+//
+//                    objectChunk.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
+//                    long[] ref3 = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
+//                    Assert.assertArrayEquals(ref3, null);
+//
+//                    // free object chunk
+//                    objectChunk.free(dynamicMetaModel);
 
-                home.addByName("sensors", sensor);
-
-                KObjectChunk objectChunk = createKObjectChunk();
-                objectChunk.init(null, dynamicMetaModel, homeMetaClass.index());
-
-                objectChunk.setPrimitiveType(homeMetaClass.attribute("attr_long").index(), 10l, homeMetaClass);
-                long attr = (long) objectChunk.getPrimitiveType(homeMetaClass.attribute("attr_long").index(), homeMetaClass);
-                Assert.assertEquals(10l, attr);
-
-                objectChunk.setPrimitiveType(homeMetaClass.attribute("name").index(), "test", homeMetaClass);
-                String name = (String) objectChunk.getPrimitiveType(homeMetaClass.attribute("name").index(), homeMetaClass);
-                Assert.assertEquals("test", name);
-
-                // add and remove attributes
-                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                objectChunk.addLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
-                long[] ref = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
-                Assert.assertArrayEquals(ref, new long[]{sensor.uuid(), sensor2.uuid()});
-
-                objectChunk.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor.uuid(), homeMetaClass);
-                long[] ref2 = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
-                Assert.assertArrayEquals(ref2, new long[]{sensor2.uuid()});
-
-                objectChunk.removeLongToArray(homeMetaClass.reference("sensors").index(), sensor2.uuid(), homeMetaClass);
-                long[] ref3 = objectChunk.getLongArray(homeMetaClass.reference("sensors").index(), homeMetaClass);
-                Assert.assertArrayEquals(ref3, null);
-
-                // free object chunk
-                objectChunk.free(dynamicMetaModel);
-
+                }
+                long end = System.currentTimeMillis();
+                System.out.println(end - start + " ms");
             }
         });
     }
 
-    @Test
+    //@Test
     public void referenceTest() {
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
@@ -155,7 +171,7 @@ public abstract class BaseKObjectChunkTest {
     }
 
 
-    @Test
+    //@Test
     public void cloneTest() {
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
@@ -218,7 +234,7 @@ public abstract class BaseKObjectChunkTest {
     }
 
 
-    @Test
+    //@Test
     public void freeMemoryTest() {
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
@@ -276,7 +292,7 @@ public abstract class BaseKObjectChunkTest {
         });
     }
 
-    @Test
+    //@Test
     public void modifiedIndexesTest() {
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
@@ -329,7 +345,7 @@ public abstract class BaseKObjectChunkTest {
         });
     }
 
-    @Test
+    //@Test
     public void inferTest() {
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
@@ -397,7 +413,7 @@ public abstract class BaseKObjectChunkTest {
         });
     }
 
-    @Test
+    //@Test
     public void serializationTest() {
         final KMetaModel dynamicMetaModel = new MetaModel("MyMetaModel");
         final KMetaClass sensorMetaClass = dynamicMetaModel.addMetaClass("Sensor");
