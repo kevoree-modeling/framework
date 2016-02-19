@@ -194,8 +194,8 @@ public class DataManager implements KDataManager, KInternalDataManager {
         if (resolvedChunk != null) {
             return resolvedChunk;
         } else {
-            //TODO
-            throw new RuntimeException("Cache Miss, not implemented Yet " + universe + "," + time + "," + uuid);
+            long[] previous = previousResolution.get();
+            throw new RuntimeException("Cache Miss / obj:" + universe + "," + time + "," + uuid + " / previous:" + previous[AbstractKObject.UNIVERSE_PREVIOUS_INDEX] + "," + previous[AbstractKObject.TIME_PREVIOUS_INDEX]);
         }
     }
 

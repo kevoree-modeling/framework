@@ -16,7 +16,7 @@ import java.util.Random;
 
 /**
  * @ignore ts
- * <p/>
+ * <p>
  * Off-heap red-black base implementation
  * - memory structure:  | magic token (4)| magic (8) | threshold (4) | root index (8) | size (4) | flags (8) | counter (4) | back (size * node size * 8) |
  * - back:              | key (8) | left (8) | right (8) | parent (8) | color (8) | value (8) |
