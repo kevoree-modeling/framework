@@ -238,7 +238,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 }*/
 
                 //int hashVictim = (int) (victimUniverse ^ victimTime ^ victimObj);
-                int hashVictim =PrimitiveHelper.tripleHash(victimUniverse, victimTime, victimObj);
+                int hashVictim = PrimitiveHelper.tripleHash(victimUniverse, victimTime, victimObj);
 
                 //XOR three keys and hash according to maxEntries
                 int indexVictim = (hashVictim & 0x7FFFFFFF) % this._maxEntries;
