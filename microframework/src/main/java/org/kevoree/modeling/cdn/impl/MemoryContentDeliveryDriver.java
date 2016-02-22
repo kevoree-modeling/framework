@@ -62,13 +62,17 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
         }
     }
 
+    public static boolean DEBUG = false;
+
     @Override
     public synchronized void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
         int nbKeys = p_keys.length / 3;
         for (int i = 0; i < nbKeys; i++) {
 
-            // KContentKey kk = KContentKey.create(KContentKey.toString(p_keys, i));
-            // System.out.println(backend.size()+"->"+kk.universe+","+kk.time+","+kk.obj);
+            if (DEBUG) {
+                KContentKey kk = KContentKey.create(KContentKey.toString(p_keys, i));
+                System.out.println(backend.size() + "->" + kk.universe + "," + kk.time + "," + kk.obj);
+            }
 
             backend.put(KContentKey.toString(p_keys, i), p_values[i]);
         }

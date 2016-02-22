@@ -104,7 +104,6 @@ public class HeapObjectIndexChunk implements KObjectIndexChunk {
         cloned.elementCount = this.elementCount;
         cloned.droppedCount = this.droppedCount;
         cloned.threshold = this.threshold;
-//        cloned.internal_set_dirty();
         return cloned;
     }
 

@@ -63,6 +63,71 @@ public class PressHeapChunkSpace implements KChunkSpace {
         return this._collisions.get();
     }
 
+
+    final class InternalDirtyStateList implements KChunkIterator {
+
+        private final AtomicInteger _nextCounter;
+
+        private final int[] _dirtyElements;
+
+        private final int _max;
+
+        private final AtomicInteger _iterationCounter;
+
+        private PressHeapChunkSpace _parent;
+
+        public InternalDirtyStateList(int maxSize, PressHeapChunkSpace p_parent) {
+
+            this._dirtyElements = new int[maxSize];
+
+            this._nextCounter = new AtomicInteger(0);
+            this._iterationCounter = new AtomicInteger(0);
+
+            this._max = maxSize;
+            this._parent = p_parent;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this._iterationCounter.get() < this._nextCounter.get();
+        }
+
+        @Override
+        public KChunk next() {
+            int previous;
+            int next;
+            do {
+                previous = this._iterationCounter.get();
+                if (this._nextCounter.get() == previous) {
+                    return null;
+                }
+                next = previous + 1;
+            } while (!this._iterationCounter.compareAndSet(previous, next));
+            return this._parent._values[this._dirtyElements[previous]];
+        }
+
+        public boolean declareDirty(int dirtyIndex) {
+            int previousDirty;
+            int nextDirty;
+            do {
+                previousDirty = this._nextCounter.get();
+                if (previousDirty == this._max) {
+                    return false;
+                }
+                nextDirty = previousDirty + 1;
+            } while (!this._nextCounter.compareAndSet(previousDirty, nextDirty));
+            //ok we have the token previous
+            this._dirtyElements[previousDirty] = dirtyIndex;
+            return true;
+        }
+
+        @Override
+        public int size() {
+            return this._nextCounter.get();
+        }
+    }
+
+/*
     final class InternalDirtyState implements KChunkIterator {
 
         private AtomicInteger dirtyHead = new AtomicInteger(-1);
@@ -118,8 +183,9 @@ public class PressHeapChunkSpace implements KChunkSpace {
             return this.dirtySize.get();
         }
     }
+*/
 
-    private final AtomicReference<InternalDirtyState> _dirtyState;
+    private final AtomicReference<InternalDirtyStateList> _dirtyState;
 
     private Random random;
 
@@ -131,8 +197,8 @@ public class PressHeapChunkSpace implements KChunkSpace {
         this.random = new Random();
         this._collisions = new AtomicInteger(0);
 
-        this._dirtyState = new AtomicReference<InternalDirtyState>();
-        this._dirtyState.set(new InternalDirtyState(this._maxEntries, this));
+        this._dirtyState = new AtomicReference<InternalDirtyStateList>();
+        this._dirtyState.set(new InternalDirtyStateList(this._threeshold, this));
 
         //init std variables
         this.elementK3a = new long[maxEntries];
@@ -216,7 +282,10 @@ public class PressHeapChunkSpace implements KChunkSpace {
             //we look for nextIndex
             int nbTry = 0;
             int currentVictimIndex = this._lru.dequeue();
-            while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() > 0 /*&& nbTry < this._maxEntries*/ && (this._values[currentVictimIndex].getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
+            while (this._values[currentVictimIndex] != null && (
+                    this._values[currentVictimIndex].counter() > 0 /*&& nbTry < this._maxEntries*/
+                            || (this._values[currentVictimIndex].getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT)
+                    ) {
                 this._lru.enqueue(currentVictimIndex);
                 currentVictimIndex = this._lru.dequeue();
                 nbTry++;
@@ -329,7 +398,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     @Override
     public KChunkIterator detachDirties() {
-        return _dirtyState.getAndSet(new InternalDirtyState(this._maxEntries, this));
+        return _dirtyState.getAndSet(new InternalDirtyStateList(this._threeshold, this));
     }
 
     @Override
@@ -346,18 +415,20 @@ public class PressHeapChunkSpace implements KChunkSpace {
         int index = (hash & 0x7FFFFFFF) % this._maxEntries;
         int entry = findNonNullKeyEntry(universe, time, obj, index);
         if (entry != -1) {
-            InternalDirtyState state = this._dirtyState.get();
-            state.declareDirty(entry);
-            int dirtySize = state.size();
-            if (dirtySize >= this._threeshold) {
-                _manager.save(new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
-                        if (throwable != null) {
-                            throwable.printStackTrace();
+            boolean success = false;
+            while (!success) {
+                InternalDirtyStateList previousState = this._dirtyState.get();
+                success = previousState.declareDirty(entry);
+                if (!success) {
+                    _manager.saveDirtyList(_dirtyState.getAndSet(new InternalDirtyStateList(this._threeshold, this)), new KCallback<Throwable>() {
+                        @Override
+                        public void on(Throwable throwable) {
+                            if (throwable != null) {
+                                throwable.printStackTrace();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         } else {
             throw new RuntimeException("Try to declare a non existing object!");

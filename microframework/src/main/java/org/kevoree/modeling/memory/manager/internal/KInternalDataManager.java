@@ -5,6 +5,7 @@ import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
 import org.kevoree.modeling.memory.manager.KDataManager;
+import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.meta.KMetaClass;
 import org.kevoree.modeling.operation.KOperationManager;
@@ -49,5 +50,7 @@ public interface KInternalDataManager extends KDataManager {
     void destroyObject(KObject victim);
 
     KChunkSpace space();
+
+    void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Throwable> callback);
 
 }

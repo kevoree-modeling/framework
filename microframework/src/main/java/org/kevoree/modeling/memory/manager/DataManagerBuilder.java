@@ -1,6 +1,5 @@
 package org.kevoree.modeling.memory.manager;
 
-import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.cdn.impl.MemoryContentDeliveryDriver;
 import org.kevoree.modeling.memory.space.KChunkSpace;

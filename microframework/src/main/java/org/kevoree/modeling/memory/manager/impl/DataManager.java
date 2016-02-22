@@ -125,15 +125,14 @@ public class DataManager implements KDataManager, KInternalDataManager {
     private static final int KEY_SIZE = 3;
 
     @Override
-    public void save(final KCallback<Throwable> callback) {
-
-        // System.out.println("Save");
-
+    public void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Throwable> callback) {
         final DataManager selfPointer = this;
         _scheduler.dispatch(new KTask() {
             @Override
             public void run() {
-                KChunkIterator dirtyIterator = selfPointer._space.detachDirties();
+
+               // System.out.println("Save");
+
                 if (dirtyIterator.size() == 0) {
                     if (callback != null) {
                         callback.on(null);
@@ -148,8 +147,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 KMetaModel _mm = selfPointer._model.metaModel();
                 while (dirtyIterator.hasNext()) {
                     KChunk loopChunk = dirtyIterator.next();
-                    //KChunk loopChunk = selfPointer._spaceManager.getAndMark(loopChunkKeys[0], loopChunkKeys[1], loopChunkKeys[2]);
-                    if (loopChunk != null && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT && (loopChunk.getFlags() & KChunkFlags.REMOVED_BIT) != KChunkFlags.REMOVED_BIT) {
+                    if (loopChunk != null && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
                         toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
                         toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
                         toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
@@ -160,7 +158,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        //selfPointer._spaceManager.unmarkMemoryElement(loopChunk);
                     }
                 }
                 toSaveKeys[i * KEY_SIZE] = KConfig.BEGINNING_OF_TIME;
@@ -188,6 +185,12 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 selfPointer._db.put(toSaveKeys, toSaveValues, callback, selfPointer.currentCdnListener);
             }
         });
+    }
+
+    @Override
+    public void save(final KCallback<Throwable> callback) {
+        KChunkIterator dirtyIterator = this._space.detachDirties();
+        saveDirtyList(dirtyIterator, callback);
     }
 
     @Override
