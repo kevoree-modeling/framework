@@ -226,21 +226,11 @@ public class PressHeapChunkSpace implements KChunkSpace {
             }
 
             if (this._values[currentVictimIndex] != null) {
-
                 KChunk victim = this._values[currentVictimIndex];
                 long victimUniverse = victim.universe();
                 long victimTime = victim.time();
                 long victimObj = victim.obj();
-
-                /*
-                if (this._values[currentVictimIndex].counter() != 0) {
-                    System.err.println(victimUniverse + "," + victimTime + "," + victimObj + "=>" + this._values[currentVictimIndex].counter());
-                }*/
-
-                //int hashVictim = (int) (victimUniverse ^ victimTime ^ victimObj);
                 int hashVictim = PrimitiveHelper.tripleHash(victimUniverse, victimTime, victimObj);
-
-                //XOR three keys and hash according to maxEntries
                 int indexVictim = (hashVictim & 0x7FFFFFFF) % this._maxEntries;
                 int previousMagic;
                 do {
@@ -341,7 +331,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
         long universe = dirtyChunk.universe();
         long time = dirtyChunk.time();
         long obj = dirtyChunk.obj();
-        int hash = PrimitiveHelper.tripleHash(universe , time , obj);
+        int hash = PrimitiveHelper.tripleHash(universe, time, obj);
         int index = (hash & 0x7FFFFFFF) % this._maxEntries;
         int entry = findNonNullKeyEntry(universe, time, obj, index);
         if (entry != -1) {
