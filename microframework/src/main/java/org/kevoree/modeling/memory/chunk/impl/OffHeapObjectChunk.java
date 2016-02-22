@@ -135,7 +135,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final KObjectChunk clone(long p_universe, long p_time, long p_obj, KMetaModel p_metaModel) {
-        System.out.println("clone is called ;-(");
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
         KMetaClass metaClass = p_metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
 
@@ -747,8 +746,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
 
         if (p_payload != null) {
-            long start = System.currentTimeMillis();
-
             KMetaClass metaClass = p_metaModel.metaClass(p_metaClassIndex);
             initMetaClass(metaClass);
             UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, p_metaClassIndex);
@@ -826,8 +823,6 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                 }
             }
 
-            long end = System.currentTimeMillis();
-            System.out.println("init time: " + (end - start));
         }
 
 
