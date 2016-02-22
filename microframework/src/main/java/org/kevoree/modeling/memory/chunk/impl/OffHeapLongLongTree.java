@@ -4,6 +4,7 @@ import org.kevoree.modeling.KConfig;
 import org.kevoree.modeling.memory.chunk.KLongLongTree;
 import org.kevoree.modeling.memory.space.impl.OffHeapChunkSpace;
 import org.kevoree.modeling.memory.space.impl.press.PressOffHeapChunkSpace;
+import org.kevoree.modeling.meta.KMetaModel;
 
 /**
  * @ignore ts

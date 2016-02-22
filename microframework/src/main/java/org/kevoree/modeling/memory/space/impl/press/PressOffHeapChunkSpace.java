@@ -12,6 +12,7 @@ import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
 import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
+import org.kevoree.modeling.memory.space.impl.ChunkIterator;
 import org.kevoree.modeling.meta.KMetaModel;
 import org.kevoree.modeling.util.PrimitiveHelper;
 import sun.misc.Unsafe;
@@ -404,7 +405,8 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
 
     @Override
     public KChunkIterator detachDirties() {
-        return null;
+        // TODO implement
+        return new ChunkIterator(new long[0], this);
     }
 
     @Override
