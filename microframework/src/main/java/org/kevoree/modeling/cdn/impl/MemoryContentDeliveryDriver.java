@@ -2,7 +2,6 @@ package org.kevoree.modeling.cdn.impl;
 
 import org.kevoree.modeling.KCallback;
 import org.kevoree.modeling.KConfig;
-import org.kevoree.modeling.KModel;
 import org.kevoree.modeling.cdn.KContentUpdateListener;
 import org.kevoree.modeling.KContentKey;
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
