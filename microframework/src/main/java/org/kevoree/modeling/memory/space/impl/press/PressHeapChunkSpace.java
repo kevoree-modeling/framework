@@ -185,8 +185,8 @@ public class PressHeapChunkSpace implements KChunkSpace {
     @Override
     public KObjectChunk clone(KObjectChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
         KObjectChunk cloned = (KObjectChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(newUniverse, newTime, newObj, metaModel), metaModel);
-        declareDirty(cloned);
         cloned.setFlags(KChunkFlags.DIRTY_BIT, 0);
+        declareDirty(cloned);
         return cloned;
     }
 
@@ -357,7 +357,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                             throwable.printStackTrace();
                         }
 
-                        System.err.println("WTF SAVE "+dirtySize);
+                       // System.err.println("WTF SAVE "+dirtySize);
 
                     }
                 });
