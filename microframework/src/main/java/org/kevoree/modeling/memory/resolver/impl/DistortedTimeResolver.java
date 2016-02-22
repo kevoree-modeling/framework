@@ -85,6 +85,9 @@ public class DistortedTimeResolver implements KResolver {
                                                                         newProxy = new GenericObjectIndex(universe, time, uuid, selfPointer._manager, closestUniverse, closestTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
                                                                     } else {
                                                                         KMetaClass resolvedMetaClass = selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunk).metaClassIndex());
+                                                                        if(resolvedMetaClass == null) {
+                                                                            System.out.println("why the heck it can be null!?!?!?");
+                                                                        }
                                                                         newProxy = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuid, resolvedMetaClass, closestUniverse, closestTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
                                                                     }
                                                                     selfPointer._spaceManager.register(newProxy);

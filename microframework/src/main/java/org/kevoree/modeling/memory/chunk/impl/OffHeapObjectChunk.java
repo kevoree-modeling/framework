@@ -66,6 +66,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
             this._start_address = UNSAFE.allocateMemory(BASE_SEGMENT_SIZE);
 
             UNSAFE.putInt(this._start_address + OFFSET_COUNTER, 0);
+            UNSAFE.putInt(this._start_address + OFFSET_META_CLASS_INDEX, -1);
         } else {
             this._start_address = _mem_addr;
         }
@@ -134,6 +135,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
 
     @Override
     public final KObjectChunk clone(long p_universe, long p_time, long p_obj, KMetaModel p_metaModel) {
+        System.out.println("clone is called ;-(");
         // TODO for now it is a deep copy, in the future a shallow copy would be more efficient (attention for the free)
         KMetaClass metaClass = p_metaModel.metaClass(UNSAFE.getInt(_start_address + OFFSET_META_CLASS_INDEX));
 
@@ -204,7 +206,7 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
         }
 
         // dirty
-        clonedEntry.setDirty();
+//        clonedEntry.setDirty();
 
         return clonedEntry;
     }
@@ -729,15 +731,24 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
     @Override
     public final void init(String p_payload, KMetaModel p_metaModel, int p_metaClassIndex) {
         // check if we have an old value stored (init not called for the first time)
-        if (this._start_address != 0 && p_metaClassIndex == -1) {
-            p_metaClassIndex = UNSAFE.getInt(this._start_address + OFFSET_META_CLASS_INDEX);
-        }
+//        if (this._start_address != -1 && p_metaClassIndex == -1) {
+//            p_metaClassIndex = UNSAFE.getInt(this._start_address + OFFSET_META_CLASS_INDEX);
+//        }
+//
+//        if (p_metaClassIndex == -1) {
+//            return;
+//        }
 
-        if (p_metaClassIndex == -1) {
+        if (UNSAFE.getInt(this._start_address + OFFSET_META_CLASS_INDEX) == -1) {
+            UNSAFE.putInt(this._start_address + OFFSET_META_CLASS_INDEX, p_metaClassIndex);
+        }
+        if (UNSAFE.getInt(this._start_address + OFFSET_META_CLASS_INDEX) == -1) {
             return;
         }
 
         if (p_payload != null) {
+            long start = System.currentTimeMillis();
+
             KMetaClass metaClass = p_metaModel.metaClass(p_metaClassIndex);
             initMetaClass(metaClass);
             UNSAFE.putInt(_start_address + OFFSET_META_CLASS_INDEX, p_metaClassIndex);
@@ -814,7 +825,11 @@ public class OffHeapObjectChunk implements KObjectChunk, KOffHeapChunk {
                     }
                 }
             }
+
+            long end = System.currentTimeMillis();
+            System.out.println("init time: " + (end - start));
         }
+
 
         // should not be dirty  after unserialization
 //        UNSAFE.putByte(_start_address + OFFSET_DIRTY, (byte) 0);

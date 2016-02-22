@@ -13,6 +13,7 @@ import org.kevoree.modeling.memory.space.KChunkIterator;
 import org.kevoree.modeling.memory.space.KChunkSpace;
 import org.kevoree.modeling.memory.space.KChunkTypes;
 import org.kevoree.modeling.meta.KMetaModel;
+import org.kevoree.modeling.util.PrimitiveHelper;
 import sun.misc.Unsafe;
 
 /**
@@ -135,11 +136,16 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
             return null;
         }
 
-
         int _maxEntries = UNSAFE.getInt(this._start_address + OFFSET_MAX_ENTRIES);
-        int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % _maxEntries;
+        int index = (PrimitiveHelper.tripleHash(universe, time, obj) & 0x7FFFFFFF) % _maxEntries;
         int m = UNSAFE.getInt(this._start_address + internal_offset_elem_hash(index));
+
+        int loopCount = 0;
         while (m != -1) {
+            loopCount++;
+            if (loopCount > 5) {
+                System.out.println("high loop count: " + loopCount);
+            }
 
             long _universe = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m));
             long _time = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m) + 1 * ATT_ELEM_KEY3_LEN);
@@ -169,7 +175,7 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
         }
 
         int _maxEntries = UNSAFE.getInt(this._start_address + OFFSET_MAX_ENTRIES);
-        int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % _maxEntries;
+        int index = (PrimitiveHelper.tripleHash(universe, time, obj) & 0x7FFFFFFF) % _maxEntries;
         int m = UNSAFE.getInt(this._start_address + internal_offset_elem_hash(index));
         while (m != -1) {
             long _universe = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m));
@@ -195,7 +201,7 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
         KOffHeapChunk result;
         int entry;
         int index;
-        int hash = (int) (universe ^ time ^ obj);
+        int hash = PrimitiveHelper.tripleHash(universe, time, obj);
 
         int _maxEntries = UNSAFE.getInt(this._start_address + OFFSET_MAX_ENTRIES);
         index = (hash & 0x7FFFFFFF) % _maxEntries;
@@ -231,7 +237,7 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
             }
 
             if (victimAddr != -1) {
-                int hashVictim = (int) (victimUniverse ^ victimTime ^ victimObj);
+                int hashVictim = PrimitiveHelper.tripleHash(victimUniverse, victimTime, victimObj);
                 //XOR three keys and hash according to maxEntries
                 int indexVictim = (hashVictim & 0x7FFFFFFF) % _maxEntries;
                 int previousMagic;
