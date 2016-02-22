@@ -126,9 +126,6 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public void save(final KCallback<Throwable> callback) {
-
-        System.out.println("SAVE");
-
         final DataManager selfPointer = this;
         _scheduler.dispatch(new KTask() {
             @Override
@@ -140,8 +137,10 @@ public class DataManager implements KDataManager, KInternalDataManager {
                     }
                     return;
                 }
-                long[] toSaveKeys = new long[(dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * KEY_SIZE];
-                String[] toSaveValues = new String[dirtyIterator.size() + PREFIX_TO_SAVE_SIZE];
+                int sizeToSaveKeys = (dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * KEY_SIZE;
+                long[] toSaveKeys = new long[sizeToSaveKeys];
+                int sizeToSaveValues = dirtyIterator.size() + PREFIX_TO_SAVE_SIZE;
+                String[] toSaveValues = new String[sizeToSaveValues];
                 int i = 0;
                 KMetaModel _mm = selfPointer._model.metaModel();
                 while (dirtyIterator.hasNext()) {
@@ -170,6 +169,19 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
                 toSaveKeys[i * KEY_SIZE + 2] = selfPointer._universeKeyCalculator.prefix();
                 toSaveValues[i] = "" + selfPointer._universeKeyCalculator.lastComputedIndex();
+
+                //shrink in case of i != full size
+                if (i != sizeToSaveValues - 1) {
+                    //shrinkValue
+                    String[] toSaveValuesShrinked = new String[i + 1];
+                    System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i + 1);
+                    toSaveValues = toSaveValuesShrinked;
+
+                    long[] toSaveKeysShrinked = new long[(i + 1) * KEY_SIZE];
+                    System.arraycopy(toSaveKeys, 0, toSaveKeysShrinked, 0, (i + 1) * KEY_SIZE);
+                    toSaveKeys = toSaveKeysShrinked;
+                }
+
                 selfPointer._db.put(toSaveKeys, toSaveValues, callback, selfPointer.currentCdnListener);
             }
         });

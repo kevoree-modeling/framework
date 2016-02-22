@@ -356,14 +356,11 @@ public class PressHeapChunkSpace implements KChunkSpace {
                         if (throwable != null) {
                             throwable.printStackTrace();
                         }
-
-                       // System.err.println("WTF SAVE "+dirtySize);
-
                     }
                 });
             }
         } else {
-            System.err.println("Try to declare a non existing object!");
+            throw new RuntimeException("Try to declare a non existing object!");
         }
     }
 
