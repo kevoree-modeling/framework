@@ -100,7 +100,7 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void close(KCallback<Throwable> callback) {
-        backend.clear();
+        //backend.clear();
         callback.on(null);
     }
 

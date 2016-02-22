@@ -307,16 +307,21 @@ public class DataManager implements KDataManager, KInternalDataManager {
     @Override
     public synchronized final void close(KCallback<Throwable> callback) {
         if (isConnected) {
-            _scheduler.stop();
-            _blas.disconnect();
-            isConnected = false;
-            if (_db != null) {
-                _db.close(callback);
-            } else {
-                if (callback != null) {
-                    callback.on(null);
+            save(new KCallback<Throwable>() {
+                @Override
+                public void on(Throwable throwable) {
+                    _scheduler.stop();
+                    _blas.disconnect();
+                    isConnected = false;
+                    if (_db != null) {
+                        _db.close(callback);
+                    } else {
+                        if (callback != null) {
+                            callback.on(null);
+                        }
+                    }
                 }
-            }
+            });
         } else {
             if (callback != null) {
                 callback.on(null);
