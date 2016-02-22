@@ -104,7 +104,7 @@ public class HeapObjectIndexChunk implements KObjectIndexChunk {
         cloned.elementCount = this.elementCount;
         cloned.droppedCount = this.droppedCount;
         cloned.threshold = this.threshold;
-        cloned.internal_set_dirty();
+//        cloned.internal_set_dirty();
         return cloned;
     }
 
@@ -475,9 +475,9 @@ public class HeapObjectIndexChunk implements KObjectIndexChunk {
     private void internal_set_dirty() {
         if (_space != null) {
             if ((_flags.get() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-                _space.declareDirty(this);
                 //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
                 setFlags(KChunkFlags.DIRTY_BIT, 0);
+                _space.declareDirty(this);
             }
         } else {
             setFlags(KChunkFlags.DIRTY_BIT, 0);
