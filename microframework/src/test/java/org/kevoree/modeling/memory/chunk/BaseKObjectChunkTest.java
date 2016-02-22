@@ -16,6 +16,9 @@ import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 import java.util.ArrayList;
 
+/**
+ * @ignore ts
+ */
 public abstract class BaseKObjectChunkTest {
 
     public abstract KObjectChunk createKObjectChunk();

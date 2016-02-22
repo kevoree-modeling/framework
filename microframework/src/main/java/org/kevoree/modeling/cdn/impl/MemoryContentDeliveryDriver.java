@@ -67,8 +67,8 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
         int nbKeys = p_keys.length / 3;
         for (int i = 0; i < nbKeys; i++) {
 
-           // KContentKey kk = KContentKey.create(KContentKey.toString(p_keys, i));
-           // System.out.println(backend.size()+"->"+kk.universe+","+kk.time+","+kk.obj);
+            // KContentKey kk = KContentKey.create(KContentKey.toString(p_keys, i));
+            // System.out.println(backend.size()+"->"+kk.universe+","+kk.time+","+kk.obj);
 
             backend.put(KContentKey.toString(p_keys, i), p_values[i]);
         }

@@ -9,6 +9,9 @@ import org.kevoree.modeling.memory.space.impl.press.PressHeapChunkSpace;
 import org.kevoree.modeling.memory.space.impl.press.PressOffHeapChunkSpace;
 import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
+/**
+ * @ignore ts
+ */
 public class HeapObjectChunkTest extends BaseKObjectChunkTest {
 
     @Override
