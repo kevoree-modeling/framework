@@ -126,6 +126,9 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public void save(final KCallback<Throwable> callback) {
+
+        // System.out.println("Save");
+
         final DataManager selfPointer = this;
         _scheduler.dispatch(new KTask() {
             @Override
