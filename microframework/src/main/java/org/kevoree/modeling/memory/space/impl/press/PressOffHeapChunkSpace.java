@@ -140,13 +140,7 @@ public class PressOffHeapChunkSpace implements KChunkSpace {
         int index = (PrimitiveHelper.tripleHash(universe, time, obj) & 0x7FFFFFFF) % _maxEntries;
         int m = UNSAFE.getInt(this._start_address + internal_offset_elem_hash(index));
 
-        int loopCount = 0;
         while (m != -1) {
-            loopCount++;
-            if (loopCount > 5) {
-                System.out.println("high loop count: " + loopCount);
-            }
-
             long _universe = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m));
             long _time = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m) + 1 * ATT_ELEM_KEY3_LEN);
             long _obj = UNSAFE.getLong(this._start_address + internal_offset_elem_key3(m) + 2 * ATT_ELEM_KEY3_LEN);
