@@ -356,6 +356,9 @@ public class PressHeapChunkSpace implements KChunkSpace {
                         if (throwable != null) {
                             throwable.printStackTrace();
                         }
+
+                        System.err.println("WTF SAVE "+dirtySize);
+
                     }
                 });
             }

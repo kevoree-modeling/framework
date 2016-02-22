@@ -1,7 +1,9 @@
 package org.kevoree.modeling.abs;
 
 import org.kevoree.modeling.*;
+import org.kevoree.modeling.defer.KCounterDefer;
 import org.kevoree.modeling.defer.KDefer;
+import org.kevoree.modeling.defer.impl.CounterDefer;
 import org.kevoree.modeling.memory.chunk.KStringMap;
 import org.kevoree.modeling.memory.chunk.impl.ArrayStringMap;
 import org.kevoree.modeling.memory.manager.internal.KInternalDataManager;
@@ -96,6 +98,11 @@ public abstract class AbstractKModel<A extends KUniverse> implements KModel<A> {
     @Override
     public KDefer defer() {
         return new Defer();
+    }
+
+    @Override
+    public KCounterDefer counterDefer(int counter) {
+        return new CounterDefer(counter);
     }
 
     @Override

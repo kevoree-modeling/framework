@@ -1,5 +1,6 @@
 package org.kevoree.modeling;
 
+import org.kevoree.modeling.defer.KCounterDefer;
 import org.kevoree.modeling.defer.KDefer;
 import org.kevoree.modeling.memory.manager.KDataManager;
 import org.kevoree.modeling.meta.KMetaClass;
@@ -26,6 +27,8 @@ public interface KModel<A extends KUniverse> {
      * Create a new KDefer
      */
     KDefer defer();
+
+    KCounterDefer counterDefer(int counter);
 
     /**
      * Operation Management
@@ -67,7 +70,9 @@ public interface KModel<A extends KUniverse> {
 
     KModelContext createModelContext();
 
-    /** Traversal management */
+    /**
+     * Traversal management
+     */
     KTraversal createTraversal(KObject[] startingElements);
 
     KTraversal createReusableTraversal();
