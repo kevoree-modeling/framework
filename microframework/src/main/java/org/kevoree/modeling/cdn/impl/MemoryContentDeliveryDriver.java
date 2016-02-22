@@ -23,6 +23,10 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
         return backend.size();
     }
 
+    public void clear() {
+        this.backend.clear();
+    }
+
     @Override
     public void atomicGetIncrement(long[] key, KCallback<Short> cb) {
         String result = backend.get(KContentKey.toString(key, 0));
@@ -100,7 +104,6 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
     @Override
     public void close(KCallback<Throwable> callback) {
-        //backend.clear();
         callback.on(null);
     }
 
