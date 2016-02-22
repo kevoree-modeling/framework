@@ -19,6 +19,10 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
     private final KStringMap<String> backend = new ArrayStringMap<String>(KConfig.CACHE_INIT_SIZE, KConfig.CACHE_LOAD_FACTOR);
 
+    public int size() {
+        return backend.size();
+    }
+
     @Override
     public void atomicGetIncrement(long[] key, KCallback<Short> cb) {
         String result = backend.get(KContentKey.toString(key, 0));

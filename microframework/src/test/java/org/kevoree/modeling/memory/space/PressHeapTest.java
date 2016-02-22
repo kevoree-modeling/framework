@@ -13,9 +13,9 @@ import org.kevoree.modeling.scheduler.impl.DirectScheduler;
 
 public class PressHeapTest {
 
-//    @Test
+    //    @Test
     public void simpleTest() {
-        final CloudModel model = new CloudModel(DataManagerBuilder.create().withSpace(new PressHeapChunkSpace(100)).withScheduler(new DirectScheduler()).build());
+        final CloudModel model = new CloudModel(DataManagerBuilder.create().withSpace(new PressHeapChunkSpace(100, 10)).withScheduler(new DirectScheduler()).build());
         model.connect(new KCallback<Throwable>() {
             @Override
             public void on(Throwable throwable) {

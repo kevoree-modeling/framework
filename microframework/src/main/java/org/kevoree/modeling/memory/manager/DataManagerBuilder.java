@@ -59,7 +59,7 @@ public class DataManagerBuilder {
      */
     public KChunkSpace space() {
         if (this._space == null) {
-            this._space = new PressHeapChunkSpace(100000);
+            this._space = new PressHeapChunkSpace(100000, 10);
         }
         return _space;
     }

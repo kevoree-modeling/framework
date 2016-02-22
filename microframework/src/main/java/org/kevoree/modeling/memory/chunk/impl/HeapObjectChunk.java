@@ -419,7 +419,7 @@ public class HeapObjectChunk implements KObjectChunk {
             HeapObjectChunk clonedEntry = new HeapObjectChunk(p_universe, p_time, p_obj, _space);
             clonedEntry.raw = cloned;
             clonedEntry._metaClassIndex = _metaClassIndex;
-            clonedEntry.internal_set_dirty();
+            //clonedEntry.internal_set_dirty();
             return clonedEntry;
         }
     }

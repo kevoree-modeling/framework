@@ -18,6 +18,6 @@ public class HeapObjectChunkTest extends BaseKObjectChunkTest {
 
     @Override
     public KInternalDataManager createKInternalDataManger() {
-        return DataManagerBuilder.create().withSpace(new PressHeapChunkSpace(100000)).withSpaceManager(new ManualChunkSpaceManager()).withScheduler(new DirectScheduler()).build();
+        return DataManagerBuilder.create().withSpace(new PressHeapChunkSpace(100000, 10)).withSpaceManager(new ManualChunkSpaceManager()).withScheduler(new DirectScheduler()).build();
     }
 }

@@ -2,7 +2,6 @@
 package org.kevoree.modeling.memory.space.impl.press;
 
 import org.kevoree.modeling.KCallback;
-import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.kevoree.modeling.memory.KChunk;
 import org.kevoree.modeling.memory.KChunkFlags;
 import org.kevoree.modeling.memory.chunk.KObjectChunk;
@@ -29,6 +28,8 @@ public class PressHeapChunkSpace implements KChunkSpace {
      * Global
      */
     private final int _maxEntries;
+
+    private final int _threeshold;
 
     private final AtomicInteger _elementCount;
 
@@ -122,8 +123,10 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     private Random random;
 
-    public PressHeapChunkSpace(int maxEntries) {
+    public PressHeapChunkSpace(int maxEntries, int autoSavePercent) {
         this._maxEntries = maxEntries;
+        this._threeshold = maxEntries * autoSavePercent / 100;
+
         this._lru = new FixedHeapFIFO(maxEntries);
         this.random = new Random();
         this._collisions = new AtomicInteger(0);
@@ -160,7 +163,6 @@ public class PressHeapChunkSpace implements KChunkSpace {
         if (this._elementCount.get() == 0) {
             return null;
         }
-        // int index = (((int) (universe ^ time ^ obj)) & 0x7FFFFFFF) % this._maxEntries;
         int index = (PrimitiveHelper.tripleHash(universe, time, obj) & 0x7FFFFFFF) % this._maxEntries;
         int m = this.elementHash[index];
         while (m != -1) {
@@ -182,7 +184,10 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     @Override
     public KObjectChunk clone(KObjectChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel) {
-        return (KObjectChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(newUniverse, newTime, newObj, metaModel), metaModel);
+        KObjectChunk cloned = (KObjectChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(newUniverse, newTime, newObj, metaModel), metaModel);
+        declareDirty(cloned);
+        cloned.setFlags(KChunkFlags.DIRTY_BIT, 0);
+        return cloned;
     }
 
     private KChunk internal_createElement(long p_universe, long p_time, long p_obj, short type) {
@@ -211,7 +216,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
             //we look for nextIndex
             int nbTry = 0;
             int currentVictimIndex = this._lru.dequeue();
-            while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() > 0 /*&& nbTry < this._maxEntries*/) {
+            while (this._values[currentVictimIndex] != null && this._values[currentVictimIndex].counter() > 0 /*&& nbTry < this._maxEntries*/ && (this._values[currentVictimIndex].getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
                 this._lru.enqueue(currentVictimIndex);
                 currentVictimIndex = this._lru.dequeue();
                 nbTry++;
@@ -221,9 +226,10 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 }
             }
 
+            /*
             if (nbTry == this._maxEntries) {
                 throw new RuntimeException("Press Cache is Full, too many object are reserved!");
-            }
+            }*/
 
             if (this._values[currentVictimIndex] != null) {
                 KChunk victim = this._values[currentVictimIndex];
@@ -262,6 +268,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 this.elementHashLock.compareAndSet(indexVictim, previousMagic, -1);
                 this._elementCount.decrementAndGet();
 
+                /*
                 //TEST IF VICTIM IS DIRTY
                 if ((victim.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
                     //SAVE VICTIM
@@ -275,7 +282,11 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 } else {
                     //FREE VICTIM FROM MEMORY
                     victim.free(metaModel);
-                }
+                }*/
+
+                //FREE VICTIM FROM MEMORY
+                victim.free(metaModel);
+
             }
             elementK3a[currentVictimIndex] = universe;
             elementK3b[currentVictimIndex] = time;
@@ -335,7 +346,21 @@ public class PressHeapChunkSpace implements KChunkSpace {
         int index = (hash & 0x7FFFFFFF) % this._maxEntries;
         int entry = findNonNullKeyEntry(universe, time, obj, index);
         if (entry != -1) {
-            this._dirtyState.get().declareDirty(entry);
+            InternalDirtyState state = this._dirtyState.get();
+            state.declareDirty(entry);
+            int dirtySize = state.size();
+            if (dirtySize >= this._threeshold) {
+                _manager.save(new KCallback<Throwable>() {
+                    @Override
+                    public void on(Throwable throwable) {
+                        if (throwable != null) {
+                            throwable.printStackTrace();
+                        }
+                    }
+                });
+            }
+        } else {
+            System.err.println("Try to declare a non existing object!");
         }
     }
 
@@ -349,6 +374,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
         //TODO
     }
 
+    /*
     private void saveChunk(KChunk chunk, KMetaModel p_metaModel, KCallback<Throwable> result) {
         if (this._manager != null) {
             KContentDeliveryDriver cdn = this._manager.cdn();
@@ -368,7 +394,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 }, -1);
             }
         }
-    }
+    }*/
 
     @Override
     public void printDebug(KMetaModel p_metaModel) {

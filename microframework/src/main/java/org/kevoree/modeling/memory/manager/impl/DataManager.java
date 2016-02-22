@@ -274,7 +274,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                                                                 selfPointer._objectKeyCalculator = new KeyCalculator(selfPointer._prefix, newObjIndex);
                                                                 selfPointer.isConnected = true;
                                                             } catch (Exception e) {
-                                                                e.printStackTrace();
+                                                                //e.printStackTrace();
                                                                 detected = e;
                                                             }
                                                             if (connectCallback != null) {
