@@ -91,7 +91,10 @@ public class BlockingAsyncScheduler implements KScheduler {
 
     @Override
     public synchronized void stop() {
-        tg.destroy();
+        for (int i = 0; i < _nbWorker; i++) {
+            WorkerThread workerThread = workers[i];
+            workerThread.isAlive = false;
+        }
     }
 
     @Override

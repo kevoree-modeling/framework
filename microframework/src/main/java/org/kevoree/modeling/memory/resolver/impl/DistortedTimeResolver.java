@@ -86,7 +86,7 @@ public class DistortedTimeResolver implements KResolver {
                                                                     } else {
                                                                         KMetaClass resolvedMetaClass = selfPointer._manager.model().metaModel().metaClass(((KObjectChunk) theObjectChunk).metaClassIndex());
                                                                         if (resolvedMetaClass == null) {
-                                                                            System.out.println("why the heck it can be null!?!?!?");
+                                                                            throw new RuntimeException("NullResolvedClass");
                                                                         }
                                                                         newProxy = ((AbstractKModel) selfPointer._manager.model()).createProxy(universe, time, uuid, resolvedMetaClass, closestUniverse, closestTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
                                                                     }
@@ -543,11 +543,11 @@ public class DistortedTimeResolver implements KResolver {
         }
 
         //SOMETHING WILL MOVE HERE ANYWAY SO WE SYNC THE OBJECT
-        int magic = -1;
-       /* do {
+        int magic;
+        do {
             magic = random.nextInt();
         } while (!objectUniverseMap.tokenCompareAndSwap(-1, magic));
-        */
+
         //OK NOW WE HAVE THE MAGIC FOR UUID
 
         try {
