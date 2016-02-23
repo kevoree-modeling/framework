@@ -271,7 +271,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
         }
     }
 
-    private synchronized KChunk internal_put(long universe, long time, long p_obj, KChunk payload, KMetaModel metaModel) {
+    private KChunk internal_put(long universe, long time, long p_obj, KChunk payload, KMetaModel metaModel) {
         KChunk result;
         int entry;
         int index;
@@ -291,7 +291,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 nbTry++;
                 if (nbTry % (this._maxEntries / 10) == 0) {
                     System.gc();
-                    //System.err.println("GC "+nbTry);
+                    System.err.println("GC "+nbTry);
                 }
             }
 

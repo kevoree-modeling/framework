@@ -126,65 +126,65 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     @Override
     public void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Throwable> callback) {
-        final DataManager selfPointer = this;
-        _scheduler.dispatch(new KTask() {
-            @Override
-            public void run() {
+        //final DataManager selfPointer = this;
+        //_scheduler.dispatch(new KTask() {
+        //    @Override
+        //    public void run() {
 
-               // System.out.println("Save");
+        // System.out.println("Save");
 
-                if (dirtyIterator.size() == 0) {
-                    if (callback != null) {
-                        callback.on(null);
-                    }
-                    return;
-                }
-                int sizeToSaveKeys = (dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * KEY_SIZE;
-                long[] toSaveKeys = new long[sizeToSaveKeys];
-                int sizeToSaveValues = dirtyIterator.size() + PREFIX_TO_SAVE_SIZE;
-                String[] toSaveValues = new String[sizeToSaveValues];
-                int i = 0;
-                KMetaModel _mm = selfPointer._model.metaModel();
-                while (dirtyIterator.hasNext()) {
-                    KChunk loopChunk = dirtyIterator.next();
-                    if (loopChunk != null && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
-                        toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
-                        toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
-                        toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
-                        try {
-                            toSaveValues[i] = loopChunk.serialize(_mm);
-                            loopChunk.setFlags(0, KChunkFlags.DIRTY_BIT);
-                            i++;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                toSaveKeys[i * KEY_SIZE] = KConfig.BEGINNING_OF_TIME;
-                toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
-                toSaveKeys[i * KEY_SIZE + 2] = selfPointer._objectKeyCalculator.prefix();
-                toSaveValues[i] = "" + selfPointer._objectKeyCalculator.lastComputedIndex();
-                i++;
-                toSaveKeys[i * KEY_SIZE] = KConfig.END_OF_TIME;
-                toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
-                toSaveKeys[i * KEY_SIZE + 2] = selfPointer._universeKeyCalculator.prefix();
-                toSaveValues[i] = "" + selfPointer._universeKeyCalculator.lastComputedIndex();
-
-                //shrink in case of i != full size
-                if (i != sizeToSaveValues - 1) {
-                    //shrinkValue
-                    String[] toSaveValuesShrinked = new String[i + 1];
-                    System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i + 1);
-                    toSaveValues = toSaveValuesShrinked;
-
-                    long[] toSaveKeysShrinked = new long[(i + 1) * KEY_SIZE];
-                    System.arraycopy(toSaveKeys, 0, toSaveKeysShrinked, 0, (i + 1) * KEY_SIZE);
-                    toSaveKeys = toSaveKeysShrinked;
-                }
-
-                selfPointer._db.put(toSaveKeys, toSaveValues, callback, selfPointer.currentCdnListener);
+        if (dirtyIterator.size() == 0) {
+            if (callback != null) {
+                callback.on(null);
             }
-        });
+            return;
+        }
+        int sizeToSaveKeys = (dirtyIterator.size() + PREFIX_TO_SAVE_SIZE) * KEY_SIZE;
+        long[] toSaveKeys = new long[sizeToSaveKeys];
+        int sizeToSaveValues = dirtyIterator.size() + PREFIX_TO_SAVE_SIZE;
+        String[] toSaveValues = new String[sizeToSaveValues];
+        int i = 0;
+        KMetaModel _mm = this._model.metaModel();
+        while (dirtyIterator.hasNext()) {
+            KChunk loopChunk = dirtyIterator.next();
+            if (loopChunk != null && (loopChunk.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
+                toSaveKeys[i * KEY_SIZE] = loopChunk.universe();
+                toSaveKeys[i * KEY_SIZE + 1] = loopChunk.time();
+                toSaveKeys[i * KEY_SIZE + 2] = loopChunk.obj();
+                try {
+                    toSaveValues[i] = loopChunk.serialize(_mm);
+                    loopChunk.setFlags(0, KChunkFlags.DIRTY_BIT);
+                    i++;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        toSaveKeys[i * KEY_SIZE] = KConfig.BEGINNING_OF_TIME;
+        toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
+        toSaveKeys[i * KEY_SIZE + 2] = this._objectKeyCalculator.prefix();
+        toSaveValues[i] = "" + this._objectKeyCalculator.lastComputedIndex();
+        i++;
+        toSaveKeys[i * KEY_SIZE] = KConfig.END_OF_TIME;
+        toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
+        toSaveKeys[i * KEY_SIZE + 2] = this._universeKeyCalculator.prefix();
+        toSaveValues[i] = "" + this._universeKeyCalculator.lastComputedIndex();
+
+        //shrink in case of i != full size
+        if (i != sizeToSaveValues - 1) {
+            //shrinkValue
+            String[] toSaveValuesShrinked = new String[i + 1];
+            System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i + 1);
+            toSaveValues = toSaveValuesShrinked;
+
+            long[] toSaveKeysShrinked = new long[(i + 1) * KEY_SIZE];
+            System.arraycopy(toSaveKeys, 0, toSaveKeysShrinked, 0, (i + 1) * KEY_SIZE);
+            toSaveKeys = toSaveKeysShrinked;
+        }
+
+        this._db.put(toSaveKeys, toSaveValues, callback, this.currentCdnListener);
+        // }
+        // });
     }
 
     @Override

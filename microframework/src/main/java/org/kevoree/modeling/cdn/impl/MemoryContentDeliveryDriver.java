@@ -64,8 +64,16 @@ public class MemoryContentDeliveryDriver implements KContentDeliveryDriver {
 
     public static boolean DEBUG = false;
 
+    public static boolean DRY = false;
+
+
     @Override
     public synchronized void put(long[] p_keys, String[] p_values, KCallback<Throwable> p_callback, int excludeListener) {
+
+        if (DRY) {
+            return;
+        }
+
         int nbKeys = p_keys.length / 3;
         for (int i = 0; i < nbKeys; i++) {
 
