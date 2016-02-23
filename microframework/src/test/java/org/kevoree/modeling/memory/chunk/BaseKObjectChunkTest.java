@@ -49,7 +49,7 @@ public abstract class BaseKObjectChunkTest {
                 for (int i = 0; i < 480000; i++) {
                     // setPrimitiveType and read attributes
                     KObject home = model.universe(0).time(0).create(model.metaModel().metaClassByName("Home"));
-//                    home.destroy();
+                    home.destroy();
 
 //                    if(i == 66666){
 //                        System.out.println("still works");
