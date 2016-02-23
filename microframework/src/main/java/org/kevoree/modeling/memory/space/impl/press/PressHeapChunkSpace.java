@@ -191,7 +191,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     public PressHeapChunkSpace(int maxEntries, int autoSavePercent) {
         this._maxEntries = maxEntries;
-        this._threeshold = maxEntries * autoSavePercent / 100;
+        this._threeshold = maxEntries /100 * autoSavePercent;
 
         this._lru = new FixedHeapFIFO(maxEntries);
         this.random = new Random();
