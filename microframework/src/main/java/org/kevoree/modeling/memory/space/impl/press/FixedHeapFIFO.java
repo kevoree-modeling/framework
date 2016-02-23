@@ -30,7 +30,7 @@ public class FixedHeapFIFO implements PressFIFO {
             currentHeadNext = this._next[currentHead];
         } while (!this._head.compareAndSet(currentHead, currentHeadNext));
         //cleanup link to avoid pollution
-        this._next[currentHead] = -1;
+        //this._next[currentHead] = -1;
         return currentHead;
     }
 
