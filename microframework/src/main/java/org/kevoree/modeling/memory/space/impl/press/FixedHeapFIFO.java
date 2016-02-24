@@ -40,7 +40,7 @@ public class FixedHeapFIFO implements PressFIFO {
         do {
             currentTail = this._tail.get();
         } while (!this._tail.compareAndSet(currentTail, index));
-        //this._next[currentTail] = index;
+        this._next[index] = currentTail;
     }
 
 }

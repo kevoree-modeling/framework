@@ -511,7 +511,7 @@ public abstract class AbstractArrayTree implements KChunk {
         return result;
     }
 
-    public final void init(String payload, KMetaModel metaModel, int metaClassIndex) {
+    public final synchronized void init(String payload, KMetaModel metaModel, int metaClassIndex) {
         if (payload == null || payload.length() == 0) {
             return;
         }
