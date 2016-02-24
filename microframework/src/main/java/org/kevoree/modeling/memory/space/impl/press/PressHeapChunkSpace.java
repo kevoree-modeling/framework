@@ -191,9 +191,9 @@ public class PressHeapChunkSpace implements KChunkSpace {
 
     public PressHeapChunkSpace(int maxEntries, int autoSavePercent) {
         this._maxEntries = maxEntries;
-        this._threeshold = maxEntries /100 * autoSavePercent;
+        this._threeshold = maxEntries / 100 * autoSavePercent;
 
-        this._lru = new FixedHeapFIFO(maxEntries);
+        this._lru = new FixedSizeLinkedList(maxEntries);
         this.random = new Random();
         this._collisions = new AtomicInteger(0);
 
@@ -292,7 +292,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
                 nbTry++;
                 if (nbTry % (this._maxEntries / 10) == 0) {
                     System.gc();
-                    System.err.println("GC "+nbTry);
+                    System.err.println("GC " + nbTry);
                 }
             }
 
@@ -382,7 +382,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
             this._lru.enqueue(currentVictimIndex);
         } else {
             result = _values[entry];
-            _lru.reenqueue(entry);
+            this._lru.reenqueue(entry);
         }
         return result;
     }

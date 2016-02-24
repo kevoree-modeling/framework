@@ -2,11 +2,10 @@ package org.kevoree.modeling.memory.space.impl.press;
 
 import org.kevoree.modeling.memory.chunk.impl.UnsafeUtil;
 import sun.misc.Unsafe;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * @ignore ts
- * <p/>
+ * <p>
  * memory structure:<br/>
  * | max elem (4) | head (4) | tail (4) | next (max elem * 4) |
  */
@@ -49,8 +48,6 @@ public class FixedOffHeapFIFO implements PressFIFO {
         } else {
             this._start_address = mem_addr;
         }
-
-
     }
 
     @Override
@@ -84,6 +81,6 @@ public class FixedOffHeapFIFO implements PressFIFO {
     @Override
     public void reenqueue(int index) {
         //todo
-        throw new NotImplementedException();
+        throw new RuntimeException("NotImplementedException");
     }
 }

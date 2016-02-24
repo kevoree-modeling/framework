@@ -34,7 +34,6 @@ public class FixedSizeLinkedList implements PressFIFO {
     @Override
     public void enqueue(int index) {
         lock();
-
         int currentHead = this._head;
         int currentPrevious = this._previous[_head];
         _head = index;
@@ -43,30 +42,27 @@ public class FixedSizeLinkedList implements PressFIFO {
 
         this._previous[currentHead] = index;
         this._next[index] = currentHead;
-
         unlock();
     }
 
     @Override
     public int dequeue() {
         lock();
-
         int currentHead = _head;
         int tail = this._previous[currentHead];
         int previous = this._previous[tail];
         this._next[previous] = _head;
         this._previous[_head] = previous;
-
         unlock();
         return tail;
     }
 
     @Override
     public void reenqueue(int index) {
-        if(_previous[_next[index]] != index) {//the element has been detached
+        lock();
+        if (_previous[_next[index]] != index) {//the element has been detached
             return;
         }
-        lock();
         //detach the value to reenqueue
         _next[_previous[index]] = _next[index];
         _previous[_next[index]] = _previous[index];
@@ -87,7 +83,6 @@ public class FixedSizeLinkedList implements PressFIFO {
         toReturn.append("_head=").append(_head).append("\n")
                 .append("_next=").append(Arrays.toString(_next)).append("\n")
                 .append("_prev=").append(Arrays.toString(_previous));
-
         return toReturn.toString();
     }
 

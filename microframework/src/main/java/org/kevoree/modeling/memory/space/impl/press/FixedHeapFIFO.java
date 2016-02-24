@@ -1,7 +1,5 @@
 package org.kevoree.modeling.memory.space.impl.press;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FixedHeapFIFO implements PressFIFO {
@@ -47,6 +45,6 @@ public class FixedHeapFIFO implements PressFIFO {
     @Override
     public void reenqueue(int index) {
         //todo
-        throw new NotImplementedException();
+        throw new RuntimeException("NotImplementedException");
     }
 }
