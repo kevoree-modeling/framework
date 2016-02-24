@@ -234,6 +234,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
         while (m != -1) {
             if (universe == this.elementK3a[m] && time == this.elementK3b[m] && obj == elementK3c[m]) {
                 //GET VALUE
+                _lru.reenqueue(m);
                 return this._values[m];
             } else {
                 m = this.elementNext[m];
@@ -381,6 +382,7 @@ public class PressHeapChunkSpace implements KChunkSpace {
             this._lru.enqueue(currentVictimIndex);
         } else {
             result = _values[entry];
+            _lru.reenqueue(entry);
         }
         return result;
     }

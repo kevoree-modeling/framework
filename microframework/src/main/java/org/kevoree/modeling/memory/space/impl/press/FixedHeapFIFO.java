@@ -1,5 +1,7 @@
 package org.kevoree.modeling.memory.space.impl.press;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FixedHeapFIFO implements PressFIFO {
@@ -30,7 +32,6 @@ public class FixedHeapFIFO implements PressFIFO {
             currentHeadNext = this._next[currentHead];
         } while (!this._head.compareAndSet(currentHead, currentHeadNext));
         //cleanup link to avoid pollution
-        //this._next[currentHead] = -1;
         return currentHead;
     }
 
@@ -43,4 +44,9 @@ public class FixedHeapFIFO implements PressFIFO {
         this._next[index] = currentTail;
     }
 
+    @Override
+    public void reenqueue(int index) {
+        //todo
+        throw new NotImplementedException();
+    }
 }

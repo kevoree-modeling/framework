@@ -6,4 +6,6 @@ public interface PressFIFO {
 
     int dequeue();
 
+    void reenqueue(int index);
+
 }

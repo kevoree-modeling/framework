@@ -1,74 +1,94 @@
 package org.kevoree.modeling.memory.space.impl.press;
 
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-/* TODO this class is not thread safe */
 public class FixedSizeLinkedList implements PressFIFO {
 
     private int[] _previous;
     private int[] _next;
-    private int _head;
-    private Random _random;
-    private AtomicInteger _magic;
+    private int _head; //youngest
+
+    AtomicBoolean _lock;
 
     public FixedSizeLinkedList(int max) {
         this._previous = new int[max];
         this._next = new int[max];
-        _head = -1;
-        _random = new Random();
-        _magic = new AtomicInteger(-1);
+        _head = 0;
+        _lock = new AtomicBoolean(false);
+
+        for (int i = 0; i < max; i++) {
+            _next[i] = (i + 1) % max;
+            _previous[i] = ((i - 1) % max + max) % max;
+        }
+    }
+
+    private void lock() { //we count on JVM inlining
+        while (!_lock.compareAndSet(false, true)) ;
+    }
+
+    private void unlock() { //should be invoke after lock succeed
+        _lock.compareAndSet(true, false);
     }
 
     @Override
     public void enqueue(int index) {
+        lock();
 
-        int localMagic;
-        do {
-            localMagic = _random.nextInt();
-        } while (!_magic.compareAndSet(-1, localMagic));
+        int currentHead = this._head;
+        int currentPrevious = this._previous[_head];
+        _head = index;
+        this._previous[index] = currentPrevious;
+        this._next[currentPrevious] = index;
 
-        if (_head == -1) {
-            this._next[index] = index;
-            this._previous[index] = index;
-            _head = index;
-        } else {
-            int currentHead = this._head;
-            int currentPrevious = this._previous[_head];
-            _head = index;
-            //chain previous
-            this._previous[index] = currentPrevious;
-            this._next[currentPrevious] = index;
+        this._previous[currentHead] = index;
+        this._next[index] = currentHead;
 
-            this._previous[currentHead] = index;
-            this._next[index] = currentHead;
-        }
-
-        _magic.compareAndSet(localMagic, -1);
-
+        unlock();
     }
 
     @Override
     public int dequeue() {
-
-        int localMagic;
-        do {
-            localMagic = _random.nextInt();
-        } while (!_magic.compareAndSet(-1, localMagic));
+        lock();
 
         int currentHead = _head;
-        if (currentHead != -1) {
-            //circular ring, take previous
-            int tail = this._previous[currentHead];
-            int previous = this._previous[tail];
-            this._next[previous] = _head;
-            this._previous[_head] = previous;
-            _magic.compareAndSet(localMagic, -1);
-            return tail;
-        } else {
-            _magic.compareAndSet(localMagic, -1);
-            return -1;
+        int tail = this._previous[currentHead];
+        int previous = this._previous[tail];
+        this._next[previous] = _head;
+        this._previous[_head] = previous;
+
+        unlock();
+        return tail;
+    }
+
+    @Override
+    public void reenqueue(int index) {
+        if(_previous[_next[index]] != index) {//the element has been detached
+            return;
         }
+        lock();
+        //detach the value to reenqueue
+        _next[_previous[index]] = _next[index];
+        _previous[_next[index]] = _previous[index];
+
+        _previous[index] = _previous[_head];
+        _previous[_head] = index;
+
+        _next[_previous[index]] = index;
+        _next[index] = _head;
+
+        _head = index;
+        unlock();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder toReturn = new StringBuilder();
+        toReturn.append("_head=").append(_head).append("\n")
+                .append("_next=").append(Arrays.toString(_next)).append("\n")
+                .append("_prev=").append(Arrays.toString(_previous));
+
+        return toReturn.toString();
     }
 
 }

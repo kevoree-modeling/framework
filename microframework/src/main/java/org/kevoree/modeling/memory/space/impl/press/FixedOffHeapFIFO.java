@@ -2,6 +2,7 @@ package org.kevoree.modeling.memory.space.impl.press;
 
 import org.kevoree.modeling.memory.chunk.impl.UnsafeUtil;
 import sun.misc.Unsafe;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * @ignore ts
@@ -80,4 +81,9 @@ public class FixedOffHeapFIFO implements PressFIFO {
         return this._start_address;
     }
 
+    @Override
+    public void reenqueue(int index) {
+        //todo
+        throw new NotImplementedException();
+    }
 }
