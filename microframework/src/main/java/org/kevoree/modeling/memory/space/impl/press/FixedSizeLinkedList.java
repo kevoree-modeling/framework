@@ -61,6 +61,12 @@ public class FixedSizeLinkedList implements PressFIFO {
     public void reenqueue(int index) {
         lock();
         if (_previous[_next[index]] != index) {//the element has been detached
+            unlock();
+            return;
+        }
+
+        if(index == _head) {
+            unlock();
             return;
         }
         //detach the value to reenqueue
