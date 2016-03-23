@@ -16,9 +16,4 @@ public class MathDoubleToken implements MathToken {
         return this._content;
     }
 
-    @Override
-    public int type2() {
-        return 0;
-    }
-
 }
