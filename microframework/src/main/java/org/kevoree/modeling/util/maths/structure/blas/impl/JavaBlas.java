@@ -6,6 +6,9 @@ import org.kevoree.modeling.util.maths.structure.blas.*;
 public class JavaBlas implements KBlas {
 
 
+//    void dgemm(KBlasTransposeType transA, KBlasTransposeType transB, int m, int n, int k, double alpha, double[] matA, int offsetA, int ldA, double[] matB, int offsetB, int ldB, double beta, double[] matC, int offsetC, int ldC);
+
+
     @Override
     public void dgemm(KBlasTransposeType paramString1, KBlasTransposeType paramString2, int paramInt1, int paramInt2, int paramInt3, double paramDouble1, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, double paramDouble2, double[] paramArrayOfDouble3, int paramInt8, int paramInt9) {
 
@@ -802,6 +805,7 @@ public class JavaBlas implements KBlas {
         }
     }
 
+    /*
     public void dcopy(int n, double[] x, int offsetx, int incx, double[] y, int offsety, int incy) {
         if (n <= 0) {
             return;
@@ -812,6 +816,17 @@ public class JavaBlas implements KBlas {
             y[indexY] = x[indexX];
             indexY += incy;
             indexX += incx;
+        }
+    }*/
+
+    //copy dx to dy
+    public void dcopy(int n, double[] dx, int dxIdx, int incx, double[] dy, int dyIdx, int incy) {
+        if (incx == 1 && incy == 1) {
+            System.arraycopy(dx, dxIdx, dy, dyIdx, n);
+        } else {
+            for (int c = 0, xi = dxIdx, yi = dyIdx; c < n; xi += incx, yi += incy, c++) {
+                dy[yi] = dx[xi];
+            }
         }
     }
 
@@ -1812,7 +1827,9 @@ public class JavaBlas implements KBlas {
         return k;
     }
 
-    public void dswap(int paramInt1, double[] paramArrayOfDouble1, int paramInt2, int paramInt3, double[] paramArrayOfDouble2, int paramInt4, int paramInt5) {
+
+    // int n, double[] dx, int dxIdx, int incx, double[] dy, int dyIdx, int incy
+ /*   public void dswap(int paramInt1, double[] paramArrayOfDouble1, int paramInt2, int paramInt3, double[] paramArrayOfDouble2, int paramInt4, int paramInt5) {
         double d = 0.0D;
         int i = 0;
         int j = 0;
@@ -1868,6 +1885,25 @@ public class JavaBlas implements KBlas {
                 j += paramInt3;
                 k += paramInt5;
                 i++;
+            }
+        }
+    }*/
+
+    /** Exchange two vectors. */
+    public void dswap(int n, double[] dx, int dxIdx, int incx, double[] dy, int dyIdx, int incy) {
+        if (incx == 1 && incy == 1 && dxIdx == 0 && dyIdx == 0) {
+            double z;
+            for (int i = 0; i < n; i++) {
+                z = dx[i];
+                dx[i] = dy[i];
+                dy[i] = z;
+            }
+        } else {
+            double z;
+            for (int c = 0, xi = dxIdx, yi = dyIdx; c < n; xi += incx, yi += incy, c++) {
+                z = dx[xi];
+                dx[xi] = dy[yi];
+                dy[yi] = z;
             }
         }
     }

@@ -193,9 +193,5 @@ public class MathFunction implements MathToken {
         return 1;
     }
 
-    @Override
-    public int type2() {
-        return 0;
-    }
 
 }

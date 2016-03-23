@@ -17,9 +17,4 @@ public class MathFreeToken implements MathToken {
         return 3;
     }
 
-    @Override
-    public int type2() {
-        return 0;
-    }
-
 }

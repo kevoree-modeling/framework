@@ -73,9 +73,4 @@ public class MathOperation implements MathToken {
         return 0;
     }
 
-
-    @Override
-    public int type2() {
-        return 0;
-    }
 }
