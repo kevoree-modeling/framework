@@ -3,7 +3,7 @@
     <groupId>org.kevoree.modeling</groupId>
     <artifactId>framework</artifactId>
     <packaging>pom</packaging>
-    <version>4.27.0</version>
+    <version>4.27.0.1-SNAPSHOT</version>
     <name>KMF :: Root</name>
     <url>https://github.com/kevoree-modeling/kevoree-modeling-framework</url>
     <description>Kevoree Modeling Framework</description>
@@ -95,6 +95,11 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
