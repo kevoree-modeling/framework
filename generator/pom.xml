@@ -3,13 +3,13 @@
     <parent>
         <groupId>org.kevoree.modeling</groupId>
         <artifactId>framework</artifactId>
-        <version>4.27.0.1-SNAPSHOT</version>
+        <version>4.27.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>generator</artifactId>
-    <version>4.27.0.1-SNAPSHOT</version>
+    <version>4.27.0.1</version>
     <name>KMF :: Generator</name>
 
     <dependencies>

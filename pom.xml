@@ -3,7 +3,7 @@
     <groupId>org.kevoree.modeling</groupId>
     <artifactId>framework</artifactId>
     <packaging>pom</packaging>
-    <version>4.27.0.1-SNAPSHOT</version>
+    <version>4.27.0.1</version>
     <name>KMF :: Root</name>
     <url>https://github.com/kevoree-modeling/kevoree-modeling-framework</url>
     <description>Kevoree Modeling Framework</description>
@@ -24,7 +24,8 @@
         <connection>scm:git:git@github.com:kevoree-modeling/framework.git</connection>
         <developerConnection>scm:git:git@github.com:kevoree-modeling/framework.git</developerConnection>
         <url>http://github.com/kevoree-modeling/framework.git</url>
-    </scm>
+      <tag>framework-4.27.0.1</tag>
+  </scm>
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
