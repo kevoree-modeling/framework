@@ -403,31 +403,33 @@ public class HeapObjectIndexChunk implements KObjectIndexChunk {
         }
         //setPrimitiveType value for all
         InternalState temp_state = new InternalState(length, newElementK, newElementV, newElementNext, newElementHash);
-        while (cursor < payload.length()) {
-            cursor++;
-            int beginChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ':') {
+        if (nbElement > 0) {
+            while (cursor < payload.length()) {
                 cursor++;
+                int beginChunk = cursor;
+                while (cursor < payload.length() && payload.charAt(cursor) != ':') {
+                    cursor++;
+                }
+                int middleChunk = cursor;
+                while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+                    cursor++;
+                }
+                String loopKey = Base64.decodeToStringWithBounds(payload, beginChunk, middleChunk);
+                long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
+                int index = (PrimitiveHelper.stringHash(loopKey) & 0x7FFFFFFF) % temp_state.elementDataSize;
+                //insert K/V
+                int newIndex = this.elementCount;
+                temp_state.elementK[newIndex] = loopKey;
+                temp_state.elementV[newIndex] = loopVal;
+                int currentHashedIndex = temp_state.elementHash[index];
+                if (currentHashedIndex != -1) {
+                    temp_state.elementNext[newIndex] = currentHashedIndex;
+                } else {
+                    temp_state.elementNext[newIndex] = -2; //special char to tag used values
+                }
+                temp_state.elementHash[index] = newIndex;
+                this.elementCount++;
             }
-            int middleChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
-                cursor++;
-            }
-            String loopKey = Base64.decodeToStringWithBounds(payload, beginChunk, middleChunk);
-            long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
-            int index = (PrimitiveHelper.stringHash(loopKey) & 0x7FFFFFFF) % temp_state.elementDataSize;
-            //insert K/V
-            int newIndex = this.elementCount;
-            temp_state.elementK[newIndex] = loopKey;
-            temp_state.elementV[newIndex] = loopVal;
-            int currentHashedIndex = temp_state.elementHash[index];
-            if (currentHashedIndex != -1) {
-                temp_state.elementNext[newIndex] = currentHashedIndex;
-            } else {
-                temp_state.elementNext[newIndex] = -2; //special char to tag used values
-            }
-            temp_state.elementHash[index] = newIndex;
-            this.elementCount++;
         }
         this.elementCount = nbElement;
         this.droppedCount = 0;

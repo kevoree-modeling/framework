@@ -73,7 +73,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
         this._listenerManager = new ListenerManager();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);
         this._db = p_cdn;
-        attachContentDeliveryDriver(new MemoryContentDeliveryDriver());
+        attachContentDeliveryDriverListener();
         this._operationManager = new HashOperationManager(this);
         this._blas = p_blas;
     }
@@ -165,6 +165,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 toSaveKeys[i * KEY_SIZE + 2] = selfPointer._universeKeyCalculator.prefix();
                 toSaveValues[i] = "" + selfPointer._universeKeyCalculator.lastComputedIndex();
                 selfPointer._db.put(toSaveKeys, toSaveValues, callback, selfPointer.currentCdnListener);
+                contentUpdateListener.onKeysUpdate(toSaveKeys);
             }
         });
     }
@@ -353,74 +354,76 @@ public class DataManager implements KDataManager, KInternalDataManager {
         return this._scheduler;
     }
 
-    private void attachContentDeliveryDriver(KContentDeliveryDriver p_dataBase) {
-        DataManager selfPointer = this;
-        currentCdnListener = selfPointer._db.addUpdateListener(new KContentUpdateListener() {
-            @Override
-            public void onKeysUpdate(long[] updatedKeys) {
-                long[] toLoadKeys = new long[updatedKeys.length];
-                int toInsertNotifyKey = 0;
-                long[] toNotifyKeys = new long[updatedKeys.length];
-                int nbElements = updatedKeys.length / KEY_SIZE;
-                int toInsertKey = 0;
-                for (int i = 0; i < nbElements; i++) {
-                    KChunk currentChunk = selfPointer._spaceManager.getAndMark(updatedKeys[i * 3], updatedKeys[i * 3 + 1], updatedKeys[i * 3 + 2]);
-                    //reload object if necessary
-                    if (currentChunk != null) {
-                        if ((currentChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
-                            toLoadKeys[toInsertKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
-                            toLoadKeys[toInsertKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
-                            toLoadKeys[toInsertKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
-                            toInsertKey++;
-                        }
-                        selfPointer._spaceManager.unmarkMemoryElement(currentChunk);
+    private KContentUpdateListener contentUpdateListener = new KContentUpdateListener() {
+        @Override
+        public void onKeysUpdate(long[] updatedKeys) {
+            long[] toLoadKeys = new long[updatedKeys.length];
+            int toInsertNotifyKey = 0;
+            long[] toNotifyKeys = new long[updatedKeys.length];
+            int nbElements = updatedKeys.length / KEY_SIZE;
+            int toInsertKey = 0;
+            for (int i = 0; i < nbElements; i++) {
+                KChunk currentChunk = DataManager.this._spaceManager.getAndMark(updatedKeys[i * 3], updatedKeys[i * 3 + 1], updatedKeys[i * 3 + 2]);
+                //reload object if necessary
+                if (currentChunk != null) {
+                    if ((currentChunk.getFlags() & KChunkFlags.DIRTY_BIT) != KChunkFlags.DIRTY_BIT) {
+                        toLoadKeys[toInsertKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
+                        toLoadKeys[toInsertKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
+                        toLoadKeys[toInsertKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
+                        toInsertKey++;
                     }
-                    //check if this is an object chunk
-                    if (selfPointer._listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2]) && updatedKeys[i * KEY_SIZE] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 1] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 2] != KConfig.NULL_LONG) {
-                        //check if the object is listened anyway
-                        toNotifyKeys[toInsertNotifyKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
-                        toNotifyKeys[toInsertNotifyKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
-                        toNotifyKeys[toInsertNotifyKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
-                        toInsertNotifyKey++;
-                    }
+                    DataManager.this._spaceManager.unmarkMemoryElement(currentChunk);
                 }
-                if (toInsertKey == 0 && toInsertNotifyKey == 0) {
-                    return;
+                //check if this is an object chunk
+                if (DataManager.this._listenerManager.isListened(updatedKeys[i * KEY_SIZE + 2]) && updatedKeys[i * KEY_SIZE] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 1] != KConfig.NULL_LONG && updatedKeys[i * KEY_SIZE + 2] != KConfig.NULL_LONG) {
+                    //check if the object is listened anyway
+                    toNotifyKeys[toInsertNotifyKey * KEY_SIZE] = updatedKeys[i * KEY_SIZE];
+                    toNotifyKeys[toInsertNotifyKey * KEY_SIZE + 1] = updatedKeys[i * KEY_SIZE + 1];
+                    toNotifyKeys[toInsertNotifyKey * KEY_SIZE + 2] = updatedKeys[i * KEY_SIZE + 2];
+                    toInsertNotifyKey++;
                 }
-                final long[] trimmedToLoad = new long[toInsertKey * 3];
-                System.arraycopy(toLoadKeys, 0, trimmedToLoad, 0, toInsertKey * 3);
-                final long[] trimmedToNotify = new long[toInsertNotifyKey * 3];
-                System.arraycopy(toNotifyKeys, 0, trimmedToNotify, 0, toInsertNotifyKey * 3);
+            }
+            if (toInsertKey == 0 && toInsertNotifyKey == 0) {
+                return;
+            }
+            final long[] trimmedToLoad = new long[toInsertKey * 3];
+            System.arraycopy(toLoadKeys, 0, trimmedToLoad, 0, toInsertKey * 3);
+            final long[] trimmedToNotify = new long[toInsertNotifyKey * 3];
+            System.arraycopy(toNotifyKeys, 0, trimmedToNotify, 0, toInsertNotifyKey * 3);
 
-                KMetaModel mm = selfPointer._model.metaModel();
-                selfPointer._db.get(trimmedToLoad, new KCallback<String[]>() {
-                    @Override
-                    public void on(String[] payloads) {
-                        for (int i = 0; i < payloads.length; i++) {
-                            if (payloads[i] != null) {
-                                KChunk currentChunk = selfPointer._spaceManager.getAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2]);
-                                if (currentChunk != null) {
-                                    currentChunk.init(payloads[i], mm, -1);
-                                    selfPointer._spaceManager.unmarkMemoryElement(currentChunk);
-                                }
+            KMetaModel mm = DataManager.this._model.metaModel();
+            DataManager.this._db.get(trimmedToLoad, new KCallback<String[]>() {
+                @Override
+                public void on(String[] payloads) {
+                    for (int i = 0; i < payloads.length; i++) {
+                        if (payloads[i] != null) {
+                            KChunk currentChunk = DataManager.this._spaceManager.getAndMark(trimmedToLoad[i * 3], trimmedToLoad[i * 3 + 1], trimmedToLoad[i * 3 + 2]);
+                            if (currentChunk != null) {
+                                currentChunk.init(payloads[i], mm, -1);
+                                DataManager.this._spaceManager.unmarkMemoryElement(currentChunk);
                             }
                         }
-                        //now call a lookup on all elements that have to be notify
-                        selfPointer._resolver.lookupPreciseKeys(trimmedToNotify, new KCallback<KObject[]>() {
-                            @Override
-                            public void on(KObject[] updatedObjects) {
-                                selfPointer._listenerManager.dispatch(updatedObjects);
-                            }
-                        }).run();
                     }
-                });
-            }
+                    //now call a lookup on all elements that have to be notify
+                    DataManager.this._resolver.lookupPreciseKeys(trimmedToNotify, new KCallback<KObject[]>() {
+                        @Override
+                        public void on(KObject[] updatedObjects) {
+                            DataManager.this._listenerManager.dispatch(updatedObjects);
+                        }
+                    }).run();
+                }
+            });
+        }
 
-            @Override
-            public void onOperationCall(KMessage operationCallMessage) {
-                selfPointer._operationManager.dispatch(operationCallMessage);
-            }
-        });
+        @Override
+        public void onOperationCall(KMessage operationCallMessage) {
+            DataManager.this._operationManager.dispatch(operationCallMessage);
+        }
+    };
+
+
+    private void attachContentDeliveryDriverListener() {
+        currentCdnListener = this._db.addUpdateListener(contentUpdateListener);
     }
 
     public KOperationManager operationManager() {
