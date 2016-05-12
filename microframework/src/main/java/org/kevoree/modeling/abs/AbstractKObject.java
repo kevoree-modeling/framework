@@ -86,7 +86,11 @@ public abstract class AbstractKObject implements KObject {
         } else {
             ArrayLongLongMap collector = new ArrayLongLongMap(-1, -1, -1, null);
             KMeta[] metaElements = _metaClass.metaElements();
+            boolean hasKey = false;
             for (int i = 0; i < metaElements.length; i++) {
+                if (metaElements[i].metaType() == MetaType.ATTRIBUTE && ((KMetaAttribute) metaElements[i]).key()) {
+                    hasKey = true;
+                }
                 if (metaElements[i] != null && metaElements[i].metaType() == MetaType.RELATION) {
                     long[] inboundsKeys = rawPayload.getLongArray(metaElements[i].index(), _metaClass);
                     for (int j = 0; j < inboundsKeys.length; j++) {
@@ -105,6 +109,7 @@ public abstract class AbstractKObject implements KObject {
                     indexI[0]++;
                 }
             });
+            boolean finalHasKey = hasKey;
             _manager.lookupAllObjects(_universe, _time, flatCollected, new KCallback<KObject[]>() {
                 @Override
                 public void on(KObject[] resolved) {
@@ -116,8 +121,38 @@ public abstract class AbstractKObject implements KObject {
                             }
                         }
                     }
-                    if (callback != null) {
-                        callback.on(null);
+                    //now detach by index
+                    String newHash = null;
+                    if (finalHasKey) {
+                        for (int i = 0; i < metaElements.length; i++) {
+                            if (metaElements[i].metaType().equals(MetaType.ATTRIBUTE) && ((KMetaAttribute) metaElements[i]).key()) {
+                                Object loopElem = rawPayload.getPrimitiveType(metaElements[i].index(), selfPointer.metaClass());
+                                if (loopElem != null) {
+                                    if (newHash == null) {
+                                        newHash = loopElem.toString();
+                                    } else {
+                                        newHash += loopElem.toString();
+                                    }
+                                }
+                            }
+                        }
+                        //update index
+                        final String finalNewHash = newHash;
+                        manager().index(_universe, _time, selfPointer.metaClass().metaName(), new KCallback<KObjectIndex>() {
+                            @Override
+                            public void on(KObjectIndex classIndex) {
+                                if(finalNewHash != null){
+                                    classIndex.setIndex(finalNewHash, KConfig.NULL_LONG);
+                                }
+                                if (callback != null) {
+                                    callback.on(null);
+                                }
+                            }
+                        });
+                    } else {
+                        if (callback != null) {
+                            callback.on(null);
+                        }
                     }
                 }
             });
