@@ -73,7 +73,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
         this._listenerManager = new ListenerManager();
         this._modelKeyCalculator = new KeyCalculator(zeroPrefix, 0);
         this._db = p_cdn;
-        attachContentDeliveryDriver(this._db);
+        attachContentDeliveryDriver(new MemoryContentDeliveryDriver());
         this._operationManager = new HashOperationManager(this);
         this._blas = p_blas;
     }
@@ -164,7 +164,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
                 toSaveKeys[i * KEY_SIZE + 1] = KConfig.NULL_LONG;
                 toSaveKeys[i * KEY_SIZE + 2] = selfPointer._universeKeyCalculator.prefix();
                 toSaveValues[i] = "" + selfPointer._universeKeyCalculator.lastComputedIndex();
-                selfPointer._db.put(toSaveKeys, toSaveValues, callback, -20);
+                selfPointer._db.put(toSaveKeys, toSaveValues, callback, selfPointer.currentCdnListener);
             }
         });
     }
@@ -355,7 +355,7 @@ public class DataManager implements KDataManager, KInternalDataManager {
 
     private void attachContentDeliveryDriver(KContentDeliveryDriver p_dataBase) {
         DataManager selfPointer = this;
-        currentCdnListener = p_dataBase.addUpdateListener(new KContentUpdateListener() {
+        currentCdnListener = selfPointer._db.addUpdateListener(new KContentUpdateListener() {
             @Override
             public void onKeysUpdate(long[] updatedKeys) {
                 long[] toLoadKeys = new long[updatedKeys.length];
